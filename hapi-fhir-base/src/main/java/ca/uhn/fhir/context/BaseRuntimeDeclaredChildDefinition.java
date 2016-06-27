@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.util.ValidateUtil;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
 	private final IAccessor myAccessor;
@@ -46,7 +47,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
 		Validate.notNull(theField, "No field speficied");
-		Validate.inclusiveBetween(0, Integer.MAX_VALUE, theChildAnnotation.min(), "Min must be >= 0");
+		ValidateUtil.isGreaterThanOrEqualTo(theChildAnnotation.min(), 0, "Min must be >= 0");
 		Validate.isTrue(theChildAnnotation.max() == -1 || theChildAnnotation.max() >= theChildAnnotation.min(), "Max must be >= Min (unless it is -1 / unlimited)");
 		Validate.notBlank(theElementName, "Element name must not be blank");
 

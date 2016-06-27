@@ -133,10 +133,6 @@ public class JaxRsResponseDstu3Test {
 	
 	@Test
 	public void testNoOutcomeXml() throws IOException {
-		int operationStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
-		boolean allowPrefer = true;
-		String resourceName = "Patient";
-		MethodOutcome methodOutcome = new MethodOutcome(null);
 		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
 		boolean addContentLocationHeader = true;
 		boolean respondGzip = true;

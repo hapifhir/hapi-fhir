@@ -96,7 +96,55 @@ public class TermConceptParentChildLink implements Serializable {
 	}
 
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myChild == null) ? 0 : myChild.hashCode());
+		result = prime * result + ((myCodeSystem == null) ? 0 : myCodeSystem.hashCode());
+		result = prime * result + ((myParent == null) ? 0 : myParent.hashCode());
+		result = prime * result + ((myRelationshipType == null) ? 0 : myRelationshipType.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TermConceptParentChildLink other = (TermConceptParentChildLink) obj;
+		if (myChild == null) {
+			if (other.myChild != null)
+				return false;
+		} else if (!myChild.equals(other.myChild))
+			return false;
+		if (myCodeSystem == null) {
+			if (other.myCodeSystem != null)
+				return false;
+		} else if (!myCodeSystem.equals(other.myCodeSystem))
+			return false;
+		if (myParent == null) {
+			if (other.myParent != null)
+				return false;
+		} else if (!myParent.equals(other.myParent))
+			return false;
+		if (myRelationshipType != other.myRelationshipType)
+			return false;
+		return true;
+	}
+
+
 	public enum RelationshipTypeEnum{
+		// ********************************************
+		// IF YOU ADD HERE MAKE SURE ORDER IS PRESERVED
 		ISA
+	}
+
+
+	public Long getId() {
+		return myPid;
 	}
 }

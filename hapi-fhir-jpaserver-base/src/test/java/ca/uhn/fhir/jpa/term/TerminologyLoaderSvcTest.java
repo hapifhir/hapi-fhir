@@ -1,17 +1,17 @@
 package ca.uhn.fhir.jpa.term;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.any;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -79,6 +80,21 @@ public class TerminologyLoaderSvcTest {
 		mySvc.loadLoinc(list(bos1.toByteArray(), bos2.toByteArray()), details);
 	}
 
+	
+	/**
+	 * This is just for trying stuff, it won't run without
+	 * local files external to the git repo
+	 */
+	@Ignore
+	@Test
+	public void testLoadSnomedCtAgainstRealFile() throws Exception {
+		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
+		
+		RequestDetails details = mock(RequestDetails.class);
+		mySvc.loadSnomedCt(list(bytes), details);
+	}
+	
+	
 	@Test
 	public void testLoadSnomedCt() throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();

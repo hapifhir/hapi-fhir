@@ -81,7 +81,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 	}
 
 	private ServletRequestDetails mockSrd() {
-		return new ServletRequestDetails();
+		return mySrd;
 	}
 
 	@Test

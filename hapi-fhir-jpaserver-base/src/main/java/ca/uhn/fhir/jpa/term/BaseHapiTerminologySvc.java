@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -32,10 +33,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.base.Stopwatch;
 
@@ -50,6 +58,8 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -85,6 +95,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	protected EntityManager myEntityManager;
 	
 	private boolean myProcessDeferred = true;
+	private long myNextReindexPass;
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
@@ -209,15 +220,6 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		return cs;
 	}
 	
-	private void parentPids(TermConcept theNextConcept, Set<Long> theParentPids) {
-		for (TermConceptParentChildLink nextParentLink : theNextConcept.getParents()){
-			TermConcept parent = nextParentLink.getParent();
-			if (parent != null && theParentPids.add(parent.getId())) {
-				parentPids(parent, theParentPids);
-			}
-		}
-	}
-
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
 			return;
@@ -231,12 +233,8 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		theConcept.setCodeSystem(theCodeSystem);
 		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 
-		Set<Long> parentPids = new HashSet<Long>();
-		parentPids(theConcept, parentPids);
-		theConcept.setParentPids(parentPids);
-
 		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
-			myConceptDao.save(theConcept);
+			saveConcept(theConcept);
 		} else {
 			myConceptsToSaveLater.add(theConcept);
 		}
@@ -247,12 +245,50 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
 			if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
-				myConceptParentChildLinkDao.save(next);
+				saveConceptLink(next);
 			} else {
 				myConceptLinksToSaveLater.add(next);
 			}
 		}
 		
+	}
+
+	private void saveConceptLink(TermConceptParentChildLink next) {
+		if (next.getId() == null) {
+			myConceptParentChildLinkDao.save(next);
+		}
+	}
+
+	private int saveConcept(TermConcept theConcept) {
+		int retVal = 0;
+		retVal += ensureParentsSaved(theConcept.getParents());
+		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
+			retVal++;
+			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+			myConceptDao.saveAndFlush(theConcept);
+		}
+		
+		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
+		return retVal;
+	}
+
+	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
+		ourLog.trace("Checking {} parents", theParents.size());
+		int retVal = 0;
+		
+		for (TermConceptParentChildLink nextLink : theParents) {
+			if (nextLink.getRelationshipType() == RelationshipTypeEnum.ISA) {
+				TermConcept nextParent = nextLink.getParent();
+				retVal += ensureParentsSaved(nextParent.getParents());
+				if (nextParent.getId() == null) {
+					myConceptDao.saveAndFlush(nextParent);
+					retVal++;
+					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
+				}
+			}
+		}
+		
+		return retVal;
 	}
 
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
@@ -269,31 +305,80 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public synchronized void saveDeferred() {
-		if (!myProcessDeferred || ((myConceptsToSaveLater.isEmpty() && myConceptLinksToSaveLater.isEmpty()))) {
+		if (!myProcessDeferred) {
+			return;
+		} else if (myConceptsToSaveLater.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
+			processReindexing();
 			return;
 		}
 		
 		int codeCount = 0, relCount = 0;
+		StopWatch stopwatch = new StopWatch();
 		
 		int count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myConceptsToSaveLater.size());
 		ourLog.info("Saving {} deferred concepts...", count);
 		while (codeCount < count && myConceptsToSaveLater.size() > 0) {
 			TermConcept next = myConceptsToSaveLater.remove(0);
-			myConceptDao.save(next);
-			codeCount++;
+			codeCount += saveConcept(next);
 		}
 
+		if (codeCount > 0) {
+			ourLog.info("Saved {} deferred concepts ({} codes remain and {} relationships remain) in {}ms ({}ms / code)", new Object[] {codeCount, myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
+		}
+		
 		if (codeCount == 0) {
 			count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myConceptLinksToSaveLater.size());
 			ourLog.info("Saving {} deferred concept relationships...", count);
 			while (relCount < count && myConceptLinksToSaveLater.size() > 0) {
 				TermConceptParentChildLink next = myConceptLinksToSaveLater.remove(0);
-				myConceptParentChildLinkDao.save(next);
+				saveConceptLink(next);
 				relCount++;
 			}
 		}
 		
-		ourLog.info("Saved {} deferred concepts ({} remain) and {} deferred relationships ({} remain)", new Object[] {codeCount, myConceptsToSaveLater.size(), relCount, myConceptLinksToSaveLater.size()});
+		if (relCount > 0) {
+			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / code)", new Object[] {relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
+		}
+		
+		if ((myConceptsToSaveLater.size() + myConceptLinksToSaveLater.size()) == 0) {
+			ourLog.info("All deferred concepts and relationships have now been synchronized to the database");
+		}
+	}
+
+	@Autowired
+	private PlatformTransactionManager myTransactionMgr;
+	
+	private void processReindexing() {
+		if (System.currentTimeMillis() < myNextReindexPass) {
+			return;
+		}
+		
+		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
+		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				int maxResult = 1000;
+				Page<TermConcept> resources = myConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
+				if (resources.hasContent() == false) {
+					myNextReindexPass = System.currentTimeMillis() + DateUtils.MILLIS_PER_MINUTE;
+					return;
+				}
+
+				ourLog.info("Indexing {} / {} concepts", resources.getContent().size(), resources.getTotalElements());
+
+				int count = 0;
+				StopWatch stopwatch = new StopWatch();
+
+				for (TermConcept resourceTable : resources) {
+					saveConcept(resourceTable);
+					count++;
+				}
+				
+				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, resources.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count) });
+			}
+		});
+
 	}
 
 	@Override

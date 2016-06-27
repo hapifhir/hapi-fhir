@@ -48,13 +48,15 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class TerminologyUploaderProviderDstu3 extends BaseJpaProvider {
+	public static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderDstu3.class);
 
 	@Autowired
 	private IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
 	
 	//@formatter:off
-	@Operation(name = "$upload-external-code-system", idempotent = false, returnParameters= {
+	@Operation(name = UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters= {
 		@OperationParam(name="conceptCount", type=IntegerType.class, min=1)
 	})
 	public Parameters uploadExternalCodeSystem(

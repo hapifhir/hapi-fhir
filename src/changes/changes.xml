@@ -386,6 +386,11 @@
 				create a BigDecimal from a double, resulting in weird floating point
 				conversions. Thanks to Craig McClendon for reporting!
 			</action>
+			<action type="fix" issue="394">
+				Remove the depdendency on a method from commons-lang3 3.3 which was
+				causing issues on some Android phones which come with an older version
+				of this library bundled. Thanks to Paolo Perliti for reporting!
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

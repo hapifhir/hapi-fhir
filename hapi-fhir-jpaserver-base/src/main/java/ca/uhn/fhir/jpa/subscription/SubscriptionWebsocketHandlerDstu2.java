@@ -146,7 +146,7 @@ public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler impl
 		public void closing() {
 			ourLog.info("Deleting subscription {}", mySubscriptionId);
 			try {
-				mySubscriptionDao.delete(mySubscriptionId, new ServletRequestDetails());
+				mySubscriptionDao.delete(mySubscriptionId, null);
 			} catch (Exception e) {
 				handleFailure(e);
 			}
@@ -233,7 +233,7 @@ public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler impl
 			}
 
 			try {
-				Subscription subscription = mySubscriptionDao.read(id, new ServletRequestDetails());
+				Subscription subscription = mySubscriptionDao.read(id, null);
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
 				myState = new BoundStaticSubscipriptionState(theSession);
@@ -270,7 +270,7 @@ public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler impl
 					}
 				}
 				
-				IIdType id = mySubscriptionDao.create(subscription, new ServletRequestDetails()).getId();
+				IIdType id = mySubscriptionDao.create(subscription, null).getId();
 
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();

@@ -205,7 +205,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
 
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
@@ -264,7 +264,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest, getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		String actionName = "Transaction";
@@ -488,7 +488,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 			IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, true, false, updateTime, theRequestDetails);
+			updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, updateTime);
 		}
 
 		myEntityManager.flush();

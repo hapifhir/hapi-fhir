@@ -38,4 +38,22 @@ public class ValidateUtil {
 		}
 	}
 
+	/**
+	 * Throws {@link IllegalArgumentException} if theValue is <= theMinimum
+	 */
+	public static void isGreaterThan(long theValue, long theMinimum, String theMessage) {
+		if (theValue <= theMinimum) {
+			throw new IllegalArgumentException(theMessage);
+		}
+	}
+
+	/**
+	 * Throws {@link IllegalArgumentException} if theValue is <= theMinimum
+	 */
+	public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
+		if (theValue < theMinimum) {
+			throw new IllegalArgumentException(theMessage);
+		}
+	}
+
 }

@@ -101,6 +101,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(name = "mySystemProviderDstu3")
 	public ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 systemProviderDstu3() {
 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 retVal = new ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3();
+		retVal.setContext(defaultFhirContext());
 		retVal.setDao(systemDaoDstu3());
 		return retVal;
 	}

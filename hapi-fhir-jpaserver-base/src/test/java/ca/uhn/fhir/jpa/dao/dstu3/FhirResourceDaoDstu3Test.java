@@ -1493,6 +1493,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		for (int i = 0; i < 10; i++) {
 			Thread.sleep(100);
 			preDates.add(new Date());
+			Thread.sleep(100);
 			patient.setId(id);
 			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i");
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());

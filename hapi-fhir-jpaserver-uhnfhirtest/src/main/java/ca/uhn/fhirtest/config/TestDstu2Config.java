@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 
 @Configuration
 @Import(CommonConfig.class)
@@ -44,6 +45,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Bean 
+	public IServerInterceptor securityInterceptor() {
+		return new PublicSecurityInterceptor();
 	}
 
 	@Bean()

@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.BaseJpaSystemProviderDstu2Plus;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -51,7 +51,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-public class JpaSystemProviderDstu3 extends BaseJpaSystemProvider<Bundle, Meta> {
+public class JpaSystemProviderDstu3 extends BaseJpaSystemProviderDstu2Plus<Bundle, Meta> {
 
 	@Autowired()
 	@Qualifier("mySystemDaoDstu3")
@@ -167,19 +167,6 @@ public class JpaSystemProviderDstu3 extends BaseJpaSystemProvider<Bundle, Meta> 
 			retVal.addParameter().setName((nextEntry.getKey())).setValue(new IntegerType(nextEntry.getValue().intValue()));
 		}
 		
-		return retVal;
-	}
-
-	//@formatter:off
-	@Operation(name="$mark-all-resources-for-reindexing", idempotent=true, returnParameters= {
-		@OperationParam(name="count", type=IntegerType.class)
-	})
-	//@formatter:on
-	public Parameters markAllResourcesForReindexing() {
-		int count = mySystemDao.markAllResourcesForReindexing();
-		
-		Parameters retVal = new Parameters();
-		retVal.addParameter().setName("count").setValue(new IntegerType(count));
 		return retVal;
 	}
 

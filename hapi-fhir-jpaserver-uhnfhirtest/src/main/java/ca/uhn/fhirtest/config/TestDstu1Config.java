@@ -10,7 +10,6 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -19,6 +18,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu1;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 
 @Configuration
 @Import(CommonConfig.class)
@@ -36,6 +37,11 @@ public class TestDstu1Config extends BaseJavaConfigDstu1 {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Bean 
+	public IServerInterceptor securityInterceptor() {
+		return new PublicSecurityInterceptor();
 	}
 
 	@Bean()

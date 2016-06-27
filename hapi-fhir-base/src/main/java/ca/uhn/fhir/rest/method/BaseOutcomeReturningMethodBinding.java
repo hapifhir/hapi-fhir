@@ -40,7 +40,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -167,7 +166,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			if (myReturnVoid) {
 				return null;
 			}
-			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), getResourceName(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			return retVal;
 		} else {
 			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -283,7 +282,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 	}
 
-	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theResourceName, String theLocationHeader) {
+	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
 		if (StringUtils.isBlank(theLocationHeader)) {
 			return;
 		}
@@ -291,22 +290,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		IIdType id = theContext.getVersion().newIdType();
 		id.setValue(theLocationHeader);
 		theOutcomeToPopulate.setId(id);
-
-		String resourceNamePart = "/" + theResourceName + "/";
-		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);
-		if (resourceIndex > -1) {
-			int idIndexStart = resourceIndex + resourceNamePart.length();
-			int idIndexEnd = theLocationHeader.indexOf('/', idIndexStart);
-			if (idIndexEnd == -1) {
-				// nothing
-			} else {
-				String versionIdPart = "/_history/";
-				int historyIdStart = theLocationHeader.indexOf(versionIdPart, idIndexEnd);
-				if (historyIdStart != -1) {
-					theOutcomeToPopulate.setVersionId(new IdDt(theLocationHeader.substring(historyIdStart + versionIdPart.length())));
-				}
-			}
-		}
 	}
 
 }

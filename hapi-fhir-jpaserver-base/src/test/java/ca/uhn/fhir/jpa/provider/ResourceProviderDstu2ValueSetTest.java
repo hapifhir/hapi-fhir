@@ -24,7 +24,6 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2Test {
@@ -251,7 +250,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		//@formatter:on
 
-		expanded = myValueSetDao.expand(myExtensionalVsId, ("systolic"));
+		expanded = myValueSetDao.expand(myExtensionalVsId, ("systolic"), mySrd);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off

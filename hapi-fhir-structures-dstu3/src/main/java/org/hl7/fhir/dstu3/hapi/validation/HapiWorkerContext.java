@@ -67,6 +67,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		ValueSetExpansionOutcome vso;
 		try {
 			vso = getExpander().expand(theSource);
+		} catch (InvalidRequestException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new InternalErrorException(e);
 		}
@@ -125,7 +127,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValueSetExpander getExpander() {
-		return new ValueSetExpanderSimple(this, this);
+		ValueSetExpanderSimple retVal = new ValueSetExpanderSimple(this, this);
+		retVal.setMaxExpansionSize(Integer.MAX_VALUE);
+		return retVal;
 	}
 
 	@Override

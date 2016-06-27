@@ -143,9 +143,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new
 	 * version or update the resource's update time.
-	 * @param theRequestDetails TODO
 	 */
-	void reindex(T theResource, ResourceTable theEntity, RequestDetails theRequestDetails);
+	void reindex(T theResource, ResourceTable theEntity);
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequestDetails);
 

@@ -37,8 +37,6 @@ import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,7 +48,6 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.TagList;
@@ -79,21 +76,20 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Override
 	public void deleteAllTagsOnServer(RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
 
 		myEntityManager.createQuery("DELETE from ResourceTag t").executeUpdate();
 	}
 
-	private int doPerformReindexingPass(final Integer theCount, final RequestDetails theRequestDetails) {
+	private int doPerformReindexingPass(final Integer theCount) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		int retVal = doPerformReindexingPassForResources(theCount, theRequestDetails, txTemplate);
-		retVal += doPerformReindexingPassForConcepts(txTemplate);
+		int retVal = doPerformReindexingPassForResources(theCount, txTemplate);
 		return retVal;
 	}
 
-	private int doPerformReindexingPassForResources(final Integer theCount, final RequestDetails theRequestDetails, TransactionTemplate txTemplate) {
+	private int doPerformReindexingPassForResources(final Integer theCount, TransactionTemplate txTemplate) {
 		return txTemplate.execute(new TransactionCallback<Integer>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -135,7 +131,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 						@SuppressWarnings("rawtypes")
 						final IFhirResourceDao dao = getDao(resource.getClass());
 
-						dao.reindex(resource, resourceTable, theRequestDetails);
+						dao.reindex(resource, resourceTable);
 					} catch (Exception e) {
 						ourLog.error("Failed to index resource {}: {}", new Object[] { resourceTable.getIdDt(), e.toString(), e });
 						throw new ReindexFailureException(resourceTable.getId());
@@ -152,41 +148,10 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		});
 	}
 
-	private int doPerformReindexingPassForConcepts(TransactionTemplate txTemplate) {
-		return txTemplate.execute(new TransactionCallback<Integer>() {
-			@Override
-			public Integer doInTransaction(TransactionStatus theStatus) {
-				
-				int maxResult = 10000;
-				Page<TermConcept> resources = myTermConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
-				if (resources.hasContent() == false) {
-					return 0;
-				}
-
-				ourLog.info("Indexing {} / {} concepts", resources.getContent().size(), resources.getTotalElements());
-
-				int count = 0;
-				long start = System.currentTimeMillis();
-
-				for (TermConcept resourceTable : resources) {
-					resourceTable.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-					myTermConceptDao.save(resourceTable);
-					count++;
-				}
-				
-				long delay = System.currentTimeMillis() - start;
-				long avg = (delay / resources.getContent().size());
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, resources.getContent().size(), delay, avg });
-
-				return resources.getContent().size();
-			}
-		});
-	}
-
 	@Override
 	public TagList getAllTags(RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
 
 		StopWatch w = new StopWatch();
@@ -221,7 +186,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
 
 		StopWatch w = new StopWatch();
@@ -301,9 +266,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public int performReindexingPass(final Integer theCount, RequestDetails theRequestDetails) {
+	public int performReindexingPass(final Integer theCount) {
 		try {
-			return doPerformReindexingPass(theCount, theRequestDetails);
+			return doPerformReindexingPass(theCount);
 		} catch (ReindexFailureException e) {
 			ourLog.warn("Reindexing failed for resource {}", e.getResourceId());
 			markResourceAsIndexingFailed(e.getResourceId());

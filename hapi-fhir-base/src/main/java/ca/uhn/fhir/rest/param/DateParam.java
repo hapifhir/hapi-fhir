@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -41,6 +40,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ValidateUtil;
 
 @SuppressWarnings("deprecation")
 public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryParameterType , IQueryParameterOr<DateParam> {
@@ -81,7 +81,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	 * Constructor
 	 */
 	public DateParam(ParamPrefixEnum thePrefix, long theDate) {
-		Validate.inclusiveBetween(1, Long.MAX_VALUE, theDate, "theDate must not be 0 or negative");
+		ValidateUtil.isGreaterThan(theDate, 0, "theDate must not be 0 or negative");
 		setPrefix(thePrefix);
 		setValue(new Date(theDate));
 	}
@@ -138,7 +138,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	 */
 	@Deprecated
 	public DateParam(QuantityCompararatorEnum theComparator, long theDate) {
-		Validate.inclusiveBetween(1, Long.MAX_VALUE, theDate, "theDate must not be 0 or negative");
+		ValidateUtil.isGreaterThan(theDate, 0, "theDate must not be 0 or negative");
 		setPrefix(toPrefix(theComparator));
 		setValue(new Date(theDate));
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +33,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -40,11 +40,13 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -55,14 +57,19 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -158,6 +165,14 @@ public class AuthorizationInterceptorDstu2Test {
 		assertThat(response, containsString("Access denied by rule: Rule 1"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
+		
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
 	}
 
 	@Test
@@ -404,6 +419,15 @@ public class AuthorizationInterceptorDstu2Test {
 		assertThat(response, containsString("Access denied by rule: Default Rule"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Default Rule"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
 	}
 	
 	@Test
@@ -770,6 +794,7 @@ public class AuthorizationInterceptorDstu2Test {
 				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 1b").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1123")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
 				//@formatter:on
@@ -784,6 +809,17 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		String response = extractResponseAndClose(status);
+		assertEquals(ERR403, response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Conditional
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.addHeader("If-None-Exist", "Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
 		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
@@ -872,6 +908,16 @@ public class AuthorizationInterceptorDstu2Test {
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Conditional
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(ERR403, response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
@@ -990,7 +1036,14 @@ public class AuthorizationInterceptorDstu2Test {
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Create()
-		public MethodOutcome create(@ResourceParam Patient theResource) {
+		public MethodOutcome create(@ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+			
+			if (isNotBlank(theConditionalUrl)) {
+				IdDt actual = new IdDt("Patient", "1123");
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.CREATE);
+			}
+			
 			ourHitMethod = true;
 			theResource.setId("Patient/1/_history/1");
 			MethodOutcome retVal = new MethodOutcome();
@@ -998,6 +1051,7 @@ public class AuthorizationInterceptorDstu2Test {
 			retVal.setResource(theResource);
 			return retVal;
 		}
+
 
 		@Delete()
 		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdDt theId) {
@@ -1009,6 +1063,24 @@ public class AuthorizationInterceptorDstu2Test {
 			return retVal;
 		}
 
+		@Validate
+		public MethodOutcome validate(@ResourceParam Patient theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+				@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+			ourHitMethod = true;
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue().setDiagnostics("OK");
+			return new MethodOutcome(oo);
+		}
+			
+		@Validate
+		public MethodOutcome validate(@ResourceParam Patient theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+				@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+			ourHitMethod = true;
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue().setDiagnostics("OK");
+			return new MethodOutcome(oo);
+		}
+		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
@@ -1027,8 +1099,15 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 		@Update()
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient theResource) {
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
+
+			if (isNotBlank(theConditionalUrl)) {
+				IdDt actual = new IdDt("Patient", "1123");
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
+			}
+			
 			theResource.setId(theId.withVersion("2"));
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setCreated(true);

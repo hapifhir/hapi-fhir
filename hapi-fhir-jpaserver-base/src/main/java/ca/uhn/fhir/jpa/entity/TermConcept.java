@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +40,8 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -49,47 +52,56 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.AnalyzerDef;
+import org.hibernate.search.annotations.AnalyzerDefs;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Fields;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
+import org.hibernate.search.annotations.TokenizerDef;
 
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 
 //@formatter:off
 @Entity
-@Indexed()	
+@Indexed(interceptor=DeferConceptIndexingInterceptor.class)	
 @Table(name="TRM_CONCEPT", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_CONCEPT_CS_CODE", columnNames= {"CODESYSTEM_PID", "CODE"})
 }, indexes= {
 	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList="INDEX_STATUS") 
 })
+@AnalyzerDefs({
+	@AnalyzerDef(name = "conceptParentPidsAnalyzer",
+		tokenizer = @TokenizerDef(factory = WhitespaceTokenizerFactory.class),
+		filters = {
+		})
+})
 //@formatter:on
 public class TermConcept implements Serializable {
 	private static final int MAX_DESC_LENGTH = 400;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
+
 	private static final long serialVersionUID = 1L;
 
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="myParent")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade= {})
 	private Collection<TermConceptParentChildLink> myChildren;
-	
-	@Column(name="CODE", length=100, nullable=false)
-	@Fields({
-		@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),
-	})
+
+	@Column(name = "CODE", length = 100, nullable = false)
+	@Fields({ @Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")), })
 	private String myCode;
 
 	@ManyToOne()
-	@JoinColumn(name="CODESYSTEM_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_CS_PID"))
+	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@Column(name="CODESYSTEM_PID", insertable=false, updatable=false)
-	@Fields({
-		@Field(name="myCodeSystemVersionPid")
-	})
+	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	@Fields({ @Field(name = "myCodeSystemVersionPid") })
 	private long myCodeSystemVersionPid;
-	
+
 	//@formatter:off
 	@Column(name="DISPLAY", length=MAX_DESC_LENGTH, nullable=true)
 	@Fields({
@@ -100,23 +112,21 @@ public class TermConcept implements Serializable {
 	})
 	private String myDisplay;
 	//@formatter:on
-	
+
 	@Id()
-	@SequenceGenerator(name="SEQ_CONCEPT_PID", sequenceName="SEQ_CONCEPT_PID")
-	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CONCEPT_PID")
-	@Column(name="PID")
+	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
+	@Column(name = "PID")
 	private Long myId;
 
 	@Column(name = "INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
 
 	@Transient
-	@Fields({
-		@Field(name = "myParentPids", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
-	})
+	@Field(name = "myParentPids", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "conceptParentPidsAnalyzer"))
 	private String myParentPids;
 
-	@OneToMany(cascade= {}, fetch=FetchType.LAZY, mappedBy="myChild")
+	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
 	private Collection<TermConceptParentChildLink> myParents;
 
 	public TermConcept() {
@@ -135,7 +145,7 @@ public class TermConcept implements Serializable {
 		link.setChild(theChild);
 		link.setRelationshipType(theRelationshipType);
 		getChildren().add(link);
-		
+
 		theChild.getParents().add(link);
 		return this;
 	}
@@ -154,8 +164,8 @@ public class TermConcept implements Serializable {
 		if (theObj == this) {
 			return true;
 		}
-		
-		TermConcept obj = (TermConcept)theObj;
+
+		TermConcept obj = (TermConcept) theObj;
 
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(myCodeSystem, obj.myCodeSystem);
@@ -190,13 +200,17 @@ public class TermConcept implements Serializable {
 		return myIndexStatus;
 	}
 
+	public String getParentPidsAsString() {
+		return myParentPids;
+	}
+
 	public Collection<TermConceptParentChildLink> getParents() {
 		if (myParents == null) {
 			myParents = new ArrayList<TermConceptParentChildLink>();
 		}
 		return myParents;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
@@ -204,7 +218,29 @@ public class TermConcept implements Serializable {
 		b.append(myCode);
 		return b.toHashCode();
 	}
-	
+
+	private void parentPids(TermConcept theNextConcept, Set<Long> theParentPids) {
+		for (TermConceptParentChildLink nextParentLink : theNextConcept.getParents()) {
+			TermConcept parent = nextParentLink.getParent();
+			Long parentConceptId = parent.getId();
+			Validate.notNull(parentConceptId);
+			if (parent != null && theParentPids.add(parentConceptId)) {
+				parentPids(parent, theParentPids);
+			}
+		}
+	}
+
+	@PreUpdate
+	@PrePersist
+	public void prePersist() {
+		Set<Long> parentPids = new HashSet<Long>();
+		TermConcept entity = this;
+		parentPids(entity, parentPids);
+		entity.setParentPids(parentPids);
+
+		ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+	}
+
 	public void setCode(String theCode) {
 		myCode = theCode;
 	}
@@ -236,7 +272,11 @@ public class TermConcept implements Serializable {
 			}
 			b.append(next);
 		}
-			
+
+		if (b.length() == 0) {
+			b.append("NONE");
+		}
+
 		myParentPids = b.toString();
 	}
 
@@ -244,5 +284,4 @@ public class TermConcept implements Serializable {
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("code", myCode).append("display", myDisplay).build();
 	}
-
 }

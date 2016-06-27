@@ -147,6 +147,9 @@ public class JpaServerDemo extends RestfulServer {
 			this.registerInterceptor(interceptor);
 		}
 
+		DaoConfig daoConfig = myAppCtx.getBean(DaoConfig.class);
+		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
+		
 	}
 
 }

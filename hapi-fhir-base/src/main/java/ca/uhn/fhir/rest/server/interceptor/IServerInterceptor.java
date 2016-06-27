@@ -371,23 +371,47 @@ public interface IServerInterceptor {
 		private IBaseResource myResource;
 		private final String myResourceType;
 
-		public ActionRequestDetails(IIdType theId, String theResourceType, FhirContext theContext, RequestDetails theRequestDetails) {
+		public ActionRequestDetails(RequestDetails theRequestDetails) {
+			myId = theRequestDetails.getId();
+			myResourceType = theRequestDetails.getResourceName();
+			myContext = theRequestDetails.getServer().getFhirContext();
+			myRequestDetails = theRequestDetails;
+		}
+
+		public ActionRequestDetails(RequestDetails theRequestDetails, FhirContext theContext, IBaseResource theResource) {
+			this(theRequestDetails, theContext, theContext.getResourceDefinition(theResource).getName(), theResource.getIdElement());
+			myResource = theResource;
+		}
+
+		public ActionRequestDetails(RequestDetails theRequestDetails, FhirContext theContext, String theResourceType, IIdType theId) {
 			myId = theId;
 			myResourceType = theResourceType;
 			myContext = theContext;
 			myRequestDetails = theRequestDetails;
 		}
 
-		public ActionRequestDetails(IIdType theId, String theResourceType, IBaseResource theResource, FhirContext theContext, RequestDetails theRequestDetails) {
-			this(theId, theResourceType, theContext, theRequestDetails);
+		public ActionRequestDetails(RequestDetails theRequestDetails, IBaseResource theResource) {
+			this(theRequestDetails, theRequestDetails.getServer().getFhirContext().getResourceDefinition(theResource).getName(), theResource.getIdElement());
 			myResource = theResource;
 		}
 
-		public ActionRequestDetails(RequestDetails theRequestDetails) {
-			myId = theRequestDetails.getId();
-			myResourceType = theRequestDetails.getResourceName();
-			myContext = theRequestDetails.getServer().getFhirContext();
-			myRequestDetails = theRequestDetails;
+		public ActionRequestDetails(RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType, IIdType theId) {
+			this(theRequestDetails, theResourceType, theId);
+			myResource = theResource;
+		}
+
+		public ActionRequestDetails(RequestDetails theRequestDetails, String theResourceType, IIdType theId) {
+			this(theRequestDetails, theRequestDetails.getServer().getFhirContext(), theResourceType, theId);
+		}
+
+		/**
+		 * Constructor
+		 * 
+		 * @param theRequestDetails The request details to wrap
+		 * @param theId The ID of the resource being created (note that the ID should have the resource type populated)
+		 */
+		public ActionRequestDetails(RequestDetails theRequestDetails, IIdType theId) {
+			this(theRequestDetails, theId.getResourceType(), theId);
 		}
 
 		public FhirContext getContext() {
@@ -437,13 +461,6 @@ public interface IServerInterceptor {
 		}
 
 		/**
-		 * This method should not be called by client code
-		 */
-		public void setResource(IBaseResource theObject) {
-			myResource = theObject;
-		}
-
-		/**
 		 * This method may be invoked by user code to notify interceptors that a nested 
 		 * operation is being invoked which is denoted by this request details.
 		 */
@@ -460,6 +477,13 @@ public interface IServerInterceptor {
 			for (IServerInterceptor next : interceptors) {
 				next.incomingRequestPreHandled(theOperationType, this);
 			}
+		}
+
+		/**
+		 * This method should not be called by client code
+		 */
+		public void setResource(IBaseResource theObject) {
+			myResource = theObject;
 		}
 
 	}

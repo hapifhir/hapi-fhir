@@ -70,13 +70,19 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 	private Set<String> excludeKeys = new HashSet<String>();
 	private ValueSetExpanderFactory factory;
 	private ValueSet focus;
+	private int maxExpansionSize = 500;
 
 	private Map<String, ValueSetExpansionContainsComponent> map = new HashMap<String, ValueSet.ValueSetExpansionContainsComponent>();
+	private int total;
 
 	public ValueSetExpanderSimple(IWorkerContext context, ValueSetExpanderFactory factory) {
 		super();
 		this.context = context;
 		this.factory = factory;
+	}
+
+	public void setMaxExpansionSize(int theMaxExpansionSize) {
+		maxExpansionSize = theMaxExpansionSize;
 	}
 
 	private void addCode(String system, String code, String display) {
@@ -101,7 +107,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 	}
 
 	private void addCodes(ValueSetExpansionComponent expand, List<ValueSetExpansionParameterComponent> params) throws ETooCostly {
-		if (expand.getContains().size() > 500)
+		if (expand.getContains().size() > maxExpansionSize)
 			throw new ETooCostly("Too many codes to display (>" + Integer.toString(expand.getContains().size()) + ")");
 		for (ValueSetExpansionParameterComponent p : expand.getParameter()) {
 			if (!existsInParams(params, p.getName(), p.getValue()))
@@ -111,6 +117,8 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 		for (ValueSetExpansionContainsComponent c : expand.getContains()) {
 			addCode(c.getSystem(), c.getCode(), c.getDisplay());
 		}
+		
+		total = expand.getTotal();
 	}
 
 	private void excludeCode(String theSystem, String theCode) {
@@ -171,6 +179,11 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 					focus.getExpansion().getContains().add(c);
 				}
 			}
+			
+			if (total > 0) {
+				focus.getExpansion().setTotal(total);
+			}
+			
 			return new ValueSetExpansionOutcome(focus, null);
 		} catch (RuntimeException e) {
 			// TODO: we should put something more specific instead of just Exception below, since
