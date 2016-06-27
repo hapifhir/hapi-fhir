@@ -22,6 +22,28 @@ public class ValidateUtilTest {
 	}
 	
 	@Test
+	public void testIsGreaterThan() {
+		ValidateUtil.isGreaterThan(2L, 1L, "");
+		try {
+			ValidateUtil.isGreaterThan(1L, 1L, "The message");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The message", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testIsGreaterThanOrEqualTo() {
+		ValidateUtil.isGreaterThanOrEqualTo(1L, 1L, "");
+		try {
+			ValidateUtil.isGreaterThanOrEqualTo(0L, 1L, "The message");
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The message", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testIsNotBlank() {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest("aa", "");
 		
