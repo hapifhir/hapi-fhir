@@ -391,6 +391,10 @@
 				causing issues on some Android phones which come with an older version
 				of this library bundled. Thanks to Paolo Perliti for reporting!
 			</action>
+			<action type="fix">
+				Parser is now better able to handle encoding fields which have been
+				populated with a class that extends the expected class
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

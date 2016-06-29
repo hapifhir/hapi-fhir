@@ -8,6 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -102,7 +103,54 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 
 	}
 
-	
+	@Test
+	public void testFindCodesBelowBuiltInCodeSystem() {
+		List<VersionIndependentConcept> concepts;
+		Set<String> codes;
+
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "active");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("active", "confirmed", "unconfirmed"));
+
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "confirmed");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("confirmed"));
+
+		// Unknown code
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "FOO");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+
+		// Unknown system
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status2222", "FOO");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+	}
+
+	@Test
+	public void testFindCodesAboveBuiltInCodeSystem() {
+		List<VersionIndependentConcept> concepts;
+		Set<String> codes;
+
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "active");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("active"));
+
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "confirmed");
+		codes = toCodes(concepts);
+		assertThat(codes, containsInAnyOrder("active", "confirmed"));
+
+		// Unknown code
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "FOO");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+
+		// Unknown system
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status2222", "FOO");
+		codes = toCodes(concepts);
+		assertThat(codes, empty());
+	}
+
 	@Test
 	public void testReindexTerminology() {
 		IIdType id = createCodeSystem();

@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -65,7 +67,6 @@ import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -81,6 +82,7 @@ public abstract class BaseParser implements IParser {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 
 	private ContainedResources myContainedResources;
+
 	private FhirContext myContext;
 	private Set<String> myDontEncodeElements;
 	private boolean myDontEncodeElementsIncludesStars;
@@ -95,7 +97,6 @@ public abstract class BaseParser implements IParser {
 	private boolean myStripVersionsFromReferences = true;
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
-
 	/**
 	 * Constructor
 	 * 
@@ -393,6 +394,51 @@ public abstract class BaseParser implements IParser {
 			retVal.setValue(theValue);
 		}
 		return retVal;
+	}
+
+	@SuppressWarnings("unchecked")
+	ChildNameAndDef getChildNameAndDef(BaseRuntimeChildDefinition theChild, IBase theValue) {
+		Class<? extends IBase> type = theValue.getClass();
+		String childName = theChild.getChildNameByDatatype(type);
+		BaseRuntimeElementDefinition<?> childDef = theChild.getChildElementDefinitionByDatatype(type);
+		if (childDef == null) {
+			if (theValue instanceof IBaseExtension) {
+				return null;
+			}
+			
+			/*
+			 * For RI structures Enumeration class, this replaces the child def
+			 * with the "code" one. This is messy, and presumably there is a better
+			 * way..
+			 */
+			BaseRuntimeElementDefinition<?> elementDef = myContext.getElementDefinition(type);
+			if (elementDef.getName().equals("code")) {
+				Class<? extends IBase> type2 = myContext.getElementDefinition("code").getImplementingClass();
+				childDef = theChild.getChildElementDefinitionByDatatype(type2);
+				childName = theChild.getChildNameByDatatype(type2);
+			}
+
+			// See possibly the user has extended a built-in type without
+			// declaring it anywhere, as in XmlParserDstu3Test#testEncodeUndeclaredBlock
+			if (childDef == null) {
+				Class<?> nextSuperType = theValue.getClass();
+				while (IBase.class.isAssignableFrom(nextSuperType) && childDef == null) {
+					if (Modifier.isAbstract(nextSuperType.getModifiers()) == false) {
+						BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition((Class<? extends IBase>) nextSuperType);
+						Class<?> nextChildType = def.getImplementingClass();
+						childDef = theChild.getChildElementDefinitionByDatatype((Class<? extends IBase>) nextChildType);
+						childName = theChild.getChildNameByDatatype((Class<? extends IBase>) nextChildType);
+					}
+					nextSuperType = nextSuperType.getSuperclass();
+				}
+			}
+			
+			if (childDef == null) {
+				throwExceptionForUnknownChildType(theChild, type);
+			}
+		}
+		
+		return new ChildNameAndDef(childName, childDef);
 	}
 
 	protected String getCompositeElementId(IBase theElement) {
@@ -880,6 +926,26 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 		return false;
+	}
+
+	class ChildNameAndDef {
+
+		private final BaseRuntimeElementDefinition<?> myChildDef;
+		private final String myChildName;
+
+		public ChildNameAndDef(String theChildName, BaseRuntimeElementDefinition<?> theChildDef) {
+			myChildName = theChildName;
+			myChildDef = theChildDef;
+		}
+
+		public BaseRuntimeElementDefinition<?> getChildDef() {
+			return myChildDef;
+		}
+
+		public String getChildName() {
+			return myChildName;
+		}
+
 	}
 
 	protected class CompositeChildElement {

@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.method.IRequestOperationCallback;
@@ -263,6 +264,14 @@ public abstract class BaseJpaTest {
 	public static Set<String> toCodes(Set<TermConcept> theConcepts) {
 		HashSet<String> retVal = new HashSet<String>();
 		for (TermConcept next : theConcepts) {
+			retVal.add(next.getCode());
+		}
+		return retVal;
+	}
+
+	public static Set<String> toCodes(List<VersionIndependentConcept> theConcepts) {
+		HashSet<String> retVal = new HashSet<String>();
+		for (VersionIndependentConcept next : theConcepts) {
 			retVal.add(next.getCode());
 		}
 		return retVal;

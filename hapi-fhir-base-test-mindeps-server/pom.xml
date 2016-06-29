@@ -25,6 +25,18 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.7</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+
+		<!-- Xiaomi phones depend on an old version of this... See #394 -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>3.2</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
 		
 		<!--
 		Woodstox note: The hapi-fhir-base-testmindeps-client project includes no Woodstox at all, so that we use the

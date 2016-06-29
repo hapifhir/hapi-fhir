@@ -110,6 +110,29 @@ public class JsonParserDstu3Test {
 		ourLog.info(output);
 		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
+	
+	
+	@Test
+	public void testEncodeUndeclaredBlock() throws Exception {
+		FooMessageHeader.FooMessageSourceComponent source = new FooMessageHeader.FooMessageSourceComponent();
+		source.getMessageHeaderApplicationId().setValue("APPID");
+		source.setName("NAME");
+		
+		FooMessageHeader header = new FooMessageHeader();
+		header.setSource(source);
+		
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(header);
+		
+      IParser p = ourCtx.newJsonParser();
+      p.setPrettyPrint(true);
+
+      String encode = p.encodeResourceToString(bundle);
+      ourLog.info(encode);
+      
+      assertThat(encode, containsString("\"value\":\"APPID\""));
+	}
+
 
 	/**
 	 * See #344
