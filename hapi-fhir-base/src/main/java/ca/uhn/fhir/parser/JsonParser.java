@@ -612,13 +612,13 @@ public class JsonParser extends BaseParser implements IParser {
 					}
 				}
 
-				Class<? extends IBase> type = nextValue.getClass();
-
-				String childName = nextChild.getChildNameByDatatype(type);
-				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildElementDefinitionByDatatype(type);
-				if (childDef == null) {
-					super.throwExceptionForUnknownChildType(nextChild, type);
+				BaseParser.ChildNameAndDef childNameAndDef = super.getChildNameAndDef(nextChild, nextValue);
+				if (childNameAndDef == null) {
+					continue;
 				}
+				
+				String childName = childNameAndDef.getChildName();
+				BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
 				boolean primitive = childDef.getChildType() == ChildTypeEnum.PRIMITIVE_DATATYPE;
 
 				if ((childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && theContainedResource) {

@@ -236,12 +236,6 @@ public class XmlParser extends BaseParser implements IParser {
 
 						break;
 					}
-					case XMLStreamConstants.ATTRIBUTE: {
-						Attribute elem = (Attribute) nextEvent;
-						String name = (elem.getName().getLocalPart());
-						parserState.attributeValue(name, elem.getValue());
-						break;
-					}
 					case XMLStreamConstants.END_DOCUMENT:
 					case XMLStreamConstants.END_ELEMENT: {
 						if (!heldComments.isEmpty()) {
@@ -649,32 +643,15 @@ public class XmlParser extends BaseParser implements IParser {
 						continue;
 					}
 					
-					Class<? extends IBase> type = nextValue.getClass();
-					String childName = nextChild.getChildNameByDatatype(type);
-					String extensionUrl = nextChild.getExtensionUrl();
-					BaseRuntimeElementDefinition<?> childDef = nextChild.getChildElementDefinitionByDatatype(type);
-					if (childDef == null) {
-						if (nextValue instanceof IBaseExtension) {
-							continue;
-						}
-						
-						/*
-						 * For RI structures Enumeration class, this replaces the child def
-						 * with the "code" one. This is messy, and presumably there is a better
-						 * way..
-						 */
-						BaseRuntimeElementDefinition<?> elementDef = myContext.getElementDefinition(type);
-						if (elementDef.getName().equals("code")) {
-							Class type2 = myContext.getElementDefinition("code").getImplementingClass();
-							childDef = nextChild.getChildElementDefinitionByDatatype(type2);
-							childName = nextChild.getChildNameByDatatype(type2);
-						}
-					
-						if (childDef == null) {
-							super.throwExceptionForUnknownChildType(nextChild, type);
-						}
+					BaseParser.ChildNameAndDef childNameAndDef = super.getChildNameAndDef(nextChild, nextValue);
+					if (childNameAndDef == null) {
+						continue;
 					}
-
+					
+					String childName = childNameAndDef.getChildName();
+					BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
+					String extensionUrl = nextChild.getExtensionUrl();
+					
 					if (nextValue instanceof IBaseExtension && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						// This is called for the Query resource in DSTU1 only
 						extensionUrl = ((IBaseExtension<?, ?>) nextValue).getUrl();

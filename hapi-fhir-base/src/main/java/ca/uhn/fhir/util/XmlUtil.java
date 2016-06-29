@@ -61,6 +61,7 @@ public class XmlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlUtil.class);
 	private static volatile XMLOutputFactory ourOutputFactory;
 	private static XMLOutputFactory ourFragmentOutputFactory;
+	private static Throwable ourNextException;
 	private static final Map<String, Integer> VALID_ENTITY_NAMES;
 	private static final ExtendedEntityReplacingXmlResolver XML_RESOLVER = new ExtendedEntityReplacingXmlResolver();
 
@@ -1519,6 +1520,8 @@ public class XmlUtil {
 	}
 
 	public static XMLEventReader createXmlReader(Reader reader) throws FactoryConfigurationError, XMLStreamException {
+		throwUnitTestExceptionIfConfiguredToDoSo();
+		
 		XMLInputFactory inputFactory = getOrCreateInputFactory();
 
 		// Now.. create the reader and return it
@@ -1526,7 +1529,19 @@ public class XmlUtil {
 		return er;
 	}
 
+	private static void throwUnitTestExceptionIfConfiguredToDoSo() throws FactoryConfigurationError, XMLStreamException {
+		if (ourNextException != null) {
+			if (ourNextException instanceof FactoryConfigurationError) {
+				throw ((FactoryConfigurationError)ourNextException);
+			} else {
+				throw (XMLStreamException)ourNextException;
+			}
+		}
+	}
+
 	public static XMLStreamWriter createXmlStreamWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
+		throwUnitTestExceptionIfConfiguredToDoSo();
+		
 		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
 		XMLStreamWriter retVal = outputFactory.createXMLStreamWriter(theWriter);
 		return retVal;
@@ -1718,6 +1733,13 @@ public class XmlUtil {
 			};
 		}
 
+	}
+
+	/**
+	 * FOR UNIT TESTS ONLY - Throw this exception for the next operation
+	 */
+	static void setThrowExceptionForUnitTest(Throwable theException) {
+		ourNextException = theException;
 	}
 
 }

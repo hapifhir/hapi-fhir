@@ -166,7 +166,7 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	public List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		if (cs == null) {
-			return Collections.emptyList();
+			return findCodesAboveUsingBuiltInSystems(theSystem, theCode);
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
@@ -198,13 +198,31 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 	public List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		if (cs == null) {
-			return Collections.emptyList();
+			return findCodesBelowUsingBuiltInSystems(theSystem, theCode);
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
 		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getResourceVersionId(), theCode);
 		ArrayList<VersionIndependentConcept> retVal = toVersionIndependentConcepts(theSystem, codes);
 		return retVal;
+	}
+
+	/**
+	 * Subclasses may override
+	 * @param theSystem The code system
+	 * @param theCode The code
+	 */
+	protected List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Subclasses may override
+	 * @param theSystem The code system
+	 * @param theCode The code
+	 */
+	protected List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		return Collections.emptyList();
 	}
 
 	private TermCodeSystemVersion findCurrentCodeSystemVersionForSystem(String theCodeSystem) {

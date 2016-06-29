@@ -78,6 +78,9 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 	@Autowired
 	private ValueSetExpander myValueSetExpander;
 
+	@Autowired
+	private IValidationSupport myValidationSupport;
+	
 	private void addCodeIfNotAlreadyAdded(String system, ValueSetExpansionComponent retVal, Set<String> addedCodes, TermConcept nextConcept) {
 		if (addedCodes.add(nextConcept.getCode())) {
 			ValueSetExpansionContainsComponent contains = retVal.addContains();
@@ -85,6 +88,71 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 			contains.setSystem(system);
 			contains.setDisplay(nextConcept.getDisplay());
 		}
+	}
+
+	@Override
+	protected List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		if (system != null) {
+			findCodesBelow(system, theSystem, theCode, retVal);
+		}
+		return retVal;
+	}
+
+	private void findCodesBelow(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
+		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
+	}
+
+	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<ConceptDefinitionComponent> conceptList) {
+		for (ConceptDefinitionComponent next : conceptList) {
+			if (theCode.equals(next.getCode())) {
+				addAllChildren(theSystemString, next, theListToPopulate);
+			} else {
+				findCodesBelow(theSystemString, theCode, theListToPopulate, next.getConcept());
+			}
+		}
+	}
+
+	private void findCodesAbove(CodeSystem theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<ConceptDefinitionComponent> conceptList = theSystem.getConcept();
+		for (ConceptDefinitionComponent next : conceptList) {
+			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
+		}
+	}
+
+	private boolean addTreeIfItContainsCode(String theSystemString, ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		boolean foundCodeInChild = false;
+		for (ConceptDefinitionComponent nextChild : theNext.getConcept()) {
+			foundCodeInChild |= addTreeIfItContainsCode(theSystemString, nextChild, theCode, theListToPopulate);
+		}
+		
+		if (theCode.equals(theNext.getCode()) || foundCodeInChild) {
+			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theNext.getCode()));
+			return true;
+		}
+		
+		return false;
+	}
+
+	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
+		if (isNotBlank(theCode.getCode())) {
+			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
+		}
+		for (ConceptDefinitionComponent nextChild : theCode.getConcept()) {
+			addAllChildren(theSystemString, nextChild, theListToPopulate);
+		}
+	}
+
+	@Override
+	protected List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
+		CodeSystem system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		if (system != null) {
+			findCodesAbove(system, theSystem, theCode, retVal);
+		}
+		return retVal;
 	}
 
 	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ConceptSetFilterComponent nextFilter) {
