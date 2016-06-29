@@ -245,14 +245,17 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			String elementName = childAnnotation.name();
 			int order = childAnnotation.order();
 			boolean childIsChoiceType = false;
+			boolean orderIsReplaceParent = false;
+			
 			if (order == Child.REPLACE_PARENT) {
-
+				
 				if (extensionAttr != null) {
 
 					for (Entry<Integer, BaseRuntimeDeclaredChildDefinition> nextEntry : orderMap.entrySet()) {
 						BaseRuntimeDeclaredChildDefinition nextDef = nextEntry.getValue();
 						if (nextDef instanceof RuntimeChildDeclaredExtensionDefinition) {
 							if (nextDef.getExtensionUrl().equals(extensionAttr.url())) {
+								orderIsReplaceParent = true;
 								order = nextEntry.getKey();
 								orderMap.remove(nextEntry.getKey());
 								elementNames.remove(elementName);
@@ -270,6 +273,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					for (Entry<Integer, BaseRuntimeDeclaredChildDefinition> nextEntry : orderMap.entrySet()) {
 						BaseRuntimeDeclaredChildDefinition nextDef = nextEntry.getValue();
 						if (elementName.equals(nextDef.getElementName())) {
+							orderIsReplaceParent = true;
 							order = nextEntry.getKey();
 							BaseRuntimeDeclaredChildDefinition existing = orderMap.remove(nextEntry.getKey());
 							elementNames.remove(elementName);
@@ -297,7 +301,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			if (order < 0 && order != Child.ORDER_UNKNOWN) {
 				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
 			}
-			if (order != Child.ORDER_UNKNOWN) {
+			
+			if (order != Child.ORDER_UNKNOWN && !orderIsReplaceParent) {
 				order = order + baseElementOrder;
 			}
 			// int min = childAnnotation.min();
