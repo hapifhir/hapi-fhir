@@ -45,6 +45,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Factory;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
@@ -170,6 +171,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 			focus.setExpansion(new ValueSet.ValueSetExpansionComponent());
 			focus.getExpansion().setTimestampElement(DateTimeType.now());
 			focus.getExpansion().setIdentifier(Factory.createUUID());
+			focus.setStatus(ConformanceResourceStatus.ACTIVE);
 
 			if (source.hasCompose())
 				handleCompose(source.getCompose(), focus.getExpansion().getParameter());

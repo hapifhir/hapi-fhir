@@ -23,21 +23,15 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.nio.file.FileVisitOption;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.StringUtils;
-import org.hl7.fhir.dstu3.exceptions.TerminologyServiceException;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -46,7 +40,6 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -86,12 +79,14 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
 
 		ValueSetExpansionOutcome outcome = workerContext.expand(theSource);
-		ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
-
-		ValueSet retVal = new ValueSet();
-		retVal.getMeta().setLastUpdated(new Date());
-		retVal.setExpansion(expansion);
-		return retVal;
+		return outcome.getValueset();
+		
+//		ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
+//
+//		ValueSet retVal = new ValueSet();
+//		retVal.getMeta().setLastUpdated(new Date());
+//		retVal.setExpansion(expansion);
+//		return retVal;
 	}
 
 	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {

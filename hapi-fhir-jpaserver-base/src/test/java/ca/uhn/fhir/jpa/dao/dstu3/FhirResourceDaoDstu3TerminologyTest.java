@@ -34,11 +34,14 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
@@ -192,13 +195,28 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		exclude.addConcept().setCode("childAAA");
 		
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "childAB", "childAAB", "ParentC", "childBA", "childCA"));
 	}
+
+	private void logAndValidateValueSet(ValueSet theResult) {
+		IParser parser = myFhirCtx.newXmlParser().setPrettyPrint(true);
+		String encoded = parser.encodeResourceToString(theResult);
+		ourLog.info(encoded);
+		
+		FhirValidator validator = myFhirCtx.newValidator();
+		validator.setValidateAgainstStandardSchema(true);
+		validator.setValidateAgainstStandardSchematron(true);
+		ValidationResult result = validator.validateWithResult(theResult);
+		
+		if (!result.isSuccessful()) {
+			ourLog.info(parser.encodeResourceToString(result.toOperationOutcome()));
+			fail(parser.encodeResourceToString(result.toOperationOutcome()));
+		}
+	}
+
 
 	@Test
 	public void testExpandWithInvalidExclude() {
@@ -273,9 +291,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("Parent B");
 		
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA", "ParentB"));
@@ -295,8 +311,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("parent a");
 		ValueSet result = myValueSetDao.expand(vs, null);
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA"));
 
@@ -305,8 +320,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("pare");
 		result = myValueSetDao.expand(vs, null);
-		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "ParentC"));
 
@@ -315,8 +329,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("display:exact").setOp(FilterOperator.EQUAL).setValue("pare");
 		result = myValueSetDao.expand(vs, null);
-		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, empty());
 
@@ -337,9 +350,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("AAA");
 		
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("AAA"));
@@ -363,9 +374,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addConcept().setCode("AB");
 		
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("A", "AA", "AAA", "AB"));
@@ -393,8 +402,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
 		
 		ValueSet result = myValueSetDao.expand(vs, null);
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		
 		assertEquals(0, result.getExpansion().getContains().size());
 		
@@ -412,11 +420,11 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
 		result = myValueSetDao.expand(vs, null);
-		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		
 		assertEquals(4, result.getExpansion().getContains().size());
 
+		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		assertThat(encoded, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 	}
 
