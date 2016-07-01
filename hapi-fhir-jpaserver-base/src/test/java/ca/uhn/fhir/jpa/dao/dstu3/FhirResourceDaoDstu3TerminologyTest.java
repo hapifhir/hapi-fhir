@@ -331,7 +331,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-//		include.addConcept().setCode("A");
+		include.addConcept().setCode("A");
 //		include.addConcept().setCode("AA");
 //		include.addConcept().setCode("AAA");
 //		include.addConcept().setCode("AB");
@@ -344,11 +344,12 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ourLog.info(encoded);
 		
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("AAA"));
+		assertThat(codes, containsInAnyOrder("A", "AAA"));
 		
-		assertEquals("AAA", result.getExpansion().getContains().get(0).getCode());
-		assertEquals("Code AAA", result.getExpansion().getContains().get(0).getDisplay());
-		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(0).getSystem());
+		int idx = codes.indexOf("AAA");
+		assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
+		assertEquals("Code AAA", result.getExpansion().getContains().get(idx).getDisplay());
+		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
 //		
 	}
 
@@ -612,7 +613,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	
 	@Test
-	@Ignore
 	public void testSearchCodeInEmptyValueSet() {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);

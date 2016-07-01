@@ -33,7 +33,7 @@ import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
-public class TokenParameterTest {
+public class TokenParamTest {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu1();
@@ -60,6 +60,32 @@ public class TokenParameterTest {
 		assertEquals("a", ourLastOrList.getListAsCodings().get(0).getSystemElement().getValue());
 		assertEquals("b", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
 		assertEquals("a", ourLastOrList.getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("b", ourLastOrList.getValuesAsQueryTokens().get(0).getValue());
+	}
+
+	@Test
+	public void testNoSystem() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=b");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(1, ourLastOrList.getListAsCodings().size());
+		assertEquals(null, ourLastOrList.getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("b", ourLastOrList.getValuesAsQueryTokens().get(0).getValue());
+	}
+
+	@Test
+	public void testEmptySystem() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=%7Cb");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(1, ourLastOrList.getListAsCodings().size());
+		assertEquals("", ourLastOrList.getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals("b", ourLastOrList.getValuesAsQueryTokens().get(0).getValue());
 	}
 

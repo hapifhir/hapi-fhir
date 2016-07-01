@@ -44,7 +44,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -402,9 +401,9 @@ public abstract class BaseParser implements IParser {
 		String childName = theChild.getChildNameByDatatype(type);
 		BaseRuntimeElementDefinition<?> childDef = theChild.getChildElementDefinitionByDatatype(type);
 		if (childDef == null) {
-			if (theValue instanceof IBaseExtension) {
-				return null;
-			}
+//			if (theValue instanceof IBaseExtension) {
+//				return null;
+//			}
 			
 			/*
 			 * For RI structures Enumeration class, this replaces the child def
