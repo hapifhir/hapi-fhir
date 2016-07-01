@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -291,1503 +291,6 @@ public class ModuleMetadata extends Type implements ICompositeType {
       }
     }
 
-    public enum ModuleMetadataContributorType {
-        /**
-         * An author of the content of the module
-         */
-        AUTHOR, 
-        /**
-         * An editor of the content of the module
-         */
-        EDITOR, 
-        /**
-         * A reviewer of the content of the module
-         */
-        REVIEWER, 
-        /**
-         * An endorser of the content of the module
-         */
-        ENDORSER, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static ModuleMetadataContributorType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("author".equals(codeString))
-          return AUTHOR;
-        if ("editor".equals(codeString))
-          return EDITOR;
-        if ("reviewer".equals(codeString))
-          return REVIEWER;
-        if ("endorser".equals(codeString))
-          return ENDORSER;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown ModuleMetadataContributorType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case AUTHOR: return "author";
-            case EDITOR: return "editor";
-            case REVIEWER: return "reviewer";
-            case ENDORSER: return "endorser";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case AUTHOR: return "http://hl7.org/fhir/module-metadata-contributor";
-            case EDITOR: return "http://hl7.org/fhir/module-metadata-contributor";
-            case REVIEWER: return "http://hl7.org/fhir/module-metadata-contributor";
-            case ENDORSER: return "http://hl7.org/fhir/module-metadata-contributor";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case AUTHOR: return "An author of the content of the module";
-            case EDITOR: return "An editor of the content of the module";
-            case REVIEWER: return "A reviewer of the content of the module";
-            case ENDORSER: return "An endorser of the content of the module";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case AUTHOR: return "Author";
-            case EDITOR: return "Editor";
-            case REVIEWER: return "Reviewer";
-            case ENDORSER: return "Endorser";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ModuleMetadataContributorTypeEnumFactory implements EnumFactory<ModuleMetadataContributorType> {
-    public ModuleMetadataContributorType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("author".equals(codeString))
-          return ModuleMetadataContributorType.AUTHOR;
-        if ("editor".equals(codeString))
-          return ModuleMetadataContributorType.EDITOR;
-        if ("reviewer".equals(codeString))
-          return ModuleMetadataContributorType.REVIEWER;
-        if ("endorser".equals(codeString))
-          return ModuleMetadataContributorType.ENDORSER;
-        throw new IllegalArgumentException("Unknown ModuleMetadataContributorType code '"+codeString+"'");
-        }
-        public Enumeration<ModuleMetadataContributorType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("author".equals(codeString))
-          return new Enumeration<ModuleMetadataContributorType>(this, ModuleMetadataContributorType.AUTHOR);
-        if ("editor".equals(codeString))
-          return new Enumeration<ModuleMetadataContributorType>(this, ModuleMetadataContributorType.EDITOR);
-        if ("reviewer".equals(codeString))
-          return new Enumeration<ModuleMetadataContributorType>(this, ModuleMetadataContributorType.REVIEWER);
-        if ("endorser".equals(codeString))
-          return new Enumeration<ModuleMetadataContributorType>(this, ModuleMetadataContributorType.ENDORSER);
-        throw new FHIRException("Unknown ModuleMetadataContributorType code '"+codeString+"'");
-        }
-    public String toCode(ModuleMetadataContributorType code) {
-      if (code == ModuleMetadataContributorType.AUTHOR)
-        return "author";
-      if (code == ModuleMetadataContributorType.EDITOR)
-        return "editor";
-      if (code == ModuleMetadataContributorType.REVIEWER)
-        return "reviewer";
-      if (code == ModuleMetadataContributorType.ENDORSER)
-        return "endorser";
-      return "?";
-      }
-    public String toSystem(ModuleMetadataContributorType code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum ModuleMetadataResourceType {
-        /**
-         * Additional documentation for the module. This would include additional instructions on usage as well additional information on clinical context or appropriateness
-         */
-        DOCUMENTATION, 
-        /**
-         * A summary of the justification for the artifact including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the module available to the consumer of interventions or results produced by the artifact
-         */
-        JUSTIFICATION, 
-        /**
-         * Bibliographic citation for papers, references, or other relevant material for the module. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this module
-         */
-        CITATION, 
-        /**
-         * The previous version of the module
-         */
-        PREDECESSOR, 
-        /**
-         * The next version of the module
-         */
-        SUCCESSOR, 
-        /**
-         * The module is derived from the resource. This is intended to capture the relationship when a particular module is based on the content of another module, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting
-         */
-        DERIVEDFROM, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static ModuleMetadataResourceType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("documentation".equals(codeString))
-          return DOCUMENTATION;
-        if ("justification".equals(codeString))
-          return JUSTIFICATION;
-        if ("citation".equals(codeString))
-          return CITATION;
-        if ("predecessor".equals(codeString))
-          return PREDECESSOR;
-        if ("successor".equals(codeString))
-          return SUCCESSOR;
-        if ("derived-from".equals(codeString))
-          return DERIVEDFROM;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown ModuleMetadataResourceType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case DOCUMENTATION: return "documentation";
-            case JUSTIFICATION: return "justification";
-            case CITATION: return "citation";
-            case PREDECESSOR: return "predecessor";
-            case SUCCESSOR: return "successor";
-            case DERIVEDFROM: return "derived-from";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case DOCUMENTATION: return "http://hl7.org/fhir/module-metadata-resource-type";
-            case JUSTIFICATION: return "http://hl7.org/fhir/module-metadata-resource-type";
-            case CITATION: return "http://hl7.org/fhir/module-metadata-resource-type";
-            case PREDECESSOR: return "http://hl7.org/fhir/module-metadata-resource-type";
-            case SUCCESSOR: return "http://hl7.org/fhir/module-metadata-resource-type";
-            case DERIVEDFROM: return "http://hl7.org/fhir/module-metadata-resource-type";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case DOCUMENTATION: return "Additional documentation for the module. This would include additional instructions on usage as well additional information on clinical context or appropriateness";
-            case JUSTIFICATION: return "A summary of the justification for the artifact including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the module available to the consumer of interventions or results produced by the artifact";
-            case CITATION: return "Bibliographic citation for papers, references, or other relevant material for the module. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this module";
-            case PREDECESSOR: return "The previous version of the module";
-            case SUCCESSOR: return "The next version of the module";
-            case DERIVEDFROM: return "The module is derived from the resource. This is intended to capture the relationship when a particular module is based on the content of another module, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case DOCUMENTATION: return "Documentation";
-            case JUSTIFICATION: return "Justification";
-            case CITATION: return "Citation";
-            case PREDECESSOR: return "Predecessor";
-            case SUCCESSOR: return "Successor";
-            case DERIVEDFROM: return "Derived From";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ModuleMetadataResourceTypeEnumFactory implements EnumFactory<ModuleMetadataResourceType> {
-    public ModuleMetadataResourceType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("documentation".equals(codeString))
-          return ModuleMetadataResourceType.DOCUMENTATION;
-        if ("justification".equals(codeString))
-          return ModuleMetadataResourceType.JUSTIFICATION;
-        if ("citation".equals(codeString))
-          return ModuleMetadataResourceType.CITATION;
-        if ("predecessor".equals(codeString))
-          return ModuleMetadataResourceType.PREDECESSOR;
-        if ("successor".equals(codeString))
-          return ModuleMetadataResourceType.SUCCESSOR;
-        if ("derived-from".equals(codeString))
-          return ModuleMetadataResourceType.DERIVEDFROM;
-        throw new IllegalArgumentException("Unknown ModuleMetadataResourceType code '"+codeString+"'");
-        }
-        public Enumeration<ModuleMetadataResourceType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("documentation".equals(codeString))
-          return new Enumeration<ModuleMetadataResourceType>(this, ModuleMetadataResourceType.DOCUMENTATION);
-        if ("justification".equals(codeString))
-          return new Enumeration<ModuleMetadataResourceType>(this, ModuleMetadataResourceType.JUSTIFICATION);
-        if ("citation".equals(codeString))
-          return new Enumeration<ModuleMetadataResourceType>(this, ModuleMetadataResourceType.CITATION);
-        if ("predecessor".equals(codeString))
-          return new Enumeration<ModuleMetadataResourceType>(this, ModuleMetadataResourceType.PREDECESSOR);
-        if ("successor".equals(codeString))
-          return new Enumeration<ModuleMetadataResourceType>(this, ModuleMetadataResourceType.SUCCESSOR);
-        if ("derived-from".equals(codeString))
-          return new Enumeration<ModuleMetadataResourceType>(this, ModuleMetadataResourceType.DERIVEDFROM);
-        throw new FHIRException("Unknown ModuleMetadataResourceType code '"+codeString+"'");
-        }
-    public String toCode(ModuleMetadataResourceType code) {
-      if (code == ModuleMetadataResourceType.DOCUMENTATION)
-        return "documentation";
-      if (code == ModuleMetadataResourceType.JUSTIFICATION)
-        return "justification";
-      if (code == ModuleMetadataResourceType.CITATION)
-        return "citation";
-      if (code == ModuleMetadataResourceType.PREDECESSOR)
-        return "predecessor";
-      if (code == ModuleMetadataResourceType.SUCCESSOR)
-        return "successor";
-      if (code == ModuleMetadataResourceType.DERIVEDFROM)
-        return "derived-from";
-      return "?";
-      }
-    public String toSystem(ModuleMetadataResourceType code) {
-      return code.getSystem();
-      }
-    }
-
-    @Block()
-    public static class ModuleMetadataCoverageComponent extends Element implements IBaseDatatypeElement {
-        /**
-         * Specifies the focus of the coverage attribute.
-         */
-        @Child(name = "focus", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="patient-gender | patient-age-group | clinical-focus | target-user | workflow-setting | workflow-task | clinical-venue | jurisdiction", formalDefinition="Specifies the focus of the coverage attribute." )
-        protected Coding focus;
-
-        /**
-         * Provides a value for the coverage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.
-         */
-        @Child(name = "value", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Value of the coverage attribute", formalDefinition="Provides a value for the coverage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus." )
-        protected CodeableConcept value;
-
-        private static final long serialVersionUID = 65126300L;
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataCoverageComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataCoverageComponent(Coding focus, CodeableConcept value) {
-        super();
-        this.focus = focus;
-        this.value = value;
-      }
-
-        /**
-         * @return {@link #focus} (Specifies the focus of the coverage attribute.)
-         */
-        public Coding getFocus() { 
-          if (this.focus == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataCoverageComponent.focus");
-            else if (Configuration.doAutoCreate())
-              this.focus = new Coding(); // cc
-          return this.focus;
-        }
-
-        public boolean hasFocus() { 
-          return this.focus != null && !this.focus.isEmpty();
-        }
-
-        /**
-         * @param value {@link #focus} (Specifies the focus of the coverage attribute.)
-         */
-        public ModuleMetadataCoverageComponent setFocus(Coding value) { 
-          this.focus = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (Provides a value for the coverage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.)
-         */
-        public CodeableConcept getValue() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataCoverageComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new CodeableConcept(); // cc
-          return this.value;
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (Provides a value for the coverage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.)
-         */
-        public ModuleMetadataCoverageComponent setValue(CodeableConcept value) { 
-          this.value = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("focus", "Coding", "Specifies the focus of the coverage attribute.", 0, java.lang.Integer.MAX_VALUE, focus));
-          childrenList.add(new Property("value", "CodeableConcept", "Provides a value for the coverage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.", 0, java.lang.Integer.MAX_VALUE, value));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 97604824: /*focus*/ return this.focus == null ? new Base[0] : new Base[] {this.focus}; // Coding
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // CodeableConcept
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 97604824: // focus
-          this.focus = castToCoding(value); // Coding
-          break;
-        case 111972721: // value
-          this.value = castToCodeableConcept(value); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("focus"))
-          this.focus = castToCoding(value); // Coding
-        else if (name.equals("value"))
-          this.value = castToCodeableConcept(value); // CodeableConcept
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 97604824:  return getFocus(); // Coding
-        case 111972721:  return getValue(); // CodeableConcept
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("focus")) {
-          this.focus = new Coding();
-          return this.focus;
-        }
-        else if (name.equals("value")) {
-          this.value = new CodeableConcept();
-          return this.value;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ModuleMetadataCoverageComponent copy() {
-        ModuleMetadataCoverageComponent dst = new ModuleMetadataCoverageComponent();
-        copyValues(dst);
-        dst.focus = focus == null ? null : focus.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ModuleMetadataCoverageComponent))
-          return false;
-        ModuleMetadataCoverageComponent o = (ModuleMetadataCoverageComponent) other;
-        return compareDeep(focus, o.focus, true) && compareDeep(value, o.value, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ModuleMetadataCoverageComponent))
-          return false;
-        ModuleMetadataCoverageComponent o = (ModuleMetadataCoverageComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(focus, value);
-      }
-
-  public String fhirType() {
-    return "ModuleMetadata.coverage";
-
-  }
-
-  }
-
-    @Block()
-    public static class ModuleMetadataContributorComponent extends Element implements IBaseDatatypeElement {
-        /**
-         * The type of contributor.
-         */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="author | editor | reviewer | endorser", formalDefinition="The type of contributor." )
-        protected Enumeration<ModuleMetadataContributorType> type;
-
-        /**
-         * The name of the individual or organization responsible for the contribution.
-         */
-        @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Name of the contributor", formalDefinition="The name of the individual or organization responsible for the contribution." )
-        protected StringType name;
-
-        /**
-         * Contacts to assist a user in finding and communicating with the contributor.
-         */
-        @Child(name = "contact", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contact details of the contributor", formalDefinition="Contacts to assist a user in finding and communicating with the contributor." )
-        protected List<ModuleMetadataContributorContactComponent> contact;
-
-        private static final long serialVersionUID = 1033333886L;
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataContributorComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataContributorComponent(Enumeration<ModuleMetadataContributorType> type, StringType name) {
-        super();
-        this.type = type;
-        this.name = name;
-      }
-
-        /**
-         * @return {@link #type} (The type of contributor.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public Enumeration<ModuleMetadataContributorType> getTypeElement() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataContributorComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<ModuleMetadataContributorType>(new ModuleMetadataContributorTypeEnumFactory()); // bb
-          return this.type;
-        }
-
-        public boolean hasTypeElement() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of contributor.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public ModuleMetadataContributorComponent setTypeElement(Enumeration<ModuleMetadataContributorType> value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return The type of contributor.
-         */
-        public ModuleMetadataContributorType getType() { 
-          return this.type == null ? null : this.type.getValue();
-        }
-
-        /**
-         * @param value The type of contributor.
-         */
-        public ModuleMetadataContributorComponent setType(ModuleMetadataContributorType value) { 
-            if (this.type == null)
-              this.type = new Enumeration<ModuleMetadataContributorType>(new ModuleMetadataContributorTypeEnumFactory());
-            this.type.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #name} (The name of the individual or organization responsible for the contribution.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataContributorComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of the individual or organization responsible for the contribution.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public ModuleMetadataContributorComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of the individual or organization responsible for the contribution.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of the individual or organization responsible for the contribution.
-         */
-        public ModuleMetadataContributorComponent setName(String value) { 
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #contact} (Contacts to assist a user in finding and communicating with the contributor.)
-         */
-        public List<ModuleMetadataContributorContactComponent> getContact() { 
-          if (this.contact == null)
-            this.contact = new ArrayList<ModuleMetadataContributorContactComponent>();
-          return this.contact;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ModuleMetadataContributorComponent setContact(List<ModuleMetadataContributorContactComponent> theContact) { 
-          this.contact = theContact;
-          return this;
-        }
-
-        public boolean hasContact() { 
-          if (this.contact == null)
-            return false;
-          for (ModuleMetadataContributorContactComponent item : this.contact)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ModuleMetadataContributorContactComponent addContact() { //3
-          ModuleMetadataContributorContactComponent t = new ModuleMetadataContributorContactComponent();
-          if (this.contact == null)
-            this.contact = new ArrayList<ModuleMetadataContributorContactComponent>();
-          this.contact.add(t);
-          return t;
-        }
-
-        public ModuleMetadataContributorComponent addContact(ModuleMetadataContributorContactComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.contact == null)
-            this.contact = new ArrayList<ModuleMetadataContributorContactComponent>();
-          this.contact.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-         */
-        public ModuleMetadataContributorContactComponent getContactFirstRep() { 
-          if (getContact().isEmpty()) {
-            addContact();
-          }
-          return getContact().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "The type of contributor.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("name", "string", "The name of the individual or organization responsible for the contribution.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the contributor.", 0, java.lang.Integer.MAX_VALUE, contact));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<ModuleMetadataContributorType>
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ModuleMetadataContributorContactComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = new ModuleMetadataContributorTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataContributorType>
-          break;
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case 951526432: // contact
-          this.getContact().add((ModuleMetadataContributorContactComponent) value); // ModuleMetadataContributorContactComponent
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = new ModuleMetadataContributorTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataContributorType>
-        else if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("contact"))
-          this.getContact().add((ModuleMetadataContributorContactComponent) value);
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<ModuleMetadataContributorType>
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ModuleMetadataContributorContactComponent
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ModuleMetadata.type");
-        }
-        else if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ModuleMetadata.name");
-        }
-        else if (name.equals("contact")) {
-          return addContact();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ModuleMetadataContributorComponent copy() {
-        ModuleMetadataContributorComponent dst = new ModuleMetadataContributorComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.name = name == null ? null : name.copy();
-        if (contact != null) {
-          dst.contact = new ArrayList<ModuleMetadataContributorContactComponent>();
-          for (ModuleMetadataContributorContactComponent i : contact)
-            dst.contact.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ModuleMetadataContributorComponent))
-          return false;
-        ModuleMetadataContributorComponent o = (ModuleMetadataContributorComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(name, o.name, true) && compareDeep(contact, o.contact, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ModuleMetadataContributorComponent))
-          return false;
-        ModuleMetadataContributorComponent o = (ModuleMetadataContributorComponent) other;
-        return compareValues(type, o.type, true) && compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, name, contact);
-      }
-
-  public String fhirType() {
-    return "ModuleMetadata.contributor";
-
-  }
-
-  }
-
-    @Block()
-    public static class ModuleMetadataContributorContactComponent extends Element implements IBaseDatatypeElement {
-        /**
-         * The name of an individual to contact regarding the contribution.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the contribution." )
-        protected StringType name;
-
-        /**
-         * Contact details for the individual (if a name was provided) or the contributor.
-         */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contact details for an individual or contributor", formalDefinition="Contact details for the individual (if a name was provided) or the contributor." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataContributorContactComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (The name of an individual to contact regarding the contribution.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataContributorContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the contribution.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public ModuleMetadataContributorContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the contribution.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the contribution.
-         */
-        public ModuleMetadataContributorContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for the individual (if a name was provided) or the contributor.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ModuleMetadataContributorContactComponent setTelecom(List<ContactPoint> theTelecom) { 
-          this.telecom = theTelecom;
-          return this;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-        public ModuleMetadataContributorContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the contribution.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for the individual (if a name was provided) or the contributor.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ModuleMetadata.name");
-        }
-        else if (name.equals("telecom")) {
-          return addTelecom();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ModuleMetadataContributorContactComponent copy() {
-        ModuleMetadataContributorContactComponent dst = new ModuleMetadataContributorContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ModuleMetadataContributorContactComponent))
-          return false;
-        ModuleMetadataContributorContactComponent o = (ModuleMetadataContributorContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ModuleMetadataContributorContactComponent))
-          return false;
-        ModuleMetadataContributorContactComponent o = (ModuleMetadataContributorContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
-      }
-
-  public String fhirType() {
-    return "ModuleMetadata.contributor.contact";
-
-  }
-
-  }
-
-    @Block()
-    public static class ModuleMetadataContactComponent extends Element implements IBaseDatatypeElement {
-        /**
-         * The name of an individual to contact regarding the module.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the module." )
-        protected StringType name;
-
-        /**
-         * Contact details for the individual (if a name was provided) or the publisher.
-         */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Contact details for an individual or publisher", formalDefinition="Contact details for the individual (if a name was provided) or the publisher." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataContactComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (The name of an individual to contact regarding the module.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the module.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public ModuleMetadataContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the module.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the module.
-         */
-        public ModuleMetadataContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for the individual (if a name was provided) or the publisher.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ModuleMetadataContactComponent setTelecom(List<ContactPoint> theTelecom) { 
-          this.telecom = theTelecom;
-          return this;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-        public ModuleMetadataContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the module.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for the individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ModuleMetadata.name");
-        }
-        else if (name.equals("telecom")) {
-          return addTelecom();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ModuleMetadataContactComponent copy() {
-        ModuleMetadataContactComponent dst = new ModuleMetadataContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ModuleMetadataContactComponent))
-          return false;
-        ModuleMetadataContactComponent o = (ModuleMetadataContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ModuleMetadataContactComponent))
-          return false;
-        ModuleMetadataContactComponent o = (ModuleMetadataContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
-      }
-
-  public String fhirType() {
-    return "ModuleMetadata.contact";
-
-  }
-
-  }
-
-    @Block()
-    public static class ModuleMetadataRelatedResourceComponent extends Element implements IBaseDatatypeElement {
-        /**
-         * The type of related resource.
-         */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="documentation | justification | citation | predecessor | successor | derived-from", formalDefinition="The type of related resource." )
-        protected Enumeration<ModuleMetadataResourceType> type;
-
-        /**
-         * The document being referenced, represented as an attachment. This is exclusive with the resource element.
-         */
-        @Child(name = "document", type = {Attachment.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The related document", formalDefinition="The document being referenced, represented as an attachment. This is exclusive with the resource element." )
-        protected Attachment document;
-
-        /**
-         * The related resource, such as a library, value set, profile, or other module.
-         */
-        @Child(name = "resource", type = {}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The related resource", formalDefinition="The related resource, such as a library, value set, profile, or other module." )
-        protected Reference resource;
-
-        /**
-         * The actual object that is the target of the reference (The related resource, such as a library, value set, profile, or other module.)
-         */
-        protected Resource resourceTarget;
-
-        private static final long serialVersionUID = -1400982664L;
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataRelatedResourceComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ModuleMetadataRelatedResourceComponent(Enumeration<ModuleMetadataResourceType> type) {
-        super();
-        this.type = type;
-      }
-
-        /**
-         * @return {@link #type} (The type of related resource.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public Enumeration<ModuleMetadataResourceType> getTypeElement() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataRelatedResourceComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<ModuleMetadataResourceType>(new ModuleMetadataResourceTypeEnumFactory()); // bb
-          return this.type;
-        }
-
-        public boolean hasTypeElement() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of related resource.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public ModuleMetadataRelatedResourceComponent setTypeElement(Enumeration<ModuleMetadataResourceType> value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return The type of related resource.
-         */
-        public ModuleMetadataResourceType getType() { 
-          return this.type == null ? null : this.type.getValue();
-        }
-
-        /**
-         * @param value The type of related resource.
-         */
-        public ModuleMetadataRelatedResourceComponent setType(ModuleMetadataResourceType value) { 
-            if (this.type == null)
-              this.type = new Enumeration<ModuleMetadataResourceType>(new ModuleMetadataResourceTypeEnumFactory());
-            this.type.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #document} (The document being referenced, represented as an attachment. This is exclusive with the resource element.)
-         */
-        public Attachment getDocument() { 
-          if (this.document == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataRelatedResourceComponent.document");
-            else if (Configuration.doAutoCreate())
-              this.document = new Attachment(); // cc
-          return this.document;
-        }
-
-        public boolean hasDocument() { 
-          return this.document != null && !this.document.isEmpty();
-        }
-
-        /**
-         * @param value {@link #document} (The document being referenced, represented as an attachment. This is exclusive with the resource element.)
-         */
-        public ModuleMetadataRelatedResourceComponent setDocument(Attachment value) { 
-          this.document = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #resource} (The related resource, such as a library, value set, profile, or other module.)
-         */
-        public Reference getResource() { 
-          if (this.resource == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ModuleMetadataRelatedResourceComponent.resource");
-            else if (Configuration.doAutoCreate())
-              this.resource = new Reference(); // cc
-          return this.resource;
-        }
-
-        public boolean hasResource() { 
-          return this.resource != null && !this.resource.isEmpty();
-        }
-
-        /**
-         * @param value {@link #resource} (The related resource, such as a library, value set, profile, or other module.)
-         */
-        public ModuleMetadataRelatedResourceComponent setResource(Reference value) { 
-          this.resource = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The related resource, such as a library, value set, profile, or other module.)
-         */
-        public Resource getResourceTarget() { 
-          return this.resourceTarget;
-        }
-
-        /**
-         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The related resource, such as a library, value set, profile, or other module.)
-         */
-        public ModuleMetadataRelatedResourceComponent setResourceTarget(Resource value) { 
-          this.resourceTarget = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "The type of related resource.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, java.lang.Integer.MAX_VALUE, document));
-          childrenList.add(new Property("resource", "Reference(Any)", "The related resource, such as a library, value set, profile, or other module.", 0, java.lang.Integer.MAX_VALUE, resource));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<ModuleMetadataResourceType>
-        case 861720859: /*document*/ return this.document == null ? new Base[0] : new Base[] {this.document}; // Attachment
-        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = new ModuleMetadataResourceTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataResourceType>
-          break;
-        case 861720859: // document
-          this.document = castToAttachment(value); // Attachment
-          break;
-        case -341064690: // resource
-          this.resource = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = new ModuleMetadataResourceTypeEnumFactory().fromType(value); // Enumeration<ModuleMetadataResourceType>
-        else if (name.equals("document"))
-          this.document = castToAttachment(value); // Attachment
-        else if (name.equals("resource"))
-          this.resource = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<ModuleMetadataResourceType>
-        case 861720859:  return getDocument(); // Attachment
-        case -341064690:  return getResource(); // Reference
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ModuleMetadata.type");
-        }
-        else if (name.equals("document")) {
-          this.document = new Attachment();
-          return this.document;
-        }
-        else if (name.equals("resource")) {
-          this.resource = new Reference();
-          return this.resource;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ModuleMetadataRelatedResourceComponent copy() {
-        ModuleMetadataRelatedResourceComponent dst = new ModuleMetadataRelatedResourceComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.document = document == null ? null : document.copy();
-        dst.resource = resource == null ? null : resource.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ModuleMetadataRelatedResourceComponent))
-          return false;
-        ModuleMetadataRelatedResourceComponent o = (ModuleMetadataRelatedResourceComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(document, o.document, true) && compareDeep(resource, o.resource, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ModuleMetadataRelatedResourceComponent))
-          return false;
-        ModuleMetadataRelatedResourceComponent o = (ModuleMetadataRelatedResourceComponent) other;
-        return compareValues(type, o.type, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, document, resource
-          );
-      }
-
-  public String fhirType() {
-    return "ModuleMetadata.relatedResource";
-
-  }
-
-  }
-
     /**
      * An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.
      */
@@ -1828,6 +331,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
      */
     @Child(name = "type", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="module | library | decision-support-rule | documentation-template | order-set", formalDefinition="Identifies the type of knowledge module, such as a rule, library, documentation template, or measure." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/module-metadata-type")
     protected Enumeration<ModuleMetadataType> type;
 
     /**
@@ -1835,6 +339,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
      */
     @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | inactive", formalDefinition="The status of the module." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/module-metadata-status")
     protected Enumeration<ModuleMetadataStatus> status;
 
     /**
@@ -1889,9 +394,9 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.
      */
-    @Child(name = "coverage", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "coverage", type = {UsageContext.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Describes the context of use for this module", formalDefinition="Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable." )
-    protected List<ModuleMetadataCoverageComponent> coverage;
+    protected List<UsageContext> coverage;
 
     /**
      * Clinical topics related to the content of the module.
@@ -1903,9 +408,9 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * A contributor to the content of the module, including authors, editors, reviewers, and endorsers.
      */
-    @Child(name = "contributor", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contributor", type = {Contributor.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the module, including authors, editors, reviewers, and endorsers." )
-    protected List<ModuleMetadataContributorComponent> contributor;
+    protected List<Contributor> contributor;
 
     /**
      * The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.
@@ -1915,11 +420,11 @@ public class ModuleMetadata extends Type implements ICompositeType {
     protected StringType publisher;
 
     /**
-     * Contacts to assist a user in finding and communicating with the publisher.
+     * Contact details to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
-    protected List<ModuleMetadataContactComponent> contact;
+    @Child(name = "contact", type = {ContactDetail.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
+    protected List<ContactDetail> contact;
 
     /**
      * A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.
@@ -1931,11 +436,11 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * Related resources such as additional documentation, justification, or bibliographic references.
      */
-    @Child(name = "relatedResource", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "relatedResource", type = {RelatedResource.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Related resources for the module", formalDefinition="Related resources such as additional documentation, justification, or bibliographic references." )
-    protected List<ModuleMetadataRelatedResourceComponent> relatedResource;
+    protected List<RelatedResource> relatedResource;
 
-    private static final long serialVersionUID = 1528493169L;
+    private static final long serialVersionUID = 774796920L;
 
   /**
    * Constructor
@@ -2609,16 +1114,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * @return {@link #coverage} (Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.)
      */
-    public List<ModuleMetadataCoverageComponent> getCoverage() { 
+    public List<UsageContext> getCoverage() { 
       if (this.coverage == null)
-        this.coverage = new ArrayList<ModuleMetadataCoverageComponent>();
+        this.coverage = new ArrayList<UsageContext>();
       return this.coverage;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ModuleMetadata setCoverage(List<ModuleMetadataCoverageComponent> theCoverage) { 
+    public ModuleMetadata setCoverage(List<UsageContext> theCoverage) { 
       this.coverage = theCoverage;
       return this;
     }
@@ -2626,25 +1131,25 @@ public class ModuleMetadata extends Type implements ICompositeType {
     public boolean hasCoverage() { 
       if (this.coverage == null)
         return false;
-      for (ModuleMetadataCoverageComponent item : this.coverage)
+      for (UsageContext item : this.coverage)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ModuleMetadataCoverageComponent addCoverage() { //3
-      ModuleMetadataCoverageComponent t = new ModuleMetadataCoverageComponent();
+    public UsageContext addCoverage() { //3
+      UsageContext t = new UsageContext();
       if (this.coverage == null)
-        this.coverage = new ArrayList<ModuleMetadataCoverageComponent>();
+        this.coverage = new ArrayList<UsageContext>();
       this.coverage.add(t);
       return t;
     }
 
-    public ModuleMetadata addCoverage(ModuleMetadataCoverageComponent t) { //3
+    public ModuleMetadata addCoverage(UsageContext t) { //3
       if (t == null)
         return this;
       if (this.coverage == null)
-        this.coverage = new ArrayList<ModuleMetadataCoverageComponent>();
+        this.coverage = new ArrayList<UsageContext>();
       this.coverage.add(t);
       return this;
     }
@@ -2652,7 +1157,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
      */
-    public ModuleMetadataCoverageComponent getCoverageFirstRep() { 
+    public UsageContext getCoverageFirstRep() { 
       if (getCoverage().isEmpty()) {
         addCoverage();
       }
@@ -2715,16 +1220,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * @return {@link #contributor} (A contributor to the content of the module, including authors, editors, reviewers, and endorsers.)
      */
-    public List<ModuleMetadataContributorComponent> getContributor() { 
+    public List<Contributor> getContributor() { 
       if (this.contributor == null)
-        this.contributor = new ArrayList<ModuleMetadataContributorComponent>();
+        this.contributor = new ArrayList<Contributor>();
       return this.contributor;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ModuleMetadata setContributor(List<ModuleMetadataContributorComponent> theContributor) { 
+    public ModuleMetadata setContributor(List<Contributor> theContributor) { 
       this.contributor = theContributor;
       return this;
     }
@@ -2732,25 +1237,25 @@ public class ModuleMetadata extends Type implements ICompositeType {
     public boolean hasContributor() { 
       if (this.contributor == null)
         return false;
-      for (ModuleMetadataContributorComponent item : this.contributor)
+      for (Contributor item : this.contributor)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ModuleMetadataContributorComponent addContributor() { //3
-      ModuleMetadataContributorComponent t = new ModuleMetadataContributorComponent();
+    public Contributor addContributor() { //3
+      Contributor t = new Contributor();
       if (this.contributor == null)
-        this.contributor = new ArrayList<ModuleMetadataContributorComponent>();
+        this.contributor = new ArrayList<Contributor>();
       this.contributor.add(t);
       return t;
     }
 
-    public ModuleMetadata addContributor(ModuleMetadataContributorComponent t) { //3
+    public ModuleMetadata addContributor(Contributor t) { //3
       if (t == null)
         return this;
       if (this.contributor == null)
-        this.contributor = new ArrayList<ModuleMetadataContributorComponent>();
+        this.contributor = new ArrayList<Contributor>();
       this.contributor.add(t);
       return this;
     }
@@ -2758,7 +1263,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * @return The first repetition of repeating field {@link #contributor}, creating it if it does not already exist
      */
-    public ModuleMetadataContributorComponent getContributorFirstRep() { 
+    public Contributor getContributorFirstRep() { 
       if (getContributor().isEmpty()) {
         addContributor();
       }
@@ -2815,18 +1320,18 @@ public class ModuleMetadata extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
      */
-    public List<ModuleMetadataContactComponent> getContact() { 
+    public List<ContactDetail> getContact() { 
       if (this.contact == null)
-        this.contact = new ArrayList<ModuleMetadataContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       return this.contact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ModuleMetadata setContact(List<ModuleMetadataContactComponent> theContact) { 
+    public ModuleMetadata setContact(List<ContactDetail> theContact) { 
       this.contact = theContact;
       return this;
     }
@@ -2834,25 +1339,25 @@ public class ModuleMetadata extends Type implements ICompositeType {
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
-      for (ModuleMetadataContactComponent item : this.contact)
+      for (ContactDetail item : this.contact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ModuleMetadataContactComponent addContact() { //3
-      ModuleMetadataContactComponent t = new ModuleMetadataContactComponent();
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
       if (this.contact == null)
-        this.contact = new ArrayList<ModuleMetadataContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return t;
     }
 
-    public ModuleMetadata addContact(ModuleMetadataContactComponent t) { //3
+    public ModuleMetadata addContact(ContactDetail t) { //3
       if (t == null)
         return this;
       if (this.contact == null)
-        this.contact = new ArrayList<ModuleMetadataContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return this;
     }
@@ -2860,7 +1365,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public ModuleMetadataContactComponent getContactFirstRep() { 
+    public ContactDetail getContactFirstRep() { 
       if (getContact().isEmpty()) {
         addContact();
       }
@@ -2919,16 +1424,16 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * @return {@link #relatedResource} (Related resources such as additional documentation, justification, or bibliographic references.)
      */
-    public List<ModuleMetadataRelatedResourceComponent> getRelatedResource() { 
+    public List<RelatedResource> getRelatedResource() { 
       if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<ModuleMetadataRelatedResourceComponent>();
+        this.relatedResource = new ArrayList<RelatedResource>();
       return this.relatedResource;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ModuleMetadata setRelatedResource(List<ModuleMetadataRelatedResourceComponent> theRelatedResource) { 
+    public ModuleMetadata setRelatedResource(List<RelatedResource> theRelatedResource) { 
       this.relatedResource = theRelatedResource;
       return this;
     }
@@ -2936,25 +1441,25 @@ public class ModuleMetadata extends Type implements ICompositeType {
     public boolean hasRelatedResource() { 
       if (this.relatedResource == null)
         return false;
-      for (ModuleMetadataRelatedResourceComponent item : this.relatedResource)
+      for (RelatedResource item : this.relatedResource)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ModuleMetadataRelatedResourceComponent addRelatedResource() { //3
-      ModuleMetadataRelatedResourceComponent t = new ModuleMetadataRelatedResourceComponent();
+    public RelatedResource addRelatedResource() { //3
+      RelatedResource t = new RelatedResource();
       if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<ModuleMetadataRelatedResourceComponent>();
+        this.relatedResource = new ArrayList<RelatedResource>();
       this.relatedResource.add(t);
       return t;
     }
 
-    public ModuleMetadata addRelatedResource(ModuleMetadataRelatedResourceComponent t) { //3
+    public ModuleMetadata addRelatedResource(RelatedResource t) { //3
       if (t == null)
         return this;
       if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<ModuleMetadataRelatedResourceComponent>();
+        this.relatedResource = new ArrayList<RelatedResource>();
       this.relatedResource.add(t);
       return this;
     }
@@ -2962,7 +1467,7 @@ public class ModuleMetadata extends Type implements ICompositeType {
     /**
      * @return The first repetition of repeating field {@link #relatedResource}, creating it if it does not already exist
      */
-    public ModuleMetadataRelatedResourceComponent getRelatedResourceFirstRep() { 
+    public RelatedResource getRelatedResourceFirstRep() { 
       if (getRelatedResource().isEmpty()) {
         addRelatedResource();
       }
@@ -2985,13 +1490,13 @@ public class ModuleMetadata extends Type implements ICompositeType {
         childrenList.add(new Property("publicationDate", "date", "The date on which the module was published.", 0, java.lang.Integer.MAX_VALUE, publicationDate));
         childrenList.add(new Property("lastReviewDate", "date", "The date on which the module content was last reviewed.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
         childrenList.add(new Property("effectivePeriod", "Period", "The period during which the module content is effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
-        childrenList.add(new Property("coverage", "", "Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.", 0, java.lang.Integer.MAX_VALUE, coverage));
+        childrenList.add(new Property("coverage", "UsageContext", "Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.", 0, java.lang.Integer.MAX_VALUE, coverage));
         childrenList.add(new Property("topic", "CodeableConcept", "Clinical topics related to the content of the module.", 0, java.lang.Integer.MAX_VALUE, topic));
-        childrenList.add(new Property("contributor", "", "A contributor to the content of the module, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
+        childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the module, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("relatedResource", "", "Related resources such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedResource));
+        childrenList.add(new Property("relatedResource", "RelatedResource", "Related resources such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedResource));
       }
 
       @Override
@@ -3011,13 +1516,13 @@ public class ModuleMetadata extends Type implements ICompositeType {
         case 1470566394: /*publicationDate*/ return this.publicationDate == null ? new Base[0] : new Base[] {this.publicationDate}; // DateType
         case -1687512484: /*lastReviewDate*/ return this.lastReviewDate == null ? new Base[0] : new Base[] {this.lastReviewDate}; // DateType
         case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
-        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // ModuleMetadataCoverageComponent
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // UsageContext
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
-        case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // ModuleMetadataContributorComponent
+        case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ModuleMetadataContactComponent
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
-        case 1554540889: /*relatedResource*/ return this.relatedResource == null ? new Base[0] : this.relatedResource.toArray(new Base[this.relatedResource.size()]); // ModuleMetadataRelatedResourceComponent
+        case 1554540889: /*relatedResource*/ return this.relatedResource == null ? new Base[0] : this.relatedResource.toArray(new Base[this.relatedResource.size()]); // RelatedResource
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -3069,25 +1574,25 @@ public class ModuleMetadata extends Type implements ICompositeType {
           this.effectivePeriod = castToPeriod(value); // Period
           break;
         case -351767064: // coverage
-          this.getCoverage().add((ModuleMetadataCoverageComponent) value); // ModuleMetadataCoverageComponent
+          this.getCoverage().add(castToUsageContext(value)); // UsageContext
           break;
         case 110546223: // topic
           this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case -1895276325: // contributor
-          this.getContributor().add((ModuleMetadataContributorComponent) value); // ModuleMetadataContributorComponent
+          this.getContributor().add(castToContributor(value)); // Contributor
           break;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
           break;
         case 951526432: // contact
-          this.getContact().add((ModuleMetadataContactComponent) value); // ModuleMetadataContactComponent
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case 1522889671: // copyright
           this.copyright = castToString(value); // StringType
           break;
         case 1554540889: // relatedResource
-          this.getRelatedResource().add((ModuleMetadataRelatedResourceComponent) value); // ModuleMetadataRelatedResourceComponent
+          this.getRelatedResource().add(castToRelatedResource(value)); // RelatedResource
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -3125,19 +1630,19 @@ public class ModuleMetadata extends Type implements ICompositeType {
         else if (name.equals("effectivePeriod"))
           this.effectivePeriod = castToPeriod(value); // Period
         else if (name.equals("coverage"))
-          this.getCoverage().add((ModuleMetadataCoverageComponent) value);
+          this.getCoverage().add(castToUsageContext(value));
         else if (name.equals("topic"))
           this.getTopic().add(castToCodeableConcept(value));
         else if (name.equals("contributor"))
-          this.getContributor().add((ModuleMetadataContributorComponent) value);
+          this.getContributor().add(castToContributor(value));
         else if (name.equals("publisher"))
           this.publisher = castToString(value); // StringType
         else if (name.equals("contact"))
-          this.getContact().add((ModuleMetadataContactComponent) value);
+          this.getContact().add(castToContactDetail(value));
         else if (name.equals("copyright"))
           this.copyright = castToString(value); // StringType
         else if (name.equals("relatedResource"))
-          this.getRelatedResource().add((ModuleMetadataRelatedResourceComponent) value);
+          this.getRelatedResource().add(castToRelatedResource(value));
         else
           super.setProperty(name, value);
       }
@@ -3159,13 +1664,13 @@ public class ModuleMetadata extends Type implements ICompositeType {
         case 1470566394: throw new FHIRException("Cannot make property publicationDate as it is not a complex type"); // DateType
         case -1687512484: throw new FHIRException("Cannot make property lastReviewDate as it is not a complex type"); // DateType
         case -403934648:  return getEffectivePeriod(); // Period
-        case -351767064:  return addCoverage(); // ModuleMetadataCoverageComponent
+        case -351767064:  return addCoverage(); // UsageContext
         case 110546223:  return addTopic(); // CodeableConcept
-        case -1895276325:  return addContributor(); // ModuleMetadataContributorComponent
+        case -1895276325:  return addContributor(); // Contributor
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ModuleMetadataContactComponent
+        case 951526432:  return addContact(); // ContactDetail
         case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
-        case 1554540889:  return addRelatedResource(); // ModuleMetadataRelatedResourceComponent
+        case 1554540889:  return addRelatedResource(); // RelatedResource
         default: return super.makeProperty(hash, name);
         }
 
@@ -3268,8 +1773,8 @@ public class ModuleMetadata extends Type implements ICompositeType {
         dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
         dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
         if (coverage != null) {
-          dst.coverage = new ArrayList<ModuleMetadataCoverageComponent>();
-          for (ModuleMetadataCoverageComponent i : coverage)
+          dst.coverage = new ArrayList<UsageContext>();
+          for (UsageContext i : coverage)
             dst.coverage.add(i.copy());
         };
         if (topic != null) {
@@ -3278,20 +1783,20 @@ public class ModuleMetadata extends Type implements ICompositeType {
             dst.topic.add(i.copy());
         };
         if (contributor != null) {
-          dst.contributor = new ArrayList<ModuleMetadataContributorComponent>();
-          for (ModuleMetadataContributorComponent i : contributor)
+          dst.contributor = new ArrayList<Contributor>();
+          for (Contributor i : contributor)
             dst.contributor.add(i.copy());
         };
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
-          dst.contact = new ArrayList<ModuleMetadataContactComponent>();
-          for (ModuleMetadataContactComponent i : contact)
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
         dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedResource != null) {
-          dst.relatedResource = new ArrayList<ModuleMetadataRelatedResourceComponent>();
-          for (ModuleMetadataRelatedResourceComponent i : relatedResource)
+          dst.relatedResource = new ArrayList<RelatedResource>();
+          for (RelatedResource i : relatedResource)
             dst.relatedResource.add(i.copy());
         };
         return dst;

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -579,6 +579,7 @@ public class CodeSystem extends BaseConformance {
          */
         @Child(name = "operator", type = {CodeType.class}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Operators that can be used with filter", formalDefinition="A list of operators that can be used with the filter." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/filter-operator")
         protected List<CodeType> operator;
 
         /**
@@ -966,6 +967,7 @@ public class CodeSystem extends BaseConformance {
          */
         @Child(name = "type", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="code | Coding | string | integer | boolean | dateTime", formalDefinition="The type of the property value. Properties of type \"code\" contain a code defined by the code system (e.g. a reference to anotherr defined concept)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/concept-property-type")
         protected Enumeration<PropertyType> type;
 
         private static final long serialVersionUID = -1810713373L;
@@ -1844,6 +1846,7 @@ public class CodeSystem extends BaseConformance {
          */
         @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Details how this designation would be used", formalDefinition="A code that details how this designation would be used." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/designation-use")
         protected Coding use;
 
         /**
@@ -2483,6 +2486,7 @@ public class CodeSystem extends BaseConformance {
      */
     @Child(name = "content", type = {CodeType.class}, order=11, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="not-present | examplar | fragment | complete", formalDefinition="How much of the content of the code system - the concepts and codes it defines - are represented in this resource." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/codesystem-content-mode")
     protected Enumeration<CodeSystemContentMode> content;
 
     /**
@@ -3732,7 +3736,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="CodeSystem.date", description="The code system publication date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="CodeSystem.date", description="The code system publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3752,7 +3756,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="CodeSystem.identifier", description="The identifier for the code system", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="CodeSystem.identifier", description="The identifier for the code system", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3772,7 +3776,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.concept.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="CodeSystem.concept.code", description="A code defined in the code system", type="token", target={} )
+  @SearchParamDefinition(name="code", path="CodeSystem.concept.code", description="A code defined in the code system", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -3792,7 +3796,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="CodeSystem.description", description="Text search in the description of the code system", type="string", target={} )
+  @SearchParamDefinition(name="description", path="CodeSystem.description", description="Text search in the description of the code system", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -3812,7 +3816,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.concept.designation.language</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="language", path="CodeSystem.concept.designation.language", description="A language in which a designation is provided", type="token", target={} )
+  @SearchParamDefinition(name="language", path="CodeSystem.concept.designation.language", description="A language in which a designation is provided", type="token" )
   public static final String SP_LANGUAGE = "language";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>language</b>
@@ -3832,7 +3836,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="CodeSystem.version", description="The version identifier of the code system", type="token", target={} )
+  @SearchParamDefinition(name="version", path="CodeSystem.version", description="The version identifier of the code system", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3852,7 +3856,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="CodeSystem.url", description="The logical URL for the code system", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="CodeSystem.url", description="The logical URL for the code system", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -3872,7 +3876,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.content</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="content", path="CodeSystem.content", description="not-present | examplar | fragment | complete", type="token", target={} )
+  @SearchParamDefinition(name="content", path="CodeSystem.content", description="not-present | examplar | fragment | complete", type="token" )
   public static final String SP_CONTENT = "content";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>content</b>
@@ -3892,7 +3896,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="system", path="CodeSystem.url", description="The system for any codes defined by this code system (same as 'url')", type="uri", target={} )
+  @SearchParamDefinition(name="system", path="CodeSystem.url", description="The system for any codes defined by this code system (same as 'url')", type="uri" )
   public static final String SP_SYSTEM = "system";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>system</b>
@@ -3912,7 +3916,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="CodeSystem.name", description="The name of the code system", type="string", target={} )
+  @SearchParamDefinition(name="name", path="CodeSystem.name", description="The name of the code system", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3932,7 +3936,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="CodeSystem.useContext", description="A use context assigned to the code system", type="token", target={} )
+  @SearchParamDefinition(name="context", path="CodeSystem.useContext", description="A use context assigned to the code system", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3952,7 +3956,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="CodeSystem.publisher", description="Name of the publisher of the code system", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="CodeSystem.publisher", description="Name of the publisher of the code system", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3972,7 +3976,7 @@ public class CodeSystem extends BaseConformance {
    * Path: <b>CodeSystem.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="CodeSystem.status", description="The status of the code system", type="token", target={} )
+  @SearchParamDefinition(name="status", path="CodeSystem.status", description="The status of the code system", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -431,6 +431,7 @@ public class Goal extends DomainResource {
      */
     @Child(name = "start", type = {DateType.class, CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When goal pursuit begins", formalDefinition="The date or event after which the goal should begin being pursued." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/goal-start-event")
     protected Type start;
 
     /**
@@ -445,6 +446,7 @@ public class Goal extends DomainResource {
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="E.g. Treatment, dietary, behavioral, etc.", formalDefinition="Indicates a category the goal falls within." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/goal-category")
     protected List<CodeableConcept> category;
 
     /**
@@ -459,6 +461,7 @@ public class Goal extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", formalDefinition="Indicates whether the goal has been reached and is still considered relevant." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/goal-status")
     protected Enumeration<GoalStatus> status;
 
     /**
@@ -473,6 +476,7 @@ public class Goal extends DomainResource {
      */
     @Child(name = "statusReason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Reason for current status", formalDefinition="Captures the reason for the current status." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/goal-status-reason")
     protected CodeableConcept statusReason;
 
     /**
@@ -492,6 +496,7 @@ public class Goal extends DomainResource {
      */
     @Child(name = "priority", type = {CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="high | medium |low", formalDefinition="Identifies the mutually agreed level of importance associated with reaching/sustaining the goal." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/goal-priority")
     protected CodeableConcept priority;
 
     /**
@@ -1469,7 +1474,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1489,7 +1494,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1515,7 +1520,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference", target={Group.class, Organization.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1541,7 +1546,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.targetDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="targetdate", path="Goal.target.as(Date)", description="Reach goal on or before", type="date", target={} )
+  @SearchParamDefinition(name="targetdate", path="Goal.target.as(Date)", description="Reach goal on or before", type="date" )
   public static final String SP_TARGETDATE = "targetdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>targetdate</b>
@@ -1561,7 +1566,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token", target={} )
+  @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1581,7 +1586,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

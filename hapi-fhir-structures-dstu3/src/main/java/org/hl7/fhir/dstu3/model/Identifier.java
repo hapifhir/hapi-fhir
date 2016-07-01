@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -175,6 +175,7 @@ public class Identifier extends Type implements ICompositeType {
      */
     @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="usual | official | temp | secondary (If known)", formalDefinition="The purpose of this identifier." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/identifier-use")
     protected Enumeration<IdentifierUse> use;
 
     /**
@@ -182,6 +183,7 @@ public class Identifier extends Type implements ICompositeType {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Description of identifier", formalDefinition="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/identifier-type")
     protected CodeableConcept type;
 
     /**

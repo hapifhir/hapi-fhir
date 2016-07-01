@@ -64,6 +64,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -278,6 +279,8 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 
 			return retVal;
 
+		} catch (BaseServerResponseException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new InternalErrorException(e);
 		}

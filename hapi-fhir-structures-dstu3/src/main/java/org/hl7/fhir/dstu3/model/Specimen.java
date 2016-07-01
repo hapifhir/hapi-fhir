@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -203,6 +203,7 @@ public class Specimen extends DomainResource {
          */
         @Child(name = "method", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Technique used to perform collection", formalDefinition="A coded value specifying the technique that is used to perform the procedure." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specimen-collection-method")
         protected CodeableConcept method;
 
         /**
@@ -210,6 +211,7 @@ public class Specimen extends DomainResource {
          */
         @Child(name = "bodySite", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Anatomical collection site", formalDefinition="Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
         protected CodeableConcept bodySite;
 
         private static final long serialVersionUID = -1324142853L;
@@ -544,6 +546,7 @@ public class Specimen extends DomainResource {
          */
         @Child(name = "procedure", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Indicates the treatment or processing step  applied to the specimen", formalDefinition="A coded value specifying the procedure used to process the specimen." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specimen-treatment-procedure")
         protected CodeableConcept procedure;
 
         /**
@@ -925,6 +928,7 @@ public class Specimen extends DomainResource {
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Kind of container directly associated with specimen", formalDefinition="The type of container associated with the specimen (e.g. slide, aliquot, etc.)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specimen-container-type")
         protected CodeableConcept type;
 
         /**
@@ -946,6 +950,7 @@ public class Specimen extends DomainResource {
          */
         @Child(name = "additive", type = {CodeableConcept.class, Substance.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Additive associated with container", formalDefinition="Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0371")
         protected Type additive;
 
         private static final long serialVersionUID = 187274879L;
@@ -1359,6 +1364,7 @@ public class Specimen extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="available | unavailable | unsatisfactory | entered-in-error", formalDefinition="The availability of the specimen." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specimen-status")
     protected Enumeration<SpecimenStatus> status;
 
     /**
@@ -1366,6 +1372,7 @@ public class Specimen extends DomainResource {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of material that forms the specimen", formalDefinition="The kind of material that forms the specimen." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0487")
     protected CodeableConcept type;
 
     /**
@@ -2285,7 +2292,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.container.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token", target={} )
+  @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token" )
   public static final String SP_CONTAINER = "container";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container</b>
@@ -2305,7 +2312,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2325,7 +2332,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference", target={Specimen.class} )
+  @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -2351,7 +2358,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.container.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container-id", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token", target={} )
+  @SearchParamDefinition(name="container-id", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
   public static final String SP_CONTAINER_ID = "container-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container-id</b>
@@ -2371,7 +2378,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token", target={} )
+  @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token" )
   public static final String SP_BODYSITE = "bodysite";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
@@ -2391,7 +2398,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference", target={Group.class, Device.class, Patient.class, Substance.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2417,7 +2424,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2443,7 +2450,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.collected[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="collected", path="Specimen.collection.collected", description="The date the specimen was collected", type="date", target={} )
+  @SearchParamDefinition(name="collected", path="Specimen.collection.collected", description="The date the specimen was collected", type="date" )
   public static final String SP_COLLECTED = "collected";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>collected</b>
@@ -2463,7 +2470,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.accessionIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token", target={} )
+  @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
   public static final String SP_ACCESSION = "accession";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>accession</b>
@@ -2483,7 +2490,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2503,7 +2510,7 @@ public class Specimen extends DomainResource {
    * Path: <b>Specimen.collection.collector</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_COLLECTOR = "collector";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>collector</b>

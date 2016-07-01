@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -267,6 +267,7 @@ public class ListResource extends DomainResource {
          */
         @Child(name = "flag", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Status/Workflow information about this item", formalDefinition="The flag allows the system constructing the list to indicate the role and significance of the item in the list." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-item-flag")
         protected CodeableConcept flag;
 
         /**
@@ -610,6 +611,7 @@ public class ListResource extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="current | retired | entered-in-error", formalDefinition="Indicates the current state of this list." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-status")
     protected Enumeration<ListStatus> status;
 
     /**
@@ -617,6 +619,7 @@ public class ListResource extends DomainResource {
      */
     @Child(name = "mode", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="working | snapshot | changes", formalDefinition="How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-mode")
     protected Enumeration<ListMode> mode;
 
     /**
@@ -631,6 +634,7 @@ public class ListResource extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What the purpose of this list is", formalDefinition="This code defines the purpose of the list - why it was created." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-example-codes")
     protected CodeableConcept code;
 
     /**
@@ -681,6 +685,7 @@ public class ListResource extends DomainResource {
      */
     @Child(name = "orderedBy", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What order the list has", formalDefinition="What order applies to the items in the list." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-order")
     protected CodeableConcept orderedBy;
 
     /**
@@ -702,6 +707,7 @@ public class ListResource extends DomainResource {
      */
     @Child(name = "emptyReason", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why list is empty", formalDefinition="If the list is empty, why the list is empty." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-empty-reason")
     protected CodeableConcept emptyReason;
 
     private static final long serialVersionUID = 2071342704L;
@@ -1536,7 +1542,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date", target={} )
+  @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1556,7 +1562,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="List.identifier", description="Business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="List.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1602,7 +1608,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.emptyReason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token", target={} )
+  @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token" )
   public static final String SP_EMPTY_REASON = "empty-reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>empty-reason</b>
@@ -1622,7 +1628,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token", target={} )
+  @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1642,7 +1648,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.note.text</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="notes", path="List.note.text", description="The annotation  - text content", type="string", target={} )
+  @SearchParamDefinition(name="notes", path="List.note.text", description="The annotation  - text content", type="string" )
   public static final String SP_NOTES = "notes";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>notes</b>
@@ -1662,7 +1668,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference", target={Group.class, Device.class, Patient.class, Location.class} )
+  @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1688,7 +1694,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1714,7 +1720,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference", target={Practitioner.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1740,7 +1746,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1766,7 +1772,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string", target={} )
+  @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -1786,7 +1792,7 @@ public class ListResource extends DomainResource {
    * Path: <b>List.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

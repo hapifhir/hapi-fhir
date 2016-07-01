@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -55,6 +55,7 @@ public class Immunization extends DomainResource {
          */
         @Child(name = "reason", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Why immunization occurred", formalDefinition="Reasons why a vaccine was administered." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-reason")
         protected List<CodeableConcept> reason;
 
         /**
@@ -62,6 +63,7 @@ public class Immunization extends DomainResource {
          */
         @Child(name = "reasonNotGiven", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Why immunization did not occur", formalDefinition="Reason why a vaccine was not administered." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/no-immunization-reason")
         protected List<CodeableConcept> reasonNotGiven;
 
         private static final long serialVersionUID = -539821866L;
@@ -626,6 +628,7 @@ public class Immunization extends DomainResource {
          */
         @Child(name = "targetDisease", type = {CodeableConcept.class}, order=6, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Disease immunized against", formalDefinition="The targeted disease." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccination-protocol-dose-target")
         protected List<CodeableConcept> targetDisease;
 
         /**
@@ -633,6 +636,7 @@ public class Immunization extends DomainResource {
          */
         @Child(name = "doseStatus", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Indicates if dose counts towards immunity", formalDefinition="Indicates if the immunization event should \"count\" against  the protocol." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccination-protocol-dose-status")
         protected CodeableConcept doseStatus;
 
         /**
@@ -640,6 +644,7 @@ public class Immunization extends DomainResource {
          */
         @Child(name = "doseStatusReason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Why dose does (not) count", formalDefinition="Provides an explanation as to why an immunization event should or should not count against the protocol." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccination-protocol-dose-status-reason")
         protected CodeableConcept doseStatusReason;
 
         private static final long serialVersionUID = 386814037L;
@@ -1190,6 +1195,7 @@ public class Immunization extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="in-progress | on-hold | completed | entered-in-error | stopped", formalDefinition="Indicates the current status of the vaccination event." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-admin-status")
     protected CodeType status;
 
     /**
@@ -1204,6 +1210,7 @@ public class Immunization extends DomainResource {
      */
     @Child(name = "vaccineCode", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Vaccine product administered", formalDefinition="Vaccine that was administered or was to be administered." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccine-code")
     protected CodeableConcept vaccineCode;
 
     /**
@@ -1311,6 +1318,7 @@ public class Immunization extends DomainResource {
      */
     @Child(name = "site", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Body site vaccine  was administered", formalDefinition="Body site where vaccine was administered." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-site")
     protected CodeableConcept site;
 
     /**
@@ -1318,6 +1326,7 @@ public class Immunization extends DomainResource {
      */
     @Child(name = "route", type = {CodeableConcept.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How vaccine entered body", formalDefinition="The path by which the vaccine product is taken into the body." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-route")
     protected CodeableConcept route;
 
     /**
@@ -2637,7 +2646,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  (non)-Administration Date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  (non)-Administration Date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2657,7 +2666,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -2683,7 +2692,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Immunization.identifier", description="Business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Immunization.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2703,7 +2712,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.explanation.reason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="Why immunization occurred", type="token", target={} )
+  @SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="Why immunization occurred", type="token" )
   public static final String SP_REASON = "reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reason</b>
@@ -2723,7 +2732,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2749,7 +2758,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.reaction.detail</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference", target={Observation.class} )
+  @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference" )
   public static final String SP_REACTION = "reaction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reaction</b>
@@ -2775,7 +2784,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.lotNumber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string", target={} )
+  @SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string" )
   public static final String SP_LOT_NUMBER = "lot-number";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>lot-number</b>
@@ -2795,7 +2804,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.wasNotGiven</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="notgiven", path="Immunization.wasNotGiven", description="Administrations which were not given", type="token", target={} )
+  @SearchParamDefinition(name="notgiven", path="Immunization.wasNotGiven", description="Administrations which were not given", type="token" )
   public static final String SP_NOTGIVEN = "notgiven";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>notgiven</b>
@@ -2815,7 +2824,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>
@@ -2841,7 +2850,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.vaccinationProtocol.doseSequence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="Dose number within series", type="number", target={} )
+  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="Dose number within series", type="number" )
   public static final String SP_DOSE_SEQUENCE = "dose-sequence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
@@ -2861,7 +2870,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2887,7 +2896,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.vaccineCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="vaccine-code", path="Immunization.vaccineCode", description="Vaccine Product Administered", type="token", target={} )
+  @SearchParamDefinition(name="vaccine-code", path="Immunization.vaccineCode", description="Vaccine Product Administered", type="token" )
   public static final String SP_VACCINE_CODE = "vaccine-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>vaccine-code</b>
@@ -2907,7 +2916,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.explanation.reasonNotGiven</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reason-not-given", path="Immunization.explanation.reasonNotGiven", description="Explanation of reason vaccination was not administered", type="token", target={} )
+  @SearchParamDefinition(name="reason-not-given", path="Immunization.explanation.reasonNotGiven", description="Explanation of reason vaccination was not administered", type="token" )
   public static final String SP_REASON_NOT_GIVEN = "reason-not-given";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reason-not-given</b>
@@ -2927,7 +2936,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2953,7 +2962,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.reaction.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When reaction started", type="date", target={} )
+  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When reaction started", type="date" )
   public static final String SP_REACTION_DATE = "reaction-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reaction-date</b>
@@ -2973,7 +2982,7 @@ public class Immunization extends DomainResource {
    * Path: <b>Immunization.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Immunization.status", description="Immunization event status", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Immunization.status", description="Immunization event status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

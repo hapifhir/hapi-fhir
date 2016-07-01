@@ -28,6 +28,9 @@
 		formalDefinition="${child.definition}"
 	)
 #end
+#if ( $child.hasBindingUrl )
+	@ca.uhn.fhir.model.api.annotation.Binding(valueSet = "${child.bindingUrl}")
+#end
 	private ${child.referenceType} ${child.variableName};
 	
 #end

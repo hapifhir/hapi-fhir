@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -299,6 +299,7 @@ public class Composition extends DomainResource {
          */
         @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="personal | professional | legal | official", formalDefinition="The type of attestation the authenticator offers." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/composition-attestation-mode")
         protected List<Enumeration<CompositionAttestationMode>> mode;
 
         /**
@@ -604,6 +605,7 @@ public class Composition extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Code(s) that apply to the event being documented", formalDefinition="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActCode")
         protected List<CodeableConcept> code;
 
         /**
@@ -911,6 +913,7 @@ public class Composition extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Classification of section (recommended)", formalDefinition="A code identifying the kind of content contained within the section. This must be consistent with the section title." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/doc-section-codes")
         protected CodeableConcept code;
 
         /**
@@ -925,6 +928,7 @@ public class Composition extends DomainResource {
          */
         @Child(name = "mode", type = {CodeType.class}, order=4, min=0, max=1, modifier=true, summary=true)
         @Description(shortDefinition="working | snapshot | changes", formalDefinition="How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-mode")
         protected CodeType mode;
 
         /**
@@ -932,6 +936,7 @@ public class Composition extends DomainResource {
          */
         @Child(name = "orderedBy", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Order of section entries", formalDefinition="Specifies the order applied to the items in the section entries." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-order")
         protected CodeableConcept orderedBy;
 
         /**
@@ -951,6 +956,7 @@ public class Composition extends DomainResource {
          */
         @Child(name = "emptyReason", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Why the section is empty", formalDefinition="If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-empty-reason")
         protected CodeableConcept emptyReason;
 
         /**
@@ -1486,6 +1492,7 @@ public class Composition extends DomainResource {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of composition (LOINC if possible)", formalDefinition="Specifies the particular kind of composition (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the composition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/doc-typecodes")
     protected CodeableConcept type;
 
     /**
@@ -1493,6 +1500,7 @@ public class Composition extends DomainResource {
      */
     @Child(name = "class", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Categorization of Composition", formalDefinition="A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/doc-classcodes")
     protected CodeableConcept class_;
 
     /**
@@ -1507,6 +1515,7 @@ public class Composition extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="preliminary | final | amended | entered-in-error", formalDefinition="The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/composition-status")
     protected Enumeration<CompositionStatus> status;
 
     /**
@@ -1514,6 +1523,7 @@ public class Composition extends DomainResource {
      */
     @Child(name = "confidentiality", type = {CodeType.class}, order=6, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="As defined by affinity domain", formalDefinition="The code specifying the level of confidentiality of the Composition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ConfidentialityClassification")
     protected CodeType confidentiality;
 
     /**
@@ -2501,7 +2511,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2521,7 +2531,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2541,7 +2551,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.event.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date", target={} )
+  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -2587,7 +2597,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2613,7 +2623,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.confidentiality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token", target={} )
+  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
@@ -2633,7 +2643,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.section.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token", target={} )
+  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
   public static final String SP_SECTION = "section";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>section</b>
@@ -2653,7 +2663,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2679,7 +2689,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2699,7 +2709,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string", target={} )
+  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -2719,7 +2729,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.attester.party</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference", target={Practitioner.class, Organization.class, Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ATTESTER = "attester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>attester</b>
@@ -2771,7 +2781,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2797,7 +2807,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.event.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token", target={} )
+  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -2817,7 +2827,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.class</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token", target={} )
+  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
   public static final String SP_CLASS = "class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>class</b>
@@ -2837,7 +2847,7 @@ public class Composition extends DomainResource {
    * Path: <b>Composition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -49,125 +49,268 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 @ResourceDef(name="EligibilityRequest", profile="http://hl7.org/fhir/Profile/EligibilityRequest")
 public class EligibilityRequest extends DomainResource {
 
+    public enum EligibilityRequestStatus {
+        /**
+         * The resource instance is currently in-force.
+         */
+        ACTIVE, 
+        /**
+         * The resource instance is withdrawn, rescinded or reversed.
+         */
+        CANCELLED, 
+        /**
+         * A new resource instance the contents of which is not complete.
+         */
+        DRAFT, 
+        /**
+         * The resource instance was entered in error.
+         */
+        ENTEREDINERROR, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static EligibilityRequestStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EligibilityRequestStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ACTIVE: return "active";
+            case CANCELLED: return "cancelled";
+            case DRAFT: return "draft";
+            case ENTEREDINERROR: return "entered-in-error";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ACTIVE: return "http://hl7.org/fhir/eligibilityrequest-status";
+            case CANCELLED: return "http://hl7.org/fhir/eligibilityrequest-status";
+            case DRAFT: return "http://hl7.org/fhir/eligibilityrequest-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/eligibilityrequest-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ACTIVE: return "The resource instance is currently in-force.";
+            case CANCELLED: return "The resource instance is withdrawn, rescinded or reversed.";
+            case DRAFT: return "A new resource instance the contents of which is not complete.";
+            case ENTEREDINERROR: return "The resource instance was entered in error.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ACTIVE: return "Active";
+            case CANCELLED: return "Cancelled";
+            case DRAFT: return "Draft";
+            case ENTEREDINERROR: return "Entered In Error";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class EligibilityRequestStatusEnumFactory implements EnumFactory<EligibilityRequestStatus> {
+    public EligibilityRequestStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return EligibilityRequestStatus.ACTIVE;
+        if ("cancelled".equals(codeString))
+          return EligibilityRequestStatus.CANCELLED;
+        if ("draft".equals(codeString))
+          return EligibilityRequestStatus.DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return EligibilityRequestStatus.ENTEREDINERROR;
+        throw new IllegalArgumentException("Unknown EligibilityRequestStatus code '"+codeString+"'");
+        }
+        public Enumeration<EligibilityRequestStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<EligibilityRequestStatus>(this, EligibilityRequestStatus.ACTIVE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<EligibilityRequestStatus>(this, EligibilityRequestStatus.CANCELLED);
+        if ("draft".equals(codeString))
+          return new Enumeration<EligibilityRequestStatus>(this, EligibilityRequestStatus.DRAFT);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<EligibilityRequestStatus>(this, EligibilityRequestStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown EligibilityRequestStatus code '"+codeString+"'");
+        }
+    public String toCode(EligibilityRequestStatus code) {
+      if (code == EligibilityRequestStatus.ACTIVE)
+        return "active";
+      if (code == EligibilityRequestStatus.CANCELLED)
+        return "cancelled";
+      if (code == EligibilityRequestStatus.DRAFT)
+        return "draft";
+      if (code == EligibilityRequestStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      return "?";
+      }
+    public String toSystem(EligibilityRequestStatus code) {
+      return code.getSystem();
+      }
+    }
+
     /**
      * The Response business identifier.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Business Identifier", formalDefinition="The Response business identifier." )
     protected List<Identifier> identifier;
 
     /**
+     * The status of the resource instance.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/eligibilityrequest-status")
+    protected Enumeration<EligibilityRequestStatus> status;
+
+    /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name = "ruleset", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "ruleset", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ruleset")
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name = "originalRuleset", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "originalRuleset", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ruleset")
     protected Coding originalRuleset;
 
     /**
      * The date when this resource was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "created", type = {DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
     protected DateTimeType created;
 
     /**
      * The Insurer who is target  of the request.
      */
-    @Child(name = "target", type = {Identifier.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Insurer", formalDefinition="The Insurer who is target  of the request." )
-    protected Type target;
+    @Child(name = "insurer", type = {Identifier.class, Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Target", formalDefinition="The Insurer who is target  of the request." )
+    protected Type insurer;
 
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "provider", type = {Identifier.class, Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "provider", type = {Identifier.class, Practitioner.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Type provider;
 
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Type organization;
 
     /**
      * Immediate (STAT), best effort (NORMAL), deferred (DEFER).
      */
-    @Child(name = "priority", type = {Coding.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "priority", type = {Coding.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Desired processing priority", formalDefinition="Immediate (STAT), best effort (NORMAL), deferred (DEFER)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/process-priority")
     protected Coding priority;
 
     /**
      * Person who created the invoice/claim/pre-determination or pre-authorization.
      */
-    @Child(name = "enterer", type = {Identifier.class, Practitioner.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "enterer", type = {Identifier.class, Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Author", formalDefinition="Person who created the invoice/claim/pre-determination or pre-authorization." )
     protected Type enterer;
 
     /**
      * Facility where the services were provided.
      */
-    @Child(name = "facility", type = {Identifier.class, Location.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "facility", type = {Identifier.class, Location.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Servicing Facility", formalDefinition="Facility where the services were provided." )
     protected Type facility;
 
     /**
      * Patient Resource.
      */
-    @Child(name = "patient", type = {Identifier.class, Patient.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "patient", type = {Identifier.class, Patient.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The subject of the Products and Services", formalDefinition="Patient Resource." )
     protected Type patient;
 
     /**
      * Financial instrument by which payment information for health care.
      */
-    @Child(name = "coverage", type = {Identifier.class, Coverage.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "coverage", type = {Identifier.class, Coverage.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected Type coverage;
 
     /**
      * The contract number of a business agreement which describes the terms and conditions.
      */
-    @Child(name = "businessArrangement", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "businessArrangement", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Business agreement", formalDefinition="The contract number of a business agreement which describes the terms and conditions." )
     protected StringType businessArrangement;
 
     /**
      * The date or dates when the enclosed suite of services were performed or completed.
      */
-    @Child(name = "serviced", type = {DateType.class, Period.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "serviced", type = {DateType.class, Period.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Estimated date or dates of Service", formalDefinition="The date or dates when the enclosed suite of services were performed or completed." )
     protected Type serviced;
 
     /**
      * Dental, Vision, Medical, Pharmacy, Rehab etc.
      */
-    @Child(name = "benefitCategory", type = {Coding.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "benefitCategory", type = {Coding.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Benefit Category", formalDefinition="Dental, Vision, Medical, Pharmacy, Rehab etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/benefit-category")
     protected Coding benefitCategory;
 
     /**
      * Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.
      */
-    @Child(name = "benefitSubCategory", type = {Coding.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "benefitSubCategory", type = {Coding.class}, order=16, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Benefit SubCategory", formalDefinition="Dental: basic, major, ortho; Vision exam, glasses, contacts; etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/benefit-subcategory")
     protected Coding benefitSubCategory;
 
-    private static final long serialVersionUID = 313969968L;
+    private static final long serialVersionUID = 1941047274L;
 
   /**
    * Constructor
    */
     public EligibilityRequest() {
       super();
+    }
+
+  /**
+   * Constructor
+   */
+    public EligibilityRequest(Enumeration<EligibilityRequestStatus> status) {
+      super();
+      this.status = status;
     }
 
     /**
@@ -221,6 +364,51 @@ public class EligibilityRequest extends DomainResource {
         addIdentifier();
       }
       return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<EligibilityRequestStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<EligibilityRequestStatus>(new EligibilityRequestStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public EligibilityRequest setStatusElement(Enumeration<EligibilityRequestStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the resource instance.
+     */
+    public EligibilityRequestStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the resource instance.
+     */
+    public EligibilityRequest setStatus(EligibilityRequestStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<EligibilityRequestStatus>(new EligibilityRequestStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
     }
 
     /**
@@ -321,47 +509,47 @@ public class EligibilityRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #target} (The Insurer who is target  of the request.)
+     * @return {@link #insurer} (The Insurer who is target  of the request.)
      */
-    public Type getTarget() { 
-      return this.target;
+    public Type getInsurer() { 
+      return this.insurer;
     }
 
     /**
-     * @return {@link #target} (The Insurer who is target  of the request.)
+     * @return {@link #insurer} (The Insurer who is target  of the request.)
      */
-    public Identifier getTargetIdentifier() throws FHIRException { 
-      if (!(this.target instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.target.getClass().getName()+" was encountered");
-      return (Identifier) this.target;
+    public Identifier getInsurerIdentifier() throws FHIRException { 
+      if (!(this.insurer instanceof Identifier))
+        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.insurer.getClass().getName()+" was encountered");
+      return (Identifier) this.insurer;
     }
 
-    public boolean hasTargetIdentifier() { 
-      return this.target instanceof Identifier;
+    public boolean hasInsurerIdentifier() { 
+      return this.insurer instanceof Identifier;
     }
 
     /**
-     * @return {@link #target} (The Insurer who is target  of the request.)
+     * @return {@link #insurer} (The Insurer who is target  of the request.)
      */
-    public Reference getTargetReference() throws FHIRException { 
-      if (!(this.target instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.target.getClass().getName()+" was encountered");
-      return (Reference) this.target;
+    public Reference getInsurerReference() throws FHIRException { 
+      if (!(this.insurer instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.insurer.getClass().getName()+" was encountered");
+      return (Reference) this.insurer;
     }
 
-    public boolean hasTargetReference() { 
-      return this.target instanceof Reference;
+    public boolean hasInsurerReference() { 
+      return this.insurer instanceof Reference;
     }
 
-    public boolean hasTarget() { 
-      return this.target != null && !this.target.isEmpty();
+    public boolean hasInsurer() { 
+      return this.insurer != null && !this.insurer.isEmpty();
     }
 
     /**
-     * @param value {@link #target} (The Insurer who is target  of the request.)
+     * @param value {@link #insurer} (The Insurer who is target  of the request.)
      */
-    public EligibilityRequest setTarget(Type value) { 
-      this.target = value;
+    public EligibilityRequest setInsurer(Type value) { 
+      this.insurer = value;
       return this;
     }
 
@@ -804,10 +992,11 @@ public class EligibilityRequest extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
         childrenList.add(new Property("created", "dateTime", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("target[x]", "Identifier|Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, target));
+        childrenList.add(new Property("insurer[x]", "Identifier|Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, insurer));
         childrenList.add(new Property("provider[x]", "Identifier|Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
         childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("priority", "Coding", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, java.lang.Integer.MAX_VALUE, priority));
@@ -825,10 +1014,11 @@ public class EligibilityRequest extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<EligibilityRequestStatus>
         case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
         case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
-        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Type
+        case 1957615864: /*insurer*/ return this.insurer == null ? new Base[0] : new Base[] {this.insurer}; // Type
         case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Type
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Coding
@@ -851,6 +1041,9 @@ public class EligibilityRequest extends DomainResource {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           break;
+        case -892481550: // status
+          this.status = new EligibilityRequestStatusEnumFactory().fromType(value); // Enumeration<EligibilityRequestStatus>
+          break;
         case 1548678118: // ruleset
           this.ruleset = castToCoding(value); // Coding
           break;
@@ -860,8 +1053,8 @@ public class EligibilityRequest extends DomainResource {
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
           break;
-        case -880905839: // target
-          this.target = (Type) value; // Type
+        case 1957615864: // insurer
+          this.insurer = (Type) value; // Type
           break;
         case -987494927: // provider
           this.provider = (Type) value; // Type
@@ -905,14 +1098,16 @@ public class EligibilityRequest extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new EligibilityRequestStatusEnumFactory().fromType(value); // Enumeration<EligibilityRequestStatus>
         else if (name.equals("ruleset"))
           this.ruleset = castToCoding(value); // Coding
         else if (name.equals("originalRuleset"))
           this.originalRuleset = castToCoding(value); // Coding
         else if (name.equals("created"))
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("target[x]"))
-          this.target = (Type) value; // Type
+        else if (name.equals("insurer[x]"))
+          this.insurer = (Type) value; // Type
         else if (name.equals("provider[x]"))
           this.provider = (Type) value; // Type
         else if (name.equals("organization[x]"))
@@ -943,10 +1138,11 @@ public class EligibilityRequest extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<EligibilityRequestStatus>
         case 1548678118:  return getRuleset(); // Coding
         case 1089373397:  return getOriginalRuleset(); // Coding
         case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case -815579825:  return getTarget(); // Type
+        case -2026616696:  return getInsurer(); // Type
         case 2064698607:  return getProvider(); // Type
         case 1326483053:  return getOrganization(); // Type
         case -1165461084:  return getPriority(); // Coding
@@ -968,6 +1164,9 @@ public class EligibilityRequest extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EligibilityRequest.status");
+        }
         else if (name.equals("ruleset")) {
           this.ruleset = new Coding();
           return this.ruleset;
@@ -979,13 +1178,13 @@ public class EligibilityRequest extends DomainResource {
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type EligibilityRequest.created");
         }
-        else if (name.equals("targetIdentifier")) {
-          this.target = new Identifier();
-          return this.target;
+        else if (name.equals("insurerIdentifier")) {
+          this.insurer = new Identifier();
+          return this.insurer;
         }
-        else if (name.equals("targetReference")) {
-          this.target = new Reference();
-          return this.target;
+        else if (name.equals("insurerReference")) {
+          this.insurer = new Reference();
+          return this.insurer;
         }
         else if (name.equals("providerIdentifier")) {
           this.provider = new Identifier();
@@ -1075,10 +1274,11 @@ public class EligibilityRequest extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.status = status == null ? null : status.copy();
         dst.ruleset = ruleset == null ? null : ruleset.copy();
         dst.originalRuleset = originalRuleset == null ? null : originalRuleset.copy();
         dst.created = created == null ? null : created.copy();
-        dst.target = target == null ? null : target.copy();
+        dst.insurer = insurer == null ? null : insurer.copy();
         dst.provider = provider == null ? null : provider.copy();
         dst.organization = organization == null ? null : organization.copy();
         dst.priority = priority == null ? null : priority.copy();
@@ -1104,13 +1304,13 @@ public class EligibilityRequest extends DomainResource {
         if (!(other instanceof EligibilityRequest))
           return false;
         EligibilityRequest o = (EligibilityRequest) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(ruleset, o.ruleset, true) && compareDeep(originalRuleset, o.originalRuleset, true)
-           && compareDeep(created, o.created, true) && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true)
-           && compareDeep(organization, o.organization, true) && compareDeep(priority, o.priority, true) && compareDeep(enterer, o.enterer, true)
-           && compareDeep(facility, o.facility, true) && compareDeep(patient, o.patient, true) && compareDeep(coverage, o.coverage, true)
-           && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(serviced, o.serviced, true)
-           && compareDeep(benefitCategory, o.benefitCategory, true) && compareDeep(benefitSubCategory, o.benefitSubCategory, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(ruleset, o.ruleset, true)
+           && compareDeep(originalRuleset, o.originalRuleset, true) && compareDeep(created, o.created, true)
+           && compareDeep(insurer, o.insurer, true) && compareDeep(provider, o.provider, true) && compareDeep(organization, o.organization, true)
+           && compareDeep(priority, o.priority, true) && compareDeep(enterer, o.enterer, true) && compareDeep(facility, o.facility, true)
+           && compareDeep(patient, o.patient, true) && compareDeep(coverage, o.coverage, true) && compareDeep(businessArrangement, o.businessArrangement, true)
+           && compareDeep(serviced, o.serviced, true) && compareDeep(benefitCategory, o.benefitCategory, true)
+           && compareDeep(benefitSubCategory, o.benefitSubCategory, true);
       }
 
       @Override
@@ -1120,14 +1320,15 @@ public class EligibilityRequest extends DomainResource {
         if (!(other instanceof EligibilityRequest))
           return false;
         EligibilityRequest o = (EligibilityRequest) other;
-        return compareValues(created, o.created, true) && compareValues(businessArrangement, o.businessArrangement, true)
+        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(businessArrangement, o.businessArrangement, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, ruleset, originalRuleset
-          , created, target, provider, organization, priority, enterer, facility, patient
-          , coverage, businessArrangement, serviced, benefitCategory, benefitSubCategory);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, ruleset
+          , originalRuleset, created, insurer, provider, organization, priority, enterer
+          , facility, patient, coverage, businessArrangement, serviced, benefitCategory, benefitSubCategory
+          );
       }
 
   @Override
@@ -1143,7 +1344,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="EligibilityRequest.identifier", description="The business identifier of the Eligibility", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="EligibilityRequest.identifier", description="The business identifier of the Eligibility", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1163,7 +1364,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.facilityReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facilityreference", path="EligibilityRequest.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="facilityreference", path="EligibilityRequest.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference" )
   public static final String SP_FACILITYREFERENCE = "facilityreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facilityreference</b>
@@ -1189,7 +1390,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.patientIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientidentifier", path="EligibilityRequest.patient.as(Identifier)", description="The reference to the patient", type="token", target={} )
+  @SearchParamDefinition(name="patientidentifier", path="EligibilityRequest.patient.as(Identifier)", description="The reference to the patient", type="token" )
   public static final String SP_PATIENTIDENTIFIER = "patientidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patientidentifier</b>
@@ -1209,7 +1410,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.organizationidentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="EligibilityRequest.organization.as(identifier)", description="The reference to the providing organization", type="token", target={} )
+  @SearchParamDefinition(name="organizationidentifier", path="EligibilityRequest.organization.as(identifier)", description="The reference to the providing organization", type="token" )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -1229,7 +1430,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="EligibilityRequest.created", description="The creation date for the EOB", type="date", target={} )
+  @SearchParamDefinition(name="created", path="EligibilityRequest.created", description="The creation date for the EOB", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -1249,7 +1450,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.patientReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientreference", path="EligibilityRequest.patient.as(Reference)", description="The reference to the patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patientreference", path="EligibilityRequest.patient.as(Reference)", description="The reference to the patient", type="reference" )
   public static final String SP_PATIENTREFERENCE = "patientreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patientreference</b>
@@ -1275,7 +1476,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.providerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="providerreference", path="EligibilityRequest.provider.as(Reference)", description="The reference to the provider", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="providerreference", path="EligibilityRequest.provider.as(Reference)", description="The reference to the provider", type="reference" )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>providerreference</b>
@@ -1301,7 +1502,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="EligibilityRequest.organization.as(Reference)", description="The reference to the providing organization", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organizationreference", path="EligibilityRequest.organization.as(Reference)", description="The reference to the providing organization", type="reference" )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -1327,7 +1528,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.provideridentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provideridentifier", path="EligibilityRequest.provider.as(identifier)", description="The reference to the provider", type="token", target={} )
+  @SearchParamDefinition(name="provideridentifier", path="EligibilityRequest.provider.as(identifier)", description="The reference to the provider", type="token" )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provideridentifier</b>
@@ -1347,7 +1548,7 @@ public class EligibilityRequest extends DomainResource {
    * Path: <b>EligibilityRequest.facilityidentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facilityidentifier", path="EligibilityRequest.facility.as(identifier)", description="Facility responsible for the goods and services", type="token", target={} )
+  @SearchParamDefinition(name="facilityidentifier", path="EligibilityRequest.facility.as(identifier)", description="Facility responsible for the goods and services", type="token" )
   public static final String SP_FACILITYIDENTIFIER = "facilityidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>facilityidentifier</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -315,6 +315,7 @@ public class Subscription extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="rest-hook | websocket | email | sms | message", formalDefinition="The type of channel to send notifications on." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-channel-type")
         protected Enumeration<SubscriptionChannelType> type;
 
         /**
@@ -698,6 +699,7 @@ public class Subscription extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="requested | active | error | off", formalDefinition="The status of the subscription, which marks the server state for managing the subscription." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-status")
     protected Enumeration<SubscriptionStatus> status;
 
     /**
@@ -726,6 +728,7 @@ public class Subscription extends DomainResource {
      */
     @Child(name = "tag", type = {Coding.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A tag to add to matching resources", formalDefinition="A tag to add to any resource that matches the criteria, after the subscription is processed." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-tag")
     protected List<Coding> tag;
 
     private static final long serialVersionUID = -1390870804L;
@@ -1312,7 +1315,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string", target={} )
+  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string" )
   public static final String SP_PAYLOAD = "payload";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload</b>
@@ -1332,7 +1335,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.criteria</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string", target={} )
+  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string" )
   public static final String SP_CRITERIA = "criteria";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>criteria</b>
@@ -1352,7 +1355,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.contact</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token", target={} )
+  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token" )
   public static final String SP_CONTACT = "contact";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contact</b>
@@ -1372,7 +1375,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.tag</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token", target={} )
+  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token" )
   public static final String SP_TAG = "tag";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>tag</b>
@@ -1392,7 +1395,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1412,7 +1415,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.channel.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1432,7 +1435,7 @@ public class Subscription extends DomainResource {
    * Path: <b>Subscription.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -843,6 +843,7 @@ public class DataElement extends BaseConformance {
      */
     @Child(name = "stringency", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="comparable | fully-specified | equivalent | convertable | scaleable | flexible", formalDefinition="Identifies how precise the data element is in its definition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dataelement-stringency")
     protected Enumeration<DataElementStringency> stringency;
 
     /**
@@ -1625,7 +1626,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="DataElement.date", description="The data element publication date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="DataElement.date", description="The data element publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1645,7 +1646,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DataElement.identifier", description="The identifier of the data element", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DataElement.identifier", description="The identifier of the data element", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1665,7 +1666,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.element.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="DataElement.element.code", description="A code for the data element (server may choose to do subsumption)", type="token", target={} )
+  @SearchParamDefinition(name="code", path="DataElement.element.code", description="A code for the data element (server may choose to do subsumption)", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1685,7 +1686,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.stringency</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="stringency", path="DataElement.stringency", description="The stringency of the data element definition", type="token", target={} )
+  @SearchParamDefinition(name="stringency", path="DataElement.stringency", description="The stringency of the data element definition", type="token" )
   public static final String SP_STRINGENCY = "stringency";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>stringency</b>
@@ -1705,7 +1706,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="DataElement.name", description="Name of the data element", type="string", target={} )
+  @SearchParamDefinition(name="name", path="DataElement.name", description="Name of the data element", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1725,7 +1726,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="DataElement.useContext", description="A use context assigned to the data element", type="token", target={} )
+  @SearchParamDefinition(name="context", path="DataElement.useContext", description="A use context assigned to the data element", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1745,7 +1746,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="DataElement.publisher", description="Name of the publisher of the data element", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="DataElement.publisher", description="Name of the publisher of the data element", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -1765,7 +1766,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.element.definition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DataElement.element.definition", description="Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.", type="string", target={} )
+  @SearchParamDefinition(name="description", path="DataElement.element.definition", description="Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -1785,7 +1786,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="DataElement.version", description="The version identifier of the data element", type="string", target={} )
+  @SearchParamDefinition(name="version", path="DataElement.version", description="The version identifier of the data element", type="string" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -1805,7 +1806,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="DataElement.url", description="The official URL for the data element", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="DataElement.url", description="The official URL for the data element", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1825,7 +1826,7 @@ public class DataElement extends BaseConformance {
    * Path: <b>DataElement.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DataElement.status", description="The current status of the data element", type="token", target={} )
+  @SearchParamDefinition(name="status", path="DataElement.status", description="The current status of the data element", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

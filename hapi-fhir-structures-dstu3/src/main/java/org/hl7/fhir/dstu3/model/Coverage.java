@@ -29,12 +29,11 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -49,129 +48,247 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 @ResourceDef(name="Coverage", profile="http://hl7.org/fhir/Profile/Coverage")
 public class Coverage extends DomainResource {
 
+    public enum CoverageStatus {
+        /**
+         * The resource instance is currently in-force.
+         */
+        ACTIVE, 
+        /**
+         * The resource instance is withdrawn, rescinded or reversed.
+         */
+        CANCELLED, 
+        /**
+         * A new resource instance the contents of which is not complete.
+         */
+        DRAFT, 
+        /**
+         * The resource instance was entered in error.
+         */
+        ENTEREDINERROR, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static CoverageStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown CoverageStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ACTIVE: return "active";
+            case CANCELLED: return "cancelled";
+            case DRAFT: return "draft";
+            case ENTEREDINERROR: return "entered-in-error";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ACTIVE: return "http://hl7.org/fhir/coverage-status";
+            case CANCELLED: return "http://hl7.org/fhir/coverage-status";
+            case DRAFT: return "http://hl7.org/fhir/coverage-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/coverage-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ACTIVE: return "The resource instance is currently in-force.";
+            case CANCELLED: return "The resource instance is withdrawn, rescinded or reversed.";
+            case DRAFT: return "A new resource instance the contents of which is not complete.";
+            case ENTEREDINERROR: return "The resource instance was entered in error.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ACTIVE: return "Active";
+            case CANCELLED: return "Cancelled";
+            case DRAFT: return "Draft";
+            case ENTEREDINERROR: return "Entered In Error";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class CoverageStatusEnumFactory implements EnumFactory<CoverageStatus> {
+    public CoverageStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return CoverageStatus.ACTIVE;
+        if ("cancelled".equals(codeString))
+          return CoverageStatus.CANCELLED;
+        if ("draft".equals(codeString))
+          return CoverageStatus.DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return CoverageStatus.ENTEREDINERROR;
+        throw new IllegalArgumentException("Unknown CoverageStatus code '"+codeString+"'");
+        }
+        public Enumeration<CoverageStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<CoverageStatus>(this, CoverageStatus.ACTIVE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<CoverageStatus>(this, CoverageStatus.CANCELLED);
+        if ("draft".equals(codeString))
+          return new Enumeration<CoverageStatus>(this, CoverageStatus.DRAFT);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<CoverageStatus>(this, CoverageStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown CoverageStatus code '"+codeString+"'");
+        }
+    public String toCode(CoverageStatus code) {
+      if (code == CoverageStatus.ACTIVE)
+        return "active";
+      if (code == CoverageStatus.CANCELLED)
+        return "cancelled";
+      if (code == CoverageStatus.DRAFT)
+        return "draft";
+      if (code == CoverageStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      return "?";
+      }
+    public String toSystem(CoverageStatus code) {
+      return code.getSystem();
+      }
+    }
+
+    /**
+     * The status of the resource instance.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/coverage-status")
+    protected Enumeration<CoverageStatus> status;
+
     /**
      * The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements.
      */
-    @Child(name = "issuer", type = {Identifier.class, Organization.class, Patient.class, RelatedPerson.class}, order=0, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "issuer", type = {Identifier.class, Organization.class, Patient.class, RelatedPerson.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifier for the plan or agreement issuer", formalDefinition="The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements." )
     protected Type issuer;
 
     /**
      * A self, or other, payment agreement not an insurance policy.
      */
-    @Child(name = "isAgreement", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "isAgreement", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Is a Payment Agreement", formalDefinition="A self, or other, payment agreement not an insurance policy." )
     protected BooleanType isAgreement;
 
     /**
      * Business Identification Number (BIN number) used to identify the routing  of eClaims.
      */
-    @Child(name = "bin", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "bin", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="BIN Number", formalDefinition="Business Identification Number (BIN number) used to identify the routing  of eClaims." )
     protected StringType bin;
 
     /**
      * Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.
      */
-    @Child(name = "period", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Coverage start and end dates", formalDefinition="Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force." )
     protected Period period;
 
     /**
      * The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health.
      */
-    @Child(name = "type", type = {Coding.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {Coding.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Type of coverage", formalDefinition="The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActCoverageTypeCode")
     protected Coding type;
 
     /**
      * The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due.
      */
-    @Child(name = "planholder", type = {Identifier.class, Patient.class, Organization.class}, order=5, min=1, max=1, modifier=true, summary=false)
+    @Child(name = "planholder", type = {Identifier.class, Patient.class, Organization.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Plan holder", formalDefinition="The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due." )
     protected Type planholder;
 
     /**
      * The party who benefits from the insurance coverage.
      */
-    @Child(name = "beneficiary", type = {Identifier.class, Patient.class}, order=6, min=1, max=1, modifier=true, summary=false)
+    @Child(name = "beneficiary", type = {Identifier.class, Patient.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Plan Beneficiary", formalDefinition="The party who benefits from the insurance coverage." )
     protected Type beneficiary;
 
     /**
-     * The relationship of the patient to the planholdersubscriber).
+     * The relationship of beneficiary (patient) (subscriber) to the the planholder.
      */
-    @Child(name = "relationship", type = {Coding.class}, order=7, min=1, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Patient relationship to planholder", formalDefinition="The relationship of the patient to the planholdersubscriber)." )
+    @Child(name = "relationship", type = {Coding.class}, order=8, min=1, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Beneficiary relationship to Planholder", formalDefinition="The relationship of beneficiary (patient) (subscriber) to the the planholder." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/policyholder-relationship")
     protected Coding relationship;
 
     /**
      * The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The primary coverage ID", formalDefinition="The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name = "group", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "group", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An identifier for the group", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType group;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name = "plan", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "plan", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An identifier for the plan", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType plan;
 
     /**
      * Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.
      */
-    @Child(name = "subPlan", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subPlan", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An identifier for the subsection of the plan", formalDefinition="Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID." )
     protected StringType subPlan;
 
     /**
      * A unique identifier for a dependent under the coverage.
      */
-    @Child(name = "dependent", type = {PositiveIntType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "dependent", type = {PositiveIntType.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Dependent number", formalDefinition="A unique identifier for a dependent under the coverage." )
     protected PositiveIntType dependent;
 
     /**
      * An optional counter for a particular instance of the identified coverage which increments upon each renewal.
      */
-    @Child(name = "sequence", type = {PositiveIntType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "sequence", type = {PositiveIntType.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The plan instance or sequence counter", formalDefinition="An optional counter for a particular instance of the identified coverage which increments upon each renewal." )
     protected PositiveIntType sequence;
 
     /**
-     * Factors which may influence the applicability of coverage.
-     */
-    @Child(name = "exception", type = {Coding.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Eligibility exceptions", formalDefinition="Factors which may influence the applicability of coverage." )
-    protected List<Coding> exception;
-
-    /**
-     * Name of school for over-aged dependants.
-     */
-    @Child(name = "school", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Name of School", formalDefinition="Name of school for over-aged dependants." )
-    protected StringType school;
-
-    /**
      * The identifier for a community of providers.
      */
-    @Child(name = "network", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "network", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Insurer network", formalDefinition="The identifier for a community of providers." )
     protected StringType network;
 
     /**
      * The policy(s) which constitute this insurance coverage.
      */
-    @Child(name = "contract", type = {Contract.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contract", type = {Contract.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract details", formalDefinition="The policy(s) which constitute this insurance coverage." )
     protected List<Reference> contract;
     /**
@@ -180,7 +297,7 @@ public class Coverage extends DomainResource {
     protected List<Contract> contractTarget;
 
 
-    private static final long serialVersionUID = 1815535942L;
+    private static final long serialVersionUID = 236069267L;
 
   /**
    * Constructor
@@ -192,12 +309,58 @@ public class Coverage extends DomainResource {
   /**
    * Constructor
    */
-    public Coverage(Type issuer, Type planholder, Type beneficiary, Coding relationship) {
+    public Coverage(Enumeration<CoverageStatus> status, Type issuer, Type planholder, Type beneficiary, Coding relationship) {
       super();
+      this.status = status;
       this.issuer = issuer;
       this.planholder = planholder;
       this.beneficiary = beneficiary;
       this.relationship = relationship;
+    }
+
+    /**
+     * @return {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<CoverageStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Coverage.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<CoverageStatus>(new CoverageStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Coverage setStatusElement(Enumeration<CoverageStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the resource instance.
+     */
+    public CoverageStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the resource instance.
+     */
+    public Coverage setStatus(CoverageStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<CoverageStatus>(new CoverageStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
     }
 
     /**
@@ -478,7 +641,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #relationship} (The relationship of the patient to the planholdersubscriber).)
+     * @return {@link #relationship} (The relationship of beneficiary (patient) (subscriber) to the the planholder.)
      */
     public Coding getRelationship() { 
       if (this.relationship == null)
@@ -494,7 +657,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @param value {@link #relationship} (The relationship of the patient to the planholdersubscriber).)
+     * @param value {@link #relationship} (The relationship of beneficiary (patient) (subscriber) to the the planholder.)
      */
     public Coverage setRelationship(Coding value) { 
       this.relationship = value;
@@ -792,108 +955,6 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #exception} (Factors which may influence the applicability of coverage.)
-     */
-    public List<Coding> getException() { 
-      if (this.exception == null)
-        this.exception = new ArrayList<Coding>();
-      return this.exception;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public Coverage setException(List<Coding> theException) { 
-      this.exception = theException;
-      return this;
-    }
-
-    public boolean hasException() { 
-      if (this.exception == null)
-        return false;
-      for (Coding item : this.exception)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public Coding addException() { //3
-      Coding t = new Coding();
-      if (this.exception == null)
-        this.exception = new ArrayList<Coding>();
-      this.exception.add(t);
-      return t;
-    }
-
-    public Coverage addException(Coding t) { //3
-      if (t == null)
-        return this;
-      if (this.exception == null)
-        this.exception = new ArrayList<Coding>();
-      this.exception.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #exception}, creating it if it does not already exist
-     */
-    public Coding getExceptionFirstRep() { 
-      if (getException().isEmpty()) {
-        addException();
-      }
-      return getException().get(0);
-    }
-
-    /**
-     * @return {@link #school} (Name of school for over-aged dependants.). This is the underlying object with id, value and extensions. The accessor "getSchool" gives direct access to the value
-     */
-    public StringType getSchoolElement() { 
-      if (this.school == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Coverage.school");
-        else if (Configuration.doAutoCreate())
-          this.school = new StringType(); // bb
-      return this.school;
-    }
-
-    public boolean hasSchoolElement() { 
-      return this.school != null && !this.school.isEmpty();
-    }
-
-    public boolean hasSchool() { 
-      return this.school != null && !this.school.isEmpty();
-    }
-
-    /**
-     * @param value {@link #school} (Name of school for over-aged dependants.). This is the underlying object with id, value and extensions. The accessor "getSchool" gives direct access to the value
-     */
-    public Coverage setSchoolElement(StringType value) { 
-      this.school = value;
-      return this;
-    }
-
-    /**
-     * @return Name of school for over-aged dependants.
-     */
-    public String getSchool() { 
-      return this.school == null ? null : this.school.getValue();
-    }
-
-    /**
-     * @param value Name of school for over-aged dependants.
-     */
-    public Coverage setSchool(String value) { 
-      if (Utilities.noString(value))
-        this.school = null;
-      else {
-        if (this.school == null)
-          this.school = new StringType();
-        this.school.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #network} (The identifier for a community of providers.). This is the underlying object with id, value and extensions. The accessor "getNetwork" gives direct access to the value
      */
     public StringType getNetworkElement() { 
@@ -1019,6 +1080,7 @@ public class Coverage extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
+        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("issuer[x]", "Identifier|Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements.", 0, java.lang.Integer.MAX_VALUE, issuer));
         childrenList.add(new Property("isAgreement", "boolean", "A self, or other, payment agreement not an insurance policy.", 0, java.lang.Integer.MAX_VALUE, isAgreement));
         childrenList.add(new Property("bin", "string", "Business Identification Number (BIN number) used to identify the routing  of eClaims.", 0, java.lang.Integer.MAX_VALUE, bin));
@@ -1026,15 +1088,13 @@ public class Coverage extends DomainResource {
         childrenList.add(new Property("type", "Coding", "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("planholder[x]", "Identifier|Reference(Patient|Organization)", "The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due.", 0, java.lang.Integer.MAX_VALUE, planholder));
         childrenList.add(new Property("beneficiary[x]", "Identifier|Reference(Patient)", "The party who benefits from the insurance coverage.", 0, java.lang.Integer.MAX_VALUE, beneficiary));
-        childrenList.add(new Property("relationship", "Coding", "The relationship of the patient to the planholdersubscriber).", 0, java.lang.Integer.MAX_VALUE, relationship));
+        childrenList.add(new Property("relationship", "Coding", "The relationship of beneficiary (patient) (subscriber) to the the planholder.", 0, java.lang.Integer.MAX_VALUE, relationship));
         childrenList.add(new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("group", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.", 0, java.lang.Integer.MAX_VALUE, group));
         childrenList.add(new Property("plan", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.", 0, java.lang.Integer.MAX_VALUE, plan));
         childrenList.add(new Property("subPlan", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.", 0, java.lang.Integer.MAX_VALUE, subPlan));
         childrenList.add(new Property("dependent", "positiveInt", "A unique identifier for a dependent under the coverage.", 0, java.lang.Integer.MAX_VALUE, dependent));
         childrenList.add(new Property("sequence", "positiveInt", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, java.lang.Integer.MAX_VALUE, sequence));
-        childrenList.add(new Property("exception", "Coding", "Factors which may influence the applicability of coverage.", 0, java.lang.Integer.MAX_VALUE, exception));
-        childrenList.add(new Property("school", "string", "Name of school for over-aged dependants.", 0, java.lang.Integer.MAX_VALUE, school));
         childrenList.add(new Property("network", "string", "The identifier for a community of providers.", 0, java.lang.Integer.MAX_VALUE, network));
         childrenList.add(new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract));
       }
@@ -1042,6 +1102,7 @@ public class Coverage extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<CoverageStatus>
         case -1179159879: /*issuer*/ return this.issuer == null ? new Base[0] : new Base[] {this.issuer}; // Type
         case -2140761088: /*isAgreement*/ return this.isAgreement == null ? new Base[0] : new Base[] {this.isAgreement}; // BooleanType
         case 97543: /*bin*/ return this.bin == null ? new Base[0] : new Base[] {this.bin}; // StringType
@@ -1056,8 +1117,6 @@ public class Coverage extends DomainResource {
         case -1868653175: /*subPlan*/ return this.subPlan == null ? new Base[0] : new Base[] {this.subPlan}; // StringType
         case -1109226753: /*dependent*/ return this.dependent == null ? new Base[0] : new Base[] {this.dependent}; // PositiveIntType
         case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
-        case 1481625679: /*exception*/ return this.exception == null ? new Base[0] : this.exception.toArray(new Base[this.exception.size()]); // Coding
-        case -907977868: /*school*/ return this.school == null ? new Base[0] : new Base[] {this.school}; // StringType
         case 1843485230: /*network*/ return this.network == null ? new Base[0] : new Base[] {this.network}; // StringType
         case -566947566: /*contract*/ return this.contract == null ? new Base[0] : this.contract.toArray(new Base[this.contract.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
@@ -1068,6 +1127,9 @@ public class Coverage extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -892481550: // status
+          this.status = new CoverageStatusEnumFactory().fromType(value); // Enumeration<CoverageStatus>
+          break;
         case -1179159879: // issuer
           this.issuer = (Type) value; // Type
           break;
@@ -1110,12 +1172,6 @@ public class Coverage extends DomainResource {
         case 1349547969: // sequence
           this.sequence = castToPositiveInt(value); // PositiveIntType
           break;
-        case 1481625679: // exception
-          this.getException().add(castToCoding(value)); // Coding
-          break;
-        case -907977868: // school
-          this.school = castToString(value); // StringType
-          break;
         case 1843485230: // network
           this.network = castToString(value); // StringType
           break;
@@ -1129,7 +1185,9 @@ public class Coverage extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("issuer[x]"))
+        if (name.equals("status"))
+          this.status = new CoverageStatusEnumFactory().fromType(value); // Enumeration<CoverageStatus>
+        else if (name.equals("issuer[x]"))
           this.issuer = (Type) value; // Type
         else if (name.equals("isAgreement"))
           this.isAgreement = castToBoolean(value); // BooleanType
@@ -1157,10 +1215,6 @@ public class Coverage extends DomainResource {
           this.dependent = castToPositiveInt(value); // PositiveIntType
         else if (name.equals("sequence"))
           this.sequence = castToPositiveInt(value); // PositiveIntType
-        else if (name.equals("exception"))
-          this.getException().add(castToCoding(value));
-        else if (name.equals("school"))
-          this.school = castToString(value); // StringType
         else if (name.equals("network"))
           this.network = castToString(value); // StringType
         else if (name.equals("contract"))
@@ -1172,6 +1226,7 @@ public class Coverage extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<CoverageStatus>
         case 185649959:  return getIssuer(); // Type
         case -2140761088: throw new FHIRException("Cannot make property isAgreement as it is not a complex type"); // BooleanType
         case 97543: throw new FHIRException("Cannot make property bin as it is not a complex type"); // StringType
@@ -1186,8 +1241,6 @@ public class Coverage extends DomainResource {
         case -1868653175: throw new FHIRException("Cannot make property subPlan as it is not a complex type"); // StringType
         case -1109226753: throw new FHIRException("Cannot make property dependent as it is not a complex type"); // PositiveIntType
         case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
-        case 1481625679:  return addException(); // Coding
-        case -907977868: throw new FHIRException("Cannot make property school as it is not a complex type"); // StringType
         case 1843485230: throw new FHIRException("Cannot make property network as it is not a complex type"); // StringType
         case -566947566:  return addContract(); // Reference
         default: return super.makeProperty(hash, name);
@@ -1197,7 +1250,10 @@ public class Coverage extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("issuerIdentifier")) {
+        if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Coverage.status");
+        }
+        else if (name.equals("issuerIdentifier")) {
           this.issuer = new Identifier();
           return this.issuer;
         }
@@ -1257,12 +1313,6 @@ public class Coverage extends DomainResource {
         else if (name.equals("sequence")) {
           throw new FHIRException("Cannot call addChild on a primitive type Coverage.sequence");
         }
-        else if (name.equals("exception")) {
-          return addException();
-        }
-        else if (name.equals("school")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Coverage.school");
-        }
         else if (name.equals("network")) {
           throw new FHIRException("Cannot call addChild on a primitive type Coverage.network");
         }
@@ -1281,6 +1331,7 @@ public class Coverage extends DomainResource {
       public Coverage copy() {
         Coverage dst = new Coverage();
         copyValues(dst);
+        dst.status = status == null ? null : status.copy();
         dst.issuer = issuer == null ? null : issuer.copy();
         dst.isAgreement = isAgreement == null ? null : isAgreement.copy();
         dst.bin = bin == null ? null : bin.copy();
@@ -1299,12 +1350,6 @@ public class Coverage extends DomainResource {
         dst.subPlan = subPlan == null ? null : subPlan.copy();
         dst.dependent = dependent == null ? null : dependent.copy();
         dst.sequence = sequence == null ? null : sequence.copy();
-        if (exception != null) {
-          dst.exception = new ArrayList<Coding>();
-          for (Coding i : exception)
-            dst.exception.add(i.copy());
-        };
-        dst.school = school == null ? null : school.copy();
         dst.network = network == null ? null : network.copy();
         if (contract != null) {
           dst.contract = new ArrayList<Reference>();
@@ -1325,12 +1370,12 @@ public class Coverage extends DomainResource {
         if (!(other instanceof Coverage))
           return false;
         Coverage o = (Coverage) other;
-        return compareDeep(issuer, o.issuer, true) && compareDeep(isAgreement, o.isAgreement, true) && compareDeep(bin, o.bin, true)
-           && compareDeep(period, o.period, true) && compareDeep(type, o.type, true) && compareDeep(planholder, o.planholder, true)
-           && compareDeep(beneficiary, o.beneficiary, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(identifier, o.identifier, true) && compareDeep(group, o.group, true) && compareDeep(plan, o.plan, true)
-           && compareDeep(subPlan, o.subPlan, true) && compareDeep(dependent, o.dependent, true) && compareDeep(sequence, o.sequence, true)
-           && compareDeep(exception, o.exception, true) && compareDeep(school, o.school, true) && compareDeep(network, o.network, true)
+        return compareDeep(status, o.status, true) && compareDeep(issuer, o.issuer, true) && compareDeep(isAgreement, o.isAgreement, true)
+           && compareDeep(bin, o.bin, true) && compareDeep(period, o.period, true) && compareDeep(type, o.type, true)
+           && compareDeep(planholder, o.planholder, true) && compareDeep(beneficiary, o.beneficiary, true)
+           && compareDeep(relationship, o.relationship, true) && compareDeep(identifier, o.identifier, true)
+           && compareDeep(group, o.group, true) && compareDeep(plan, o.plan, true) && compareDeep(subPlan, o.subPlan, true)
+           && compareDeep(dependent, o.dependent, true) && compareDeep(sequence, o.sequence, true) && compareDeep(network, o.network, true)
            && compareDeep(contract, o.contract, true);
       }
 
@@ -1341,16 +1386,16 @@ public class Coverage extends DomainResource {
         if (!(other instanceof Coverage))
           return false;
         Coverage o = (Coverage) other;
-        return compareValues(isAgreement, o.isAgreement, true) && compareValues(bin, o.bin, true) && compareValues(group, o.group, true)
-           && compareValues(plan, o.plan, true) && compareValues(subPlan, o.subPlan, true) && compareValues(dependent, o.dependent, true)
-           && compareValues(sequence, o.sequence, true) && compareValues(school, o.school, true) && compareValues(network, o.network, true)
+        return compareValues(status, o.status, true) && compareValues(isAgreement, o.isAgreement, true) && compareValues(bin, o.bin, true)
+           && compareValues(group, o.group, true) && compareValues(plan, o.plan, true) && compareValues(subPlan, o.subPlan, true)
+           && compareValues(dependent, o.dependent, true) && compareValues(sequence, o.sequence, true) && compareValues(network, o.network, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(issuer, isAgreement, bin
-          , period, type, planholder, beneficiary, relationship, identifier, group, plan
-          , subPlan, dependent, sequence, exception, school, network, contract);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, issuer, isAgreement
+          , bin, period, type, planholder, beneficiary, relationship, identifier, group
+          , plan, subPlan, dependent, sequence, network, contract);
       }
 
   @Override
@@ -1366,7 +1411,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured and the coverage", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured and the coverage", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1386,7 +1431,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.issuerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issuerreference", path="Coverage.issuer.as(Reference)", description="The identity of the insurer", type="reference", target={Organization.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="issuerreference", path="Coverage.issuer.as(Reference)", description="The identity of the insurer", type="reference" )
   public static final String SP_ISSUERREFERENCE = "issuerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issuerreference</b>
@@ -1412,7 +1457,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.subPlan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token", target={} )
+  @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token" )
   public static final String SP_SUBPLAN = "subplan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subplan</b>
@@ -1432,7 +1477,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage (health plan, auto, Workers Compensation)", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage (health plan, auto, Workers Compensation)", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1452,7 +1497,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.beneficiaryIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="beneficiaryidentifier", path="Coverage.beneficiary.as(Identifier)", description="Covered party", type="token", target={} )
+  @SearchParamDefinition(name="beneficiaryidentifier", path="Coverage.beneficiary.as(Identifier)", description="Covered party", type="token" )
   public static final String SP_BENEFICIARYIDENTIFIER = "beneficiaryidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>beneficiaryidentifier</b>
@@ -1472,7 +1517,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.planholderIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="planholderidentifier", path="Coverage.planholder.as(Identifier)", description="Reference to the planholder", type="token", target={} )
+  @SearchParamDefinition(name="planholderidentifier", path="Coverage.planholder.as(Identifier)", description="Reference to the planholder", type="token" )
   public static final String SP_PLANHOLDERIDENTIFIER = "planholderidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>planholderidentifier</b>
@@ -1492,7 +1537,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.sequence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token", target={} )
+  @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token" )
   public static final String SP_SEQUENCE = "sequence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sequence</b>
@@ -1512,7 +1557,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.planholderReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="planholderreference", path="Coverage.planholder.as(Reference)", description="Reference to the planholder", type="reference", target={Organization.class, Patient.class} )
+  @SearchParamDefinition(name="planholderreference", path="Coverage.planholder.as(Reference)", description="Reference to the planholder", type="reference" )
   public static final String SP_PLANHOLDERREFERENCE = "planholderreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>planholderreference</b>
@@ -1538,7 +1583,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.issuerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issueridentifier", path="Coverage.issuer.as(Identifier)", description="The identity of the insurer", type="token", target={} )
+  @SearchParamDefinition(name="issueridentifier", path="Coverage.issuer.as(Identifier)", description="The identity of the insurer", type="token" )
   public static final String SP_ISSUERIDENTIFIER = "issueridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issueridentifier</b>
@@ -1558,7 +1603,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.plan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token", target={} )
+  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token" )
   public static final String SP_PLAN = "plan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>plan</b>
@@ -1578,7 +1623,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.dependent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token", target={} )
+  @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token" )
   public static final String SP_DEPENDENT = "dependent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dependent</b>
@@ -1598,7 +1643,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.beneficiaryReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="beneficiaryreference", path="Coverage.beneficiary.as(Reference)", description="Covered party", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="beneficiaryreference", path="Coverage.beneficiary.as(Reference)", description="Covered party", type="reference" )
   public static final String SP_BENEFICIARYREFERENCE = "beneficiaryreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>beneficiaryreference</b>
@@ -1624,7 +1669,7 @@ public class Coverage extends DomainResource {
    * Path: <b>Coverage.group</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token", target={} )
+  @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token" )
   public static final String SP_GROUP = "group";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>group</b>

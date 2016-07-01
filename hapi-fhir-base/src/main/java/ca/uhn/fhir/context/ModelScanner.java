@@ -112,13 +112,6 @@ class ModelScanner {
 		init(theExistingDefinitions, toScan);
 	}
 
-	private void addScanAlso(Class<? extends IBase> theType) {
-		if (theType.isInterface() || Modifier.isAbstract(theType.getModifiers())) {
-			return;
-		}
-		myScanAlso.add(theType);
-	}
-
 	static Class<?> determineElementType(Field next) {
 		Class<?> nextElementType = next.getType();
 		if (List.class.equals(nextElementType)) {
@@ -310,12 +303,6 @@ class ModelScanner {
 
 		RuntimeResourceBlockDefinition blockDef = new RuntimeResourceBlockDefinition(resourceName, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
 		myClassToElementDefinitions.put(theClass, blockDef);
-
-		scanCompositeElementForChildren(theClass, blockDef);
-	}
-
-	private void scanCompositeElementForChildren(Class<? extends IBase> theClass, Object theBlockDef) {
-		// TODO remove
 	}
 
 	private void scanCompositeDatatype(Class<? extends ICompositeType> theClass, DatatypeDef theDatatypeDefinition) {
@@ -331,7 +318,6 @@ class ModelScanner {
 		}
 		myClassToElementDefinitions.put(theClass, elementDef);
 		myNameToElementDefinitions.put(elementDef.getName().toLowerCase(), elementDef);
-		scanCompositeElementForChildren(theClass, elementDef);
 	}
 
 
@@ -422,7 +408,6 @@ class ModelScanner {
 				myNameToResourceDefinitions.put(resourceName.toLowerCase(), resourceDef);
 			}
 		}
-		scanCompositeElementForChildren(theClass, resourceDef);
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);
 

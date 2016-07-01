@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -427,6 +427,7 @@ public class CompartmentDefinition extends BaseConformance {
          */
         @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of resource type", formalDefinition="The name of a resource supported by the server." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
         protected CodeType code;
 
         /**
@@ -775,6 +776,7 @@ public class CompartmentDefinition extends BaseConformance {
      */
     @Child(name = "code", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Patient | Encounter | RelatedPerson | Practitioner | Device", formalDefinition="Which compartment this definition describes." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/compartment-type")
     protected Enumeration<CompartmentType> code;
 
     /**
@@ -1493,7 +1495,7 @@ public class CompartmentDefinition extends BaseConformance {
    * Path: <b>CompartmentDefinition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="CompartmentDefinition.date", description="Publication Date(/time)", type="date", target={} )
+  @SearchParamDefinition(name="date", path="CompartmentDefinition.date", description="Publication Date(/time)", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1513,7 +1515,7 @@ public class CompartmentDefinition extends BaseConformance {
    * Path: <b>CompartmentDefinition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="CompartmentDefinition.code", description="Patient | Encounter | RelatedPerson | Practitioner | Device", type="token", target={} )
+  @SearchParamDefinition(name="code", path="CompartmentDefinition.code", description="Patient | Encounter | RelatedPerson | Practitioner | Device", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1533,7 +1535,7 @@ public class CompartmentDefinition extends BaseConformance {
    * Path: <b>CompartmentDefinition.resource.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="resource", path="CompartmentDefinition.resource.code", description="Name of resource type", type="token", target={} )
+  @SearchParamDefinition(name="resource", path="CompartmentDefinition.resource.code", description="Name of resource type", type="token" )
   public static final String SP_RESOURCE = "resource";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>resource</b>
@@ -1553,7 +1555,7 @@ public class CompartmentDefinition extends BaseConformance {
    * Path: <b>CompartmentDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="CompartmentDefinition.name", description="Informal name for this compartment definition", type="string", target={} )
+  @SearchParamDefinition(name="name", path="CompartmentDefinition.name", description="Informal name for this compartment definition", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1573,7 +1575,7 @@ public class CompartmentDefinition extends BaseConformance {
    * Path: <b>CompartmentDefinition.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="CompartmentDefinition.url", description="Absolute URL used to reference this compartment definition", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="CompartmentDefinition.url", description="Absolute URL used to reference this compartment definition", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1593,7 +1595,7 @@ public class CompartmentDefinition extends BaseConformance {
    * Path: <b>CompartmentDefinition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="CompartmentDefinition.status", description="draft | active | retired", type="token", target={} )
+  @SearchParamDefinition(name="status", path="CompartmentDefinition.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

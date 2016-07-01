@@ -431,7 +431,14 @@ public class FHIRPathEngine {
 			log.append("; ");
 		log.append(name);
 		log.append(": ");
-		log.append(contents);
+      boolean first = true;
+      for (Base b : contents) {
+        if (first)
+          first = false;
+        else
+          log.append(",");
+        log.append(convertToString(b));
+      }
 	}
   }
 	

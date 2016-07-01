@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -191,6 +191,7 @@ public class ImagingStudy extends DomainResource {
          */
         @Child(name = "modality", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The modality of the instances in the series", formalDefinition="The modality of this series sequence." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dicom-cid29")
         protected Coding modality;
 
         /**
@@ -212,6 +213,7 @@ public class ImagingStudy extends DomainResource {
          */
         @Child(name = "availability", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE", formalDefinition="Availability of series (online, offline or nearline)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/instance-availability")
         protected Enumeration<InstanceAvailability> availability;
 
         /**
@@ -226,6 +228,7 @@ public class ImagingStudy extends DomainResource {
          */
         @Child(name = "bodySite", type = {Coding.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Body part examined", formalDefinition="Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed CT." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
         protected Coding bodySite;
 
         /**
@@ -233,6 +236,7 @@ public class ImagingStudy extends DomainResource {
          */
         @Child(name = "laterality", type = {Coding.class}, order=9, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Body part laterality", formalDefinition="Laterality if body site is paired anatomic structure and laterality is not pre-coordinated in body site code." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/bodysite-laterality")
         protected Coding laterality;
 
         /**
@@ -1479,6 +1483,7 @@ public class ImagingStudy extends DomainResource {
      */
     @Child(name = "availability", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)", formalDefinition="Availability of study (online, offline or nearline)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/instance-availability")
     protected Enumeration<InstanceAvailability> availability;
 
     /**
@@ -1486,6 +1491,7 @@ public class ImagingStudy extends DomainResource {
      */
     @Child(name = "modalityList", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="All series modality if actual acquisition modalities", formalDefinition="A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dicom-cid29")
     protected List<Coding> modalityList;
 
     /**
@@ -2724,7 +2730,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImagingStudy.identifier", description="Other identifiers for the Study", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="ImagingStudy.identifier", description="Other identifiers for the Study", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2744,7 +2750,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri", target={} )
+  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri" )
   public static final String SP_UID = "uid";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>uid</b>
@@ -2764,7 +2770,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri", target={} )
+  @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri" )
   public static final String SP_STUDY = "study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>study</b>
@@ -2784,7 +2790,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.instance.sopClass</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri", target={} )
+  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri" )
   public static final String SP_DICOM_CLASS = "dicom-class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dicom-class</b>
@@ -2804,7 +2810,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.modality</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token", target={} )
+  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token" )
   public static final String SP_MODALITY = "modality";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>modality</b>
@@ -2824,7 +2830,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token", target={} )
+  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token" )
   public static final String SP_BODYSITE = "bodysite";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
@@ -2844,7 +2850,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2870,7 +2876,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.series.uid</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri", target={} )
+  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri" )
   public static final String SP_SERIES = "series";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>series</b>
@@ -2890,7 +2896,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.started</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date", target={} )
+  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
   public static final String SP_STARTED = "started";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>started</b>
@@ -2910,7 +2916,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.accession</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token", target={} )
+  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token" )
   public static final String SP_ACCESSION = "accession";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>accession</b>
@@ -2930,7 +2936,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.order</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference", target={DiagnosticOrder.class} )
+  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference" )
   public static final String SP_ORDER = "order";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>order</b>

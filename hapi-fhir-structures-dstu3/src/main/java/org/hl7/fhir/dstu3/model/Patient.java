@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -162,6 +162,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "relationship", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="The kind of relationship", formalDefinition="The nature of the relationship between the patient and the contact person." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/patient-contact-relationship")
         protected List<CodeableConcept> relationship;
 
         /**
@@ -190,6 +191,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "gender", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the contact person is considered to have for administration and record keeping purposes." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/administrative-gender")
         protected Enumeration<AdministrativeGender> gender;
 
         /**
@@ -674,6 +676,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "species", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="E.g. Dog, Cow", formalDefinition="Identifies the high level taxonomic categorization of the kind of animal." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/animal-species")
         protected CodeableConcept species;
 
         /**
@@ -681,6 +684,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "breed", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="E.g. Poodle, Angus", formalDefinition="Identifies the detailed categorization of the kind of animal." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/animal-breeds")
         protected CodeableConcept breed;
 
         /**
@@ -688,6 +692,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "genderStatus", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="E.g. Neutered, Intact", formalDefinition="Indicates the current state of the animal's reproductive organs." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/animal-genderstatus")
         protected CodeableConcept genderStatus;
 
         private static final long serialVersionUID = -549738382L;
@@ -1120,6 +1125,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=false)
         @Description(shortDefinition="replace | refer | seealso - type of link", formalDefinition="The type of link between this patient resource and another patient resource." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/link-type")
         protected Enumeration<LinkType> type;
 
         private static final long serialVersionUID = -1942104050L;
@@ -1364,6 +1370,7 @@ public class Patient extends DomainResource {
      */
     @Child(name = "gender", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/administrative-gender")
     protected Enumeration<AdministrativeGender> gender;
 
     /**
@@ -1392,6 +1399,7 @@ public class Patient extends DomainResource {
      */
     @Child(name = "maritalStatus", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Marital (civil) status of a patient", formalDefinition="This field contains a patient's most recent marital (civil) status." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/marital-status")
     protected CodeableConcept maritalStatus;
 
     /**
@@ -2636,7 +2644,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.birthDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth", type="date", target={} )
+  @SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth", type="date" )
   public static final String SP_BIRTHDATE = "birthdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>birthdate</b>
@@ -2656,7 +2664,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceased[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists()", description="This patient has been marked as deceased, or as a death date entered", type="token", target={} )
+  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists()", description="This patient has been marked as deceased, or as a death date entered", type="token" )
   public static final String SP_DECEASED = "deceased";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>deceased</b>
@@ -2676,7 +2684,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -2696,7 +2704,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token", target={} )
+  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token" )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -2716,7 +2724,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.animal.species</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token", target={} )
+  @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token" )
   public static final String SP_ANIMAL_SPECIES = "animal-species";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>animal-species</b>
@@ -2736,7 +2744,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.link.other</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_LINK = "link";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>link</b>
@@ -2762,7 +2770,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.communication.language</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token", target={} )
+  @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token" )
   public static final String SP_LANGUAGE = "language";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>language</b>
@@ -2782,7 +2790,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.animal.breed</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token", target={} )
+  @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token" )
   public static final String SP_ANIMAL_BREED = "animal-breed";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>animal-breed</b>
@@ -2802,7 +2810,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -2822,7 +2830,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceasedDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(DateTime)", description="The date of death has been provided and satisfies this search value", type="date", target={} )
+  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(DateTime)", description="The date of death has been provided and satisfies this search value", type="date" )
   public static final String SP_DEATH_DATE = "death-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>death-date</b>
@@ -2842,7 +2850,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phonetic", path="Patient.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string", target={} )
+  @SearchParamDefinition(name="phonetic", path="Patient.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
@@ -2862,7 +2870,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token", target={} )
+  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -2882,7 +2890,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -2902,7 +2910,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token", target={} )
+  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>
@@ -2922,7 +2930,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2942,7 +2950,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name.given</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string", target={} )
+  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string" )
   public static final String SP_GIVEN = "given";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>given</b>
@@ -2962,7 +2970,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient", type="string", target={} )
+  @SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -2982,7 +2990,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.active</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token", target={} )
+  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token" )
   public static final String SP_ACTIVE = "active";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>active</b>
@@ -3002,7 +3010,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -3022,7 +3030,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.careProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_CAREPROVIDER = "careprovider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>careprovider</b>
@@ -3048,7 +3056,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token", target={} )
+  @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
@@ -3068,7 +3076,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -3094,7 +3102,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string", target={} )
+  @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -3114,7 +3122,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token", target={} )
+  @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -3134,7 +3142,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.name.family</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string", target={} )
+  @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string" )
   public static final String SP_FAMILY = "family";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>family</b>

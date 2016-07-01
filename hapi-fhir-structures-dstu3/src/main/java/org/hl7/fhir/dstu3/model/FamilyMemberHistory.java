@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -178,6 +178,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Condition suffered by relation", formalDefinition="The actual condition specified. Could be a coded condition (like MI or Diabetes) or a less specific string like 'cancer' depending on how much is known about the condition and the capabilities of the creating system." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
         protected CodeableConcept code;
 
         /**
@@ -185,6 +186,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         @Child(name = "outcome", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="deceased | permanent disability | etc.", formalDefinition="Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-outcome")
         protected CodeableConcept outcome;
 
         /**
@@ -535,6 +537,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="partial | completed | entered-in-error | health-unknown", formalDefinition="A code specifying a state of a Family Member History record." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/history-status")
     protected Enumeration<FamilyHistoryStatus> status;
 
     /**
@@ -549,6 +552,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     @Child(name = "relationship", type = {CodeableConcept.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Relationship to the subject", formalDefinition="The type of relationship this person has to the patient (father, mother, brother etc.)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-FamilyMember")
     protected CodeableConcept relationship;
 
     /**
@@ -556,6 +560,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     @Child(name = "gender", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/administrative-gender")
     protected Enumeration<AdministrativeGender> gender;
 
     /**
@@ -1491,7 +1496,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was captured/updated", type="date", target={} )
+  @SearchParamDefinition(name="date", path="FamilyMemberHistory.date", description="When history was captured/updated", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1511,7 +1516,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="FamilyMemberHistory.identifier", description="A search by a record identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="FamilyMemberHistory.identifier", description="A search by a record identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1531,7 +1536,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.condition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="FamilyMemberHistory.condition.code", description="A search by a condition code", type="token", target={} )
+  @SearchParamDefinition(name="code", path="FamilyMemberHistory.condition.code", description="A search by a condition code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1551,7 +1556,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.gender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="gender", path="FamilyMemberHistory.gender", description="A search by a gender code of a family member", type="token", target={} )
+  @SearchParamDefinition(name="gender", path="FamilyMemberHistory.gender", description="A search by a gender code of a family member", type="token" )
   public static final String SP_GENDER = "gender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>gender</b>
@@ -1571,7 +1576,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1597,7 +1602,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.relationship</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relationship", path="FamilyMemberHistory.relationship", description="A search by a relationship type", type="token", target={} )
+  @SearchParamDefinition(name="relationship", path="FamilyMemberHistory.relationship", description="A search by a relationship type", type="token" )
   public static final String SP_RELATIONSHIP = "relationship";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relationship</b>

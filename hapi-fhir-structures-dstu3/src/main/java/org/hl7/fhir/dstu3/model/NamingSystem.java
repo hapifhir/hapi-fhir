@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -517,6 +517,7 @@ public class NamingSystem extends BaseConformance {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="oid | uuid | uri | other", formalDefinition="Identifies the unique identifier scheme used for this particular identifier." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/namingsystem-identifier-type")
         protected Enumeration<NamingSystemIdentifierType> type;
 
         /**
@@ -851,6 +852,7 @@ public class NamingSystem extends BaseConformance {
      */
     @Child(name = "kind", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the naming system - what kinds of things does it make unique?" )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/namingsystem-type")
     protected Enumeration<NamingSystemType> kind;
 
     /**
@@ -879,6 +881,7 @@ public class NamingSystem extends BaseConformance {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="e.g. driver,  provider,  patient, bank etc.", formalDefinition="Categorizes a naming system for easier search by grouping related naming systems." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/identifier-type")
     protected CodeableConcept type;
 
     /**
@@ -1642,7 +1645,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date", target={} )
+  @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1662,7 +1665,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.uniqueId.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date", target={} )
+  @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -1682,7 +1685,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token", target={} )
+  @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token" )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -1702,7 +1705,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token", target={} )
+  @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1722,7 +1725,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.uniqueId.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token", target={} )
+  @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
   public static final String SP_ID_TYPE = "id-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>id-type</b>
@@ -1742,7 +1745,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.responsible</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string", target={} )
+  @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
   public static final String SP_RESPONSIBLE = "responsible";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsible</b>
@@ -1762,7 +1765,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.contact.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of an individual to contact", type="string", target={} )
+  @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of an individual to contact", type="string" )
   public static final String SP_CONTACT = "contact";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contact</b>
@@ -1782,7 +1785,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string", target={} )
+  @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1802,7 +1805,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token", target={} )
+  @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1822,7 +1825,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -1842,7 +1845,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.contact.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token", target={} )
+  @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
@@ -1862,7 +1865,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.uniqueId.value</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string", target={} )
+  @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string" )
   public static final String SP_VALUE = "value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value</b>
@@ -1882,7 +1885,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.replacedBy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference", target={NamingSystem.class} )
+  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
   public static final String SP_REPLACED_BY = "replaced-by";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>replaced-by</b>
@@ -1908,7 +1911,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token", target={} )
+  @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

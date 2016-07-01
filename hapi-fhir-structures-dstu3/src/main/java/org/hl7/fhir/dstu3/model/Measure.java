@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -989,6 +989,7 @@ public class Measure extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-score", formalDefinition="The type of population criteria." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-population")
         protected Enumeration<MeasurePopulationType> type;
 
         /**
@@ -1683,6 +1684,7 @@ public class Measure extends DomainResource {
          */
         @Child(name = "usage", type = {CodeType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="supplemental-data | risk-adjustment-factor", formalDefinition="An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-data-usage")
         protected List<Enumeration<MeasureDataUsage>> usage;
 
         /**
@@ -2063,6 +2065,7 @@ public class Measure extends DomainResource {
      */
     @Child(name = "scoring", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="The measure scoring type, e.g. proportion, CV." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-scoring")
     protected Enumeration<MeasureScoring> scoring;
 
     /**
@@ -2070,6 +2073,7 @@ public class Measure extends DomainResource {
      */
     @Child(name = "type", type = {CodeType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="process | outcome", formalDefinition="The measure type, e.g. process, outcome." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-type")
     protected List<Enumeration<MeasureType>> type;
 
     /**
@@ -3208,7 +3212,7 @@ public class Measure extends DomainResource {
    * Path: <b>Measure.moduleMetadata.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Measure.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Measure.moduleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3228,7 +3232,7 @@ public class Measure extends DomainResource {
    * Path: <b>Measure.moduleMetadata.topic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="Measure.moduleMetadata.topic", description="Topics associated with the module", type="token", target={} )
+  @SearchParamDefinition(name="topic", path="Measure.moduleMetadata.topic", description="Topics associated with the module", type="token" )
   public static final String SP_TOPIC = "topic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>topic</b>
@@ -3248,7 +3252,7 @@ public class Measure extends DomainResource {
    * Path: <b>Measure.moduleMetadata.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="Measure.moduleMetadata.description", description="Text search against the description", type="string", target={} )
+  @SearchParamDefinition(name="description", path="Measure.moduleMetadata.description", description="Text search against the description", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -3268,7 +3272,7 @@ public class Measure extends DomainResource {
    * Path: <b>Measure.moduleMetadata.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Measure.moduleMetadata.title", description="Text search against the title", type="string", target={} )
+  @SearchParamDefinition(name="title", path="Measure.moduleMetadata.title", description="Text search against the title", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -3288,7 +3292,7 @@ public class Measure extends DomainResource {
    * Path: <b>Measure.moduleMetadata.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="Measure.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string", target={} )
+  @SearchParamDefinition(name="version", path="Measure.moduleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3308,7 +3312,7 @@ public class Measure extends DomainResource {
    * Path: <b>Measure.moduleMetadata.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Measure.moduleMetadata.status", description="Status of the module", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Measure.moduleMetadata.status", description="Status of the module", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

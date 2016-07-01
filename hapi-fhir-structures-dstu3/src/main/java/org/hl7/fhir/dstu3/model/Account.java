@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -164,6 +164,7 @@ public class Account extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | inactive", formalDefinition="Indicates whether the account is presently used/useable or not." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
     protected Enumeration<AccountStatus> status;
 
     /**
@@ -879,7 +880,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.owner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="owner", path="Account.owner", description="Who is responsible?", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="owner", path="Account.owner", description="Who is responsible?", type="reference" )
   public static final String SP_OWNER = "owner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>owner</b>
@@ -905,7 +906,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Account.identifier", description="Account number", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Account.identifier", description="Account number", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -925,7 +926,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.coveragePeriod</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date", target={} )
+  @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
@@ -945,7 +946,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.balance</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="balance", path="Account.balance", description="How much is in account?", type="quantity", target={} )
+  @SearchParamDefinition(name="balance", path="Account.balance", description="How much is in account?", type="quantity" )
   public static final String SP_BALANCE = "balance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>balance</b>
@@ -965,7 +966,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, HealthcareService.class, Location.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -991,7 +992,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Account.subject", description="What is account tied to?", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Account.subject", description="What is account tied to?", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1017,7 +1018,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Account.name", description="Human-readable label", type="string", target={} )
+  @SearchParamDefinition(name="name", path="Account.name", description="Human-readable label", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1037,7 +1038,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Account.type", description="E.g. patient, expense, depreciation", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Account.type", description="E.g. patient, expense, depreciation", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1057,7 +1058,7 @@ public class Account extends DomainResource {
    * Path: <b>Account.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -177,6 +177,7 @@ public class SupplyRequest extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Fulfilment code", formalDefinition="Code indicating when the request should be fulfilled." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supplyrequest-when")
         protected CodeableConcept code;
 
         /**
@@ -389,6 +390,7 @@ public class SupplyRequest extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=4, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="requested | completed | failed | cancelled", formalDefinition="Status of the supply request." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supplyrequest-status")
     protected Enumeration<SupplyRequestStatus> status;
 
     /**
@@ -396,6 +398,7 @@ public class SupplyRequest extends DomainResource {
      */
     @Child(name = "kind", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The kind of supply (central, non-stock, etc.)", formalDefinition="Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supplyrequest-kind")
     protected CodeableConcept kind;
 
     /**
@@ -403,6 +406,7 @@ public class SupplyRequest extends DomainResource {
      */
     @Child(name = "orderedItem", type = {CodeableConcept.class, Medication.class, Substance.class, Device.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Medication, Substance, or Device requested to be supplied", formalDefinition="The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supply-item")
     protected Type orderedItem;
 
     /**
@@ -422,6 +426,7 @@ public class SupplyRequest extends DomainResource {
      */
     @Child(name = "reason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Why the supply item was requested", formalDefinition="Why the supply item was requested." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supplyrequest-reason")
     protected Type reason;
 
     /**
@@ -1093,7 +1098,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date", target={} )
+  @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1113,7 +1118,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1133,7 +1138,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc.)", type="token", target={} )
+  @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc.)", type="token" )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -1153,7 +1158,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1179,7 +1184,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.supplier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference" )
   public static final String SP_SUPPLIER = "supplier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplier</b>
@@ -1205,7 +1210,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference", target={Practitioner.class, Organization.class, Patient.class} )
+  @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1231,7 +1236,7 @@ public class SupplyRequest extends DomainResource {
    * Path: <b>SupplyRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token", target={} )
+  @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

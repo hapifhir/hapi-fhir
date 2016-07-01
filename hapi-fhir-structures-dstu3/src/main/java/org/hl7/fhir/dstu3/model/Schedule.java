@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -60,6 +60,7 @@ public class Schedule extends DomainResource {
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
     protected CodeableConcept serviceCategory;
 
     /**
@@ -67,6 +68,7 @@ public class Schedule extends DomainResource {
      */
     @Child(name = "serviceType", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The specific service that is to be performed during this appointment", formalDefinition="The specific service that is to be performed during this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-type")
     protected List<CodeableConcept> serviceType;
 
     /**
@@ -74,6 +76,7 @@ public class Schedule extends DomainResource {
      */
     @Child(name = "specialty", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment", formalDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
     protected List<CodeableConcept> specialty;
 
     /**
@@ -609,7 +612,7 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -635,7 +638,7 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.planningHorizon</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -655,7 +658,7 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -675,7 +678,7 @@ public class Schedule extends DomainResource {
    * Path: <b>Schedule.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>

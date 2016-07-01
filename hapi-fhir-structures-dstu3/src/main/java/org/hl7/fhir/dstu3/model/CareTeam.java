@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -55,6 +55,7 @@ public class CareTeam extends DomainResource {
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Type of involvement", formalDefinition="Indicates specific responsibility of an individual within the care team, such as \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participant-role")
         protected CodeableConcept role;
 
         /**
@@ -911,7 +912,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="CareTeam.period", description="Time period team covers", type="date", target={} )
+  @SearchParamDefinition(name="date", path="CareTeam.period", description="Time period team covers", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -931,7 +932,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="CareTeam.identifier", description="External Ids for this team", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="CareTeam.identifier", description="External Ids for this team", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -951,7 +952,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CareTeam.subject", description="Who care team is for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="CareTeam.subject", description="Who care team is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -977,7 +978,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="CareTeam.subject", description="Who care team is for", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="CareTeam.subject", description="Who care team is for", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1003,7 +1004,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="CareTeam.type", description="Type of team", type="token", target={} )
+  @SearchParamDefinition(name="type", path="CareTeam.type", description="Type of team", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1023,7 +1024,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.participant.member</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>
@@ -1049,7 +1050,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="CareTeam.status", description="active | suspended | inactive | entered in error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="CareTeam.status", description="active | suspended | inactive | entered in error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

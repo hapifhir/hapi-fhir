@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1464,6 +1464,7 @@ public class ValueSet extends BaseConformance {
          */
         @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Details how this designation would be used", formalDefinition="A code that details how this designation would be used." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/designation-use")
         protected Coding use;
 
         /**
@@ -1737,6 +1738,7 @@ public class ValueSet extends BaseConformance {
          */
         @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="= | is-a | is-not-a | regex | in | not-in", formalDefinition="The kind of operation to perform as a part of the filter criteria." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/filter-operator")
         protected Enumeration<FilterOperator> op;
 
         /**
@@ -4319,7 +4321,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -4339,7 +4341,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.compose.include.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri", target={} )
+  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri" )
   public static final String SP_REFERENCE = "reference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reference</b>
@@ -4359,7 +4361,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -4379,7 +4381,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string", target={} )
+  @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -4399,7 +4401,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ValueSet.useContext", description="A use context assigned to the value set", type="token", target={} )
+  @SearchParamDefinition(name="context", path="ValueSet.useContext", description="A use context assigned to the value set", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -4419,7 +4421,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -4439,7 +4441,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string", target={} )
+  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -4459,7 +4461,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token", target={} )
+  @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -4479,7 +4481,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical URL for the value set", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical URL for the value set", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -4499,7 +4501,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token", target={} )
+  @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
@@ -4519,7 +4521,7 @@ public class ValueSet extends BaseConformance {
    * Path: <b>ValueSet.expansion.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri", target={} )
+  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri" )
   public static final String SP_EXPANSION = "expansion";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>expansion</b>

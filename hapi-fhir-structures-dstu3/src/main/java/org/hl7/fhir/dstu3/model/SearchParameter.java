@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -460,6 +460,7 @@ public class SearchParameter extends BaseConformance {
      */
     @Child(name = "base", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The resource type this search parameter applies to", formalDefinition="The base resource type that this search parameter refers to." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected CodeType base;
 
     /**
@@ -467,6 +468,7 @@ public class SearchParameter extends BaseConformance {
      */
     @Child(name = "type", type = {CodeType.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri", formalDefinition="The type of value a search parameter refers to, and how the content is interpreted." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-param-type")
     protected Enumeration<SearchParamType> type;
 
     /**
@@ -495,6 +497,7 @@ public class SearchParameter extends BaseConformance {
      */
     @Child(name = "xpathUsage", type = {CodeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="normal | phonetic | nearby | distance | other", formalDefinition="How the search parameter relates to the set of elements returned by evaluating the xpath query." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-xpath-usage")
     protected Enumeration<XPathUsageType> xpathUsage;
 
     /**
@@ -502,6 +505,7 @@ public class SearchParameter extends BaseConformance {
      */
     @Child(name = "target", type = {CodeType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Types of resource (if a resource reference)", formalDefinition="Types of resource (if a resource is referenced)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> target;
 
     private static final long serialVersionUID = 1983327493L;
@@ -1471,7 +1475,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="SearchParameter.code", description="Code used in URL", type="token", target={} )
+  @SearchParamDefinition(name="code", path="SearchParameter.code", description="Code used in URL", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1491,7 +1495,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="SearchParameter.name", description="Informal name for this search parameter", type="string", target={} )
+  @SearchParamDefinition(name="name", path="SearchParameter.name", description="Informal name for this search parameter", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -1511,7 +1515,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="SearchParameter.useContext", description="A use context assigned to the search parameter", type="token", target={} )
+  @SearchParamDefinition(name="context", path="SearchParameter.useContext", description="A use context assigned to the search parameter", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1531,7 +1535,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string", target={} )
+  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -1551,7 +1555,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token", target={} )
+  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1571,7 +1575,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="SearchParameter.url", description="Absolute URL used to reference this search parameter", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="SearchParameter.url", description="Absolute URL used to reference this search parameter", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1591,7 +1595,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.base</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token", target={} )
+  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token" )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>
@@ -1611,7 +1615,7 @@ public class SearchParameter extends BaseConformance {
    * Path: <b>SearchParameter.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token", target={} )
+  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token" )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>

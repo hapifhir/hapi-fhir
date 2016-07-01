@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -453,6 +453,7 @@ public class CarePlan extends DomainResource {
          */
         @Child(name = "code", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="includes | replaces | fulfills", formalDefinition="Identifies the type of relationship this plan has to the target plan." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-relationship")
         protected Enumeration<CarePlanRelationship> code;
 
         /**
@@ -1051,6 +1052,7 @@ public class CarePlan extends DomainResource {
          */
         @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="diet | drug | encounter | observation | procedure | supply | other", formalDefinition="High-level categorization of the type of activity in a care plan." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-activity-category")
         protected CodeableConcept category;
 
         /**
@@ -1058,6 +1060,7 @@ public class CarePlan extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Detail type of activity", formalDefinition="Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-activity")
         protected CodeableConcept code;
 
         /**
@@ -1065,6 +1068,7 @@ public class CarePlan extends DomainResource {
          */
         @Child(name = "reasonCode", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Why activity should be done", formalDefinition="Provides the rationale that drove the inclusion of this particular activity as part of the plan." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/activity-reason")
         protected List<CodeableConcept> reasonCode;
 
         /**
@@ -1096,6 +1100,7 @@ public class CarePlan extends DomainResource {
          */
         @Child(name = "status", type = {CodeType.class}, order=6, min=0, max=1, modifier=true, summary=false)
         @Description(shortDefinition="not-started | scheduled | in-progress | on-hold | completed | cancelled", formalDefinition="Identifies what progress is being made for the specific activity." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-activity-status")
         protected Enumeration<CarePlanActivityStatus> status;
 
         /**
@@ -1103,6 +1108,7 @@ public class CarePlan extends DomainResource {
          */
         @Child(name = "statusReason", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reason for current status", formalDefinition="Provides reason why the activity isn't yet started, is on hold, was cancelled, etc." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/goal-status-reason")
         protected CodeableConcept statusReason;
 
         /**
@@ -1148,6 +1154,7 @@ public class CarePlan extends DomainResource {
          */
         @Child(name = "product", type = {CodeableConcept.class, Medication.class, Substance.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="What is to be administered/supplied", formalDefinition="Identifies the food, drug or other product to be consumed or supplied in the activity." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-codes")
         protected Type product;
 
         /**
@@ -2189,6 +2196,7 @@ public class CarePlan extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | draft | active | completed | cancelled", formalDefinition="Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-status")
     protected Enumeration<CarePlanStatus> status;
 
     /**
@@ -2234,6 +2242,7 @@ public class CarePlan extends DomainResource {
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type of plan", formalDefinition="Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-category")
     protected List<CodeableConcept> category;
 
     /**
@@ -3459,7 +3468,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="CarePlan.period", description="Time period plan covers", type="date", target={} )
+  @SearchParamDefinition(name="date", path="CarePlan.period", description="Time period plan covers", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3479,7 +3488,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.detail.code", description="Detail type of activity", type="token", target={} )
+  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.detail.code", description="Detail type of activity", type="token" )
   public static final String SP_ACTIVITYCODE = "activitycode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activitycode</b>
@@ -3499,7 +3508,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.scheduled[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.detail.scheduled", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date", target={} )
+  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.detail.scheduled", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date" )
   public static final String SP_ACTIVITYDATE = "activitydate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activitydate</b>
@@ -3519,7 +3528,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activityreference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference", target={Appointment.class, Order.class, ReferralRequest.class, ProcessRequest.class, NutritionOrder.class, VisionPrescription.class, DiagnosticOrder.class, ProcedureRequest.class, DeviceUseRequest.class, MedicationOrder.class, CommunicationRequest.class, SupplyRequest.class} )
+  @SearchParamDefinition(name="activityreference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference" )
   public static final String SP_ACTIVITYREFERENCE = "activityreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activityreference</b>
@@ -3545,7 +3554,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.activity.detail.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -3571,7 +3580,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.goal</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference", target={Goal.class} )
+  @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference" )
   public static final String SP_GOAL = "goal";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>goal</b>
@@ -3597,7 +3606,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="CarePlan.subject", description="Who care plan is for", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="CarePlan.subject", description="Who care plan is for", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -3623,7 +3632,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.relatedPlan.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relatedcode", path="CarePlan.relatedPlan.code", description="includes | replaces | fulfills", type="token", target={} )
+  @SearchParamDefinition(name="relatedcode", path="CarePlan.relatedPlan.code", description="includes | replaces | fulfills", type="token" )
   public static final String SP_RELATEDCODE = "relatedcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatedcode</b>
@@ -3643,7 +3652,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.careTeam</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="careteam", path="CarePlan.careTeam", description="Who's involved in plan?", type="reference", target={CareTeam.class} )
+  @SearchParamDefinition(name="careteam", path="CarePlan.careTeam", description="Who's involved in plan?", type="reference" )
   public static final String SP_CARETEAM = "careteam";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>careteam</b>
@@ -3669,7 +3678,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.relatedPlan.plan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relatedplan", path="CarePlan.relatedPlan.plan", description="Plan relationship exists with", type="reference", target={CarePlan.class} )
+  @SearchParamDefinition(name="relatedplan", path="CarePlan.relatedPlan.plan", description="Plan relationship exists with", type="reference" )
   public static final String SP_RELATEDPLAN = "relatedplan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relatedplan</b>
@@ -3695,7 +3704,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.addresses</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="CarePlan.addresses", description="Health issues this plan addresses", type="reference", target={Condition.class} )
+  @SearchParamDefinition(name="condition", path="CarePlan.addresses", description="Health issues this plan addresses", type="reference" )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -3721,7 +3730,7 @@ public class CarePlan extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite", compositeOf={"relatedcode", "relatedplan"}, target={} )
+  @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite", compositeOf={"relatedcode", "relatedplan"} )
   public static final String SP_RELATED = "related";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related</b>
@@ -3741,7 +3750,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3767,7 +3776,7 @@ public class CarePlan extends DomainResource {
    * Path: <b>CarePlan.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="CarePlan.category", description="Type of plan", type="token", target={} )
+  @SearchParamDefinition(name="category", path="CarePlan.category", description="Type of plan", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

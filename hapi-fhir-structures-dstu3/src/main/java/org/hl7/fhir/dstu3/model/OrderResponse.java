@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -293,6 +293,7 @@ public class OrderResponse extends DomainResource {
      */
     @Child(name = "orderStatus", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", formalDefinition="What this response says about the status of the original order." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/order-status")
     protected Enumeration<OrderStatus> orderStatus;
 
     /**
@@ -864,7 +865,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date", target={} )
+  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -884,7 +885,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference", target={Order.class} )
+  @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference" )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -910,7 +911,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -930,7 +931,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.orderStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token", target={} )
+  @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -976,7 +977,7 @@ public class OrderResponse extends DomainResource {
    * Path: <b>OrderResponse.who</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference", target={Practitioner.class, Organization.class, Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_WHO = "who";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>who</b>

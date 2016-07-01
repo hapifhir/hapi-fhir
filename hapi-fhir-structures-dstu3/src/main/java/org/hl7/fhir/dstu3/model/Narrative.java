@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -175,6 +175,7 @@ public class Narrative extends BaseNarrative implements INarrative {
      */
     @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="generated | extensions | additional | empty", formalDefinition="The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/narrative-status")
     protected Enumeration<NarrativeStatus> status;
 
     /**

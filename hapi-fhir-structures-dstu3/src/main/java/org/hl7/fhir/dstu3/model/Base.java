@@ -170,11 +170,11 @@ private Map<String, Object> userData;
   }
 
 	public boolean equalsDeep(Base other) {
-	  return other != null;
+	  return other == this;
   }  
   
 	public boolean equalsShallow(Base other) {
-	  return other != null;
+	  return other == this;
   }  
   
 	public static boolean compareDeep(List<? extends Base> e1, List<? extends Base> e2, boolean allowNull) {
@@ -494,7 +494,35 @@ private Map<String, Object> userData;
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Address");
 	}
-	
+
+	public ContactDetail castToContactDetail(Base b) throws FHIRException {
+		if (b instanceof ContactDetail)
+			return (ContactDetail) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ContactDetail");
+	}
+
+	public Contributor castToContributor(Base b) throws FHIRException {
+		if (b instanceof Contributor)
+			return (Contributor) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Contributor");
+	}
+
+	public UsageContext castToUsageContext(Base b) throws FHIRException {
+		if (b instanceof UsageContext)
+			return (UsageContext) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a UsageContext");
+	}
+
+	public RelatedResource castToRelatedResource(Base b) throws FHIRException {
+		if (b instanceof RelatedResource)
+			return (RelatedResource) b;
+		else
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a RelatedResource");
+	}
+
 	public ContactPoint castToContactPoint(Base b) throws FHIRException {
 		if (b instanceof ContactPoint)
 			return (ContactPoint) b;

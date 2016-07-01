@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -542,6 +542,7 @@ public class Timing extends Type implements ICompositeType {
          */
         @Child(name = "durationUnit", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition="The units of time for the duration, in UCUM units." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/units-of-time")
         protected Enumeration<UnitsOfTime> durationUnit;
 
         /**
@@ -577,6 +578,7 @@ public class Timing extends Type implements ICompositeType {
          */
         @Child(name = "periodUnit", type = {CodeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition="The units of time for the period in UCUM units." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/units-of-time")
         protected Enumeration<UnitsOfTime> periodUnit;
 
         /**
@@ -584,6 +586,7 @@ public class Timing extends Type implements ICompositeType {
          */
         @Child(name = "when", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Regular life events the event is tied to", formalDefinition="A real world event that the occurrence of the event should be tied to." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/event-timing")
         protected Enumeration<EventTiming> when;
 
         /**
@@ -1571,6 +1574,7 @@ public class Timing extends Type implements ICompositeType {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | Q4H | Q6H +", formalDefinition="A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/timing-abbreviation")
     protected CodeableConcept code;
 
     private static final long serialVersionUID = 791565112L;

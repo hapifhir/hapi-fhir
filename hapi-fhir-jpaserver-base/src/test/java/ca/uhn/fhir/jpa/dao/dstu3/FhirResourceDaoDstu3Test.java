@@ -3087,23 +3087,23 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
-		res.addElement().addTarget().addDependsOn().setElement("http://foo2");
+		res.addGroup().setSource("http://foo2");
 		IIdType id2 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addElement().addTarget().addDependsOn().setElement("http://foo1");
+		res.addGroup().setSource("http://foo1");
 		IIdType id1 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addElement().addTarget().addDependsOn().setElement("http://bar3");
+		res.addGroup().setSource("http://bar3");
 		IIdType id3 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addElement().addTarget().addDependsOn().setElement("http://bar4");
+		res.addGroup().setSource("http://bar4");
 		IIdType id4 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(ConceptMap.SP_DEPENDSON));
+		pm.setSort(new SortSpec(ConceptMap.SP_SOURCE));
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));

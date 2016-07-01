@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -268,6 +268,7 @@ public class VisionPrescription extends DomainResource {
          */
         @Child(name = "product", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Product to be supplied", formalDefinition="Identifies the type of vision correction product which is required for the patient." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-product")
         protected Coding product;
 
         /**
@@ -275,6 +276,7 @@ public class VisionPrescription extends DomainResource {
          */
         @Child(name = "eye", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="right | left", formalDefinition="The eye for which the lens applies." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-eye-codes")
         protected Enumeration<VisionEyes> eye;
 
         /**
@@ -310,6 +312,7 @@ public class VisionPrescription extends DomainResource {
          */
         @Child(name = "base", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="up | down | in | out", formalDefinition="The relative base, or reference lens edge, for the prism." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-base-codes")
         protected Enumeration<VisionBase> base;
 
         /**
@@ -2062,7 +2065,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.prescriber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the vision product", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the vision product", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PRESCRIBER = "prescriber";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>prescriber</b>
@@ -2088,7 +2091,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="VisionPrescription.identifier", description="Return prescriptions with this external identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="VisionPrescription.identifier", description="Return prescriptions with this external identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2108,7 +2111,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2134,7 +2137,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.dateWritten</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date", target={} )
+  @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date" )
   public static final String SP_DATEWRITTEN = "datewritten";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>datewritten</b>
@@ -2154,7 +2157,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identifier", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identifier", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

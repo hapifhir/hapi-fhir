@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -173,6 +173,7 @@ public class Device extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="available | not-available | entered-in-error", formalDefinition="Status of the Device availability." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/devicestatus")
     protected Enumeration<DeviceStatus> status;
 
     /**
@@ -180,6 +181,7 @@ public class Device extends DomainResource {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What kind of device this is", formalDefinition="Code or identifier to identify a kind of device." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-kind")
     protected CodeableConcept type;
 
     /**
@@ -1341,7 +1343,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, and others", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, and others", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1361,7 +1363,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1387,7 +1389,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.owner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1413,7 +1415,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.model</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string", target={} )
+  @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string" )
   public static final String SP_MODEL = "model";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>model</b>
@@ -1433,7 +1435,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -1459,7 +1461,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1479,7 +1481,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token", target={} )
+  @SearchParamDefinition(name="udicarrier", path="Device.udiCarrier", description="Barcode string (udi)", type="token" )
   public static final String SP_UDICARRIER = "udicarrier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>udicarrier</b>
@@ -1499,7 +1501,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -1519,7 +1521,7 @@ public class Device extends DomainResource {
    * Path: <b>Device.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string", target={} )
+  @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string" )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>

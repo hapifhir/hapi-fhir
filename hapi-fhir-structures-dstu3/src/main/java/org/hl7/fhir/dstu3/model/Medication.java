@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -55,6 +55,7 @@ public class Medication extends DomainResource {
          */
         @Child(name = "form", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="powder | tablets | carton +", formalDefinition="Describes the form of the item.  Powder; tablets; carton." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-form-codes")
         protected CodeableConcept form;
 
         /**
@@ -777,6 +778,7 @@ public class Medication extends DomainResource {
          */
         @Child(name = "container", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="E.g. box, vial, blister-pack", formalDefinition="The kind of container that this package comes as." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-package-form-codes")
         protected CodeableConcept container;
 
         /**
@@ -1192,6 +1194,7 @@ public class Medication extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Codes that identify this medication", formalDefinition="A code (or set of codes) that specify this medication, or a textual description if no code is available. Usage note: This could be a standard medication code such as a code from RxNorm, SNOMED CT, IDMP etc. It could also be a national or local formulary code, optionally with translations to other code systems." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-codes")
     protected CodeableConcept code;
 
     /**
@@ -1555,7 +1558,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.ingredient.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient-code", path="Medication.product.ingredient.item.as(CodeableConcept)", description="The product contained", type="token", target={} )
+  @SearchParamDefinition(name="ingredient-code", path="Medication.product.ingredient.item.as(CodeableConcept)", description="The product contained", type="token" )
   public static final String SP_INGREDIENT_CODE = "ingredient-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient-code</b>
@@ -1575,7 +1578,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.container</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container", path="Medication.package.container", description="E.g. box, vial, blister-pack", type="token", target={} )
+  @SearchParamDefinition(name="container", path="Medication.package.container", description="E.g. box, vial, blister-pack", type="token" )
   public static final String SP_CONTAINER = "container";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container</b>
@@ -1595,7 +1598,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.content.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="package-item", path="Medication.package.content.item.as(Reference)", description="The item in the package", type="reference", target={Medication.class} )
+  @SearchParamDefinition(name="package-item", path="Medication.package.content.item.as(Reference)", description="The item in the package", type="reference" )
   public static final String SP_PACKAGE_ITEM = "package-item";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>package-item</b>
@@ -1621,7 +1624,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Medication.code", description="Codes that identify this medication", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Medication.code", description="Codes that identify this medication", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1641,7 +1644,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.ingredient.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item.as(Reference)", description="The product contained", type="reference", target={Medication.class, Substance.class} )
+  @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item.as(Reference)", description="The product contained", type="reference" )
   public static final String SP_INGREDIENT = "ingredient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient</b>
@@ -1667,7 +1670,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.product.form</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token", target={} )
+  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token" )
   public static final String SP_FORM = "form";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>form</b>
@@ -1687,7 +1690,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.package.content.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="package-item-code", path="Medication.package.content.item.as(CodeableConcept)", description="The item in the package", type="token", target={} )
+  @SearchParamDefinition(name="package-item-code", path="Medication.package.content.item.as(CodeableConcept)", description="The item in the package", type="token" )
   public static final String SP_PACKAGE_ITEM_CODE = "package-item-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>package-item-code</b>
@@ -1707,7 +1710,7 @@ public class Medication extends DomainResource {
    * Path: <b>Medication.manufacturer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="Manufacturer of the item", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="Manufacturer of the item", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>

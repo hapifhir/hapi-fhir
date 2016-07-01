@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -622,6 +622,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "rules", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="closed | open | openAtEnd", formalDefinition="Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-slicing-rules")
         protected Enumeration<SlicingRules> rules;
 
         private static final long serialVersionUID = 233544215L;
@@ -1272,6 +1273,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of Data type or Resource", formalDefinition="Name of Data type or Resource that is a(or the) type used for this element." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/defined-types")
         protected CodeType code;
 
         /**
@@ -1286,6 +1288,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "aggregation", type = {CodeType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="contained | referenced | bundled - how aggregated", formalDefinition="If the type is a reference to another resource, how the resource is or can be aggregated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-aggregation-mode")
         protected List<Enumeration<AggregationMode>> aggregation;
 
         /**
@@ -1293,6 +1296,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "versioning", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="either | independent | specific", formalDefinition="Whether this reference needs to be version specific or version independent, or whetehr either can be used." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/reference-version-rules")
         protected Enumeration<ReferenceVersionRules> versioning;
 
         private static final long serialVersionUID = -829583924L;
@@ -1685,6 +1689,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "severity", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="error | warning", formalDefinition="Identifies the impact constraint violation has on the conformance of the instance." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/constraint-severity")
         protected Enumeration<ConstraintSeverity> severity;
 
         /**
@@ -2167,6 +2172,7 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "strength", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="required | extensible | preferred | example", formalDefinition="Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/binding-strength")
         protected Enumeration<BindingStrength> strength;
 
         /**
@@ -2768,6 +2774,7 @@ public class ElementDefinition extends Type implements ICompositeType {
      */
     @Child(name = "representation", type = {CodeType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="xmlAttr | xmlText | typeAttr | cdaText | xhtml", formalDefinition="Codes that define how this element is represented in instances, when the deviation varies from the normal case." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/property-representation")
     protected List<Enumeration<PropertyRepresentation>> representation;
 
     /**
@@ -2789,6 +2796,7 @@ public class ElementDefinition extends Type implements ICompositeType {
      */
     @Child(name = "code", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Defining code", formalDefinition="A code that provides the meaning for the element according to a particular terminology." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-codes")
     protected List<Coding> code;
 
     /**

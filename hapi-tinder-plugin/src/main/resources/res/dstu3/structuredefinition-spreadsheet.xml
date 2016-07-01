@@ -9,7 +9,7 @@
   <Author>Grahame</Author>
   <LastAuthor>Grahame Grieve</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-03-29T03:20:07Z</LastSaved>
+  <LastSaved>2016-06-07T04:36:18Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -96,9 +96,8 @@
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>2</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
-  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -4479,7 +4478,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4521,7 +4519,7 @@
    <Column ss:StyleID="s102" ss:Width="55.5"/>
    <Column ss:StyleID="s102" ss:Width="165"/>
    <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="453"/>
-   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="429"/>
+   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="567"/>
    <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="691.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
@@ -4674,26 +4672,28 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">baseType implies derivation</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">baseType implies derivation</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">snapshot.element.base implies baseType</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">not(exists(f:baseType)) or exists(f:derivation)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">14</Data><NamedCell
+      ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">elements have id</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">All element definitions must have an id</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">snapshot.element.all(id) and differential.element.all(id)</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">not(exists(f:baseType)) or exists(f:derivation)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s108"><Data ss:Type="String">!15</Data><NamedCell
+      ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">elements have id</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">All element definition ids must have an unique</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">snapshot.element.id.trace('ids').isDistinct() and differential.element.id.trace('ids').isDistinct()</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">not(exists(f:baseType)) or exists(f:derivation)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -5006,12 +5006,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
-   <LeftColumnRightPane>3</LeftColumnRightPane>
+   <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -5026,6 +5027,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
+     <ActiveRow>15</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>

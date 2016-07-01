@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -324,7 +324,11 @@ public class Protocol extends DomainResource {
       }
     }
 
-    public enum ActivityDefinitionCategory {
+    public enum ProtocolActivityDefinitionCategory {
+        /**
+         * To communicate with a participant in some way
+         */
+        COMMUNICATION, 
         /**
          * To consume food of a specified nature
          */
@@ -334,7 +338,7 @@ public class Protocol extends DomainResource {
          */
         DRUG, 
         /**
-         * To meet or communicate with the patient (in-patient, out-patient, phone call, etc.)
+         * To meet with the patient (in-patient, out-patient, etc.)
          */
         ENCOUNTER, 
         /**
@@ -345,6 +349,10 @@ public class Protocol extends DomainResource {
          * To modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)
          */
         PROCEDURE, 
+        /**
+         * To refer the patient to receive some service
+         */
+        REFERRAL, 
         /**
          * To provide something to the patient (medication, medical supply, etc.)
          */
@@ -357,9 +365,11 @@ public class Protocol extends DomainResource {
          * added to help the parsers with the generic types
          */
         NULL;
-        public static ActivityDefinitionCategory fromCode(String codeString) throws FHIRException {
+        public static ProtocolActivityDefinitionCategory fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("communication".equals(codeString))
+          return COMMUNICATION;
         if ("diet".equals(codeString))
           return DIET;
         if ("drug".equals(codeString))
@@ -370,6 +380,8 @@ public class Protocol extends DomainResource {
           return OBSERVATION;
         if ("procedure".equals(codeString))
           return PROCEDURE;
+        if ("referral".equals(codeString))
+          return REFERRAL;
         if ("supply".equals(codeString))
           return SUPPLY;
         if ("other".equals(codeString))
@@ -377,15 +389,17 @@ public class Protocol extends DomainResource {
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
-          throw new FHIRException("Unknown ActivityDefinitionCategory code '"+codeString+"'");
+          throw new FHIRException("Unknown ProtocolActivityDefinitionCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
+            case COMMUNICATION: return "communication";
             case DIET: return "diet";
             case DRUG: return "drug";
             case ENCOUNTER: return "encounter";
             case OBSERVATION: return "observation";
             case PROCEDURE: return "procedure";
+            case REFERRAL: return "referral";
             case SUPPLY: return "supply";
             case OTHER: return "other";
             default: return "?";
@@ -393,23 +407,27 @@ public class Protocol extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DIET: return "http://hl7.org/fhir/activity-definition-category";
-            case DRUG: return "http://hl7.org/fhir/activity-definition-category";
-            case ENCOUNTER: return "http://hl7.org/fhir/activity-definition-category";
-            case OBSERVATION: return "http://hl7.org/fhir/activity-definition-category";
-            case PROCEDURE: return "http://hl7.org/fhir/activity-definition-category";
-            case SUPPLY: return "http://hl7.org/fhir/activity-definition-category";
-            case OTHER: return "http://hl7.org/fhir/activity-definition-category";
+            case COMMUNICATION: return "http://hl7.org/fhir/protocol-activity-category";
+            case DIET: return "http://hl7.org/fhir/protocol-activity-category";
+            case DRUG: return "http://hl7.org/fhir/protocol-activity-category";
+            case ENCOUNTER: return "http://hl7.org/fhir/protocol-activity-category";
+            case OBSERVATION: return "http://hl7.org/fhir/protocol-activity-category";
+            case PROCEDURE: return "http://hl7.org/fhir/protocol-activity-category";
+            case REFERRAL: return "http://hl7.org/fhir/protocol-activity-category";
+            case SUPPLY: return "http://hl7.org/fhir/protocol-activity-category";
+            case OTHER: return "http://hl7.org/fhir/protocol-activity-category";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
+            case COMMUNICATION: return "To communicate with a participant in some way";
             case DIET: return "To consume food of a specified nature";
             case DRUG: return "To consume/receive a drug, vaccine or other product";
-            case ENCOUNTER: return "To meet or communicate with the patient (in-patient, out-patient, phone call, etc.)";
+            case ENCOUNTER: return "To meet with the patient (in-patient, out-patient, etc.)";
             case OBSERVATION: return "To capture information about a patient (vitals, labs, diagnostic images, etc.)";
             case PROCEDURE: return "To modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)";
+            case REFERRAL: return "To refer the patient to receive some service";
             case SUPPLY: return "To provide something to the patient (medication, medical supply, etc.)";
             case OTHER: return "Some other form of action";
             default: return "?";
@@ -417,11 +435,13 @@ public class Protocol extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
+            case COMMUNICATION: return "Communication";
             case DIET: return "Diet";
             case DRUG: return "Drug";
             case ENCOUNTER: return "Encounter";
             case OBSERVATION: return "Observation";
             case PROCEDURE: return "Procedure";
+            case REFERRAL: return "Referral";
             case SUPPLY: return "Supply";
             case OTHER: return "Other";
             default: return "?";
@@ -429,67 +449,79 @@ public class Protocol extends DomainResource {
         }
     }
 
-  public static class ActivityDefinitionCategoryEnumFactory implements EnumFactory<ActivityDefinitionCategory> {
-    public ActivityDefinitionCategory fromCode(String codeString) throws IllegalArgumentException {
+  public static class ProtocolActivityDefinitionCategoryEnumFactory implements EnumFactory<ProtocolActivityDefinitionCategory> {
+    public ProtocolActivityDefinitionCategory fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("communication".equals(codeString))
+          return ProtocolActivityDefinitionCategory.COMMUNICATION;
         if ("diet".equals(codeString))
-          return ActivityDefinitionCategory.DIET;
+          return ProtocolActivityDefinitionCategory.DIET;
         if ("drug".equals(codeString))
-          return ActivityDefinitionCategory.DRUG;
+          return ProtocolActivityDefinitionCategory.DRUG;
         if ("encounter".equals(codeString))
-          return ActivityDefinitionCategory.ENCOUNTER;
+          return ProtocolActivityDefinitionCategory.ENCOUNTER;
         if ("observation".equals(codeString))
-          return ActivityDefinitionCategory.OBSERVATION;
+          return ProtocolActivityDefinitionCategory.OBSERVATION;
         if ("procedure".equals(codeString))
-          return ActivityDefinitionCategory.PROCEDURE;
+          return ProtocolActivityDefinitionCategory.PROCEDURE;
+        if ("referral".equals(codeString))
+          return ProtocolActivityDefinitionCategory.REFERRAL;
         if ("supply".equals(codeString))
-          return ActivityDefinitionCategory.SUPPLY;
+          return ProtocolActivityDefinitionCategory.SUPPLY;
         if ("other".equals(codeString))
-          return ActivityDefinitionCategory.OTHER;
-        throw new IllegalArgumentException("Unknown ActivityDefinitionCategory code '"+codeString+"'");
+          return ProtocolActivityDefinitionCategory.OTHER;
+        throw new IllegalArgumentException("Unknown ProtocolActivityDefinitionCategory code '"+codeString+"'");
         }
-        public Enumeration<ActivityDefinitionCategory> fromType(Base code) throws FHIRException {
+        public Enumeration<ProtocolActivityDefinitionCategory> fromType(Base code) throws FHIRException {
           if (code == null || code.isEmpty())
             return null;
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
+        if ("communication".equals(codeString))
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.COMMUNICATION);
         if ("diet".equals(codeString))
-          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.DIET);
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.DIET);
         if ("drug".equals(codeString))
-          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.DRUG);
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.DRUG);
         if ("encounter".equals(codeString))
-          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.ENCOUNTER);
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.ENCOUNTER);
         if ("observation".equals(codeString))
-          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.OBSERVATION);
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.OBSERVATION);
         if ("procedure".equals(codeString))
-          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.PROCEDURE);
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.PROCEDURE);
+        if ("referral".equals(codeString))
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.REFERRAL);
         if ("supply".equals(codeString))
-          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.SUPPLY);
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.SUPPLY);
         if ("other".equals(codeString))
-          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.OTHER);
-        throw new FHIRException("Unknown ActivityDefinitionCategory code '"+codeString+"'");
+          return new Enumeration<ProtocolActivityDefinitionCategory>(this, ProtocolActivityDefinitionCategory.OTHER);
+        throw new FHIRException("Unknown ProtocolActivityDefinitionCategory code '"+codeString+"'");
         }
-    public String toCode(ActivityDefinitionCategory code) {
-      if (code == ActivityDefinitionCategory.DIET)
+    public String toCode(ProtocolActivityDefinitionCategory code) {
+      if (code == ProtocolActivityDefinitionCategory.COMMUNICATION)
+        return "communication";
+      if (code == ProtocolActivityDefinitionCategory.DIET)
         return "diet";
-      if (code == ActivityDefinitionCategory.DRUG)
+      if (code == ProtocolActivityDefinitionCategory.DRUG)
         return "drug";
-      if (code == ActivityDefinitionCategory.ENCOUNTER)
+      if (code == ProtocolActivityDefinitionCategory.ENCOUNTER)
         return "encounter";
-      if (code == ActivityDefinitionCategory.OBSERVATION)
+      if (code == ProtocolActivityDefinitionCategory.OBSERVATION)
         return "observation";
-      if (code == ActivityDefinitionCategory.PROCEDURE)
+      if (code == ProtocolActivityDefinitionCategory.PROCEDURE)
         return "procedure";
-      if (code == ActivityDefinitionCategory.SUPPLY)
+      if (code == ProtocolActivityDefinitionCategory.REFERRAL)
+        return "referral";
+      if (code == ProtocolActivityDefinitionCategory.SUPPLY)
         return "supply";
-      if (code == ActivityDefinitionCategory.OTHER)
+      if (code == ProtocolActivityDefinitionCategory.OTHER)
         return "other";
       return "?";
       }
-    public String toSystem(ActivityDefinitionCategory code) {
+    public String toSystem(ProtocolActivityDefinitionCategory code) {
       return code.getSystem();
       }
     }
@@ -2411,8 +2443,9 @@ public class Protocol extends DomainResource {
          * High-level categorization of the type of activity.
          */
         @Child(name = "category", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="diet | drug | encounter | observation +", formalDefinition="High-level categorization of the type of activity." )
-        protected Enumeration<ActivityDefinitionCategory> category;
+        @Description(shortDefinition="communication | diet | drug | encounter | observation | procedure | referral | supply | other", formalDefinition="High-level categorization of the type of activity." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/protocol-activity-category")
+        protected Enumeration<ProtocolActivityDefinitionCategory> category;
 
         /**
          * Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter.
@@ -2473,7 +2506,7 @@ public class Protocol extends DomainResource {
         @Description(shortDefinition="Extra info on activity occurrence", formalDefinition="This provides a textual description of constraints on the activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc." )
         protected StringType description;
 
-        private static final long serialVersionUID = -2110199458L;
+        private static final long serialVersionUID = -1203502826L;
 
     /**
      * Constructor
@@ -2485,12 +2518,12 @@ public class Protocol extends DomainResource {
         /**
          * @return {@link #category} (High-level categorization of the type of activity.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
          */
-        public Enumeration<ActivityDefinitionCategory> getCategoryElement() { 
+        public Enumeration<ProtocolActivityDefinitionCategory> getCategoryElement() { 
           if (this.category == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ProtocolStepActivityDetailComponent.category");
             else if (Configuration.doAutoCreate())
-              this.category = new Enumeration<ActivityDefinitionCategory>(new ActivityDefinitionCategoryEnumFactory()); // bb
+              this.category = new Enumeration<ProtocolActivityDefinitionCategory>(new ProtocolActivityDefinitionCategoryEnumFactory()); // bb
           return this.category;
         }
 
@@ -2505,7 +2538,7 @@ public class Protocol extends DomainResource {
         /**
          * @param value {@link #category} (High-level categorization of the type of activity.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
          */
-        public ProtocolStepActivityDetailComponent setCategoryElement(Enumeration<ActivityDefinitionCategory> value) { 
+        public ProtocolStepActivityDetailComponent setCategoryElement(Enumeration<ProtocolActivityDefinitionCategory> value) { 
           this.category = value;
           return this;
         }
@@ -2513,19 +2546,19 @@ public class Protocol extends DomainResource {
         /**
          * @return High-level categorization of the type of activity.
          */
-        public ActivityDefinitionCategory getCategory() { 
+        public ProtocolActivityDefinitionCategory getCategory() { 
           return this.category == null ? null : this.category.getValue();
         }
 
         /**
          * @param value High-level categorization of the type of activity.
          */
-        public ProtocolStepActivityDetailComponent setCategory(ActivityDefinitionCategory value) { 
+        public ProtocolStepActivityDetailComponent setCategory(ProtocolActivityDefinitionCategory value) { 
           if (value == null)
             this.category = null;
           else {
             if (this.category == null)
-              this.category = new Enumeration<ActivityDefinitionCategory>(new ActivityDefinitionCategoryEnumFactory());
+              this.category = new Enumeration<ProtocolActivityDefinitionCategory>(new ProtocolActivityDefinitionCategoryEnumFactory());
             this.category.setValue(value);
           }
           return this;
@@ -2840,7 +2873,7 @@ public class Protocol extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<ActivityDefinitionCategory>
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<ProtocolActivityDefinitionCategory>
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
@@ -2857,7 +2890,7 @@ public class Protocol extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 50511102: // category
-          this.category = new ActivityDefinitionCategoryEnumFactory().fromType(value); // Enumeration<ActivityDefinitionCategory>
+          this.category = new ProtocolActivityDefinitionCategoryEnumFactory().fromType(value); // Enumeration<ProtocolActivityDefinitionCategory>
           break;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -2888,7 +2921,7 @@ public class Protocol extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("category"))
-          this.category = new ActivityDefinitionCategoryEnumFactory().fromType(value); // Enumeration<ActivityDefinitionCategory>
+          this.category = new ProtocolActivityDefinitionCategoryEnumFactory().fromType(value); // Enumeration<ProtocolActivityDefinitionCategory>
         else if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("timing[x]"))
@@ -2910,7 +2943,7 @@ public class Protocol extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 50511102: throw new FHIRException("Cannot make property category as it is not a complex type"); // Enumeration<ActivityDefinitionCategory>
+        case 50511102: throw new FHIRException("Cannot make property category as it is not a complex type"); // Enumeration<ProtocolActivityDefinitionCategory>
         case 3059181:  return getCode(); // CodeableConcept
         case 164632566:  return getTiming(); // Type
         case 1901043637:  return getLocation(); // Reference
@@ -3309,6 +3342,7 @@ public class Protocol extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | testing | review | active | withdrawn | superseded", formalDefinition="The status of the protocol." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/protocol-status")
     protected Enumeration<ProtocolStatus> status;
 
     /**
@@ -3316,6 +3350,7 @@ public class Protocol extends DomainResource {
      */
     @Child(name = "type", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="condition | device | drug | study", formalDefinition="A code that classifies the general type of context to which these behavior definitions apply.  This is used for searching, sorting and display purposes." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/protocol-type")
     protected Enumeration<ProtocolType> type;
 
     /**
@@ -4020,7 +4055,7 @@ public class Protocol extends DomainResource {
    * Path: <b>Protocol.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Protocol.identifier", description="The unique id for a particular protocol", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Protocol.identifier", description="The unique id for a particular protocol", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -4040,7 +4075,7 @@ public class Protocol extends DomainResource {
    * Path: <b>Protocol.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Protocol.subject", description="Protocols with specified subject", type="reference", target={Condition.class, Device.class, Medication.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="subject", path="Protocol.subject", description="Protocols with specified subject", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

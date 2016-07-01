@@ -36,11 +36,14 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
@@ -52,7 +55,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 	}
-
 
 	@Before
 	public void before() {
@@ -130,7 +132,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		createLocalVs(codeSystem);
 	}
 
-
 	private void createLocalVs(CodeSystem codeSystem) {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);
@@ -138,17 +139,16 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myValueSetDao.create(valueSet, mySrd);
 	}
 
-
 	@Test
 	public void testCodeSystemCreateDuplicateFails() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		try {
 			myCodeSystemDao.create(codeSystem, mySrd);
 			fail();
@@ -172,14 +172,14 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 				.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code AA"))
 				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code AB"));
 		//@formatter:on
-		
+
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		
+
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
 		assertThat(toCodes(codes), containsInAnyOrder("A", "AA", "AB"));
-		
+
 	}
-	
+
 	@Test
 	public void testExpandWithExcludeInExternalValueSet() {
 		createExternalCsAndLocalVs();
@@ -192,14 +192,28 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		exclude.setSystem(URL_MY_CODE_SYSTEM);
 		exclude.addConcept().setCode("childAA");
 		exclude.addConcept().setCode("childAAA");
-		
+
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
-		
+		logAndValidateValueSet(result);
+
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "childAB", "childAAB", "ParentC", "childBA", "childCA"));
+	}
+
+	private void logAndValidateValueSet(ValueSet theResult) {
+		IParser parser = myFhirCtx.newXmlParser().setPrettyPrint(true);
+		String encoded = parser.encodeResourceToString(theResult);
+		ourLog.info(encoded);
+
+		FhirValidator validator = myFhirCtx.newValidator();
+		validator.setValidateAgainstStandardSchema(true);
+		validator.setValidateAgainstStandardSchematron(true);
+		ValidationResult result = validator.validateWithResult(theResult);
+
+		if (!result.isSuccessful()) {
+			ourLog.info(parser.encodeResourceToString(result.toOperationOutcome()));
+			fail(parser.encodeResourceToString(result.toOperationOutcome()));
+		}
 	}
 
 	@Test
@@ -239,7 +253,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("Unable to find code 'ZZZZ' in code system http://example.com/my_code_system", e.getMessage());
 		}
-		
+
 	}
 
 	@Test
@@ -259,10 +273,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		}
 	}
 
-
-
 	@Test
-	public void testExpandWithSystemAndCodesAndFilterInExternalValueSet() {
+	public void testExpandWithSystemAndCodesInExternalValueSet() {
 		createExternalCsAndLocalVs();
 
 		ValueSet vs = new ValueSet();
@@ -272,20 +284,34 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addConcept().setCode("childAA");
 		include.addConcept().setCode("childAAA");
 
-		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("Parent B");
-		
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
-		
+		logAndValidateValueSet(result);
+
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA", "ParentB"));
-		
+		assertThat(codes, containsInAnyOrder("ParentA", "childAA", "childAAA"));
+
 		int idx = codes.indexOf("childAA");
 		assertEquals("childAA", result.getExpansion().getContains().get(idx).getCode());
 		assertEquals("Child AA", result.getExpansion().getContains().get(idx).getDisplay());
 		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
+	}
+
+	@Test
+	public void testExpandWithSystemAndFilterInExternalValueSet() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+
+		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("Parent B");
+
+		ValueSet result = myValueSetDao.expand(vs, null);
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("ParentB"));
+
 	}
 
 	@Test
@@ -297,8 +323,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("parent a");
 		ValueSet result = myValueSetDao.expand(vs, null);
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA"));
 
@@ -307,8 +332,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("pare");
 		result = myValueSetDao.expand(vs, null);
-		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "ParentC"));
 
@@ -317,8 +341,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("display:exact").setOp(FilterOperator.EQUAL).setValue("pare");
 		result = myValueSetDao.expand(vs, null);
-		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
+		logAndValidateValueSet(result);
 		codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, empty());
 
@@ -332,25 +355,20 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addConcept().setCode("A");
-//		include.addConcept().setCode("AA");
-//		include.addConcept().setCode("AAA");
-//		include.addConcept().setCode("AB");
 
 		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("AAA");
-		
+
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
-		
+		logAndValidateValueSet(result);
+
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("A", "AAA"));
-		
+
 		int idx = codes.indexOf("AAA");
 		assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
 		assertEquals("Code AAA", result.getExpansion().getContains().get(idx).getDisplay());
 		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
-//		
+		//
 	}
 
 	@Test
@@ -364,43 +382,40 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addConcept().setCode("AA");
 		include.addConcept().setCode("AAA");
 		include.addConcept().setCode("AB");
-		
+
 		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
-		
+		logAndValidateValueSet(result);
+
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("A", "AA", "AAA", "AB"));
-		
+
 		int idx = codes.indexOf("AAA");
 		assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
 		assertEquals("Code AAA", result.getExpansion().getContains().get(idx).getDisplay());
 		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
-//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
-//		ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
-//		
+		// ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
+		// ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
+		//
 	}
 
 	@Test
 	public void testIndexingIsDeferredForLargeCodeSystems() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
-		
+
 		myTermSvc.setProcessDeferred(false);
-		
+
 		createExternalCsAndLocalVs();
 
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
-		
+
 		ValueSet result = myValueSetDao.expand(vs, null);
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
-		
+		logAndValidateValueSet(result);
+
 		assertEquals(0, result.getExpansion().getContains().size());
-		
+
 		myTermSvc.setProcessDeferred(true);
 		myTermSvc.saveDeferred();
 		myTermSvc.saveDeferred();
@@ -409,29 +424,29 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myTermSvc.saveDeferred();
 		myTermSvc.saveDeferred();
 		myTermSvc.saveDeferred();
-		
+
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
 		result = myValueSetDao.expand(vs, null);
-		encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info(encoded);
-		
+		logAndValidateValueSet(result);
+
 		assertEquals(4, result.getExpansion().getContains().size());
 
+		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		assertThat(encoded, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 	}
 
 	/**
-	 * Can't currently abort costly 
+	 * Can't currently abort costly
 	 */
 	@Test
 	@Ignore
 	public void testRefuseCostlyExpansionFhirCodesystem() {
 		createLocalCsAndVs();
 		myDaoConfig.setMaximumExpansionSize(1);
-		
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
 		try {
@@ -446,7 +461,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public void testRefuseCostlyExpansionLocalCodesystem() {
 		createLocalCsAndVs();
 		myDaoConfig.setMaximumExpansionSize(1);
-		
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));
 		try {
@@ -460,7 +475,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Test
 	public void testSearchCodeAboveLocalCodesystem() {
 		createLocalCsAndVs();
-		
+
 		Observation obsAA = new Observation();
 		obsAA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("AA");
 		IIdType idAA = myObservationDao.create(obsAA, mySrd).getId().toUnqualifiedVersionless();
@@ -476,18 +491,18 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAA.getValue()));
-		
+
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "A").setModifier(TokenParamModifier.ABOVE));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
-		
+
 	}
 
 	@Test
 	public void testSearchCodeBelowAndAboveUnknownCodeSystem() {
 
 		SearchParameterMap params = new SearchParameterMap();
-		
+
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
 
@@ -496,14 +511,13 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
-		
-	}
 
+	}
 
 	@Test
 	public void testSearchCodeBelowLocalCodesystem() {
 		createLocalCsAndVs();
-		
+
 		Observation obsAA = new Observation();
 		obsAA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("AA");
 		IIdType idAA = myObservationDao.create(obsAA, mySrd).getId().toUnqualifiedVersionless();
@@ -519,10 +533,84 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "A").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAA.getValue()));
-		
+
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+
+	}
+
+	@Test
+	public void testSearchCodeInBuiltInValueSet() {
+		AllergyIntolerance ai1 = new AllergyIntolerance();
+		ai1.setStatus(AllergyIntoleranceStatus.ACTIVE);
+		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		AllergyIntolerance ai2 = new AllergyIntolerance();
+		ai2.setStatus(AllergyIntoleranceStatus.CONFIRMED);
+		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		AllergyIntolerance ai3 = new AllergyIntolerance();
+		ai3.setStatus(AllergyIntoleranceStatus.INACTIVE);
+		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap params;
+		params = new SearchParameterMap();
+		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-status").setModifier(TokenParamModifier.IN));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2, id3));
+
+		// No codes in this one
+		params = new SearchParameterMap();
+		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality").setModifier(TokenParamModifier.IN));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
+
+		// Invalid VS
+		params = new SearchParameterMap();
+		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/FOO").setModifier(TokenParamModifier.IN));
+		try {
+			myAllergyIntoleranceDao.search(params);
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to find imported value set http://hl7.org/fhir/ValueSet/FOO", e.getMessage());
+		}
+
+	}
+
+	/**
+	 * Todo: not yet implemented
+	 */
+	@Test
+	@Ignore
+	public void testSearchCodeNotInBuiltInValueSet() {
+		AllergyIntolerance ai1 = new AllergyIntolerance();
+		ai1.setStatus(AllergyIntoleranceStatus.ACTIVE);
+		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		AllergyIntolerance ai2 = new AllergyIntolerance();
+		ai2.setStatus(AllergyIntoleranceStatus.CONFIRMED);
+		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		AllergyIntolerance ai3 = new AllergyIntolerance();
+		ai3.setStatus(AllergyIntoleranceStatus.INACTIVE);
+		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap params;
+		params = new SearchParameterMap();
+		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-status").setModifier(TokenParamModifier.NOT_IN));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
+
+		// No codes in this one
+		params = new SearchParameterMap();
+		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality").setModifier(TokenParamModifier.NOT_IN));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2, id3));
+
+		// Invalid VS
+		params = new SearchParameterMap();
+		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/FOO").setModifier(TokenParamModifier.NOT_IN));
+		try {
+			myAllergyIntoleranceDao.search(params);
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to find imported value set http://hl7.org/fhir/ValueSet/FOO", e.getMessage());
+		}
 
 	}
 
@@ -531,20 +619,20 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
 		ai1.setStatus(AllergyIntoleranceStatus.ACTIVE);
 		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
-		
+
 		AllergyIntolerance ai2 = new AllergyIntolerance();
 		ai2.setStatus(AllergyIntoleranceStatus.CONFIRMED);
 		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
-		
+
 		AllergyIntolerance ai3 = new AllergyIntolerance();
 		ai3.setStatus(AllergyIntoleranceStatus.INACTIVE);
 		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
-		
+
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_STATUS, new TokenParam("http://hl7.org/fhir/allergy-intolerance-status", AllergyIntoleranceStatus.ACTIVE.toCode()));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
-		
+
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_STATUS, new TokenParam("http://hl7.org/fhir/allergy-intolerance-status", AllergyIntoleranceStatus.ACTIVE.toCode()).setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2));
@@ -574,25 +662,24 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	@Ignore
 	public void testSearchCodeBelowBuiltInCodesystemUnqualified() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
 		ai1.setStatus(AllergyIntoleranceStatus.ACTIVE);
 		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
-		
+
 		AllergyIntolerance ai2 = new AllergyIntolerance();
 		ai2.setStatus(AllergyIntoleranceStatus.CONFIRMED);
 		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
-		
+
 		AllergyIntolerance ai3 = new AllergyIntolerance();
 		ai3.setStatus(AllergyIntoleranceStatus.INACTIVE);
 		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
-		
+
 		SearchParameterMap params;
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, AllergyIntoleranceStatus.ACTIVE.toCode()));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
-		
+
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_STATUS, new TokenParam(null, AllergyIntoleranceStatus.ACTIVE.toCode()).setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2));
@@ -611,13 +698,12 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	}
 
-	
 	@Test
 	public void testSearchCodeInEmptyValueSet() {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		myValueSetDao.create(valueSet, mySrd);
-		
+
 		Observation obsAA = new Observation();
 		obsAA.setStatus(ObservationStatus.FINAL);
 		obsAA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("AA");
@@ -634,11 +720,11 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params;
-		
+
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
-		
+
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
@@ -648,7 +734,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Test
 	public void testSearchCodeInExternalCodesystem() {
 		createExternalCsAndLocalVs();
-		
+
 		Observation obsPA = new Observation();
 		obsPA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("ParentA");
 		IIdType idPA = myObservationDao.create(obsPA, mySrd).getId().toUnqualifiedVersionless();
@@ -665,7 +751,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		obsCA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("CA");
 		IIdType idCA = myObservationDao.create(obsCA, mySrd).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap params = new SearchParameterMap();		
+		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "childAA").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAAA.getValue(), idAAB.getValue()));
 
@@ -676,17 +762,17 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idPA.getValue(), idAAA.getValue(), idAAB.getValue()));
-		
+
 	}
-	
+
 	@Test
 	public void testSearchCodeInFhirCodesystem() {
 		createLocalCsAndVs();
-		
+
 		AuditEvent aeIn1 = new AuditEvent();
 		aeIn1.getType().setSystem("http://nema.org/dicom/dicm").setCode("110102");
 		IIdType idIn1 = myAuditEventDao.create(aeIn1, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		AuditEvent aeIn2 = new AuditEvent();
 		aeIn2.getType().setSystem("http://hl7.org/fhir/audit-event-type").setCode("rest");
 		IIdType idIn2 = myAuditEventDao.create(aeIn2, mySrd).getId().toUnqualifiedVersionless();
@@ -697,17 +783,17 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params)), containsInAnyOrder(idIn1.getValue(), idIn2.getValue()));		
+		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params)), containsInAnyOrder(idIn1.getValue(), idIn2.getValue()));
 
 		params = new SearchParameterMap();
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/v3-PurposeOfUse").setModifier(TokenParamModifier.IN));
-		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params)), empty());		
+		assertThat(toUnqualifiedVersionlessIdValues(myAuditEventDao.search(params)), empty());
 	}
 
 	@Test
 	public void testSearchCodeInLocalCodesystem() {
 		createLocalCsAndVs();
-		
+
 		Observation obsAA = new Observation();
 		obsAA.getCode().addCoding().setSystem(URL_MY_CODE_SYSTEM).setCode("AA");
 		IIdType idAA = myObservationDao.create(obsAA, mySrd).getId().toUnqualifiedVersionless();
@@ -723,9 +809,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), containsInAnyOrder(idAA.getValue(), idBA.getValue()));
-		
-	}
 
+	}
 
 	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {
 		ArrayList<String> retVal = new ArrayList<String>();
@@ -735,13 +820,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		return retVal;
 	}
 
-	
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	
-	
-	
 }

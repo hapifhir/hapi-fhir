@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -498,6 +498,7 @@ public class CommunicationRequest extends DomainResource {
      */
     @Child(name = "medium", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A channel of communication", formalDefinition="A channel that was used for this communication (e.g. email, fax)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ParticipationMode")
     protected List<CodeableConcept> medium;
 
     /**
@@ -517,6 +518,7 @@ public class CommunicationRequest extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=7, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed", formalDefinition="The status of the proposal or order." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/communication-request-status")
     protected Enumeration<CommunicationRequestStatus> status;
 
     /**
@@ -569,6 +571,7 @@ public class CommunicationRequest extends DomainResource {
      */
     @Child(name = "priority", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Message urgency", formalDefinition="Characterizes how quickly the proposed act must be initiated. Includes concepts such as stat, urgent, routine." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnostic-order-priority")
     protected CodeableConcept priority;
 
     private static final long serialVersionUID = 146906020L;
@@ -1509,7 +1512,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="An individual who requested a communication", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="An individual who requested a communication", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -1535,7 +1538,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1555,7 +1558,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1581,7 +1584,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.medium</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="A channel of communication", type="token", target={} )
+  @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="A channel of communication", type="token" )
   public static final String SP_MEDIUM = "medium";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medium</b>
@@ -1601,7 +1604,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1627,7 +1630,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token", target={} )
+  @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token" )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -1647,7 +1650,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.requestedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requested", path="CommunicationRequest.requestedOn", description="When ordered or proposed", type="date", target={} )
+  @SearchParamDefinition(name="requested", path="CommunicationRequest.requestedOn", description="When ordered or proposed", type="date" )
   public static final String SP_REQUESTED = "requested";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requested</b>
@@ -1667,7 +1670,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.sender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_SENDER = "sender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sender</b>
@@ -1693,7 +1696,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1719,7 +1722,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="CommunicationRequest.recipient", description="Message recipient", type="reference", target={Practitioner.class, Group.class, Organization.class, CareTeam.class, Device.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="recipient", path="CommunicationRequest.recipient", description="Message recipient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1745,7 +1748,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.scheduledDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="time", path="CommunicationRequest.scheduled.as(DateTime)", description="When scheduled", type="date", target={} )
+  @SearchParamDefinition(name="time", path="CommunicationRequest.scheduled.as(DateTime)", description="When scheduled", type="date" )
   public static final String SP_TIME = "time";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>time</b>
@@ -1765,7 +1768,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token", target={} )
+  @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1785,7 +1788,7 @@ public class CommunicationRequest extends DomainResource {
    * Path: <b>CommunicationRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="CommunicationRequest.status", description="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed", type="token", target={} )
+  @SearchParamDefinition(name="status", path="CommunicationRequest.status", description="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -803,7 +803,7 @@ public class DeviceUseStatement extends DomainResource {
    * Path: <b>DeviceUseStatement.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DeviceUseStatement.subject", description="Search by subject", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="DeviceUseStatement.subject", description="Search by subject", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -829,7 +829,7 @@ public class DeviceUseStatement extends DomainResource {
    * Path: <b>DeviceUseStatement.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DeviceUseStatement.subject", description="Search by subject - a patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="DeviceUseStatement.subject", description="Search by subject - a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -855,7 +855,7 @@ public class DeviceUseStatement extends DomainResource {
    * Path: <b>DeviceUseStatement.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="DeviceUseStatement.device", description="Search by device", type="reference", target={Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="device", path="DeviceUseStatement.device", description="Search by device", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>

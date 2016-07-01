@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -161,6 +161,7 @@ public class ClinicalImpression extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="A name/code for the set", formalDefinition="A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/investigation-sets")
         protected CodeableConcept code;
 
         /**
@@ -392,6 +393,7 @@ public class ClinicalImpression extends DomainResource {
          */
         @Child(name = "item", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Specific text or code for finding", formalDefinition="Specific text of code for finding or diagnosis." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
         protected CodeableConcept item;
 
         /**
@@ -600,6 +602,7 @@ public class ClinicalImpression extends DomainResource {
          */
         @Child(name = "item", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Specific text of code for diagnosis", formalDefinition="Specific text of code for diagnosis." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
         protected CodeableConcept item;
 
         /**
@@ -830,6 +833,7 @@ public class ClinicalImpression extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="in-progress | completed | entered-in-error", formalDefinition="Identifies the workflow status of the assessment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-impression-status")
     protected Enumeration<ClinicalImpressionStatus> status;
 
     /**
@@ -875,6 +879,7 @@ public class ClinicalImpression extends DomainResource {
      */
     @Child(name = "trigger", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Request or event that necessitated this assessment", formalDefinition="The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-findings")
     protected Type trigger;
 
     /**
@@ -910,6 +915,7 @@ public class ClinicalImpression extends DomainResource {
      */
     @Child(name = "resolved", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Diagnoses/conditions resolved since previous assessment", formalDefinition="Diagnoses/conditions resolved since the last assessment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
     protected List<CodeableConcept> resolved;
 
     /**
@@ -2177,7 +2183,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date", target={} )
+  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2197,7 +2203,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.previous</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference", target={ClinicalImpression.class} )
+  @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference" )
   public static final String SP_PREVIOUS = "previous";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>previous</b>
@@ -2223,7 +2229,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.assessor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ASSESSOR = "assessor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>assessor</b>
@@ -2275,7 +2281,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.finding.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token", target={} )
+  @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token" )
   public static final String SP_FINDING = "finding";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>finding</b>
@@ -2295,7 +2301,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.ruledOut.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token", target={} )
+  @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
   public static final String SP_RULEDOUT = "ruledout";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ruledout</b>
@@ -2315,7 +2321,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.problem</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference", target={Condition.class, AllergyIntolerance.class} )
+  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference" )
   public static final String SP_PROBLEM = "problem";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>problem</b>
@@ -2341,7 +2347,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2367,7 +2373,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.investigations.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference", target={FamilyMemberHistory.class, Observation.class, DiagnosticReport.class, QuestionnaireResponse.class} )
+  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference" )
   public static final String SP_INVESTIGATION = "investigation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>investigation</b>
@@ -2393,7 +2399,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference", target={Appointment.class, ReferralRequest.class, NutritionOrder.class, ProcedureRequest.class, Procedure.class, DiagnosticOrder.class, MedicationOrder.class, SupplyRequest.class} )
+  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference" )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
@@ -2419,7 +2425,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.triggerCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.trigger.as(CodeableConcept)", description="Request or event that necessitated this assessment", type="token", target={} )
+  @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.trigger.as(CodeableConcept)", description="Request or event that necessitated this assessment", type="token" )
   public static final String SP_TRIGGER_CODE = "trigger-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>trigger-code</b>
@@ -2439,7 +2445,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.plan</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference", target={Appointment.class, Order.class, ReferralRequest.class, ProcessRequest.class, VisionPrescription.class, DiagnosticOrder.class, ProcedureRequest.class, DeviceUseRequest.class, SupplyRequest.class, CarePlan.class, NutritionOrder.class, MedicationOrder.class, CommunicationRequest.class} )
+  @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference" )
   public static final String SP_PLAN = "plan";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>plan</b>
@@ -2465,7 +2471,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.resolved</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnoses/conditions resolved since previous assessment", type="token", target={} )
+  @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnoses/conditions resolved since previous assessment", type="token" )
   public static final String SP_RESOLVED = "resolved";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>resolved</b>
@@ -2485,7 +2491,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

@@ -29,13 +29,13 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.DiagnosticOrder;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Immunization;
 import org.hl7.fhir.dstu3.model.Location;
@@ -74,8 +74,6 @@ import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -98,7 +96,6 @@ import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unchecked")
@@ -291,10 +288,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	@Test
 	public void testIndexNoDuplicatesUri() {
 		ConceptMap res = new ConceptMap();
-		res.addElement().addTarget().addDependsOn().setElement("http://foo");
-		res.addElement().addTarget().addDependsOn().setElement("http://foo");
-		res.addElement().addTarget().addDependsOn().setElement("http://bar");
-		res.addElement().addTarget().addDependsOn().setElement("http://bar");
+		res.addGroup().setSource("http://foo");
+		res.addGroup().setSource("http://foo");
+		res.addGroup().setSource("http://bar");
+		res.addGroup().setSource("http://bar");
 		
 		IIdType id = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 		

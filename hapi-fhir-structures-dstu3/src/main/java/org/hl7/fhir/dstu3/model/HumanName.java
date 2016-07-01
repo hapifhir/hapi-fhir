@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -222,6 +222,7 @@ public class HumanName extends Type implements ICompositeType {
      */
     @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="usual | official | temp | nickname | anonymous | old | maiden", formalDefinition="Identifies the purpose for this name." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/name-use")
     protected Enumeration<NameUse> use;
 
     /**

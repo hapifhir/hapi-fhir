@@ -1,5 +1,7 @@
 package ca.uhn.fhir.context;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -45,18 +47,17 @@ import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.model.api.annotation.Binding;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -245,14 +246,17 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			String elementName = childAnnotation.name();
 			int order = childAnnotation.order();
 			boolean childIsChoiceType = false;
+			boolean orderIsReplaceParent = false;
+			
 			if (order == Child.REPLACE_PARENT) {
-
+				
 				if (extensionAttr != null) {
 
 					for (Entry<Integer, BaseRuntimeDeclaredChildDefinition> nextEntry : orderMap.entrySet()) {
 						BaseRuntimeDeclaredChildDefinition nextDef = nextEntry.getValue();
 						if (nextDef instanceof RuntimeChildDeclaredExtensionDefinition) {
 							if (nextDef.getExtensionUrl().equals(extensionAttr.url())) {
+								orderIsReplaceParent = true;
 								order = nextEntry.getKey();
 								orderMap.remove(nextEntry.getKey());
 								elementNames.remove(elementName);
@@ -270,6 +274,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					for (Entry<Integer, BaseRuntimeDeclaredChildDefinition> nextEntry : orderMap.entrySet()) {
 						BaseRuntimeDeclaredChildDefinition nextDef = nextEntry.getValue();
 						if (elementName.equals(nextDef.getElementName())) {
+							orderIsReplaceParent = true;
 							order = nextEntry.getKey();
 							BaseRuntimeDeclaredChildDefinition existing = orderMap.remove(nextEntry.getKey());
 							elementNames.remove(elementName);
@@ -297,7 +302,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			if (order < 0 && order != Child.ORDER_UNKNOWN) {
 				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
 			}
-			if (order != Child.ORDER_UNKNOWN) {
+			
+			if (order != Child.ORDER_UNKNOWN && !orderIsReplaceParent) {
 				order = order + baseElementOrder;
 			}
 			// int min = childAnnotation.min();
@@ -328,32 +334,25 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 
 			Class<?> nextElementType = ModelScanner.determineElementType(next);
 
+			BaseRuntimeDeclaredChildDefinition def;
 			if (childAnnotation.name().equals("extension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
-				RuntimeChildExtension def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
-				orderMap.put(order, def);
+				def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
 			} else if (childAnnotation.name().equals("modifierExtension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
-				RuntimeChildExtension def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
-				orderMap.put(order, def);
+				def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
 			} else if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IBaseResource.class.isAssignableFrom(nextElementType))) {
 				/*
 				 * Child is contained resources
 				 */
-				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
-				orderMap.put(order, def);
-
+				def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
 			} else if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
 				/*
 				 * Child is a resource as a direct child, as in Bundle.entry.resource
 				 */
-				RuntimeChildDirectResource def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
-				orderMap.put(order, def);
-
+				def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
 			} else {
 				childIsChoiceType |= choiceTypes.size() > 1;
 				if (childIsChoiceType && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
-					RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
-					orderMap.put(order, def);
-
+					def = new RuntimeChildChoiceDefinition(next, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
 				} else if (extensionAttr != null) {
 					/*
 					 * Child is an extension
@@ -365,14 +364,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						binder = ModelScanner.getBoundCodeBinder(next);
 					}
 
-					RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et,
-							binder);
+					def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et,							binder);
 
 					if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-						def.setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next));
+						((RuntimeChildDeclaredExtensionDefinition)def).setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next));
 					}
-
-					orderMap.put(order, def);
 				} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || IBaseReference.class.isAssignableFrom(nextElementType)) {
 					/*
 					 * Child is a resource reference
@@ -387,8 +383,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						}
 						refTypesList.add((Class<? extends IBaseResource>) nextType);
 					}
-					RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
-					orderMap.put(order, def);
+					def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
 
 				} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBaseBackboneElement.class.isAssignableFrom(nextElementType)
 						|| IBaseDatatypeElement.class.isAssignableFrom(nextElementType)) {
@@ -397,20 +392,15 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					 */
 
 					Class<? extends IBase> blockDef = (Class<? extends IBase>) nextElementType;
-					RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(myContext, next, childAnnotation, descriptionAnnotation, elementName, blockDef);
-					orderMap.put(order, def);
-
+					def = new RuntimeChildResourceBlockDefinition(myContext, next, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "Type".equals(nextElementType.getSimpleName())
 						|| IBaseDatatype.class.equals(nextElementType)) {
 
-					RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
-					orderMap.put(order, def);
-
+					def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				} else if (IDatatype.class.isAssignableFrom(nextElementType) || IPrimitiveType.class.isAssignableFrom(nextElementType) || ICompositeType.class.isAssignableFrom(nextElementType)
 						|| IBaseDatatype.class.isAssignableFrom(nextElementType) || IBaseExtension.class.isAssignableFrom(nextElementType)) {
 					Class<? extends IBase> nextDatatype = (Class<? extends IBase>) nextElementType;
 
-					BaseRuntimeChildDatatypeDefinition def;
 					if (IPrimitiveType.class.isAssignableFrom(nextElementType)) {
 						if (nextElementType.equals(BoundCodeDt.class)) {
 							IValueSetEnumBinder<Enum<?>> binder = ModelScanner.getBoundCodeBinder(next);
@@ -434,13 +424,20 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						}
 					}
 
-					orderMap.put(order, def);
-
 				} else {
 					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a valid child type: " + nextElementType);
 				}
+
+				Binding bindingAnnotation = ModelScanner.pullAnnotation(next, Binding.class);
+				if (bindingAnnotation != null) {
+					if (isNotBlank(bindingAnnotation.valueSet())) {
+						def.setBindingValueSet(bindingAnnotation.valueSet());
+					}
+				}
+				
 			}
 
+			orderMap.put(order, def);
 			elementNames.add(elementName);
 		}
 	}

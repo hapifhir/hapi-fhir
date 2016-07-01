@@ -10,10 +10,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Claim;
 import org.hl7.fhir.dstu3.model.Claim.CoverageComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -23,7 +23,10 @@ import org.hl7.fhir.dstu3.model.Practitioner.PractitionerPractitionerRoleCompone
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ModelDstu3Test {
@@ -37,6 +40,17 @@ public class ModelDstu3Test {
 	public void testSetters() {
 		Claim claim = new Claim();
 		claim.setIdentifier(new ArrayList<Identifier>()).setCoverage(new ArrayList<CoverageComponent>());
+	}
+
+	@Test
+	public void testModelBindings() {
+		FhirTerser t = ourCtx.newTerser();
+		RuntimeResourceDefinition def = ourCtx.getResourceDefinition(Patient.class);
+		assertEquals("http://hl7.org/fhir/ValueSet/administrative-gender", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("gender")).getBindingValueSet());
+		assertEquals("http://hl7.org/fhir/ValueSet/link-type", ((BaseRuntimeDeclaredChildDefinition)t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet());
+
+		def = ourCtx.getResourceDefinition(Appointment.class);
+		assertEquals("http://hl7.org/fhir/ValueSet/appointmentstatus", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("status")).getBindingValueSet());
 	}
 
 	/**

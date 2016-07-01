@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -216,6 +216,7 @@ public class MedicationStatement extends DomainResource {
          */
         @Child(name = "additionalInstructions", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Supplemental instructions - e.g. \"with meals\"", formalDefinition="Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/additional-instructions-codes")
         protected List<CodeableConcept> additionalInstructions;
 
         /**
@@ -232,6 +233,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
          */
         @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Take \"as needed\" (for x)", formalDefinition="Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  \n\nSpecifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-as-needed-reason")
         protected Type asNeeded;
 
         /**
@@ -239,6 +241,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
          */
         @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Where (on body) medication is/was administered", formalDefinition="A coded specification of or a reference to the anatomic site where the medication first enters the body." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/approach-site-codes")
         protected Type site;
 
         /**
@@ -246,6 +249,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
          */
         @Child(name = "route", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="How the medication entered the body", formalDefinition="A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/route-codes")
         protected CodeableConcept route;
 
         /**
@@ -253,6 +257,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
          */
         @Child(name = "method", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Technique used to administer medication", formalDefinition="A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  For example, Slow Push, Deep IV." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/administration-method-codes")
         protected CodeableConcept method;
 
         /**
@@ -929,6 +934,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | completed | entered-in-error | intended | stopped | on-hold", formalDefinition="A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-statement-status")
     protected Enumeration<MedicationStatementStatus> status;
 
     /**
@@ -936,6 +942,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
      */
     @Child(name = "medication", type = {CodeableConcept.class, Medication.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What medication was taken", formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-codes")
     protected Type medication;
 
     /**
@@ -1007,6 +1014,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
      */
     @Child(name = "reasonForUseCode", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reason for why the medication is being/was taken", formalDefinition="A reason for why the medication is being/was taken." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
     protected List<CodeableConcept> reasonForUseCode;
 
     /**
@@ -2077,7 +2085,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2097,7 +2105,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="effective", path="MedicationStatement.effective", description="Date when patient was taking (or not taking) the medication", type="date", target={} )
+  @SearchParamDefinition(name="effective", path="MedicationStatement.effective", description="Date when patient was taking (or not taking) the medication", type="date" )
   public static final String SP_EFFECTIVE = "effective";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>effective</b>
@@ -2117,7 +2125,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token", target={} )
+  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2137,7 +2145,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2163,7 +2171,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class} )
+  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return administrations of this medication reference", type="reference" )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -2189,7 +2197,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.informationSource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -2215,7 +2223,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
    * Path: <b>MedicationStatement.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token", target={} )
+  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

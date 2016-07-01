@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -453,6 +453,7 @@ public class DocumentManifest extends DomainResource {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of document set", formalDefinition="Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-doc-typecodes")
     protected CodeableConcept type;
 
     /**
@@ -486,6 +487,7 @@ public class DocumentManifest extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=8, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="current | superseded | entered-in-error", formalDefinition="The status of this document manifest." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/document-reference-status")
     protected Enumeration<DocumentReferenceStatus> status;
 
     /**
@@ -1356,7 +1358,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.masterIdentifier, DocumentManifest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1376,7 +1378,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.related.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token", target={} )
+  @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token" )
   public static final String SP_RELATED_ID = "related-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related-id</b>
@@ -1422,7 +1424,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Practitioner.class, Group.class, Device.class, Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1448,7 +1450,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1474,7 +1476,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date", target={} )
+  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -1494,7 +1496,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string", target={} )
+  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
@@ -1514,7 +1516,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri", target={} )
+  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1534,7 +1536,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token", target={} )
+  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1580,7 +1582,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1606,7 +1608,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1632,7 +1634,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token", target={} )
+  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

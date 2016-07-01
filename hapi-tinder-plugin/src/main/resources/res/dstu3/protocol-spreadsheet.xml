@@ -3,6 +3,7 @@
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:o="urn:schemas-microsoft-com:office:office"
  xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"
  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
@@ -10,18 +11,22 @@
   <LastAuthor>Microsoft Office User</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2016-04-17T19:27:57Z</LastSaved>
-  <Version>14.00</Version>
+  <Version>16.00</Version>
  </DocumentProperties>
+ <CustomDocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <WorkbookGuid dt:dt="string">96602189-9e6c-4167-ad9b-9e7068e002eb</WorkbookGuid>
+ </CustomDocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>15915</WindowHeight>
-  <WindowWidth>28560</WindowWidth>
+  <WindowHeight>7950</WindowHeight>
+  <WindowWidth>19275</WindowWidth>
   <WindowTopX>0</WindowTopX>
-  <WindowTopY>465</WindowTopY>
+  <WindowTopY>0</WindowTopY>
   <TabRatio>737</TabRatio>
-  <ActiveSheet>2</ActiveSheet>
+  <ActiveSheet>1</ActiveSheet>
+  <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1951,14 +1956,14 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">ActivityDefinitionCategory</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ProtocolActivityDefinitionCategory</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">diet | drug | encounter | observation +</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">communication | diet | drug | encounter | observation | procedure | referral | supply | other</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">High-level categorization of the type of activity.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1986,7 +1991,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">ActivityDefinitionType</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ProtocolActivityDefinitionType</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2021,7 +2026,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">ActivityTiming</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ProtocolActivityTiming</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4028,11 +4033,11 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Zoom>200</Zoom>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>25</TopRowBottomPane>
+   <TopRowBottomPane>28</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4050,8 +4055,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>37</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>35</ActiveRow>
+     <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4567,7 +4572,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6695,11 +6699,11 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">ActivityDefinitionCategory</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">ProtocolActivityDefinitionCategory</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">High-level categorization of the type of activity in a protocol.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">#activity-definition-category</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">#protocol-activity-category</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6710,7 +6714,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">ActivityDefinitionType</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">ProtocolActivityDefinitionType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed type of planned activity; e.g. CBC</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">unbound</Data></Cell>
     <Cell ss:StyleID="s117"/>
@@ -6725,7 +6729,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">ActivityTiming</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">ProtocolActivityTiming</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Code describing the timing of an activity; e.g. BID, QD</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">unbound</Data></Cell>
     <Cell ss:StyleID="s117"/>
@@ -7102,8 +7106,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>8</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8384,7 +8388,7 @@
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
  </Worksheet>
- <Worksheet ss:Name="activity-definition-category">
+ <Worksheet ss:Name="protocol-activity-category">
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
    <Column ss:Width="80.25"/>
@@ -8424,19 +8428,30 @@
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font>       </ss:Data></Comment></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s138"><Data ss:Type="String">diet</Data></Cell>
-    <Cell ss:StyleID="s127"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s149"><Data ss:Type="String">To consume food of a specified nature</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">communication</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">To communicate with a participant in some way</Data></Cell>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s139"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s138"><Data ss:Type="String">diet</Data></Cell>
+    <Cell ss:StyleID="s127"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s114"/>
+    <Cell ss:StyleID="s149"/>
+    <Cell ss:StyleID="s149"/>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">To consume food of a specified nature</Data></Cell>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s141"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s140"><Data ss:Type="String">drug</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"/>
@@ -8447,18 +8462,18 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s140"><Data ss:Type="String">encounter</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">To meet or communicate with the patient (in-patient, out-patient, phone call, etc.)</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">To meet with the patient (in-patient, out-patient, etc.)</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s140"><Data ss:Type="String">observation</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">5</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"/>
@@ -8469,7 +8484,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s140"><Data ss:Type="String">procedure</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">6</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"/>
@@ -8478,9 +8493,20 @@
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="30">
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s140"><Data ss:Type="String">referral</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">7</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">To refer the patient to receive some service</Data></Cell>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s141"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"><Data ss:Type="String">supply</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">6</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">8</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"/>
@@ -8491,33 +8517,11 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"><Data ss:Type="String">other</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">7</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">9</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"><Data ss:Type="String">Some other form of action</Data></Cell>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s140"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s140"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -8981,11 +8985,12 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <TopRowVisible>3</TopRowVisible>
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>21</ActiveRow>
+     <ActiveCol>2</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

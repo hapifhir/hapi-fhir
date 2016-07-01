@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1173,6 +1173,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         @Child(name = "mode", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="match | include | outcome - why this is in the result set", formalDefinition="Why this entry is in the result set - whether it's included as a match or because of an _include requirement." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-entry-mode")
         protected Enumeration<SearchEntryMode> mode;
 
         /**
@@ -1415,6 +1416,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         @Child(name = "method", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="GET | POST | PUT | DELETE", formalDefinition="The HTTP verb for this entry in either a change history, or a transaction/ transaction response." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/http-verb")
         protected Enumeration<HTTPVerb> method;
 
         /**
@@ -2282,6 +2284,7 @@ public class Bundle extends Resource implements IBaseBundle {
      */
     @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", formalDefinition="Indicates the purpose of this bundle- how it was intended to be used." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/bundle-type")
     protected Enumeration<BundleType> type;
 
     /**
@@ -2759,7 +2762,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.entry.resource(0)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="composition", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference", target={Composition.class} )
+  @SearchParamDefinition(name="composition", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference" )
   public static final String SP_COMPOSITION = "composition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>composition</b>
@@ -2785,7 +2788,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2805,7 +2808,7 @@ public class Bundle extends Resource implements IBaseBundle {
    * Path: <b>Bundle.entry.resource(0)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="message", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference", target={MessageHeader.class} )
+  @SearchParamDefinition(name="message", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference" )
   public static final String SP_MESSAGE = "message";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>message</b>

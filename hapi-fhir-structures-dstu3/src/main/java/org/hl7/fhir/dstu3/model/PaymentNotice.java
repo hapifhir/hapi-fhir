@@ -29,10 +29,11 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
+import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
@@ -48,84 +49,217 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 @ResourceDef(name="PaymentNotice", profile="http://hl7.org/fhir/Profile/PaymentNotice")
 public class PaymentNotice extends DomainResource {
 
+    public enum PaymentNoticeStatus {
+        /**
+         * The resource instance is currently in-force.
+         */
+        ACTIVE, 
+        /**
+         * The resource instance is withdrawn, rescinded or reversed.
+         */
+        CANCELLED, 
+        /**
+         * A new resource instance the contents of which is not complete.
+         */
+        DRAFT, 
+        /**
+         * The resource instance was entered in error.
+         */
+        ENTEREDINERROR, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static PaymentNoticeStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown PaymentNoticeStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ACTIVE: return "active";
+            case CANCELLED: return "cancelled";
+            case DRAFT: return "draft";
+            case ENTEREDINERROR: return "entered-in-error";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ACTIVE: return "http://hl7.org/fhir/paymentnotice-status";
+            case CANCELLED: return "http://hl7.org/fhir/paymentnotice-status";
+            case DRAFT: return "http://hl7.org/fhir/paymentnotice-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/paymentnotice-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ACTIVE: return "The resource instance is currently in-force.";
+            case CANCELLED: return "The resource instance is withdrawn, rescinded or reversed.";
+            case DRAFT: return "A new resource instance the contents of which is not complete.";
+            case ENTEREDINERROR: return "The resource instance was entered in error.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ACTIVE: return "Active";
+            case CANCELLED: return "Cancelled";
+            case DRAFT: return "Draft";
+            case ENTEREDINERROR: return "Entered In Error";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PaymentNoticeStatusEnumFactory implements EnumFactory<PaymentNoticeStatus> {
+    public PaymentNoticeStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return PaymentNoticeStatus.ACTIVE;
+        if ("cancelled".equals(codeString))
+          return PaymentNoticeStatus.CANCELLED;
+        if ("draft".equals(codeString))
+          return PaymentNoticeStatus.DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return PaymentNoticeStatus.ENTEREDINERROR;
+        throw new IllegalArgumentException("Unknown PaymentNoticeStatus code '"+codeString+"'");
+        }
+        public Enumeration<PaymentNoticeStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<PaymentNoticeStatus>(this, PaymentNoticeStatus.ACTIVE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<PaymentNoticeStatus>(this, PaymentNoticeStatus.CANCELLED);
+        if ("draft".equals(codeString))
+          return new Enumeration<PaymentNoticeStatus>(this, PaymentNoticeStatus.DRAFT);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<PaymentNoticeStatus>(this, PaymentNoticeStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown PaymentNoticeStatus code '"+codeString+"'");
+        }
+    public String toCode(PaymentNoticeStatus code) {
+      if (code == PaymentNoticeStatus.ACTIVE)
+        return "active";
+      if (code == PaymentNoticeStatus.CANCELLED)
+        return "cancelled";
+      if (code == PaymentNoticeStatus.DRAFT)
+        return "draft";
+      if (code == PaymentNoticeStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      return "?";
+      }
+    public String toSystem(PaymentNoticeStatus code) {
+      return code.getSystem();
+      }
+    }
+
     /**
      * The Response business identifier.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Business Identifier", formalDefinition="The Response business identifier." )
     protected List<Identifier> identifier;
 
     /**
+     * The status of the resource instance.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/paymentnotice-status")
+    protected Enumeration<PaymentNoticeStatus> status;
+
+    /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name = "ruleset", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "ruleset", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ruleset")
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name = "originalRuleset", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "originalRuleset", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ruleset")
     protected Coding originalRuleset;
 
     /**
      * The date when this resource was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "created", type = {DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
     protected DateTimeType created;
 
     /**
      * The Insurer who is target  of the request.
      */
-    @Child(name = "target", type = {Identifier.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "target", type = {Identifier.class, Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Insurer or Regulatory body", formalDefinition="The Insurer who is target  of the request." )
     protected Type target;
 
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "provider", type = {Identifier.class, Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "provider", type = {Identifier.class, Practitioner.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Type provider;
 
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Type organization;
 
     /**
      * Reference of resource to reverse.
      */
-    @Child(name = "request", type = {Identifier.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "request", type = {Identifier.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Request reference", formalDefinition="Reference of resource to reverse." )
     protected Type request;
 
     /**
      * Reference of response to resource to reverse.
      */
-    @Child(name = "response", type = {Identifier.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "response", type = {Identifier.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Response reference", formalDefinition="Reference of response to resource to reverse." )
     protected Type response;
 
     /**
      * The payment status, typically paid: payment sent, cleared: payment received.
      */
-    @Child(name = "paymentStatus", type = {Coding.class}, order=9, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "paymentStatus", type = {Coding.class}, order=10, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Status of the payment", formalDefinition="The payment status, typically paid: payment sent, cleared: payment received." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payment-status")
     protected Coding paymentStatus;
 
     /**
      * The date when the above payment action occurrred.
      */
-    @Child(name = "statusDate", type = {DateType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "statusDate", type = {DateType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Payment or clearing date", formalDefinition="The date when the above payment action occurrred." )
     protected DateType statusDate;
 
-    private static final long serialVersionUID = -771143315L;
+    private static final long serialVersionUID = 1561677330L;
 
   /**
    * Constructor
@@ -137,8 +271,9 @@ public class PaymentNotice extends DomainResource {
   /**
    * Constructor
    */
-    public PaymentNotice(Coding paymentStatus) {
+    public PaymentNotice(Enumeration<PaymentNoticeStatus> status, Coding paymentStatus) {
       super();
+      this.status = status;
       this.paymentStatus = paymentStatus;
     }
 
@@ -193,6 +328,51 @@ public class PaymentNotice extends DomainResource {
         addIdentifier();
       }
       return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<PaymentNoticeStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<PaymentNoticeStatus>(new PaymentNoticeStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public PaymentNotice setStatusElement(Enumeration<PaymentNoticeStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the resource instance.
+     */
+    public PaymentNoticeStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the resource instance.
+     */
+    public PaymentNotice setStatus(PaymentNoticeStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<PaymentNoticeStatus>(new PaymentNoticeStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
     }
 
     /**
@@ -593,6 +773,7 @@ public class PaymentNotice extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
         childrenList.add(new Property("created", "dateTime", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, created));
@@ -609,6 +790,7 @@ public class PaymentNotice extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PaymentNoticeStatus>
         case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
         case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
@@ -629,6 +811,9 @@ public class PaymentNotice extends DomainResource {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new PaymentNoticeStatusEnumFactory().fromType(value); // Enumeration<PaymentNoticeStatus>
           break;
         case 1548678118: // ruleset
           this.ruleset = castToCoding(value); // Coding
@@ -669,6 +854,8 @@ public class PaymentNotice extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new PaymentNoticeStatusEnumFactory().fromType(value); // Enumeration<PaymentNoticeStatus>
         else if (name.equals("ruleset"))
           this.ruleset = castToCoding(value); // Coding
         else if (name.equals("originalRuleset"))
@@ -697,6 +884,7 @@ public class PaymentNotice extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PaymentNoticeStatus>
         case 1548678118:  return getRuleset(); // Coding
         case 1089373397:  return getOriginalRuleset(); // Coding
         case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
@@ -716,6 +904,9 @@ public class PaymentNotice extends DomainResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
           return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentNotice.status");
         }
         else if (name.equals("ruleset")) {
           this.ruleset = new Coding();
@@ -792,6 +983,7 @@ public class PaymentNotice extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.status = status == null ? null : status.copy();
         dst.ruleset = ruleset == null ? null : ruleset.copy();
         dst.originalRuleset = originalRuleset == null ? null : originalRuleset.copy();
         dst.created = created == null ? null : created.copy();
@@ -816,11 +1008,11 @@ public class PaymentNotice extends DomainResource {
         if (!(other instanceof PaymentNotice))
           return false;
         PaymentNotice o = (PaymentNotice) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(ruleset, o.ruleset, true) && compareDeep(originalRuleset, o.originalRuleset, true)
-           && compareDeep(created, o.created, true) && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true)
-           && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true) && compareDeep(response, o.response, true)
-           && compareDeep(paymentStatus, o.paymentStatus, true) && compareDeep(statusDate, o.statusDate, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(ruleset, o.ruleset, true)
+           && compareDeep(originalRuleset, o.originalRuleset, true) && compareDeep(created, o.created, true)
+           && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true) && compareDeep(organization, o.organization, true)
+           && compareDeep(request, o.request, true) && compareDeep(response, o.response, true) && compareDeep(paymentStatus, o.paymentStatus, true)
+           && compareDeep(statusDate, o.statusDate, true);
       }
 
       @Override
@@ -830,13 +1022,14 @@ public class PaymentNotice extends DomainResource {
         if (!(other instanceof PaymentNotice))
           return false;
         PaymentNotice o = (PaymentNotice) other;
-        return compareValues(created, o.created, true) && compareValues(statusDate, o.statusDate, true);
+        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(statusDate, o.statusDate, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, ruleset, originalRuleset
-          , created, target, provider, organization, request, response, paymentStatus, statusDate
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, ruleset
+          , originalRuleset, created, target, provider, organization, request, response
+          , paymentStatus, statusDate);
       }
 
   @Override
@@ -852,7 +1045,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="PaymentNotice.identifier", description="The business identifier of the notice", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="PaymentNotice.identifier", description="The business identifier of the notice", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -872,7 +1065,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.responseIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responseidentifier", path="PaymentNotice.response.as(Identifier)", description="The ClaimResponse", type="token", target={} )
+  @SearchParamDefinition(name="responseidentifier", path="PaymentNotice.response.as(Identifier)", description="The ClaimResponse", type="token" )
   public static final String SP_RESPONSEIDENTIFIER = "responseidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responseidentifier</b>
@@ -892,7 +1085,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="PaymentNotice.organization.as(Identifier)", description="The organization who generated this resource", type="token", target={} )
+  @SearchParamDefinition(name="organizationidentifier", path="PaymentNotice.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
   public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
@@ -912,7 +1105,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="PaymentNotice.created", description="Creation date fro the notice", type="date", target={} )
+  @SearchParamDefinition(name="created", path="PaymentNotice.created", description="Creation date fro the notice", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -932,7 +1125,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestidentifier", path="PaymentNotice.request.as(Identifier)", description="The Claim", type="token", target={} )
+  @SearchParamDefinition(name="requestidentifier", path="PaymentNotice.request.as(Identifier)", description="The Claim", type="token" )
   public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
@@ -952,7 +1145,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.paymentStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="paymentstatus", path="PaymentNotice.paymentStatus", description="The type of payment notice", type="token", target={} )
+  @SearchParamDefinition(name="paymentstatus", path="PaymentNotice.paymentStatus", description="The type of payment notice", type="token" )
   public static final String SP_PAYMENTSTATUS = "paymentstatus";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>paymentstatus</b>
@@ -972,7 +1165,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="PaymentNotice.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organizationreference", path="PaymentNotice.organization.as(Reference)", description="The organization who generated this resource", type="reference" )
   public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
@@ -998,7 +1191,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.providerReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="providerreference", path="PaymentNotice.provider.as(Reference)", description="The reference to the provider", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="providerreference", path="PaymentNotice.provider.as(Reference)", description="The reference to the provider", type="reference" )
   public static final String SP_PROVIDERREFERENCE = "providerreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>providerreference</b>
@@ -1050,7 +1243,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.providerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provideridentifier", path="PaymentNotice.provider.as(Identifier)", description="The reference to the provider", type="token", target={} )
+  @SearchParamDefinition(name="provideridentifier", path="PaymentNotice.provider.as(Identifier)", description="The reference to the provider", type="token" )
   public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provideridentifier</b>
@@ -1096,7 +1289,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.statusDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="statusdate", path="PaymentNotice.statusDate", description="The date of the payment action", type="date", target={} )
+  @SearchParamDefinition(name="statusdate", path="PaymentNotice.statusDate", description="The date of the payment action", type="date" )
   public static final String SP_STATUSDATE = "statusdate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>statusdate</b>

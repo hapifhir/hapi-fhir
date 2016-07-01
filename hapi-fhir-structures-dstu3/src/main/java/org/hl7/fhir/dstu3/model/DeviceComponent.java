@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -593,6 +593,7 @@ public class DeviceComponent extends DomainResource {
      */
     @Child(name = "measurementPrinciple", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="other | chemical | electrical | impedance | nuclear | optical | thermal | biological | mechanical | acoustical | manual+", formalDefinition="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measurement-principle")
     protected Enumeration<MeasmntPrinciple> measurementPrinciple;
 
     /**
@@ -1245,7 +1246,7 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference", target={DeviceComponent.class} )
+  @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference" )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1271,7 +1272,7 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference", target={Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1297,7 +1298,7 @@ public class DeviceComponent extends DomainResource {
    * Path: <b>DeviceComponent.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token", target={} )
+  @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>

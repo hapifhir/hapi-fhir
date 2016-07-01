@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.audit;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
  * Copyright (C) 2014 - 2016 University Health Network
  * %%

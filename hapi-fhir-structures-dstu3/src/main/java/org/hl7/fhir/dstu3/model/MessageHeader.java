@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -169,6 +169,7 @@ public class MessageHeader extends DomainResource {
          */
         @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
         @Description(shortDefinition="ok | transient-error | fatal-error", formalDefinition="Code that identifies the type of response to the message - whether it was successful or not, and whether it should be resent or not." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/response-code")
         protected Enumeration<ResponseType> code;
 
         /**
@@ -1172,6 +1173,7 @@ public class MessageHeader extends DomainResource {
      */
     @Child(name = "event", type = {Coding.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="Code for the event this message represents", formalDefinition="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-events\"." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-events")
     protected Coding event;
 
     /**
@@ -1248,6 +1250,7 @@ public class MessageHeader extends DomainResource {
      */
     @Child(name = "reason", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Cause of event", formalDefinition="Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-reason-encounter")
     protected CodeableConcept reason;
 
     /**
@@ -1949,7 +1952,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.response.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MessageHeader.response.code", description="ok | transient-error | fatal-error", type="token", target={} )
+  @SearchParamDefinition(name="code", path="MessageHeader.response.code", description="ok | transient-error | fatal-error", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1995,7 +1998,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.receiver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended \"real-world\" recipient for the data", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended \"real-world\" recipient for the data", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECEIVER = "receiver";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
@@ -2021,7 +2024,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2047,7 +2050,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="destination", path="MessageHeader.destination.name", description="Name of system", type="string", target={} )
+  @SearchParamDefinition(name="destination", path="MessageHeader.destination.name", description="Name of system", type="string" )
   public static final String SP_DESTINATION = "destination";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>destination</b>
@@ -2067,7 +2070,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.source.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="MessageHeader.source.name", description="Name of system", type="string", target={} )
+  @SearchParamDefinition(name="source", path="MessageHeader.source.name", description="Name of system", type="string" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -2087,7 +2090,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.target</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference", target={Device.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
+  @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") } )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -2113,7 +2116,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="destination-uri", path="MessageHeader.destination.endpoint", description="Actual destination address or id", type="uri", target={} )
+  @SearchParamDefinition(name="destination-uri", path="MessageHeader.destination.endpoint", description="Actual destination address or id", type="uri" )
   public static final String SP_DESTINATION_URI = "destination-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>destination-uri</b>
@@ -2133,7 +2136,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.source.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-uri", path="MessageHeader.source.endpoint", description="Actual message source address or id", type="uri", target={} )
+  @SearchParamDefinition(name="source-uri", path="MessageHeader.source.endpoint", description="Actual message source address or id", type="uri" )
   public static final String SP_SOURCE_URI = "source-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-uri</b>
@@ -2153,7 +2156,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.responsible</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RESPONSIBLE = "responsible";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsible</b>
@@ -2179,7 +2182,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.response.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="response-id", path="MessageHeader.response.identifier", description="Id of original message", type="token", target={} )
+  @SearchParamDefinition(name="response-id", path="MessageHeader.response.identifier", description="Id of original message", type="token" )
   public static final String SP_RESPONSE_ID = "response-id";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>response-id</b>
@@ -2199,7 +2202,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.enterer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ENTERER = "enterer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>enterer</b>
@@ -2225,7 +2228,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.event</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event", path="MessageHeader.event", description="Code for the event this message represents", type="token", target={} )
+  @SearchParamDefinition(name="event", path="MessageHeader.event", description="Code for the event this message represents", type="token" )
   public static final String SP_EVENT = "event";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event</b>
@@ -2245,7 +2248,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.timestamp</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="timestamp", path="MessageHeader.timestamp", description="Time that the message was sent", type="date", target={} )
+  @SearchParamDefinition(name="timestamp", path="MessageHeader.timestamp", description="Time that the message was sent", type="date" )
   public static final String SP_TIMESTAMP = "timestamp";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>timestamp</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1040,6 +1040,7 @@ public class QuestionnaireResponse extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire response as a whole." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-answers-status")
     protected Enumeration<QuestionnaireResponseStatus> status;
 
     /**
@@ -1711,7 +1712,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date", target={} )
+  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authored</b>
@@ -1731,7 +1732,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.questionnaire</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference", target={Questionnaire.class} )
+  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
   public static final String SP_QUESTIONNAIRE = "questionnaire";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>questionnaire</b>
@@ -1783,7 +1784,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1809,7 +1810,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1835,7 +1836,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1861,7 +1862,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1887,7 +1888,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token", target={} )
+  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

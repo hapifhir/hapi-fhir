@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -166,6 +166,7 @@ public class Media extends DomainResource {
      */
     @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="photo | video | audio", formalDefinition="Whether the media is a photo (still image), an audio recording, or a video recording." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/digital-media-type")
     protected Enumeration<DigitalMediaType> type;
 
     /**
@@ -173,6 +174,7 @@ public class Media extends DomainResource {
      */
     @Child(name = "subtype", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The type of acquisition equipment/process", formalDefinition="Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/digital-media-subtype")
     protected CodeableConcept subtype;
 
     /**
@@ -180,6 +182,7 @@ public class Media extends DomainResource {
      */
     @Child(name = "view", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Imaging view, e.g. Lateral or Antero-posterior", formalDefinition="The name of the imaging view e.g. Lateral or Antero-posterior (AP)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/media-view")
     protected CodeableConcept view;
 
     /**
@@ -1001,7 +1004,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1021,7 +1024,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.view</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="view", path="Media.view", description="Imaging view, e.g. Lateral or Antero-posterior", type="token", target={} )
+  @SearchParamDefinition(name="view", path="Media.view", description="Imaging view, e.g. Lateral or Antero-posterior", type="token" )
   public static final String SP_VIEW = "view";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>view</b>
@@ -1041,7 +1044,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.subtype</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token", target={} )
+  @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token" )
   public static final String SP_SUBTYPE = "subtype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subtype</b>
@@ -1061,7 +1064,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.content.creation</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="Media.content.creation", description="Date attachment was first created", type="date", target={} )
+  @SearchParamDefinition(name="created", path="Media.content.creation", description="Date attachment was first created", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -1081,7 +1084,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference", target={Practitioner.class, Group.class, Specimen.class, Device.class, Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1107,7 +1110,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1133,7 +1136,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Media.type", description="photo | video | audio", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Media.type", description="photo | video | audio", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1153,7 +1156,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.operator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference", target={Practitioner.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_OPERATOR = "operator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>operator</b>

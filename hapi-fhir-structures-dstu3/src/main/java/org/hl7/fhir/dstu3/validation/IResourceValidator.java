@@ -3,7 +3,7 @@ package org.hl7.fhir.dstu3.validation;
 import java.io.InputStream;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.metamodel.Manager.FhirFormat;
+import org.hl7.fhir.dstu3.elementmodel.Manager.FhirFormat;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.w3c.dom.Document;
 
@@ -74,22 +74,22 @@ public interface IResourceValidator {
    * a Json Object 
    * 
    */
-  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.metamodel.Element element) throws Exception;
-  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.metamodel.Element element, String profile) throws Exception;
-  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.metamodel.Element element, StructureDefinition profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format, String profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format, StructureDefinition profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource, String profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource, StructureDefinition profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Element element) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Element element, String profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Element element, StructureDefinition profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Document document) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Document document, String profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Document document, StructureDefinition profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, JsonObject object) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, JsonObject object, String profile) throws Exception;
-  org.hl7.fhir.dstu3.metamodel.Element validate(List<ValidationMessage> errors, JsonObject object, StructureDefinition profile) throws Exception; 
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.elementmodel.Element element) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.elementmodel.Element element, String profile) throws Exception;
+  void validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.elementmodel.Element element, StructureDefinition profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format, String profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, InputStream stream, FhirFormat format, StructureDefinition profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource, String profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.hl7.fhir.dstu3.model.Resource resource, StructureDefinition profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Element element) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Element element, String profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Element element, StructureDefinition profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Document document) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Document document, String profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, org.w3c.dom.Document document, StructureDefinition profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, JsonObject object) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, JsonObject object, String profile) throws Exception;
+  org.hl7.fhir.dstu3.elementmodel.Element validate(List<ValidationMessage> errors, JsonObject object, StructureDefinition profile) throws Exception; 
 }

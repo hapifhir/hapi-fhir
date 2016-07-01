@@ -6,19 +6,19 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Microsoft Office User</LastAuthor>
+  <LastAuthor>Eric Haas</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-05-26T07:07:09Z</LastSaved>
+  <LastSaved>2016-06-01T03:52:30Z</LastSaved>
   <Version>15.0</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>18000</WindowHeight>
+  <WindowHeight>16000</WindowHeight>
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
-  <WindowTopY>0</WindowTopY>
+  <WindowTopY>460</WindowTopY>
   <TabRatio>663</TabRatio>
   <ActiveSheet>4</ActiveSheet>
   <FirstVisibleSheet>4</FirstVisibleSheet>
@@ -985,8 +985,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Print>
-   </Print>
    <PageLayoutZoom>0</PageLayoutZoom>
    <Panes>
     <Pane>
@@ -997,6 +995,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
@@ -5597,7 +5596,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Operations!R1C1:R2C9"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="52" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="52" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s115" ss:DefaultColumnWidth="65"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="131"/>
@@ -5649,6 +5648,8 @@
         html:Size="8" html:Color="#000000"
         xmlns="http://www.w3.org/TR/REC-html40">Additional usage notes for an operation</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">Example.Request</Data></Cell>
+    <Cell><Data ss:Type="String">Example.Response</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s117"><Data ss:Type="String">stats</Data><NamedCell
@@ -5664,8 +5665,9 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s145"><Data ss:Type="String">The Statistics operation performs a set of statistical calculations on a set of clinical measurements such as a blood pressure.  This operation is limited to [Observation](observation.html) resources with valueQuantity elements.&#13;&#13;The set of Observations is defined by a the input parameters `patient`,`code` and `duration` and `params`. The set of statistical calculation depends upon the value of the `params` parameter:&#13;&#13;- **average** - for example if code = 55284-4 the mean of 55284-4 over the stated period from an operation&#13;- **max** - for example if code = 55284-4 the max of 55284-4 over the stated period from an operation&#13;- **min** - for example if code = 55284-4 the min of 55284-4 over the stated period from an operation&#13;- **count** - for example if code = 55284-4 the number of occurances of value x of 55284-4 over the stated period from an operation&#13;&#13;If successful, the operation returns an Observation resource with the results of the statistical calculations as component value pairs where the component code = the params code. The Observation also contains the the input parameters `patient`,`code` and `duration` parameters. If unsuccessful, an [OperationOutcome](operationoutcome.html) with an error message will be returned.&#13;&#13;</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Example:&#13;&#13;- patient resource id = 123&#13;- code = 55284-4 = 'Blood pressure systolic and diastolic'&#13;- duration = last hour&#13;&#13;for the following data:&#13;&#13;1. 107 mmHg/60 mmHg&#13;2. 121 mmHg/56 mmHg&#13;3. 125 mmHg/62 mmHg&#13;4. 140 mmHg/80 mmHg&#13;5. 145 mmHg/90 mmHg&#13;6. 165 mmHg/100 mmHg&#13;7. 180 mmHg/110 mmHg&#13;&#13;The FHIR API:&#13;&#13;`GET [base]/Observation/$stats?patient=13&amp;code=55284-4&amp;duration=1&amp;params=average,min,max,count`&#13;&#13;will produce this Bundle containing 2 Observation resources:&#13;&#13;     {&#13;       &quot;resourceType&quot; : &quot;Bundle&quot;,&#13;       &quot;type&quot; : &quot;searchset&quot;,&#13;       &quot;total&quot; : 2,&#13;       &quot;entry&quot; : [&#13;      {&#13;        &quot;fullUrl&quot; : &quot;https://example.com/base/Observation/????&quot;,&#13;        &quot;resource&quot; : {&#13;       &quot;resourceType&quot; : &quot;Observation&quot;,&#13;       &quot;id&quot; : &quot;stats-diastolic&quot;,&#13;       &quot;identifier&quot; : [&#13;         {&#13;        &quot;system&quot; : &quot;urn:ietf:rfc:3986&quot;,&#13;        &quot;value&quot; : &quot;urn:uuid:187e0c12-8dd2-67e2-99b2-bf273c878281&quot;&#13;         }&#13;       ],&#13;       &quot;status&quot; : &quot;final&quot;,&#13;       &quot;category&quot; : {&#13;         &quot;coding&quot; : [&#13;        {&#13;          &quot;system&quot; : &quot;http://hl7.org/fhir/observation-category&quot;,&#13;          &quot;code&quot; : &quot;vital-signs&quot;,&#13;          &quot;display&quot; : &quot;Vital Signs&quot;&#13;        }&#13;         ]&#13;       },&#13;       &quot;code&quot; : {&#13;         &quot;coding&quot; : [&#13;        {&#13;          &quot;system&quot; : &quot;http://loinc.org&quot;,&#13;          &quot;code&quot; : &quot;8462-4&quot;,&#13;          &quot;display&quot; : &quot;Diastolic blood pressure&quot;&#13;        }&#13;         ]&#13;       },&#13;       &quot;subject&quot; : {&#13;         &quot;reference&quot; : &quot;Patient/123&quot;&#13;       },&#13;       &quot;effectivePeriod&quot; : {&#13;         &quot;start&quot; : &quot;2016-05-25T19:26:16Z&quot;,&#13;         &quot;end&quot; : &quot;2016-05-25T20:26:16Z&quot;&#13;       },&#13;       &quot;component&quot; : [&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;average&quot;,&#13;           &quot;display&quot; : &quot;Average&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 79.7,&#13;          &quot;unit&quot; : &quot;mmHg&quot;,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;mm[Hg]&quot;&#13;        }&#13;         },&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;max&quot;,&#13;           &quot;display&quot; : &quot;Maximum&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 110,&#13;          &quot;unit&quot; : &quot;mmHg&quot;,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;mm[Hg]&quot;&#13;        }&#13;         },&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;min&quot;,&#13;           &quot;display&quot; : &quot;Minimum&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 56,&#13;          &quot;unit&quot; : &quot;mmHg&quot;,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;mm[Hg]&quot;&#13;        }&#13;         },&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;min&quot;,&#13;           &quot;display&quot; : &quot;Minimum&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 7,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;{observations}&quot;&#13;        }&#13;         }&#13;       ]&#13;        },&#13;        &quot;search&quot; : {&#13;       &quot;mode&quot; : &quot;match&quot;&#13;        }&#13;      },&#13;      {&#13;        &quot;resource&quot; : {&#13;       &quot;resourceType&quot; : &quot;Observation&quot;,&#13;       &quot;id&quot; : &quot;stats-diastolic&quot;,&#13;       &quot;identifier&quot; : [&#13;         {&#13;        &quot;system&quot; : &quot;urn:ietf:rfc:3986&quot;,&#13;        &quot;value&quot; : &quot;urn:uuid:187e0c12-8dd2-67e2-99b2-bf273c878281&quot;&#13;         }&#13;       ],&#13;       &quot;status&quot; : &quot;final&quot;,&#13;       &quot;category&quot; : {&#13;         &quot;coding&quot; : [&#13;        {&#13;          &quot;system&quot; : &quot;http://hl7.org/fhir/observation-category&quot;,&#13;          &quot;code&quot; : &quot;vital-signs&quot;,&#13;          &quot;display&quot; : &quot;Vital Signs&quot;&#13;        }&#13;         ]&#13;       },&#13;       &quot;code&quot; : {&#13;         &quot;coding&quot; : [&#13;        {&#13;          &quot;system&quot; : &quot;http://loinc.org&quot;,&#13;          &quot;code&quot; : &quot;8462-4&quot;,&#13;          &quot;display&quot; : &quot;Diastolic blood pressure&quot;&#13;        }&#13;         ]&#13;       },&#13;       &quot;subject&quot; : {&#13;         &quot;reference&quot; : &quot;Patient/123&quot;&#13;       },&#13;       &quot;effectivePeriod&quot; : {&#13;         &quot;start&quot; : &quot;2016-05-25T19:26:16Z&quot;,&#13;         &quot;end&quot; : &quot;2016-05-25T20:26:16Z&quot;&#13;       },&#13;       &quot;component&quot; : [&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;average&quot;,&#13;           &quot;display&quot; : &quot;Average&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 79.7,&#13;          &quot;unit&quot; : &quot;mmHg&quot;,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;mm[Hg]&quot;&#13;        }&#13;         },&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;max&quot;,&#13;           &quot;display&quot; : &quot;Maximum&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 110,&#13;          &quot;unit&quot; : &quot;mmHg&quot;,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;mm[Hg]&quot;&#13;        }&#13;         },&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;min&quot;,&#13;           &quot;display&quot; : &quot;Minimum&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 56,&#13;          &quot;unit&quot; : &quot;mmHg&quot;,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;mm[Hg]&quot;&#13;        }&#13;         },&#13;         {&#13;        &quot;code&quot; : {&#13;          &quot;coding&quot; : [&#13;         {&#13;           &quot;system&quot; : &quot;http://hl7.org/fhir/observation-paramcode&quot;,&#13;           &quot;code&quot; : &quot;min&quot;,&#13;           &quot;display&quot; : &quot;Minimum&quot;&#13;         }&#13;          ]&#13;        },&#13;        &quot;valueQuantity&quot; : {&#13;          &quot;value&quot; : 7,&#13;          &quot;system&quot; : &quot;http://unitsofmeasure.org&quot;,&#13;          &quot;code&quot; : &quot;{observations}&quot;&#13;        }&#13;         }&#13;       ]&#13;        },&#13;        &quot;search&quot; : {&#13;       &quot;mode&quot; : &quot;match&quot;&#13;        }&#13;      }&#13;       ]&#13;     }&#13;</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s146"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">$stats-request.txt</Data></Cell>
+    <Cell><Data ss:Type="String">$stats-response.txt</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s125"><Data ss:Type="String">stats.patient</Data></Cell>
@@ -6226,7 +6228,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>4</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -6234,13 +6236,15 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>8</ActiveCol>
+     <ActiveRow>7</ActiveRow>
+     <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8939,6 +8943,7 @@
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -9572,6 +9577,7 @@
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -10189,6 +10195,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:Print>    </x:Print>
   </WorksheetOptions>
  </Worksheet>
  <Worksheet ss:Name="some-code-list">
@@ -10828,6 +10835,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>

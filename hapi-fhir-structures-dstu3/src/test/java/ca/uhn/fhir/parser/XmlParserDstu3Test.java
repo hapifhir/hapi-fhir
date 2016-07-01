@@ -34,7 +34,6 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
@@ -77,7 +76,6 @@ import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationOrder;
 import org.hl7.fhir.dstu3.model.MedicationStatement;
-import org.hl7.fhir.dstu3.model.MessageHeader.MessageSourceComponent;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationRelationshipType;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -107,6 +105,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.parser.FooMessageHeaderWithExplicitField.FooMessageSourceComponent;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
@@ -1407,6 +1406,8 @@ public class XmlParserDstu3Test {
 		FooMessageHeader header = new FooMessageHeader();
 		header.setSource(source);
 		
+		header.addDestination().setName("DEST");
+		
 		Bundle bundle = new Bundle();
 		bundle.addEntry().setResource(header);
 		
@@ -1417,6 +1418,31 @@ public class XmlParserDstu3Test {
       ourLog.info(encode);
       
       assertThat(encode, containsString("<value value=\"APPID\"/>"));
+      assertThat(encode, stringContainsInOrder("<source", "<dest"));
+	}
+
+	@Test
+	public void testEncodeDeclaredBlock() throws Exception {
+		FooMessageSourceComponent source = new FooMessageHeaderWithExplicitField.FooMessageSourceComponent();
+		source.getMessageHeaderApplicationId().setValue("APPID");
+		source.setName("NAME");
+		
+		FooMessageHeaderWithExplicitField header = new FooMessageHeaderWithExplicitField();
+		header.setSourceNew(source);
+		
+		header.addDestination().setName("DEST");
+		
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(header);
+		
+      IParser p = ourCtx.newXmlParser();
+      p.setPrettyPrint(true);
+
+      String encode = p.encodeResourceToString(bundle);
+      ourLog.info(encode);
+      
+      assertThat(encode, containsString("<value value=\"APPID\"/>"));
+      assertThat(encode, stringContainsInOrder("<source", "<dest"));
 	}
 
 	@Test

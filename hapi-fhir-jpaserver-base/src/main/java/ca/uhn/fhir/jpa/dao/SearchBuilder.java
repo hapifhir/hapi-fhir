@@ -71,6 +71,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -1379,8 +1381,10 @@ public class SearchBuilder {
 		if (modifier == TokenParamModifier.IN) {
 			codes = myTerminologySvc.expandValueSet(code);
 		} else if (modifier == TokenParamModifier.ABOVE) {
+			system = determineSystemIfMissing(theParamName, code, system);
 			codes = myTerminologySvc.findCodesAbove(system, code);
 		} else if (modifier == TokenParamModifier.BELOW) {
+			system = determineSystemIfMissing(theParamName, code, system);
 			codes = myTerminologySvc.findCodesBelow(system, code);
 		}
 		
@@ -1426,6 +1430,34 @@ public class SearchBuilder {
 
 		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
 		return singleCode;
+	}
+
+	private String determineSystemIfMissing(String theParamName, String code, String system) {
+		if (system == null) {
+			RuntimeSearchParam param = getSearchParam(theParamName);
+			if (param != null) {
+				Set<String> valueSetUris = Sets.newHashSet();
+				for (String nextPath : param.getPathsSplit()) {
+					BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, nextPath);
+					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
+						String valueSet = ((BaseRuntimeDeclaredChildDefinition) def).getBindingValueSet();
+						if (isNotBlank(valueSet)) {
+							valueSetUris.add(valueSet);
+						}
+					}
+				}
+				if (valueSetUris.size() == 1) {
+					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSetUris.iterator().next());
+					for (VersionIndependentConcept nextCandidate : candidateCodes) {
+						if (nextCandidate.getCode().equals(code)) {
+							system = nextCandidate.getSystem();
+							break;
+						}
+					}
+				}
+			}
+		}
+		return system;
 	}
 
 	private Predicate createResourceLinkPathPredicate(String theParamName, Root<? extends ResourceLink> from) {
@@ -1488,8 +1520,7 @@ public class SearchBuilder {
 			return;
 		}
 
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
-		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
+		RuntimeSearchParam param = getSearchParam(theSort.getParamName());
 		if (param == null) {
 			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
@@ -1551,6 +1582,12 @@ public class SearchBuilder {
 		}
 
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
+	}
+
+	private RuntimeSearchParam getSearchParam(String theParamName) {
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
+		RuntimeSearchParam param = resourceDef.getSearchParam(theParamName);
+		return param;
 	}
 
 	public Set<Long> doGetPids() {

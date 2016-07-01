@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -182,6 +182,7 @@ public class Slot extends DomainResource {
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
     protected CodeableConcept serviceCategory;
 
     /**
@@ -189,6 +190,7 @@ public class Slot extends DomainResource {
      */
     @Child(name = "serviceType", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource", formalDefinition="The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-type")
     protected List<CodeableConcept> serviceType;
 
     /**
@@ -196,6 +198,7 @@ public class Slot extends DomainResource {
      */
     @Child(name = "specialty", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment", formalDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
     protected List<CodeableConcept> specialty;
 
     /**
@@ -203,6 +206,7 @@ public class Slot extends DomainResource {
      */
     @Child(name = "appointmentType", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The style of appointment or patient that has been booked in the slot (not service type)", formalDefinition="The style of appointment or patient that has been booked in the slot (not service type)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0276")
     protected CodeableConcept appointmentType;
 
     /**
@@ -222,6 +226,7 @@ public class Slot extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="busy | free | busy-unavailable | busy-tentative", formalDefinition="busy | free | busy-unavailable | busy-tentative." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/slotstatus")
     protected Enumeration<SlotStatus> status;
 
     /**
@@ -998,7 +1003,7 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.schedule</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference", target={Schedule.class} )
+  @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference" )
   public static final String SP_SCHEDULE = "schedule";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>schedule</b>
@@ -1024,7 +1029,7 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1044,7 +1049,7 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date", target={} )
+  @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date" )
   public static final String SP_START = "start";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start</b>
@@ -1064,7 +1069,7 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="slot-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token", target={} )
+  @SearchParamDefinition(name="slot-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token" )
   public static final String SP_SLOT_TYPE = "slot-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>slot-type</b>
@@ -1084,7 +1089,7 @@ public class Slot extends DomainResource {
    * Path: <b>Slot.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Slot.status", description="The free/busy status of the appointment", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Slot.status", description="The free/busy status of the appointment", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

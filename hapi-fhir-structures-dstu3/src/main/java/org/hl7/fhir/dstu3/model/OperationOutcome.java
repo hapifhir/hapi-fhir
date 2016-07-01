@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -699,6 +699,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         @Child(name = "severity", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
         @Description(shortDefinition="fatal | error | warning | information", formalDefinition="Indicates whether the issue indicates a variation from successful processing." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/issue-severity")
         protected Enumeration<IssueSeverity> severity;
 
         /**
@@ -706,6 +707,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Error or warning code", formalDefinition="Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/issue-type")
         protected Enumeration<IssueType> code;
 
         /**
@@ -713,6 +715,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         @Child(name = "details", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Additional details about the error", formalDefinition="Additional details about the error. This may be a text description of the error, or a system code that identifies the error." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-outcome")
         protected CodeableConcept details;
 
         /**

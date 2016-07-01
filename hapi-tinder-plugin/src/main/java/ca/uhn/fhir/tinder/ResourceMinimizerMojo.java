@@ -63,6 +63,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			throw new MojoFailureException("Unknown version: " + fhirVersion);
 		}
 
+		ourLog.info("Looking for files in directory: {}", targetDirectory.getAbsolutePath());
+		
 		Collection<File> files = FileUtils.listFiles(targetDirectory, new String[] { "xml", "json" }, true);
 		for (File nextFile : files) {
 			ourLog.debug("Checking file: {}", nextFile);
@@ -171,28 +173,28 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		long byteCount = 0;
 		
 		ResourceMinimizerMojo m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2;
-		m.targetDirectory = new File("../hapi-tinder-plugin/src/main/resources/vs/dstu2");
-		m.fhirVersion = "DSTU2";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
-
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2;
-		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/valueset");
-		m.fhirVersion = "DSTU2";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
-
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxDstu2;
-		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/profile");
-		m.fhirVersion = "DSTU2";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
+//		m.myCtx = ctxDstu2;
+//		m.targetDirectory = new File("../hapi-tinder-plugin/src/main/resources/vs/dstu2");
+//		m.fhirVersion = "DSTU2";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+//
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2;
+//		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/valueset");
+//		m.fhirVersion = "DSTU2";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+//
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2;
+//		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/profile");
+//		m.fhirVersion = "DSTU2";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
 		m.myCtx = ctxDstu3;

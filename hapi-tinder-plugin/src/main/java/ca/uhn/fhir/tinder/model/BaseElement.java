@@ -32,6 +32,7 @@ public abstract class BaseElement {
 	private boolean mySummary;
 	private List<String> myType;
 	private String myV2Mapping;
+	private String myBindingUrl;
 
 	public void addChild(Child theElem) {
 		if (myChildren == null) {
@@ -351,6 +352,18 @@ public abstract class BaseElement {
 			b.append(next);
 		}
 		return b.toString().trim();
+	}
+
+	public void setBindingUrl(String theBindingUrl) {
+		myBindingUrl = theBindingUrl;
+	}
+
+	public boolean isHasBindingUrl() {
+		return isNotBlank(myBindingUrl);
+	}
+
+	public String getBindingUrl() {
+		return myBindingUrl;
 	}
 
 }

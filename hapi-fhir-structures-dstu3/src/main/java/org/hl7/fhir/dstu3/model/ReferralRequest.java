@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -323,6 +323,7 @@ public class ReferralRequest extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | cancelled | completed | entered-in-error", formalDefinition="The status of the authorization/intention reflected by the referral request record." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/referralstatus")
     protected Enumeration<ReferralStatus> status;
 
     /**
@@ -330,6 +331,7 @@ public class ReferralRequest extends DomainResource {
      */
     @Child(name = "category", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposal | plan | request", formalDefinition="Distinguishes the \"level\" of authorization/demand implicit in this request." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/referralcategory")
     protected Enumeration<ReferralCategory> category;
 
     /**
@@ -344,6 +346,7 @@ public class ReferralRequest extends DomainResource {
      */
     @Child(name = "priority", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Urgency of referral / transfer of care request", formalDefinition="An indication of the urgency of referral (or where applicable the type of transfer of care) request." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnostic-order-priority")
     protected CodeableConcept priority;
 
     /**
@@ -401,6 +404,7 @@ public class ReferralRequest extends DomainResource {
      */
     @Child(name = "specialty", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The clinical specialty (discipline) that the referral is requested for", formalDefinition="Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/practitioner-specialty")
     protected CodeableConcept specialty;
 
     /**
@@ -434,6 +438,7 @@ public class ReferralRequest extends DomainResource {
      */
     @Child(name = "serviceRequested", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Actions requested as part of the referral", formalDefinition="The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
     protected List<CodeableConcept> serviceRequested;
 
     /**
@@ -1562,7 +1567,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ReferralRequest.authored", description="Creation or activation date", type="date", target={} )
+  @SearchParamDefinition(name="date", path="ReferralRequest.authored", description="Creation or activation date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1582,7 +1587,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference", target={Practitioner.class, Organization.class, Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -1608,7 +1613,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="ReferralRequest.parent", description="Part of common request", type="token", target={} )
+  @SearchParamDefinition(name="parent", path="ReferralRequest.parent", description="Part of common request", type="token" )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1628,7 +1633,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token", target={} )
+  @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token" )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
@@ -1648,7 +1653,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1674,7 +1679,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -1700,7 +1705,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="ReferralRequest.context", description="Part of encounter or episode of care", type="reference", target={EpisodeOfCare.class, Encounter.class} )
+  @SearchParamDefinition(name="context", path="ReferralRequest.context", description="Part of encounter or episode of care", type="reference" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -1726,7 +1731,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token", target={} )
+  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1746,7 +1751,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.priority</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token", target={} )
+  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token" )
   public static final String SP_PRIORITY = "priority";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>priority</b>
@@ -1766,7 +1771,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="ReferralRequest.category", description="Proposal, plan or request", type="token", target={} )
+  @SearchParamDefinition(name="category", path="ReferralRequest.category", description="Proposal, plan or request", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -1786,7 +1791,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference", target={ReferralRequest.class, CarePlan.class, DiagnosticOrder.class, ProcedureRequest.class} )
+  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference" )
   public static final String SP_BASEDON = "basedon";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>basedon</b>
@@ -1812,7 +1817,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token", target={} )
+  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

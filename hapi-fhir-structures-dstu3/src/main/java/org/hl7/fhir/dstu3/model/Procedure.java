@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -189,6 +189,7 @@ public class Procedure extends DomainResource {
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The role the actor was in", formalDefinition="For example: surgeon, anaethetist, endoscopist." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/performer-role")
         protected CodeableConcept role;
 
         private static final long serialVersionUID = -843698327L;
@@ -373,6 +374,7 @@ public class Procedure extends DomainResource {
          */
         @Child(name = "action", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Kind of change to device", formalDefinition="The kind of change that happened to the device during the procedure." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-action")
         protected CodeableConcept action;
 
         /**
@@ -599,6 +601,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="in-progress | aborted | completed | entered-in-error", formalDefinition="A code specifying the state of the procedure. Generally this will be in-progress or completed state." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-status")
     protected Enumeration<ProcedureStatus> status;
 
     /**
@@ -606,6 +609,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Classification of the procedure", formalDefinition="A code that classifies the procedure for searching, sorting and display purposes (e.g. \"Surgical Procedure\")." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-category")
     protected CodeableConcept category;
 
     /**
@@ -613,6 +617,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identification of the procedure", formalDefinition="The specific procedure that is performed. Use text if the exact nature of the procedure cannot be coded (e.g. \"Laparoscopic Appendectomy\")." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-code")
     protected CodeableConcept code;
 
     /**
@@ -627,6 +632,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "reasonNotPerformed", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reason procedure was not performed", formalDefinition="A code indicating why the procedure was not performed." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-not-performed-reason")
     protected List<CodeableConcept> reasonNotPerformed;
 
     /**
@@ -634,6 +640,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "bodySite", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Target body sites", formalDefinition="Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
     protected List<CodeableConcept> bodySite;
 
     /**
@@ -641,6 +648,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Reason procedure performed", formalDefinition="The reason why the procedure was performed. This may be due to a Condition, may be coded entity of some type, or may simply be present as text." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-reason")
     protected Type reason;
 
     /**
@@ -686,6 +694,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "outcome", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The result of procedure", formalDefinition="The outcome of the procedure - did it resolve reasons for the procedure being performed?" )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-outcome")
     protected CodeableConcept outcome;
 
     /**
@@ -705,6 +714,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "complication", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Complication following the procedure", formalDefinition="Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
     protected List<CodeableConcept> complication;
 
     /**
@@ -712,6 +722,7 @@ public class Procedure extends DomainResource {
      */
     @Child(name = "followUp", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Instructions for follow up", formalDefinition="If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-followup")
     protected List<CodeableConcept> followUp;
 
     /**
@@ -2162,7 +2173,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performed[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Procedure.performed", description="Date/Period the procedure was performed", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Procedure.performed", description="Date/Period the procedure was performed", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2182,7 +2193,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Procedure.identifier", description="A unique identifier for a procedure", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Procedure.identifier", description="A unique identifier for a procedure", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2202,7 +2213,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Procedure.code", description="A code to identify a  procedure", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Procedure.code", description="A code to identify a  procedure", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2222,7 +2233,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.performer.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2248,7 +2259,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2274,7 +2285,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2300,7 +2311,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2326,7 +2337,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2352,7 +2363,7 @@ public class Procedure extends DomainResource {
    * Path: <b>Procedure.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Procedure.category", description="Classification of the procedure", type="token", target={} )
+  @SearchParamDefinition(name="category", path="Procedure.category", description="Classification of the procedure", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

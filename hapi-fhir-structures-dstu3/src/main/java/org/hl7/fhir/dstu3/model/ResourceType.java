@@ -2,10 +2,11 @@ package org.hl7.fhir.dstu3.model;
 
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 12:24-0400 for FHIR v1.4.0
 
 public enum ResourceType {
     Account,
+    ActivityDefinition,
     AllergyIntolerance,
     Appointment,
     AppointmentResponse,
@@ -91,6 +92,7 @@ public enum ResourceType {
     PaymentNotice,
     PaymentReconciliation,
     Person,
+    PlanDefinition,
     Practitioner,
     PractitionerRole,
     Procedure,
@@ -125,6 +127,8 @@ public enum ResourceType {
       switch (this) {
     case Account:
       return "account";
+    case ActivityDefinition:
+      return "activitydefinition";
     case AllergyIntolerance:
       return "allergyintolerance";
     case Appointment:
@@ -295,6 +299,8 @@ public enum ResourceType {
       return "paymentreconciliation";
     case Person:
       return "person";
+    case PlanDefinition:
+      return "plandefinition";
     case Practitioner:
       return "practitioner";
     case PractitionerRole:
@@ -359,6 +365,8 @@ public enum ResourceType {
     public static ResourceType fromCode(String code) throws FHIRException {;
     if ("Account".equals(code))
       return Account;
+    if ("ActivityDefinition".equals(code))
+      return ActivityDefinition;
     if ("AllergyIntolerance".equals(code))
       return AllergyIntolerance;
     if ("Appointment".equals(code))
@@ -529,6 +537,8 @@ public enum ResourceType {
       return PaymentReconciliation;
     if ("Person".equals(code))
       return Person;
+    if ("PlanDefinition".equals(code))
+      return PlanDefinition;
     if ("Practitioner".equals(code))
       return Practitioner;
     if ("PractitionerRole".equals(code))

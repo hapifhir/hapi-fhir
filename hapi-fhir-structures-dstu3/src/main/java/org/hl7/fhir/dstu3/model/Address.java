@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -280,6 +280,7 @@ public class Address extends Type implements ICompositeType {
      */
     @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="home | work | temp | old - purpose of this address", formalDefinition="The purpose of this address." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/address-use")
     protected Enumeration<AddressUse> use;
 
     /**
@@ -287,6 +288,7 @@ public class Address extends Type implements ICompositeType {
      */
     @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="postal | physical | both", formalDefinition="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/address-type")
     protected Enumeration<AddressType> type;
 
     /**

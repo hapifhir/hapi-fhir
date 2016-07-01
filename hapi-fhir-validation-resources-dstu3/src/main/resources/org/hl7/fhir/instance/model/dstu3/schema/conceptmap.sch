@@ -47,8 +47,8 @@
     <sch:rule context="//f:ConceptMap/f:targetReference">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
-    <sch:rule context="//f:ConceptMap/f:element/f:target">
-      <sch:assert test="exists(f:comments) or ((f:equivalence/@value != 'narrower') and (f:equivalence/@value != 'inexact'))">cmd-1: If the map is narrower or inexact, there SHALL be some comments</sch:assert>
+    <sch:rule context="//f:ConceptMap/f:group/f:element/f:target">
+      <sch:assert test="exists(f:comments) or not(exists(f:equivalence)) or ((f:equivalence/@value != 'narrower') and (f:equivalence/@value != 'inexact'))">cmd-1: If the map is narrower or inexact, there SHALL be some comments</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>

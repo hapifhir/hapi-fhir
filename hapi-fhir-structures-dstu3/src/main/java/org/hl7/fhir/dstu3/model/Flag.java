@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -166,6 +166,7 @@ public class Flag extends DomainResource {
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-category")
     protected CodeableConcept category;
 
     /**
@@ -173,6 +174,7 @@ public class Flag extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Supports basic workflow." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-status")
     protected Enumeration<FlagStatus> status;
 
     /**
@@ -223,6 +225,7 @@ public class Flag extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition="The coded value or textual component of the flag to display to the user." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-code")
     protected CodeableConcept code;
 
     private static final long serialVersionUID = 701147751L;
@@ -737,7 +740,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -757,7 +760,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", target={Practitioner.class, Group.class, Organization.class, Patient.class, Location.class} )
+  @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -783,7 +786,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -809,7 +812,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -835,7 +838,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

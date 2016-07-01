@@ -395,6 +395,13 @@
 				Parser is now better able to handle encoding fields which have been
 				populated with a class that extends the expected class
 			</action>
+			<action type="fix">
+				When declaring a child with 
+				<![CDATA[<code>order=Child.REPLACE_PARENT</code>]]>
+				the serialized form still put the element at the
+				end of the resource instead of in the correct
+				order
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

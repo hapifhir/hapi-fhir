@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1402,6 +1402,7 @@ public class ModuleDefinition extends DomainResource {
          */
         @Child(name = "use", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="", formalDefinition="Whether the parameter is input or output for the module." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-parameter-use")
         protected CodeType use;
 
         /**
@@ -1416,6 +1417,7 @@ public class ModuleDefinition extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="", formalDefinition="The type of the parameter." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/defined-types")
         protected CodeType type;
 
         /**
@@ -1825,6 +1827,7 @@ public class ModuleDefinition extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The type of the required data", formalDefinition="The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/defined-types")
         protected CodeType type;
 
         /**

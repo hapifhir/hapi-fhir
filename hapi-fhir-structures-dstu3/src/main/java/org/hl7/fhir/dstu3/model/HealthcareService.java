@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -225,6 +225,7 @@ public class HealthcareService extends DomainResource {
          */
         @Child(name = "daysOfWeek", type = {CodeType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="mon | tue | wed | thu | fri | sat | sun", formalDefinition="Indicates which days of the week are available between the start and end Times." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/days-of-week")
         protected List<Enumeration<DaysOfWeek>> daysOfWeek;
 
         /**
@@ -821,6 +822,7 @@ public class HealthcareService extends DomainResource {
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Broad category of service being performed or delivered", formalDefinition="Identifies the broad category of service being performed or delivered." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
     protected CodeableConcept serviceCategory;
 
     /**
@@ -828,6 +830,7 @@ public class HealthcareService extends DomainResource {
      */
     @Child(name = "serviceType", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type of service that may be delivered or performed", formalDefinition="The specific type of service that may be delivered or performed." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-type")
     protected List<CodeableConcept> serviceType;
 
     /**
@@ -835,6 +838,7 @@ public class HealthcareService extends DomainResource {
      */
     @Child(name = "specialty", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Specialties handled by the HealthcareService", formalDefinition="Collection of specialties handled by the service site. This is more of a medical term." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
     protected List<CodeableConcept> specialty;
 
     /**
@@ -901,6 +905,7 @@ public class HealthcareService extends DomainResource {
      */
     @Child(name = "serviceProvisionCode", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Conditions under which service is available/offered", formalDefinition="The code(s) that detail the conditions under which the healthcare service is available/offered." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-provision-conditions")
     protected List<CodeableConcept> serviceProvisionCode;
 
     /**
@@ -936,6 +941,7 @@ public class HealthcareService extends DomainResource {
      */
     @Child(name = "referralMethod", type = {CodeableConcept.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Ways that the service accepts referrals", formalDefinition="Ways that the service accepts referrals, if this is not provided then it is implied that no referral is required." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-referral-method")
     protected List<CodeableConcept> referralMethod;
 
     /**
@@ -2562,7 +2568,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="HealthcareService.identifier", description="External identifiers for this item", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="HealthcareService.identifier", description="External identifiers for this item", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2582,7 +2588,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceCategory</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="servicecategory", path="HealthcareService.serviceCategory", description="Service Category of the Healthcare Service", type="token", target={} )
+  @SearchParamDefinition(name="servicecategory", path="HealthcareService.serviceCategory", description="Service Category of the Healthcare Service", type="token" )
   public static final String SP_SERVICECATEGORY = "servicecategory";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>servicecategory</b>
@@ -2602,7 +2608,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="servicetype", path="HealthcareService.serviceType", description="The type of service provided by this healthcare service", type="token", target={} )
+  @SearchParamDefinition(name="servicetype", path="HealthcareService.serviceType", description="The type of service provided by this healthcare service", type="token" )
   public static final String SP_SERVICETYPE = "servicetype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>servicetype</b>
@@ -2622,7 +2628,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.providedBy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="HealthcareService.providedBy", description="The organization that provides this Healthcare Service", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="HealthcareService.providedBy", description="The organization that provides this Healthcare Service", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -2648,7 +2654,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.serviceName</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="HealthcareService.serviceName", description="A portion of the Healthcare service name", type="string", target={} )
+  @SearchParamDefinition(name="name", path="HealthcareService.serviceName", description="A portion of the Healthcare service name", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -2668,7 +2674,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.programName</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="programname", path="HealthcareService.programName", description="One of the Program Names serviced by this HealthcareService", type="string", target={} )
+  @SearchParamDefinition(name="programname", path="HealthcareService.programName", description="One of the Program Names serviced by this HealthcareService", type="string" )
   public static final String SP_PROGRAMNAME = "programname";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>programname</b>
@@ -2688,7 +2694,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="HealthcareService.location", description="The location of the Healthcare Service", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="HealthcareService.location", description="The location of the Healthcare Service", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2714,7 +2720,7 @@ public class HealthcareService extends DomainResource {
    * Path: <b>HealthcareService.characteristic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic", path="HealthcareService.characteristic", description="One of the HealthcareService's characteristics", type="token", target={} )
+  @SearchParamDefinition(name="characteristic", path="HealthcareService.characteristic", description="One of the HealthcareService's characteristics", type="token" )
   public static final String SP_CHARACTERISTIC = "characteristic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic</b>

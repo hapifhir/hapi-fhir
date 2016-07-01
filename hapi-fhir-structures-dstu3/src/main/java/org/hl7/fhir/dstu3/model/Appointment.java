@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -453,6 +453,7 @@ public class Appointment extends DomainResource {
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Role of participant in the appointment", formalDefinition="Role of participant in the appointment." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/encounter-participant-type")
         protected List<CodeableConcept> type;
 
         /**
@@ -472,6 +473,7 @@ public class Appointment extends DomainResource {
          */
         @Child(name = "required", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="required | optional | information-only", formalDefinition="Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participantrequired")
         protected Enumeration<ParticipantRequired> required;
 
         /**
@@ -479,6 +481,7 @@ public class Appointment extends DomainResource {
          */
         @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="accepted | declined | tentative | needs-action", formalDefinition="Participation status of the Patient." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participationstatus")
         protected Enumeration<ParticipationStatus> status;
 
         private static final long serialVersionUID = -1620552507L;
@@ -828,6 +831,7 @@ public class Appointment extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | pending | booked | arrived | fulfilled | cancelled | noshow", formalDefinition="The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/appointmentstatus")
     protected Enumeration<AppointmentStatus> status;
 
     /**
@@ -835,6 +839,7 @@ public class Appointment extends DomainResource {
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
     protected CodeableConcept serviceCategory;
 
     /**
@@ -842,6 +847,7 @@ public class Appointment extends DomainResource {
      */
     @Child(name = "serviceType", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The specific service that is to be performed during this appointment", formalDefinition="The specific service that is to be performed during this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-type")
     protected List<CodeableConcept> serviceType;
 
     /**
@@ -849,6 +855,7 @@ public class Appointment extends DomainResource {
      */
     @Child(name = "specialty", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment", formalDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
     protected List<CodeableConcept> specialty;
 
     /**
@@ -856,6 +863,7 @@ public class Appointment extends DomainResource {
      */
     @Child(name = "appointmentType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The style of appointment or patient that has been booked in the slot (not service type)", formalDefinition="The style of appointment or patient that has been booked in the slot (not service type)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0276")
     protected CodeableConcept appointmentType;
 
     /**
@@ -863,6 +871,7 @@ public class Appointment extends DomainResource {
      */
     @Child(name = "reason", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Reason this appointment is scheduled", formalDefinition="The reason that this appointment is being scheduled. This is more clinical than administrative." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/encounter-reason")
     protected CodeableConcept reason;
 
     /**
@@ -2005,7 +2014,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.start</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2025,7 +2034,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference", target={Practitioner.class, Device.class, Patient.class, HealthcareService.class, RelatedPerson.class, Location.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
+  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2051,7 +2060,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -2071,7 +2080,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference", target={Practitioner.class} )
+  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -2097,7 +2106,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token", target={} )
+  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
   public static final String SP_PART_STATUS = "part-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>part-status</b>
@@ -2117,7 +2126,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2143,7 +2152,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.appointmentType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="appointment-type", path="Appointment.appointmentType", description="The style of appointment or patient that has been booked in the slot (not service type)", type="token", target={} )
+  @SearchParamDefinition(name="appointment-type", path="Appointment.appointmentType", description="The style of appointment or patient that has been booked in the slot (not service type)", type="token" )
   public static final String SP_APPOINTMENT_TYPE = "appointment-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>appointment-type</b>
@@ -2163,7 +2172,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.serviceType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="service-type", path="Appointment.serviceType", description="The specific service that is to be performed during this appointment", type="token", target={} )
+  @SearchParamDefinition(name="service-type", path="Appointment.serviceType", description="The specific service that is to be performed during this appointment", type="token" )
   public static final String SP_SERVICE_TYPE = "service-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>service-type</b>
@@ -2183,7 +2192,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference" )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -2209,7 +2218,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

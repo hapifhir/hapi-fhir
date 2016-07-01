@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -476,6 +476,7 @@ public class OperationDefinition extends BaseConformance {
          */
         @Child(name = "use", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="in | out", formalDefinition="Whether this is an input or an output parameter." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-parameter-use")
         protected Enumeration<OperationParameterUse> use;
 
         /**
@@ -504,6 +505,7 @@ public class OperationDefinition extends BaseConformance {
          */
         @Child(name = "type", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="What type this parameter has", formalDefinition="The type for this parameter." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/all-types")
         protected CodeType type;
 
         /**
@@ -511,6 +513,7 @@ public class OperationDefinition extends BaseConformance {
          */
         @Child(name = "searchType", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri", formalDefinition="How the parameter is understood as a search parameter. This is only used if the parameter type is 'string'." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-param-type")
         protected Enumeration<SearchParamType> searchType;
 
         /**
@@ -1223,6 +1226,7 @@ public class OperationDefinition extends BaseConformance {
          */
         @Child(name = "strength", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="required | extensible | preferred | example", formalDefinition="Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/binding-strength")
         protected Enumeration<BindingStrength> strength;
 
         /**
@@ -1451,6 +1455,7 @@ public class OperationDefinition extends BaseConformance {
      */
     @Child(name = "kind", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="operation | query", formalDefinition="Whether this is an operation or a named query." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-kind")
     protected Enumeration<OperationKind> kind;
 
     /**
@@ -1533,6 +1538,7 @@ public class OperationDefinition extends BaseConformance {
      */
     @Child(name = "type", type = {CodeType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Invoke at resource level for these type", formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> type;
 
     /**
@@ -2663,7 +2669,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date", target={} )
+  @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2683,7 +2689,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token", target={} )
+  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2703,7 +2709,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.instance</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token", target={} )
+  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token" )
   public static final String SP_INSTANCE = "instance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>instance</b>
@@ -2723,7 +2729,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.kind</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token", target={} )
+  @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token" )
   public static final String SP_KIND = "kind";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>kind</b>
@@ -2743,7 +2749,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token", target={} )
+  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -2763,7 +2769,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token", target={} )
+  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -2783,7 +2789,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.parameter.profile</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="paramprofile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference", target={StructureDefinition.class} )
+  @SearchParamDefinition(name="paramprofile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
   public static final String SP_PARAMPROFILE = "paramprofile";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>paramprofile</b>
@@ -2809,7 +2815,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri", target={} )
+  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
@@ -2829,7 +2835,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.system</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token", target={} )
+  @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token" )
   public static final String SP_SYSTEM = "system";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>system</b>
@@ -2849,7 +2855,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this operation", type="string", target={} )
+  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this operation", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
@@ -2869,7 +2875,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="OperationDefinition.useContext", description="A use context assigned to the operation definition", type="token", target={} )
+  @SearchParamDefinition(name="context", path="OperationDefinition.useContext", description="A use context assigned to the operation definition", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -2889,7 +2895,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -2909,7 +2915,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token", target={} )
+  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
@@ -2929,7 +2935,7 @@ public class OperationDefinition extends BaseConformance {
    * Path: <b>OperationDefinition.base</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference", target={OperationDefinition.class} )
+  @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference" )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>

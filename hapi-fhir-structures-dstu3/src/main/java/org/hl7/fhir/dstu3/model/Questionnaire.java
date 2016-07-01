@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -515,6 +515,7 @@ public class Questionnaire extends DomainResource {
          */
         @Child(name = "concept", type = {Coding.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Concept that represents this item within in a questionnaire", formalDefinition="Identifies a how this group of questions is known in a particular terminology such as LOINC." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
         protected List<Coding> concept;
 
         /**
@@ -536,6 +537,7 @@ public class Questionnaire extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="group | display | question | boolean | decimal | integer | date | dateTime +", formalDefinition="Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/item-type")
         protected Enumeration<QuestionnaireItemType> type;
 
         /**
@@ -2247,6 +2249,7 @@ public class Questionnaire extends DomainResource {
          */
         @Child(name = "value", type = {IntegerType.class, DateType.class, TimeType.class, StringType.class, Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Answer value", formalDefinition="Identifies a specific answer that's allowed as the answer to a question." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-answers")
         protected Type value;
 
         private static final long serialVersionUID = -732981989L;
@@ -2482,6 +2485,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | published | retired", formalDefinition="The lifecycle status of the questionnaire as a whole." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-status")
     protected Enumeration<QuestionnaireStatus> status;
 
     /**
@@ -2510,6 +2514,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "useContext", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Questionnaire intends to support these contexts", formalDefinition="A code that identifies the questionnaire as falling into a particular group of like questionnaires; e.g. \"Pediatric\", \"Admissions\", \"Research\", \"Demographic\", \"Opinion Survey\", etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/use-context")
     protected List<CodeableConcept> useContext;
 
     /**
@@ -2524,6 +2529,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "concept", type = {Coding.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Concept that represents the overall questionnaire", formalDefinition="Identifies a how this question or group of questions is known in a particular terminology such as LOINC." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
     protected List<Coding> concept;
 
     /**
@@ -2531,6 +2537,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "subjectType", type = {CodeType.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Resource that can be subject of QuestionnaireResponse", formalDefinition="Identifies the types of subjects that can be the subject of the questionnaire." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> subjectType;
 
     /**
@@ -3441,7 +3448,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3461,7 +3468,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3481,7 +3488,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.item.concept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -3501,7 +3508,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="Questionnaire.useContext", description="A use context assigned to the questionnaire", type="token", target={} )
+  @SearchParamDefinition(name="context", path="Questionnaire.useContext", description="A use context assigned to the questionnaire", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3521,7 +3528,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3541,7 +3548,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string", target={} )
+  @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -3561,7 +3568,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string", target={} )
+  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3581,7 +3588,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

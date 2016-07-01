@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -161,6 +161,7 @@ public class Linkage extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="source | alternate | historical", formalDefinition="Distinguishes which item is \"source of truth\" (if any) and which items are no longer considered to be current representations." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/linkage-type")
         protected Enumeration<LinkageType> type;
 
         /**
@@ -600,7 +601,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference", target={} )
+  @SearchParamDefinition(name="item", path="Linkage.item.resource", description="Matches on any item in the Linkage", type="reference" )
   public static final String SP_ITEM = "item";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item</b>
@@ -626,7 +627,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -652,7 +653,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.item.resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference", target={} )
+  @SearchParamDefinition(name="source", path="Linkage.item.resource", description="Matches on any item in the Linkage with a type of 'source'", type="reference" )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>

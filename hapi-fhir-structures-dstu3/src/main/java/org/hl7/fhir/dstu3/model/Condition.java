@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -209,6 +209,7 @@ public class Condition extends DomainResource {
          */
         @Child(name = "summary", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Simple summary (disease specific)", formalDefinition="A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-stage")
         protected CodeableConcept summary;
 
         /**
@@ -432,6 +433,7 @@ public class Condition extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Manifestation/symptom", formalDefinition="A manifestation or symptom that led to the recording of this condition." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/manifestation-or-symptom")
         protected CodeableConcept code;
 
         /**
@@ -703,6 +705,7 @@ public class Condition extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identification of the condition, problem or diagnosis", formalDefinition="Identification of the condition, problem or diagnosis." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
     protected CodeableConcept code;
 
     /**
@@ -710,6 +713,7 @@ public class Condition extends DomainResource {
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="complaint | symptom | finding | diagnosis", formalDefinition="A category assigned to the condition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-category")
     protected CodeableConcept category;
 
     /**
@@ -717,6 +721,7 @@ public class Condition extends DomainResource {
      */
     @Child(name = "clinicalStatus", type = {CodeType.class}, order=7, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | relapse | remission | resolved", formalDefinition="The clinical status of the condition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-clinical")
     protected CodeType clinicalStatus;
 
     /**
@@ -724,6 +729,7 @@ public class Condition extends DomainResource {
      */
     @Child(name = "verificationStatus", type = {CodeType.class}, order=8, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="provisional | differential | confirmed | refuted | entered-in-error | unknown", formalDefinition="The verification status to support the clinical status of the condition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-ver-status")
     protected Enumeration<ConditionVerificationStatus> verificationStatus;
 
     /**
@@ -731,6 +737,7 @@ public class Condition extends DomainResource {
      */
     @Child(name = "severity", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Subjective severity of condition", formalDefinition="A subjective assessment of the severity of the condition as evaluated by the clinician." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-severity")
     protected CodeableConcept severity;
 
     /**
@@ -766,6 +773,7 @@ public class Condition extends DomainResource {
      */
     @Child(name = "bodySite", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Anatomical location, if relevant", formalDefinition="The anatomical location where this condition manifests itself." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
     protected List<CodeableConcept> bodySite;
 
     /**
@@ -1907,7 +1915,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.severity</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token", target={} )
+  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
   public static final String SP_SEVERITY = "severity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>severity</b>
@@ -1927,7 +1935,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1947,7 +1955,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.clinicalStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token", target={} )
+  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
   public static final String SP_CLINICALSTATUS = "clinicalstatus";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>clinicalstatus</b>
@@ -1967,7 +1975,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset-info", path="Condition.onset.as(boolean) | Condition.onset.as(Quantity) | Condition.onset.as(Range) | Condition.onset.as(string)", description="Other onsets (boolean, age, range, string)", type="string", target={} )
+  @SearchParamDefinition(name="onset-info", path="Condition.onset.as(boolean) | Condition.onset.as(Quantity) | Condition.onset.as(Range) | Condition.onset.as(string)", description="Other onsets (boolean, age, range, string)", type="string" )
   public static final String SP_ONSET_INFO = "onset-info";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset-info</b>
@@ -1987,7 +1995,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2007,7 +2015,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.evidence.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token", target={} )
+  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
   public static final String SP_EVIDENCE = "evidence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>evidence</b>
@@ -2027,7 +2035,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2053,7 +2061,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.onset[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="onset", path="Condition.onset.as(dateTime) | Condition.onset.as(Period)", description="Date related onsets (dateTime and Period)", type="date", target={} )
+  @SearchParamDefinition(name="onset", path="Condition.onset.as(dateTime) | Condition.onset.as(Period)", description="Date related onsets (dateTime and Period)", type="date" )
   public static final String SP_ONSET = "onset";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>onset</b>
@@ -2073,7 +2081,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.asserter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", target={Practitioner.class, Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_ASSERTER = "asserter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>asserter</b>
@@ -2099,7 +2107,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.dateRecorded</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date", target={} )
+  @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date" )
   public static final String SP_DATE_RECORDED = "date-recorded";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date-recorded</b>
@@ -2119,7 +2127,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.stage.summary</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token", target={} )
+  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
   public static final String SP_STAGE = "stage";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>stage</b>
@@ -2139,7 +2147,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference", target={Patient.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2165,7 +2173,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token", target={} )
+  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -2185,7 +2193,7 @@ public class Condition extends DomainResource {
    * Path: <b>Condition.bodySite</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token", target={} )
+  @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token" )
   public static final String SP_BODY_SITE = "body-site";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>body-site</b>

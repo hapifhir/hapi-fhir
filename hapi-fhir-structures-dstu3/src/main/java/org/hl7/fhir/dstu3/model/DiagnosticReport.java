@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 29, 2016 16:57-0400 for FHIR v1.4.0
+// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -463,6 +463,7 @@ public class DiagnosticReport extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="registered | partial | final | corrected | appended | cancelled | entered-in-error", formalDefinition="The status of the diagnostic report as a whole." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnostic-report-status")
     protected Enumeration<DiagnosticReportStatus> status;
 
     /**
@@ -470,6 +471,7 @@ public class DiagnosticReport extends DomainResource {
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Service category", formalDefinition="A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnostic-service-sections")
     protected CodeableConcept category;
 
     /**
@@ -477,6 +479,7 @@ public class DiagnosticReport extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name/Code for this diagnostic report", formalDefinition="A code or name that describes this diagnostic report." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/report-codes")
     protected CodeableConcept code;
 
     /**
@@ -596,6 +599,7 @@ public class DiagnosticReport extends DomainResource {
      */
     @Child(name = "codedDiagnosis", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Codes for the conclusion", formalDefinition="Codes for the conclusion." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-findings")
     protected List<CodeableConcept> codedDiagnosis;
 
     /**
@@ -1842,7 +1846,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="DiagnosticReport.effective", description="The clinically relevant time of the report", type="date", target={} )
+  @SearchParamDefinition(name="date", path="DiagnosticReport.effective", description="The clinically relevant time of the report", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1862,7 +1866,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1882,7 +1886,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.image.link</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="A reference to the image source.", type="reference", target={Media.class} )
+  @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="A reference to the image source.", type="reference" )
   public static final String SP_IMAGE = "image";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>image</b>
@@ -1908,7 +1912,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="DiagnosticReport.request", description="Reference to the test or procedure request.", type="reference", target={ReferralRequest.class, DiagnosticOrder.class, ProcedureRequest.class} )
+  @SearchParamDefinition(name="request", path="DiagnosticReport.request", description="Reference to the test or procedure request.", type="reference" )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -1934,7 +1938,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference", target={Practitioner.class, Organization.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
+  @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -1960,7 +1964,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="DiagnosticReport.code", description="The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result", type="token", target={} )
+  @SearchParamDefinition(name="code", path="DiagnosticReport.code", description="The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1980,7 +1984,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference", target={Group.class, Device.class, Patient.class, Location.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2006,7 +2010,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.codedDiagnosis</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token", target={} )
+  @SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token" )
   public static final String SP_DIAGNOSIS = "diagnosis";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>diagnosis</b>
@@ -2026,7 +2030,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference", target={Encounter.class}, providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
+  @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -2052,7 +2056,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.result</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference", target={Observation.class} )
+  @SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference" )
   public static final String SP_RESULT = "result";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>result</b>
@@ -2078,7 +2082,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DiagnosticReport.subject", description="The subject of the report if a patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="DiagnosticReport.subject", description="The subject of the report if a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2104,7 +2108,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.specimen</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference", target={Specimen.class} )
+  @SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
@@ -2130,7 +2134,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.issued</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date", target={} )
+  @SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date" )
   public static final String SP_ISSUED = "issued";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>issued</b>
@@ -2150,7 +2154,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="DiagnosticReport.category", description="Which diagnostic discipline/department created the report", type="token", target={} )
+  @SearchParamDefinition(name="category", path="DiagnosticReport.category", description="Which diagnostic discipline/department created the report", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
@@ -2170,7 +2174,7 @@ public class DiagnosticReport extends DomainResource {
    * Path: <b>DiagnosticReport.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token", target={} )
+  @SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
