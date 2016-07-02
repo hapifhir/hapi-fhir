@@ -588,7 +588,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("The code 1234 is invalid in code system http://loinc.org", errors.get(0).getMessage());
+		assertEquals("Code 1234 is not a valid code in code system http://loinc.org", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -604,6 +604,24 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(errors.toString(), 0, errors.size());
+	}
+
+	@Test
+	public void testValidateResourceWithExampleBindingCodeValidationFailingNonLoinc() {
+		Observation input = new Observation();
+
+		myInstanceVal.setValidationSupport(myMockSupport);
+		addValidConcept("http://acme.org", "12345");
+
+		input.setStatus(ObservationStatus.FINAL);
+		input.getCode().addCoding().setSystem("http://acme.org").setCode("9988877");
+
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
+		assertThat(errors.toString(), errors.size(), greaterThan(0));
+		assertEquals("Code 9988877 is not a valid code in code system http://acme.org", errors.get(0).getMessage());
+		
+		
 	}
 
 	@Test

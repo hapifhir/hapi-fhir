@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
+// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -931,7 +931,7 @@ public class EnrollmentRequest extends DomainResource {
    * Path: <b>EnrollmentRequest.subjectreference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subjectreference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subjectreference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_SUBJECTREFERENCE = "subjectreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subjectreference</b>
@@ -997,7 +997,7 @@ public class EnrollmentRequest extends DomainResource {
    * Path: <b>EnrollmentRequest.subjectreference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientreference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference" )
+  @SearchParamDefinition(name="patientreference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference", target={Patient.class } )
   public static final String SP_PATIENTREFERENCE = "patientreference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patientreference</b>

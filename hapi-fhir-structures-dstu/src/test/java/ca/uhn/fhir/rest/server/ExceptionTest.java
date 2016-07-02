@@ -47,9 +47,6 @@ import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import junit.framework.AssertionFailedError;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ExceptionTest {
 
 	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";

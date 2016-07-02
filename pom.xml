@@ -257,9 +257,10 @@
 		<!-- Dependency Versions -->
 		<derby_version>10.12.1.1</derby_version>
 		<jersey_version>2.22.2</jersey_version>
-		<jetty_version>9.3.9.v20160517</jetty_version>
+		<jetty_version>9.3.10.v20160621</jetty_version>
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
 			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
+		<!-- 5.2.0 has issues with hibernate-search 5.5.3 -->
 		<hibernate_version>5.1.0.Final</hibernate_version>
 		<hibernate_validator_version>5.2.4.Final</hibernate_validator_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
@@ -267,7 +268,7 @@
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.4</phloc_commons_version>
-		<spring_version>4.2.6.RELEASE</spring_version>
+		<spring_version>4.3.0.RELEASE</spring_version>
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
@@ -643,7 +644,7 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.10.1.RELEASE</version>
+				<version>1.10.2.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -853,7 +854,7 @@
 				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
 					<artifactId>coveralls-maven-plugin</artifactId>
-					<version>4.1.0</version>
+					<version>4.2.0</version>
 					<configuration>
 						<coberturaReports>
 						</coberturaReports>

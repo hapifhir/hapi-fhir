@@ -15,10 +15,12 @@ import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -220,4 +222,21 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
+	
+	@Test
+	public void testValiedateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
+		IPrimitiveType<String> display = null;
+		Coding coding = null;
+		CodeableConcept codeableConcept = null;
+		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/v2-0487");
+		StringType code = new StringType("BRN");
+		StringType system = new StringType("http://hl7.org/fhir/v2/0487");
+		ValidateCodeResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
+		
+		ourLog.info(result.getMessage());
+		assertTrue(result.getMessage(), result.isResult());
+	}
+
+	
 }
+

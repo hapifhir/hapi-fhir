@@ -91,10 +91,12 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				throw new Exception("Failed during reading: " + spreadsheetName, e);
 			}
 
-			Element bindingsSheet = findSheetByName(spreadsheetName, "Bindings", file);
-			processBindingsSheet(bindingsSheet);
+			Element bindingsSheet = findSheetByName(spreadsheetName, "Bindings", file, false);
+			if (bindingsSheet != null) {
+				processBindingsSheet(bindingsSheet);
+			}
 
-			Element dataElementsSheet = findSheetByName(spreadsheetName, "Data Elements", file);
+			Element dataElementsSheet = findSheetByName(spreadsheetName, "Data Elements", file, true);
 			NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
 			Element table = (Element) tableList.item(0);
 
@@ -203,7 +205,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 	}
 
-	private Element findSheetByName(String spreadsheetName, String wantedName, Document file) throws Exception {
+	private Element findSheetByName(String spreadsheetName, String wantedName, Document file, boolean theFailIfNotFound) throws Exception {
 		Element retVal = null;
 		for (int i = 0; i < file.getElementsByTagName("Worksheet").getLength() && retVal == null; i++) {
 			retVal = (Element) file.getElementsByTagName("Worksheet").item(i);
@@ -212,7 +214,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			}
 		}
 
-		if (retVal == null) {
+		if (retVal == null && theFailIfNotFound) {
 			throw new Exception("Failed to find worksheet with name '" + wantedName + "' in spreadsheet: " + spreadsheetName);
 		}
 		return retVal;

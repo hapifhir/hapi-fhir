@@ -33,6 +33,7 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
@@ -75,9 +76,6 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
-
-	@Autowired
-	private ValueSetExpander myValueSetExpander;
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
@@ -272,7 +270,8 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 		try {
 			ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
 
-			ValueSetExpansionOutcome outcome = myValueSetExpander.expand(source);
+			HapiWorkerContext worker = new HapiWorkerContext(myContext, myValidationSupport);
+			ValueSetExpansionOutcome outcome = worker.expand(source);
 			for (ValueSetExpansionContainsComponent next : outcome.getValueset().getExpansion().getContains()) {
 				retVal.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
 			}

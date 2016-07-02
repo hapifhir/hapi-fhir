@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
+// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
 
 import java.util.*;
 
@@ -1885,7 +1885,7 @@ public class NamingSystem extends BaseConformance {
    * Path: <b>NamingSystem.replacedBy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
+  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference", target={NamingSystem.class } )
   public static final String SP_REPLACED_BY = "replaced-by";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>replaced-by</b>

@@ -44,12 +44,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	private IIdType myLocalValueSetId;
 	private ValueSet myLocalVs;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
 	@Before
 	@Transactional
 	public void before02() throws IOException {
@@ -59,7 +53,101 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
+
+
+	private CodeSystem createExternalCs() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+		cs.setResourceVersionId(table.getVersion());
+
+		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA").setDisplay("Child AA");
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA").setDisplay("Child AAA");
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB").setDisplay("Child AAB");
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB").setDisplay("Child AB");
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
+		cs.getConcepts().add(parentB);
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		return codeSystem;
+	}
 	
+	private void createExternalCsAndLocalVs() {
+		CodeSystem codeSystem = createExternalCs();
+
+		createLocalVs(codeSystem);
+	}
+
+	private void createExternalCsAndLocalVsWithUnknownCode() {
+		CodeSystem codeSystem = createExternalCs();
+
+		createLocalVsWithUnknownCode(codeSystem);
+	}
+
+	private void createLocalCsAndVs() {
+		//@formatter:off
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
+		codeSystem
+			.addConcept().setCode("A").setDisplay("Code A")
+				.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
+					.addConcept(new ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
+				)
+				.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
+		codeSystem
+			.addConcept().setCode("B").setDisplay("Code B")
+				.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
+				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
+		//@formatter:on
+		myCodeSystemDao.create(codeSystem, mySrd);
+
+		createLocalVs(codeSystem);
+	}
+
+	private void createLocalVs(CodeSystem codeSystem) {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
+		include.setSystem(codeSystem.getUrl());
+		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childAA");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private void createLocalVsPointingAtBuiltInCodeSystem() {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
+		include.setSystem("http://hl7.org/fhir/v3/MaritalStatus");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private void createLocalVsWithUnknownCode(CodeSystem codeSystem) {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
+		include.setSystem(codeSystem.getUrl());
+		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childFOOOOOOO");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+	}
+
 	@Test
 	public void testExpandById() throws IOException {
 		//@formatter:off
@@ -91,46 +179,71 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandLocalVsAgainstExternalCs() throws IOException {
-		createExternalCsAndLocalVs();
-		assertNotNull(myLocalValueSetId);
-		
+	public void testExpandByIdentifier() {
 		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
-			.onInstance(myLocalValueSetId)
+			.onType(ValueSet.class)
 			.named("expand")
-			.withNoParameters(Parameters.class)
+			.withParameter(Parameters.class, "identifier", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		//@formatter:on
-		
+
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		//@formatter:off
+		assertThat(resp, stringContainsInOrder(
+				"<code value=\"11378-7\"/>", 
+				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		//@formatter:on
+
+	}
+
+	// 
+	
+	@Test
+	public void testExpandByIdWithFilter() throws IOException {
+
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
 		
 	}
 
 	@Test
-	public void testExpandLocalVsWithUnknownCode() throws IOException {
-		createExternalCsAndLocalVsWithUnknownCode();
-		assertNotNull(myLocalValueSetId);
+	public void testExpandByValueSet() throws IOException {
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		
 		//@formatter:off
-		try {
-			ourClient
-				.operation()
-				.onInstance(myLocalValueSetId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid filter criteria - code does not exist: {http://example.com/my_code_system}childFOOOOOOO", e.getMessage());
-		}
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		//@formatter:off
+		assertThat(resp, stringContainsInOrder(
+				"<code value=\"11378-7\"/>", 
+				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		//@formatter:on
+
 	}
 
 	@Test
@@ -152,51 +265,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		ourLog.info(resp);
 		
 		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
-	}
-
-	@Test
-	public void testExpandLocalVsAgainstBuiltInCs() throws IOException {
-		createLocalVsPointingAtBuiltInCodeSystem();
-		assertNotNull(myLocalValueSetId);
-		
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onInstance(myLocalValueSetId)
-			.named("expand")
-			.withNoParameters(Parameters.class)
-			.execute();
-		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
-		
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		
-		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
-	}
-
-	@Test
-	public void testExpandLocalVsCanonicalAgainstExternalCs() throws IOException {
-		createExternalCsAndLocalVs();
-		assertNotNull(myLocalValueSetId);
-		
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("expand")
-			.withParameter(Parameters.class, "identifier", new UriType(URL_MY_VALUE_SET))
-			.execute();
-		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
-		
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
-		
 	}
 
 	@Test
@@ -224,100 +292,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		
 	}
 
-	@Test
-	public void testExpandByIdWithFilter() throws IOException {
-
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onInstance(myExtensionalVsId)
-			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
-			.execute();
-		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
-		
-	}
-
-	// 
-	
-	@Test
-	public void testExpandByIdentifier() {
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("expand")
-			.withParameter(Parameters.class, "identifier", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-			.execute();
-		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
-
-	}
-
-	@Test
-	@Ignore
-	public void testValidateCode() {
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("validate-code")
-			.withParameter(Parameters.class, "code", new StringType("BRN"))
-			.andParameter("identifier", new StringType("http://hl7.org/fhir/ValueSet/v2-0487"))
-			.andParameter("system", new StringType("http://hl7.org/fhir/v2/0487"))
-			.useHttpGet()
-			.execute();
-
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
-
-	}
-
-	@Test
-	public void testExpandByValueSet() throws IOException {
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("expand")
-			.withParameter(Parameters.class, "valueSet", toExpand)
-			.execute();
-		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
-
-	}
 
 	@Test
 	public void testExpandInvalidParams() throws IOException {
@@ -369,6 +343,125 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	}
 
+	@Test
+	public void testExpandLocalVsAgainstBuiltInCs() throws IOException {
+		createLocalVsPointingAtBuiltInCodeSystem();
+		assertNotNull(myLocalValueSetId);
+		
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myLocalValueSetId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+		//@formatter:on
+		
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		
+		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
+	}
+	
+	
+	
+	
+	
+	@Test
+	public void testExpandLocalVsAgainstExternalCs() throws IOException {
+		createExternalCsAndLocalVs();
+		assertNotNull(myLocalValueSetId);
+		
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myLocalValueSetId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+		//@formatter:on
+		
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		
+		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
+		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
+		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		
+	}
+
+	@Test
+	public void testExpandLocalVsCanonicalAgainstExternalCs() throws IOException {
+		createExternalCsAndLocalVs();
+		assertNotNull(myLocalValueSetId);
+		
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "identifier", new UriType(URL_MY_VALUE_SET))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+		//@formatter:on
+		
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		
+		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
+		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
+		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		
+	}
+
+	@Test
+	public void testExpandLocalVsWithUnknownCode() throws IOException {
+		createExternalCsAndLocalVsWithUnknownCode();
+		assertNotNull(myLocalValueSetId);
+		
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onInstance(myLocalValueSetId)
+				.named("expand")
+				.withNoParameters(Parameters.class)
+				.execute();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid filter criteria - code does not exist: {http://example.com/my_code_system}childFOOOOOOO", e.getMessage());
+		}
+		//@formatter:on
+	}
+
+	@Test
+	public void testValiedateCodeAgainstBuiltInSystem() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new StringType("BRN"))
+			.andParameter("identifier", new StringType("http://hl7.org/fhir/ValueSet/v2-0487"))
+			.andParameter("system", new StringType("http://hl7.org/fhir/v2/0487"))
+			.useHttpGet()
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("result", respParam.getParameter().get(0).getName());
+		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).getValue().booleanValue());
+		
+		assertEquals("message", respParam.getParameter().get(1).getName());
+		assertThat(((StringType)respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
+
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Burn", ((StringType)respParam.getParameter().get(2).getValue()).getValue());
+	}
+
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() {
@@ -405,103 +498,10 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		
 		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).booleanValue());
 	}
-	
-	
-	
-	
-	
-	private CodeSystem createExternalCs() {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
-
-		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
-		cs.getConcepts().add(parentA);
-
-		TermConcept childAA = new TermConcept(cs, "childAA").setDisplay("Child AA");
-		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAA = new TermConcept(cs, "childAAA").setDisplay("Child AAA");
-		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAB = new TermConcept(cs, "childAAB").setDisplay("Child AAB");
-		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
-
-		TermConcept childAB = new TermConcept(cs, "childAB").setDisplay("Child AB");
-		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
-
-		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
-		cs.getConcepts().add(parentB);
-
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
-		return codeSystem;
-	}
-
-	private void createExternalCsAndLocalVs() {
-		CodeSystem codeSystem = createExternalCs();
-
-		createLocalVs(codeSystem);
-	}
-
-	private void createExternalCsAndLocalVsWithUnknownCode() {
-		CodeSystem codeSystem = createExternalCs();
-
-		createLocalVsWithUnknownCode(codeSystem);
-	}
-
-	private void createLocalCsAndVs() {
-		//@formatter:off
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
-		codeSystem
-			.addConcept().setCode("A").setDisplay("Code A")
-				.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
-					.addConcept(new ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
-				)
-				.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
-		codeSystem
-			.addConcept().setCode("B").setDisplay("Code B")
-				.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
-				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
-		//@formatter:on
-		myCodeSystemDao.create(codeSystem, mySrd);
-
-		createLocalVs(codeSystem);
-	}
-
-
-	private void createLocalVs(CodeSystem codeSystem) {
-		myLocalVs = new ValueSet();
-		myLocalVs.setUrl(URL_MY_VALUE_SET);
-		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
-		include.setSystem(codeSystem.getUrl());
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childAA");
-		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	private void createLocalVsWithUnknownCode(CodeSystem codeSystem) {
-		myLocalVs = new ValueSet();
-		myLocalVs.setUrl(URL_MY_VALUE_SET);
-		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
-		include.setSystem(codeSystem.getUrl());
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childFOOOOOOO");
-		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	private void createLocalVsPointingAtBuiltInCodeSystem() {
-		myLocalVs = new ValueSet();
-		myLocalVs.setUrl(URL_MY_VALUE_SET);
-		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
-		include.setSystem("http://hl7.org/fhir/v3/MaritalStatus");
-		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

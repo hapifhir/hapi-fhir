@@ -35,9 +35,11 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
-						<li>Spring (JPA, Web Tester): 4.2.5 -&gt; 4.2.6</li>
+						<li>Spring (JPA, Web Tester): 4.2.5 -&gt; 4.3.0</li>
 						<li>Spring-Data (JPA): 1.9.2 -&gt; 1.10.1</li>
+						<!--<li>Hibernate ORM (JPA): 5.1.0 -&gt; 5.2.0</li>-->
 						<li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.3</li>
+						<li>Jetty (CLI): 9.3.9 -&gt; 9.3.10</li>
 					</ul>
 				]]>
 			</action>

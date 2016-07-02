@@ -414,21 +414,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
               } else {
                 long t = System.nanoTime();
                 
-                boolean atLeastOneSystemIsSupported = false;
-                for (Coding nextCoding : cc.getCoding()) {
-                  String nextSystem = nextCoding.getSystem();
-                  if (isNotBlank(nextSystem) && context.supportsSystem(nextSystem)) {
-                     atLeastOneSystemIsSupported = true;
-                     break;
-                  }
-                }
-                
-                if (!atLeastOneSystemIsSupported && binding.getStrength() == BindingStrength.EXAMPLE) {
-                  // ignore this since we can't validate but it doesn't matter..
-                } else {
+                // Check whether the codes are appropriate for the type of binding we have
+                boolean bindingsOk = true;
+                if (binding.getStrength() != BindingStrength.EXAMPLE) {
                   ValidationResult vr = context.validateCode(cc, valueset);
-                  txTime = txTime + (System.nanoTime() - t);
                   if (!vr.isOk()) {
+                    bindingsOk = false;
                     if (binding.getStrength() == BindingStrength.REQUIRED)
                       rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "None of the codes provided are in the value set " + describeReference(binding.getValueSet()) + " (" + valueset.getUrl()+", and a code from this value set is required");
                     else if (binding.getStrength() == BindingStrength.EXTENSIBLE)
@@ -437,6 +428,23 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                       hint(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false,  "None of the codes provided are in the value set " + describeReference(binding.getValueSet()) + " (" + valueset.getUrl() + ", and a code is recommended to come from this value set");
                   }
                 }
+
+                // Then, for any codes that are in code systems we are able
+                // to validate, we'll validate that the codes actually exist
+                if (bindingsOk) {
+	                for (Coding nextCoding : cc.getCoding()) {
+	                  String nextCode = nextCoding.getCode();
+	                  String nextSystem = nextCoding.getSystem();
+	                  if (isNotBlank(nextCode) && isNotBlank(nextSystem) && context.supportsSystem(nextSystem)) {
+	                  	ValidationResult vr = context.validateCode(nextSystem, nextCode, null);
+	                  	if (!vr.isOk()) {
+	                        warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "Code {0} is not a valid code in code system {1}", nextCode, nextSystem);
+	                  	}
+	                  }
+	                }
+                }
+
+                txTime = txTime + (System.nanoTime() - t);
               }
             } catch (Exception e) {
               warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "Error "+e.getMessage()+" validating CodeableConcept");

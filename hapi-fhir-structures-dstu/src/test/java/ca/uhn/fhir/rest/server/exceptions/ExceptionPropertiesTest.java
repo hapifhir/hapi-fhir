@@ -11,6 +11,8 @@ import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.util.TestUtil;
@@ -27,6 +29,10 @@ public class ExceptionPropertiesTest {
 		new NotImplementedOperationException(null, new OperationOutcome());
 		new FhirClientInappropriateForServerException(new Exception());
 		new FhirClientInappropriateForServerException("", new Exception());
+		
+		assertEquals("Resource Patient/123 is gone/deleted", new ResourceGoneException(new IdDt("Patient/123")).getMessage());
+		assertEquals("FOO", new ResourceGoneException("FOO", new OperationOutcome()).getMessage());
+		assertEquals("Resource of type Practitioner with ID Patient/123 is gone/deleted", new ResourceGoneException(Practitioner.class, new IdDt("Patient/123")).getMessage());
 	}
 	
 	@SuppressWarnings("deprecation")

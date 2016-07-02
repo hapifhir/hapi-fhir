@@ -31,9 +31,9 @@ public class Element extends Base {
 		CONTAINED, BUNDLE_ENTRY, PARAMETER;
 
     public static SpecialElement fromProperty(Property property) {
-      if (property.getStructure().getId().equals("Parameters"))
+      if (property.getStructure().getIdElement().getIdPart().equals("Parameters"))
         return PARAMETER;
-      if (property.getStructure().getId().equals("Bundle"))
+      if (property.getStructure().getIdElement().getIdPart().equals("Bundle"))
         return BUNDLE_ENTRY;
       if (property.getName().equals("contained")) 
         return CONTAINED;

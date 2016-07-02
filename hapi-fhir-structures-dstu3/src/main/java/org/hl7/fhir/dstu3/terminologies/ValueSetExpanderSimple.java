@@ -232,8 +232,13 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 		if (vs == null)
 			throw new TerminologyServiceException("Unable to find imported value set " + value);
 		ValueSetExpansionOutcome vso = factory.getExpander().expand(vs);
-		if (vso.getService() != null)
-			throw new TerminologyServiceException("Unable to expand imported value set " + value);
+		
+		if (isNotBlank(vso.getError())) {
+			throw new TerminologyServiceException("Unable to expand imported value set \"" + value + "\" - Error was: " + vso.getError());
+		}
+		if (vso.getService() != null) {
+			throw new TerminologyServiceException("Unable to expand imported value set \"" + value + "\"");
+		}
 		if (vs.hasVersion())
 			if (!existsInParams(params, "version", new UriType(vs.getUrl() + "?version=" + vs.getVersion())))
 				params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(vs.getUrl() + "?version=" + vs.getVersion())));

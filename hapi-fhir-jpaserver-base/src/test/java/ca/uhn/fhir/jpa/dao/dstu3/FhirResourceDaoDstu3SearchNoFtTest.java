@@ -287,20 +287,22 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testIndexNoDuplicatesUri() {
-		ConceptMap res = new ConceptMap();
-		res.addGroup().setSource("http://foo");
-		res.addGroup().setSource("http://foo");
-		res.addGroup().setSource("http://bar");
-		res.addGroup().setSource("http://bar");
+		ValueSet res = new ValueSet();
+		res.getCompose().addInclude().setSystem("http://foo");
+		res.getCompose().addInclude().setSystem("http://bar");
+		res.getCompose().addInclude().setSystem("http://foo");
+		res.getCompose().addInclude().setSystem("http://bar");
+		res.getCompose().addInclude().setSystem("http://foo");
+		res.getCompose().addInclude().setSystem("http://bar");
 		
-		IIdType id = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = myValueSetDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 		
 		Class<ResourceIndexedSearchParamUri> type = ResourceIndexedSearchParamUri.class;
 		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 		
-		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(ConceptMap.SP_DEPENDSON, new UriParam("http://foo")));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myValueSetDao.search(ValueSet.SP_REFERENCE, new UriParam("http://foo")));
 		assertThat(actual, contains(id));
 	}
 

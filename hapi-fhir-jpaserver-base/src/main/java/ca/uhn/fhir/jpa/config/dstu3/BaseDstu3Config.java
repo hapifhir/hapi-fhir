@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.config.dstu3;
 
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.validation.IResourceValidator.BestPracticeWarningLevel;
 
@@ -58,11 +57,6 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
 		return new TerminologyLoaderSvc();
-	}
-
-	@Bean
-	public HapiWorkerContext workerContext() {
-		return new HapiWorkerContext(defaultFhirContext(), validationSupportChainDstu3());
 	}
 
 	@Bean
