@@ -201,7 +201,7 @@ public class TestRestfulServer extends RestfulServer {
 		 * This is a simple paging strategy that keeps the last 10 
 		 * searches in memory
 		 */
-		setPagingProvider(new FifoMemoryPagingProvider(10));
+		setPagingProvider(new FifoMemoryPagingProvider(10).setMaximumPageSize(500));
 
 		/*
 		 * Load interceptors for the server from Spring
