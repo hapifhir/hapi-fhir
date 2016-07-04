@@ -24,6 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
@@ -70,10 +71,9 @@ public class TestUtil {
 		 * but it helps us make sure we don't have any tests that depend on a particular
 		 * environment 
 		 */
-		Locale[] available = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
-		Locale newLocale = available[(int) (Math.random() * available.length)];
-		Locale.setDefault(newLocale);
-		ourLog.info("Tests are running in locale: " + newLocale.getDisplayName());
+		Locale[] availableLocales = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
+		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
+		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
 		if (Math.random() < 0.5) {
 			ourLog.info("Tests are using WINDOWS line endings and ISO-8851-1");
 			System.setProperty("file.encoding", "ISO-8859-1");
@@ -83,7 +83,10 @@ public class TestUtil {
 			System.setProperty("file.encoding", "UTF-8");
 			System.setProperty("line.separator", "\n");
 		}
-
+		String availableTimeZones[] = { "GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30" }; 
+		String timeZone = availableTimeZones[(int)(Math.random() * availableTimeZones.length)];
+		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
+		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
 		
 	}
 	

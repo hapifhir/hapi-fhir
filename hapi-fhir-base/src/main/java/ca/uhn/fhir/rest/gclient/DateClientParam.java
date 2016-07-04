@@ -101,35 +101,40 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 		public ICriterion<DateClientParam> day(Date theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
-			return new Criterion(myPrefix, dt.getValueAsString());
+			String valueAsString = dt.getValueAsString();
+			return new Criterion(myPrefix, valueAsString);
 		}
 
 		@Override
 		public ICriterion<DateClientParam> day(String theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.DAY);
-			return new Criterion(myPrefix , dt.getValueAsString());
+			String valueAsString = dt.getValueAsString();
+			return new Criterion(myPrefix , valueAsString);
 		}
 
 		@Override
 		public ICriterion<DateClientParam> now() {
 			DateTimeDt dt = DateTimeDt.withCurrentTime();
 			dt.setPrecision(TemporalPrecisionEnum.SECOND);
-			return new Criterion(myPrefix , dt.getValueAsString());
+			String valueAsString = dt.getValueAsString();
+			return new Criterion(myPrefix , valueAsString);
 		}
 
 		@Override
 		public ICriterion<DateClientParam> second(Date theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.SECOND);
-			return new Criterion(myPrefix , dt.getValueAsString());
+			String valueAsString = dt.getValueAsString();
+			return new Criterion(myPrefix , valueAsString);
 		}
 
 		@Override
 		public ICriterion<DateClientParam> second(String theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
 			dt.setPrecision(TemporalPrecisionEnum.SECOND);
-			return new Criterion(myPrefix , dt.getValueAsString());
+			String valueAsString = dt.getValueAsString();
+			return new Criterion(myPrefix , valueAsString);
 		}
 
 	}

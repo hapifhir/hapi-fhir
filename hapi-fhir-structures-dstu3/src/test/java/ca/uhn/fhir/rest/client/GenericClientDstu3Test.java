@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -685,7 +687,7 @@ public class GenericClientDstu3Test {
 	}
 
 	@Test
-	public void testSearchByDate() throws Exception {
+	public void testSearchByDate() throws Exception {		
 		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -702,66 +704,67 @@ public class GenericClientDstu3Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		Date date = new DateTimeDt("2011-01-02T22:33:01Z").getValue();
+		DateTimeDt now = DateTimeDt.withCurrentTime();
+		String dateString = now.getValueAsString().substring(0, 10);
 
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
-			.where(Patient.BIRTHDATE.after().day("2011-01-02"))
+			.where(Patient.BIRTHDATE.after().day(dateString))
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt"+dateString, capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
-			.where(Patient.BIRTHDATE.after().day(date))
+			.where(Patient.BIRTHDATE.after().day(now.getValue()))
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt"+dateString, capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
-			.where(Patient.BIRTHDATE.afterOrEquals().day("2011-01-02"))
+			.where(Patient.BIRTHDATE.afterOrEquals().day(dateString))
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals("http://example.com/fhir/Patient?birthdate=ge2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=ge"+dateString, capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
-			.where(Patient.BIRTHDATE.before().day("2011-01-02"))
+			.where(Patient.BIRTHDATE.before().day(dateString))
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals("http://example.com/fhir/Patient?birthdate=lt2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=lt"+dateString, capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
-			.where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-02"))
+			.where(Patient.BIRTHDATE.beforeOrEquals().day(dateString))
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals("http://example.com/fhir/Patient?birthdate=le2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate=le"+dateString, capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
-			.where(Patient.BIRTHDATE.exactly().day("2011-01-02"))
+			.where(Patient.BIRTHDATE.exactly().day(dateString))
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals("http://example.com/fhir/Patient?birthdate=2011-01-02", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?birthdate="+dateString, capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		//@formatter:off
@@ -774,16 +777,14 @@ public class GenericClientDstu3Test {
 		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02T22:33:01Z", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
-		String expDate = new DateTimeDt(date).getValueAsString();
-
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
-			.where(Patient.BIRTHDATE.after().second(date))
+			.where(Patient.BIRTHDATE.after().second(now.getValueAsString()))
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + expDate, UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + now.getValueAsString(), UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		//@formatter:off
@@ -794,7 +795,7 @@ public class GenericClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(capt.getAllValues().get(idx).getURI().toString(), startsWith("http://example.com/fhir/Patient?birthdate=gt2"));
-		String dateString = UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()).substring(44);
+		dateString = UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()).substring(44);
 		ourLog.info(dateString);
 		assertEquals(TemporalPrecisionEnum.SECOND, new DateTimeDt(dateString).getPrecision());
 		idx++;
