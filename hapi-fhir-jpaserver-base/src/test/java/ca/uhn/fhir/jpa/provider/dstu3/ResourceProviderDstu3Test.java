@@ -2803,9 +2803,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testValidateResourceWithId() throws IOException {
 
 		Patient patient = new Patient();
-		patient.setId("123");
+		patient.setId("A123");
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
+		myPatientDao.update(patient, mySrd);
 
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
@@ -2813,7 +2814,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/123/$validate");
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/A123/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
