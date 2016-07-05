@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Claim;
@@ -89,11 +90,16 @@ public class ModelDstu3Test {
 		}
 	}
 	
+	
+//	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelDstu3Test.class);
+
+	
 	/**
 	 * See #325
 	 */
 	@Test
 	public void testEqualsDeep() throws Exception {
+		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		Date date = dateFormat.parse("19920925");
 		FhirContext context = FhirContext.forDstu3();
