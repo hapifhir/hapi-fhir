@@ -404,6 +404,10 @@
 				end of the resource instead of in the correct
 				order
 			</action>
+			<action type="fix">
+				Fix STU3 JPA resource providers to allow validate operation 
+				at instance level
+			</action>
 		</release>
 		<release version="1.5" date="2016-04-20">
 			<action type="fix" issue="339">

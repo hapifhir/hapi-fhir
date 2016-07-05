@@ -423,6 +423,60 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
+	public void testValidateRawXmlResourceWithEmptyPrimitive() {
+		// @formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><name><given/></name></Patient>";
+		// @formatter:on
+
+		ValidationResult output = myVal.validateWithResult(input);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertThat(output.getMessages().get(0).getMessage(), containsString("Element must have some content"));
+	}
+
+	@Test
+	public void testValidateRawXmlResourceWithPrimitiveContainingOnlyAnExtension() {
+		// @formatter:off
+		String input = "<ActivityDefinition xmlns=\"http://hl7.org/fhir\">\n" + 
+				"                        <id value=\"referralToMentalHealthCare\"/>\n" + 
+				"                        <status value=\"draft\"/>\n" + 
+				"                        <description value=\"refer to primary care mental-health integrated care program for evaluation and treatment of mental health conditions now\"/>\n" + 
+				"                        <relatedResource>\n" + 
+				"                                <type value=\"citation\"/>\n" + 
+				"                                <document>\n" + 
+				"                                        <url value=\"blah blah blah\"/>\n" + 
+				"                                        <title value=\"citation title\"/>\n" + 
+				"                                </document>\n" + 
+				"                                <resource>\n" + 
+				"                                        <reference value=\"DocumentReference/123\"/> <!-- DocumentReference -->\n" + 
+				"                                        <display value=\"citation title\"/>\n" + 
+				"                                </resource>\n" + 
+				"                        </relatedResource>\n" + 
+				"                        <category value=\"referral\"/>\n" + 
+				"                        <code>\n" + 
+				"                                <coding>\n" + 
+				"                                        <!-- Error: Connection to http://localhost:960 refused -->\n" + 
+				"                                        <!--<system value=\"http://snomed.info/sct\"/>-->\n" + 
+				"                                        <code value=\"306206005\"/>\n" + 
+				"                                </coding>\n" + 
+				"                        </code>\n" + 
+				"                        <!-- Specifying this this way results in a null reference exception in the validator -->\n" + 
+				"                        <timingTiming>\n" + 
+				"                                <event>\n" + 
+				"                                        <extension url=\"http://fhir.org/cql-expression\">\n" + 
+				"                                                <valueString value=\"Now()\"/>\n" + 
+				"                                        </extension>\n" + 
+				"                                </event>\n" + 
+				"                        </timingTiming>\n" + 
+				"                        <participantType value=\"practitioner\"/>\n" + 
+				"                </ActivityDefinition>";
+		// @formatter:on
+
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(output.toString(), 0, res.size());
+	}
+
+	@Test
 	public void testValidateRawXmlResourceBadAttributes() {
 		//@formatter:off
     String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "<foo value=\"222\"/>"

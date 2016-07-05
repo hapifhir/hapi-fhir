@@ -10,6 +10,8 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -135,7 +137,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	}
 
 	@Test
-	public void testCreateWithClientSuppliedId() {
+	public void testCreateWithClientSuppliedId() throws Exception {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testCreateWithId01");
 
 		Patient p1 = new Patient();

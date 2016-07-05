@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.Bundle;
@@ -129,9 +130,20 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 
 		validator.registerValidatorModule(new IdChecker(theMode));
 
+		IBaseResource resourceToValidateById = null;
+		if (theId != null && theId.hasResourceType() && theId.hasIdPart()) {
+			Class<? extends IBaseResource> type = getContext().getResourceDefinition(theId.getResourceType()).getImplementingClass();
+			IFhirResourceDao<? extends IBaseResource> dao = getDao(type);
+			resourceToValidateById = dao.read(theId, theRequestDetails);
+		}
+		
 		ValidationResult result;
 		if (theResource == null) {
-			throw new InvalidRequestException("No resource supplied for $validate operation (resource is required unless mode is \"delete\")");
+			if (resourceToValidateById != null) {
+				result = validator.validateWithResult(resourceToValidateById);
+			} else {
+				throw new InvalidRequestException("No resource supplied for $validate operation (resource is required unless mode is \"delete\")");
+			}
 		} else if (isNotBlank(theRawResource)) {
 			result = validator.validateWithResult(theRawResource);
 		} else {

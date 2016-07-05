@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -30,6 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -48,6 +50,7 @@ public class ValidateDstu3Test {
 	private static int ourPort;
 	private static Server ourServer;
 	public static Patient ourLastPatient;
+	private static IdType ourLastId;
 
 	@Before()
 	public void before() {
@@ -57,7 +60,6 @@ public class ValidateDstu3Test {
 		ourLastMode = null;
 		ourLastProfile = null;
 	}
-
 
 	@Test
 	public void testValidate() throws Exception {
@@ -218,6 +220,25 @@ public class ValidateDstu3Test {
 		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
 	}
 
+	@Test
+	public void testValidateWithGet() throws Exception {
+		ourOutcomeToReturn = new OperationOutcome();
+		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$validate");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String resp = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
+		assertEquals(null, ourLastPatient);
+		assertEquals("Patient", ourLastId.getResourceType());
+		assertEquals("123", ourLastId.getIdPart());
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -271,15 +292,16 @@ public class ValidateDstu3Test {
 		}
 
 		@Validate()
-		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
-			
+		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @IdParam IdType theId, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
+
 			ourLastPatient = thePatient;
+			ourLastId = theId;
 			IdType id;
 			if (thePatient != null) {
-			id = new IdType(thePatient.getIdentifier().get(0).getValue());
-			if (thePatient.getIdElement().isEmpty() == false) {
-				id = thePatient.getIdElement();
-			}
+				id = new IdType(thePatient.getIdentifier().get(0).getValue());
+				if (thePatient.getIdElement().isEmpty() == false) {
+					id = thePatient.getIdElement();
+				}
 			} else {
 				id = new IdType("1");
 			}

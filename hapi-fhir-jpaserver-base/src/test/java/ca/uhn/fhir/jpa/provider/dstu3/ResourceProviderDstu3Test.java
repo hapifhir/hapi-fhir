@@ -2706,6 +2706,30 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
+	@Test
+	public void testValidateResourceInstanceOnServer() throws IOException {
+
+		Patient patient = new Patient();
+		patient.addName().addGiven("James");
+		patient.setBirthDateElement(new DateType("2011-02-02"));
+		patient.addContact().setGender(AdministrativeGender.MALE);
+		patient.addCommunication().setPreferred(true); // missing language
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		
+		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart() + "/$validate");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertThat(resp, containsString("SHALL at least contain a contact's details or a reference to an organization"));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
 	// Y
 	@Test
 	public void testValidateResourceHuge() throws IOException {
