@@ -4,21 +4,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.PrePopulatedValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -104,65 +100,6 @@ public class ValidateDirectory {
          ourLog.info("Result:\n{}", xmlParser.setPrettyPrint(true).encodeResourceToString(oo));
       }
       
-   }
-
-   public static class PrePopulatedValidationSupport implements IValidationSupport {
-
-      private Map<String, StructureDefinition> myStructureDefinitions;
-      private Map<String, ValueSet> myValueSets;
-      private Map<String, CodeSystem> myCodeSystems;
-
-      public PrePopulatedValidationSupport(Map<String, StructureDefinition> theStructureDefinitions, Map<String, ValueSet> theValueSets, Map<String, CodeSystem> theCodeSystems) {
-         myStructureDefinitions = theStructureDefinitions;
-         myValueSets = theValueSets;
-         myCodeSystems = theCodeSystems;
-      }
-
-      @Override
-      public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-         return null;
-      }
-
-      @Override
-      public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-         return new ArrayList<StructureDefinition>(myStructureDefinitions.values());
-      }
-
-      @Override
-      public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-         return myCodeSystems.get(theSystem);
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-         if (theClass.equals(StructureDefinition.class)) {
-            return (T) myStructureDefinitions.get(theUri);
-         }
-         if (theClass.equals(ValueSet.class)) {
-            return (T) myValueSets.get(theUri);
-         }
-         if (theClass.equals(CodeSystem.class)) {
-            return (T) myCodeSystems.get(theUri);
-         }
-         return null;
-      }
-
-      @Override
-      public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-         return myStructureDefinitions.get(theUrl);
-      }
-
-      @Override
-      public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-         return false;
-      }
-
-      @Override
-      public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-         return null;
-      }
-
    }
 
 }

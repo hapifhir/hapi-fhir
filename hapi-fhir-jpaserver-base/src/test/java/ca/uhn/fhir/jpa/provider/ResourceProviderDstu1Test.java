@@ -14,6 +14,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,9 +27,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
@@ -81,6 +85,8 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	private static Server ourServer;
 	private static String ourServerBase;
 	private static CloseableHttpClient ourHttpClient;
+	private static EntityManager ourEntityManager;
+	private static PlatformTransactionManager ourTxManager;
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -542,9 +548,10 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
 
 		ourDaoConfig = (DaoConfig) ourAppCtx.getBean(DaoConfig.class);
-
 		ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
-
+		ourEntityManager = ourAppCtx.getBean(EntityManager.class);
+		ourTxManager = ourAppCtx.getBean(PlatformTransactionManager.class);
+		
 		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServer.setResourceProviders(rpsDev);
 
@@ -581,6 +588,12 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		builder.setConnectionManager(connectionManager);
 		ourHttpClient = builder.build();
 
+
+	}
+	
+	@Before
+	public void before() {
+		super.purgeDatabase(ourEntityManager, ourTxManager);
 	}
 
 }
