@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.6" date="TBD">
+		<release version="1.6" date="2016-07-07">
 			<action type="fix">
 				Performance has been improved for the initial FhirContext
 				object creation by avoiding a lot of unnecessary reflection. HAPI FHIR
@@ -360,7 +360,7 @@
 				Server parameters annotated with 
 				<![CDATA[<code>@Since</code>]]>
 				or
-				<![CDATA[<code>@CountS</code>]]>
+				<![CDATA[<code>@Count</code>]]>
 				which are of a FHIR type such as IntegerDt or DateTimeType will
 				now be set to null if the client's URL does not
 				contain this parameter. Previously they would be populated
