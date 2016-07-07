@@ -202,7 +202,7 @@
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateServerBaseIfConfiguredToDoSo(String theServerBase, <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpClient.html">IHttpClient</a> theHttpClient, <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">BaseClient</a> theClient) {
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> 		String serverBase = normalizeBaseUrlForMap(theServerBase);
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> 
-<a class="jxr_linenumber" name="L197" href="#L197">197</a> 		<strong class="jxr_keyword">switch</strong> (myServerValidationMode) {
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 		<strong class="jxr_keyword">switch</strong> (getServerValidationMode()) {
 <a class="jxr_linenumber" name="L198" href="#L198">198</a> 		<strong class="jxr_keyword">case</strong> NEVER:
 <a class="jxr_linenumber" name="L199" href="#L199">199</a> 			<strong class="jxr_keyword">break</strong>;
 <a class="jxr_linenumber" name="L200" href="#L200">200</a> 		<strong class="jxr_keyword">case</strong> ONCE:
@@ -275,99 +275,84 @@
 <a class="jxr_linenumber" name="L267" href="#L267">267</a> 		myPoolMaxPerRoute = thePoolMaxPerRoute;
 <a class="jxr_linenumber" name="L268" href="#L268">268</a> 		resetHttpClient();
 <a class="jxr_linenumber" name="L269" href="#L269">269</a> 	}
-<a class="jxr_linenumber" name="L270" href="#L270">270</a> 	
-<a class="jxr_linenumber" name="L271" href="#L271">271</a> 	 <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">	 * Instantiates a new client invocation handler</em>
-<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">	 * @param theClient </em>
-<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment">	 *                 the client which will invoke the call</em>
-<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">	 * @param theUrlBase </em>
-<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment">	 *                 the url base</em>
-<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">	 * @param theMethodToReturnValue</em>
-<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">	 * @param theBindings</em>
-<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">	 * @param theMethodToLambda</em>
-<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">	 * @return a newly created client invocation handler</em>
-<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L282" href="#L282">282</a> 	ClientInvocationHandler newInvocationHandler(<a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpClient.html">IHttpClient</a> theClient, String theUrlBase, Map&lt;Method, Object&gt; theMethodToReturnValue, Map&lt;Method, BaseMethodBinding&lt;?&gt;&gt; theBindings, Map&lt;Method, ClientInvocationHandlerFactory.ILambda&gt; theMethodToLambda) {
-<a class="jxr_linenumber" name="L283" href="#L283">283</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/ClientInvocationHandler.html">ClientInvocationHandler</a>(theClient, getFhirContext(), theUrlBase.toString(), theMethodToReturnValue,
-<a class="jxr_linenumber" name="L284" href="#L284">284</a> 				theBindings, theMethodToLambda, <strong class="jxr_keyword">this</strong>);
-<a class="jxr_linenumber" name="L285" href="#L285">285</a> 	}
-<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
-<a class="jxr_linenumber" name="L287" href="#L287">287</a> 	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	@Override
-<a class="jxr_linenumber" name="L289" href="#L289">289</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateServerBase(String theServerBase, <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpClient.html">IHttpClient</a> theHttpClient, <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">BaseClient</a> theClient) {
-<a class="jxr_linenumber" name="L290" href="#L290">290</a> 		GenericClient client = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">GenericClient</a>(myContext, theHttpClient, theServerBase, <strong class="jxr_keyword">this</strong>);
-<a class="jxr_linenumber" name="L291" href="#L291">291</a> 		client.setEncoding(theClient.getEncoding());
-<a class="jxr_linenumber" name="L292" href="#L292">292</a> 		<strong class="jxr_keyword">for</strong> (IClientInterceptor interceptor : theClient.getInterceptors()) {
-<a class="jxr_linenumber" name="L293" href="#L293">293</a> 			client.registerInterceptor(interceptor);
-<a class="jxr_linenumber" name="L294" href="#L294">294</a> 		}
-<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		client.setDontValidateConformance(<strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L296" href="#L296">296</a> 		
-<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		IBaseResource conformance;
-<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L299" href="#L299">299</a> 			@SuppressWarnings(<span class="jxr_string">"rawtypes"</span>)
-<a class="jxr_linenumber" name="L300" href="#L300">300</a> 			Class implementingClass = myContext.getResourceDefinition(<span class="jxr_string">"Conformance"</span>).getImplementingClass();
-<a class="jxr_linenumber" name="L301" href="#L301">301</a> 			conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
-<a class="jxr_linenumber" name="L302" href="#L302">302</a> 		} <strong class="jxr_keyword">catch</strong> (FhirClientConnectionException e) {
-<a class="jxr_linenumber" name="L303" href="#L303">303</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(myContext.getLocalizer().getMessage(RestfulClientFactory.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"failedToRetrieveConformance"</span>, theServerBase + Constants.URL_TOKEN_METADATA), e);
-<a class="jxr_linenumber" name="L304" href="#L304">304</a> 		}
-<a class="jxr_linenumber" name="L305" href="#L305">305</a> 
-<a class="jxr_linenumber" name="L306" href="#L306">306</a> 		FhirTerser t = myContext.newTerser();
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 		String serverFhirVersionString = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> 		Object value = t.getSingleValueOrNull(conformance, <span class="jxr_string">"fhirVersion"</span>);
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> 		<strong class="jxr_keyword">if</strong> (value instanceof IPrimitiveType) {
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> 			serverFhirVersionString = ((IPrimitiveType&lt;?&gt;) value).getValueAsString();
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> 
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> 	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 	@Override
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateServerBase(String theServerBase, <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpClient.html">IHttpClient</a> theHttpClient, <a href="../../../../../ca/uhn/fhir/rest/client/BaseClient.html">BaseClient</a> theClient) {
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 		GenericClient client = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/GenericClient.html">GenericClient</a>(myContext, theHttpClient, theServerBase, <strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 		client.setEncoding(theClient.getEncoding());
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 		<strong class="jxr_keyword">for</strong> (IClientInterceptor interceptor : theClient.getInterceptors()) {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 			client.registerInterceptor(interceptor);
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> 		}
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 		client.setDontValidateConformance(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> 		
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> 		IBaseResource conformance;
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> 			@SuppressWarnings(<span class="jxr_string">"rawtypes"</span>)
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 			Class implementingClass = myContext.getResourceDefinition(<span class="jxr_string">"Conformance"</span>).getImplementingClass();
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 			conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 		} <strong class="jxr_keyword">catch</strong> (FhirClientConnectionException e) {
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 			String msg = myContext.getLocalizer().getMessage(RestfulClientFactory.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"failedToRetrieveConformance"</span>, theServerBase + Constants.URL_TOKEN_METADATA);
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientConnectionException.html">FhirClientConnectionException</a>(msg, e);
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 		}
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 		FhirTerser t = myContext.newTerser();
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 		String serverFhirVersionString = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		Object value = t.getSingleValueOrNull(conformance, <span class="jxr_string">"fhirVersion"</span>);
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 		<strong class="jxr_keyword">if</strong> (value instanceof IPrimitiveType) {
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 			serverFhirVersionString = ((IPrimitiveType&lt;?&gt;) value).getValueAsString();
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 		}
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		FhirVersionEnum serverFhirVersionEnum = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(serverFhirVersionString)) {
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 			<em class="jxr_comment">// we'll be lenient and accept this</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 			<strong class="jxr_keyword">if</strong> (serverFhirVersionString.startsWith(<span class="jxr_string">"0.80"</span>) || serverFhirVersionString.startsWith(<span class="jxr_string">"0.0.8"</span>)) {
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (serverFhirVersionString.startsWith(<span class="jxr_string">"0.4"</span>)) {
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (serverFhirVersionString.startsWith(<span class="jxr_string">"0.5"</span>)) {
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 				<em class="jxr_comment">// we'll be lenient and accept this</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 				ourLog.debug(<span class="jxr_string">"Server conformance statement indicates unknown FHIR version: {}"</span>, serverFhirVersionString);
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 			}
 <a class="jxr_linenumber" name="L311" href="#L311">311</a> 		}
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 		FhirVersionEnum serverFhirVersionEnum = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(serverFhirVersionString)) {
-<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			<em class="jxr_comment">// we'll be lenient and accept this</em>
-<a class="jxr_linenumber" name="L315" href="#L315">315</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L316" href="#L316">316</a> 			<strong class="jxr_keyword">if</strong> (serverFhirVersionString.startsWith(<span class="jxr_string">"0.80"</span>) || serverFhirVersionString.startsWith(<span class="jxr_string">"0.0.8"</span>)) {
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
-<a class="jxr_linenumber" name="L318" href="#L318">318</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (serverFhirVersionString.startsWith(<span class="jxr_string">"0.4"</span>)) {
-<a class="jxr_linenumber" name="L319" href="#L319">319</a> 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (serverFhirVersionString.startsWith(<span class="jxr_string">"0.5"</span>)) {
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L323" href="#L323">323</a> 				<em class="jxr_comment">// we'll be lenient and accept this</em>
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 				ourLog.debug(<span class="jxr_string">"Server conformance statement indicates unknown FHIR version: {}"</span>, serverFhirVersionString);
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 			}
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 		}
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		<strong class="jxr_keyword">if</strong> (serverFhirVersionEnum != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 			<strong class="jxr_keyword">if</strong> (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientInappropriateForServerException.html">FhirClientInappropriateForServerException</a>(myContext.getLocalizer().getMessage(RestfulClientFactory.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"wrongVersionInConformance"</span>, theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 			}
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		}
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 		myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 	}
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 	@Override
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/ServerValidationModeEnum.html">ServerValidationModeEnum</a> getServerValidationModeEnum() {
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 		<strong class="jxr_keyword">return</strong> getServerValidationMode();
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 	}
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 
-<a class="jxr_linenumber" name="L344" href="#L344">344</a> 	@Override
-<a class="jxr_linenumber" name="L345" href="#L345">345</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setServerValidationModeEnum(<a href="../../../../../ca/uhn/fhir/rest/client/ServerValidationModeEnum.html">ServerValidationModeEnum</a> theServerValidationMode) {
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		setServerValidationMode(theServerValidationMode);
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 	}
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> 	
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_javadoccomment">	 * Get the http client for the given server base</em>
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment">	 * @param theServerBase the server base</em>
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">	 * @return the http client</em>
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpClient.html">IHttpClient</a> getHttpClient(String theServerBase);
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> 	
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment">	 * Reset the http client. This method is used when parameters have been set and a</em>
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_javadoccomment">	 * new http client needs to be created</em>
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> resetHttpClient();
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> 
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> }
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 		<strong class="jxr_keyword">if</strong> (serverFhirVersionEnum != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 			<strong class="jxr_keyword">if</strong> (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/client/exceptions/FhirClientInappropriateForServerException.html">FhirClientInappropriateForServerException</a>(myContext.getLocalizer().getMessage(RestfulClientFactory.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"wrongVersionInConformance"</span>, theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 			}
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 		}
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 		
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 		myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 	}
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 	@Override
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/ServerValidationModeEnum.html">ServerValidationModeEnum</a> getServerValidationModeEnum() {
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 		<strong class="jxr_keyword">return</strong> getServerValidationMode();
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 	}
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 	@Override
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setServerValidationModeEnum(<a href="../../../../../ca/uhn/fhir/rest/client/ServerValidationModeEnum.html">ServerValidationModeEnum</a> theServerValidationMode) {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 		setServerValidationMode(theServerValidationMode);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 	}
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 	
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_javadoccomment">	 * Get the http client for the given server base</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">	 * @param theServerBase the server base</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">	 * @return the http client</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpClient.html">IHttpClient</a> getHttpClient(String theServerBase);
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 	
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment">	 * Reset the http client. This method is used when parameters have been set and a</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_javadoccomment">	 * new http client needs to be created</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> resetHttpClient();
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

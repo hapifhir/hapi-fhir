@@ -120,7 +120,7 @@
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 		myName = theOperationName;
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">if</strong> (theContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU1)) {
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"@"</span> + Operation.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" methods are not supported on servers for FHIR version "</span> + theContext.getVersion().getVersion().name());
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"@"</span> + Operation.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" methods are not supported on servers for FHIR version "</span> + theContext.getVersion().getVersion().name() + <span class="jxr_string">" - Found one on class "</span> + theMethod.getDeclaringClass().getName());
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 		}
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">if</strong> (theReturnTypeFromRp != <strong class="jxr_keyword">null</strong>) {

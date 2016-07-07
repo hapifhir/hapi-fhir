@@ -109,7 +109,7 @@
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 		<strong class="jxr_keyword">if</strong> (requestId != <strong class="jxr_keyword">null</strong> &amp;&amp; requestId.hasIdPart()) {
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 			Subscription existing;
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 			<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 				existing = myDao.read(requestId, <strong class="jxr_keyword">new</strong> ServletRequestDetails());
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 				existing = myDao.read(requestId, <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 				<strong class="jxr_keyword">if</strong> (existingStatus != newStatus) {
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 					verifyActiveStatus(subscription, newStatus, existingStatus);

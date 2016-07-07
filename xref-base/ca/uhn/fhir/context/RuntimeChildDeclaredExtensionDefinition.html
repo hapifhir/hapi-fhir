@@ -166,29 +166,38 @@
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 		myUrlToChildExtension = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeChildDeclaredExtensionDefinition&gt;();
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 		
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> 		BaseRuntimeElementDefinition&lt;?&gt; elementDef = theClassToElementDefinitions.get(myChildType);
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		<strong class="jxr_keyword">if</strong> (elementDef instanceof RuntimePrimitiveDatatypeDefinition || elementDef instanceof RuntimeCompositeDatatypeDefinition) {
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 			myDatatypeChildName = <span class="jxr_string">"value"</span> + elementDef.getName().substring(0, 1).toUpperCase() + elementDef.getName().substring(1);
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"valueResourceReference"</span>.equals(myDatatypeChildName)) {
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 				<em class="jxr_comment">// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension</em>
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 				myDatatypeChildName = <span class="jxr_string">"valueResource"</span>;
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 				List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; types = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;();
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 				types.add(IResource.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 				myChildDef = findResourceReferenceDefinition(theClassToElementDefinitions);
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 				myChildDef = elementDef;
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			}
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 			RuntimeResourceBlockDefinition extDef = ((RuntimeResourceBlockDefinition) elementDef);
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 			<strong class="jxr_keyword">for</strong> (RuntimeChildDeclaredExtensionDefinition next : extDef.getExtensions()) {
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 				myUrlToChildExtension.put(next.getExtensionUrl(), next);
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 			}
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 			myChildDef = extDef;
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		}
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		myUrlToChildExtension = Collections.unmodifiableMap(myUrlToChildExtension);
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 	}
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> }
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_comment">		 * This will happen for any type that isn't defined in the base set of </em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_comment">		 * built-in types, e.g. custom structures or custom extensions</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 		<strong class="jxr_keyword">if</strong> (elementDef == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			elementDef = theContext.getElementDefinition(myChildType);
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 		}
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 		<strong class="jxr_keyword">if</strong> (elementDef instanceof RuntimePrimitiveDatatypeDefinition || elementDef instanceof RuntimeCompositeDatatypeDefinition) {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			myDatatypeChildName = <span class="jxr_string">"value"</span> + elementDef.getName().substring(0, 1).toUpperCase() + elementDef.getName().substring(1);
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"valueResourceReference"</span>.equals(myDatatypeChildName)) {
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 				<em class="jxr_comment">// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 				myDatatypeChildName = <span class="jxr_string">"valueResource"</span>;
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 				List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; types = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;();
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 				types.add(IResource.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 				myChildDef = findResourceReferenceDefinition(theClassToElementDefinitions);
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 				myChildDef = elementDef;
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 			}
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 			RuntimeResourceBlockDefinition extDef = ((RuntimeResourceBlockDefinition) elementDef);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 			<strong class="jxr_keyword">for</strong> (RuntimeChildDeclaredExtensionDefinition next : extDef.getExtensions()) {
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 				myUrlToChildExtension.put(next.getExtensionUrl(), next);
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 			}
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 			myChildDef = extDef;
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		}
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 		myUrlToChildExtension = Collections.unmodifiableMap(myUrlToChildExtension);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 	}
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -3,20 +3,20 @@
   <title>HAPI-FHIR: HAPI FHIR Changelog</title>
   <link rel="alternate" href="https://github.com/jamesagnew/hapi-fhir/changes-report.html" />
   <subtitle>These are the latest changes of this project.</subtitle>
-  <updated>2016-04-21T11:23:30Z</updated>
+  <updated>2016-07-07T10:34:06Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2016-04-21T11:23:30Z</dc:date>
+  <dc:date>2016-07-07T10:34:06Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
-    <title>1.5</title>
-    <link rel="alternate" href="https://github.com/jamesagnew/hapi-fhir/changes-report.html#a1.5" />
+    <title>1.6</title>
+    <link rel="alternate" href="https://github.com/jamesagnew/hapi-fhir/changes-report.html#a1.6" />
     <author>
       <name />
     </author>
-    <updated>2016-04-21T11:23:30Z</updated>
-    <published>2016-04-21T11:23:30Z</published>
-    <summary type="html">&lt;p&gt;Version 1.5 is available with 60 fixed issues.&lt;/p&gt;</summary>
-    <dc:date>2016-04-21T11:23:30Z</dc:date>
+    <updated>2016-07-07T04:00:00Z</updated>
+    <published>2016-07-07T04:00:00Z</published>
+    <summary type="html">&lt;p&gt;Version 1.6 is available with 65 fixed issues.&lt;/p&gt;</summary>
+    <dc:date>2016-07-07T04:00:00Z</dc:date>
   </entry>
 </feed>
 

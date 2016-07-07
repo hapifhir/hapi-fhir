@@ -86,7 +86,7 @@
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  	
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  	@Override
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> ValueSet expand(IIdType theId, String theFilter) {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		ValueSet source = loadValueSetForExpansion(theId);
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">return</strong> expand(source, theFilter);
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  
@@ -187,7 +187,7 @@
 <a class="jxr_linenumber" name="L179" href="#L179">179</a> 	}
 <a class="jxr_linenumber" name="L180" href="#L180">180</a> 
 <a class="jxr_linenumber" name="L181" href="#L181">181</a> 	@Override
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	<strong class="jxr_keyword">public</strong> ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType&lt;String&gt; theValueSetIdentifier, IIdType theId, IPrimitiveType&lt;String&gt; theCode, IPrimitiveType&lt;String&gt; theSystem, IPrimitiveType&lt;String&gt; theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept) {
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	<strong class="jxr_keyword">public</strong> ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType&lt;String&gt; theValueSetIdentifier, IIdType theId, IPrimitiveType&lt;String&gt; theCode, IPrimitiveType&lt;String&gt; theSystem, IPrimitiveType&lt;String&gt; theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> 		List&lt;IIdType&gt; valueSetIds;
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> 
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> 		<strong class="jxr_keyword">boolean</strong> haveCodeableConcept = theCodeableConcept != <strong class="jxr_keyword">null</strong> &amp;&amp; theCodeableConcept.getCoding().size() &gt; 0;
@@ -220,7 +220,7 @@
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 		}
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> 
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 		<strong class="jxr_keyword">for</strong> (IIdType nextId : valueSetIds) {
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> 			ValueSet expansion = expand(nextId, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 			ValueSet expansion = expand(nextId, <strong class="jxr_keyword">null</strong>, theRequestDetails);
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 			List&lt;ExpansionContains&gt; contains = expansion.getExpansion().getContains();
 <a class="jxr_linenumber" name="L217" href="#L217">217</a> 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 <a class="jxr_linenumber" name="L218" href="#L218">218</a> 			<strong class="jxr_keyword">if</strong> (result != <strong class="jxr_keyword">null</strong>) {
@@ -322,7 +322,7 @@
 <a class="jxr_linenumber" name="L314" href="#L314">314</a> 		
 <a class="jxr_linenumber" name="L315" href="#L315">315</a> 		List&lt;IIdType&gt; valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system);
 <a class="jxr_linenumber" name="L316" href="#L316">316</a> 		<strong class="jxr_keyword">for</strong> (IIdType nextId : valueSetIds) {
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 			ValueSet expansion = expand(nextId, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 			ValueSet expansion = expand(nextId, <strong class="jxr_keyword">null</strong>, theRequestDetails);
 <a class="jxr_linenumber" name="L318" href="#L318">318</a> 			List&lt;ExpansionContains&gt; contains = expansion.getExpansion().getContains();
 <a class="jxr_linenumber" name="L319" href="#L319">319</a> 			LookupCodeResult result = lookup(contains, system, code);
 <a class="jxr_linenumber" name="L320" href="#L320">320</a> 			<strong class="jxr_keyword">if</strong> (result != <strong class="jxr_keyword">null</strong>) {

@@ -54,24 +54,32 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	<strong class="jxr_keyword">public</strong> Set&lt;String&gt; getValidChildNames() {
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  		<strong class="jxr_keyword">return</strong> Collections.singleton(getElementName());
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  	}
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_comment">//	@Override</em>
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_comment">//	public BaseRuntimeElementDefinition&lt;?&gt; getChildElementDefinitionByDatatype(Class&lt;? extends IBase&gt; theDatatype) {</em>
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_comment">//		if (IBaseExtension.class.isAssignableFrom(theDatatype)) {</em>
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_comment">//			return myExtensionElement;</em>
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_comment">//		}</em>
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_comment">//		return super.getChildElementDefinitionByDatatype(theDatatype);</em>
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_comment">//	}</em>
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	@Override
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<strong class="jxr_keyword">public</strong> BaseRuntimeElementDefinition&lt;?&gt; getChildByName(String theName) {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"extension"</span>.equals(theName) || <span class="jxr_string">"modifierExtension"</span>.equals(theName)) {
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.getChildByName(<span class="jxr_string">"extensionExtension"</span>);
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		}
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.getChildByName(theName);
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	}
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_comment">//	@Override</em>
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_comment">//	void sealAndInitialize(FhirContext theContext, Map&lt;Class&lt;? extends IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {</em>
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_comment">//		super.sealAndInitialize(theContext, theClassToElementDefinitions);</em>
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_comment">//		</em>
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_comment">//		myExtensionElement = theContext.getRuntimeChildUndeclaredExtensionDefinition();</em>
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_comment">//	}</em>
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  }
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_comment">//	public BaseRuntimeElementDefinition&lt;?&gt; getChildElementDefinitionByDatatype(Class&lt;? extends IBase&gt; theDatatype) {</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_comment">//		if (IBaseExtension.class.isAssignableFrom(theDatatype)) {</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_comment">//			return myExtensionElement;</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_comment">//		}</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_comment">//		return super.getChildElementDefinitionByDatatype(theDatatype);</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_comment">//	}</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_comment">//	@Override</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_comment">//	void sealAndInitialize(FhirContext theContext, Map&lt;Class&lt;? extends IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_comment">//		super.sealAndInitialize(theContext, theClassToElementDefinitions);</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_comment">//		</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_comment">//		myExtensionElement = theContext.getRuntimeChildUndeclaredExtensionDefinition();</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_comment">//	}</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -121,7 +121,7 @@
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">	 * Request that the client return the specified bundle type, e.g. &lt;code&gt;org.hl7.fhir.instance.model.Bundle.class&lt;/code&gt;</em>
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">	 * or &lt;code&gt;ca.uhn.fhir.model.dstu2.resource.Bundle.class&lt;/code&gt;</em>
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	&lt;B <strong class="jxr_keyword">extends</strong> IBaseBundle&gt; IQuery&lt;B&gt; returnBundle(Class&lt;B&gt; theClass);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	&lt;B <strong class="jxr_keyword">extends</strong> IBaseBundle&gt; IClientExecutable&lt;IQuery&lt;B&gt;, B&gt; returnBundle(Class&lt;B&gt; theClass);
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">	 * {@inheritDoc}</em>
@@ -137,7 +137,16 @@
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 	@Override
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 	IQuery&lt;T&gt; and(ICriterion&lt;?&gt; theCriterion);
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> }
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_javadoccomment">	 * @deprecated You should call {@link #returnBundle(Class)} on the method chain before calling</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment">	 * {@link #execute()} in order to specify why return type to use</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	<em class="jxr_comment">// This is overriding in order to deprecate</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	@Deprecated
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	@Override
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	T execute();
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 	
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

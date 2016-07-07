@@ -109,58 +109,62 @@
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 	@Override
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 	<strong class="jxr_keyword">public</strong> IdDt getIdDt() {
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		Object id = getForcedId() == <strong class="jxr_keyword">null</strong> ? getResourceId() : getForcedId().getForcedId();
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	}
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	<strong class="jxr_keyword">public</strong> Long getResourceId() {
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		<strong class="jxr_keyword">return</strong> myResourceId;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		<strong class="jxr_keyword">if</strong> (getForcedId() == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 			Long id = myResourceId;
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		}
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 	}
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	@Override
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	<strong class="jxr_keyword">public</strong> String getResourceType() {
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">return</strong> myResourceType;
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	}
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	@Override
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<strong class="jxr_keyword">public</strong> Collection&lt;ResourceHistoryTag&gt; getTags() {
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		<strong class="jxr_keyword">if</strong> (myTags == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			myTags = <strong class="jxr_keyword">new</strong> ArrayList&lt;ResourceHistoryTag&gt;();
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		}
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">return</strong> myTags;
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	}
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	@Override
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> getVersion() {
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 		<strong class="jxr_keyword">return</strong> myResourceVersion;
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	}
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasTag(String theTerm, String theScheme) {
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		<strong class="jxr_keyword">for</strong> (ResourceHistoryTag next : getTags()) {
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			<strong class="jxr_keyword">if</strong> (next.getTag().getSystem().equals(theScheme) &amp;&amp; next.getTag().getCode().equals(theTerm)) {
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			}
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 		}
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	}
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setId(Long theId) {
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		myId = theId;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	<strong class="jxr_keyword">public</strong> Long getResourceId() {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<strong class="jxr_keyword">return</strong> myResourceId;
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	}
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	@Override
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	<strong class="jxr_keyword">public</strong> String getResourceType() {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">return</strong> myResourceType;
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 	}
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	@Override
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	<strong class="jxr_keyword">public</strong> Collection&lt;ResourceHistoryTag&gt; getTags() {
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		<strong class="jxr_keyword">if</strong> (myTags == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			myTags = <strong class="jxr_keyword">new</strong> ArrayList&lt;ResourceHistoryTag&gt;();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		}
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">return</strong> myTags;
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	@Override
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> getVersion() {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		<strong class="jxr_keyword">return</strong> myResourceVersion;
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	}
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasTag(String theTerm, String theScheme) {
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 		<strong class="jxr_keyword">for</strong> (ResourceHistoryTag next : getTags()) {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			<strong class="jxr_keyword">if</strong> (next.getTag().getSystem().equals(theScheme) &amp;&amp; next.getTag().getCode().equals(theTerm)) {
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			}
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 		}
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 	}
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setResourceId(Long theResourceId) {
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		myResourceId = theResourceId;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setId(Long theId) {
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		myId = theId;
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 	}
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setResourceType(String theResourceType) {
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 		myResourceType = theResourceType;
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setResourceId(Long theResourceId) {
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 		myResourceId = theResourceId;
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 	}
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setVersion(<strong class="jxr_keyword">long</strong> theVersion) {
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 		myResourceVersion = theVersion;
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setResourceType(String theResourceType) {
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 		myResourceType = theResourceType;
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 	}
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> }
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setVersion(<strong class="jxr_keyword">long</strong> theVersion) {
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 		myResourceVersion = theVersion;
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 	}
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

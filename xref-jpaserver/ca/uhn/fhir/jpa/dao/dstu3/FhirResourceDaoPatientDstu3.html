@@ -72,7 +72,7 @@
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  			paramMap.add(<span class="jxr_string">"_id"</span>, <strong class="jxr_keyword">new</strong> StringParam(theId.getIdPart()));
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  		}
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		SearchBuilder builder = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchBuilder.html">SearchBuilder</a>(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, <strong class="jxr_keyword">this</strong>, myResourceIndexedSearchParamUriDao);
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		SearchBuilder builder = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchBuilder.html">SearchBuilder</a>(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, <strong class="jxr_keyword">this</strong>, myResourceIndexedSearchParamUriDao, myForcedIdDao, myTerminologySvc);
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  		builder.setType(getResourceType(), getResourceName());
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  		<strong class="jxr_keyword">return</strong> builder.search(paramMap);
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  	}
@@ -80,7 +80,7 @@
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  	@Override
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<em class="jxr_comment">// Notify interceptors</em>
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(<strong class="jxr_keyword">null</strong>, getResourceName(), getContext(), theRequestDetails);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(theRequestDetails, getResourceName(), <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE, requestDetails);
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative);
@@ -89,7 +89,7 @@
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  	@Override
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<em class="jxr_comment">// Notify interceptors</em>
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(<strong class="jxr_keyword">null</strong>, getResourceName(), getContext(), theRequestDetails);
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(theRequestDetails, getResourceName(), <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, requestDetails);
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(<strong class="jxr_keyword">null</strong>, theCount, theLastUpdated, theSort, theContent, theNarrative);

@@ -1,3 +1,4 @@
+org.hl7.fhir.dstu3.elementmodel
 org.hl7.fhir.dstu3.exceptions
 org.hl7.fhir.dstu3.formats
 org.hl7.fhir.dstu3.hapi.ctx
@@ -10,5 +11,6 @@ org.hl7.fhir.dstu3.utils
 org.hl7.fhir.dstu3.validation
 org.hl7.fhir.exceptions
 org.hl7.fhir.utilities
+org.hl7.fhir.utilities.ucum
 org.hl7.fhir.utilities.xhtml
 org.hl7.fhir.utilities.xml
