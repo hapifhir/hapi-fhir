@@ -44,6 +44,8 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.utils.WorkerContext;
 
+import ca.uhn.fhir.util.ElementUtil;
+
 /**
  * Validates that an instance of {@link QuestionnaireResponse} is valid against the {@link Questionnaire} that it claims to conform to.
  * 
@@ -364,7 +366,9 @@ public class QuestionnaireResponseValidator extends BaseValidator {
     String linkId = theQuestion.getLinkId();
     Set<Class<? extends Type>> allowedAnswerTypes = determineAllowedAnswerTypes(type);
     if (allowedAnswerTypes.isEmpty()) {
-      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, answerQuestion.isEmpty(), "Question with linkId[{0}] has no answer type but an answer was provided", linkId);
+      for (QuestionAnswerComponent nextAnswer : answerQuestion.getAnswer()) {
+        rule(theErrors, IssueType.BUSINESSRULE, thePathStack, ElementUtil.isEmpty(nextAnswer.getValue()), "Question with linkId[{0}] has no answer type but an answer was provided", linkId);
+      }
     } else {
       rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !(answerQuestion.getAnswer().size() > 1 && !theQuestion.getRepeats()), "Multiple answers to non repeating question with linkId[{0}]",
           linkId);
@@ -381,6 +385,9 @@ public class QuestionnaireResponseValidator extends BaseValidator {
       try {
         thePathStack.add("answer[" + answerIdx + "]");
         Type nextValue = nextAnswer.getValue();
+        if (nextValue == null) {
+          continue;
+        }
         if (!allowedAnswerTypes.contains(nextValue.getClass())) {
           rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Answer to question with linkId[{0}] found of type [{1}] but this is invalid for question of type [{2}]", linkId,
               nextValue.getClass().getSimpleName(), type.toCode());

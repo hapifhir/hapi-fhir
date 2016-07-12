@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.gclient;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -75,6 +76,11 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 			public ICriterion<TokenClientParam> systemAndIdentifier(String theSystem, String theCode) {
 				return new TokenCriterion(getParamName(), defaultString(theSystem), theCode);
 			}
+
+			@Override
+			public ICriterion<?> systemAndValues(String theSystem, Collection<String> theValues) {
+				return new TokenCriterion(getParamName(), defaultString(theSystem), theValues);
+			}
 };
 	}
 
@@ -92,7 +98,7 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 	 * </p>
 	 */
 	public ICriterion<TokenClientParam> hasSystemWithAnyCode(String theSystem) {
-		return new TokenCriterion(getParamName(), theSystem, null);
+		return new TokenCriterion(getParamName(), theSystem, (String)null);
 	}
 
 	public interface IMatches {
@@ -153,6 +159,15 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 		 * @return A criterion
 		 */
 		ICriterion<TokenClientParam> systemAndCode(String theSystem, String theCode);
+
+		/**
+		 * Creates a search criterion that matches a given system with a collection of possible 
+		 * values (this will be used to form a comma-separated OR query)
+		 * 
+		 * @param theSystem The system, which will be used with each value
+		 * @param theValues The values
+		 */
+		public ICriterion<?> systemAndValues(String theSystem, Collection<String> theValues);
 
 		/**
 		 * Creates a search criterion that matches against the given system and identifier

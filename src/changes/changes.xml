@@ -6,6 +6,16 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="2.0" date="TBD">
+			<action type="fix">
+				Fix issue in DSTU1 Bundle parsing where unexpected elements in the bundle resulted in a failure
+				to parse.
+			</action>
+			<action type="fix">
+				DSTU2 QuestionnaireResponse validator failed with an exception if the
+				QuestionnaireResponse contained certain groups with no content
+			</action>
+		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
 				Performance has been improved for the initial FhirContext

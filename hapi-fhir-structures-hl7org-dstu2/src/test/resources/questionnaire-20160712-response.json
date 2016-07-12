@@ -1,0 +1,76 @@
+{
+	"resourceType": "QuestionnaireResponse",
+	"status": "completed",
+	"questionnaire": {
+		"reference": "Questionnaire/90079"
+	},
+	"group": {
+		"linkId": "PHR",
+		"title": "NSW Government My Personal Health Record, january 2013",
+		"group": [
+			{
+				"linkId": "birthDetails",
+				"title": "Birth details - To be completed by health professional",
+				"group": [
+					{
+						"linkId": "neonatalInformation",
+						"title": "Neonatal Information",
+						"question": [
+							{
+								"linkId": "birthWeight",
+								"text": "Birth weight (kg)",
+								"answer": [
+									{
+										"valueDecimal": 3.25
+									}
+								]
+							},
+							{
+								"linkId": "birthLength",
+								"text": "Birth length (cm)",
+								"answer": [
+									{
+										"valueDecimal": 44.3
+									}
+								]
+							},
+							{
+								"linkId": "vitaminKgiven",
+								"text": "Vitamin K given",
+								"answer": [
+									{
+										"group": [
+											{
+												"linkId": "vitaminKgivenDoses",
+												"question": [
+													{
+														"linkId": "vitaminiKDose1",
+														"text": "1st dose",
+														"answer": [
+															{
+																"valueDate": "1972-11-30"
+															}
+														]
+													},
+													{
+														"linkId": "vitaminiKDose2",
+														"text": "2nd dose",
+														"answer": [
+															{
+																"valueDate": "1972-12-11"
+															}
+														]
+													}
+												]
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}

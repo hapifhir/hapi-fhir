@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -151,6 +152,46 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	}
 
+	@Test
+	public void testCreateAndUpdateWithoutRequest() throws Exception {
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		IIdType id = myPatientDao.create(p).getId().toUnqualified();
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		IIdType id2 = myPatientDao.create(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
+		assertEquals(id.getValue(), id2.getValue());
+		
+		p = new Patient();
+		p.setId(id);
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.update(p).getId();
+
+		id2 = myPatientDao.update(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
+		assertEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("3", id2.getVersionIdPart());
+
+		Patient newPatient = myPatientDao.read(id);
+		assertEquals("1", newPatient.getIdElement().getVersionIdPart());
+
+		newPatient = myPatientDao.read(id.toVersionless());
+		assertEquals("3", newPatient.getIdElement().getVersionIdPart());
+		
+		myPatientDao.delete(id.toVersionless());
+		
+		try {
+			myPatientDao.read(id.toVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			// nothing
+		}
+		
+	}
+	
+	
 	@Test
 	public void testUpdateConditionalByLastUpdated() throws Exception {
 		String methodName = "testUpdateByUrl";

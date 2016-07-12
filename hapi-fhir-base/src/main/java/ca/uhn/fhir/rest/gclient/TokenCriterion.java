@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.gclient;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -63,6 +67,20 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 				b.append(',');
 			}
 			b.append(toValue(next.getSystemElement().getValueAsString(), next.getValueElement().getValue()));
+		}
+		myValue = b.toString();
+	}
+
+	public TokenCriterion(String theParamName, String theSystem, Collection<String> theValues) {
+		myName = theParamName;
+		StringBuilder b = new StringBuilder();
+		for (String next : theValues) {
+			if (isNotBlank(next)) {
+				if (b.length() > 0) {
+					b.append(',');
+				}
+				b.append(toValue(theSystem, next));
+			}
 		}
 		myValue = b.toString();
 	}

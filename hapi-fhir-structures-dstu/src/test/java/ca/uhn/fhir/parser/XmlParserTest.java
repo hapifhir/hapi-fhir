@@ -1,7 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,7 +45,6 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
@@ -95,6 +103,13 @@ public class XmlParserTest {
 
 		// comp.
 
+	}
+	
+	@Test
+	public void testUnknownElementInDstu1() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/old_07_feed.xml"));
+		Bundle b = ourCtx.newXmlParser().parseBundle(input);
+		assertEquals(1, b.getEntries().size());
 	}
 
 	@Test

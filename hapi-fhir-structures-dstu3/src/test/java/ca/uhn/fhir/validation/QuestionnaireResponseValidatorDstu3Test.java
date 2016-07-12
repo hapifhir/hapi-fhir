@@ -9,6 +9,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,7 @@ import org.junit.Test;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 
 public class QuestionnaireResponseValidatorDstu3Test {
@@ -182,6 +184,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No LinkId, so can't be validated"));
 	}
+	
 
 	@Test
 	public void testItemWithNoType() {
