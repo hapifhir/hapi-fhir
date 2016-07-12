@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -618,16 +618,23 @@ public class Location extends DomainResource {
     protected StringType name;
 
     /**
+     * A list of alternate names that the location is known as, or was known as in the past.
+     */
+    @Child(name = "alias", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="A list of alternate names that the location is known as, or was known as in the past", formalDefinition="A list of alternate names that the location is known as, or was known as in the past." )
+    protected List<StringType> alias;
+
+    /**
      * Description of the Location, which helps in finding or referencing the place.
      */
-    @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional details about the location that could be displayed as further information to identify the location beyond its name", formalDefinition="Description of the Location, which helps in finding or referencing the place." )
     protected StringType description;
 
     /**
      * Indicates whether a resource instance represents a specific location or a class of locations.
      */
-    @Child(name = "mode", type = {CodeType.class}, order=4, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "mode", type = {CodeType.class}, order=5, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="instance | kind", formalDefinition="Indicates whether a resource instance represents a specific location or a class of locations." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/location-mode")
     protected Enumeration<LocationMode> mode;
@@ -635,7 +642,7 @@ public class Location extends DomainResource {
     /**
      * Indicates the type of function performed at the location.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Type of function performed", formalDefinition="Indicates the type of function performed at the location." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ServiceDeliveryLocationRoleType")
     protected CodeableConcept type;
@@ -643,21 +650,21 @@ public class Location extends DomainResource {
     /**
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contact details of the location", formalDefinition="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites." )
     protected List<ContactPoint> telecom;
 
     /**
      * Physical location.
      */
-    @Child(name = "address", type = {Address.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "address", type = {Address.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Physical location", formalDefinition="Physical location." )
     protected Address address;
 
     /**
      * Physical form of the location, e.g. building, room, vehicle, road.
      */
-    @Child(name = "physicalType", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "physicalType", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Physical form of the location", formalDefinition="Physical form of the location, e.g. building, room, vehicle, road." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/location-physical-type")
     protected CodeableConcept physicalType;
@@ -665,14 +672,14 @@ public class Location extends DomainResource {
     /**
      * The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML).
      */
-    @Child(name = "position", type = {}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "position", type = {}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The absolute geographic location", formalDefinition="The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML)." )
     protected LocationPositionComponent position;
 
     /**
      * The organization responsible for the provisioning and upkeep of the location.
      */
-    @Child(name = "managingOrganization", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Organization responsible for provisioning and upkeep", formalDefinition="The organization responsible for the provisioning and upkeep of the location." )
     protected Reference managingOrganization;
 
@@ -684,7 +691,7 @@ public class Location extends DomainResource {
     /**
      * Another Location which this Location is physically part of.
      */
-    @Child(name = "partOf", type = {Location.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "partOf", type = {Location.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Another Location this one is physically part of", formalDefinition="Another Location which this Location is physically part of." )
     protected Reference partOf;
 
@@ -696,7 +703,7 @@ public class Location extends DomainResource {
     /**
      * Technical endpoints providing access to services operated for the location.
      */
-    @Child(name = "endpoint", type = {Endpoint.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "endpoint", type = {Endpoint.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Technical endpoints providing access to services operated for the location", formalDefinition="Technical endpoints providing access to services operated for the location." )
     protected List<Reference> endpoint;
     /**
@@ -705,7 +712,7 @@ public class Location extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = -358235102L;
+    private static final long serialVersionUID = -573853423L;
 
   /**
    * Constructor
@@ -863,6 +870,67 @@ public class Location extends DomainResource {
         this.name.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public List<StringType> getAlias() { 
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      return this.alias;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Location setAlias(List<StringType> theAlias) { 
+      this.alias = theAlias;
+      return this;
+    }
+
+    public boolean hasAlias() { 
+      if (this.alias == null)
+        return false;
+      for (StringType item : this.alias)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public StringType addAliasElement() {//2 
+      StringType t = new StringType();
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      this.alias.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public Location addAlias(String value) { //1
+      StringType t = new StringType();
+      t.setValue(value);
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      this.alias.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public boolean hasAlias(String value) { 
+      if (this.alias == null)
+        return false;
+      for (StringType v : this.alias)
+        if (v.equals(value)) // string
+          return true;
+      return false;
     }
 
     /**
@@ -1280,6 +1348,7 @@ public class Location extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "active | suspended | inactive.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("alias", "string", "A list of alternate names that the location is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         childrenList.add(new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, java.lang.Integer.MAX_VALUE, mode));
         childrenList.add(new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type));
@@ -1298,6 +1367,7 @@ public class Location extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<LocationStatus>
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 92902992: /*alias*/ return this.alias == null ? new Base[0] : this.alias.toArray(new Base[this.alias.size()]); // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<LocationMode>
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
@@ -1324,6 +1394,9 @@ public class Location extends DomainResource {
           break;
         case 3373707: // name
           this.name = castToString(value); // StringType
+          break;
+        case 92902992: // alias
+          this.getAlias().add(castToString(value)); // StringType
           break;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -1368,6 +1441,8 @@ public class Location extends DomainResource {
           this.status = new LocationStatusEnumFactory().fromType(value); // Enumeration<LocationStatus>
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
+        else if (name.equals("alias"))
+          this.getAlias().add(castToString(value));
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
         else if (name.equals("mode"))
@@ -1398,6 +1473,7 @@ public class Location extends DomainResource {
         case -1618432855:  return addIdentifier(); // Identifier
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<LocationStatus>
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 92902992: throw new FHIRException("Cannot make property alias as it is not a complex type"); // StringType
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
         case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<LocationMode>
         case 3575610:  return getType(); // CodeableConcept
@@ -1423,6 +1499,9 @@ public class Location extends DomainResource {
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type Location.name");
+        }
+        else if (name.equals("alias")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.alias");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Location.description");
@@ -1479,6 +1558,11 @@ public class Location extends DomainResource {
         };
         dst.status = status == null ? null : status.copy();
         dst.name = name == null ? null : name.copy();
+        if (alias != null) {
+          dst.alias = new ArrayList<StringType>();
+          for (StringType i : alias)
+            dst.alias.add(i.copy());
+        };
         dst.description = description == null ? null : description.copy();
         dst.mode = mode == null ? null : mode.copy();
         dst.type = type == null ? null : type.copy();
@@ -1512,9 +1596,9 @@ public class Location extends DomainResource {
           return false;
         Location o = (Location) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(name, o.name, true)
-           && compareDeep(description, o.description, true) && compareDeep(mode, o.mode, true) && compareDeep(type, o.type, true)
-           && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true) && compareDeep(physicalType, o.physicalType, true)
-           && compareDeep(position, o.position, true) && compareDeep(managingOrganization, o.managingOrganization, true)
+           && compareDeep(alias, o.alias, true) && compareDeep(description, o.description, true) && compareDeep(mode, o.mode, true)
+           && compareDeep(type, o.type, true) && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true)
+           && compareDeep(physicalType, o.physicalType, true) && compareDeep(position, o.position, true) && compareDeep(managingOrganization, o.managingOrganization, true)
            && compareDeep(partOf, o.partOf, true) && compareDeep(endpoint, o.endpoint, true);
       }
 
@@ -1525,13 +1609,13 @@ public class Location extends DomainResource {
         if (!(other instanceof Location))
           return false;
         Location o = (Location) other;
-        return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
-           && compareValues(mode, o.mode, true);
+        return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(alias, o.alias, true)
+           && compareValues(description, o.description, true) && compareValues(mode, o.mode, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, name
-          , description, mode, type, telecom, address, physicalType, position, managingOrganization
+          , alias, description, mode, type, telecom, address, physicalType, position, managingOrganization
           , partOf, endpoint);
       }
 
@@ -1589,22 +1673,26 @@ public class Location extends DomainResource {
  /**
    * Search parameter: <b>near-distance</b>
    * <p>
-   * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br>
-   * Type: <b>token</b><br>
+   * Description: <b>A distance quantity to limit the near search to locations within a specific distance
+
+Requires the near parameter to be included also</b><br>
+   * Type: <b>quantity</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance", type="token" )
+  @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance\n\nRequires the near parameter to be included also", type="quantity" )
   public static final String SP_NEAR_DISTANCE = "near-distance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near-distance</b>
    * <p>
-   * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br>
-   * Type: <b>token</b><br>
+   * Description: <b>A distance quantity to limit the near search to locations within a specific distance
+
+Requires the near parameter to be included also</b><br>
+   * Type: <b>quantity</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam NEAR_DISTANCE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_NEAR_DISTANCE);
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam NEAR_DISTANCE = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_NEAR_DISTANCE);
 
  /**
    * Search parameter: <b>address</b>
@@ -1735,19 +1823,19 @@ public class Location extends DomainResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A (portion of the) name of the location</b><br>
+   * Description: <b>A (portion of the) name of the location or alias</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Location.name</b><br>
+   * Path: <b>Location.name, Location.alias</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
+  @SearchParamDefinition(name="name", path="Location.name or Location.alias", description="A (portion of the) name of the location or alias", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A (portion of the) name of the location</b><br>
+   * Description: <b>A (portion of the) name of the location or alias</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Location.name</b><br>
+   * Path: <b>Location.name, Location.alias</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
@@ -1775,17 +1863,21 @@ public class Location extends DomainResource {
  /**
    * Search parameter: <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br>
+   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
+
+Requires the near-distance parameter to be provided also</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
+  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). \n\nRequires the near-distance parameter to be provided also", type="token" )
   public static final String SP_NEAR = "near";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br>
+   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
+
+Requires the near-distance parameter to be provided also</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Location.position</b><br>
    * </p>

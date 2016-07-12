@@ -3,6 +3,7 @@ package ca.uhn.fhir.validation;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -96,11 +97,35 @@ public class FhirInstanceValidatorDstu3Test {
 		 */
 		RelatedPerson rp = new RelatedPerson();
 		rp.getPatient().setReference("Patient/1");
-		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/patient-contact-relationship").setCode("emergency");
+		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("c");
 		
 		ValidationResult results = myVal.validateWithResult(rp);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
+
+		/*
+		 * Code system is case insensitive, so try with capital C
+		 */
+		rp = new RelatedPerson();
+		rp.getPatient().setReference("Patient/1");
+		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("C");
+		
+		results = myVal.validateWithResult(rp);
+		outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome, empty());
+
+		
+		/*
+		 * Now a bad code
+		 */
+		rp = new RelatedPerson();
+		rp.getPatient().setReference("Patient/1");
+		rp.getRelationship().addCoding().setSystem("http://hl7.org/fhir/v2/0131").setCode("GAGAGAGA");
+		
+		results = myVal.validateWithResult(rp);
+		outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome, not(empty()));
+
 	}
 	
 	@Test
@@ -507,7 +532,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
-		assertThat(errors.toString(), containsString("information"));
+		assertThat(errors.toString(), containsString("warning"));
 		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
 	}
 
@@ -560,7 +585,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Element 'Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
+		assertEquals("Profile http://hl7.org/fhir/StructureDefinition/Observation, Element 'Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
 
 	}
 
@@ -642,7 +667,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Code 1234 is not a valid code in code system http://loinc.org", errors.get(0).getMessage());
+		assertEquals("Unknown code: http://loinc.org / 1234", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -673,7 +698,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Code 9988877 is not a valid code in code system http://acme.org", errors.get(0).getMessage());
+		assertEquals("Unknown code: http://acme.org / 9988877", errors.get(0).getMessage());
 		
 		
 	}

@@ -126,7 +126,7 @@ public class QuestionnaireResponseValidatorIntegrationTest {
 	}
 
 	 @Test
-	  public void testGroup() throws Exception {
+	  public void testGroupWithNoAnswer() throws Exception {
 	    Questionnaire q = ourCtx.newJsonParser().parseResource(Questionnaire.class, IOUtils.toString(getClass().getResourceAsStream("/questionnaire-20160712.json")));
 	    QuestionnaireResponse qa = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, IOUtils.toString(getClass().getResourceAsStream("/questionnaire-20160712-response.json")));
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1327,7 +1327,7 @@ public class Task extends DomainResource {
     /**
      * Identifies a plan, proposal or order that this task has been created in fulfillment of.
      */
-    @Child(name = "basedOn", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "basedOn", type = {Reference.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Request fulfilled by this request", formalDefinition="Identifies a plan, proposal or order that this task has been created in fulfillment of." )
     protected List<Reference> basedOn;
     /**
@@ -1410,7 +1410,7 @@ public class Task extends DomainResource {
     /**
      * The request being actioned or the resource being manipulated by this task.
      */
-    @Child(name = "focus", type = {}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "focus", type = {Reference.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What task is acting on", formalDefinition="The request being actioned or the resource being manipulated by this task." )
     protected Reference focus;
 
@@ -1422,7 +1422,7 @@ public class Task extends DomainResource {
     /**
      * The entity who benefits from the performance of the service specified in the task (e.g., the patient).
      */
-    @Child(name = "for", type = {}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "for", type = {Reference.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Beneficiary of the Task", formalDefinition="The entity who benefits from the performance of the service specified in the task (e.g., the patient)." )
     protected Reference for_;
 

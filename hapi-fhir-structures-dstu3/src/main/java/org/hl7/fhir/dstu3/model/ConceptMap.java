@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1418,7 +1418,7 @@ public class ConceptMap extends BaseConformance {
         /**
          * An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).
          */
-        @Child(name = "system", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "system", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code System (if necessary)", formalDefinition="An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems)." )
         protected UriType system;
 
@@ -1441,10 +1441,9 @@ public class ConceptMap extends BaseConformance {
     /**
      * Constructor
      */
-      public OtherElementComponent(UriType property, UriType system, StringType code) {
+      public OtherElementComponent(UriType property, StringType code) {
         super();
         this.property = property;
-        this.system = system;
         this.code = code;
       }
 
@@ -1532,9 +1531,13 @@ public class ConceptMap extends BaseConformance {
          * @param value An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).
          */
         public OtherElementComponent setSystem(String value) { 
+          if (Utilities.noString(value))
+            this.system = null;
+          else {
             if (this.system == null)
               this.system = new UriType();
             this.system.setValue(value);
+          }
           return this;
         }
 
@@ -1729,16 +1732,16 @@ public class ConceptMap extends BaseConformance {
     /**
      * A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.
      */
-    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human language description of the concept map", formalDefinition="A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc." )
-    protected StringType description;
+    protected MarkdownType description;
 
     /**
      * Explains why this concept map is needed and why it has been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why needed", formalDefinition="Explains why this concept map is needed and why it has been constrained as it has." )
-    protected StringType requirements;
+    protected MarkdownType requirements;
 
     /**
      * A copyright statement relating to the concept map and/or its contents.
@@ -1768,7 +1771,7 @@ public class ConceptMap extends BaseConformance {
     @Description(shortDefinition="Same source and target systems", formalDefinition="A group of mappings that all have the same source and target system." )
     protected List<ConceptMapGroupComponent> group;
 
-    private static final long serialVersionUID = -1261123041L;
+    private static final long serialVersionUID = 186664735L;
 
   /**
    * Constructor
@@ -2027,12 +2030,12 @@ public class ConceptMap extends BaseConformance {
     /**
      * @return {@link #description} (A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ConceptMap.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -2047,7 +2050,7 @@ public class ConceptMap extends BaseConformance {
     /**
      * @param value {@link #description} (A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public ConceptMap setDescriptionElement(StringType value) { 
+    public ConceptMap setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -2063,11 +2066,11 @@ public class ConceptMap extends BaseConformance {
      * @param value A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.
      */
     public ConceptMap setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
@@ -2076,12 +2079,12 @@ public class ConceptMap extends BaseConformance {
     /**
      * @return {@link #requirements} (Explains why this concept map is needed and why it has been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public StringType getRequirementsElement() { 
+    public MarkdownType getRequirementsElement() { 
       if (this.requirements == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ConceptMap.requirements");
         else if (Configuration.doAutoCreate())
-          this.requirements = new StringType(); // bb
+          this.requirements = new MarkdownType(); // bb
       return this.requirements;
     }
 
@@ -2096,7 +2099,7 @@ public class ConceptMap extends BaseConformance {
     /**
      * @param value {@link #requirements} (Explains why this concept map is needed and why it has been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public ConceptMap setRequirementsElement(StringType value) { 
+    public ConceptMap setRequirementsElement(MarkdownType value) { 
       this.requirements = value;
       return this;
     }
@@ -2112,11 +2115,11 @@ public class ConceptMap extends BaseConformance {
      * @param value Explains why this concept map is needed and why it has been constrained as it has.
      */
     public ConceptMap setRequirements(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.requirements = null;
       else {
         if (this.requirements == null)
-          this.requirements = new StringType();
+          this.requirements = new MarkdownType();
         this.requirements.setValue(value);
       }
       return this;
@@ -2320,8 +2323,8 @@ public class ConceptMap extends BaseConformance {
         childrenList.add(new Property("experimental", "boolean", "This ConceptMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the concept map.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("requirements", "string", "Explains why this concept map is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("requirements", "markdown", "Explains why this concept map is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the concept map and/or its contents.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("source[x]", "uri|Reference(ValueSet|StructureDefinition)", "The source value set that specifies the concepts that are being mapped.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("target[x]", "uri|Reference(ValueSet|StructureDefinition)", "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.", 0, java.lang.Integer.MAX_VALUE, target));
@@ -2340,9 +2343,9 @@ public class ConceptMap extends BaseConformance {
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ConceptMapContactComponent
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Type
         case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Type
@@ -2383,13 +2386,13 @@ public class ConceptMap extends BaseConformance {
           this.date = castToDateTime(value); // DateTimeType
           break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
           this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case -1619874672: // requirements
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
           break;
         case 1522889671: // copyright
           this.copyright = castToString(value); // StringType
@@ -2429,11 +2432,11 @@ public class ConceptMap extends BaseConformance {
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
           this.getUseContext().add(castToCodeableConcept(value));
         else if (name.equals("requirements"))
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
         else if (name.equals("copyright"))
           this.copyright = castToString(value); // StringType
         else if (name.equals("source[x]"))
@@ -2458,9 +2461,9 @@ public class ConceptMap extends BaseConformance {
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // ConceptMapContactComponent
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
         case -669707736:  return addUseContext(); // CodeableConcept
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
         case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
         case -1698413947:  return getSource(); // Type
         case -815579825:  return getTarget(); // Type

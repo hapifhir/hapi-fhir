@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -507,30 +507,30 @@ public class ProcessRequest extends DomainResource {
     protected Type target;
 
     /**
-     * The practitioner who is responsible for the action specified in thise request.
+     * The practitioner who is responsible for the action specified in this request.
      */
     @Child(name = "provider", type = {Identifier.class, Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the action specified in thise request." )
+    @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the action specified in this request." )
     protected Type provider;
 
     /**
-     * The organization which is responsible for the action speccified in thise request.
+     * The organization which is responsible for the action speccified in this request.
      */
     @Child(name = "organization", type = {Identifier.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the action speccified in thise request." )
+    @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the action speccified in this request." )
     protected Type organization;
 
     /**
      * Reference of resource which is the target or subject of this action.
      */
-    @Child(name = "request", type = {Identifier.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "request", type = {Identifier.class, Reference.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Request reference", formalDefinition="Reference of resource which is the target or subject of this action." )
     protected Type request;
 
     /**
      * Reference of a prior response to resource which is the target or subject of this action.
      */
-    @Child(name = "response", type = {Identifier.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "response", type = {Identifier.class, Reference.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Response reference", formalDefinition="Reference of a prior response to resource which is the target or subject of this action." )
     protected Type response;
 
@@ -880,14 +880,14 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #provider} (The practitioner who is responsible for the action specified in thise request.)
+     * @return {@link #provider} (The practitioner who is responsible for the action specified in this request.)
      */
     public Type getProvider() { 
       return this.provider;
     }
 
     /**
-     * @return {@link #provider} (The practitioner who is responsible for the action specified in thise request.)
+     * @return {@link #provider} (The practitioner who is responsible for the action specified in this request.)
      */
     public Identifier getProviderIdentifier() throws FHIRException { 
       if (!(this.provider instanceof Identifier))
@@ -900,7 +900,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #provider} (The practitioner who is responsible for the action specified in thise request.)
+     * @return {@link #provider} (The practitioner who is responsible for the action specified in this request.)
      */
     public Reference getProviderReference() throws FHIRException { 
       if (!(this.provider instanceof Reference))
@@ -917,7 +917,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #provider} (The practitioner who is responsible for the action specified in thise request.)
+     * @param value {@link #provider} (The practitioner who is responsible for the action specified in this request.)
      */
     public ProcessRequest setProvider(Type value) { 
       this.provider = value;
@@ -925,14 +925,14 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #organization} (The organization which is responsible for the action speccified in thise request.)
+     * @return {@link #organization} (The organization which is responsible for the action speccified in this request.)
      */
     public Type getOrganization() { 
       return this.organization;
     }
 
     /**
-     * @return {@link #organization} (The organization which is responsible for the action speccified in thise request.)
+     * @return {@link #organization} (The organization which is responsible for the action speccified in this request.)
      */
     public Identifier getOrganizationIdentifier() throws FHIRException { 
       if (!(this.organization instanceof Identifier))
@@ -945,7 +945,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #organization} (The organization which is responsible for the action speccified in thise request.)
+     * @return {@link #organization} (The organization which is responsible for the action speccified in this request.)
      */
     public Reference getOrganizationReference() throws FHIRException { 
       if (!(this.organization instanceof Reference))
@@ -962,7 +962,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #organization} (The organization which is responsible for the action speccified in thise request.)
+     * @param value {@link #organization} (The organization which is responsible for the action speccified in this request.)
      */
     public ProcessRequest setOrganization(Type value) { 
       this.organization = value;
@@ -1361,8 +1361,8 @@ public class ProcessRequest extends DomainResource {
         childrenList.add(new Property("action", "code", "The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.", 0, java.lang.Integer.MAX_VALUE, action));
         childrenList.add(new Property("created", "dateTime", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("target[x]", "Identifier|Reference(Organization)", "The organization which is the target of the request.", 0, java.lang.Integer.MAX_VALUE, target));
-        childrenList.add(new Property("provider[x]", "Identifier|Reference(Practitioner)", "The practitioner who is responsible for the action specified in thise request.", 0, java.lang.Integer.MAX_VALUE, provider));
-        childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the action speccified in thise request.", 0, java.lang.Integer.MAX_VALUE, organization));
+        childrenList.add(new Property("provider[x]", "Identifier|Reference(Practitioner)", "The practitioner who is responsible for the action specified in this request.", 0, java.lang.Integer.MAX_VALUE, provider));
+        childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the action speccified in this request.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("request[x]", "Identifier|Reference(Any)", "Reference of resource which is the target or subject of this action.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("response[x]", "Identifier|Reference(Any)", "Reference of a prior response to resource which is the target or subject of this action.", 0, java.lang.Integer.MAX_VALUE, response));
         childrenList.add(new Property("nullify", "boolean", "If true remove all history excluding audit.", 0, java.lang.Integer.MAX_VALUE, nullify));

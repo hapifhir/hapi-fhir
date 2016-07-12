@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Jul 1, 2016 14:13-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1301,7 +1301,7 @@ public class ActionDefinition extends Type implements ICompositeType {
     /**
      * The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).
      */
-    @Child(name = "resource", type = {}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "resource", type = {Reference.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Static portion of the action definition", formalDefinition="The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition)." )
     protected Reference resource;
 

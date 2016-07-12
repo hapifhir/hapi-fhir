@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, May 28, 2016 10:02-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -47,11 +47,11 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 public abstract class Element extends Base implements IBaseHasExtensions, IBaseElement {
 
     /**
-     * unique id for the element within a resource (for internal references).
+     * unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
      */
-    @Child(name = "id", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="xml:id (or equivalent in JSON)", formalDefinition="unique id for the element within a resource (for internal references)." )
-    protected IdType id;
+    @Child(name = "id", type = {StringType.class}, order=0, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="xml:id (or equivalent in JSON)", formalDefinition="unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces." )
+    protected StringType id;
 
     /**
      * May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.
@@ -60,7 +60,7 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
     @Description(shortDefinition="Additional Content defined by implementations", formalDefinition="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension." )
     protected List<Extension> extension;
 
-    private static final long serialVersionUID = -158027598L;
+    private static final long serialVersionUID = -1452745816L;
 
   /**
    * Constructor
@@ -70,14 +70,14 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
     }
 
     /**
-     * @return {@link #id} (unique id for the element within a resource (for internal references).). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
+     * @return {@link #id} (unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
      */
-    public IdType getIdElement() { 
+    public StringType getIdElement() { 
       if (this.id == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Element.id");
         else if (Configuration.doAutoCreate())
-          this.id = new IdType(); // bb
+          this.id = new StringType(); // bb
       return this.id;
     }
 
@@ -90,29 +90,29 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
     }
 
     /**
-     * @param value {@link #id} (unique id for the element within a resource (for internal references).). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
+     * @param value {@link #id} (unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
      */
-    public Element setIdElement(IdType value) { 
+    public Element setIdElement(StringType value) { 
       this.id = value;
       return this;
     }
 
     /**
-     * @return unique id for the element within a resource (for internal references).
+     * @return unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
      */
     public String getId() { 
       return this.id == null ? null : this.id.getValue();
     }
 
     /**
-     * @param value unique id for the element within a resource (for internal references).
+     * @param value unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
      */
     public Element setId(String value) { 
       if (Utilities.noString(value))
         this.id = null;
       else {
         if (this.id == null)
-          this.id = new IdType();
+          this.id = new StringType();
         this.id.setValue(value);
       }
       return this;
@@ -205,14 +205,14 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
   }
 
       protected void listChildren(List<Property> childrenList) {
-        childrenList.add(new Property("id", "id", "unique id for the element within a resource (for internal references).", 0, java.lang.Integer.MAX_VALUE, id));
+        childrenList.add(new Property("id", "string", "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.", 0, java.lang.Integer.MAX_VALUE, id));
         childrenList.add(new Property("extension", "Extension", "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", 0, java.lang.Integer.MAX_VALUE, extension));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3355: /*id*/ return this.id == null ? new Base[0] : new Base[] {this.id}; // IdType
+        case 3355: /*id*/ return this.id == null ? new Base[0] : new Base[] {this.id}; // StringType
         case -612557761: /*extension*/ return this.extension == null ? new Base[0] : this.extension.toArray(new Base[this.extension.size()]); // Extension
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -223,7 +223,7 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3355: // id
-          this.id = castToId(value); // IdType
+          this.id = castToString(value); // StringType
           break;
         case -612557761: // extension
           this.getExtension().add(castToExtension(value)); // Extension
@@ -236,7 +236,7 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("id"))
-          this.id = castToId(value); // IdType
+          this.id = castToString(value); // StringType
         else if (name.equals("extension"))
           this.getExtension().add(castToExtension(value));
         else
@@ -246,7 +246,7 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3355: throw new FHIRException("Cannot make property id as it is not a complex type"); // IdType
+        case 3355: throw new FHIRException("Cannot make property id as it is not a complex type"); // StringType
         case -612557761:  return addExtension(); // Extension
         default: return super.makeProperty(hash, name);
         }

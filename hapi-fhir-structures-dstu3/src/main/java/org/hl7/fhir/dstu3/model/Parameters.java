@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -72,10 +72,10 @@ public class Parameters extends Resource implements IBaseParameters {
         protected Resource resource;
 
         /**
-         * A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".
+         * A named part of a multi-part parameter.
          */
         @Child(name = "part", type = {ParametersParameterComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Named part of a parameter (e.g. Tuple)", formalDefinition="A named part of a parameter. In many implementation context, a set of named parts is known as a \"Tuple\"." )
+        @Description(shortDefinition="Named part of a multi-part parameter", formalDefinition="A named part of a multi-part parameter." )
         protected List<ParametersParameterComponent> part;
 
         private static final long serialVersionUID = -839605058L;
@@ -179,7 +179,7 @@ public class Parameters extends Resource implements IBaseParameters {
         }
 
         /**
-         * @return {@link #part} (A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".)
+         * @return {@link #part} (A named part of a multi-part parameter.)
          */
         public List<ParametersParameterComponent> getPart() { 
           if (this.part == null)
@@ -236,7 +236,7 @@ public class Parameters extends Resource implements IBaseParameters {
           childrenList.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("value[x]", "*", "If the parameter is a data type.", 0, java.lang.Integer.MAX_VALUE, value));
           childrenList.add(new Property("resource", "Resource", "If the parameter is a whole resource.", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("part", "@Parameters.parameter", "A named part of a parameter. In many implementation context, a set of named parts is known as a \"Tuple\".", 0, java.lang.Integer.MAX_VALUE, part));
+          childrenList.add(new Property("part", "@Parameters.parameter", "A named part of a multi-part parameter.", 0, java.lang.Integer.MAX_VALUE, part));
         }
 
       @Override

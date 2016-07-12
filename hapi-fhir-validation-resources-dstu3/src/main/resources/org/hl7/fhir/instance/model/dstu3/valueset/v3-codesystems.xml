@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="v3-valuesets"/>
  <meta>
-  <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+  <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -10,7 +10,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CalendarType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -44,7 +44,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ManagedParticipationStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -78,7 +78,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-InformationSensitivityPolicy"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -116,7 +116,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -150,7 +150,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ConfidentialityClassification"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -201,7 +201,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ServiceDeliveryLocationRoleType"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -245,7 +245,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryResponse"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -279,7 +279,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityPolicy"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -317,7 +317,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableCellHorizontalAlign"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -351,7 +351,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassOrganization"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -389,7 +389,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetDirect"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -427,7 +427,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipHasComponent"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -465,7 +465,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProbabilityDistributionType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -499,7 +499,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActPriority"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActPriority"/>
@@ -530,7 +530,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CommunicationFunctionType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -564,7 +564,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ReligiousAffiliation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ReligiousAffiliation"/>
@@ -595,7 +595,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ResponseMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -629,7 +629,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMood"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -663,7 +663,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassSupply"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -701,7 +701,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityIntegrityObservationValue"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -745,7 +745,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-substanceAdminSubstitution"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-substanceAdminSubstitution"/>
@@ -776,7 +776,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AmericanIndianAlaskaNativeLanguages"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-AmericanIndianAlaskaNativeLanguages"/>
@@ -807,7 +807,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementCondition"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -841,7 +841,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationMode"/>
@@ -872,7 +872,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassDocument"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -910,7 +910,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TargetAwareness"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -944,7 +944,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNameUseR2"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -978,7 +978,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AdministrativeGender"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1012,7 +1012,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityRisk"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityRisk"/>
@@ -1043,7 +1043,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RefrainPolicy"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1081,7 +1081,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetSubject"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1119,7 +1119,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipPertains"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1157,7 +1157,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1191,7 +1191,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentStorage"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-DocumentStorage"/>
@@ -1222,7 +1222,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryPriority"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1256,7 +1256,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TribalEntityUS"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-TribalEntityUS"/>
@@ -1287,7 +1287,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ResponseLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1321,7 +1321,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-IntegrityCheckAlgorithm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1355,7 +1355,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassManufacturedProduct"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1393,7 +1393,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassROI"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1437,7 +1437,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRelationshipFormal"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1481,7 +1481,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SpecimenType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SpecimenType"/>
@@ -1512,7 +1512,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActSubstanceAdminSubstitutionCode"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1556,7 +1556,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-AS"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1607,7 +1607,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ResponseModality"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1641,7 +1641,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPartitive"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1685,7 +1685,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassDevice"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1723,7 +1723,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1757,7 +1757,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DataOperation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-DataOperation"/>
@@ -1788,7 +1788,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Race"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-Race"/>
@@ -1819,7 +1819,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SubstitutionCondition"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SubstitutionCondition"/>
@@ -1850,7 +1850,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-DC"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1898,7 +1898,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TelecommunicationCapabilities"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1932,7 +1932,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementDetailCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementDetailCode"/>
@@ -1963,7 +1963,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SubstanceAdminSubstitutionReason"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2007,7 +2007,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipSubset"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2041,7 +2041,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPassive"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2085,7 +2085,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipSplit"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2119,7 +2119,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassClinicalDocument"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2157,7 +2157,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-IdentifierScope"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2191,7 +2191,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassObservation"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2229,7 +2229,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryRequestLimit"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryRequestLimit"/>
@@ -2260,7 +2260,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActUncertainty"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2294,7 +2294,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HL7UpdateMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2328,7 +2328,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EmployeeJobClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2362,7 +2362,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EncounterAdmissionSource"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2396,7 +2396,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationPhysicalPerformer"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2434,7 +2434,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HumanLanguage"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2467,7 +2467,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRoot"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2505,7 +2505,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActInvoiceElementModifier"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2539,7 +2539,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableRules"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2573,7 +2573,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationValue"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ObservationValue"/>
@@ -2604,7 +2604,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PersonDisabilityType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-PersonDisabilityType"/>
@@ -2635,7 +2635,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2669,7 +2669,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MessageWaitingPriority"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-MessageWaitingPriority"/>
@@ -2700,7 +2700,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationFunction"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2734,7 +2734,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableFrame"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2768,7 +2768,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassSpecimen"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2806,7 +2806,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Calendar"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2840,7 +2840,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodIntent"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2878,7 +2878,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityDeterminerDetermined"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2916,7 +2916,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-hl7V3Conformance"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-hl7V3Conformance"/>
@@ -2947,7 +2947,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationType"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -2988,7 +2988,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LanguageAbilityProficiency"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3022,7 +3022,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActCode"/>
@@ -3053,7 +3053,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassPlace"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3091,7 +3091,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentSectionType"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3124,7 +3124,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityCode"/>
@@ -3155,7 +3155,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassRoot"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3193,7 +3193,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipJoin"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3227,7 +3227,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationTranscriber"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3265,7 +3265,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LanguageAbilityMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3299,7 +3299,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3331,7 +3331,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActCoverageTypeCode"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3369,7 +3369,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActExposureLevelCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActExposureLevelCode"/>
@@ -3400,7 +3400,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProcessingID"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3434,7 +3434,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContainerCap"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ContainerCap"/>
@@ -3465,7 +3465,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentCompletion"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3499,7 +3499,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableCellScope"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3533,7 +3533,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationGenerator"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3577,7 +3577,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DeviceAlertLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3611,7 +3611,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Confidentiality"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-Confidentiality"/>
@@ -3642,7 +3642,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-xBasicConfidentialityKind"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3684,7 +3684,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Ethnicity"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-Ethnicity"/>
@@ -3715,7 +3715,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleCode"/>
@@ -3746,7 +3746,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MilitaryRoleType"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3784,7 +3784,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActConsentType"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3822,7 +3822,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3856,7 +3856,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-hl7Realm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3890,7 +3890,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAssociative"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3934,7 +3934,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Compartment"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -3972,7 +3972,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ExposureMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ExposureMode"/>
@@ -4003,7 +4003,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EncounterSpecialCourtesy"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4037,7 +4037,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryStatusCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4071,7 +4071,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4105,7 +4105,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4139,7 +4139,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PatientImportance"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4173,7 +4173,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LocalRemoteControlState"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4207,7 +4207,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityControlObservationValue"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4242,7 +4242,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PersonalRelationshipRoleType"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4286,7 +4286,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContextControl"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4320,7 +4320,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PaymentTerms"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4354,7 +4354,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SetOperator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4388,7 +4388,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartQualifier"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4422,7 +4422,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationVerifier"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4460,7 +4460,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodPredicate"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4504,7 +4504,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActReason"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActReason"/>
@@ -4535,7 +4535,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LivingArrangement"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-LivingArrangement"/>
@@ -4566,7 +4566,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassLivingSubject"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4604,7 +4604,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementDetailType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4638,7 +4638,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActSite"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActSite"/>
@@ -4669,7 +4669,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-VaccineManufacturer"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4703,7 +4703,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationIndirectTarget"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4741,7 +4741,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationMethod"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4775,7 +4775,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SeverityObservation"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4819,7 +4819,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AddressUse"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4853,7 +4853,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CalendarCycle"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-CalendarCycle"/>
@@ -4884,7 +4884,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAgent"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4922,7 +4922,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GenderStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4956,7 +4956,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -4990,7 +4990,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Charset"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5024,7 +5024,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MapRelationship"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5058,7 +5058,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CodingRationale"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5092,7 +5092,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AddressPartType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5126,7 +5126,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContainerSeparator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5160,7 +5160,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActEncounterCode"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5204,7 +5204,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EquipmentAlertLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5238,7 +5238,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryParameterValue"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryParameterValue"/>
@@ -5269,7 +5269,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipCheckpoint"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5303,7 +5303,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GTSAbbreviation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-GTSAbbreviation"/>
@@ -5334,7 +5334,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-NullFlavor"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5368,7 +5368,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContentProcessingMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5402,7 +5402,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNameUse"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5436,7 +5436,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipConditional"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5480,7 +5480,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RelationshipConjunction"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5514,7 +5514,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PurposeOfUse"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5552,7 +5552,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RouteOfAdministration"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RouteOfAdministration"/>
@@ -5583,7 +5583,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassManufacturedMaterial"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5621,7 +5621,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RelationalOperator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5655,7 +5655,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipFulfills"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5693,7 +5693,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActIncidentCode"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5737,7 +5737,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5771,7 +5771,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleLinkStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5805,7 +5805,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActInvoiceGroupCode"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5849,7 +5849,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassProcedure"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5887,7 +5887,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GeneralPurposeOfUse"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5947,7 +5947,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassInvestigation"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -5985,7 +5985,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-VerificationMethod"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6023,7 +6023,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EducationLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6057,7 +6057,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-FamilyMember"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6095,7 +6095,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationInterpretation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6129,7 +6129,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Sequencing"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6163,7 +6163,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CompressionAlgorithm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6197,7 +6197,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassMutualRelationship"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6241,7 +6241,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MaritalStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-MaritalStatus"/>
@@ -6272,7 +6272,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TimingEvent"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6306,7 +6306,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6340,7 +6340,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ModifyIndicator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6374,7 +6374,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TransmissionRelationshipTypeCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6408,7 +6408,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartQualifierR2"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6442,7 +6442,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-orderableDrugForm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-orderableDrugForm"/>
@@ -6473,7 +6473,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObligationPolicy"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6511,7 +6511,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetLocation"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6549,7 +6549,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableCellVerticalAlign"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6583,7 +6583,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationSignature"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6617,7 +6617,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityDeterminer"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6651,7 +6651,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HtmlLinkType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6685,7 +6685,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProcessingMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6719,7 +6719,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartTypeR2"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6753,7 +6753,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityHandling"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6787,7 +6787,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassServiceDeliveryLocation"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6825,7 +6825,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActPharmacySupplyType"/>
     <meta>
-     <lastUpdated value="2016-06-30T22:09:26.083+00:00"/>
+     <lastUpdated value="2016-07-12T12:04:33.697-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6869,7 +6869,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LocalMarkupIgnore"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6903,7 +6903,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleLinkType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -6937,7 +6937,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActUSPrivacyLaw"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActUSPrivacyLaw"/>
@@ -6968,7 +6968,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-IdentifierReliability"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -7002,7 +7002,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.14"/>
@@ -7019,7 +7019,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Codes representing the defined possible states of an Act, as defined by the Act class state machine."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActStatus"/>
@@ -7083,7 +7083,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RelationalOperator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.105"/>
@@ -7100,7 +7100,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RelationalOperator"/>
@@ -7154,7 +7154,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ModifyIndicator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.81"/>
@@ -7171,7 +7171,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ModifyIndicator"/>
@@ -7195,7 +7195,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ExposureMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1113"/>
@@ -7212,7 +7212,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Code for the mechanism by which the exposure agent was exchanged or potentially exchanged by the participants involved in the exposure."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ExposureMode"/>
@@ -7261,7 +7261,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="PaymentTerms"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.91"/>
@@ -7278,7 +7278,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Describes payment terms for a financial transaction, used in an invoice. This is typically expressed as a responsibility of the acceptor or payor of an invoice."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-PaymentTerms"/>
@@ -7312,7 +7312,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ContentProcessingMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1110"/>
@@ -7329,7 +7329,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Identifies the order in which content should be processed."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ContentProcessingMode"/>
@@ -7353,7 +7353,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="Charset"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.21"/>
@@ -7370,7 +7370,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Internet Assigned Numbers Authority (IANA) Charset Types"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-Charset"/>
@@ -7434,7 +7434,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="DocumentStorage"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.34"/>
@@ -7451,7 +7451,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Identifies the storage status of a document."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-DocumentStorage"/>
@@ -7485,7 +7485,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="orderableDrugForm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.85"/>
@@ -7502,7 +7502,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  OpenIssue: Missing description."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-orderableDrugForm"/>
@@ -8385,7 +8385,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ProcessingMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.101"/>
@@ -8402,7 +8402,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ProcessingMode"/>
@@ -8436,7 +8436,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TelecommunicationCapabilities"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1118"/>
@@ -8453,7 +8453,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Concepts that define the telecommunication capabilities of a particular device. Used to identify the expected capabilities to be found at a particular telecommunication address."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TelecommunicationCapabilities"/>
@@ -8492,7 +8492,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ObservationMethod"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.84"/>
@@ -8509,7 +8509,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code that provides additional detail about the means or technique used to ascertain the observation.  Examples: Blood pressure measurement method: arterial puncture vs. sphygmomanometer (Riva-Rocci), sitting vs. supine position, etc.  OpenIssue: Description copied from Concept Domain of same name.  Must be verified.  Note that the Domain has a full discussion about use of the attribute and constraining that is not appropriate for the code system description.  Needs to be improved."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ObservationMethod"/>
@@ -10075,7 +10075,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AddressPartType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.16"/>
@@ -10092,7 +10092,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Code that specifies whether an address part names the street, city, country, postal code, post box, etc. Discussion: The hierarchical nature of these concepts shows composition.  E.g. &quot;Street Name&quot; is part of &quot;Street Address Line&quot;"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AddressPartType"/>
@@ -10256,7 +10256,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RoleClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.110"/>
@@ -10273,7 +10273,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Codes for the Role class hierarchy.  The values in this hierarchy, represent a Role which is an association or relationship between two entities - the entity that plays the role and the entity that scopes the role.  Roles names are derived from the name of the playing entity in that role. The role hierarchy stems from three core concepts, or abstract domains:    RoleClassOntological is an abstract domain that collects roles in which the playing entity is defined or specified by the scoping entity.   RoleClassPartitive collects roles in which the playing entity is in some sense a &quot;part&quot; of the scoping entity.   RoleClassAssociative collects all of the remaining forms of association between the playing entity and the scoping entity. This set of roles is further partitioned between:    RoleClassPassive which are roles in which the playing entity is used, known, treated, handled, built, or destroyed, etc. under the auspices of the scoping entity. The playing entity is passive in these roles in that the role exists without an agreement from the playing entity.   RoleClassMutualRelationship which are relationships based on mutual behavior of the two entities. The basis of these relationship may be formal agreements or they may bede facto behavior.  Thus, this sub-domain is further divided into:    RoleClassRelationshipFormal in which the relationship is formally defined, frequently by a contract or agreement.   Personal relationship which inks two people in a personal relationship. The hierarchy discussed above is represented In the current vocabulary tables as a set of abstract domains, with the exception of the  &quot;Personal relationship&quot; which is a leaf concept.  OpenIssue: Description copied from Concept Domain of same name.  Must be verified."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RoleClass"/>
@@ -10925,7 +10925,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.41"/>
@@ -10942,7 +10942,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Classifies the Entity class and all of its subclasses.  The terminology is hierarchical.  At the top is this  HL7-defined domain of high-level categories (such as represented by the Entity subclasses). Each of these terms must be harmonized and is specializable. The value sets beneath are drawn from multiple, frequently external, domains that reflect much more fine-grained typing."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityClass"/>
@@ -11091,7 +11091,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AcknowledgementDetailCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1100"/>
@@ -11108,7 +11108,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  OpenIssue: Missing description."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementDetailCode"/>
@@ -11272,7 +11272,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="Calendar"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1055"/>
@@ -11289,7 +11289,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-Calendar"/>
@@ -11308,7 +11308,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="GenderStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.51"/>
@@ -11325,7 +11325,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-GenderStatus"/>
@@ -11349,7 +11349,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="IdentifierReliability"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1117"/>
@@ -11366,7 +11366,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Specifies the reliability with which the identifier is known. This attribute MAY be used to assist with identifier matching algorithms."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-IdentifierReliability"/>
@@ -11395,7 +11395,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="QueryParameterValue"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1096"/>
@@ -11412,7 +11412,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The domain of coded values used as parameters within QueryByParameter queries."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-QueryParameterValue"/>
@@ -11528,7 +11528,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ResponseLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.108"/>
@@ -11545,7 +11545,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Specifies whether a response is expected from the addressee of this interaction and what level of detail that response should include"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ResponseLevel"/>
@@ -11594,7 +11594,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="LivingArrangement"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.63"/>
@@ -11611,7 +11611,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code depicting the living arrangements of a person"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-LivingArrangement"/>
@@ -11685,7 +11685,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="DeviceAlertLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.31"/>
@@ -11702,7 +11702,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Domain values for the Device.Alert_levelCode"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-DeviceAlertLevel"/>
@@ -11736,7 +11736,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AmericanIndianAlaskaNativeLanguages"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1054"/>
@@ -11753,7 +11753,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" American Indian and Alaska Native languages currently being used in the United States."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AmericanIndianAlaskaNativeLanguages"/>
@@ -13432,7 +13432,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ResponseModality"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.109"/>
@@ -13449,7 +13449,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Defines the timing and grouping of the response instances.  OpenIssue: Description copied from Concept Domain of same name.  Must be verified."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ResponseModality"/>
@@ -13478,7 +13478,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ReligiousAffiliation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1076"/>
@@ -13495,7 +13495,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Assigment of spiritual faith affiliation"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ReligiousAffiliation"/>
@@ -13919,7 +13919,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AcknowledgementDetailType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1082"/>
@@ -13936,7 +13936,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code identifying the specific message to be provided.  Discussion: A textual value may be specified as the print name, or for non-coded messages, as the original text.  Examples: 'Required attribute xxx is missing', 'System will be unavailable March 19 from 0100 to 0300'"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementDetailType"/>
@@ -13992,7 +13992,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TableCellVerticalAlign"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.133"/>
@@ -14009,7 +14009,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" These values are defined within the XHTML 4.0 Table Model"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TableCellVerticalAlign"/>
@@ -14043,7 +14043,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ProbabilityDistributionType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1020"/>
@@ -14060,7 +14060,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ProbabilityDistributionType"/>
@@ -14119,7 +14119,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="MaritalStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.2"/>
@@ -14136,7 +14136,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" * * * No description supplied * * *  Open Issue: The specific meanings of these codes can vary somewhat by jurisdiction and implementation so caution should be used when determining equivalency."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-MaritalStatus"/>
@@ -14200,7 +14200,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="substanceAdminSubstitution"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1070"/>
@@ -14217,7 +14217,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Identifies what sort of change is permitted or has occurred between the therapy that was ordered and the therapy that was/will be provided."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-substanceAdminSubstitution"/>
@@ -14291,7 +14291,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="VaccineManufacturer"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.144"/>
@@ -14308,7 +14308,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The manufacturer of a vaccine."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-VaccineManufacturer"/>
@@ -14522,7 +14522,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="Race"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.104"/>
@@ -14539,7 +14539,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" In the United States, federal standards for classifying data on race determine the categories used by federal agencies and exert a strong influence on categorization by state and local agencies and private sector organizations.  The federal standards do not conceptually define race, and they recognize the absence of an anthropological or scientific basis for racial classification.  Instead, the federal standards acknowledge that race is a social-political construct in which an individual's own identification with one more race categories is preferred to observer identification. The standards use a variety of features to define five minimum race categories. Among these features are descent from &quot;the original peoples&quot; of a specified region or nation.  The minimum race categories are American Indian or Alaska Native, Asian, Black or African American, Native Hawaiian or Other Pacific Islander, and White.  The federal standards stipulate that race data need not be limited to the five minimum categories, but any expansion must be collapsible to those categories."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-Race"/>
@@ -19158,7 +19158,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TargetAwareness"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.137"/>
@@ -19175,7 +19175,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TargetAwareness"/>
@@ -19219,7 +19219,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TribalEntityUS"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.140"/>
@@ -19236,7 +19236,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" INDIAN ENTITIES RECOGNIZED AND ELIGIBLE TO RECEIVE SERVICES FROM THE UNITED STATES BUREAU OF INDIAN AFFAIRS"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TribalEntityUS"/>
@@ -22104,7 +22104,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="MapRelationship"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.67"/>
@@ -22121,7 +22121,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The closeness or quality of the mapping between the HL7 concept (as represented by the HL7 concept identifier) and the source coding system. The values are patterned after the similar relationships used in the UMLS Metathesaurus. Because the HL7 coding sy"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-MapRelationship"/>
@@ -22150,7 +22150,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="QueryStatusCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.103"/>
@@ -22167,7 +22167,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code specifying the state of the Query."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-QueryStatusCode"/>
@@ -22206,7 +22206,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActRelationshipType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1002"/>
@@ -22223,7 +22223,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The source is an excerpt from the target."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipType"/>
@@ -23072,7 +23072,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RoleLinkType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.107"/>
@@ -23089,7 +23089,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RoleLinkType"/>
@@ -23143,7 +23143,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TransmissionRelationshipTypeCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1111"/>
@@ -23160,7 +23160,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: A code specifying the meaning and purpose of every TransmissionRelationship instance. Each of its values implies specific constraints to what kinds of Transmission objects can be related and in which way."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TransmissionRelationshipTypeCode"/>
@@ -23179,7 +23179,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="SetOperator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1069"/>
@@ -23196,7 +23196,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-SetOperator"/>
@@ -23250,7 +23250,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityHandling"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.42"/>
@@ -23267,7 +23267,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityHandling"/>
@@ -23371,7 +23371,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityRisk"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.46"/>
@@ -23388,7 +23388,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Kinds of risks associated with the handling of the material.."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityRisk"/>
@@ -23457,7 +23457,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ParticipationSignature"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.89"/>
@@ -23474,7 +23474,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A set of codes specifying whether and how the participant has attested his participation through a signature and or whether such a signature is needed.  Examples: A surgical Procedure act object (representing a procedure report) requires a signature of the performing and responsible surgeon, and possibly other participants. (See also: Participation.signatureText.)"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ParticipationSignature"/>
@@ -23503,7 +23503,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActMood"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1001"/>
@@ -23520,7 +23520,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" OpenIssue:  In Ballot 2009May, a strong Negative vote was lodged against several of the concept definitions in the vocabulary used for Act.moodCode. The vote was found &quot;Persuasive With Mod&quot;, with the understanding that M and M would undertake a detailed review of these concept definitions for a future release of the RIM."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActMood"/>
@@ -23740,7 +23740,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="IntegrityCheckAlgorithm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1010"/>
@@ -23757,7 +23757,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-IntegrityCheckAlgorithm"/>
@@ -23781,7 +23781,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="HL7UpdateMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.57"/>
@@ -23798,7 +23798,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The possible modes of updating that occur when an attribute is received by a system that already contains values for that attribute."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-HL7UpdateMode"/>
@@ -23940,7 +23940,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ProcessingID"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.100"/>
@@ -23957,7 +23957,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Codes used to specify whether a message is part of a production, training, or debugging system."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ProcessingID"/>
@@ -23986,7 +23986,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RoleCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.111"/>
@@ -24003,7 +24003,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A set of codes further specifying the kind of Role; specific classification codes for further qualifying RoleClass codes."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RoleCode"/>
@@ -26369,7 +26369,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActRelationshipCheckpoint"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.10"/>
@@ -26386,7 +26386,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipCheckpoint"/>
@@ -26425,7 +26425,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AdministrativeGender"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1"/>
@@ -26442,7 +26442,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The gender of a person used for adminstrative purposes (as opposed to clinical gender)"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AdministrativeGender"/>
@@ -26471,7 +26471,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="Sequencing"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.113"/>
@@ -26488,7 +26488,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Specifies sequence of sort order."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-Sequencing"/>
@@ -26517,7 +26517,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="hl7Realm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1124"/>
@@ -26534,7 +26534,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Coded concepts representing Binding Realms (used for Context Binding of terminology in HL7 models)  and/or Namespace Realms (used to help ensure unique identification of HL7 artifacts). This code system is partitioned into three sections: Affiliate realms, Binding realms and Namespace realms.  All affiliate realm codes may automatically be used as both binding realms and namespace realms.  Furthermore, affiliate realms are the only realms that have authority over the creation of binding realms.  (Note that 'affiliate' includes the idea of both international affiliates and the HL7 International organization.)  All other codes must be associated with an owning affiliate realm and must appear as a specialization of _BindingRealm or _NamespaceRealm.  For affiliates whose concepts align with nations, the country codes from ISO 3166-1 2-character alpha are used for the code when possible so these codes should not be used for other realm types.  It is recommended that binding realm and namespace codes submitted by affiliates use the realm code as a prefix to avoid possible collisions with ISO codes.  However, tooling does not currently support namepace realm codes greater than 2 characters.  Open Issue: The name of the concept property &quot;owningAffiliate&quot; should be changed to better reflect that the property value is the human readable name of the organizational entity that manages the Realm identified by the Realm Code.  Open Issue: In spite of the inability of tooling to process codes longer than 2 characters, there is at least one realm codes ('SOA') that was added that is 3 characters in length."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-hl7Realm"/>
@@ -26797,7 +26797,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ContainerCap"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.26"/>
@@ -26814,7 +26814,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The type of cap associated with a container"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ContainerCap"/>
@@ -26873,7 +26873,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="CalendarCycle"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.9"/>
@@ -26890,7 +26890,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Calendar cycle identifiers"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-CalendarCycle"/>
@@ -27046,7 +27046,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="QueryResponse"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1067"/>
@@ -27063,7 +27063,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code classifying the general nature of the response to a given query. Includes whether or not data was found, or whether an error occurred."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-QueryResponse"/>
@@ -27097,7 +27097,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="Confidentiality"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.25"/>
@@ -27114,7 +27114,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A set of codes specifying the security classification of acts and roles in accordance with the definition for concept domain &quot;Confidentiality&quot;."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-Confidentiality"/>
@@ -27362,7 +27362,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ParticipationMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1064"/>
@@ -27379,7 +27379,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A set of codes specifying the modality by which the Entity playing the Role is participating in the Act.  Examples: Physically present, over the telephone, written communication.  Rationale: Particularly for author (originator) participants this is used to specify whether the information represented by the act was initially provided verbally, (hand-)written, or electronically.  Open Issue: There needs to be a reexamination of the hierarchies as there seems to be some muddling between ELECTRONIC and other concepts that involve electronic communication that are in other hierarchies."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ParticipationMode"/>
@@ -27468,7 +27468,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityNamePartQualifier"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.43"/>
@@ -27485,7 +27485,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  OpenIssue: Needs description"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartQualifier"/>
@@ -27726,7 +27726,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AcknowledgementType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.18"/>
@@ -27743,7 +27743,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" This attribute contains an acknowledgement code as described in the HL7 message processing rules.  OpenIssue: Description was copied from attribute and needs to be improved to be appropriate for a code system."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementType"/>
@@ -27787,7 +27787,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RouteOfAdministration"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.112"/>
@@ -27804,7 +27804,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The path the administered medication takes to get into the body or into contact with the body."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RouteOfAdministration"/>
@@ -30991,7 +30991,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ResponseMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1126"/>
@@ -31008,7 +31008,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Specifies the mode, immediate versus deferred or queued, by which a receiver should communicate its receiver responsibilities."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ResponseMode"/>
@@ -31037,7 +31037,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ContextControl"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1057"/>
@@ -31054,7 +31054,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code that specifies how an ActRelationship or Participation contributes to the context of an Act, and whether it may be propagated to descendent Acts whose association allows such propagation (see also attributes Participation.contextControlCode, ActRelationship.contextControlCode, ActRelationship.contextConductionInd)."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ContextControl"/>
@@ -31142,7 +31142,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="NullFlavor"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1008"/>
@@ -31159,7 +31159,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A collection of codes specifying why a valid value is not present."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-NullFlavor"/>
@@ -31271,7 +31271,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EquipmentAlertLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.49"/>
@@ -31288,7 +31288,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EquipmentAlertLevel"/>
@@ -31322,7 +31322,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AcknowledgementCondition"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1050"/>
@@ -31339,7 +31339,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" The codes identify the conditions under which accept acknowledgements are required to be returned in response to this message. Note that accept acknowledgement address two different issues at the same time: reliable transport as well as syntactical correctness"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementCondition"/>
@@ -31383,7 +31383,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="PersonDisabilityType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.93"/>
@@ -31400,7 +31400,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code identifying a person's disability."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-PersonDisabilityType"/>
@@ -31464,7 +31464,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityNamePartQualifierR2"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1122"/>
@@ -31481,7 +31481,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: The qualifier is a set of codes each of which specifies a certain subcategory of the name part in addition to the main name part type. For example, a given name may be flagged as a nickname, a family name may be a pseudonym or a name of public records."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartQualifierR2"/>
@@ -31644,7 +31644,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EncounterSpecialCourtesy"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.40"/>
@@ -31661,7 +31661,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EncounterSpecialCourtesy"/>
@@ -31700,7 +31700,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ObservationInterpretation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.83"/>
@@ -31717,7 +31717,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" One or more codes specifying a rough qualitative interpretation of the observation, such as &quot;normal&quot;, &quot;abnormal&quot;, &quot;below normal&quot;, &quot;change up&quot;, &quot;resistant&quot;, &quot;susceptible&quot;, etc.  OpenIssue: Description copied from Concept Domain of same name.  Must be verified.  Note also that this might be identical to the V2 code system of interpretation codes (formerly Abnormal Flags in older versions)."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ObservationInterpretation"/>
@@ -32080,7 +32080,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RelationshipConjunction"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.106"/>
@@ -32097,7 +32097,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RelationshipConjunction"/>
@@ -32126,7 +32126,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActRelationshipJoin"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.12"/>
@@ -32143,7 +32143,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipJoin"/>
@@ -32177,7 +32177,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RoleStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1068"/>
@@ -32194,7 +32194,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Codes representing the defined possible states of an Role, as defined by the Role class state machine."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RoleStatus"/>
@@ -32243,7 +32243,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.6"/>
@@ -32260,7 +32260,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActClass"/>
@@ -33042,7 +33042,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="IdentifierScope"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1116"/>
@@ -33059,7 +33059,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Codes to specify the scope in which the identifier applies to the object with which it is associated, and used in the datatype property II."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-IdentifierScope"/>
@@ -33093,7 +33093,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="Ethnicity"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.50"/>
@@ -33110,7 +33110,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" In the United States, federal standards for classifying data on ethnicity determine the categories used by federal agencies and exert a strong influence on categorization by state and local agencies and private sector organizations. The federal standards do not conceptually define ethnicity, and they recognize the absence of an anthropological or scientific basis for ethnicity classification.  Instead, the federal standards acknowledge that ethnicity is a social-political construct in which an individual's own identification with a particular ethnicity is preferred to observer identification.  The standards specify two minimum ethnicity categories: Hispanic or Latino, and Not Hispanic or Latino.  The standards define a Hispanic or Latino as a person of &quot;Mexican, Puerto Rican, Cuban, South or Central America, or other Spanish culture or origin, regardless of race.&quot; The standards stipulate that ethnicity data need not be limited to the two minimum categories, but any expansion must be collapsible to those categories.  In addition, the standards stipulate that an individual can be Hispanic or Latino or can be Not Hispanic or Latino, but cannot be both."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-Ethnicity"/>
@@ -33339,7 +33339,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActPriority"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.7"/>
@@ -33356,7 +33356,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A set of codes (e.g., for routine, emergency), specifying the urgency under which the Act happened, can happen, is happening, is intended to happen, or is requested/demanded to happen."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActPriority"/>
@@ -33445,7 +33445,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ContainerSeparator"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.27"/>
@@ -33462,7 +33462,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A material in a blood collection container that facilites the separation of of blood cells from serum or plasma"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ContainerSeparator"/>
@@ -33486,7 +33486,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActExposureLevelCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1114"/>
@@ -33503,7 +33503,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A qualitative measure of the degree of exposure to the causative agent.  This includes concepts such as &quot;low&quot;, &quot;medium&quot; and &quot;high&quot;.  This quantifies how the quantity that was available to be administered to the target differs from typical or background levels of the substance."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActExposureLevelCode"/>
@@ -33547,7 +33547,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="CommunicationFunctionType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1056"/>
@@ -33564,7 +33564,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Describes the type of communication function that the associated entity plays in the associated transmission."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-CommunicationFunctionType"/>
@@ -33593,7 +33593,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ObservationValue"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1063"/>
@@ -33610,7 +33610,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" This domain is the root domain to which all HL7-recognized value sets for the Observation.value attribute will be linked when Observation.value has a coded data type.  OpenIssue: Description copied from Concept Domain of same name.  Must be corrected.."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ObservationValue"/>
@@ -34974,7 +34974,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EducationLevel"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1077"/>
@@ -34991,7 +34991,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Years of education that a person has completed"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EducationLevel"/>
@@ -35050,7 +35050,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1061"/>
@@ -35067,7 +35067,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Codes representing the defined possible states of an Entity, as defined by the Entity class state machine."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityStatus"/>
@@ -35116,7 +35116,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="PatientImportance"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1075"/>
@@ -35133,7 +35133,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Patient VIP code"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-PatientImportance"/>
@@ -35192,7 +35192,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityDeterminer"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.30"/>
@@ -35209,7 +35209,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" EntityDeterminer in natural language grammar is the class of words that comprises articles, demonstrative pronouns, and quantifiers. In the RIM, determiner is a structural code in the Entity class to distinguish whether any given Entity object stands for some, any one, or a specific thing."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityDeterminer"/>
@@ -35268,7 +35268,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="LocalMarkupIgnore"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.65"/>
@@ -35285,7 +35285,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Tells a receiver to ignore just the local markup tags (local_markup, local_header, local_attr) when value=&quot;markup&quot;, or to ignore the local markup tags and all contained content when value=&quot;all&quot;"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-LocalMarkupIgnore"/>
@@ -35309,7 +35309,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="LanguageAbilityMode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.60"/>
@@ -35326,7 +35326,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A value representing the method of expression of the language.  Example: Expressed spoken, expressed written, expressed signed, received spoken, received written, received signed.  OpenIssue: Description copied from Concept Domain of same name.  Must be verified."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-LanguageAbilityMode"/>
@@ -35370,7 +35370,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ParticipationType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.90"/>
@@ -35387,7 +35387,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ParticipationType"/>
@@ -35730,7 +35730,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="CalendarType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1017"/>
@@ -35747,7 +35747,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-CalendarType"/>
@@ -35766,7 +35766,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="RoleLinkStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1137"/>
@@ -35783,7 +35783,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Codes representing possible states of a RoleLink, as defined by the RoleLink class state machine."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-RoleLinkStatus"/>
@@ -35827,7 +35827,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="AddressUse"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1119"/>
@@ -35844,7 +35844,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Codes that provide guidance around the circumstances in which a given address should be used."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AddressUse"/>
@@ -35971,7 +35971,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="LocalRemoteControlState"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.66"/>
@@ -35988,7 +35988,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-LocalRemoteControlState"/>
@@ -36012,7 +36012,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="GTSAbbreviation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1022"/>
@@ -36029,7 +36029,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-GTSAbbreviation"/>
@@ -36238,7 +36238,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ParticipationFunction"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.88"/>
@@ -36255,7 +36255,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" This code is used to specify the exact function an actor had in a service in all necessary detail. This domain may include local extensions (CWE)."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ParticipationFunction"/>
@@ -36552,7 +36552,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TableCellHorizontalAlign"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.131"/>
@@ -36569,7 +36569,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" These values are defined within the XHTML 4.0 Table Model"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TableCellHorizontalAlign"/>
@@ -36608,7 +36608,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="SpecimenType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.129"/>
@@ -36625,7 +36625,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-SpecimenType"/>
@@ -37269,7 +37269,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="HtmlLinkType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.58"/>
@@ -37286,7 +37286,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" HtmlLinkType values are drawn from HTML 4.0 and describe the relationship between the current document and the anchor that is the target of the link"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-HtmlLinkType"/>
@@ -37375,7 +37375,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityNameUseR2"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1120"/>
@@ -37392,7 +37392,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: A set of codes advising a system or user which name in a set of names to select for a given purpose."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityNameUseR2"/>
@@ -37510,7 +37510,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActSite"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1052"/>
@@ -37527,7 +37527,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" An anatomical location on an organism which can be the focus of an act."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActSite"/>
@@ -37825,7 +37825,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityNamePartType"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.44"/>
@@ -37842,7 +37842,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartType"/>
@@ -37881,7 +37881,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TimingEvent"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.139"/>
@@ -37898,7 +37898,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TimingEvent"/>
@@ -38002,7 +38002,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActRelationshipSplit"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.13"/>
@@ -38019,7 +38019,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipSplit"/>
@@ -38053,7 +38053,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityNameUse"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.45"/>
@@ -38070,7 +38070,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityNameUse"/>
@@ -38169,7 +38169,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActInvoiceElementModifier"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1051"/>
@@ -38186,7 +38186,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Processing consideration and clarification codes."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActInvoiceElementModifier"/>
@@ -38220,7 +38220,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="DataOperation"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1123"/>
@@ -38237,7 +38237,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-DataOperation"/>
@@ -38351,7 +38351,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="MessageWaitingPriority"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1083"/>
@@ -38368,7 +38368,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Indicates that the receiver has messages for the sender  OpenIssue: Description does not make sense relative to name of coding system.  Must be reviewed and improved."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-MessageWaitingPriority"/>
@@ -38397,7 +38397,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="LanguageAbilityProficiency"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.61"/>
@@ -38414,7 +38414,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A value representing the level of proficiency in a language.  Example: Excellent, good, fair, poor.  OpenIssue: Description copied from Concept Domain of same name.  Must be verified."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-LanguageAbilityProficiency"/>
@@ -38448,7 +38448,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActRelationshipSubset"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1099"/>
@@ -38465,7 +38465,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" &lt;ns1:p>Used to indicate that the target of the relationship will be a filtered subset of the total related set of targets.&lt;/ns1:p>&lt;ns1:p>Used when there is a need to limit the number of components to the first, the last, the next, the total, the average or some other filtered or calculated subset.&lt;/ns1:p>"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipSubset"/>
@@ -38559,7 +38559,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="DocumentCompletion"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.33"/>
@@ -38576,7 +38576,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Identifies the current completion state of a clinical document."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-DocumentCompletion"/>
@@ -38635,7 +38635,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="QueryPriority"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.102"/>
@@ -38652,7 +38652,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-QueryPriority"/>
@@ -38676,7 +38676,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityNamePartTypeR2"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1121"/>
@@ -38693,7 +38693,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Indicates whether the name part is a given name, family name, prefix, suffix, etc."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityNamePartTypeR2"/>
@@ -38727,7 +38727,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EncounterAdmissionSource"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.37"/>
@@ -38744,7 +38744,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EncounterAdmissionSource"/>
@@ -38773,7 +38773,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="QueryRequestLimit"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1112"/>
@@ -38790,7 +38790,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Definition: Defines the units associated with the magnitude of the maximum size limit of a query response that can be accepted by the requesting application."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-QueryRequestLimit"/>
@@ -38824,7 +38824,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActReason"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.8"/>
@@ -38841,7 +38841,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A set of codes specifying the motivation, cause, or rationale of an Act, when such rationale is not reasonably represented as an ActRelationship of type &quot;has reason&quot; linking to another Act.  Examples: Example reasons that might qualify for being coded in this field might be: &quot;routine requirement&quot;, &quot;infectious disease reporting requirement&quot;, &quot;on patient request&quot;, &quot;required by law&quot;."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActReason"/>
@@ -40403,7 +40403,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="CompressionAlgorithm"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1009"/>
@@ -40420,7 +40420,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-CompressionAlgorithm"/>
@@ -40464,7 +40464,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="hl7V3Conformance"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1125"/>
@@ -40481,7 +40481,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  Description: Identifies allowed codes for HL7aTMs v3 conformance property."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-hl7V3Conformance"/>
@@ -40525,7 +40525,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ManagedParticipationStatus"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1062"/>
@@ -40542,7 +40542,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Codes representing the defined possible states of a Managed Participation, as defined by the Managed Participation class state machine."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ManagedParticipationStatus"/>
@@ -40586,7 +40586,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EntityCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1060"/>
@@ -40603,7 +40603,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  OpenIssue: Missing description."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EntityCode"/>
@@ -41433,7 +41433,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="EmployeeJobClass"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1059"/>
@@ -41450,7 +41450,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="**** MISSING DEFINITIONS ****"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-EmployeeJobClass"/>
@@ -41474,7 +41474,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActUncertainty"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1053"/>
@@ -41491,7 +41491,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value="  OpenIssue: Missing Description"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActUncertainty"/>
@@ -41515,7 +41515,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="SubstitutionCondition"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1071"/>
@@ -41532,7 +41532,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Identifies what sort of change is permitted or has occurred between the item that was ordered/requested and the one that was/will be provided."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-SubstitutionCondition"/>
@@ -41581,7 +41581,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TableCellScope"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.132"/>
@@ -41598,7 +41598,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" These values are defined within the XHTML 4.0 Table Model"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TableCellScope"/>
@@ -41632,7 +41632,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActUSPrivacyLaw"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1138"/>
@@ -41649,7 +41649,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A jurisdictional mandate in the US relating to privacy.   Deprecation Comment: Content moved to ActCode under _ActPrivacyLaw; use that instead."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActUSPrivacyLaw"/>
@@ -41732,7 +41732,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="ActCode"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.4"/>
@@ -41749,7 +41749,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" A code specifying the particular kind of Act that the Act-instance represents within its class.  Constraints: The kind of Act (e.g. physical examination, serum potassium, inpatient encounter, charge financial transaction, etc.) is specified with a code from one of several, typically external, coding systems.  The coding system will depend on the class of Act, such as LOINC for observations, etc. Conceptually, the Act.code must be a specialization of the Act.classCode. This is why the structure of ActClass domain should be reflected in the superstructure of the ActCode domain and then individual codes or externally referenced vocabularies subordinated under these domains that reflect the ActClass structure. Act.classCode and Act.code are not modifiers of each other but the Act.code concept should really imply the Act.classCode concept. For a negative example, it is not appropriate to use an Act.code &quot;potassium&quot; together with and Act.classCode for &quot;laboratory observation&quot; to somehow mean &quot;potassium laboratory observation&quot; and then use the same Act.code for &quot;potassium&quot; together with Act.classCode for &quot;medication&quot; to mean &quot;substitution of potassium&quot;. This mutually modifying use of Act.code and Act.classCode is not permitted."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-ActCode"/>
@@ -47926,7 +47926,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TableRules"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.136"/>
@@ -47943,7 +47943,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" These values are defined within the XHTML 4.0 Table Model"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TableRules"/>
@@ -47982,7 +47982,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="CodingRationale"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.1074"/>
@@ -47999,7 +47999,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" Identifies how to interpret the instance of the code, codeSystem value in a set of translations.  Since HL7 (or a government body) may mandate that codes from certain code systems be sent in conformant messages, other synonyms that are sent in the translation set need to be distinguished among the originally captured source, the HL7 specified code, or some future role.  When this code is NULL, it indicates that the translation is an undefined type.  When valued, this property must contain one of the following values: SRC - Source (or original) code HL7 - HL7 Specified or Mandated SH - both HL7 mandated and the original code (precoordination) There may be additional values added to this value set as we work through the use of codes in messages and determine other Use Cases requiring special interpretation of the translations."/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-CodingRationale"/>
@@ -48071,7 +48071,7 @@
    <CodeSystem xmlns="http://hl7.org/fhir">
     <id value="TableFrame"/>
     <meta>
-     <lastUpdated value="2016-03-23T00:00:00.000+00:00"/>
+     <lastUpdated value="2016-03-23T00:00:00.000-04:00"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
      <valueUri value="urn:oid:2.16.840.1.113883.5.134"/>
@@ -48088,7 +48088,7 @@
       <value value="http://hl7.org"/>
      </telecom>
     </contact>
-    <date value="2016-03-23T00:00:00+00:00"/>
+    <date value="2016-03-23T00:00:00-04:00"/>
     <description value=" These values are defined within the XHTML 4.0 Table Model"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-TableFrame"/>

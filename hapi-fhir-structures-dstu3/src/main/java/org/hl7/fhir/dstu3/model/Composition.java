@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -618,7 +618,7 @@ public class Composition extends DomainResource {
         /**
          * The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.
          */
-        @Child(name = "detail", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "detail", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="The event(s) being documented", formalDefinition="The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy." )
         protected List<Reference> detail;
         /**
@@ -942,7 +942,7 @@ public class Composition extends DomainResource {
         /**
          * A reference to the actual resource from which the narrative in the section is derived.
          */
-        @Child(name = "entry", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "entry", type = {Reference.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A reference to data that supports this section", formalDefinition="A reference to the actual resource from which the narrative in the section is derived." )
         protected List<Reference> entry;
         /**
@@ -1529,7 +1529,7 @@ public class Composition extends DomainResource {
     /**
      * Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).
      */
-    @Child(name = "subject", type = {}, order=7, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Reference.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what the composition is about", formalDefinition="Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure)." )
     protected Reference subject;
 

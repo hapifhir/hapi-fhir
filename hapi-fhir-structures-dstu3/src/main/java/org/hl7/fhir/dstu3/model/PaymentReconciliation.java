@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -184,14 +184,14 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * The claim or financial resource.
          */
-        @Child(name = "request", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "request", type = {Identifier.class, Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Claim", formalDefinition="The claim or financial resource." )
         protected Type request;
 
         /**
          * The claim response resource.
          */
-        @Child(name = "responce", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "responce", type = {Identifier.class, Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Claim Response", formalDefinition="The claim response resource." )
         protected Type responce;
 

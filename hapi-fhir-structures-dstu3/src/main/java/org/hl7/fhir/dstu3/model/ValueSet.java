@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -56,7 +56,7 @@ public class ValueSet extends BaseConformance {
          */
         EQUAL, 
         /**
-         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself.
+         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (i.e. include child codes)
          */
         ISA, 
         /**
@@ -76,6 +76,10 @@ public class ValueSet extends BaseConformance {
          */
         NOTIN, 
         /**
+         * Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (e.g. include parent codes)
+         */
+        GENERALIZES, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -94,6 +98,8 @@ public class ValueSet extends BaseConformance {
           return IN;
         if ("not-in".equals(codeString))
           return NOTIN;
+        if ("generalizes".equals(codeString))
+          return GENERALIZES;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -107,6 +113,7 @@ public class ValueSet extends BaseConformance {
             case REGEX: return "regex";
             case IN: return "in";
             case NOTIN: return "not-in";
+            case GENERALIZES: return "generalizes";
             default: return "?";
           }
         }
@@ -118,17 +125,19 @@ public class ValueSet extends BaseConformance {
             case REGEX: return "http://hl7.org/fhir/filter-operator";
             case IN: return "http://hl7.org/fhir/filter-operator";
             case NOTIN: return "http://hl7.org/fhir/filter-operator";
+            case GENERALIZES: return "http://hl7.org/fhir/filter-operator";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case EQUAL: return "The specified property of the code equals the provided value.";
-            case ISA: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself.";
+            case ISA: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (i.e. include child codes)";
             case ISNOTA: return "The specified property of the code does not have an is-a relationship with the provided value.";
             case REGEX: return "The specified property of the code  matches the regex specified in the provided value.";
             case IN: return "The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).";
             case NOTIN: return "The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).";
+            case GENERALIZES: return "Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (e.g. include parent codes)";
             default: return "?";
           }
         }
@@ -140,6 +149,7 @@ public class ValueSet extends BaseConformance {
             case REGEX: return "Regular Expression";
             case IN: return "In Set";
             case NOTIN: return "Not in Set";
+            case GENERALIZES: return "Generalizes (by Subsumption)";
             default: return "?";
           }
         }
@@ -162,6 +172,8 @@ public class ValueSet extends BaseConformance {
           return FilterOperator.IN;
         if ("not-in".equals(codeString))
           return FilterOperator.NOTIN;
+        if ("generalizes".equals(codeString))
+          return FilterOperator.GENERALIZES;
         throw new IllegalArgumentException("Unknown FilterOperator code '"+codeString+"'");
         }
         public Enumeration<FilterOperator> fromType(Base code) throws FHIRException {
@@ -182,6 +194,8 @@ public class ValueSet extends BaseConformance {
           return new Enumeration<FilterOperator>(this, FilterOperator.IN);
         if ("not-in".equals(codeString))
           return new Enumeration<FilterOperator>(this, FilterOperator.NOTIN);
+        if ("generalizes".equals(codeString))
+          return new Enumeration<FilterOperator>(this, FilterOperator.GENERALIZES);
         throw new FHIRException("Unknown FilterOperator code '"+codeString+"'");
         }
     public String toCode(FilterOperator code) {
@@ -197,6 +211,8 @@ public class ValueSet extends BaseConformance {
         return "in";
       if (code == FilterOperator.NOTIN)
         return "not-in";
+      if (code == FilterOperator.GENERALIZES)
+        return "generalizes";
       return "?";
       }
     public String toSystem(FilterOperator code) {
@@ -439,10 +455,10 @@ public class ValueSet extends BaseConformance {
     @Block()
     public static class ValueSetComposeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.
+         * Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.url.
          */
         @Child(name = "import", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Import the contents of another value set", formalDefinition="Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri." )
+        @Description(shortDefinition="Import the contents of another value set", formalDefinition="Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.url." )
         protected List<UriType> import_;
 
         /**
@@ -469,7 +485,7 @@ public class ValueSet extends BaseConformance {
       }
 
         /**
-         * @return {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.)
+         * @return {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.url.)
          */
         public List<UriType> getImport() { 
           if (this.import_ == null)
@@ -495,7 +511,7 @@ public class ValueSet extends BaseConformance {
         }
 
         /**
-         * @return {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.)
+         * @return {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.url.)
          */
         public UriType addImportElement() {//2 
           UriType t = new UriType();
@@ -506,7 +522,7 @@ public class ValueSet extends BaseConformance {
         }
 
         /**
-         * @param value {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.)
+         * @param value {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.url.)
          */
         public ValueSetComposeComponent addImport(String value) { //1
           UriType t = new UriType();
@@ -518,7 +534,7 @@ public class ValueSet extends BaseConformance {
         }
 
         /**
-         * @param value {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.)
+         * @param value {@link #import_} (Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.url.)
          */
         public boolean hasImport(String value) { 
           if (this.import_ == null)
@@ -637,7 +653,7 @@ public class ValueSet extends BaseConformance {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("import", "uri", "Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.", 0, java.lang.Integer.MAX_VALUE, import_));
+          childrenList.add(new Property("import", "uri", "Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.url.", 0, java.lang.Integer.MAX_VALUE, import_));
           childrenList.add(new Property("include", "", "Include one or more codes from a code system.", 0, java.lang.Integer.MAX_VALUE, include));
           childrenList.add(new Property("exclude", "@ValueSet.compose.include", "Exclude one or more codes from the value set.", 0, java.lang.Integer.MAX_VALUE, exclude));
         }
@@ -1737,7 +1753,7 @@ public class ValueSet extends BaseConformance {
          * The kind of operation to perform as a part of the filter criteria.
          */
         @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="= | is-a | is-not-a | regex | in | not-in", formalDefinition="The kind of operation to perform as a part of the filter criteria." )
+        @Description(shortDefinition="= | is-a | is-not-a | regex | in | not-in | generalizes", formalDefinition="The kind of operation to perform as a part of the filter criteria." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/filter-operator")
         protected Enumeration<FilterOperator> op;
 
@@ -3328,11 +3344,11 @@ public class ValueSet extends BaseConformance {
   }
 
     /**
-     * Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.
+     * A formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Additional identifier for the value set (e.g. HL7 v2 / CDA)", formalDefinition="Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance." )
-    protected Identifier identifier;
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Additional identifier for the value set (e.g. HL7 v2 / CDA)", formalDefinition="A formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance." )
+    protected List<Identifier> identifier;
 
     /**
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
@@ -3365,9 +3381,9 @@ public class ValueSet extends BaseConformance {
     /**
      * A free text natural language description of the use of the value set - reason for definition, "the semantic space" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.
      */
-    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human language description of the value set", formalDefinition="A free text natural language description of the use of the value set - reason for definition, \"the semantic space\" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set." )
-    protected StringType description;
+    protected MarkdownType description;
 
     /**
      * If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.
@@ -3379,9 +3395,9 @@ public class ValueSet extends BaseConformance {
     /**
      * Explains why this value set is needed and why it has been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {MarkdownType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why needed", formalDefinition="Explains why this value set is needed and why it has been constrained as it has." )
-    protected StringType requirements;
+    protected MarkdownType requirements;
 
     /**
      * A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set.
@@ -3411,7 +3427,7 @@ public class ValueSet extends BaseConformance {
     @Description(shortDefinition="Used when the value set is \"expanded\"", formalDefinition="A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed." )
     protected ValueSetExpansionComponent expansion;
 
-    private static final long serialVersionUID = 182109950L;
+    private static final long serialVersionUID = 1034294604L;
 
   /**
    * Constructor
@@ -3443,27 +3459,56 @@ public class ValueSet extends BaseConformance {
     }
 
     /**
-     * @return {@link #identifier} (Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     * @return {@link #identifier} (A formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ValueSet setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public ValueSet addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public ValueSet setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -3717,12 +3762,12 @@ public class ValueSet extends BaseConformance {
     /**
      * @return {@link #description} (A free text natural language description of the use of the value set - reason for definition, "the semantic space" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ValueSet.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -3737,7 +3782,7 @@ public class ValueSet extends BaseConformance {
     /**
      * @param value {@link #description} (A free text natural language description of the use of the value set - reason for definition, "the semantic space" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public ValueSet setDescriptionElement(StringType value) { 
+    public ValueSet setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -3753,11 +3798,11 @@ public class ValueSet extends BaseConformance {
      * @param value A free text natural language description of the use of the value set - reason for definition, "the semantic space" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.
      */
     public ValueSet setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
@@ -3811,12 +3856,12 @@ public class ValueSet extends BaseConformance {
     /**
      * @return {@link #requirements} (Explains why this value set is needed and why it has been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public StringType getRequirementsElement() { 
+    public MarkdownType getRequirementsElement() { 
       if (this.requirements == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ValueSet.requirements");
         else if (Configuration.doAutoCreate())
-          this.requirements = new StringType(); // bb
+          this.requirements = new MarkdownType(); // bb
       return this.requirements;
     }
 
@@ -3831,7 +3876,7 @@ public class ValueSet extends BaseConformance {
     /**
      * @param value {@link #requirements} (Explains why this value set is needed and why it has been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public ValueSet setRequirementsElement(StringType value) { 
+    public ValueSet setRequirementsElement(MarkdownType value) { 
       this.requirements = value;
       return this;
     }
@@ -3847,11 +3892,11 @@ public class ValueSet extends BaseConformance {
      * @param value Explains why this value set is needed and why it has been constrained as it has.
      */
     public ValueSet setRequirements(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.requirements = null;
       else {
         if (this.requirements == null)
-          this.requirements = new StringType();
+          this.requirements = new MarkdownType();
         this.requirements.setValue(value);
       }
       return this;
@@ -4001,14 +4046,14 @@ public class ValueSet extends BaseConformance {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("experimental", "boolean", "This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the value set.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("lockedDate", "date", "If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.", 0, java.lang.Integer.MAX_VALUE, lockedDate));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the use of the value set - reason for definition, \"the semantic space\" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the use of the value set - reason for definition, \"the semantic space\" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("immutable", "boolean", "If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.", 0, java.lang.Integer.MAX_VALUE, immutable));
-        childrenList.add(new Property("requirements", "string", "Explains why this value set is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("requirements", "markdown", "Explains why this value set is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("extensible", "boolean", "Whether this is intended to be used with an extensible binding or not.", 0, java.lang.Integer.MAX_VALUE, extensible));
         childrenList.add(new Property("compose", "", "A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set.", 0, java.lang.Integer.MAX_VALUE, compose));
@@ -4019,7 +4064,7 @@ public class ValueSet extends BaseConformance {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
@@ -4028,10 +4073,10 @@ public class ValueSet extends BaseConformance {
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ValueSetContactComponent
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1391591896: /*lockedDate*/ return this.lockedDate == null ? new Base[0] : new Base[] {this.lockedDate}; // DateType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
         case 1596987778: /*immutable*/ return this.immutable == null ? new Base[0] : new Base[] {this.immutable}; // BooleanType
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
         case -1809433861: /*extensible*/ return this.extensible == null ? new Base[0] : new Base[] {this.extensible}; // BooleanType
         case 950497682: /*compose*/ return this.compose == null ? new Base[0] : new Base[] {this.compose}; // ValueSetComposeComponent
@@ -4048,7 +4093,7 @@ public class ValueSet extends BaseConformance {
           this.url = castToUri(value); // UriType
           break;
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           break;
         case 351608024: // version
           this.version = castToString(value); // StringType
@@ -4075,7 +4120,7 @@ public class ValueSet extends BaseConformance {
           this.lockedDate = castToDate(value); // DateType
           break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
           this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
@@ -4084,7 +4129,7 @@ public class ValueSet extends BaseConformance {
           this.immutable = castToBoolean(value); // BooleanType
           break;
         case -1619874672: // requirements
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
           break;
         case 1522889671: // copyright
           this.copyright = castToString(value); // StringType
@@ -4108,7 +4153,7 @@ public class ValueSet extends BaseConformance {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
         else if (name.equals("identifier"))
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("version"))
           this.version = castToString(value); // StringType
         else if (name.equals("name"))
@@ -4126,13 +4171,13 @@ public class ValueSet extends BaseConformance {
         else if (name.equals("lockedDate"))
           this.lockedDate = castToDate(value); // DateType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
           this.getUseContext().add(castToCodeableConcept(value));
         else if (name.equals("immutable"))
           this.immutable = castToBoolean(value); // BooleanType
         else if (name.equals("requirements"))
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
         else if (name.equals("copyright"))
           this.copyright = castToString(value); // StringType
         else if (name.equals("extensible"))
@@ -4149,7 +4194,7 @@ public class ValueSet extends BaseConformance {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case -1618432855:  return getIdentifier(); // Identifier
+        case -1618432855:  return addIdentifier(); // Identifier
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
@@ -4158,10 +4203,10 @@ public class ValueSet extends BaseConformance {
         case 951526432:  return addContact(); // ValueSetContactComponent
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case 1391591896: throw new FHIRException("Cannot make property lockedDate as it is not a complex type"); // DateType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
         case -669707736:  return addUseContext(); // CodeableConcept
         case 1596987778: throw new FHIRException("Cannot make property immutable as it is not a complex type"); // BooleanType
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
         case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
         case -1809433861: throw new FHIRException("Cannot make property extensible as it is not a complex type"); // BooleanType
         case 950497682:  return getCompose(); // ValueSetComposeComponent
@@ -4177,8 +4222,7 @@ public class ValueSet extends BaseConformance {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.url");
         }
         else if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("version")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.version");
@@ -4243,7 +4287,11 @@ public class ValueSet extends BaseConformance {
         ValueSet dst = new ValueSet();
         copyValues(dst);
         dst.url = url == null ? null : url.copy();
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.status = status == null ? null : status.copy();

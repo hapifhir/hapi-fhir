@@ -228,9 +228,28 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
+		
+		boolean caseSensitive = true;
+		CodeSystem system = fetchCodeSystem(theSystem);
+		if (system != null) {
+			if (system.hasCaseSensitive()) {
+				caseSensitive = system.getCaseSensitive();
+			}
+		}
+		
+		String wantCode = theCode;
+		if (!caseSensitive) {
+			wantCode = wantCode.toUpperCase();
+		}
+		
 		ValueSetExpansionOutcome expandedValueSet = expand(theVs);
 		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-			if (next.getCode().equals(theCode)) {
+			String nextCode = next.getCode();
+			if (!caseSensitive) {
+				nextCode = nextCode.toUpperCase();
+			}
+			
+			if (nextCode.equals(wantCode)) {
 				if (theSystem == null || next.getSystem().equals(theSystem)) {
 					ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
 					definition.setCode(next.getCode());

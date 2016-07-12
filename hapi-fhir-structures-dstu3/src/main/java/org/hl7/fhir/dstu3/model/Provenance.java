@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1141,7 +1141,7 @@ public class Provenance extends DomainResource {
     /**
      * The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity.
      */
-    @Child(name = "target", type = {}, order=0, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "target", type = {Reference.class}, order=0, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Target Reference(s) (usually version specific)", formalDefinition="The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity." )
     protected List<Reference> target;
     /**

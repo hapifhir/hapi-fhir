@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -2179,9 +2179,9 @@ public class ExpansionProfile extends BaseConformance {
     /**
      * A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.
      */
-    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human language description of the expansion profile", formalDefinition="A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile." )
-    protected StringType description;
+    protected MarkdownType description;
 
     /**
      * A set of criteria that provide the constraints imposed on the value set expansion by including or excluding codes from specific code systems (or versions).
@@ -2253,7 +2253,7 @@ public class ExpansionProfile extends BaseConformance {
     @Description(shortDefinition="Controls behaviour of the value set expand operation when value sets are too large to be completely expanded", formalDefinition="If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete." )
     protected BooleanType limitedExpansion;
 
-    private static final long serialVersionUID = -995543774L;
+    private static final long serialVersionUID = 184454016L;
 
   /**
    * Constructor
@@ -2510,12 +2510,12 @@ public class ExpansionProfile extends BaseConformance {
     /**
      * @return {@link #description} (A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ExpansionProfile.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -2530,7 +2530,7 @@ public class ExpansionProfile extends BaseConformance {
     /**
      * @param value {@link #description} (A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public ExpansionProfile setDescriptionElement(StringType value) { 
+    public ExpansionProfile setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -2546,11 +2546,11 @@ public class ExpansionProfile extends BaseConformance {
      * @param value A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.
      */
     public ExpansionProfile setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
@@ -2974,7 +2974,7 @@ public class ExpansionProfile extends BaseConformance {
         childrenList.add(new Property("experimental", "boolean", "This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("codeSystem", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding codes from specific code systems (or versions).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
         childrenList.add(new Property("includeDesignations", "boolean", "Controls whether concept designations are to be included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, includeDesignations));
         childrenList.add(new Property("designation", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.", 0, java.lang.Integer.MAX_VALUE, designation));
@@ -2999,7 +2999,7 @@ public class ExpansionProfile extends BaseConformance {
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ExpansionProfileContactComponent
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -916511108: /*codeSystem*/ return this.codeSystem == null ? new Base[0] : new Base[] {this.codeSystem}; // ExpansionProfileCodeSystemComponent
         case 461507620: /*includeDesignations*/ return this.includeDesignations == null ? new Base[0] : new Base[] {this.includeDesignations}; // BooleanType
         case -900931593: /*designation*/ return this.designation == null ? new Base[0] : new Base[] {this.designation}; // ExpansionProfileDesignationComponent
@@ -3046,7 +3046,7 @@ public class ExpansionProfile extends BaseConformance {
           this.date = castToDateTime(value); // DateTimeType
           break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -916511108: // codeSystem
           this.codeSystem = (ExpansionProfileCodeSystemComponent) value; // ExpansionProfileCodeSystemComponent
@@ -3104,7 +3104,7 @@ public class ExpansionProfile extends BaseConformance {
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("codeSystem"))
           this.codeSystem = (ExpansionProfileCodeSystemComponent) value; // ExpansionProfileCodeSystemComponent
         else if (name.equals("includeDesignations"))
@@ -3141,7 +3141,7 @@ public class ExpansionProfile extends BaseConformance {
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // ExpansionProfileContactComponent
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
         case -916511108:  return getCodeSystem(); // ExpansionProfileCodeSystemComponent
         case 461507620: throw new FHIRException("Cannot make property includeDesignations as it is not a complex type"); // BooleanType
         case -900931593:  return getDesignation(); // ExpansionProfileDesignationComponent

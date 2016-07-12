@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -12612,6 +12612,26 @@ public class ExplanationOfBenefit extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DISPOSITION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DISPOSITION);
 
  /**
+   * Search parameter: <b>claimidentifier</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExplanationOfBenefit.claimIdentifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="claimidentifier", path="ExplanationOfBenefit.claim.as(Identifier)", description="The reference to the claim", type="token" )
+  public static final String SP_CLAIMIDENTIFIER = "claimidentifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>claimidentifier</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExplanationOfBenefit.claimIdentifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CLAIMIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CLAIMIDENTIFIER);
+
+ /**
    * Search parameter: <b>facilityreference</b>
    * <p>
    * Description: <b>Facility responsible for the goods and services</b><br>
@@ -12636,26 +12656,6 @@ public class ExplanationOfBenefit extends DomainResource {
    * the path value of "<b>ExplanationOfBenefit:facilityreference</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_FACILITYREFERENCE = new ca.uhn.fhir.model.api.Include("ExplanationOfBenefit:facilityreference").toLocked();
-
- /**
-   * Search parameter: <b>claimindentifier</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ExplanationOfBenefit.claimIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="claimindentifier", path="ExplanationOfBenefit.claim.as(Identifier)", description="The reference to the claim", type="token" )
-  public static final String SP_CLAIMINDENTIFIER = "claimindentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>claimindentifier</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ExplanationOfBenefit.claimIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CLAIMINDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CLAIMINDENTIFIER);
 
  /**
    * Search parameter: <b>facilityidentifier</b>

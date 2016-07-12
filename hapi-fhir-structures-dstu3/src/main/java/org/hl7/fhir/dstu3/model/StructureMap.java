@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -492,21 +492,41 @@ public class StructureMap extends BaseConformance {
          */
         REFERENCE, 
         /**
-         * something
+         * Perform a date operation. Parameters to be documented
          */
         DATEOP, 
         /**
-         * something
+         * Generate a random UUID (in lowercase). No Parameters
          */
         UUID, 
         /**
-         * something
+         * Return the appropriate string to put in a Reference that refers to the resource provided as a parameter
          */
         POINTER, 
         /**
-         * something
+         * Execute the supplied fluentpath expression and use the value returned by that
          */
         EVALUATE, 
+        /**
+         * Create a CodeableConcept. Parameters = (text) or (system. Code[, display])
+         */
+        CC, 
+        /**
+         * Create a Coding. Parameters = (system. Code[, display])
+         */
+        C, 
+        /**
+         * Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text =s the natural represenation e.g. [comparator]value[space]unit
+         */
+        QTY, 
+        /**
+         * Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set
+         */
+        ID, 
+        /**
+         * Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value
+         */
+        CP, 
         /**
          * added to help the parsers with the generic types
          */
@@ -538,6 +558,16 @@ public class StructureMap extends BaseConformance {
           return POINTER;
         if ("evaluate".equals(codeString))
           return EVALUATE;
+        if ("cc".equals(codeString))
+          return CC;
+        if ("c".equals(codeString))
+          return C;
+        if ("qty".equals(codeString))
+          return QTY;
+        if ("id".equals(codeString))
+          return ID;
+        if ("cp".equals(codeString))
+          return CP;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -557,6 +587,11 @@ public class StructureMap extends BaseConformance {
             case UUID: return "uuid";
             case POINTER: return "pointer";
             case EVALUATE: return "evaluate";
+            case CC: return "cc";
+            case C: return "c";
+            case QTY: return "qty";
+            case ID: return "id";
+            case CP: return "cp";
             default: return "?";
           }
         }
@@ -574,6 +609,11 @@ public class StructureMap extends BaseConformance {
             case UUID: return "http://hl7.org/fhir/map-transform";
             case POINTER: return "http://hl7.org/fhir/map-transform";
             case EVALUATE: return "http://hl7.org/fhir/map-transform";
+            case CC: return "http://hl7.org/fhir/map-transform";
+            case C: return "http://hl7.org/fhir/map-transform";
+            case QTY: return "http://hl7.org/fhir/map-transform";
+            case ID: return "http://hl7.org/fhir/map-transform";
+            case CP: return "http://hl7.org/fhir/map-transform";
             default: return "?";
           }
         }
@@ -587,10 +627,15 @@ public class StructureMap extends BaseConformance {
             case APPEND: return "append(source...) - source is element or string";
             case TRANSLATE: return "translate(source, uri_of_map) - use the translate operation";
             case REFERENCE: return "reference(source : object) - return a string that references the provided tree properly";
-            case DATEOP: return "something";
-            case UUID: return "something";
-            case POINTER: return "something";
-            case EVALUATE: return "something";
+            case DATEOP: return "Perform a date operation. Parameters to be documented";
+            case UUID: return "Generate a random UUID (in lowercase). No Parameters";
+            case POINTER: return "Return the appropriate string to put in a Reference that refers to the resource provided as a parameter";
+            case EVALUATE: return "Execute the supplied fluentpath expression and use the value returned by that";
+            case CC: return "Create a CodeableConcept. Parameters = (text) or (system. Code[, display])";
+            case C: return "Create a Coding. Parameters = (system. Code[, display])";
+            case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text =s the natural represenation e.g. [comparator]value[space]unit";
+            case ID: return "Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set";
+            case CP: return "Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value";
             default: return "?";
           }
         }
@@ -608,6 +653,11 @@ public class StructureMap extends BaseConformance {
             case UUID: return "uuid";
             case POINTER: return "pointer";
             case EVALUATE: return "evaluate";
+            case CC: return "cc";
+            case C: return "c";
+            case QTY: return "qty";
+            case ID: return "id";
+            case CP: return "cp";
             default: return "?";
           }
         }
@@ -642,6 +692,16 @@ public class StructureMap extends BaseConformance {
           return StructureMapTransform.POINTER;
         if ("evaluate".equals(codeString))
           return StructureMapTransform.EVALUATE;
+        if ("cc".equals(codeString))
+          return StructureMapTransform.CC;
+        if ("c".equals(codeString))
+          return StructureMapTransform.C;
+        if ("qty".equals(codeString))
+          return StructureMapTransform.QTY;
+        if ("id".equals(codeString))
+          return StructureMapTransform.ID;
+        if ("cp".equals(codeString))
+          return StructureMapTransform.CP;
         throw new IllegalArgumentException("Unknown StructureMapTransform code '"+codeString+"'");
         }
         public Enumeration<StructureMapTransform> fromType(Base code) throws FHIRException {
@@ -674,6 +734,16 @@ public class StructureMap extends BaseConformance {
           return new Enumeration<StructureMapTransform>(this, StructureMapTransform.POINTER);
         if ("evaluate".equals(codeString))
           return new Enumeration<StructureMapTransform>(this, StructureMapTransform.EVALUATE);
+        if ("cc".equals(codeString))
+          return new Enumeration<StructureMapTransform>(this, StructureMapTransform.CC);
+        if ("c".equals(codeString))
+          return new Enumeration<StructureMapTransform>(this, StructureMapTransform.C);
+        if ("qty".equals(codeString))
+          return new Enumeration<StructureMapTransform>(this, StructureMapTransform.QTY);
+        if ("id".equals(codeString))
+          return new Enumeration<StructureMapTransform>(this, StructureMapTransform.ID);
+        if ("cp".equals(codeString))
+          return new Enumeration<StructureMapTransform>(this, StructureMapTransform.CP);
         throw new FHIRException("Unknown StructureMapTransform code '"+codeString+"'");
         }
     public String toCode(StructureMapTransform code) {
@@ -701,6 +771,16 @@ public class StructureMap extends BaseConformance {
         return "pointer";
       if (code == StructureMapTransform.EVALUATE)
         return "evaluate";
+      if (code == StructureMapTransform.CC)
+        return "cc";
+      if (code == StructureMapTransform.C)
+        return "c";
+      if (code == StructureMapTransform.QTY)
+        return "qty";
+      if (code == StructureMapTransform.ID)
+        return "id";
+      if (code == StructureMapTransform.CP)
+        return "cp";
       return "?";
       }
     public String toSystem(StructureMapTransform code) {
@@ -4381,16 +4461,16 @@ public class StructureMap extends BaseConformance {
     /**
      * A free text natural language description of the StructureMap and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Natural language description of the StructureMap", formalDefinition="A free text natural language description of the StructureMap and its use." )
-    protected StringType description;
+    protected MarkdownType description;
 
     /**
      * Explains why this structure map is needed and why it's been designed as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Scope and Usage this structure map is for", formalDefinition="Explains why this structure map is needed and why it's been designed as it has." )
-    protected StringType requirements;
+    protected MarkdownType requirements;
 
     /**
      * A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
@@ -4420,7 +4500,7 @@ public class StructureMap extends BaseConformance {
     @Description(shortDefinition="Named sections for reader convenience", formalDefinition="Named sections for reader convenience." )
     protected List<StructureMapGroupComponent> group;
 
-    private static final long serialVersionUID = 1891400819L;
+    private static final long serialVersionUID = 629253107L;
 
   /**
    * Constructor
@@ -4700,12 +4780,12 @@ public class StructureMap extends BaseConformance {
     /**
      * @return {@link #description} (A free text natural language description of the StructureMap and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create StructureMap.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -4720,7 +4800,7 @@ public class StructureMap extends BaseConformance {
     /**
      * @param value {@link #description} (A free text natural language description of the StructureMap and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StructureMap setDescriptionElement(StringType value) { 
+    public StructureMap setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -4736,11 +4816,11 @@ public class StructureMap extends BaseConformance {
      * @param value A free text natural language description of the StructureMap and its use.
      */
     public StructureMap setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
@@ -4749,12 +4829,12 @@ public class StructureMap extends BaseConformance {
     /**
      * @return {@link #requirements} (Explains why this structure map is needed and why it's been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public StringType getRequirementsElement() { 
+    public MarkdownType getRequirementsElement() { 
       if (this.requirements == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create StructureMap.requirements");
         else if (Configuration.doAutoCreate())
-          this.requirements = new StringType(); // bb
+          this.requirements = new MarkdownType(); // bb
       return this.requirements;
     }
 
@@ -4769,7 +4849,7 @@ public class StructureMap extends BaseConformance {
     /**
      * @param value {@link #requirements} (Explains why this structure map is needed and why it's been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public StructureMap setRequirementsElement(StringType value) { 
+    public StructureMap setRequirementsElement(MarkdownType value) { 
       this.requirements = value;
       return this;
     }
@@ -4785,11 +4865,11 @@ public class StructureMap extends BaseConformance {
      * @param value Explains why this structure map is needed and why it's been designed as it has.
      */
     public StructureMap setRequirements(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.requirements = null;
       else {
         if (this.requirements == null)
-          this.requirements = new StringType();
+          this.requirements = new MarkdownType();
         this.requirements.setValue(value);
       }
       return this;
@@ -5017,8 +5097,8 @@ public class StructureMap extends BaseConformance {
         childrenList.add(new Property("experimental", "boolean", "This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the structure map.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the StructureMap and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("requirements", "string", "Explains why this structure map is needed and why it's been designed as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the StructureMap and its use.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("requirements", "markdown", "Explains why this structure map is needed and why it's been designed as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("structure", "", "A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced.", 0, java.lang.Integer.MAX_VALUE, structure));
         childrenList.add(new Property("import", "uri", "Other maps used by this map (canonical URLs).", 0, java.lang.Integer.MAX_VALUE, import_));
@@ -5037,9 +5117,9 @@ public class StructureMap extends BaseConformance {
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // StructureMapContactComponent
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
         case 144518515: /*structure*/ return this.structure == null ? new Base[0] : this.structure.toArray(new Base[this.structure.size()]); // StructureMapStructureComponent
         case -1184795739: /*import*/ return this.import_ == null ? new Base[0] : this.import_.toArray(new Base[this.import_.size()]); // UriType
@@ -5080,13 +5160,13 @@ public class StructureMap extends BaseConformance {
           this.date = castToDateTime(value); // DateTimeType
           break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
           this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case -1619874672: // requirements
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
           break;
         case 1522889671: // copyright
           this.copyright = castToString(value); // StringType
@@ -5126,11 +5206,11 @@ public class StructureMap extends BaseConformance {
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
           this.getUseContext().add(castToCodeableConcept(value));
         else if (name.equals("requirements"))
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
         else if (name.equals("copyright"))
           this.copyright = castToString(value); // StringType
         else if (name.equals("structure"))
@@ -5155,9 +5235,9 @@ public class StructureMap extends BaseConformance {
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // StructureMapContactComponent
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
         case -669707736:  return addUseContext(); // CodeableConcept
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
         case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
         case 144518515:  return addStructure(); // StructureMapStructureComponent
         case -1184795739: throw new FHIRException("Cannot make property import as it is not a complex type"); // UriType

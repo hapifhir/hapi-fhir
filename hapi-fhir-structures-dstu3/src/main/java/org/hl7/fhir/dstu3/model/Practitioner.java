@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -124,7 +124,19 @@ public class Practitioner extends DomainResource {
         protected List<HealthcareService> healthcareServiceTarget;
 
 
-        private static final long serialVersionUID = -2082448551L;
+        /**
+         * Technical endpoints providing access to services operated for the PractitonerRole.
+         */
+        @Child(name = "endpoint", type = {Endpoint.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Technical endpoints providing access to services operated for the PractitonerRole", formalDefinition="Technical endpoints providing access to services operated for the PractitonerRole." )
+        protected List<Reference> endpoint;
+        /**
+         * The actual objects that are the target of the reference (Technical endpoints providing access to services operated for the PractitonerRole.)
+         */
+        protected List<Endpoint> endpointTarget;
+
+
+        private static final long serialVersionUID = 767367768L;
 
     /**
      * Constructor
@@ -534,6 +546,81 @@ public class Practitioner extends DomainResource {
           return r;
         }
 
+        /**
+         * @return {@link #endpoint} (Technical endpoints providing access to services operated for the PractitonerRole.)
+         */
+        public List<Reference> getEndpoint() { 
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          return this.endpoint;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PractitionerPractitionerRoleComponent setEndpoint(List<Reference> theEndpoint) { 
+          this.endpoint = theEndpoint;
+          return this;
+        }
+
+        public boolean hasEndpoint() { 
+          if (this.endpoint == null)
+            return false;
+          for (Reference item : this.endpoint)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Reference addEndpoint() { //3
+          Reference t = new Reference();
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          this.endpoint.add(t);
+          return t;
+        }
+
+        public PractitionerPractitionerRoleComponent addEndpoint(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.endpoint == null)
+            this.endpoint = new ArrayList<Reference>();
+          this.endpoint.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #endpoint}, creating it if it does not already exist
+         */
+        public Reference getEndpointFirstRep() { 
+          if (getEndpoint().isEmpty()) {
+            addEndpoint();
+          }
+          return getEndpoint().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<Endpoint> getEndpointTarget() { 
+          if (this.endpointTarget == null)
+            this.endpointTarget = new ArrayList<Endpoint>();
+          return this.endpointTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public Endpoint addEndpointTarget() { 
+          Endpoint r = new Endpoint();
+          if (this.endpointTarget == null)
+            this.endpointTarget = new ArrayList<Endpoint>();
+          this.endpointTarget.add(r);
+          return r;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("organization", "Reference(Organization)", "The organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, organization));
@@ -544,6 +631,7 @@ public class Practitioner extends DomainResource {
           childrenList.add(new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, java.lang.Integer.MAX_VALUE, period));
           childrenList.add(new Property("location", "Reference(Location)", "The location(s) at which this practitioner provides care.", 0, java.lang.Integer.MAX_VALUE, location));
           childrenList.add(new Property("healthcareService", "Reference(HealthcareService)", "The list of healthcare services that this worker provides for this role's Organization/Location(s).", 0, java.lang.Integer.MAX_VALUE, healthcareService));
+          childrenList.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the PractitonerRole.", 0, java.lang.Integer.MAX_VALUE, endpoint));
         }
 
       @Override
@@ -557,6 +645,7 @@ public class Practitioner extends DomainResource {
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // Reference
         case 1289661064: /*healthcareService*/ return this.healthcareService == null ? new Base[0] : this.healthcareService.toArray(new Base[this.healthcareService.size()]); // Reference
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -589,6 +678,9 @@ public class Practitioner extends DomainResource {
         case 1289661064: // healthcareService
           this.getHealthcareService().add(castToReference(value)); // Reference
           break;
+        case 1741102485: // endpoint
+          this.getEndpoint().add(castToReference(value)); // Reference
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -612,6 +704,8 @@ public class Practitioner extends DomainResource {
           this.getLocation().add(castToReference(value));
         else if (name.equals("healthcareService"))
           this.getHealthcareService().add(castToReference(value));
+        else if (name.equals("endpoint"))
+          this.getEndpoint().add(castToReference(value));
         else
           super.setProperty(name, value);
       }
@@ -627,6 +721,7 @@ public class Practitioner extends DomainResource {
         case -991726143:  return getPeriod(); // Period
         case 1901043637:  return addLocation(); // Reference
         case 1289661064:  return addHealthcareService(); // Reference
+        case 1741102485:  return addEndpoint(); // Reference
         default: return super.makeProperty(hash, name);
         }
 
@@ -660,6 +755,9 @@ public class Practitioner extends DomainResource {
         }
         else if (name.equals("healthcareService")) {
           return addHealthcareService();
+        }
+        else if (name.equals("endpoint")) {
+          return addEndpoint();
         }
         else
           return super.addChild(name);
@@ -696,6 +794,11 @@ public class Practitioner extends DomainResource {
           for (Reference i : healthcareService)
             dst.healthcareService.add(i.copy());
         };
+        if (endpoint != null) {
+          dst.endpoint = new ArrayList<Reference>();
+          for (Reference i : endpoint)
+            dst.endpoint.add(i.copy());
+        };
         return dst;
       }
 
@@ -709,7 +812,7 @@ public class Practitioner extends DomainResource {
         return compareDeep(organization, o.organization, true) && compareDeep(role, o.role, true) && compareDeep(specialty, o.specialty, true)
            && compareDeep(identifier, o.identifier, true) && compareDeep(telecom, o.telecom, true) && compareDeep(period, o.period, true)
            && compareDeep(location, o.location, true) && compareDeep(healthcareService, o.healthcareService, true)
-          ;
+           && compareDeep(endpoint, o.endpoint, true);
       }
 
       @Override
@@ -724,7 +827,7 @@ public class Practitioner extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, role, specialty
-          , identifier, telecom, period, location, healthcareService);
+          , identifier, telecom, period, location, healthcareService, endpoint);
       }
 
   public String fhirType() {
@@ -2116,6 +2219,26 @@ Work addresses are not typically entered in this property as they are usually ro
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam GENDER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_GENDER);
+
+ /**
+   * Search parameter: <b>active</b>
+   * <p>
+   * Description: <b>Whether the practitioner record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Practitioner.active</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="active", path="Practitioner.active", description="Whether the practitioner record is active", type="token" )
+  public static final String SP_ACTIVE = "active";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>active</b>
+   * <p>
+   * Description: <b>Whether the practitioner record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Practitioner.active</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTIVE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTIVE);
 
  /**
    * Search parameter: <b>address-postalcode</b>

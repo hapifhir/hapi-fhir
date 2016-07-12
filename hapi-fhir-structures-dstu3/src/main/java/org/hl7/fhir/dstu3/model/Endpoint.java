@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -193,14 +193,14 @@ public class Endpoint extends DomainResource {
     protected StringType name;
 
     /**
-     * The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).
+     * The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).
      */
     @Child(name = "managingOrganization", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Organization that exposes the endpoint", formalDefinition="The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data)." )
+    @Description(shortDefinition="Organization that manages this endpoint (may not be the organization that exposes the endpoint)", formalDefinition="The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data)." )
     protected Reference managingOrganization;
 
     /**
-     * The actual object that is the target of the reference (The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * The actual object that is the target of the reference (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
      */
     protected Organization managingOrganizationTarget;
 
@@ -214,10 +214,10 @@ public class Endpoint extends DomainResource {
     /**
      * The type of channel to send notifications on.
      */
-    @Child(name = "connectionType", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "connectionType", type = {Coding.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="rest-hook | websocket | email | sms | message", formalDefinition="The type of channel to send notifications on." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-channel-type")
-    protected CodeType connectionType;
+    protected Coding connectionType;
 
     /**
      * The http verb to be used when calling this endpoint.
@@ -253,6 +253,7 @@ public class Endpoint extends DomainResource {
      */
     @Child(name = "payloadType", type = {CodeableConcept.class}, order=10, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The type of content that may be used at this endpoint (e.g. XDS Discharge summaries)", formalDefinition="The payload type describes the acceptable content that can be communicated on the endpoint." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/endpoint-payload-type")
     protected List<CodeableConcept> payloadType;
 
     /**
@@ -269,7 +270,7 @@ public class Endpoint extends DomainResource {
     @Description(shortDefinition="PKI Public keys to support secure communications", formalDefinition="The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available." )
     protected StringType publicKey;
 
-    private static final long serialVersionUID = 1749798003L;
+    private static final long serialVersionUID = -1590319658L;
 
   /**
    * Constructor
@@ -281,7 +282,7 @@ public class Endpoint extends DomainResource {
   /**
    * Constructor
    */
-    public Endpoint(Enumeration<EndpointStatus> status, CodeType connectionType, UriType address, StringType payloadFormat) {
+    public Endpoint(Enumeration<EndpointStatus> status, Coding connectionType, UriType address, StringType payloadFormat) {
       super();
       this.status = status;
       this.connectionType = connectionType;
@@ -437,7 +438,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return {@link #managingOrganization} (The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @return {@link #managingOrganization} (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
      */
     public Reference getManagingOrganization() { 
       if (this.managingOrganization == null)
@@ -453,7 +454,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @param value {@link #managingOrganization} (The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @param value {@link #managingOrganization} (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
      */
     public Endpoint setManagingOrganization(Reference value) { 
       this.managingOrganization = value;
@@ -461,7 +462,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
      */
     public Organization getManagingOrganizationTarget() { 
       if (this.managingOrganizationTarget == null)
@@ -473,7 +474,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
      */
     public Endpoint setManagingOrganizationTarget(Organization value) { 
       this.managingOrganizationTarget = value;
@@ -534,19 +535,15 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return {@link #connectionType} (The type of channel to send notifications on.). This is the underlying object with id, value and extensions. The accessor "getConnectionType" gives direct access to the value
+     * @return {@link #connectionType} (The type of channel to send notifications on.)
      */
-    public CodeType getConnectionTypeElement() { 
+    public Coding getConnectionType() { 
       if (this.connectionType == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Endpoint.connectionType");
         else if (Configuration.doAutoCreate())
-          this.connectionType = new CodeType(); // bb
+          this.connectionType = new Coding(); // cc
       return this.connectionType;
-    }
-
-    public boolean hasConnectionTypeElement() { 
-      return this.connectionType != null && !this.connectionType.isEmpty();
     }
 
     public boolean hasConnectionType() { 
@@ -554,27 +551,10 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @param value {@link #connectionType} (The type of channel to send notifications on.). This is the underlying object with id, value and extensions. The accessor "getConnectionType" gives direct access to the value
+     * @param value {@link #connectionType} (The type of channel to send notifications on.)
      */
-    public Endpoint setConnectionTypeElement(CodeType value) { 
+    public Endpoint setConnectionType(Coding value) { 
       this.connectionType = value;
-      return this;
-    }
-
-    /**
-     * @return The type of channel to send notifications on.
-     */
-    public String getConnectionType() { 
-      return this.connectionType == null ? null : this.connectionType.getValue();
-    }
-
-    /**
-     * @param value The type of channel to send notifications on.
-     */
-    public Endpoint setConnectionType(String value) { 
-        if (this.connectionType == null)
-          this.connectionType = new CodeType();
-        this.connectionType.setValue(value);
       return this;
     }
 
@@ -913,9 +893,9 @@ public class Endpoint extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the endpoint across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "active | suspended | error | off.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("name", "string", "A friendly name that this endpoint can be referred to with.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization that exposes the endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
+        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
         childrenList.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("connectionType", "code", "The type of channel to send notifications on.", 0, java.lang.Integer.MAX_VALUE, connectionType));
+        childrenList.add(new Property("connectionType", "Coding", "The type of channel to send notifications on.", 0, java.lang.Integer.MAX_VALUE, connectionType));
         childrenList.add(new Property("method", "Coding", "The http verb to be used when calling this endpoint.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("address", "uri", "The uri that describes the actual end-point to send messages to.", 0, java.lang.Integer.MAX_VALUE, address));
@@ -933,7 +913,7 @@ public class Endpoint extends DomainResource {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactPoint
-        case 1270211384: /*connectionType*/ return this.connectionType == null ? new Base[0] : new Base[] {this.connectionType}; // CodeType
+        case 1270211384: /*connectionType*/ return this.connectionType == null ? new Base[0] : new Base[] {this.connectionType}; // Coding
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : this.method.toArray(new Base[this.method.size()]); // Coding
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case -1147692044: /*address*/ return this.address == null ? new Base[0] : new Base[] {this.address}; // UriType
@@ -965,7 +945,7 @@ public class Endpoint extends DomainResource {
           this.getContact().add(castToContactPoint(value)); // ContactPoint
           break;
         case 1270211384: // connectionType
-          this.connectionType = castToCode(value); // CodeType
+          this.connectionType = castToCoding(value); // Coding
           break;
         case -1077554975: // method
           this.getMethod().add(castToCoding(value)); // Coding
@@ -1006,7 +986,7 @@ public class Endpoint extends DomainResource {
         else if (name.equals("contact"))
           this.getContact().add(castToContactPoint(value));
         else if (name.equals("connectionType"))
-          this.connectionType = castToCode(value); // CodeType
+          this.connectionType = castToCoding(value); // Coding
         else if (name.equals("method"))
           this.getMethod().add(castToCoding(value));
         else if (name.equals("period"))
@@ -1033,7 +1013,7 @@ public class Endpoint extends DomainResource {
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
         case -2058947787:  return getManagingOrganization(); // Reference
         case 951526432:  return addContact(); // ContactPoint
-        case 1270211384: throw new FHIRException("Cannot make property connectionType as it is not a complex type"); // CodeType
+        case 1270211384:  return getConnectionType(); // Coding
         case -1077554975:  return addMethod(); // Coding
         case -991726143:  return getPeriod(); // Period
         case -1147692044: throw new FHIRException("Cannot make property address as it is not a complex type"); // UriType
@@ -1065,7 +1045,8 @@ public class Endpoint extends DomainResource {
           return addContact();
         }
         else if (name.equals("connectionType")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Endpoint.connectionType");
+          this.connectionType = new Coding();
+          return this.connectionType;
         }
         else if (name.equals("method")) {
           return addMethod();
@@ -1162,9 +1143,9 @@ public class Endpoint extends DomainResource {
         if (!(other instanceof Endpoint))
           return false;
         Endpoint o = (Endpoint) other;
-        return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(connectionType, o.connectionType, true)
-           && compareValues(address, o.address, true) && compareValues(payloadFormat, o.payloadFormat, true) && compareValues(header, o.header, true)
-           && compareValues(publicKey, o.publicKey, true);
+        return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(address, o.address, true)
+           && compareValues(payloadFormat, o.payloadFormat, true) && compareValues(header, o.header, true) && compareValues(publicKey, o.publicKey, true)
+          ;
       }
 
       public boolean isEmpty() {

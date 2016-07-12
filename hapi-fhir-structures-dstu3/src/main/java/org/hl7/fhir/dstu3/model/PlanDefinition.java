@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -430,9 +430,16 @@ public class PlanDefinition extends DomainResource {
         protected PlanDefinitionActionDefinitionRelatedActionComponent relatedAction;
 
         /**
+         * An optional value describing when the action should be performed.
+         */
+        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
+        protected Type timing;
+
+        /**
          * The type of action to perform (create, update, remove).
          */
-        @Child(name = "type", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="create | update | remove | fire-event", formalDefinition="The type of action to perform (create, update, remove)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/planaction-type")
         protected Enumeration<PlanActionType> type;
@@ -440,14 +447,14 @@ public class PlanDefinition extends DomainResource {
         /**
          * A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.
          */
-        @Child(name = "behavior", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "behavior", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Defines behaviors such as selection and grouping", formalDefinition="A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment." )
         protected List<PlanDefinitionActionDefinitionBehaviorComponent> behavior;
 
         /**
          * The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).
          */
-        @Child(name = "activityDefinition", type = {ActivityDefinition.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "activityDefinition", type = {ActivityDefinition.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of the activity to be performed", formalDefinition="The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition)." )
         protected Reference activityDefinition;
 
@@ -457,20 +464,32 @@ public class PlanDefinition extends DomainResource {
         protected ActivityDefinition activityDefinitionTarget;
 
         /**
+         * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
+         */
+        @Child(name = "transform", type = {StructureMap.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
+        protected Reference transform;
+
+        /**
+         * The actual object that is the target of the reference (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         */
+        protected StructureMap transformTarget;
+
+        /**
          * Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.
          */
-        @Child(name = "customization", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "dynamicValue", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result." )
-        protected List<PlanDefinitionActionDefinitionCustomizationComponent> customization;
+        protected List<PlanDefinitionActionDefinitionDynamicValueComponent> dynamicValue;
 
         /**
          * Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.
          */
-        @Child(name = "actionDefinition", type = {PlanDefinitionActionDefinitionComponent.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "actionDefinition", type = {PlanDefinitionActionDefinitionComponent.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A sub-action", formalDefinition="Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition." )
         protected List<PlanDefinitionActionDefinitionComponent> actionDefinition;
 
-        private static final long serialVersionUID = 295965155L;
+        private static final long serialVersionUID = -194721510L;
 
     /**
      * Constructor
@@ -956,6 +975,90 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Type getTiming() { 
+          return this.timing;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public DateTimeType getTimingDateTimeType() throws FHIRException { 
+          if (!(this.timing instanceof DateTimeType))
+            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (DateTimeType) this.timing;
+        }
+
+        public boolean hasTimingDateTimeType() { 
+          return this.timing instanceof DateTimeType;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Period getTimingPeriod() throws FHIRException { 
+          if (!(this.timing instanceof Period))
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Period) this.timing;
+        }
+
+        public boolean hasTimingPeriod() { 
+          return this.timing instanceof Period;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Duration getTimingDuration() throws FHIRException { 
+          if (!(this.timing instanceof Duration))
+            throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Duration) this.timing;
+        }
+
+        public boolean hasTimingDuration() { 
+          return this.timing instanceof Duration;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Range getTimingRange() throws FHIRException { 
+          if (!(this.timing instanceof Range))
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Range) this.timing;
+        }
+
+        public boolean hasTimingRange() { 
+          return this.timing instanceof Range;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Timing getTimingTiming() throws FHIRException { 
+          if (!(this.timing instanceof Timing))
+            throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Timing) this.timing;
+        }
+
+        public boolean hasTimingTiming() { 
+          return this.timing instanceof Timing;
+        }
+
+        public boolean hasTiming() { 
+          return this.timing != null && !this.timing.isEmpty();
+        }
+
+        /**
+         * @param value {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public PlanDefinitionActionDefinitionComponent setTiming(Type value) { 
+          this.timing = value;
+          return this;
+        }
+
+        /**
          * @return {@link #type} (The type of action to perform (create, update, remove).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public Enumeration<PlanActionType> getTypeElement() { 
@@ -1102,56 +1205,100 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #customization} (Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.)
+         * @return {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
          */
-        public List<PlanDefinitionActionDefinitionCustomizationComponent> getCustomization() { 
-          if (this.customization == null)
-            this.customization = new ArrayList<PlanDefinitionActionDefinitionCustomizationComponent>();
-          return this.customization;
+        public Reference getTransform() { 
+          if (this.transform == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.transform");
+            else if (Configuration.doAutoCreate())
+              this.transform = new Reference(); // cc
+          return this.transform;
+        }
+
+        public boolean hasTransform() { 
+          return this.transform != null && !this.transform.isEmpty();
+        }
+
+        /**
+         * @param value {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         */
+        public PlanDefinitionActionDefinitionComponent setTransform(Reference value) { 
+          this.transform = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #transform} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         */
+        public StructureMap getTransformTarget() { 
+          if (this.transformTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.transform");
+            else if (Configuration.doAutoCreate())
+              this.transformTarget = new StructureMap(); // aa
+          return this.transformTarget;
+        }
+
+        /**
+         * @param value {@link #transform} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         */
+        public PlanDefinitionActionDefinitionComponent setTransformTarget(StructureMap value) { 
+          this.transformTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #dynamicValue} (Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.)
+         */
+        public List<PlanDefinitionActionDefinitionDynamicValueComponent> getDynamicValue() { 
+          if (this.dynamicValue == null)
+            this.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
+          return this.dynamicValue;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setCustomization(List<PlanDefinitionActionDefinitionCustomizationComponent> theCustomization) { 
-          this.customization = theCustomization;
+        public PlanDefinitionActionDefinitionComponent setDynamicValue(List<PlanDefinitionActionDefinitionDynamicValueComponent> theDynamicValue) { 
+          this.dynamicValue = theDynamicValue;
           return this;
         }
 
-        public boolean hasCustomization() { 
-          if (this.customization == null)
+        public boolean hasDynamicValue() { 
+          if (this.dynamicValue == null)
             return false;
-          for (PlanDefinitionActionDefinitionCustomizationComponent item : this.customization)
+          for (PlanDefinitionActionDefinitionDynamicValueComponent item : this.dynamicValue)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public PlanDefinitionActionDefinitionCustomizationComponent addCustomization() { //3
-          PlanDefinitionActionDefinitionCustomizationComponent t = new PlanDefinitionActionDefinitionCustomizationComponent();
-          if (this.customization == null)
-            this.customization = new ArrayList<PlanDefinitionActionDefinitionCustomizationComponent>();
-          this.customization.add(t);
+        public PlanDefinitionActionDefinitionDynamicValueComponent addDynamicValue() { //3
+          PlanDefinitionActionDefinitionDynamicValueComponent t = new PlanDefinitionActionDefinitionDynamicValueComponent();
+          if (this.dynamicValue == null)
+            this.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
+          this.dynamicValue.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addCustomization(PlanDefinitionActionDefinitionCustomizationComponent t) { //3
+        public PlanDefinitionActionDefinitionComponent addDynamicValue(PlanDefinitionActionDefinitionDynamicValueComponent t) { //3
           if (t == null)
             return this;
-          if (this.customization == null)
-            this.customization = new ArrayList<PlanDefinitionActionDefinitionCustomizationComponent>();
-          this.customization.add(t);
+          if (this.dynamicValue == null)
+            this.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
+          this.dynamicValue.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #customization}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #dynamicValue}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionCustomizationComponent getCustomizationFirstRep() { 
-          if (getCustomization().isEmpty()) {
-            addCustomization();
+        public PlanDefinitionActionDefinitionDynamicValueComponent getDynamicValueFirstRep() { 
+          if (getDynamicValue().isEmpty()) {
+            addDynamicValue();
           }
-          return getCustomization().get(0);
+          return getDynamicValue().get(0);
         }
 
         /**
@@ -1220,10 +1367,12 @@ public class PlanDefinition extends DomainResource {
           childrenList.add(new Property("triggerDefinition", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, triggerDefinition));
           childrenList.add(new Property("condition", "string", "An expression specifying whether or not the action is applicable in a given context.", 0, java.lang.Integer.MAX_VALUE, condition));
           childrenList.add(new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction));
+          childrenList.add(new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, java.lang.Integer.MAX_VALUE, timing));
           childrenList.add(new Property("type", "code", "The type of action to perform (create, update, remove).", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("behavior", "", "A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.", 0, java.lang.Integer.MAX_VALUE, behavior));
           childrenList.add(new Property("activityDefinition", "Reference(ActivityDefinition)", "The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).", 0, java.lang.Integer.MAX_VALUE, activityDefinition));
-          childrenList.add(new Property("customization", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, customization));
+          childrenList.add(new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, java.lang.Integer.MAX_VALUE, transform));
+          childrenList.add(new Property("dynamicValue", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
           childrenList.add(new Property("actionDefinition", "@PlanDefinition.actionDefinition", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, actionDefinition));
         }
 
@@ -1241,10 +1390,12 @@ public class PlanDefinition extends DomainResource {
         case 1126736171: /*triggerDefinition*/ return this.triggerDefinition == null ? new Base[0] : new Base[] {this.triggerDefinition}; // TriggerDefinition
         case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // StringType
         case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : new Base[] {this.relatedAction}; // PlanDefinitionActionDefinitionRelatedActionComponent
+        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<PlanActionType>
         case 1510912594: /*behavior*/ return this.behavior == null ? new Base[0] : this.behavior.toArray(new Base[this.behavior.size()]); // PlanDefinitionActionDefinitionBehaviorComponent
         case -990265918: /*activityDefinition*/ return this.activityDefinition == null ? new Base[0] : new Base[] {this.activityDefinition}; // Reference
-        case 1637263315: /*customization*/ return this.customization == null ? new Base[0] : this.customization.toArray(new Base[this.customization.size()]); // PlanDefinitionActionDefinitionCustomizationComponent
+        case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // Reference
+        case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // PlanDefinitionActionDefinitionDynamicValueComponent
         case -285031383: /*actionDefinition*/ return this.actionDefinition == null ? new Base[0] : this.actionDefinition.toArray(new Base[this.actionDefinition.size()]); // PlanDefinitionActionDefinitionComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1287,6 +1438,9 @@ public class PlanDefinition extends DomainResource {
         case -384107967: // relatedAction
           this.relatedAction = (PlanDefinitionActionDefinitionRelatedActionComponent) value; // PlanDefinitionActionDefinitionRelatedActionComponent
           break;
+        case -873664438: // timing
+          this.timing = (Type) value; // Type
+          break;
         case 3575610: // type
           this.type = new PlanActionTypeEnumFactory().fromType(value); // Enumeration<PlanActionType>
           break;
@@ -1296,8 +1450,11 @@ public class PlanDefinition extends DomainResource {
         case -990265918: // activityDefinition
           this.activityDefinition = castToReference(value); // Reference
           break;
-        case 1637263315: // customization
-          this.getCustomization().add((PlanDefinitionActionDefinitionCustomizationComponent) value); // PlanDefinitionActionDefinitionCustomizationComponent
+        case 1052666732: // transform
+          this.transform = castToReference(value); // Reference
+          break;
+        case 572625010: // dynamicValue
+          this.getDynamicValue().add((PlanDefinitionActionDefinitionDynamicValueComponent) value); // PlanDefinitionActionDefinitionDynamicValueComponent
           break;
         case -285031383: // actionDefinition
           this.getActionDefinition().add((PlanDefinitionActionDefinitionComponent) value); // PlanDefinitionActionDefinitionComponent
@@ -1331,14 +1488,18 @@ public class PlanDefinition extends DomainResource {
           this.condition = castToString(value); // StringType
         else if (name.equals("relatedAction"))
           this.relatedAction = (PlanDefinitionActionDefinitionRelatedActionComponent) value; // PlanDefinitionActionDefinitionRelatedActionComponent
+        else if (name.equals("timing[x]"))
+          this.timing = (Type) value; // Type
         else if (name.equals("type"))
           this.type = new PlanActionTypeEnumFactory().fromType(value); // Enumeration<PlanActionType>
         else if (name.equals("behavior"))
           this.getBehavior().add((PlanDefinitionActionDefinitionBehaviorComponent) value);
         else if (name.equals("activityDefinition"))
           this.activityDefinition = castToReference(value); // Reference
-        else if (name.equals("customization"))
-          this.getCustomization().add((PlanDefinitionActionDefinitionCustomizationComponent) value);
+        else if (name.equals("transform"))
+          this.transform = castToReference(value); // Reference
+        else if (name.equals("dynamicValue"))
+          this.getDynamicValue().add((PlanDefinitionActionDefinitionDynamicValueComponent) value);
         else if (name.equals("actionDefinition"))
           this.getActionDefinition().add((PlanDefinitionActionDefinitionComponent) value);
         else
@@ -1359,10 +1520,12 @@ public class PlanDefinition extends DomainResource {
         case 1126736171:  return getTriggerDefinition(); // TriggerDefinition
         case -861311717: throw new FHIRException("Cannot make property condition as it is not a complex type"); // StringType
         case -384107967:  return getRelatedAction(); // PlanDefinitionActionDefinitionRelatedActionComponent
+        case 164632566:  return getTiming(); // Type
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<PlanActionType>
         case 1510912594:  return addBehavior(); // PlanDefinitionActionDefinitionBehaviorComponent
         case -990265918:  return getActivityDefinition(); // Reference
-        case 1637263315:  return addCustomization(); // PlanDefinitionActionDefinitionCustomizationComponent
+        case 1052666732:  return getTransform(); // Reference
+        case 572625010:  return addDynamicValue(); // PlanDefinitionActionDefinitionDynamicValueComponent
         case -285031383:  return addActionDefinition(); // PlanDefinitionActionDefinitionComponent
         default: return super.makeProperty(hash, name);
         }
@@ -1407,6 +1570,26 @@ public class PlanDefinition extends DomainResource {
           this.relatedAction = new PlanDefinitionActionDefinitionRelatedActionComponent();
           return this.relatedAction;
         }
+        else if (name.equals("timingDateTime")) {
+          this.timing = new DateTimeType();
+          return this.timing;
+        }
+        else if (name.equals("timingPeriod")) {
+          this.timing = new Period();
+          return this.timing;
+        }
+        else if (name.equals("timingDuration")) {
+          this.timing = new Duration();
+          return this.timing;
+        }
+        else if (name.equals("timingRange")) {
+          this.timing = new Range();
+          return this.timing;
+        }
+        else if (name.equals("timingTiming")) {
+          this.timing = new Timing();
+          return this.timing;
+        }
         else if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.type");
         }
@@ -1417,8 +1600,12 @@ public class PlanDefinition extends DomainResource {
           this.activityDefinition = new Reference();
           return this.activityDefinition;
         }
-        else if (name.equals("customization")) {
-          return addCustomization();
+        else if (name.equals("transform")) {
+          this.transform = new Reference();
+          return this.transform;
+        }
+        else if (name.equals("dynamicValue")) {
+          return addDynamicValue();
         }
         else if (name.equals("actionDefinition")) {
           return addActionDefinition();
@@ -1453,6 +1640,7 @@ public class PlanDefinition extends DomainResource {
         dst.triggerDefinition = triggerDefinition == null ? null : triggerDefinition.copy();
         dst.condition = condition == null ? null : condition.copy();
         dst.relatedAction = relatedAction == null ? null : relatedAction.copy();
+        dst.timing = timing == null ? null : timing.copy();
         dst.type = type == null ? null : type.copy();
         if (behavior != null) {
           dst.behavior = new ArrayList<PlanDefinitionActionDefinitionBehaviorComponent>();
@@ -1460,10 +1648,11 @@ public class PlanDefinition extends DomainResource {
             dst.behavior.add(i.copy());
         };
         dst.activityDefinition = activityDefinition == null ? null : activityDefinition.copy();
-        if (customization != null) {
-          dst.customization = new ArrayList<PlanDefinitionActionDefinitionCustomizationComponent>();
-          for (PlanDefinitionActionDefinitionCustomizationComponent i : customization)
-            dst.customization.add(i.copy());
+        dst.transform = transform == null ? null : transform.copy();
+        if (dynamicValue != null) {
+          dst.dynamicValue = new ArrayList<PlanDefinitionActionDefinitionDynamicValueComponent>();
+          for (PlanDefinitionActionDefinitionDynamicValueComponent i : dynamicValue)
+            dst.dynamicValue.add(i.copy());
         };
         if (actionDefinition != null) {
           dst.actionDefinition = new ArrayList<PlanDefinitionActionDefinitionComponent>();
@@ -1485,8 +1674,9 @@ public class PlanDefinition extends DomainResource {
            && compareDeep(concept, o.concept, true) && compareDeep(supportingEvidence, o.supportingEvidence, true)
            && compareDeep(documentation, o.documentation, true) && compareDeep(triggerDefinition, o.triggerDefinition, true)
            && compareDeep(condition, o.condition, true) && compareDeep(relatedAction, o.relatedAction, true)
-           && compareDeep(type, o.type, true) && compareDeep(behavior, o.behavior, true) && compareDeep(activityDefinition, o.activityDefinition, true)
-           && compareDeep(customization, o.customization, true) && compareDeep(actionDefinition, o.actionDefinition, true)
+           && compareDeep(timing, o.timing, true) && compareDeep(type, o.type, true) && compareDeep(behavior, o.behavior, true)
+           && compareDeep(activityDefinition, o.activityDefinition, true) && compareDeep(transform, o.transform, true)
+           && compareDeep(dynamicValue, o.dynamicValue, true) && compareDeep(actionDefinition, o.actionDefinition, true)
           ;
       }
 
@@ -1505,8 +1695,8 @@ public class PlanDefinition extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, label, title
           , description, textEquivalent, concept, supportingEvidence, documentation, triggerDefinition
-          , condition, relatedAction, type, behavior, activityDefinition, customization, actionDefinition
-          );
+          , condition, relatedAction, timing, type, behavior, activityDefinition, transform
+          , dynamicValue, actionDefinition);
       }
 
   public String fhirType() {
@@ -2049,7 +2239,7 @@ public class PlanDefinition extends DomainResource {
   }
 
     @Block()
-    public static class PlanDefinitionActionDefinitionCustomizationComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PlanDefinitionActionDefinitionDynamicValueComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
          */
@@ -2058,25 +2248,32 @@ public class PlanDefinition extends DomainResource {
         protected StringType path;
 
         /**
+         * The media type of the language for the expression.
+         */
+        @Child(name = "language", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Language of the expression", formalDefinition="The media type of the language for the expression." )
+        protected StringType language;
+
+        /**
          * An expression specifying the value of the customized element.
          */
-        @Child(name = "expression", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "expression", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="An expression that provides the dynamic value for the customization", formalDefinition="An expression specifying the value of the customized element." )
         protected StringType expression;
 
-        private static final long serialVersionUID = -252690483L;
+        private static final long serialVersionUID = -1704320150L;
 
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionCustomizationComponent() {
+      public PlanDefinitionActionDefinitionDynamicValueComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public PlanDefinitionActionDefinitionCustomizationComponent(StringType path, StringType expression) {
+      public PlanDefinitionActionDefinitionDynamicValueComponent(StringType path, StringType expression) {
         super();
         this.path = path;
         this.expression = expression;
@@ -2088,7 +2285,7 @@ public class PlanDefinition extends DomainResource {
         public StringType getPathElement() { 
           if (this.path == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionCustomizationComponent.path");
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.path");
             else if (Configuration.doAutoCreate())
               this.path = new StringType(); // bb
           return this.path;
@@ -2105,7 +2302,7 @@ public class PlanDefinition extends DomainResource {
         /**
          * @param value {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionCustomizationComponent setPathElement(StringType value) { 
+        public PlanDefinitionActionDefinitionDynamicValueComponent setPathElement(StringType value) { 
           this.path = value;
           return this;
         }
@@ -2120,10 +2317,59 @@ public class PlanDefinition extends DomainResource {
         /**
          * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
          */
-        public PlanDefinitionActionDefinitionCustomizationComponent setPath(String value) { 
+        public PlanDefinitionActionDefinitionDynamicValueComponent setPath(String value) { 
             if (this.path == null)
               this.path = new StringType();
             this.path.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public StringType getLanguageElement() { 
+          if (this.language == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.language");
+            else if (Configuration.doAutoCreate())
+              this.language = new StringType(); // bb
+          return this.language;
+        }
+
+        public boolean hasLanguageElement() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        public boolean hasLanguage() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        /**
+         * @param value {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionDynamicValueComponent setLanguageElement(StringType value) { 
+          this.language = value;
+          return this;
+        }
+
+        /**
+         * @return The media type of the language for the expression.
+         */
+        public String getLanguage() { 
+          return this.language == null ? null : this.language.getValue();
+        }
+
+        /**
+         * @param value The media type of the language for the expression.
+         */
+        public PlanDefinitionActionDefinitionDynamicValueComponent setLanguage(String value) { 
+          if (Utilities.noString(value))
+            this.language = null;
+          else {
+            if (this.language == null)
+              this.language = new StringType();
+            this.language.setValue(value);
+          }
           return this;
         }
 
@@ -2133,7 +2379,7 @@ public class PlanDefinition extends DomainResource {
         public StringType getExpressionElement() { 
           if (this.expression == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionCustomizationComponent.expression");
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.expression");
             else if (Configuration.doAutoCreate())
               this.expression = new StringType(); // bb
           return this.expression;
@@ -2150,7 +2396,7 @@ public class PlanDefinition extends DomainResource {
         /**
          * @param value {@link #expression} (An expression specifying the value of the customized element.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionCustomizationComponent setExpressionElement(StringType value) { 
+        public PlanDefinitionActionDefinitionDynamicValueComponent setExpressionElement(StringType value) { 
           this.expression = value;
           return this;
         }
@@ -2165,7 +2411,7 @@ public class PlanDefinition extends DomainResource {
         /**
          * @param value An expression specifying the value of the customized element.
          */
-        public PlanDefinitionActionDefinitionCustomizationComponent setExpression(String value) { 
+        public PlanDefinitionActionDefinitionDynamicValueComponent setExpression(String value) { 
             if (this.expression == null)
               this.expression = new StringType();
             this.expression.setValue(value);
@@ -2175,6 +2421,7 @@ public class PlanDefinition extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.", 0, java.lang.Integer.MAX_VALUE, path));
+          childrenList.add(new Property("language", "string", "The media type of the language for the expression.", 0, java.lang.Integer.MAX_VALUE, language));
           childrenList.add(new Property("expression", "string", "An expression specifying the value of the customized element.", 0, java.lang.Integer.MAX_VALUE, expression));
         }
 
@@ -2182,6 +2429,7 @@ public class PlanDefinition extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // StringType
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2193,6 +2441,9 @@ public class PlanDefinition extends DomainResource {
         switch (hash) {
         case 3433509: // path
           this.path = castToString(value); // StringType
+          break;
+        case -1613589672: // language
+          this.language = castToString(value); // StringType
           break;
         case -1795452264: // expression
           this.expression = castToString(value); // StringType
@@ -2206,6 +2457,8 @@ public class PlanDefinition extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("path"))
           this.path = castToString(value); // StringType
+        else if (name.equals("language"))
+          this.language = castToString(value); // StringType
         else if (name.equals("expression"))
           this.expression = castToString(value); // StringType
         else
@@ -2216,6 +2469,7 @@ public class PlanDefinition extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // StringType
         case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
         default: return super.makeProperty(hash, name);
         }
@@ -2227,6 +2481,9 @@ public class PlanDefinition extends DomainResource {
         if (name.equals("path")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.path");
         }
+        else if (name.equals("language")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.language");
+        }
         else if (name.equals("expression")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.expression");
         }
@@ -2234,10 +2491,11 @@ public class PlanDefinition extends DomainResource {
           return super.addChild(name);
       }
 
-      public PlanDefinitionActionDefinitionCustomizationComponent copy() {
-        PlanDefinitionActionDefinitionCustomizationComponent dst = new PlanDefinitionActionDefinitionCustomizationComponent();
+      public PlanDefinitionActionDefinitionDynamicValueComponent copy() {
+        PlanDefinitionActionDefinitionDynamicValueComponent dst = new PlanDefinitionActionDefinitionDynamicValueComponent();
         copyValues(dst);
         dst.path = path == null ? null : path.copy();
+        dst.language = language == null ? null : language.copy();
         dst.expression = expression == null ? null : expression.copy();
         return dst;
       }
@@ -2246,28 +2504,31 @@ public class PlanDefinition extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionCustomizationComponent))
+        if (!(other instanceof PlanDefinitionActionDefinitionDynamicValueComponent))
           return false;
-        PlanDefinitionActionDefinitionCustomizationComponent o = (PlanDefinitionActionDefinitionCustomizationComponent) other;
-        return compareDeep(path, o.path, true) && compareDeep(expression, o.expression, true);
+        PlanDefinitionActionDefinitionDynamicValueComponent o = (PlanDefinitionActionDefinitionDynamicValueComponent) other;
+        return compareDeep(path, o.path, true) && compareDeep(language, o.language, true) && compareDeep(expression, o.expression, true)
+          ;
       }
 
       @Override
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionCustomizationComponent))
+        if (!(other instanceof PlanDefinitionActionDefinitionDynamicValueComponent))
           return false;
-        PlanDefinitionActionDefinitionCustomizationComponent o = (PlanDefinitionActionDefinitionCustomizationComponent) other;
-        return compareValues(path, o.path, true) && compareValues(expression, o.expression, true);
+        PlanDefinitionActionDefinitionDynamicValueComponent o = (PlanDefinitionActionDefinitionDynamicValueComponent) other;
+        return compareValues(path, o.path, true) && compareValues(language, o.language, true) && compareValues(expression, o.expression, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, expression);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, language, expression
+          );
       }
 
   public String fhirType() {
-    return "PlanDefinition.actionDefinition.customization";
+    return "PlanDefinition.actionDefinition.dynamicValue";
 
   }
 

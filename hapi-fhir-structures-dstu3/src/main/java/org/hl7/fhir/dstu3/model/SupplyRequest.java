@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -424,7 +424,7 @@ public class SupplyRequest extends DomainResource {
     /**
      * Why the supply item was requested.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Why the supply item was requested", formalDefinition="Why the supply item was requested." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supplyrequest-reason")
     protected Type reason;

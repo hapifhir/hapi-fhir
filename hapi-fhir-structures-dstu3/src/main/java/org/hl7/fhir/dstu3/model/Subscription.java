@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -326,10 +326,10 @@ public class Subscription extends DomainResource {
         protected UriType endpoint;
 
         /**
-         * The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
+         * The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.
          */
-        @Child(name = "payload", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Mimetype to send, or blank for no payload", formalDefinition="The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification." )
+        @Child(name = "payload", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Mimetype to send, or omit for no payload", formalDefinition="The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification." )
         protected StringType payload;
 
         /**
@@ -351,10 +351,9 @@ public class Subscription extends DomainResource {
     /**
      * Constructor
      */
-      public SubscriptionChannelComponent(Enumeration<SubscriptionChannelType> type, StringType payload) {
+      public SubscriptionChannelComponent(Enumeration<SubscriptionChannelType> type) {
         super();
         this.type = type;
-        this.payload = payload;
       }
 
         /**
@@ -452,7 +451,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @return {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
         public StringType getPayloadElement() { 
           if (this.payload == null)
@@ -472,7 +471,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @param value {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
         public SubscriptionChannelComponent setPayloadElement(StringType value) { 
           this.payload = value;
@@ -480,19 +479,23 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
+         * @return The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.
          */
         public String getPayload() { 
           return this.payload == null ? null : this.payload.getValue();
         }
 
         /**
-         * @param value The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
+         * @param value The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.
          */
         public SubscriptionChannelComponent setPayload(String value) { 
+          if (Utilities.noString(value))
+            this.payload = null;
+          else {
             if (this.payload == null)
               this.payload = new StringType();
             this.payload.setValue(value);
+          }
           return this;
         }
 
@@ -549,7 +552,7 @@ public class Subscription extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "code", "The type of channel to send notifications on.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-          childrenList.add(new Property("payload", "string", "The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payload));
+          childrenList.add(new Property("payload", "string", "The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payload));
           childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         }
 
@@ -1310,17 +1313,17 @@ public class Subscription extends DomainResource {
  /**
    * Search parameter: <b>payload</b>
    * <p>
-   * Description: <b>Mimetype to send, or blank for no payload</b><br>
+   * Description: <b>Mimetype to send, or omit for no payload</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string" )
+  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or omit for no payload", type="string" )
   public static final String SP_PAYLOAD = "payload";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload</b>
    * <p>
-   * Description: <b>Mimetype to send, or blank for no payload</b><br>
+   * Description: <b>Mimetype to send, or omit for no payload</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>

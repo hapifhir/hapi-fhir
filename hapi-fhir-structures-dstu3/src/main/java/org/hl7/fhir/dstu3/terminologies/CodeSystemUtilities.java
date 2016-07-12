@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemPropertyComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem.PropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionPropertyComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptPropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.PropertyType;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
@@ -14,7 +14,7 @@ import org.hl7.fhir.dstu3.model.DateType;
 public class CodeSystemUtilities {
 
   public static boolean isDeprecated(CodeSystem cs, ConceptDefinitionComponent def) {
-    for (ConceptDefinitionPropertyComponent p : def.getProperty()) {
+    for (ConceptPropertyComponent p : def.getProperty()) {
       if (p.getCode().equals("deprecated") && p.hasValue() && p.getValue() instanceof BooleanType) 
         return ((BooleanType) p.getValue()).getValue();
     }
@@ -22,7 +22,7 @@ public class CodeSystemUtilities {
   }
 
   public static boolean isAbstract(CodeSystem cs, ConceptDefinitionComponent def) {
-    for (ConceptDefinitionPropertyComponent p : def.getProperty()) {
+    for (ConceptPropertyComponent p : def.getProperty()) {
       if (p.getCode().equals("abstract") && p.hasValue() && p.getValue() instanceof BooleanType) 
         return ((BooleanType) p.getValue()).getValue();
     }
@@ -57,7 +57,7 @@ public class CodeSystemUtilities {
   }
 
   public static void defineCodeSystemProperty(CodeSystem cs, String code, String description, PropertyType type) {
-    for (CodeSystemPropertyComponent p : cs.getProperty()) {
+    for (PropertyComponent p : cs.getProperty()) {
       if (p.getCode().equals(code))
         return;
     }

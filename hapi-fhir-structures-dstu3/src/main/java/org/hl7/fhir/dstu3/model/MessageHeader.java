@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1256,7 +1256,7 @@ public class MessageHeader extends DomainResource {
     /**
      * The actual data of the message - a reference to the root/focus class of the event.
      */
-    @Child(name = "data", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "data", type = {Reference.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The actual content of the message", formalDefinition="The actual data of the message - a reference to the root/focus class of the event." )
     protected List<Reference> data;
     /**

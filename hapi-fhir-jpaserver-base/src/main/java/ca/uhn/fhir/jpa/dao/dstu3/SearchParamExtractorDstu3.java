@@ -352,6 +352,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 							nextValue.getSystemElement().getValueAsString(), nextValue.getCode());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
+				} else if (nextObject instanceof LocationPositionComponent) {
+					continue;
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());

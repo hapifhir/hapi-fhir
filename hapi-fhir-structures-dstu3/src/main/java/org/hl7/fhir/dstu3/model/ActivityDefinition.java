@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -54,11 +54,19 @@ public class ActivityDefinition extends DomainResource {
          */
         COMMUNICATION, 
         /**
+         * To use a specific device
+         */
+        DEVICE, 
+        /**
+         * To perform a particular diagnostic
+         */
+        DIAGNOSTIC, 
+        /**
          * To consume food of a specified nature
          */
         DIET, 
         /**
-         * To consume/receive a drug, vaccine or other product
+         * To consume/receive a drug or other product
          */
         DRUG, 
         /**
@@ -66,7 +74,11 @@ public class ActivityDefinition extends DomainResource {
          */
         ENCOUNTER, 
         /**
-         * To capture information about a patient (vitals, labs, diagnostic images, etc.)
+         * To administer a particular immunization
+         */
+        IMMUNIZATION, 
+        /**
+         * To capture information about a patient (vitals, labs, etc.)
          */
         OBSERVATION, 
         /**
@@ -82,6 +94,10 @@ public class ActivityDefinition extends DomainResource {
          */
         SUPPLY, 
         /**
+         * To receive a particular vision correction device
+         */
+        VISION, 
+        /**
          * Some other form of action
          */
         OTHER, 
@@ -94,12 +110,18 @@ public class ActivityDefinition extends DomainResource {
                 return null;
         if ("communication".equals(codeString))
           return COMMUNICATION;
+        if ("device".equals(codeString))
+          return DEVICE;
+        if ("diagnostic".equals(codeString))
+          return DIAGNOSTIC;
         if ("diet".equals(codeString))
           return DIET;
         if ("drug".equals(codeString))
           return DRUG;
         if ("encounter".equals(codeString))
           return ENCOUNTER;
+        if ("immunization".equals(codeString))
+          return IMMUNIZATION;
         if ("observation".equals(codeString))
           return OBSERVATION;
         if ("procedure".equals(codeString))
@@ -108,6 +130,8 @@ public class ActivityDefinition extends DomainResource {
           return REFERRAL;
         if ("supply".equals(codeString))
           return SUPPLY;
+        if ("vision".equals(codeString))
+          return VISION;
         if ("other".equals(codeString))
           return OTHER;
         if (Configuration.isAcceptInvalidEnums())
@@ -118,13 +142,17 @@ public class ActivityDefinition extends DomainResource {
         public String toCode() {
           switch (this) {
             case COMMUNICATION: return "communication";
+            case DEVICE: return "device";
+            case DIAGNOSTIC: return "diagnostic";
             case DIET: return "diet";
             case DRUG: return "drug";
             case ENCOUNTER: return "encounter";
+            case IMMUNIZATION: return "immunization";
             case OBSERVATION: return "observation";
             case PROCEDURE: return "procedure";
             case REFERRAL: return "referral";
             case SUPPLY: return "supply";
+            case VISION: return "vision";
             case OTHER: return "other";
             default: return "?";
           }
@@ -132,13 +160,17 @@ public class ActivityDefinition extends DomainResource {
         public String getSystem() {
           switch (this) {
             case COMMUNICATION: return "http://hl7.org/fhir/activity-definition-category";
+            case DEVICE: return "http://hl7.org/fhir/activity-definition-category";
+            case DIAGNOSTIC: return "http://hl7.org/fhir/activity-definition-category";
             case DIET: return "http://hl7.org/fhir/activity-definition-category";
             case DRUG: return "http://hl7.org/fhir/activity-definition-category";
             case ENCOUNTER: return "http://hl7.org/fhir/activity-definition-category";
+            case IMMUNIZATION: return "http://hl7.org/fhir/activity-definition-category";
             case OBSERVATION: return "http://hl7.org/fhir/activity-definition-category";
             case PROCEDURE: return "http://hl7.org/fhir/activity-definition-category";
             case REFERRAL: return "http://hl7.org/fhir/activity-definition-category";
             case SUPPLY: return "http://hl7.org/fhir/activity-definition-category";
+            case VISION: return "http://hl7.org/fhir/activity-definition-category";
             case OTHER: return "http://hl7.org/fhir/activity-definition-category";
             default: return "?";
           }
@@ -146,13 +178,17 @@ public class ActivityDefinition extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case COMMUNICATION: return "To communicate with a participant in some way";
+            case DEVICE: return "To use a specific device";
+            case DIAGNOSTIC: return "To perform a particular diagnostic";
             case DIET: return "To consume food of a specified nature";
-            case DRUG: return "To consume/receive a drug, vaccine or other product";
+            case DRUG: return "To consume/receive a drug or other product";
             case ENCOUNTER: return "To meet with the patient (in-patient, out-patient, etc.)";
-            case OBSERVATION: return "To capture information about a patient (vitals, labs, diagnostic images, etc.)";
+            case IMMUNIZATION: return "To administer a particular immunization";
+            case OBSERVATION: return "To capture information about a patient (vitals, labs, etc.)";
             case PROCEDURE: return "To modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)";
             case REFERRAL: return "To refer the patient to receive some service";
             case SUPPLY: return "To provide something to the patient (medication, medical supply, etc.)";
+            case VISION: return "To receive a particular vision correction device";
             case OTHER: return "Some other form of action";
             default: return "?";
           }
@@ -160,13 +196,17 @@ public class ActivityDefinition extends DomainResource {
         public String getDisplay() {
           switch (this) {
             case COMMUNICATION: return "Communication";
+            case DEVICE: return "Device";
+            case DIAGNOSTIC: return "Diagnostic";
             case DIET: return "Diet";
             case DRUG: return "Drug";
             case ENCOUNTER: return "Encounter";
+            case IMMUNIZATION: return "Immunization";
             case OBSERVATION: return "Observation";
             case PROCEDURE: return "Procedure";
             case REFERRAL: return "Referral";
             case SUPPLY: return "Supply";
+            case VISION: return "Vision";
             case OTHER: return "Other";
             default: return "?";
           }
@@ -180,12 +220,18 @@ public class ActivityDefinition extends DomainResource {
                 return null;
         if ("communication".equals(codeString))
           return ActivityDefinitionCategory.COMMUNICATION;
+        if ("device".equals(codeString))
+          return ActivityDefinitionCategory.DEVICE;
+        if ("diagnostic".equals(codeString))
+          return ActivityDefinitionCategory.DIAGNOSTIC;
         if ("diet".equals(codeString))
           return ActivityDefinitionCategory.DIET;
         if ("drug".equals(codeString))
           return ActivityDefinitionCategory.DRUG;
         if ("encounter".equals(codeString))
           return ActivityDefinitionCategory.ENCOUNTER;
+        if ("immunization".equals(codeString))
+          return ActivityDefinitionCategory.IMMUNIZATION;
         if ("observation".equals(codeString))
           return ActivityDefinitionCategory.OBSERVATION;
         if ("procedure".equals(codeString))
@@ -194,6 +240,8 @@ public class ActivityDefinition extends DomainResource {
           return ActivityDefinitionCategory.REFERRAL;
         if ("supply".equals(codeString))
           return ActivityDefinitionCategory.SUPPLY;
+        if ("vision".equals(codeString))
+          return ActivityDefinitionCategory.VISION;
         if ("other".equals(codeString))
           return ActivityDefinitionCategory.OTHER;
         throw new IllegalArgumentException("Unknown ActivityDefinitionCategory code '"+codeString+"'");
@@ -206,12 +254,18 @@ public class ActivityDefinition extends DomainResource {
             return null;
         if ("communication".equals(codeString))
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.COMMUNICATION);
+        if ("device".equals(codeString))
+          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.DEVICE);
+        if ("diagnostic".equals(codeString))
+          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.DIAGNOSTIC);
         if ("diet".equals(codeString))
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.DIET);
         if ("drug".equals(codeString))
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.DRUG);
         if ("encounter".equals(codeString))
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.ENCOUNTER);
+        if ("immunization".equals(codeString))
+          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.IMMUNIZATION);
         if ("observation".equals(codeString))
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.OBSERVATION);
         if ("procedure".equals(codeString))
@@ -220,6 +274,8 @@ public class ActivityDefinition extends DomainResource {
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.REFERRAL);
         if ("supply".equals(codeString))
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.SUPPLY);
+        if ("vision".equals(codeString))
+          return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.VISION);
         if ("other".equals(codeString))
           return new Enumeration<ActivityDefinitionCategory>(this, ActivityDefinitionCategory.OTHER);
         throw new FHIRException("Unknown ActivityDefinitionCategory code '"+codeString+"'");
@@ -227,12 +283,18 @@ public class ActivityDefinition extends DomainResource {
     public String toCode(ActivityDefinitionCategory code) {
       if (code == ActivityDefinitionCategory.COMMUNICATION)
         return "communication";
+      if (code == ActivityDefinitionCategory.DEVICE)
+        return "device";
+      if (code == ActivityDefinitionCategory.DIAGNOSTIC)
+        return "diagnostic";
       if (code == ActivityDefinitionCategory.DIET)
         return "diet";
       if (code == ActivityDefinitionCategory.DRUG)
         return "drug";
       if (code == ActivityDefinitionCategory.ENCOUNTER)
         return "encounter";
+      if (code == ActivityDefinitionCategory.IMMUNIZATION)
+        return "immunization";
       if (code == ActivityDefinitionCategory.OBSERVATION)
         return "observation";
       if (code == ActivityDefinitionCategory.PROCEDURE)
@@ -241,6 +303,8 @@ public class ActivityDefinition extends DomainResource {
         return "referral";
       if (code == ActivityDefinitionCategory.SUPPLY)
         return "supply";
+      if (code == ActivityDefinitionCategory.VISION)
+        return "vision";
       if (code == ActivityDefinitionCategory.OTHER)
         return "other";
       return "?";
@@ -355,6 +419,302 @@ public class ActivityDefinition extends DomainResource {
       return code.getSystem();
       }
     }
+
+    @Block()
+    public static class ActivityDefinitionDynamicValueComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         */
+        @Child(name = "path", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The path to the element to be set dynamically", formalDefinition="The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression." )
+        protected StringType path;
+
+        /**
+         * The media type of the language for the expression.
+         */
+        @Child(name = "language", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Language of the expression", formalDefinition="The media type of the language for the expression." )
+        protected StringType language;
+
+        /**
+         * An expression specifying the value of the customized element.
+         */
+        @Child(name = "expression", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="An expression that provides the dynamic value for the customization", formalDefinition="An expression specifying the value of the customized element." )
+        protected StringType expression;
+
+        private static final long serialVersionUID = -1704320150L;
+
+    /**
+     * Constructor
+     */
+      public ActivityDefinitionDynamicValueComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ActivityDefinitionDynamicValueComponent(StringType path, StringType expression) {
+        super();
+        this.path = path;
+        this.expression = expression;
+      }
+
+        /**
+         * @return {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         */
+        public StringType getPathElement() { 
+          if (this.path == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ActivityDefinitionDynamicValueComponent.path");
+            else if (Configuration.doAutoCreate())
+              this.path = new StringType(); // bb
+          return this.path;
+        }
+
+        public boolean hasPathElement() { 
+          return this.path != null && !this.path.isEmpty();
+        }
+
+        public boolean hasPath() { 
+          return this.path != null && !this.path.isEmpty();
+        }
+
+        /**
+         * @param value {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         */
+        public ActivityDefinitionDynamicValueComponent setPathElement(StringType value) { 
+          this.path = value;
+          return this;
+        }
+
+        /**
+         * @return The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         */
+        public String getPath() { 
+          return this.path == null ? null : this.path.getValue();
+        }
+
+        /**
+         * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         */
+        public ActivityDefinitionDynamicValueComponent setPath(String value) { 
+            if (this.path == null)
+              this.path = new StringType();
+            this.path.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public StringType getLanguageElement() { 
+          if (this.language == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ActivityDefinitionDynamicValueComponent.language");
+            else if (Configuration.doAutoCreate())
+              this.language = new StringType(); // bb
+          return this.language;
+        }
+
+        public boolean hasLanguageElement() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        public boolean hasLanguage() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        /**
+         * @param value {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public ActivityDefinitionDynamicValueComponent setLanguageElement(StringType value) { 
+          this.language = value;
+          return this;
+        }
+
+        /**
+         * @return The media type of the language for the expression.
+         */
+        public String getLanguage() { 
+          return this.language == null ? null : this.language.getValue();
+        }
+
+        /**
+         * @param value The media type of the language for the expression.
+         */
+        public ActivityDefinitionDynamicValueComponent setLanguage(String value) { 
+          if (Utilities.noString(value))
+            this.language = null;
+          else {
+            if (this.language == null)
+              this.language = new StringType();
+            this.language.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #expression} (An expression specifying the value of the customized element.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public StringType getExpressionElement() { 
+          if (this.expression == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ActivityDefinitionDynamicValueComponent.expression");
+            else if (Configuration.doAutoCreate())
+              this.expression = new StringType(); // bb
+          return this.expression;
+        }
+
+        public boolean hasExpressionElement() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        public boolean hasExpression() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        /**
+         * @param value {@link #expression} (An expression specifying the value of the customized element.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public ActivityDefinitionDynamicValueComponent setExpressionElement(StringType value) { 
+          this.expression = value;
+          return this;
+        }
+
+        /**
+         * @return An expression specifying the value of the customized element.
+         */
+        public String getExpression() { 
+          return this.expression == null ? null : this.expression.getValue();
+        }
+
+        /**
+         * @param value An expression specifying the value of the customized element.
+         */
+        public ActivityDefinitionDynamicValueComponent setExpression(String value) { 
+            if (this.expression == null)
+              this.expression = new StringType();
+            this.expression.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.", 0, java.lang.Integer.MAX_VALUE, path));
+          childrenList.add(new Property("language", "string", "The media type of the language for the expression.", 0, java.lang.Integer.MAX_VALUE, language));
+          childrenList.add(new Property("expression", "string", "An expression specifying the value of the customized element.", 0, java.lang.Integer.MAX_VALUE, expression));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // StringType
+        case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3433509: // path
+          this.path = castToString(value); // StringType
+          break;
+        case -1613589672: // language
+          this.language = castToString(value); // StringType
+          break;
+        case -1795452264: // expression
+          this.expression = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path"))
+          this.path = castToString(value); // StringType
+        else if (name.equals("language"))
+          this.language = castToString(value); // StringType
+        else if (name.equals("expression"))
+          this.expression = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
+        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // StringType
+        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("path")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ActivityDefinition.path");
+        }
+        else if (name.equals("language")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ActivityDefinition.language");
+        }
+        else if (name.equals("expression")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ActivityDefinition.expression");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ActivityDefinitionDynamicValueComponent copy() {
+        ActivityDefinitionDynamicValueComponent dst = new ActivityDefinitionDynamicValueComponent();
+        copyValues(dst);
+        dst.path = path == null ? null : path.copy();
+        dst.language = language == null ? null : language.copy();
+        dst.expression = expression == null ? null : expression.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof ActivityDefinitionDynamicValueComponent))
+          return false;
+        ActivityDefinitionDynamicValueComponent o = (ActivityDefinitionDynamicValueComponent) other;
+        return compareDeep(path, o.path, true) && compareDeep(language, o.language, true) && compareDeep(expression, o.expression, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof ActivityDefinitionDynamicValueComponent))
+          return false;
+        ActivityDefinitionDynamicValueComponent o = (ActivityDefinitionDynamicValueComponent) other;
+        return compareValues(path, o.path, true) && compareValues(language, o.language, true) && compareValues(expression, o.expression, true)
+          ;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, language, expression
+          );
+      }
+
+  public String fhirType() {
+    return "ActivityDefinition.dynamicValue";
+
+  }
+
+  }
 
     /**
      * An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.
@@ -513,7 +873,7 @@ public class ActivityDefinition extends DomainResource {
      * High-level categorization of the type of activity.
      */
     @Child(name = "category", type = {CodeType.class}, order=21, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="communication | diet | drug | encounter | observation | procedure | referral | supply | other", formalDefinition="High-level categorization of the type of activity." )
+    @Description(shortDefinition="communication | device | diagnostic | diet | drug | encounter | immunization | observation | procedure | referral | supply | vision | other", formalDefinition="High-level categorization of the type of activity." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/activity-definition-category")
     protected Enumeration<ActivityDefinitionCategory> category;
 
@@ -565,7 +925,26 @@ public class ActivityDefinition extends DomainResource {
     @Description(shortDefinition="How much is administered/consumed/supplied", formalDefinition="Identifies the quantity expected to be consumed at once (per dose, per meal, etc.)." )
     protected SimpleQuantity quantity;
 
-    private static final long serialVersionUID = -1624469573L;
+    /**
+     * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
+     */
+    @Child(name = "transform", type = {StructureMap.class}, order=28, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
+    protected Reference transform;
+
+    /**
+     * The actual object that is the target of the reference (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+     */
+    protected StructureMap transformTarget;
+
+    /**
+     * Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.
+     */
+    @Child(name = "dynamicValue", type = {}, order=29, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result." )
+    protected List<ActivityDefinitionDynamicValueComponent> dynamicValue;
+
+    private static final long serialVersionUID = -1371717355L;
 
   /**
    * Constructor
@@ -1920,6 +2299,103 @@ public class ActivityDefinition extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+     */
+    public Reference getTransform() { 
+      if (this.transform == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ActivityDefinition.transform");
+        else if (Configuration.doAutoCreate())
+          this.transform = new Reference(); // cc
+      return this.transform;
+    }
+
+    public boolean hasTransform() { 
+      return this.transform != null && !this.transform.isEmpty();
+    }
+
+    /**
+     * @param value {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+     */
+    public ActivityDefinition setTransform(Reference value) { 
+      this.transform = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #transform} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+     */
+    public StructureMap getTransformTarget() { 
+      if (this.transformTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ActivityDefinition.transform");
+        else if (Configuration.doAutoCreate())
+          this.transformTarget = new StructureMap(); // aa
+      return this.transformTarget;
+    }
+
+    /**
+     * @param value {@link #transform} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+     */
+    public ActivityDefinition setTransformTarget(StructureMap value) { 
+      this.transformTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #dynamicValue} (Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.)
+     */
+    public List<ActivityDefinitionDynamicValueComponent> getDynamicValue() { 
+      if (this.dynamicValue == null)
+        this.dynamicValue = new ArrayList<ActivityDefinitionDynamicValueComponent>();
+      return this.dynamicValue;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ActivityDefinition setDynamicValue(List<ActivityDefinitionDynamicValueComponent> theDynamicValue) { 
+      this.dynamicValue = theDynamicValue;
+      return this;
+    }
+
+    public boolean hasDynamicValue() { 
+      if (this.dynamicValue == null)
+        return false;
+      for (ActivityDefinitionDynamicValueComponent item : this.dynamicValue)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ActivityDefinitionDynamicValueComponent addDynamicValue() { //3
+      ActivityDefinitionDynamicValueComponent t = new ActivityDefinitionDynamicValueComponent();
+      if (this.dynamicValue == null)
+        this.dynamicValue = new ArrayList<ActivityDefinitionDynamicValueComponent>();
+      this.dynamicValue.add(t);
+      return t;
+    }
+
+    public ActivityDefinition addDynamicValue(ActivityDefinitionDynamicValueComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.dynamicValue == null)
+        this.dynamicValue = new ArrayList<ActivityDefinitionDynamicValueComponent>();
+      this.dynamicValue.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #dynamicValue}, creating it if it does not already exist
+     */
+    public ActivityDefinitionDynamicValueComponent getDynamicValueFirstRep() { 
+      if (getDynamicValue().isEmpty()) {
+        addDynamicValue();
+      }
+      return getDynamicValue().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.", 0, java.lang.Integer.MAX_VALUE, url));
@@ -1950,6 +2426,8 @@ public class ActivityDefinition extends DomainResource {
         childrenList.add(new Property("participantType", "code", "The type of participant in the action.", 0, java.lang.Integer.MAX_VALUE, participantType));
         childrenList.add(new Property("product[x]", "Reference(Medication|Substance)|CodeableConcept", "Identifies the food, drug or other product being consumed or supplied in the activity.", 0, java.lang.Integer.MAX_VALUE, product));
         childrenList.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be consumed at once (per dose, per meal, etc.).", 0, java.lang.Integer.MAX_VALUE, quantity));
+        childrenList.add(new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, java.lang.Integer.MAX_VALUE, transform));
+        childrenList.add(new Property("dynamicValue", "", "Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
       }
 
       @Override
@@ -1983,6 +2461,8 @@ public class ActivityDefinition extends DomainResource {
         case 841294093: /*participantType*/ return this.participantType == null ? new Base[0] : this.participantType.toArray(new Base[this.participantType.size()]); // Enumeration<ActivityParticipantType>
         case -309474065: /*product*/ return this.product == null ? new Base[0] : new Base[] {this.product}; // Type
         case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // Reference
+        case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // ActivityDefinitionDynamicValueComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2075,6 +2555,12 @@ public class ActivityDefinition extends DomainResource {
         case -1285004149: // quantity
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
           break;
+        case 1052666732: // transform
+          this.transform = castToReference(value); // Reference
+          break;
+        case 572625010: // dynamicValue
+          this.getDynamicValue().add((ActivityDefinitionDynamicValueComponent) value); // ActivityDefinitionDynamicValueComponent
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -2138,6 +2624,10 @@ public class ActivityDefinition extends DomainResource {
           this.product = (Type) value; // Type
         else if (name.equals("quantity"))
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("transform"))
+          this.transform = castToReference(value); // Reference
+        else if (name.equals("dynamicValue"))
+          this.getDynamicValue().add((ActivityDefinitionDynamicValueComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -2173,6 +2663,8 @@ public class ActivityDefinition extends DomainResource {
         case 841294093: throw new FHIRException("Cannot make property participantType as it is not a complex type"); // Enumeration<ActivityParticipantType>
         case 1753005361:  return getProduct(); // Type
         case -1285004149:  return getQuantity(); // SimpleQuantity
+        case 1052666732:  return getTransform(); // Reference
+        case 572625010:  return addDynamicValue(); // ActivityDefinitionDynamicValueComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -2278,6 +2770,13 @@ public class ActivityDefinition extends DomainResource {
           this.quantity = new SimpleQuantity();
           return this.quantity;
         }
+        else if (name.equals("transform")) {
+          this.transform = new Reference();
+          return this.transform;
+        }
+        else if (name.equals("dynamicValue")) {
+          return addDynamicValue();
+        }
         else
           return super.addChild(name);
       }
@@ -2350,6 +2849,12 @@ public class ActivityDefinition extends DomainResource {
         };
         dst.product = product == null ? null : product.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
+        dst.transform = transform == null ? null : transform.copy();
+        if (dynamicValue != null) {
+          dst.dynamicValue = new ArrayList<ActivityDefinitionDynamicValueComponent>();
+          for (ActivityDefinitionDynamicValueComponent i : dynamicValue)
+            dst.dynamicValue.add(i.copy());
+        };
         return dst;
       }
 
@@ -2374,7 +2879,8 @@ public class ActivityDefinition extends DomainResource {
            && compareDeep(relatedResource, o.relatedResource, true) && compareDeep(library, o.library, true)
            && compareDeep(category, o.category, true) && compareDeep(code, o.code, true) && compareDeep(timing, o.timing, true)
            && compareDeep(location, o.location, true) && compareDeep(participantType, o.participantType, true)
-           && compareDeep(product, o.product, true) && compareDeep(quantity, o.quantity, true);
+           && compareDeep(product, o.product, true) && compareDeep(quantity, o.quantity, true) && compareDeep(transform, o.transform, true)
+           && compareDeep(dynamicValue, o.dynamicValue, true);
       }
 
       @Override
@@ -2397,7 +2903,7 @@ public class ActivityDefinition extends DomainResource {
           , name, title, status, experimental, description, purpose, usage, publicationDate
           , lastReviewDate, effectivePeriod, coverage, topic, contributor, publisher, contact
           , copyright, relatedResource, library, category, code, timing, location, participantType
-          , product, quantity);
+          , product, quantity, transform, dynamicValue);
       }
 
   @Override

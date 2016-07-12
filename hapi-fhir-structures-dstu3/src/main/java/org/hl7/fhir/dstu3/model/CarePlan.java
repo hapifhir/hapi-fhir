@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -685,7 +685,7 @@ public class CarePlan extends DomainResource {
         /**
          * Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc.
          */
-        @Child(name = "actionResulting", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "actionResulting", type = {Reference.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Appointments, orders, etc.", formalDefinition="Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc." )
         protected List<Reference> actionResulting;
         /**
@@ -2267,7 +2267,7 @@ public class CarePlan extends DomainResource {
     /**
      * Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc.
      */
-    @Child(name = "support", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "support", type = {Reference.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Information considered as part of plan", formalDefinition="Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc." )
     protected List<Reference> support;
     /**

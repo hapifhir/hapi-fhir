@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -979,7 +979,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports or is used to derive the MedicationStatement.
      */
-    @Child(name = "supportingInformation", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supportingInformation", type = {Reference.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional supporting information", formalDefinition="Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports or is used to derive the MedicationStatement." )
     protected List<Reference> supportingInformation;
     /**

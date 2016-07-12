@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -439,7 +439,7 @@ public class Condition extends DomainResource {
         /**
          * Links to other relevant information, including pathology reports.
          */
-        @Child(name = "detail", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "detail", type = {Reference.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Supporting information found elsewhere", formalDefinition="Links to other relevant information, including pathology reports." )
         protected List<Reference> detail;
         /**

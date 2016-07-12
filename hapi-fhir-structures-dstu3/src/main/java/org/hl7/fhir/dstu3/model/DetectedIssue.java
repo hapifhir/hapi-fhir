@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -464,7 +464,7 @@ public class DetectedIssue extends DomainResource {
     /**
      * Indicates the resource representing the current activity or proposed activity that is potentially problematic.
      */
-    @Child(name = "implicated", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "implicated", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Problem resource", formalDefinition="Indicates the resource representing the current activity or proposed activity that is potentially problematic." )
     protected List<Reference> implicated;
     /**

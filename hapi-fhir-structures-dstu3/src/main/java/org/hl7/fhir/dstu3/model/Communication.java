@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -191,7 +191,7 @@ public class Communication extends DomainResource {
         /**
          * A communicated content (or for multi-part communications, one portion of the communication).
          */
-        @Child(name = "content", type = {StringType.class, Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "content", type = {StringType.class, Attachment.class, Reference.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Message part content", formalDefinition="A communicated content (or for multi-part communications, one portion of the communication)." )
         protected Type content;
 

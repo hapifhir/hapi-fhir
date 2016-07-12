@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -519,10 +519,10 @@ public class Goal extends DomainResource {
     protected List<Annotation> note;
 
     /**
-     * Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.
+     * Identifies the change (or lack of change) at the point where the goal was deemed to be cancelled or achieved.
      */
     @Child(name = "outcome", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="What was end result of goal?", formalDefinition="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved." )
+    @Description(shortDefinition="What was end result of goal?", formalDefinition="Identifies the change (or lack of change) at the point where the goal was deemed to be cancelled or achieved." )
     protected List<GoalOutcomeComponent> outcome;
 
     private static final long serialVersionUID = -475818230L;
@@ -1121,7 +1121,7 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #outcome} (Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.)
+     * @return {@link #outcome} (Identifies the change (or lack of change) at the point where the goal was deemed to be cancelled or achieved.)
      */
     public List<GoalOutcomeComponent> getOutcome() { 
       if (this.outcome == null)
@@ -1188,7 +1188,7 @@ public class Goal extends DomainResource {
         childrenList.add(new Property("priority", "CodeableConcept", "Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("addresses", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ProcedureRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, addresses));
         childrenList.add(new Property("note", "Annotation", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("outcome", "", "Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.", 0, java.lang.Integer.MAX_VALUE, outcome));
+        childrenList.add(new Property("outcome", "", "Identifies the change (or lack of change) at the point where the goal was deemed to be cancelled or achieved.", 0, java.lang.Integer.MAX_VALUE, outcome));
       }
 
       @Override

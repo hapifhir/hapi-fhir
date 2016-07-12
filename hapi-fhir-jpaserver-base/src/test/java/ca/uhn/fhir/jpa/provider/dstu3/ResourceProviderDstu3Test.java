@@ -59,7 +59,7 @@ import org.hl7.fhir.dstu3.model.DocumentManifest;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
-import org.hl7.fhir.dstu3.model.Encounter.EncounterState;
+import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ImagingStudy;
@@ -648,7 +648,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("urn:foo").setValue("testDeepChainingE1");
-		e1.getStatusElement().setValue(EncounterState.INPROGRESS);
+		e1.getStatusElement().setValue(EncounterStatus.INPROGRESS);
 		EncounterLocationComponent location = e1.addLocation();
 		location.getLocation().setReferenceElement(l2id.toUnqualifiedVersionless());
 		location.setPeriod(new Period().setStart(new Date(), TemporalPrecisionEnum.SECOND).setEnd(new Date(), TemporalPrecisionEnum.SECOND));

@@ -46,10 +46,10 @@
       <sch:assert test="not(exists(f:slicing))">dae-2: No slicing allowed</sch:assert>
       <sch:assert test="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) &gt;= f:min/@value)">eld-2: Min &lt;= Max</sch:assert>
       <sch:assert test="not(exists(f:contentReference) and (exists(f:type) or exists(f:*[starts-with(local-name(.), 'value')]) or exists(f:*[starts-with(local-name(.), 'defaultValue')])  or exists(f:*[starts-with(local-name(.), 'fixed')]) or exists(f:*[starts-with(local-name(.), 'pattern')]) or exists(f:*[starts-with(local-name(.), 'example')]) or exists(f:*[starts-with(local-name(.), 'f:minValue')]) or exists(f:*[starts-with(local-name(.), 'f:maxValue')]) or exists(f:maxLength) or exists(f:binding)))">eld-5: if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding</sch:assert>
-      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)=1)">eld-7: Pattern may only be specified if there is one type</sch:assert>
-      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)=1)">eld-6: Fixed value may only be specified if there is one type</sch:assert>
+      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)&lt;=1)">eld-7: Pattern may only be specified if there is one type</sch:assert>
+      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)&lt;=1)">eld-6: Fixed value may only be specified if there is one type</sch:assert>
       <sch:assert test="not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','Extension', 'string', 'uri')">eld-11: Binding can only be present for coded elements, string, and uri</sch:assert>
-      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'value')]))">eld-8: Pattern and value are mutually exclusive</sch:assert>
+      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))">eld-8: Pattern and value are mutually exclusive</sch:assert>
       <sch:assert test="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))">eld-14: Constraints must be unique by key</sch:assert>
       <sch:assert test="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))">eld-13: Types must be unique by the combination of code and profile</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">eld-15: default value and meaningWhenMissing are mutually exclusive</sch:assert>
@@ -62,6 +62,12 @@
     </sch:rule>
     <sch:rule context="//f:DataElement/f:element/f:type">
       <sch:assert test="not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])">eld-4: Aggregation may only be specified if one of the allowed types for the element is a resource</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:DataElement/f:element/f:minValueQuantity">
+      <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:DataElement/f:element/f:maxValueQuantity">
+      <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
     <sch:rule context="//f:DataElement/f:element/f:binding">
       <sch:assert test="(exists(f:valueSetUri) or exists(f:valueSetReference)) or exists(f:description)">eld-10: provide either a reference or a description (or both)</sch:assert>

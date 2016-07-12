@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1148,7 +1148,7 @@ public class DocumentReference extends DomainResource {
         /**
          * Related Resource to this DocumentReference. If both id and ref are present they shall refer to the same thing.
          */
-        @Child(name = "ref", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "ref", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Related Resource", formalDefinition="Related Resource to this DocumentReference. If both id and ref are present they shall refer to the same thing." )
         protected Reference ref;
 

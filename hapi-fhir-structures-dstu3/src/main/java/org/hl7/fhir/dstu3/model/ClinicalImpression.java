@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -877,7 +877,7 @@ public class ClinicalImpression extends DomainResource {
     /**
      * The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.
      */
-    @Child(name = "trigger", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "trigger", type = {CodeableConcept.class, Reference.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Request or event that necessitated this assessment", formalDefinition="The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-findings")
     protected Type trigger;

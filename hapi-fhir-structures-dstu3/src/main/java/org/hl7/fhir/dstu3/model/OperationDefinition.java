@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -536,10 +536,10 @@ public class OperationDefinition extends BaseConformance {
         protected OperationDefinitionParameterBindingComponent binding;
 
         /**
-         * The parts of a Tuple Parameter.
+         * The parts of a nested Parameter.
          */
         @Child(name = "part", type = {OperationDefinitionParameterComponent.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Parts of a Tuple Parameter", formalDefinition="The parts of a Tuple Parameter." )
+        @Description(shortDefinition="Parts of a nested Parameter", formalDefinition="The parts of a nested Parameter." )
         protected List<OperationDefinitionParameterComponent> part;
 
         private static final long serialVersionUID = -885506257L;
@@ -958,7 +958,7 @@ public class OperationDefinition extends BaseConformance {
         }
 
         /**
-         * @return {@link #part} (The parts of a Tuple Parameter.)
+         * @return {@link #part} (The parts of a nested Parameter.)
          */
         public List<OperationDefinitionParameterComponent> getPart() { 
           if (this.part == null)
@@ -1021,7 +1021,7 @@ public class OperationDefinition extends BaseConformance {
           childrenList.add(new Property("searchType", "code", "How the parameter is understood as a search parameter. This is only used if the parameter type is 'string'.", 0, java.lang.Integer.MAX_VALUE, searchType));
           childrenList.add(new Property("profile", "Reference(StructureDefinition)", "A profile the specifies the rules that this parameter must conform to.", 0, java.lang.Integer.MAX_VALUE, profile));
           childrenList.add(new Property("binding", "", "Binds to a value set if this parameter is coded (code, Coding, CodeableConcept).", 0, java.lang.Integer.MAX_VALUE, binding));
-          childrenList.add(new Property("part", "@OperationDefinition.parameter", "The parts of a Tuple Parameter.", 0, java.lang.Integer.MAX_VALUE, part));
+          childrenList.add(new Property("part", "@OperationDefinition.parameter", "The parts of a nested Parameter.", 0, java.lang.Integer.MAX_VALUE, part));
         }
 
       @Override
@@ -1482,16 +1482,16 @@ public class OperationDefinition extends BaseConformance {
     /**
      * A free text natural language description of the profile and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Natural language description of the operation", formalDefinition="A free text natural language description of the profile and its use." )
-    protected StringType description;
+    protected MarkdownType description;
 
     /**
      * Explains why this operation definition is needed and why it's been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why this resource has been created", formalDefinition="Explains why this operation definition is needed and why it's been constrained as it has." )
-    protected StringType requirements;
+    protected MarkdownType requirements;
 
     /**
      * Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.
@@ -1555,7 +1555,7 @@ public class OperationDefinition extends BaseConformance {
     @Description(shortDefinition="Parameters for the operation/query", formalDefinition="The parameters for the operation/query." )
     protected List<OperationDefinitionParameterComponent> parameter;
 
-    private static final long serialVersionUID = 1970462589L;
+    private static final long serialVersionUID = -597504387L;
 
   /**
    * Constructor
@@ -1834,12 +1834,12 @@ public class OperationDefinition extends BaseConformance {
     /**
      * @return {@link #description} (A free text natural language description of the profile and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create OperationDefinition.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -1854,7 +1854,7 @@ public class OperationDefinition extends BaseConformance {
     /**
      * @param value {@link #description} (A free text natural language description of the profile and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public OperationDefinition setDescriptionElement(StringType value) { 
+    public OperationDefinition setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -1870,11 +1870,11 @@ public class OperationDefinition extends BaseConformance {
      * @param value A free text natural language description of the profile and its use.
      */
     public OperationDefinition setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
@@ -1883,12 +1883,12 @@ public class OperationDefinition extends BaseConformance {
     /**
      * @return {@link #requirements} (Explains why this operation definition is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public StringType getRequirementsElement() { 
+    public MarkdownType getRequirementsElement() { 
       if (this.requirements == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create OperationDefinition.requirements");
         else if (Configuration.doAutoCreate())
-          this.requirements = new StringType(); // bb
+          this.requirements = new MarkdownType(); // bb
       return this.requirements;
     }
 
@@ -1903,7 +1903,7 @@ public class OperationDefinition extends BaseConformance {
     /**
      * @param value {@link #requirements} (Explains why this operation definition is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public OperationDefinition setRequirementsElement(StringType value) { 
+    public OperationDefinition setRequirementsElement(MarkdownType value) { 
       this.requirements = value;
       return this;
     }
@@ -1919,11 +1919,11 @@ public class OperationDefinition extends BaseConformance {
      * @param value Explains why this operation definition is needed and why it's been constrained as it has.
      */
     public OperationDefinition setRequirements(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.requirements = null;
       else {
         if (this.requirements == null)
-          this.requirements = new StringType();
+          this.requirements = new MarkdownType();
         this.requirements.setValue(value);
       }
       return this;
@@ -2322,8 +2322,8 @@ public class OperationDefinition extends BaseConformance {
         childrenList.add(new Property("experimental", "boolean", "This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the operation definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the profile and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("requirements", "string", "Explains why this operation definition is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the profile and its use.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("requirements", "markdown", "Explains why this operation definition is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("idempotent", "boolean", "Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.", 0, java.lang.Integer.MAX_VALUE, idempotent));
         childrenList.add(new Property("code", "code", "The name used to invoke the operation.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("comment", "string", "Additional information about how to use this operation or named query.", 0, java.lang.Integer.MAX_VALUE, comment));
@@ -2346,9 +2346,9 @@ public class OperationDefinition extends BaseConformance {
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // OperationDefinitionContactComponent
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
         case 1680468793: /*idempotent*/ return this.idempotent == null ? new Base[0] : new Base[] {this.idempotent}; // BooleanType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
         case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
@@ -2393,13 +2393,13 @@ public class OperationDefinition extends BaseConformance {
           this.getContact().add((OperationDefinitionContactComponent) value); // OperationDefinitionContactComponent
           break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
           this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case -1619874672: // requirements
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
           break;
         case 1680468793: // idempotent
           this.idempotent = castToBoolean(value); // BooleanType
@@ -2451,11 +2451,11 @@ public class OperationDefinition extends BaseConformance {
         else if (name.equals("contact"))
           this.getContact().add((OperationDefinitionContactComponent) value);
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
           this.getUseContext().add(castToCodeableConcept(value));
         else if (name.equals("requirements"))
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
         else if (name.equals("idempotent"))
           this.idempotent = castToBoolean(value); // BooleanType
         else if (name.equals("code"))
@@ -2488,9 +2488,9 @@ public class OperationDefinition extends BaseConformance {
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // OperationDefinitionContactComponent
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
         case -669707736:  return addUseContext(); // CodeableConcept
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
         case 1680468793: throw new FHIRException("Cannot make property idempotent as it is not a complex type"); // BooleanType
         case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
         case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType

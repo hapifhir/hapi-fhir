@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -65,7 +65,7 @@ public class Basic extends DomainResource {
     /**
      * Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.
      */
-    @Child(name = "subject", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifies the focus of this resource", formalDefinition="Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource." )
     protected Reference subject;
 

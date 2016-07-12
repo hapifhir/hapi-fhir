@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -561,10 +561,10 @@ public class CodeSystem extends BaseConformance {
     @Block()
     public static class CodeSystemFilterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The code that identifies thise filter when it is used in the instance.
+         * The code that identifies this filter when it is used in the instance.
          */
         @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Code that identifies the filter", formalDefinition="The code that identifies thise filter when it is used in the instance." )
+        @Description(shortDefinition="Code that identifies the filter", formalDefinition="The code that identifies this filter when it is used in the instance." )
         protected CodeType code;
 
         /**
@@ -608,7 +608,7 @@ public class CodeSystem extends BaseConformance {
       }
 
         /**
-         * @return {@link #code} (The code that identifies thise filter when it is used in the instance.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @return {@link #code} (The code that identifies this filter when it is used in the instance.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public CodeType getCodeElement() { 
           if (this.code == null)
@@ -628,7 +628,7 @@ public class CodeSystem extends BaseConformance {
         }
 
         /**
-         * @param value {@link #code} (The code that identifies thise filter when it is used in the instance.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @param value {@link #code} (The code that identifies this filter when it is used in the instance.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public CodeSystemFilterComponent setCodeElement(CodeType value) { 
           this.code = value;
@@ -636,14 +636,14 @@ public class CodeSystem extends BaseConformance {
         }
 
         /**
-         * @return The code that identifies thise filter when it is used in the instance.
+         * @return The code that identifies this filter when it is used in the instance.
          */
         public String getCode() { 
           return this.code == null ? null : this.code.getValue();
         }
 
         /**
-         * @param value The code that identifies thise filter when it is used in the instance.
+         * @param value The code that identifies this filter when it is used in the instance.
          */
         public CodeSystemFilterComponent setCode(String value) { 
             if (this.code == null)
@@ -809,7 +809,7 @@ public class CodeSystem extends BaseConformance {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "The code that identifies thise filter when it is used in the instance.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("code", "code", "The code that identifies this filter when it is used in the instance.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("description", "string", "A description of how or why the filter is used.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("operator", "code", "A list of operators that can be used with the filter.", 0, java.lang.Integer.MAX_VALUE, operator));
           childrenList.add(new Property("value", "string", "A description of what the value for the filter should be.", 0, java.lang.Integer.MAX_VALUE, value));
@@ -940,7 +940,7 @@ public class CodeSystem extends BaseConformance {
   }
 
     @Block()
-    public static class CodeSystemPropertyComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PropertyComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.
          */
@@ -975,14 +975,14 @@ public class CodeSystem extends BaseConformance {
     /**
      * Constructor
      */
-      public CodeSystemPropertyComponent() {
+      public PropertyComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public CodeSystemPropertyComponent(CodeType code, Enumeration<PropertyType> type) {
+      public PropertyComponent(CodeType code, Enumeration<PropertyType> type) {
         super();
         this.code = code;
         this.type = type;
@@ -994,7 +994,7 @@ public class CodeSystem extends BaseConformance {
         public CodeType getCodeElement() { 
           if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemPropertyComponent.code");
+              throw new Error("Attempt to auto-create PropertyComponent.code");
             else if (Configuration.doAutoCreate())
               this.code = new CodeType(); // bb
           return this.code;
@@ -1011,7 +1011,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value {@link #code} (A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
-        public CodeSystemPropertyComponent setCodeElement(CodeType value) { 
+        public PropertyComponent setCodeElement(CodeType value) { 
           this.code = value;
           return this;
         }
@@ -1026,7 +1026,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.
          */
-        public CodeSystemPropertyComponent setCode(String value) { 
+        public PropertyComponent setCode(String value) { 
             if (this.code == null)
               this.code = new CodeType();
             this.code.setValue(value);
@@ -1039,7 +1039,7 @@ public class CodeSystem extends BaseConformance {
         public UriType getUriElement() { 
           if (this.uri == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemPropertyComponent.uri");
+              throw new Error("Attempt to auto-create PropertyComponent.uri");
             else if (Configuration.doAutoCreate())
               this.uri = new UriType(); // bb
           return this.uri;
@@ -1056,7 +1056,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value {@link #uri} (Reference to the formal meaning of the property. One possible source of meaning is the [Concept Properties](codesystem-concept-properties.html) code system.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
          */
-        public CodeSystemPropertyComponent setUriElement(UriType value) { 
+        public PropertyComponent setUriElement(UriType value) { 
           this.uri = value;
           return this;
         }
@@ -1071,7 +1071,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value Reference to the formal meaning of the property. One possible source of meaning is the [Concept Properties](codesystem-concept-properties.html) code system.
          */
-        public CodeSystemPropertyComponent setUri(String value) { 
+        public PropertyComponent setUri(String value) { 
           if (Utilities.noString(value))
             this.uri = null;
           else {
@@ -1088,7 +1088,7 @@ public class CodeSystem extends BaseConformance {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemPropertyComponent.description");
+              throw new Error("Attempt to auto-create PropertyComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -1105,7 +1105,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value {@link #description} (A description of the property- why it is defined, and how it's value might be used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public CodeSystemPropertyComponent setDescriptionElement(StringType value) { 
+        public PropertyComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -1120,7 +1120,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value A description of the property- why it is defined, and how it's value might be used.
          */
-        public CodeSystemPropertyComponent setDescription(String value) { 
+        public PropertyComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -1137,7 +1137,7 @@ public class CodeSystem extends BaseConformance {
         public Enumeration<PropertyType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemPropertyComponent.type");
+              throw new Error("Attempt to auto-create PropertyComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new Enumeration<PropertyType>(new PropertyTypeEnumFactory()); // bb
           return this.type;
@@ -1154,7 +1154,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value {@link #type} (The type of the property value. Properties of type "code" contain a code defined by the code system (e.g. a reference to anotherr defined concept).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public CodeSystemPropertyComponent setTypeElement(Enumeration<PropertyType> value) { 
+        public PropertyComponent setTypeElement(Enumeration<PropertyType> value) { 
           this.type = value;
           return this;
         }
@@ -1169,7 +1169,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value The type of the property value. Properties of type "code" contain a code defined by the code system (e.g. a reference to anotherr defined concept).
          */
-        public CodeSystemPropertyComponent setType(PropertyType value) { 
+        public PropertyComponent setType(PropertyType value) { 
             if (this.type == null)
               this.type = new Enumeration<PropertyType>(new PropertyTypeEnumFactory());
             this.type.setValue(value);
@@ -1260,8 +1260,8 @@ public class CodeSystem extends BaseConformance {
           return super.addChild(name);
       }
 
-      public CodeSystemPropertyComponent copy() {
-        CodeSystemPropertyComponent dst = new CodeSystemPropertyComponent();
+      public PropertyComponent copy() {
+        PropertyComponent dst = new PropertyComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.uri = uri == null ? null : uri.copy();
@@ -1274,9 +1274,9 @@ public class CodeSystem extends BaseConformance {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof CodeSystemPropertyComponent))
+        if (!(other instanceof PropertyComponent))
           return false;
-        CodeSystemPropertyComponent o = (CodeSystemPropertyComponent) other;
+        PropertyComponent o = (PropertyComponent) other;
         return compareDeep(code, o.code, true) && compareDeep(uri, o.uri, true) && compareDeep(description, o.description, true)
            && compareDeep(type, o.type, true);
       }
@@ -1285,9 +1285,9 @@ public class CodeSystem extends BaseConformance {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof CodeSystemPropertyComponent))
+        if (!(other instanceof PropertyComponent))
           return false;
-        CodeSystemPropertyComponent o = (CodeSystemPropertyComponent) other;
+        PropertyComponent o = (PropertyComponent) other;
         return compareValues(code, o.code, true) && compareValues(uri, o.uri, true) && compareValues(description, o.description, true)
            && compareValues(type, o.type, true);
       }
@@ -1339,7 +1339,7 @@ public class CodeSystem extends BaseConformance {
          */
         @Child(name = "property", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Property value for the concept", formalDefinition="A property value for this concept." )
-        protected List<ConceptDefinitionPropertyComponent> property;
+        protected List<ConceptPropertyComponent> property;
 
         /**
          * Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts.
@@ -1348,7 +1348,7 @@ public class CodeSystem extends BaseConformance {
         @Description(shortDefinition="Child Concepts (is-a/contains/categorizes)", formalDefinition="Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts." )
         protected List<ConceptDefinitionComponent> concept;
 
-        private static final long serialVersionUID = 1495076297L;
+        private static final long serialVersionUID = 878320988L;
 
     /**
      * Constructor
@@ -1564,16 +1564,16 @@ public class CodeSystem extends BaseConformance {
         /**
          * @return {@link #property} (A property value for this concept.)
          */
-        public List<ConceptDefinitionPropertyComponent> getProperty() { 
+        public List<ConceptPropertyComponent> getProperty() { 
           if (this.property == null)
-            this.property = new ArrayList<ConceptDefinitionPropertyComponent>();
+            this.property = new ArrayList<ConceptPropertyComponent>();
           return this.property;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ConceptDefinitionComponent setProperty(List<ConceptDefinitionPropertyComponent> theProperty) { 
+        public ConceptDefinitionComponent setProperty(List<ConceptPropertyComponent> theProperty) { 
           this.property = theProperty;
           return this;
         }
@@ -1581,25 +1581,25 @@ public class CodeSystem extends BaseConformance {
         public boolean hasProperty() { 
           if (this.property == null)
             return false;
-          for (ConceptDefinitionPropertyComponent item : this.property)
+          for (ConceptPropertyComponent item : this.property)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public ConceptDefinitionPropertyComponent addProperty() { //3
-          ConceptDefinitionPropertyComponent t = new ConceptDefinitionPropertyComponent();
+        public ConceptPropertyComponent addProperty() { //3
+          ConceptPropertyComponent t = new ConceptPropertyComponent();
           if (this.property == null)
-            this.property = new ArrayList<ConceptDefinitionPropertyComponent>();
+            this.property = new ArrayList<ConceptPropertyComponent>();
           this.property.add(t);
           return t;
         }
 
-        public ConceptDefinitionComponent addProperty(ConceptDefinitionPropertyComponent t) { //3
+        public ConceptDefinitionComponent addProperty(ConceptPropertyComponent t) { //3
           if (t == null)
             return this;
           if (this.property == null)
-            this.property = new ArrayList<ConceptDefinitionPropertyComponent>();
+            this.property = new ArrayList<ConceptPropertyComponent>();
           this.property.add(t);
           return this;
         }
@@ -1607,7 +1607,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @return The first repetition of repeating field {@link #property}, creating it if it does not already exist
          */
-        public ConceptDefinitionPropertyComponent getPropertyFirstRep() { 
+        public ConceptPropertyComponent getPropertyFirstRep() { 
           if (getProperty().isEmpty()) {
             addProperty();
           }
@@ -1684,7 +1684,7 @@ public class CodeSystem extends BaseConformance {
         case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // StringType
         case -900931593: /*designation*/ return this.designation == null ? new Base[0] : this.designation.toArray(new Base[this.designation.size()]); // ConceptDefinitionDesignationComponent
-        case -993141291: /*property*/ return this.property == null ? new Base[0] : this.property.toArray(new Base[this.property.size()]); // ConceptDefinitionPropertyComponent
+        case -993141291: /*property*/ return this.property == null ? new Base[0] : this.property.toArray(new Base[this.property.size()]); // ConceptPropertyComponent
         case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // ConceptDefinitionComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1707,7 +1707,7 @@ public class CodeSystem extends BaseConformance {
           this.getDesignation().add((ConceptDefinitionDesignationComponent) value); // ConceptDefinitionDesignationComponent
           break;
         case -993141291: // property
-          this.getProperty().add((ConceptDefinitionPropertyComponent) value); // ConceptDefinitionPropertyComponent
+          this.getProperty().add((ConceptPropertyComponent) value); // ConceptPropertyComponent
           break;
         case 951024232: // concept
           this.getConcept().add((ConceptDefinitionComponent) value); // ConceptDefinitionComponent
@@ -1728,7 +1728,7 @@ public class CodeSystem extends BaseConformance {
         else if (name.equals("designation"))
           this.getDesignation().add((ConceptDefinitionDesignationComponent) value);
         else if (name.equals("property"))
-          this.getProperty().add((ConceptDefinitionPropertyComponent) value);
+          this.getProperty().add((ConceptPropertyComponent) value);
         else if (name.equals("concept"))
           this.getConcept().add((ConceptDefinitionComponent) value);
         else
@@ -1742,7 +1742,7 @@ public class CodeSystem extends BaseConformance {
         case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
         case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // StringType
         case -900931593:  return addDesignation(); // ConceptDefinitionDesignationComponent
-        case -993141291:  return addProperty(); // ConceptDefinitionPropertyComponent
+        case -993141291:  return addProperty(); // ConceptPropertyComponent
         case 951024232:  return addConcept(); // ConceptDefinitionComponent
         default: return super.makeProperty(hash, name);
         }
@@ -1785,8 +1785,8 @@ public class CodeSystem extends BaseConformance {
             dst.designation.add(i.copy());
         };
         if (property != null) {
-          dst.property = new ArrayList<ConceptDefinitionPropertyComponent>();
-          for (ConceptDefinitionPropertyComponent i : property)
+          dst.property = new ArrayList<ConceptPropertyComponent>();
+          for (ConceptPropertyComponent i : property)
             dst.property.add(i.copy());
         };
         if (concept != null) {
@@ -2107,7 +2107,7 @@ public class CodeSystem extends BaseConformance {
   }
 
     @Block()
-    public static class ConceptDefinitionPropertyComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ConceptPropertyComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code that is a reference to CodeSystem.property.code.
          */
@@ -2127,14 +2127,14 @@ public class CodeSystem extends BaseConformance {
     /**
      * Constructor
      */
-      public ConceptDefinitionPropertyComponent() {
+      public ConceptPropertyComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public ConceptDefinitionPropertyComponent(CodeType code, Type value) {
+      public ConceptPropertyComponent(CodeType code, Type value) {
         super();
         this.code = code;
         this.value = value;
@@ -2146,7 +2146,7 @@ public class CodeSystem extends BaseConformance {
         public CodeType getCodeElement() { 
           if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptDefinitionPropertyComponent.code");
+              throw new Error("Attempt to auto-create ConceptPropertyComponent.code");
             else if (Configuration.doAutoCreate())
               this.code = new CodeType(); // bb
           return this.code;
@@ -2163,7 +2163,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value {@link #code} (A code that is a reference to CodeSystem.property.code.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
-        public ConceptDefinitionPropertyComponent setCodeElement(CodeType value) { 
+        public ConceptPropertyComponent setCodeElement(CodeType value) { 
           this.code = value;
           return this;
         }
@@ -2178,7 +2178,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value A code that is a reference to CodeSystem.property.code.
          */
-        public ConceptDefinitionPropertyComponent setCode(String value) { 
+        public ConceptPropertyComponent setCode(String value) { 
             if (this.code == null)
               this.code = new CodeType();
             this.code.setValue(value);
@@ -2277,7 +2277,7 @@ public class CodeSystem extends BaseConformance {
         /**
          * @param value {@link #value} (The value of this property.)
          */
-        public ConceptDefinitionPropertyComponent setValue(Type value) { 
+        public ConceptPropertyComponent setValue(Type value) { 
           this.value = value;
           return this;
         }
@@ -2365,8 +2365,8 @@ public class CodeSystem extends BaseConformance {
           return super.addChild(name);
       }
 
-      public ConceptDefinitionPropertyComponent copy() {
-        ConceptDefinitionPropertyComponent dst = new ConceptDefinitionPropertyComponent();
+      public ConceptPropertyComponent copy() {
+        ConceptPropertyComponent dst = new ConceptPropertyComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.value = value == null ? null : value.copy();
@@ -2377,9 +2377,9 @@ public class CodeSystem extends BaseConformance {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof ConceptDefinitionPropertyComponent))
+        if (!(other instanceof ConceptPropertyComponent))
           return false;
-        ConceptDefinitionPropertyComponent o = (ConceptDefinitionPropertyComponent) other;
+        ConceptPropertyComponent o = (ConceptPropertyComponent) other;
         return compareDeep(code, o.code, true) && compareDeep(value, o.value, true);
       }
 
@@ -2387,9 +2387,9 @@ public class CodeSystem extends BaseConformance {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof ConceptDefinitionPropertyComponent))
+        if (!(other instanceof ConceptPropertyComponent))
           return false;
-        ConceptDefinitionPropertyComponent o = (ConceptDefinitionPropertyComponent) other;
+        ConceptPropertyComponent o = (ConceptPropertyComponent) other;
         return compareValues(code, o.code, true);
       }
 
@@ -2435,16 +2435,16 @@ public class CodeSystem extends BaseConformance {
     /**
      * A free text natural language description of the use of the code system - reason for definition, "the semantic space" to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system.
      */
-    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human language description of the code system", formalDefinition="A free text natural language description of the use of the code system - reason for definition, \"the semantic space\" to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system." )
-    protected StringType description;
+    protected MarkdownType description;
 
     /**
      * Explains why this code system is needed and why it has been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why needed", formalDefinition="Explains why this code system is needed and why it has been constrained as it has." )
-    protected StringType requirements;
+    protected MarkdownType requirements;
 
     /**
      * A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.
@@ -2508,7 +2508,7 @@ public class CodeSystem extends BaseConformance {
      */
     @Child(name = "property", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Additional information supplied about each concept", formalDefinition="A property defines an additional slot through which additional information can be provided about a concept." )
-    protected List<CodeSystemPropertyComponent> property;
+    protected List<PropertyComponent> property;
 
     /**
      * Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.
@@ -2517,7 +2517,7 @@ public class CodeSystem extends BaseConformance {
     @Description(shortDefinition="Concepts in the code system", formalDefinition="Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are." )
     protected List<ConceptDefinitionComponent> concept;
 
-    private static final long serialVersionUID = 592864288L;
+    private static final long serialVersionUID = -611281540L;
 
   /**
    * Constructor
@@ -2775,12 +2775,12 @@ public class CodeSystem extends BaseConformance {
     /**
      * @return {@link #description} (A free text natural language description of the use of the code system - reason for definition, "the semantic space" to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create CodeSystem.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -2795,7 +2795,7 @@ public class CodeSystem extends BaseConformance {
     /**
      * @param value {@link #description} (A free text natural language description of the use of the code system - reason for definition, "the semantic space" to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public CodeSystem setDescriptionElement(StringType value) { 
+    public CodeSystem setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -2811,11 +2811,11 @@ public class CodeSystem extends BaseConformance {
      * @param value A free text natural language description of the use of the code system - reason for definition, "the semantic space" to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system.
      */
     public CodeSystem setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
@@ -2824,12 +2824,12 @@ public class CodeSystem extends BaseConformance {
     /**
      * @return {@link #requirements} (Explains why this code system is needed and why it has been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public StringType getRequirementsElement() { 
+    public MarkdownType getRequirementsElement() { 
       if (this.requirements == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create CodeSystem.requirements");
         else if (Configuration.doAutoCreate())
-          this.requirements = new StringType(); // bb
+          this.requirements = new MarkdownType(); // bb
       return this.requirements;
     }
 
@@ -2844,7 +2844,7 @@ public class CodeSystem extends BaseConformance {
     /**
      * @param value {@link #requirements} (Explains why this code system is needed and why it has been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public CodeSystem setRequirementsElement(StringType value) { 
+    public CodeSystem setRequirementsElement(MarkdownType value) { 
       this.requirements = value;
       return this;
     }
@@ -2860,11 +2860,11 @@ public class CodeSystem extends BaseConformance {
      * @param value Explains why this code system is needed and why it has been constrained as it has.
      */
     public CodeSystem setRequirements(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.requirements = null;
       else {
         if (this.requirements == null)
-          this.requirements = new StringType();
+          this.requirements = new MarkdownType();
         this.requirements.setValue(value);
       }
       return this;
@@ -3249,16 +3249,16 @@ public class CodeSystem extends BaseConformance {
     /**
      * @return {@link #property} (A property defines an additional slot through which additional information can be provided about a concept.)
      */
-    public List<CodeSystemPropertyComponent> getProperty() { 
+    public List<PropertyComponent> getProperty() { 
       if (this.property == null)
-        this.property = new ArrayList<CodeSystemPropertyComponent>();
+        this.property = new ArrayList<PropertyComponent>();
       return this.property;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CodeSystem setProperty(List<CodeSystemPropertyComponent> theProperty) { 
+    public CodeSystem setProperty(List<PropertyComponent> theProperty) { 
       this.property = theProperty;
       return this;
     }
@@ -3266,25 +3266,25 @@ public class CodeSystem extends BaseConformance {
     public boolean hasProperty() { 
       if (this.property == null)
         return false;
-      for (CodeSystemPropertyComponent item : this.property)
+      for (PropertyComponent item : this.property)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeSystemPropertyComponent addProperty() { //3
-      CodeSystemPropertyComponent t = new CodeSystemPropertyComponent();
+    public PropertyComponent addProperty() { //3
+      PropertyComponent t = new PropertyComponent();
       if (this.property == null)
-        this.property = new ArrayList<CodeSystemPropertyComponent>();
+        this.property = new ArrayList<PropertyComponent>();
       this.property.add(t);
       return t;
     }
 
-    public CodeSystem addProperty(CodeSystemPropertyComponent t) { //3
+    public CodeSystem addProperty(PropertyComponent t) { //3
       if (t == null)
         return this;
       if (this.property == null)
-        this.property = new ArrayList<CodeSystemPropertyComponent>();
+        this.property = new ArrayList<PropertyComponent>();
       this.property.add(t);
       return this;
     }
@@ -3292,7 +3292,7 @@ public class CodeSystem extends BaseConformance {
     /**
      * @return The first repetition of repeating field {@link #property}, creating it if it does not already exist
      */
-    public CodeSystemPropertyComponent getPropertyFirstRep() { 
+    public PropertyComponent getPropertyFirstRep() { 
       if (getProperty().isEmpty()) {
         addProperty();
       }
@@ -3358,8 +3358,8 @@ public class CodeSystem extends BaseConformance {
         childrenList.add(new Property("experimental", "boolean", "This CodeSystem was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the code system.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the use of the code system - reason for definition, \"the semantic space\" to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("requirements", "string", "Explains why this code system is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the use of the code system - reason for definition, \"the semantic space\" to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("requirements", "markdown", "Explains why this code system is needed and why it has been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, java.lang.Integer.MAX_VALUE, caseSensitive));
         childrenList.add(new Property("valueSet", "uri", "Canonical URL of value set that contains the entire code system.", 0, java.lang.Integer.MAX_VALUE, valueSet));
@@ -3384,9 +3384,9 @@ public class CodeSystem extends BaseConformance {
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // CodeSystemContactComponent
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
         case -35616442: /*caseSensitive*/ return this.caseSensitive == null ? new Base[0] : new Base[] {this.caseSensitive}; // BooleanType
         case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : new Base[] {this.valueSet}; // UriType
@@ -3395,7 +3395,7 @@ public class CodeSystem extends BaseConformance {
         case 951530617: /*content*/ return this.content == null ? new Base[0] : new Base[] {this.content}; // Enumeration<CodeSystemContentMode>
         case 94851343: /*count*/ return this.count == null ? new Base[0] : new Base[] {this.count}; // UnsignedIntType
         case -1274492040: /*filter*/ return this.filter == null ? new Base[0] : this.filter.toArray(new Base[this.filter.size()]); // CodeSystemFilterComponent
-        case -993141291: /*property*/ return this.property == null ? new Base[0] : this.property.toArray(new Base[this.property.size()]); // CodeSystemPropertyComponent
+        case -993141291: /*property*/ return this.property == null ? new Base[0] : this.property.toArray(new Base[this.property.size()]); // PropertyComponent
         case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // ConceptDefinitionComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -3433,13 +3433,13 @@ public class CodeSystem extends BaseConformance {
           this.date = castToDateTime(value); // DateTimeType
           break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
           this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case -1619874672: // requirements
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
           break;
         case 1522889671: // copyright
           this.copyright = castToString(value); // StringType
@@ -3466,7 +3466,7 @@ public class CodeSystem extends BaseConformance {
           this.getFilter().add((CodeSystemFilterComponent) value); // CodeSystemFilterComponent
           break;
         case -993141291: // property
-          this.getProperty().add((CodeSystemPropertyComponent) value); // CodeSystemPropertyComponent
+          this.getProperty().add((PropertyComponent) value); // PropertyComponent
           break;
         case 951024232: // concept
           this.getConcept().add((ConceptDefinitionComponent) value); // ConceptDefinitionComponent
@@ -3497,11 +3497,11 @@ public class CodeSystem extends BaseConformance {
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
           this.getUseContext().add(castToCodeableConcept(value));
         else if (name.equals("requirements"))
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
         else if (name.equals("copyright"))
           this.copyright = castToString(value); // StringType
         else if (name.equals("caseSensitive"))
@@ -3519,7 +3519,7 @@ public class CodeSystem extends BaseConformance {
         else if (name.equals("filter"))
           this.getFilter().add((CodeSystemFilterComponent) value);
         else if (name.equals("property"))
-          this.getProperty().add((CodeSystemPropertyComponent) value);
+          this.getProperty().add((PropertyComponent) value);
         else if (name.equals("concept"))
           this.getConcept().add((ConceptDefinitionComponent) value);
         else
@@ -3538,9 +3538,9 @@ public class CodeSystem extends BaseConformance {
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // CodeSystemContactComponent
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
         case -669707736:  return addUseContext(); // CodeableConcept
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
         case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
         case -35616442: throw new FHIRException("Cannot make property caseSensitive as it is not a complex type"); // BooleanType
         case -1410174671: throw new FHIRException("Cannot make property valueSet as it is not a complex type"); // UriType
@@ -3549,7 +3549,7 @@ public class CodeSystem extends BaseConformance {
         case 951530617: throw new FHIRException("Cannot make property content as it is not a complex type"); // Enumeration<CodeSystemContentMode>
         case 94851343: throw new FHIRException("Cannot make property count as it is not a complex type"); // UnsignedIntType
         case -1274492040:  return addFilter(); // CodeSystemFilterComponent
-        case -993141291:  return addProperty(); // CodeSystemPropertyComponent
+        case -993141291:  return addProperty(); // PropertyComponent
         case 951024232:  return addConcept(); // ConceptDefinitionComponent
         default: return super.makeProperty(hash, name);
         }
@@ -3670,8 +3670,8 @@ public class CodeSystem extends BaseConformance {
             dst.filter.add(i.copy());
         };
         if (property != null) {
-          dst.property = new ArrayList<CodeSystemPropertyComponent>();
-          for (CodeSystemPropertyComponent i : property)
+          dst.property = new ArrayList<PropertyComponent>();
+          for (PropertyComponent i : property)
             dst.property.add(i.copy());
         };
         if (concept != null) {

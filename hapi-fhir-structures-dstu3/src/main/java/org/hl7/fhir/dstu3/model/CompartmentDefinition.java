@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -760,16 +760,16 @@ public class CompartmentDefinition extends BaseConformance {
     /**
      * A free text natural language description of the CompartmentDefinition and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {MarkdownType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Natural language description of the CompartmentDefinition", formalDefinition="A free text natural language description of the CompartmentDefinition and its use." )
-    protected StringType description;
+    protected MarkdownType description;
 
     /**
      * The Scope and Usage that this compartment definition was created to meet.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why this compartment definition is defined", formalDefinition="The Scope and Usage that this compartment definition was created to meet." )
-    protected StringType requirements;
+    protected MarkdownType requirements;
 
     /**
      * Which compartment this definition describes.
@@ -793,7 +793,7 @@ public class CompartmentDefinition extends BaseConformance {
     @Description(shortDefinition="How resource is related to the compartment", formalDefinition="Information about how a resource it related to the compartment." )
     protected List<CompartmentDefinitionResourceComponent> resource;
 
-    private static final long serialVersionUID = -735353959L;
+    private static final long serialVersionUID = -1020391L;
 
   /**
    * Constructor
@@ -1011,12 +1011,12 @@ public class CompartmentDefinition extends BaseConformance {
     /**
      * @return {@link #description} (A free text natural language description of the CompartmentDefinition and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create CompartmentDefinition.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -1031,7 +1031,7 @@ public class CompartmentDefinition extends BaseConformance {
     /**
      * @param value {@link #description} (A free text natural language description of the CompartmentDefinition and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public CompartmentDefinition setDescriptionElement(StringType value) { 
+    public CompartmentDefinition setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -1047,11 +1047,11 @@ public class CompartmentDefinition extends BaseConformance {
      * @param value A free text natural language description of the CompartmentDefinition and its use.
      */
     public CompartmentDefinition setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
@@ -1060,12 +1060,12 @@ public class CompartmentDefinition extends BaseConformance {
     /**
      * @return {@link #requirements} (The Scope and Usage that this compartment definition was created to meet.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public StringType getRequirementsElement() { 
+    public MarkdownType getRequirementsElement() { 
       if (this.requirements == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create CompartmentDefinition.requirements");
         else if (Configuration.doAutoCreate())
-          this.requirements = new StringType(); // bb
+          this.requirements = new MarkdownType(); // bb
       return this.requirements;
     }
 
@@ -1080,7 +1080,7 @@ public class CompartmentDefinition extends BaseConformance {
     /**
      * @param value {@link #requirements} (The Scope and Usage that this compartment definition was created to meet.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
      */
-    public CompartmentDefinition setRequirementsElement(StringType value) { 
+    public CompartmentDefinition setRequirementsElement(MarkdownType value) { 
       this.requirements = value;
       return this;
     }
@@ -1096,11 +1096,11 @@ public class CompartmentDefinition extends BaseConformance {
      * @param value The Scope and Usage that this compartment definition was created to meet.
      */
     public CompartmentDefinition setRequirements(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.requirements = null;
       else {
         if (this.requirements == null)
-          this.requirements = new StringType();
+          this.requirements = new MarkdownType();
         this.requirements.setValue(value);
       }
       return this;
@@ -1254,8 +1254,8 @@ public class CompartmentDefinition extends BaseConformance {
         childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this compartment definition definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the compartment definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the CompartmentDefinition and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("requirements", "string", "The Scope and Usage that this compartment definition was created to meet.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the CompartmentDefinition and its use.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("requirements", "markdown", "The Scope and Usage that this compartment definition was created to meet.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("code", "code", "Which compartment this definition describes.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("search", "boolean", "Whether the search syntax is supported.", 0, java.lang.Integer.MAX_VALUE, search));
         childrenList.add(new Property("resource", "", "Information about how a resource it related to the compartment.", 0, java.lang.Integer.MAX_VALUE, resource));
@@ -1271,8 +1271,8 @@ public class CompartmentDefinition extends BaseConformance {
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // CompartmentDefinitionContactComponent
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // StringType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
+        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Enumeration<CompartmentType>
         case -906336856: /*search*/ return this.search == null ? new Base[0] : new Base[] {this.search}; // BooleanType
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : this.resource.toArray(new Base[this.resource.size()]); // CompartmentDefinitionResourceComponent
@@ -1306,10 +1306,10 @@ public class CompartmentDefinition extends BaseConformance {
           this.date = castToDateTime(value); // DateTimeType
           break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -1619874672: // requirements
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
           break;
         case 3059181: // code
           this.code = new CompartmentTypeEnumFactory().fromType(value); // Enumeration<CompartmentType>
@@ -1342,9 +1342,9 @@ public class CompartmentDefinition extends BaseConformance {
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("requirements"))
-          this.requirements = castToString(value); // StringType
+          this.requirements = castToMarkdown(value); // MarkdownType
         else if (name.equals("code"))
           this.code = new CompartmentTypeEnumFactory().fromType(value); // Enumeration<CompartmentType>
         else if (name.equals("search"))
@@ -1365,8 +1365,8 @@ public class CompartmentDefinition extends BaseConformance {
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // CompartmentDefinitionContactComponent
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // StringType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
+        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
         case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // Enumeration<CompartmentType>
         case -906336856: throw new FHIRException("Cannot make property search as it is not a complex type"); // BooleanType
         case -341064690:  return addResource(); // CompartmentDefinitionResourceComponent

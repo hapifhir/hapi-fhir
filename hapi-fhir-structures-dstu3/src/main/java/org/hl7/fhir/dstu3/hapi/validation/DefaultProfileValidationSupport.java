@@ -223,26 +223,44 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
 		if (cs != null) {
-			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept());
+			boolean caseSensitive = true;
+			if (cs.hasCaseSensitive()) {
+				caseSensitive = cs.getCaseSensitive();
+			}
+			
+			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
 			
 			if (retVal != null) {
 				return retVal;
 			}
 		}
 
-		return new CodeValidationResult(IssueSeverity.INFORMATION, "Unknown code: " + theCodeSystem + " / " + theCode);
+		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
 
-	private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList) {
+	private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
+		String code = theCode;
+		if (theCaseSensitive == false) {
+			code = code.toUpperCase();
+		}
+		
+		return testIfConceptIsInListInner(conceptList, theCaseSensitive, code);
+	}
+
+	private CodeValidationResult testIfConceptIsInListInner(List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
 		CodeValidationResult retVal = null;
 		for (ConceptDefinitionComponent next : conceptList) {
-			if (next.getCode().equals(theCode)) {
+			String nextCandidate = next.getCode();
+			if (theCaseSensitive == false) {
+				nextCandidate = nextCandidate.toUpperCase();
+			}
+			if (nextCandidate.equals(code)) {
 				retVal = new CodeValidationResult(next);
 				break;
 			}
 
 			// recurse
-			retVal = testIfConceptIsInList(theCode, next.getConcept());
+			retVal = testIfConceptIsInList(code, next.getConcept(), theCaseSensitive);
 			if (retVal != null) {
 				break;
 			}

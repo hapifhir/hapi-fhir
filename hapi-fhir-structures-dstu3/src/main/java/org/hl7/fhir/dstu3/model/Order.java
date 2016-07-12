@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -276,7 +276,7 @@ public class Order extends DomainResource {
     /**
      * Text - why the order was made.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Text - why the order was made", formalDefinition="Text - why the order was made." )
     protected Type reason;
 
@@ -290,7 +290,7 @@ public class Order extends DomainResource {
     /**
      * What action is being ordered.
      */
-    @Child(name = "detail", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "detail", type = {Reference.class}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What action is being ordered", formalDefinition="What action is being ordered." )
     protected List<Reference> detail;
     /**

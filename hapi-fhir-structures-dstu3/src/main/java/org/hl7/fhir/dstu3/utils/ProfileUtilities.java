@@ -316,8 +316,13 @@ public class ProfileUtilities {
     int baseCursor = 0;
     int diffCursor = 0; // we need a diff cursor because we can only look ahead, in the bound scoped by longer paths
 
+    if (!derived.getDifferential().getElementFirstRep().getType().isEmpty())
+      derived.getDifferential().getElementFirstRep().getType().clear();
+
     // we actually delegate the work to a subroutine so we can re-enter it with a different cursors
     processPaths(derived.getSnapshot(), base.getSnapshot(), derived.getDifferential(), baseCursor, diffCursor, base.getSnapshot().getElement().size()-1, derived.getDifferential().getElement().size()-1, url, derived.getId(), null, false, base.getUrl(), null, false);
+    if (!derived.getSnapshot().getElementFirstRep().getType().isEmpty())
+      derived.getSnapshot().getElementFirstRep().getType().clear();
   }
 
   /**
@@ -352,7 +357,7 @@ public class ProfileUtilities {
         } else if (diffMatches.size() == 1 && (slicingDone || (!diffMatches.get(0).hasSlicing() && !(isExtension(diffMatches.get(0)) && !diffMatches.get(0).hasName())))) {// one matching element in the differential
           ElementDefinition template = null;
           if (diffMatches.get(0).hasType() && diffMatches.get(0).getType().size() == 1 && diffMatches.get(0).getType().get(0).hasProfile() && !diffMatches.get(0).getType().get(0).getCode().equals("Reference")) {
-            String p = diffMatches.get(0).getType().get(0).getProfile().get(0).asStringValue();
+            String p = diffMatches.get(0).getType().get(0).getProfile();
             StructureDefinition sd = context.fetchResource(StructureDefinition.class, p);
             if (sd != null) {
               if (!sd.hasSnapshot()) {
@@ -640,7 +645,7 @@ public class ProfileUtilities {
     
     ElementDefinition d = diffMatches.get(i);
     String s = d.getPath().contains(".") ? d.getPath().substring(d.getPath().lastIndexOf(".")+1) : d.getPath();
-    return "."+s + (d.hasType() && d.getType().get(0).hasProfile() ? "["+d.getType().get(0).getProfile().get(0).asStringValue()+"]" : "");
+    return "."+s + (d.hasType() && d.getType().get(0).hasProfile() ? "["+d.getType().get(0).getProfile()+"]" : "");
   }
 
 
@@ -708,7 +713,7 @@ public class ProfileUtilities {
   private StructureDefinition getProfileForDataType(TypeRefComponent type)  {
     StructureDefinition sd = null;
     if (type.hasProfile())  
-      sd = context.fetchResource(StructureDefinition.class, type.getProfile().get(0).asStringValue()); 
+      sd = context.fetchResource(StructureDefinition.class, type.getProfile()); 
     if (sd == null) 
       sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+type.getCode());
     if (sd == null)
@@ -754,9 +759,9 @@ public class ProfileUtilities {
       if (defn.hasBinding() && defn.getBinding().getValueSet() instanceof Reference && ((Reference)defn.getBinding().getValueSet()).getReference().startsWith("#"))
         ((Reference)defn.getBinding().getValueSet()).setReference(url+((Reference)defn.getBinding().getValueSet()).getReference());
       for (TypeRefComponent t : defn.getType()) {
-        for (UriType tp : t.getProfile()) {
-        	if (tp.getValue().startsWith("#"))
-            tp.setValue(url+t.getProfile());
+        if (t.hasProfile()) {
+        	if (t.getProfile().startsWith("#"))
+            t.setProfile(url+t.getProfile());
         }
       }
     }
@@ -1303,27 +1308,27 @@ public class ProfileUtilities {
           c.getPieces().add(gen.new Piece(corePath+"references.html", "Reference", null));
           c.getPieces().add(gen.new Piece(null, "(", null));
         }
-        if (t.hasProfile() && t.getProfile().get(0).getValue().startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-          StructureDefinition sd = context.fetchResource(StructureDefinition.class, t.getProfile().get(0).getValue());
+        if (t.hasProfile() && t.getProfile().startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+          StructureDefinition sd = context.fetchResource(StructureDefinition.class, t.getProfile());
           if (sd != null) {
             String disp = sd.hasDisplay() ? sd.getDisplay() : sd.getName();
             c.addPiece(checkForNoChange(t, gen.new Piece(checkPrepend(corePath, sd.getUserString("path")), disp, null)));
           } else {
-            String rn = t.getProfile().get(0).getValue().substring(40);
+            String rn = t.getProfile().substring(40);
             c.addPiece(checkForNoChange(t, gen.new Piece(pkp.getLinkFor(corePath, rn), rn, null)));
           }
-        } else if (t.getProfile().size() == 0) {
+        } else if (t.hasProfile() && Utilities.isAbsoluteUrl(t.getProfile())) {
           c.addPiece(checkForNoChange(t, gen.new Piece(null, t.getCode(), null)));
-        } else if (t.getProfile().get(0).getValue().startsWith("#"))
-          c.addPiece(checkForNoChange(t, gen.new Piece(corePath+profileBaseFileName+"."+t.getProfile().get(0).getValue().substring(1).toLowerCase()+".html", t.getProfile().get(0).getValue(), null)));
+        } else if (t.hasProfile() && t.getProfile().startsWith("#"))
+          c.addPiece(checkForNoChange(t, gen.new Piece(corePath+profileBaseFileName+"."+t.getProfile().substring(1).toLowerCase()+".html", t.getProfile(), null)));
         else
-          c.addPiece(checkForNoChange(t, gen.new Piece(corePath+t.getProfile().get(0).getValue(), t.getProfile().get(0).getValue(), null)));
+          c.addPiece(checkForNoChange(t, gen.new Piece(corePath+t.getProfile(), t.getProfile(), null)));
         if (ADD_REFERENCE_TO_TABLE && !allReference) {
           c.getPieces().add(gen.new Piece(null, ")", null));
         }
       } else if (t.hasProfile()) { // a profiled type
         String ref;
-        ref = pkp.getLinkForProfile(profile, t.getProfile().get(0).getValue());
+        ref = pkp.getLinkForProfile(profile, t.getProfile());
         if (ref != null) {
           String[] parts = ref.split("\\|");
           c.addPiece(checkForNoChange(t, gen.new Piece(corePath+parts[0], parts[1], t.getCode())));
@@ -1462,7 +1467,7 @@ public class ProfileUtilities {
       boolean hasDef = element != null;
       boolean ext = false;
       if (s.equals("extension") || s.equals("modifierExtension")) {
-        if (element.hasType() && element.getType().get(0).hasProfile() && extensionIsComplex(element.getType().get(0).getProfile().get(0).getValue()))
+        if (element.hasType() && element.getType().get(0).hasProfile() && extensionIsComplex(element.getType().get(0).getProfile()))
           row.setIcon("icon_extension_complex.png", HierarchicalTableGenerator.TEXT_ICON_EXTENSION_COMPLEX);
         else
           row.setIcon("icon_extension_simple.png", HierarchicalTableGenerator.TEXT_ICON_EXTENSION_SIMPLE);
@@ -1503,13 +1508,13 @@ public class ProfileUtilities {
       ExtensionContext extDefn = null;
       if (ext) {
         if (element != null && element.getType().size() == 1 && element.getType().get(0).hasProfile()) {
-        extDefn = locateExtension(StructureDefinition.class, element.getType().get(0).getProfile().get(0).getValue());
+        extDefn = locateExtension(StructureDefinition.class, element.getType().get(0).getProfile());
           if (extDefn == null) {
             genCardinality(gen, element, row, hasDef, used, null);
             row.getCells().add(gen.new Cell(null, null, "?? "+element.getType().get(0).getProfile(), null, null));
-            generateDescription(gen, row, element, null, used.used, profile.getUrl(), element.getType().get(0).getProfile().get(0).getValue(), profile, corePath, imagePath, root, logicalModel);
+            generateDescription(gen, row, element, null, used.used, profile.getUrl(), element.getType().get(0).getProfile(), profile, corePath, imagePath, root, logicalModel);
           } else {
-            String name = urltail(element.getType().get(0).getProfile().get(0).getValue());
+            String name = urltail(element.getType().get(0).getProfile());
             left.getPieces().get(0).setText(name);
             // left.getPieces().get(0).setReference((String) extDefn.getExtensionStructure().getTag("filename"));
             left.getPieces().get(0).setHint("Extension URL = "+extDefn.getUrl());
@@ -2018,7 +2023,7 @@ public class ProfileUtilities {
         if (ed.getType().isEmpty() || isAbstract(ed.getType().get(0).getCode()) || ed.getType().get(0).getCode().equals(ed.getPath())) {
           ccmp = new ElementDefinitionComparer(true, cmp.snapshot, cmp.base, cmp.prefixLength, cmp.name);
         } else if (ed.getType().get(0).getCode().equals("Extension") && child.getSelf().getType().size() == 1 && child.getSelf().getType().get(0).hasProfile()) {
-          ccmp = new ElementDefinitionComparer(true, context.fetchResource(StructureDefinition.class, child.getSelf().getType().get(0).getProfile().get(0).getValue()).getSnapshot().getElement(), ed.getType().get(0).getCode(), child.getSelf().getPath().length(), cmp.name);
+          ccmp = new ElementDefinitionComparer(true, context.fetchResource(StructureDefinition.class, child.getSelf().getType().get(0).getProfile()).getSnapshot().getElement(), ed.getType().get(0).getCode(), child.getSelf().getPath().length(), cmp.name);
         } else if (ed.getType().size() == 1 && !ed.getType().get(0).getCode().equals("*")) {
           ccmp = new ElementDefinitionComparer(false, context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+ed.getType().get(0).getCode()).getSnapshot().getElement(), ed.getType().get(0).getCode(), child.getSelf().getPath().length(), cmp.name);
         } else if (child.getSelf().getType().size() == 1) {
@@ -2115,7 +2120,7 @@ public class ProfileUtilities {
         return new Slicer(false);
       else {
       Slicer s = new Slicer(true);
-      String url = (ued == null || !ued.hasFixed()) ? child.getType().get(0).getProfile().get(0).asStringValue() : ((UriType) ued.getFixed()).asStringValue();
+      String url = (ued == null || !ued.hasFixed()) ? child.getType().get(0).getProfile() : ((UriType) ued.getFixed()).asStringValue();
       s.name = " with URL = '"+url+"'";
       s.criteria = "[@url = '"+url+"']";
       return s;

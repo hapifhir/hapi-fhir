@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1775,7 +1775,7 @@ public class AuditEvent extends DomainResource {
         /**
          * Identifies a specific instance of the entity. The reference should be version specific.
          */
-        @Child(name = "reference", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "reference", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Specific instance of resource", formalDefinition="Identifies a specific instance of the entity. The reference should be version specific." )
         protected Reference reference;
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -281,7 +281,7 @@ public class GuidanceResponse extends DomainResource {
         /**
          * The resource that is the target of the action (e.g. CommunicationRequest).
          */
-        @Child(name = "resource", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "resource", type = {Reference.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The target of the action", formalDefinition="The resource that is the target of the action (e.g. CommunicationRequest)." )
         protected Reference resource;
 
@@ -1278,7 +1278,14 @@ public class GuidanceResponse extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-relationship-anchor")
         protected CodeType anchor;
 
-        private static final long serialVersionUID = -1200619014L;
+        /**
+         * An optional value describing when the action should be performed.
+         */
+        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
+        protected Type timing;
+
+        private static final long serialVersionUID = -1577269772L;
 
     /**
      * Constructor
@@ -1459,12 +1466,84 @@ public class GuidanceResponse extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Type getTiming() { 
+          return this.timing;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public DateTimeType getTimingDateTimeType() throws FHIRException { 
+          if (!(this.timing instanceof DateTimeType))
+            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (DateTimeType) this.timing;
+        }
+
+        public boolean hasTimingDateTimeType() { 
+          return this.timing instanceof DateTimeType;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Period getTimingPeriod() throws FHIRException { 
+          if (!(this.timing instanceof Period))
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Period) this.timing;
+        }
+
+        public boolean hasTimingPeriod() { 
+          return this.timing instanceof Period;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Duration getTimingDuration() throws FHIRException { 
+          if (!(this.timing instanceof Duration))
+            throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Duration) this.timing;
+        }
+
+        public boolean hasTimingDuration() { 
+          return this.timing instanceof Duration;
+        }
+
+        /**
+         * @return {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public Range getTimingRange() throws FHIRException { 
+          if (!(this.timing instanceof Range))
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.timing.getClass().getName()+" was encountered");
+          return (Range) this.timing;
+        }
+
+        public boolean hasTimingRange() { 
+          return this.timing instanceof Range;
+        }
+
+        public boolean hasTiming() { 
+          return this.timing != null && !this.timing.isEmpty();
+        }
+
+        /**
+         * @param value {@link #timing} (An optional value describing when the action should be performed.)
+         */
+        public GuidanceResponseActionRelatedActionComponent setTiming(Type value) { 
+          this.timing = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("actionIdentifier", "Identifier", "The unique identifier of the related action.", 0, java.lang.Integer.MAX_VALUE, actionIdentifier));
           childrenList.add(new Property("relationship", "code", "The relationship of this action to the related action.", 0, java.lang.Integer.MAX_VALUE, relationship));
           childrenList.add(new Property("offset[x]", "Duration|Range", "A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.", 0, java.lang.Integer.MAX_VALUE, offset));
           childrenList.add(new Property("anchor", "code", "An optional indicator for how the relationship is anchored to the related action. For example \"before the start\" or \"before the end\" of the related action.", 0, java.lang.Integer.MAX_VALUE, anchor));
+          childrenList.add(new Property("timing[x]", "dateTime|Period|Duration|Range", "An optional value describing when the action should be performed.", 0, java.lang.Integer.MAX_VALUE, timing));
         }
 
       @Override
@@ -1474,6 +1553,7 @@ public class GuidanceResponse extends DomainResource {
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeType
         case -1019779949: /*offset*/ return this.offset == null ? new Base[0] : new Base[] {this.offset}; // Type
         case -1413299531: /*anchor*/ return this.anchor == null ? new Base[0] : new Base[] {this.anchor}; // CodeType
+        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1494,6 +1574,9 @@ public class GuidanceResponse extends DomainResource {
         case -1413299531: // anchor
           this.anchor = castToCode(value); // CodeType
           break;
+        case -873664438: // timing
+          this.timing = (Type) value; // Type
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -1509,6 +1592,8 @@ public class GuidanceResponse extends DomainResource {
           this.offset = (Type) value; // Type
         else if (name.equals("anchor"))
           this.anchor = castToCode(value); // CodeType
+        else if (name.equals("timing[x]"))
+          this.timing = (Type) value; // Type
         else
           super.setProperty(name, value);
       }
@@ -1520,6 +1605,7 @@ public class GuidanceResponse extends DomainResource {
         case -261851592: throw new FHIRException("Cannot make property relationship as it is not a complex type"); // CodeType
         case -1960684787:  return getOffset(); // Type
         case -1413299531: throw new FHIRException("Cannot make property anchor as it is not a complex type"); // CodeType
+        case 164632566:  return getTiming(); // Type
         default: return super.makeProperty(hash, name);
         }
 
@@ -1545,6 +1631,22 @@ public class GuidanceResponse extends DomainResource {
         else if (name.equals("anchor")) {
           throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.anchor");
         }
+        else if (name.equals("timingDateTime")) {
+          this.timing = new DateTimeType();
+          return this.timing;
+        }
+        else if (name.equals("timingPeriod")) {
+          this.timing = new Period();
+          return this.timing;
+        }
+        else if (name.equals("timingDuration")) {
+          this.timing = new Duration();
+          return this.timing;
+        }
+        else if (name.equals("timingRange")) {
+          this.timing = new Range();
+          return this.timing;
+        }
         else
           return super.addChild(name);
       }
@@ -1556,6 +1658,7 @@ public class GuidanceResponse extends DomainResource {
         dst.relationship = relationship == null ? null : relationship.copy();
         dst.offset = offset == null ? null : offset.copy();
         dst.anchor = anchor == null ? null : anchor.copy();
+        dst.timing = timing == null ? null : timing.copy();
         return dst;
       }
 
@@ -1567,7 +1670,8 @@ public class GuidanceResponse extends DomainResource {
           return false;
         GuidanceResponseActionRelatedActionComponent o = (GuidanceResponseActionRelatedActionComponent) other;
         return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(offset, o.offset, true) && compareDeep(anchor, o.anchor, true);
+           && compareDeep(offset, o.offset, true) && compareDeep(anchor, o.anchor, true) && compareDeep(timing, o.timing, true)
+          ;
       }
 
       @Override
@@ -1582,7 +1686,7 @@ public class GuidanceResponse extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, relationship
-          , offset, anchor);
+          , offset, anchor, timing);
       }
 
   public String fhirType() {

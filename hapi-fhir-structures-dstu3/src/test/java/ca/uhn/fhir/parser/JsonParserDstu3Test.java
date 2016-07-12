@@ -1248,7 +1248,7 @@ public class JsonParserDstu3Test {
 		assertEquals(3, comm.getPayload().size());
 		assertEquals(Attachment.class, comm.getPayload().get(0).getContent().getClass());
 		assertEquals(Reference.class, comm.getPayload().get(1).getContent().getClass());
-		assertEquals(String.class, comm.getPayload().get(2).getContent().getClass());
+		assertEquals(StringType.class, comm.getPayload().get(2).getContent().getClass());
 	}
 
 	

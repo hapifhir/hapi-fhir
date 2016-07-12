@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -306,7 +306,7 @@ public class OrderResponse extends DomainResource {
     /**
      * Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.
      */
-    @Child(name = "fulfillment", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "fulfillment", type = {Reference.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Details of the outcome of performing the order", formalDefinition="Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order." )
     protected List<Reference> fulfillment;
     /**

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1457,9 +1457,9 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * Represents the date and/or time of the last known occurrence of a reaction event.
      */
-    @Child(name = "lastOccurence", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "lastOccurrence", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date(/time) of last known occurrence of a reaction", formalDefinition="Represents the date and/or time of the last known occurrence of a reaction event." )
-    protected DateTimeType lastOccurence;
+    protected DateTimeType lastOccurrence;
 
     /**
      * Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.
@@ -1475,7 +1475,7 @@ public class AllergyIntolerance extends DomainResource {
     @Description(shortDefinition="Adverse Reaction Events linked to exposure to substance", formalDefinition="Details about each adverse reaction event linked to exposure to the identified Substance." )
     protected List<AllergyIntoleranceReactionComponent> reaction;
 
-    private static final long serialVersionUID = 278089117L;
+    private static final long serialVersionUID = 2119732291L;
 
   /**
    * Constructor
@@ -1987,50 +1987,50 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @return {@link #lastOccurence} (Represents the date and/or time of the last known occurrence of a reaction event.). This is the underlying object with id, value and extensions. The accessor "getLastOccurence" gives direct access to the value
+     * @return {@link #lastOccurrence} (Represents the date and/or time of the last known occurrence of a reaction event.). This is the underlying object with id, value and extensions. The accessor "getLastOccurrence" gives direct access to the value
      */
-    public DateTimeType getLastOccurenceElement() { 
-      if (this.lastOccurence == null)
+    public DateTimeType getLastOccurrenceElement() { 
+      if (this.lastOccurrence == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create AllergyIntolerance.lastOccurence");
+          throw new Error("Attempt to auto-create AllergyIntolerance.lastOccurrence");
         else if (Configuration.doAutoCreate())
-          this.lastOccurence = new DateTimeType(); // bb
-      return this.lastOccurence;
+          this.lastOccurrence = new DateTimeType(); // bb
+      return this.lastOccurrence;
     }
 
-    public boolean hasLastOccurenceElement() { 
-      return this.lastOccurence != null && !this.lastOccurence.isEmpty();
+    public boolean hasLastOccurrenceElement() { 
+      return this.lastOccurrence != null && !this.lastOccurrence.isEmpty();
     }
 
-    public boolean hasLastOccurence() { 
-      return this.lastOccurence != null && !this.lastOccurence.isEmpty();
+    public boolean hasLastOccurrence() { 
+      return this.lastOccurrence != null && !this.lastOccurrence.isEmpty();
     }
 
     /**
-     * @param value {@link #lastOccurence} (Represents the date and/or time of the last known occurrence of a reaction event.). This is the underlying object with id, value and extensions. The accessor "getLastOccurence" gives direct access to the value
+     * @param value {@link #lastOccurrence} (Represents the date and/or time of the last known occurrence of a reaction event.). This is the underlying object with id, value and extensions. The accessor "getLastOccurrence" gives direct access to the value
      */
-    public AllergyIntolerance setLastOccurenceElement(DateTimeType value) { 
-      this.lastOccurence = value;
+    public AllergyIntolerance setLastOccurrenceElement(DateTimeType value) { 
+      this.lastOccurrence = value;
       return this;
     }
 
     /**
      * @return Represents the date and/or time of the last known occurrence of a reaction event.
      */
-    public Date getLastOccurence() { 
-      return this.lastOccurence == null ? null : this.lastOccurence.getValue();
+    public Date getLastOccurrence() { 
+      return this.lastOccurrence == null ? null : this.lastOccurrence.getValue();
     }
 
     /**
      * @param value Represents the date and/or time of the last known occurrence of a reaction event.
      */
-    public AllergyIntolerance setLastOccurence(Date value) { 
+    public AllergyIntolerance setLastOccurrence(Date value) { 
       if (value == null)
-        this.lastOccurence = null;
+        this.lastOccurrence = null;
       else {
-        if (this.lastOccurence == null)
-          this.lastOccurence = new DateTimeType();
-        this.lastOccurence.setValue(value);
+        if (this.lastOccurrence == null)
+          this.lastOccurrence = new DateTimeType();
+        this.lastOccurrence.setValue(value);
       }
       return this;
     }
@@ -2154,7 +2154,7 @@ public class AllergyIntolerance extends DomainResource {
         childrenList.add(new Property("recorder", "Reference(Practitioner|Patient)", "Individual who recorded the record and takes responsibility for its content.", 0, java.lang.Integer.MAX_VALUE, recorder));
         childrenList.add(new Property("reporter", "Reference(Patient|RelatedPerson|Practitioner)", "The source of the information about the allergy that is recorded.", 0, java.lang.Integer.MAX_VALUE, reporter));
         childrenList.add(new Property("onset", "dateTime", "Record of the date and/or time of the onset of the Allergy or Intolerance.", 0, java.lang.Integer.MAX_VALUE, onset));
-        childrenList.add(new Property("lastOccurence", "dateTime", "Represents the date and/or time of the last known occurrence of a reaction event.", 0, java.lang.Integer.MAX_VALUE, lastOccurence));
+        childrenList.add(new Property("lastOccurrence", "dateTime", "Represents the date and/or time of the last known occurrence of a reaction event.", 0, java.lang.Integer.MAX_VALUE, lastOccurrence));
         childrenList.add(new Property("note", "Annotation", "Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("reaction", "", "Details about each adverse reaction event linked to exposure to the identified Substance.", 0, java.lang.Integer.MAX_VALUE, reaction));
       }
@@ -2173,7 +2173,7 @@ public class AllergyIntolerance extends DomainResource {
         case -799233858: /*recorder*/ return this.recorder == null ? new Base[0] : new Base[] {this.recorder}; // Reference
         case -427039519: /*reporter*/ return this.reporter == null ? new Base[0] : new Base[] {this.reporter}; // Reference
         case 105901603: /*onset*/ return this.onset == null ? new Base[0] : new Base[] {this.onset}; // DateTimeType
-        case 1307739841: /*lastOccurence*/ return this.lastOccurence == null ? new Base[0] : new Base[] {this.lastOccurence}; // DateTimeType
+        case 1896977671: /*lastOccurrence*/ return this.lastOccurrence == null ? new Base[0] : new Base[] {this.lastOccurrence}; // DateTimeType
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case -867509719: /*reaction*/ return this.reaction == null ? new Base[0] : this.reaction.toArray(new Base[this.reaction.size()]); // AllergyIntoleranceReactionComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -2217,8 +2217,8 @@ public class AllergyIntolerance extends DomainResource {
         case 105901603: // onset
           this.onset = castToDateTime(value); // DateTimeType
           break;
-        case 1307739841: // lastOccurence
-          this.lastOccurence = castToDateTime(value); // DateTimeType
+        case 1896977671: // lastOccurrence
+          this.lastOccurrence = castToDateTime(value); // DateTimeType
           break;
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
@@ -2255,8 +2255,8 @@ public class AllergyIntolerance extends DomainResource {
           this.reporter = castToReference(value); // Reference
         else if (name.equals("onset"))
           this.onset = castToDateTime(value); // DateTimeType
-        else if (name.equals("lastOccurence"))
-          this.lastOccurence = castToDateTime(value); // DateTimeType
+        else if (name.equals("lastOccurrence"))
+          this.lastOccurrence = castToDateTime(value); // DateTimeType
         else if (name.equals("note"))
           this.getNote().add(castToAnnotation(value));
         else if (name.equals("reaction"))
@@ -2279,7 +2279,7 @@ public class AllergyIntolerance extends DomainResource {
         case -799233858:  return getRecorder(); // Reference
         case -427039519:  return getReporter(); // Reference
         case 105901603: throw new FHIRException("Cannot make property onset as it is not a complex type"); // DateTimeType
-        case 1307739841: throw new FHIRException("Cannot make property lastOccurence as it is not a complex type"); // DateTimeType
+        case 1896977671: throw new FHIRException("Cannot make property lastOccurrence as it is not a complex type"); // DateTimeType
         case 3387378:  return addNote(); // Annotation
         case -867509719:  return addReaction(); // AllergyIntoleranceReactionComponent
         default: return super.makeProperty(hash, name);
@@ -2326,8 +2326,8 @@ public class AllergyIntolerance extends DomainResource {
         else if (name.equals("onset")) {
           throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.onset");
         }
-        else if (name.equals("lastOccurence")) {
-          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.lastOccurence");
+        else if (name.equals("lastOccurrence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.lastOccurrence");
         }
         else if (name.equals("note")) {
           return addNote();
@@ -2362,7 +2362,7 @@ public class AllergyIntolerance extends DomainResource {
         dst.recorder = recorder == null ? null : recorder.copy();
         dst.reporter = reporter == null ? null : reporter.copy();
         dst.onset = onset == null ? null : onset.copy();
-        dst.lastOccurence = lastOccurence == null ? null : lastOccurence.copy();
+        dst.lastOccurrence = lastOccurrence == null ? null : lastOccurrence.copy();
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
@@ -2390,7 +2390,7 @@ public class AllergyIntolerance extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(category, o.category, true) && compareDeep(criticality, o.criticality, true) && compareDeep(substance, o.substance, true)
            && compareDeep(patient, o.patient, true) && compareDeep(recordedDate, o.recordedDate, true) && compareDeep(recorder, o.recorder, true)
-           && compareDeep(reporter, o.reporter, true) && compareDeep(onset, o.onset, true) && compareDeep(lastOccurence, o.lastOccurence, true)
+           && compareDeep(reporter, o.reporter, true) && compareDeep(onset, o.onset, true) && compareDeep(lastOccurrence, o.lastOccurrence, true)
            && compareDeep(note, o.note, true) && compareDeep(reaction, o.reaction, true);
       }
 
@@ -2403,13 +2403,13 @@ public class AllergyIntolerance extends DomainResource {
         AllergyIntolerance o = (AllergyIntolerance) other;
         return compareValues(status, o.status, true) && compareValues(type, o.type, true) && compareValues(category, o.category, true)
            && compareValues(criticality, o.criticality, true) && compareValues(recordedDate, o.recordedDate, true)
-           && compareValues(onset, o.onset, true) && compareValues(lastOccurence, o.lastOccurence, true);
+           && compareValues(onset, o.onset, true) && compareValues(lastOccurrence, o.lastOccurrence, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
           , category, criticality, substance, patient, recordedDate, recorder, reporter
-          , onset, lastOccurence, note, reaction);
+          , onset, lastOccurrence, note, reaction);
       }
 
   @Override
@@ -2700,17 +2700,17 @@ public class AllergyIntolerance extends DomainResource {
    * <p>
    * Description: <b>Date(/time) of last known occurrence of a reaction</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>AllergyIntolerance.lastOccurence</b><br>
+   * Path: <b>AllergyIntolerance.lastOccurrence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurrence of a reaction", type="date" )
+  @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurrence", description="Date(/time) of last known occurrence of a reaction", type="date" )
   public static final String SP_LAST_DATE = "last-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>last-date</b>
    * <p>
    * Description: <b>Date(/time) of last known occurrence of a reaction</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>AllergyIntolerance.lastOccurence</b><br>
+   * Path: <b>AllergyIntolerance.lastOccurrence</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam LAST_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_LAST_DATE);

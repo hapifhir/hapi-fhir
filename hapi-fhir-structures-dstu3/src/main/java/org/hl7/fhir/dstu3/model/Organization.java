@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -377,23 +377,30 @@ public class Organization extends DomainResource {
     protected StringType name;
 
     /**
+     * A list of alternate names that the organization is known as, or was known as in the past.
+     */
+    @Child(name = "alias", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="A list of alternate names that the organization is known as, or was known as in the past", formalDefinition="A list of alternate names that the organization is known as, or was known as in the past." )
+    protected List<StringType> alias;
+
+    /**
      * A contact detail for the organization.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A contact detail for the organization", formalDefinition="A contact detail for the organization." )
     protected List<ContactPoint> telecom;
 
     /**
      * An address for the organization.
      */
-    @Child(name = "address", type = {Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "address", type = {Address.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="An address for the organization", formalDefinition="An address for the organization." )
     protected List<Address> address;
 
     /**
      * The organization of which this organization forms a part.
      */
-    @Child(name = "partOf", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "partOf", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The organization of which this organization forms a part", formalDefinition="The organization of which this organization forms a part." )
     protected Reference partOf;
 
@@ -405,14 +412,14 @@ public class Organization extends DomainResource {
     /**
      * Contact for the organization for a certain purpose.
      */
-    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contact", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contact for the organization for a certain purpose", formalDefinition="Contact for the organization for a certain purpose." )
     protected List<OrganizationContactComponent> contact;
 
     /**
      * Technical endpoints providing access to services operated for the organization.
      */
-    @Child(name = "endpoint", type = {Endpoint.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "endpoint", type = {Endpoint.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Technical endpoints providing access to services operated for the organization", formalDefinition="Technical endpoints providing access to services operated for the organization." )
     protected List<Reference> endpoint;
     /**
@@ -421,7 +428,7 @@ public class Organization extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = 1375175620L;
+    private static final long serialVersionUID = 1607359371L;
 
   /**
    * Constructor
@@ -599,6 +606,67 @@ public class Organization extends DomainResource {
         this.name.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     */
+    public List<StringType> getAlias() { 
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      return this.alias;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Organization setAlias(List<StringType> theAlias) { 
+      this.alias = theAlias;
+      return this;
+    }
+
+    public boolean hasAlias() { 
+      if (this.alias == null)
+        return false;
+      for (StringType item : this.alias)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     */
+    public StringType addAliasElement() {//2 
+      StringType t = new StringType();
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      this.alias.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     */
+    public Organization addAlias(String value) { //1
+      StringType t = new StringType();
+      t.setValue(value);
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      this.alias.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     */
+    public boolean hasAlias(String value) { 
+      if (this.alias == null)
+        return false;
+      for (StringType v : this.alias)
+        if (v.equals(value)) // string
+          return true;
+      return false;
     }
 
     /**
@@ -885,6 +953,7 @@ public class Organization extends DomainResource {
         childrenList.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("type", "CodeableConcept", "The kind of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("name", "string", "A name associated with the organization.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address));
         childrenList.add(new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, java.lang.Integer.MAX_VALUE, partOf));
@@ -899,6 +968,7 @@ public class Organization extends DomainResource {
         case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 92902992: /*alias*/ return this.alias == null ? new Base[0] : this.alias.toArray(new Base[this.alias.size()]); // StringType
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
         case -1147692044: /*address*/ return this.address == null ? new Base[0] : this.address.toArray(new Base[this.address.size()]); // Address
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : new Base[] {this.partOf}; // Reference
@@ -923,6 +993,9 @@ public class Organization extends DomainResource {
           break;
         case 3373707: // name
           this.name = castToString(value); // StringType
+          break;
+        case 92902992: // alias
+          this.getAlias().add(castToString(value)); // StringType
           break;
         case -1429363305: // telecom
           this.getTelecom().add(castToContactPoint(value)); // ContactPoint
@@ -954,6 +1027,8 @@ public class Organization extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
+        else if (name.equals("alias"))
+          this.getAlias().add(castToString(value));
         else if (name.equals("telecom"))
           this.getTelecom().add(castToContactPoint(value));
         else if (name.equals("address"))
@@ -975,6 +1050,7 @@ public class Organization extends DomainResource {
         case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
         case 3575610:  return getType(); // CodeableConcept
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 92902992: throw new FHIRException("Cannot make property alias as it is not a complex type"); // StringType
         case -1429363305:  return addTelecom(); // ContactPoint
         case -1147692044:  return addAddress(); // Address
         case -995410646:  return getPartOf(); // Reference
@@ -999,6 +1075,9 @@ public class Organization extends DomainResource {
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type Organization.name");
+        }
+        else if (name.equals("alias")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Organization.alias");
         }
         else if (name.equals("telecom")) {
           return addTelecom();
@@ -1036,6 +1115,11 @@ public class Organization extends DomainResource {
         dst.active = active == null ? null : active.copy();
         dst.type = type == null ? null : type.copy();
         dst.name = name == null ? null : name.copy();
+        if (alias != null) {
+          dst.alias = new ArrayList<StringType>();
+          for (StringType i : alias)
+            dst.alias.add(i.copy());
+        };
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
@@ -1072,9 +1156,9 @@ public class Organization extends DomainResource {
           return false;
         Organization o = (Organization) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(type, o.type, true)
-           && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true)
-           && compareDeep(partOf, o.partOf, true) && compareDeep(contact, o.contact, true) && compareDeep(endpoint, o.endpoint, true)
-          ;
+           && compareDeep(name, o.name, true) && compareDeep(alias, o.alias, true) && compareDeep(telecom, o.telecom, true)
+           && compareDeep(address, o.address, true) && compareDeep(partOf, o.partOf, true) && compareDeep(contact, o.contact, true)
+           && compareDeep(endpoint, o.endpoint, true);
       }
 
       @Override
@@ -1084,12 +1168,13 @@ public class Organization extends DomainResource {
         if (!(other instanceof Organization))
           return false;
         Organization o = (Organization) other;
-        return compareValues(active, o.active, true) && compareValues(name, o.name, true);
+        return compareValues(active, o.active, true) && compareValues(name, o.name, true) && compareValues(alias, o.alias, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, type
-          , name, telecom, address, partOf, contact, endpoint);
+          , name, alias, telecom, address, partOf, contact, endpoint);
       }
 
   @Override
@@ -1206,19 +1291,19 @@ public class Organization extends DomainResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A portion of the organization's name</b><br>
+   * Description: <b>A portion of the organization's name, or alias</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Organization.name</b><br>
+   * Path: <b>Organization.name, Organization.alias</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string" )
+  @SearchParamDefinition(name="name", path="Organization.name or Organization.alias", description="A portion of the organization's name, or alias", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A portion of the organization's name</b><br>
+   * Description: <b>A portion of the organization's name, or alias</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Organization.name</b><br>
+   * Path: <b>Organization.name, Organization.alias</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);

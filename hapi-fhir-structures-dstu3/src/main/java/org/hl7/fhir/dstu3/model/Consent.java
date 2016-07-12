@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 /**
- * Information about a healthcare consumer’s consent - a series of statements regard their agreement (or lack thereof) to various health-related procedures, in accordance with governing jurisdictional and organization privacy policies that grant or withhold consent:.
+ * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
  */
 @ResourceDef(name="Consent", profile="http://hl7.org/fhir/Profile/Consent")
 public class Consent extends DomainResource {
@@ -1158,7 +1158,7 @@ public class Consent extends DomainResource {
         /**
          * The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').
          */
-        @Child(name = "reference", type = {Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "reference", type = {Device.class, Group.class, CareTeam.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Resource for the actor (or group, by role)", formalDefinition="The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers')." )
         protected Reference reference;
 
@@ -1251,7 +1251,7 @@ public class Consent extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "CodeableConcept", "How the individual is or was involved in the resourcescontent that is described in the exception.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("reference", "Reference(Device|Group|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, reference));
+          childrenList.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, reference));
         }
 
       @Override
@@ -1364,7 +1364,7 @@ public class Consent extends DomainResource {
         /**
          * A reference to a specific resource that defines which resources are covered by this consent.
          */
-        @Child(name = "reference", type = {}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "reference", type = {Reference.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The actual data reference", formalDefinition="A reference to a specific resource that defines which resources are covered by this consent." )
         protected Reference reference;
 
@@ -1615,28 +1615,28 @@ public class Consent extends DomainResource {
     protected Period period;
 
     /**
-     * The patient to whom this consent applies.
+     * The patient/healthcare consumer to whom this consent applies.
      */
-    @Child(name = "patient", type = {Patient.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who the consent applies to", formalDefinition="The patient to whom this consent applies." )
+    @Child(name = "patient", type = {Patient.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who the consent applies to", formalDefinition="The patient/healthcare consumer to whom this consent applies." )
     protected Reference patient;
 
     /**
-     * The actual object that is the target of the reference (The patient to whom this consent applies.)
+     * The actual object that is the target of the reference (The patient/healthcare consumer to whom this consent applies.)
      */
     protected Patient patientTarget;
 
     /**
-     * Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it.
+     * The patient/consumer that is responsible for agreeing to the consent represented by this resource. This is the person (usually) that agreed to the policy, along with the exceptions, e.g. the persion who takes responsibility for the agreement. In the signature this corresponds to the role "Consent Signature".
      */
-    @Child(name = "author", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who made the consent statement", formalDefinition="Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it." )
-    protected Reference author;
-
+    @Child(name = "consentor", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Who is agreeing to the policy and exceptions", formalDefinition="The patient/consumer that is responsible for agreeing to the consent represented by this resource. This is the person (usually) that agreed to the policy, along with the exceptions, e.g. the persion who takes responsibility for the agreement. In the signature this corresponds to the role \"Consent Signature\"." )
+    protected List<Reference> consentor;
     /**
-     * The actual object that is the target of the reference (Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it.)
+     * The actual objects that are the target of the reference (The patient/consumer that is responsible for agreeing to the consent represented by this resource. This is the person (usually) that agreed to the policy, along with the exceptions, e.g. the persion who takes responsibility for the agreement. In the signature this corresponds to the role "Consent Signature".)
      */
-    protected Resource authorTarget;
+    protected List<Resource> consentorTarget;
+
 
     /**
      * The organization that manages the consent, and the framework within which it is executed.
@@ -1653,7 +1653,7 @@ public class Consent extends DomainResource {
     /**
      * The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.
      */
-    @Child(name = "source", type = {Attachment.class, Identifier.class, Consent.class, DocumentReference.class, Contract.class, Questionnaire.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "source", type = {Attachment.class, Identifier.class, Consent.class, DocumentReference.class, Contract.class, QuestionnaireResponse.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Source from which this consent is taken", formalDefinition="The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document." )
     protected Type source;
 
@@ -1667,7 +1667,7 @@ public class Consent extends DomainResource {
     /**
      * Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement.
      */
-    @Child(name = "recipient", type = {Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "recipient", type = {Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, CareTeam.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who|what the consent is in regard to", formalDefinition="Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement." )
     protected List<Reference> recipient;
     /**
@@ -1683,7 +1683,7 @@ public class Consent extends DomainResource {
     @Description(shortDefinition="Consent Exception", formalDefinition="An exception to the base policy of this Consent." )
     protected List<ExceptComponent> except;
 
-    private static final long serialVersionUID = 746554662L;
+    private static final long serialVersionUID = 1122839630L;
 
   /**
    * Constructor
@@ -1695,9 +1695,10 @@ public class Consent extends DomainResource {
   /**
    * Constructor
    */
-    public Consent(Enumeration<ConsentStatus> status, UriType policy) {
+    public Consent(Enumeration<ConsentStatus> status, Reference patient, UriType policy) {
       super();
       this.status = status;
+      this.patient = patient;
       this.policy = policy;
     }
 
@@ -1897,7 +1898,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (The patient to whom this consent applies.)
+     * @return {@link #patient} (The patient/healthcare consumer to whom this consent applies.)
      */
     public Reference getPatient() { 
       if (this.patient == null)
@@ -1913,7 +1914,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} (The patient to whom this consent applies.)
+     * @param value {@link #patient} (The patient/healthcare consumer to whom this consent applies.)
      */
     public Consent setPatient(Reference value) { 
       this.patient = value;
@@ -1921,7 +1922,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient to whom this consent applies.)
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient/healthcare consumer to whom this consent applies.)
      */
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
@@ -1933,7 +1934,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient to whom this consent applies.)
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient/healthcare consumer to whom this consent applies.)
      */
     public Consent setPatientTarget(Patient value) { 
       this.patientTarget = value;
@@ -1941,42 +1942,66 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it.)
+     * @return {@link #consentor} (The patient/consumer that is responsible for agreeing to the consent represented by this resource. This is the person (usually) that agreed to the policy, along with the exceptions, e.g. the persion who takes responsibility for the agreement. In the signature this corresponds to the role "Consent Signature".)
      */
-    public Reference getAuthor() { 
-      if (this.author == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Consent.author");
-        else if (Configuration.doAutoCreate())
-          this.author = new Reference(); // cc
-      return this.author;
-    }
-
-    public boolean hasAuthor() { 
-      return this.author != null && !this.author.isEmpty();
+    public List<Reference> getConsentor() { 
+      if (this.consentor == null)
+        this.consentor = new ArrayList<Reference>();
+      return this.consentor;
     }
 
     /**
-     * @param value {@link #author} (Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Consent setAuthor(Reference value) { 
-      this.author = value;
+    public Consent setConsentor(List<Reference> theConsentor) { 
+      this.consentor = theConsentor;
+      return this;
+    }
+
+    public boolean hasConsentor() { 
+      if (this.consentor == null)
+        return false;
+      for (Reference item : this.consentor)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addConsentor() { //3
+      Reference t = new Reference();
+      if (this.consentor == null)
+        this.consentor = new ArrayList<Reference>();
+      this.consentor.add(t);
+      return t;
+    }
+
+    public Consent addConsentor(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.consentor == null)
+        this.consentor = new ArrayList<Reference>();
+      this.consentor.add(t);
       return this;
     }
 
     /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it.)
+     * @return The first repetition of repeating field {@link #consentor}, creating it if it does not already exist
      */
-    public Resource getAuthorTarget() { 
-      return this.authorTarget;
+    public Reference getConsentorFirstRep() { 
+      if (getConsentor().isEmpty()) {
+        addConsentor();
+      }
+      return getConsentor().get(0);
     }
 
     /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
-    public Consent setAuthorTarget(Resource value) { 
-      this.authorTarget = value;
-      return this;
+    @Deprecated
+    public List<Resource> getConsentorTarget() { 
+      if (this.consentorTarget == null)
+        this.consentorTarget = new ArrayList<Resource>();
+      return this.consentorTarget;
     }
 
     /**
@@ -2249,12 +2274,12 @@ public class Consent extends DomainResource {
         childrenList.add(new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, java.lang.Integer.MAX_VALUE, dateTime));
         childrenList.add(new Property("period", "Period", "Relevant time or time-period when this Consent is applicable.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient to whom this consent applies.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("author", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Who made the Consent statement - this is the persion who takes responsibility for the content, not the scribe who recorded it.", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("consentor", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "The patient/consumer that is responsible for agreeing to the consent represented by this resource. This is the person (usually) that agreed to the policy, along with the exceptions, e.g. the persion who takes responsibility for the agreement. In the signature this corresponds to the role \"Consent Signature\".", 0, java.lang.Integer.MAX_VALUE, consentor));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization that manages the consent, and the framework within which it is executed.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|Questionnaire)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("policy", "uri", "A reference to the policy that this consents to. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy));
-        childrenList.add(new Property("recipient", "Reference(Device|Group|Organization|Patient|Practitioner|RelatedPerson)", "Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement.", 0, java.lang.Integer.MAX_VALUE, recipient));
+        childrenList.add(new Property("recipient", "Reference(Device|Group|Organization|Patient|Practitioner|RelatedPerson|CareTeam)", "Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement.", 0, java.lang.Integer.MAX_VALUE, recipient));
         childrenList.add(new Property("except", "", "An exception to the base policy of this Consent.", 0, java.lang.Integer.MAX_VALUE, except));
       }
 
@@ -2267,7 +2292,7 @@ public class Consent extends DomainResource {
         case 1792749467: /*dateTime*/ return this.dateTime == null ? new Base[0] : new Base[] {this.dateTime}; // DateTimeType
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
-        case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
+        case -435736707: /*consentor*/ return this.consentor == null ? new Base[0] : this.consentor.toArray(new Base[this.consentor.size()]); // Reference
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Type
         case -982670030: /*policy*/ return this.policy == null ? new Base[0] : new Base[] {this.policy}; // UriType
@@ -2299,8 +2324,8 @@ public class Consent extends DomainResource {
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
           break;
-        case -1406328437: // author
-          this.author = castToReference(value); // Reference
+        case -435736707: // consentor
+          this.getConsentor().add(castToReference(value)); // Reference
           break;
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
@@ -2336,8 +2361,8 @@ public class Consent extends DomainResource {
           this.period = castToPeriod(value); // Period
         else if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
-        else if (name.equals("author"))
-          this.author = castToReference(value); // Reference
+        else if (name.equals("consentor"))
+          this.getConsentor().add(castToReference(value));
         else if (name.equals("organization"))
           this.organization = castToReference(value); // Reference
         else if (name.equals("source[x]"))
@@ -2361,7 +2386,7 @@ public class Consent extends DomainResource {
         case 1792749467: throw new FHIRException("Cannot make property dateTime as it is not a complex type"); // DateTimeType
         case -991726143:  return getPeriod(); // Period
         case -791418107:  return getPatient(); // Reference
-        case -1406328437:  return getAuthor(); // Reference
+        case -435736707:  return addConsentor(); // Reference
         case 1178922291:  return getOrganization(); // Reference
         case -1698413947:  return getSource(); // Type
         case -982670030: throw new FHIRException("Cannot make property policy as it is not a complex type"); // UriType
@@ -2395,9 +2420,8 @@ public class Consent extends DomainResource {
           this.patient = new Reference();
           return this.patient;
         }
-        else if (name.equals("author")) {
-          this.author = new Reference();
-          return this.author;
+        else if (name.equals("consentor")) {
+          return addConsentor();
         }
         else if (name.equals("organization")) {
           this.organization = new Reference();
@@ -2446,7 +2470,11 @@ public class Consent extends DomainResource {
         dst.dateTime = dateTime == null ? null : dateTime.copy();
         dst.period = period == null ? null : period.copy();
         dst.patient = patient == null ? null : patient.copy();
-        dst.author = author == null ? null : author.copy();
+        if (consentor != null) {
+          dst.consentor = new ArrayList<Reference>();
+          for (Reference i : consentor)
+            dst.consentor.add(i.copy());
+        };
         dst.organization = organization == null ? null : organization.copy();
         dst.source = source == null ? null : source.copy();
         dst.policy = policy == null ? null : policy.copy();
@@ -2476,9 +2504,9 @@ public class Consent extends DomainResource {
         Consent o = (Consent) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(dateTime, o.dateTime, true) && compareDeep(period, o.period, true) && compareDeep(patient, o.patient, true)
-           && compareDeep(author, o.author, true) && compareDeep(organization, o.organization, true) && compareDeep(source, o.source, true)
-           && compareDeep(policy, o.policy, true) && compareDeep(recipient, o.recipient, true) && compareDeep(except, o.except, true)
-          ;
+           && compareDeep(consentor, o.consentor, true) && compareDeep(organization, o.organization, true)
+           && compareDeep(source, o.source, true) && compareDeep(policy, o.policy, true) && compareDeep(recipient, o.recipient, true)
+           && compareDeep(except, o.except, true);
       }
 
       @Override
@@ -2494,7 +2522,7 @@ public class Consent extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, category
-          , dateTime, period, patient, author, organization, source, policy, recipient
+          , dateTime, period, patient, consentor, organization, source, policy, recipient
           , except);
       }
 
@@ -2610,32 +2638,6 @@ public class Consent extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PURPOSE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PURPOSE);
 
  /**
-   * Search parameter: <b>author</b>
-   * <p>
-   * Description: <b>Who made the consent statement</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Consent.author</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="author", path="Consent.author", description="Who made the consent statement", type="reference", target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
-  public static final String SP_AUTHOR = "author";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>author</b>
-   * <p>
-   * Description: <b>Who made the consent statement</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Consent.author</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Consent:author</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("Consent:author").toLocked();
-
- /**
    * Search parameter: <b>source</b>
    * <p>
    * Description: <b>Source from which this consent is taken</b><br>
@@ -2643,7 +2645,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.source[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Consent.source", description="Source from which this consent is taken", type="reference", target={Consent.class, Contract.class, DocumentReference.class, Questionnaire.class } )
+  @SearchParamDefinition(name="source", path="Consent.source", description="Source from which this consent is taken", type="reference", target={Consent.class, Contract.class, DocumentReference.class, QuestionnaireResponse.class } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -2669,7 +2671,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.except.actor.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="Consent.except.actor.reference", description="Resource for the actor (or group, by role)", type="reference", target={Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="actor", path="Consent.except.actor.reference", description="Resource for the actor (or group, by role)", type="reference", target={CareTeam.class, Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2767,7 +2769,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="Consent.recipient", description="Who|what the consent is in regard to", type="reference", target={Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="recipient", path="Consent.recipient", description="Who|what the consent is in regard to", type="reference", target={CareTeam.class, Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
@@ -2804,6 +2806,32 @@ public class Consent extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTION);
+
+ /**
+   * Search parameter: <b>consentor</b>
+   * <p>
+   * Description: <b>Who is agreeing to the policy and exceptions</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Consent.consentor</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="consentor", path="Consent.consentor", description="Who is agreeing to the policy and exceptions", type="reference", target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  public static final String SP_CONSENTOR = "consentor";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>consentor</b>
+   * <p>
+   * Description: <b>Who is agreeing to the policy and exceptions</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Consent.consentor</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONSENTOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONSENTOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Consent:consentor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONSENTOR = new ca.uhn.fhir.model.api.Include("Consent:consentor").toLocked();
 
  /**
    * Search parameter: <b>category</b>

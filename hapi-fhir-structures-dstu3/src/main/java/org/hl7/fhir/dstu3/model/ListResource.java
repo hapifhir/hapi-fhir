@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Jul 2, 2016 11:26-0400 for FHIR v1.4.0
+// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -287,7 +287,7 @@ public class ListResource extends DomainResource {
         /**
          * A reference to the actual resource from which data was derived.
          */
-        @Child(name = "item", type = {}, order=4, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "item", type = {Reference.class}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Actual entry", formalDefinition="A reference to the actual resource from which data was derived." )
         protected Reference item;
 
