@@ -5,14 +5,13 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.json.Json;
-import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,6 +27,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.google.gson.stream.JsonWriter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -375,14 +376,14 @@ public class Controller extends BaseController {
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/search" })
-	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
+	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) throws IOException {
 		addCommonParams(theReq, theRequest, theModel);
 
 		StringWriter clientCodeJsonStringWriter = new StringWriter();
-		JsonGenerator clientCodeJsonWriter = Json.createGenerator(clientCodeJsonStringWriter);
-		clientCodeJsonWriter.writeStartObject();
-		clientCodeJsonWriter.write("action", "search");
-		clientCodeJsonWriter.write("base", (String) theModel.get("base"));
+		JsonWriter clientCodeJsonWriter = new JsonWriter(clientCodeJsonStringWriter);
+		clientCodeJsonWriter.beginObject();
+		clientCodeJsonWriter.name("action");clientCodeJsonWriter.value("search");
+		clientCodeJsonWriter.name("base");clientCodeJsonWriter.value((String) theModel.get("base"));
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
@@ -396,27 +397,28 @@ public class Controller extends BaseController {
 				theModel.put("errorMsg", e.toString());
 				return "resource";
 			}
-			clientCodeJsonWriter.write("resource", theReq.getParameter("resource"));
+			clientCodeJsonWriter.name("resource");clientCodeJsonWriter.value(theReq.getParameter("resource"));
 		} else {
 			query = search.forAllResources();
-			clientCodeJsonWriter.writeNull("resource");
+			clientCodeJsonWriter.name("resource");clientCodeJsonWriter.nullValue();
 		}
 
 		if (client.getPrettyPrint() != null) {
-			clientCodeJsonWriter.write("pretty", client.getPrettyPrint().toString());
+			clientCodeJsonWriter.name("pretty");clientCodeJsonWriter.value( client.getPrettyPrint().toString());
 		} else {
-			clientCodeJsonWriter.writeNull("pretty");
+			clientCodeJsonWriter.name("pretty");clientCodeJsonWriter.nullValue();
 		}
 
 		if (client.getEncoding() != null) {
-			clientCodeJsonWriter.write("format", client.getEncoding().getRequestContentType());
+			clientCodeJsonWriter.name("format");clientCodeJsonWriter.value(client.getEncoding().getRequestContentType());
 		} else {
-			clientCodeJsonWriter.writeNull("format");
+			clientCodeJsonWriter.name("format");clientCodeJsonWriter.nullValue();
 		}
 
 		String outcomeDescription = "Search for Resources";
 
-		clientCodeJsonWriter.writeStartArray("params");
+		clientCodeJsonWriter.name("params");
+		clientCodeJsonWriter.beginArray();
 		int paramIdx = -1;
 		while (true) {
 			paramIdx++;
@@ -427,31 +429,33 @@ public class Controller extends BaseController {
 				break;
 			}
 		}
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endArray();
 
-		clientCodeJsonWriter.writeStartArray("includes");
+		clientCodeJsonWriter.name("includes");
+		clientCodeJsonWriter.beginArray();
 		String[] incValues = theReq.getParameterValues(Constants.PARAM_INCLUDE);
 		if (incValues != null) {
 			for (String next : incValues) {
 				if (isNotBlank(next)) {
 					query.include(new Include(next));
-					clientCodeJsonWriter.write(next);
+					clientCodeJsonWriter.value(next);
 				}
 			}
 		}
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endArray();
 
-		clientCodeJsonWriter.writeStartArray("revincludes");
+		clientCodeJsonWriter.name("revincludes");
+		clientCodeJsonWriter.beginArray();
 		String[] revIncValues = theReq.getParameterValues(Constants.PARAM_REVINCLUDE);
 		if (revIncValues != null) {
 			for (String next : revIncValues) {
 				if (isNotBlank(next)) {
 					query.revInclude(new Include(next));
-					clientCodeJsonWriter.write(next);
+					clientCodeJsonWriter.value(next);
 				}
 			}
 		}
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endArray();
 
 		String limit = theReq.getParameter("resource-search-limit");
 		if (isNotBlank(limit)) {
@@ -461,9 +465,9 @@ public class Controller extends BaseController {
 			}
 			int limitInt = Integer.parseInt(limit);
 			query.limitTo(limitInt);
-			clientCodeJsonWriter.write("limit", limit);
+			clientCodeJsonWriter.name("limit");clientCodeJsonWriter.value(limit);
 		} else {
-			clientCodeJsonWriter.writeNull("limit");
+			clientCodeJsonWriter.name("limit");clientCodeJsonWriter.nullValue();
 		}
 
 		String[] sort = theReq.getParameterValues("sort_by");
@@ -501,7 +505,7 @@ public class Controller extends BaseController {
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endObject();
 		clientCodeJsonWriter.close();
 		String clientCodeJson = clientCodeJsonStringWriter.toString();
 		theModel.put("clientCodeJson", clientCodeJson);
@@ -837,7 +841,7 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery<?> theQuery, JsonGenerator theClientCodeJsonWriter) {
+	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery<?> theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
 		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
 		if (isBlank(nextName)) {
 			return false;
@@ -921,12 +925,12 @@ public class Controller extends BaseController {
 
 		for (String nextValue : values) {
 
-			theClientCodeJsonWriter.writeStartObject();
-			theClientCodeJsonWriter.write("type", nextType);
-			theClientCodeJsonWriter.write("name", nextName);
-			theClientCodeJsonWriter.write("qualifier", nextQualifier);
-			theClientCodeJsonWriter.write("value", nextValue);
-			theClientCodeJsonWriter.writeEnd();
+			theClientCodeJsonWriter.beginObject();
+			theClientCodeJsonWriter.name("type");theClientCodeJsonWriter.value(nextType);
+			theClientCodeJsonWriter.name("name");theClientCodeJsonWriter.value(nextName);
+			theClientCodeJsonWriter.name("qualifier");theClientCodeJsonWriter.value(nextQualifier);
+			theClientCodeJsonWriter.name("value");theClientCodeJsonWriter.value(nextValue);
+			theClientCodeJsonWriter.endObject();
 			if (addToWhere) {
 				theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
 			}

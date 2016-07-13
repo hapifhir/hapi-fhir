@@ -775,7 +775,4 @@
             "title" : "HTML Report"
           }
         ]
-      },
-      "summary" : "\r\n<div xmlns=\"http://www.w3.org/1999/xhtml\"> &#x0A;      &#x0A;      \r\n  <h3>CBC Report for Wile. E. COYOTE (MRN: 23453) issued 3-Mar 2011 11:45</h3>            &#x0A;&#x0A;      \r\n  <!--  you could use ab html table here, but laboratories are still \n using fixed text tables, and this will take decades to change...  -->&#x0A;            &#x0A;      \r\n  <pre>&#x0A;Test                  Units       Value       Reference Range&#x0A;Haemoglobin           g/L         176         135 - 180&#x0A;Red Cell Count        x10*12/L    5.9         4.2 - 6.0&#x0A;Haematocrit                       0.55+       0.38 - 0.52&#x0A;Mean Cell Volume      fL          99+         80 - 98&#x0A;Mean Cell Haemoglobin pg          36+         27 - 35&#x0A;Platelet Count        x10*9/L     444         150 - 450&#x0A;White Cell Count      x10*9/L     4.6         4.0 - 11.0&#x0A;Neutrophils           %           20 &#x0A;Neutrophils           x10*9/L     0.9---      2.0 - 7.5&#x0A;Lymphocytes           %           20  &#x0A;Lymphocytes           x10*9/L     0.9-        1.1 - 4.0&#x0A;Monocytes             %           20 &#x0A;Monocytes             x10*9/L     0.9         0.2 - 1.0&#x0A;Eosinophils           %           20 &#x0A;Eosinophils           x10*9/L     0.92++      0.04 - 0.40&#x0A;Basophils             %           20 &#x0A;Basophils             x10*9/L     0.92+++     &lt;0.21&#x0A;      </pre>&#x0A;          &#x0A;      \r\n  <p>Acme Laboratory, Inc signed: Dr Pete Pathologist</p>&#x0A;      </div>"
-    }
-    
+      }

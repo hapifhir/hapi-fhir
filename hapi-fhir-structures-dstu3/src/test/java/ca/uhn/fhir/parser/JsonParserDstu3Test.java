@@ -97,7 +97,7 @@ public class JsonParserDstu3Test {
 
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
-		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class JsonParserDstu3Test {
 
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
-		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 	
 	
@@ -130,7 +130,7 @@ public class JsonParserDstu3Test {
       String encode = p.encodeResourceToString(bundle);
       ourLog.info(encode);
       
-      assertThat(encode, containsString("\"value\":\"APPID\""));
+      assertThat(encode, containsString("\"value\": \"APPID\""));
 	}
 
 
@@ -271,33 +271,33 @@ public class JsonParserDstu3Test {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc, stringContainsInOrder("\"meta\":{", 
-				"\"profile\":[", 
+		assertThat(enc, stringContainsInOrder("\"meta\": {", 
+				"\"profile\": [", 
 				"\"http://foo/Profile1\",", 
 				"\"http://foo/Profile2\"", 
 				"],", 
-				"\"security\":[", 
+				"\"security\": [", 
 				"{", 
-				"\"system\":\"sec_scheme1\",", 
-				"\"code\":\"sec_term1\",", 
-				"\"display\":\"sec_label1\"", 
+				"\"system\": \"sec_scheme1\",", 
+				"\"code\": \"sec_term1\",", 
+				"\"display\": \"sec_label1\"", 
 				"},", 
 				"{", 
-				"\"system\":\"sec_scheme2\",", 
-				"\"code\":\"sec_term2\",", 
-				"\"display\":\"sec_label2\"", 
+				"\"system\": \"sec_scheme2\",", 
+				"\"code\": \"sec_term2\",", 
+				"\"display\": \"sec_label2\"", 
 				"}", 
 				"],", 
-				"\"tag\":[", 
+				"\"tag\": [", 
 				"{", 
-				"\"system\":\"scheme1\",", 
-				"\"code\":\"term1\",", 
-				"\"display\":\"label1\"", 
+				"\"system\": \"scheme1\",", 
+				"\"code\": \"term1\",", 
+				"\"display\": \"label1\"", 
 				"},", 
 				"{", 
-				"\"system\":\"scheme2\",", 
-				"\"code\":\"term2\",", 
-				"\"display\":\"label2\"", 
+				"\"system\": \"scheme2\",", 
+				"\"code\": \"term2\",", 
+				"\"display\": \"label2\"", 
 				"}", 
 				"]", 
 				"},"));
@@ -400,30 +400,30 @@ public class JsonParserDstu3Test {
 
 		//@formatter:off
 		assertEquals("{\n" + 
-			"    \"resourceType\":\"Patient\",\n" + 
-			"    \"meta\":{\n" + 
-			"        \"security\":[\n" + 
-			"            {\n" + 
-			"                \"system\":\"SYSTEM1\",\n" + 
-			"                \"version\":\"VERSION1\",\n" + 
-			"                \"code\":\"CODE1\",\n" + 
-			"                \"display\":\"DISPLAY1\"\n" + 
-			"            },\n" + 
-			"            {\n" + 
-			"                \"system\":\"SYSTEM2\",\n" + 
-			"                \"version\":\"VERSION2\",\n" + 
-			"                \"code\":\"CODE2\",\n" + 
-			"                \"display\":\"DISPLAY2\"\n" + 
-			"            }\n" + 
-			"        ]\n" + 
-			"    },\n" + 
-			"    \"name\":[\n" + 
-			"        {\n" + 
-			"            \"family\":[\n" + 
-			"                \"FAMILY\"\n" + 
-			"            ]\n" + 
-			"        }\n" + 
+			"  \"resourceType\": \"Patient\",\n" + 
+			"  \"meta\": {\n" + 
+			"    \"security\": [\n" + 
+			"      {\n" + 
+			"        \"system\": \"SYSTEM1\",\n" + 
+			"        \"version\": \"VERSION1\",\n" + 
+			"        \"code\": \"CODE1\",\n" + 
+			"        \"display\": \"DISPLAY1\"\n" + 
+			"      },\n" + 
+			"      {\n" + 
+			"        \"system\": \"SYSTEM2\",\n" + 
+			"        \"version\": \"VERSION2\",\n" + 
+			"        \"code\": \"CODE2\",\n" + 
+			"        \"display\": \"DISPLAY2\"\n" + 
+			"      }\n" + 
 			"    ]\n" + 
+			"  },\n" + 
+			"  \"name\": [\n" + 
+			"    {\n" + 
+			"      \"family\": [\n" + 
+			"        \"FAMILY\"\n" + 
+			"      ]\n" + 
+			"    }\n" + 
+			"  ]\n" + 
 			"}", enc.trim());
 		//@formatter:on
 
@@ -478,22 +478,22 @@ public class JsonParserDstu3Test {
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
 			"{",
-				"\"resourceType\":\"Patient\",",
-				"\"contained\":[",
+				"\"resourceType\": \"Patient\",",
+				"\"contained\": [",
 					"{",
-					"\"resourceType\":\"Condition\",",
-					"\"id\":\"1\"",
+					"\"resourceType\": \"Condition\",",
+					"\"id\": \"1\"",
 					"}",
 				"],",
-				"\"extension\":[",
+				"\"extension\": [",
 					"{",
-					"\"url\":\"test\",",
-					"\"valueReference\":{",
-					"\"reference\":\"#1\"",
+					"\"url\": \"test\",",
+					"\"valueReference\": {",
+					"\"reference\": \"#1\"",
 					"}",
 					"}",
 				"],",
-				"\"birthDate\":\"2016-04-05\"",
+				"\"birthDate\": \"2016-04-05\"",
 			"}"
 		));
 		//@formatter:on
@@ -595,17 +595,17 @@ public class JsonParserDstu3Test {
 
 		//@formatter:off
 		assertThat(output, stringContainsInOrder(
-			"\"id\":\"1\"",
+			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
-			"\"url\":\"http://exturl\"",
-			"\"valueString\":\"ext_url_value\"",
+			"\"url\": \"http://exturl\"",
+			"\"valueString\": \"ext_url_value\"",
 			"\"code\":"
 		));
 		assertThat(output, not(stringContainsInOrder(
-			"\"url\":\"http://exturl\"",
+			"\"url\": \"http://exturl\"",
 			",",
-			"\"url\":\"http://exturl\""
+			"\"url\": \"http://exturl\""
 		)));
 		//@formatter:on
 
@@ -635,19 +635,19 @@ public class JsonParserDstu3Test {
 
 		//@formatter:off
 		assertThat(output, stringContainsInOrder(
-				"\"id\":\"1\"",
+				"\"id\": \"1\"",
 				"\"meta\"",
 				"\"extension\"",
-				"\"url\":\"http://exturl\"",
+				"\"url\": \"http://exturl\"",
 				"\"extension\"",
-				"\"url\":\"http://subext\"",
-				"\"valueString\":\"sub_ext_value\"",
+				"\"url\": \"http://subext\"",
+				"\"valueString\": \"sub_ext_value\"",
 				"\"code\":"
 			));
 			assertThat(output, not(stringContainsInOrder(
-				"\"url\":\"http://exturl\"",
+				"\"url\": \"http://exturl\"",
 				",",
-				"\"url\":\"http://exturl\""
+				"\"url\": \"http://exturl\""
 			)));
 		//@formatter:on
 
@@ -687,7 +687,7 @@ public class JsonParserDstu3Test {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(reqParms);
 		ourLog.info(enc);
 
-		assertThat(enc, containsString("\"valueId\":\"1\""));
+		assertThat(enc, containsString("\"valueId\": \"1\""));
 	}
 
 	@Test
@@ -705,7 +705,7 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\""));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\""));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -726,7 +726,7 @@ public class JsonParserDstu3Test {
 
 		assertThat(encoded, containsString("Patient"));
 		assertThat(encoded,
-				stringContainsInOrder("\"tag\"", "\"system\":\"foo\",", "\"code\":\"bar\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\""));
+				stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\"", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\""));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -924,9 +924,22 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testExplanationOfBenefit() {
-		String input = "{" + "  \"resourceType\":\"ExplanationOfBenefit\"," + "  \"coverage\": {\n" + "    \"coverageReference\": {\n" + "      \"reference\": \"Coverage/123\"\n" + "    }\n" + "  },\n"
-				+ "  \"relationship\": {\n" + "    \"system\": \"http://hl7.org/fhir/relationship\",\n" + "    \"code\": \"1\",\n" + "    \"display\": \"self\"\n" + "  }\n" + "}";
-
+		//@formatter:off
+		String input = "{" + 
+			 "  \"resourceType\": \"ExplanationOfBenefit\"," + 
+			 "  \"coverage\": {\n" + 
+			 "    \"coverageReference\": {\n" + 
+			 "      \"reference\": \"Coverage/123\"\n" + 
+			 "    }\n" + 
+			 "  },\n" + 
+			 "  \"relationship\": {\n" + 
+			 "    \"system\": \"http://hl7.org/fhir/relationship\",\n" + 
+			 "    \"code\": \"1\",\n" + 
+			 "    \"display\": \"self\"\n" + 
+			 "  }\n" + 
+			 "}";
+		//@formatter:on
+		
 		ExplanationOfBenefit eob = ourCtx.newJsonParser().parseResource(ExplanationOfBenefit.class, input);
 		assertEquals(Reference.class, eob.getCoverage().getCoverage().getClass());
 
@@ -1281,7 +1294,7 @@ public class JsonParserDstu3Test {
 		
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
-				"\"identifier\":[", 
+				"\"identifier\": [", 
 				"{",
 				"\"fhir_comments\":",
 				"[",
@@ -1289,8 +1302,8 @@ public class JsonParserDstu3Test {
 				",",
 				"\"identifier comment 2\"",
 				"]",
-				"\"use\":\"usual\",", 
-				"\"_use\":{", 
+				"\"use\": \"usual\",", 
+				"\"_use\": {", 
 				"\"fhir_comments\":",
 				"[",
 				"\"use comment 1\"",
@@ -1372,9 +1385,24 @@ public class JsonParserDstu3Test {
 	/**
 	 * See #342
 	 */
-	@Test(expected = DataFormatException.class)
+	@Test()
 	public void testParseInvalid() {
-		ourCtx.newJsonParser().parseResource("FOO");
+		try {
+			ourCtx.newJsonParser().parseResource("FOO");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+		}
+		try {
+			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+		}
+		
+		
+		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
+		
 	}
 
 	@Test
@@ -1440,6 +1468,18 @@ public class JsonParserDstu3Test {
 
 	}
 
+	@Test
+	public void testParseWithTrailingContent() throws Exception {
+		//@formatter:off
+		String bundle = "{\n" + 
+			"  \"resourceType\" : \"Bundle\",\n" + 
+			"  \"total\" : 1\n" + 
+			"}}";
+		//@formatter:on
+
+		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
+	}
+	
 	/**
 	 * See #163
 	 */

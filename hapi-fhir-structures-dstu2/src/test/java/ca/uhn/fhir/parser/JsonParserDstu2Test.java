@@ -89,7 +89,7 @@ public class JsonParserDstu2Test {
 		
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
-		assertThat(output, containsString("\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public class JsonParserDstu2Test {
 		
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
-		assertThat(output, containsString("\"div\":\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+		assertThat(output, containsString("\"div\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 	
 	@Test
@@ -267,21 +267,21 @@ public class JsonParserDstu2Test {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc, stringContainsInOrder("\"meta\":{", 
-				"\"profile\":[", 
+		assertThat(enc, stringContainsInOrder("\"meta\": {", 
+				"\"profile\": [", 
 				"\"http://foo/Profile1\",", 
 				"\"http://foo/Profile2\"", 
 				"],", 
-				"\"tag\":[", 
+				"\"tag\": [", 
 				"{", 
-				"\"system\":\"scheme1\",", 
-				"\"code\":\"term1\",", 
-				"\"display\":\"label1\"", 
+				"\"system\": \"scheme1\",", 
+				"\"code\": \"term1\",", 
+				"\"display\": \"label1\"", 
 				"},", 
 				"{", 
-				"\"system\":\"scheme2\",", 
-				"\"code\":\"term2\",", 
-				"\"display\":\"label2\"", 
+				"\"system\": \"scheme2\",", 
+				"\"code\": \"term2\",", 
+				"\"display\": \"label2\"", 
 				"}", 
 				"]", 
 				"},"));
@@ -377,32 +377,35 @@ public class JsonParserDstu2Test {
 		ourLog.info(enc);
 
 		//@formatter:off
+		String actual = enc.trim();
+		ourLog.info("Actual:\n{}", actual);
+		
 		assertEquals("{\n" + 
-			"    \"resourceType\":\"Patient\",\n" + 
-			"    \"meta\":{\n" + 
-			"        \"security\":[\n" + 
-			"            {\n" + 
-			"                \"system\":\"SYSTEM1\",\n" + 
-			"                \"version\":\"VERSION1\",\n" + 
-			"                \"code\":\"CODE1\",\n" + 
-			"                \"display\":\"DISPLAY1\"\n" + 
-			"            },\n" + 
-			"            {\n" + 
-			"                \"system\":\"SYSTEM2\",\n" + 
-			"                \"version\":\"VERSION2\",\n" + 
-			"                \"code\":\"CODE2\",\n" + 
-			"                \"display\":\"DISPLAY2\"\n" + 
-			"            }\n" + 
-			"        ]\n" + 
-			"    },\n" + 
-			"    \"name\":[\n" + 
-			"        {\n" + 
-			"            \"family\":[\n" + 
-			"                \"FAMILY\"\n" + 
-			"            ]\n" + 
-			"        }\n" + 
+			"  \"resourceType\": \"Patient\",\n" + 
+			"  \"meta\": {\n" + 
+			"    \"security\": [\n" + 
+			"      {\n" + 
+			"        \"system\": \"SYSTEM1\",\n" + 
+			"        \"version\": \"VERSION1\",\n" + 
+			"        \"code\": \"CODE1\",\n" + 
+			"        \"display\": \"DISPLAY1\"\n" + 
+			"      },\n" + 
+			"      {\n" + 
+			"        \"system\": \"SYSTEM2\",\n" + 
+			"        \"version\": \"VERSION2\",\n" + 
+			"        \"code\": \"CODE2\",\n" + 
+			"        \"display\": \"DISPLAY2\"\n" + 
+			"      }\n" + 
 			"    ]\n" + 
-			"}", enc.trim());
+			"  },\n" + 
+			"  \"name\": [\n" + 
+			"    {\n" + 
+			"      \"family\": [\n" + 
+			"        \"FAMILY\"\n" + 
+			"      ]\n" + 
+			"    }\n" + 
+			"  ]\n" + 
+			"}", actual);
 		//@formatter:on
 
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
@@ -597,17 +600,17 @@ public class JsonParserDstu2Test {
 
 		//@formatter:off
 		assertThat(output, stringContainsInOrder(
-			"\"id\":\"1\"",
+			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
-			"\"url\":\"http://exturl\"",
-			"\"valueString\":\"ext_url_value\"",
+			"\"url\": \"http://exturl\"",
+			"\"valueString\": \"ext_url_value\"",
 			"\"code\":"
 		));
 		assertThat(output, not(stringContainsInOrder(
-			"\"url\":\"http://exturl\"",
+			"\"url\": \"http://exturl\"",
 			",",
-			"\"url\":\"http://exturl\""
+			"\"url\": \"http://exturl\""
 		)));
 		//@formatter:on
 		
@@ -637,19 +640,19 @@ public class JsonParserDstu2Test {
 
 		//@formatter:off
 		assertThat(output, stringContainsInOrder(
-				"\"id\":\"1\"",
+				"\"id\": \"1\"",
 				"\"meta\"",
 				"\"extension\"",
-				"\"url\":\"http://exturl\"",
+				"\"url\": \"http://exturl\"",
 				"\"extension\"",
-				"\"url\":\"http://subext\"",
-				"\"valueString\":\"sub_ext_value\"",
+				"\"url\": \"http://subext\"",
+				"\"valueString\": \"sub_ext_value\"",
 				"\"code\":"
 			));
 			assertThat(output, not(stringContainsInOrder(
-				"\"url\":\"http://exturl\"",
+				"\"url\": \"http://exturl\"",
 				",",
-				"\"url\":\"http://exturl\""
+				"\"url\": \"http://exturl\""
 			)));
 		//@formatter:on
 		
@@ -708,7 +711,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\","));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\","));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -730,7 +733,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\":\"foo\",", "\"code\":\"bar\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\","));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\","));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -1246,7 +1249,7 @@ public class JsonParserDstu2Test {
 		
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
-				"\"identifier\":[", 
+				"\"identifier\": [", 
 				"{",
 				"\"fhir_comments\":",
 				"[",
@@ -1254,8 +1257,8 @@ public class JsonParserDstu2Test {
 				",",
 				"\"identifier comment 2\"",
 				"]",
-				"\"use\":\"usual\",", 
-				"\"_use\":{", 
+				"\"use\": \"usual\",", 
+				"\"_use\": {", 
 				"\"fhir_comments\":",
 				"[",
 				"\"use comment 1\"",
@@ -1316,11 +1319,11 @@ public class JsonParserDstu2Test {
 
 		//@formatter:off
 		assertThat(enc, stringContainsInOrder(
-			"\"resourceType\":\"Observation\"",
-			"\"contained\":[",
-			"\"resourceType\":\"Patient\",",
-			"\"id\":\"1\"",
-			"\"reference\":\"#1\""
+			"\"resourceType\": \"Observation\"",
+			"\"contained\": [",
+			"\"resourceType\": \"Patient\",",
+			"\"id\": \"1\"",
+			"\"reference\": \"#1\""
 			));
 		//@formatter:on
 
@@ -1547,7 +1550,16 @@ public class JsonParserDstu2Test {
 	 */
 	@Test
 	public void testParseResourceWithInvalidType() {
-		String input = "{" + "\"resourceType\":\"Patient\"," + "\"contained\":[" + "    {" + "       \"rezType\":\"Organization\"" + "    }" + "  ]" + "}";
+		//@formatter:off
+		String input = "{" + 
+			"\"resourceType\":\"Patient\"," + 
+			 "\"contained\":[" + 
+			 "    {" + 
+			 "       \"rezType\":\"Organization\"" + 
+			 "    }" + 
+			 "  ]" + 
+			 "}";
+		//@formatter:on
 
 		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		try {
@@ -1589,7 +1601,7 @@ public class JsonParserDstu2Test {
 			ourCtx.newJsonParser().parseResource(Conformance.class, input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
+			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'JsonObject'", e.getMessage());
 		}
 	}
 

@@ -1635,28 +1635,29 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	public void testOrganizationName() {
 
 		//@formatter:off
-		String inputStr = "{\"resourceType\":\"Organization\",\n" + 
-				"                \"extension\":[\n" + 
-				"                    {\n" + 
-				"                        \"url\":\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\",\n" + 
-				"                        \"valueUri\":\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"\n" + 
-				"                    }\n" + 
-				"                ],\n" + 
-				"                \"text\":{\n" + 
-				"                    \"status\":\"empty\",\n" + 
-				"                    \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">No narrative template available for resource profile: http://fhir.connectinggta.ca/Profile/organization</div>\"\n" + 
-				"                },\n" + 
-				"                \"identifier\":[\n" + 
-				"                    {\n" + 
-				"                        \"use\":\"official\",\n" + 
-				"                        \"label\":\"HSP 2.16.840.1.113883.3.239.23.21\",\n" + 
-				"                        \"system\":\"urn:cgta:hsp_ids\",\n" + 
-				"                        \"value\":\"urn:oid:2.16.840.1.113883.3.239.23.21\"\n" + 
-				"                    }\n" + 
-				"                ],\n" + 
-				"                \"name\":\"Peterborough Regional Health Centre\"\n" + 
-				"            }\n" + 
-				"        }";
+		String inputStr = 
+				"{" +
+				"  \"resourceType\":\"Organization\",\n" + 
+				"  \"extension\":[\n" + 
+				"     {\n" + 
+				"       \"url\":\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\",\n" + 
+				"       \"valueUri\":\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"\n" + 
+				"     }\n" + 
+				"  ],\n" + 
+				"  \"text\":{\n" + 
+				"     \"status\":\"empty\",\n" + 
+				"     \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">No narrative template available for resource profile: http://fhir.connectinggta.ca/Profile/organization</div>\"\n" + 
+				"  },\n" + 
+				"  \"identifier\":[\n" + 
+				"     {\n" + 
+				"       \"use\":\"official\",\n" + 
+				"       \"label\":\"HSP 2.16.840.1.113883.3.239.23.21\",\n" + 
+				"       \"system\":\"urn:cgta:hsp_ids\",\n" + 
+				"       \"value\":\"urn:oid:2.16.840.1.113883.3.239.23.21\"\n" + 
+				"     }\n" + 
+				"  ],\n" + 
+				"  \"name\":\"Peterborough Regional Health Centre\"\n" + 
+				"}\n";
 		//@formatter:on
 
 		Set<Long> val = myOrganizationDao.searchForIds("name", new StringParam("P"));
