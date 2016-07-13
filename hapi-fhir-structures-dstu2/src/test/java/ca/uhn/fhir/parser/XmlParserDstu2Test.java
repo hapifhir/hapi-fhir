@@ -1767,7 +1767,7 @@ public class XmlParserDstu2Test {
 		
 		//@formatter:off
 		assertThat(encoded, stringContainsInOrder(
-				"\"identifier\":[", 
+				"\"identifier\": [", 
 				"{",
 				"\"fhir_comments\":",
 				"[",
@@ -1775,8 +1775,8 @@ public class XmlParserDstu2Test {
 				",",
 				"\"identifier comment 2\"",
 				"]",
-				"\"use\":\"usual\",", 
-				"\"_use\":{", 
+				"\"use\": \"usual\",", 
+				"\"_use\": {", 
 				"\"fhir_comments\":",
 				"[",
 				"\"use comment 1\"",

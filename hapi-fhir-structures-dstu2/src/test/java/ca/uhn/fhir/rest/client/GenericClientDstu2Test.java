@@ -1724,7 +1724,7 @@ public class GenericClientDstu2Test {
 
 	@Test
 	public void testReadWithElementsParam() throws Exception {
-		String msg = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}";
+		String msg = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -2595,7 +2595,7 @@ public class GenericClientDstu2Test {
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
 		assertEquals("http://example.com/fhir/Patient/$validate?_format=json&_pretty=true", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
-		assertThat(extractBody(capt, idx), containsString("\"resourceType\":\"Parameters\",\n"));
+		assertThat(extractBody(capt, idx), containsString("\"resourceType\": \"Parameters\",\n"));
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		idx++;

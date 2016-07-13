@@ -109,7 +109,7 @@ public class JaxRsResponseDstu3Test {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals("application/json+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertTrue(result.getEntity().toString().contains("resourceType\":\"Patient"));
+		assertTrue(result.getEntity().toString().contains("resourceType\": \"Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 		
 	}

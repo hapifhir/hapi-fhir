@@ -38,6 +38,13 @@
 		    <version>3.2</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 		
+		<!-- Use an old version of Gson -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		
 		<!--
 		Woodstox note: The hapi-fhir-base-testmindeps-client project includes no Woodstox at all, so that we use the
 		StAX version that's bundled with the JDK. The hapi-fhir-base-testmindeps-server 

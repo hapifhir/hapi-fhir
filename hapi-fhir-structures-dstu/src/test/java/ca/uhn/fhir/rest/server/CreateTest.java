@@ -222,7 +222,7 @@ public class CreateTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Unexpected char"));
+		assertThat(responseContent, containsString("Content does not appear to be FHIR JSON, first non-whitespace character was: '&lt;' (must be '{')"));
 	}
 
 	@Test
