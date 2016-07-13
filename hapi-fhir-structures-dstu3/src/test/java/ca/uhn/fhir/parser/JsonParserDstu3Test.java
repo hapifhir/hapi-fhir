@@ -1486,7 +1486,7 @@ public class JsonParserDstu3Test {
 
 	}
 
-	@Test
+	@Test(expected=DataFormatException.class)
 	public void testParseWithTrailingContent() throws Exception {
 		//@formatter:off
 		String bundle = "{\n" + 
