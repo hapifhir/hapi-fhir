@@ -301,7 +301,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return theServletPath.length() + delta;
 	}
 
-	private void findResourceMethods(Object theProvider) throws Exception {
+	private void findResourceMethods(Object theProvider) {
 
 		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
 		int count = 0;
@@ -1017,11 +1017,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Register a single provider. This could be a Resource Provider or a "plain" provider not associated with any
 	 * resource.
-	 * 
-	 * @param provider
-	 * @throws Exception
 	 */
-	public void registerProvider(Object provider) throws Exception {
+	public void registerProvider(Object provider) {
 		if (provider != null) {
 			Collection<Object> providerList = new ArrayList<Object>(1);
 			providerList.add(provider);
@@ -1034,9 +1031,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * 
 	 * @param providers
 	 *           a {@code Collection} of providers. The parameter could be null or an empty {@code Collection}
-	 * @throws Exception
 	 */
-	public void registerProviders(Collection<? extends Object> providers) throws Exception {
+	public void registerProviders(Collection<? extends Object> providers) {
 		myProviderRegistrationMutex.lock();
 		try {
 			if (!myStarted) {
@@ -1059,7 +1055,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/*
 	 * Inner method to actually register providers
 	 */
-	protected void registerProviders(Collection<? extends Object> providers, boolean inInit) throws Exception {
+	protected void registerProviders(Collection<? extends Object> providers, boolean inInit) {
 		List<IResourceProvider> newResourceProviders = new ArrayList<IResourceProvider>();
 		List<Object> newPlainProviders = new ArrayList<Object>();
 		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
@@ -1074,7 +1070,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					}
 					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
 					if (myTypeToProvider.containsKey(resourceName)) {
-						throw new ServletException("Multiple resource providers return resource type[" + resourceName + "]: First[" + myTypeToProvider.get(resourceName).getClass().getCanonicalName() + "] and Second[" + rsrcProvider.getClass().getCanonicalName() + "]");
+						throw new ConfigurationException("Multiple resource providers return resource type[" + resourceName + "]: First[" + myTypeToProvider.get(resourceName).getClass().getCanonicalName() + "] and Second[" + rsrcProvider.getClass().getCanonicalName() + "]");
 					}
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);

@@ -8,6 +8,29 @@
 	<body>
 		<release version="2.0" date="TBD">
 			<action type="fix">
+				JSON parsing in HAPI FHIR has been switched from using JSR353 (javax.json) to
+				using Google Gson. For this reason we are bumping the major release number to
+				2.0. Theoretically this should not affect projects in any major way, but Gson
+				does have subtle differences. Two differences which popped up a fair bit in
+				our own testing:
+				<![CDATA[
+				<ul>
+					<ul>
+						A space is placed after the : in keys, e.g. what was previously
+						encoded as <code>"resourceType":"Patient"</code> is now encoded
+						as <code>"resourceType": "Patient"</code> (this broke a number of
+						our unit tests with hardcoded resource definitions)
+					</ul>
+					<ul>
+						Trailing content after a valid json resource is rejected by
+						Gson (it was ignored by the Glassfish parser we were previously
+						using even though it was invalid)
+					</ul>
+						
+				</ul>
+				]]>
+			</action>
+			<action type="fix">
 				Fix issue in DSTU1 Bundle parsing where unexpected elements in the bundle resulted in a failure
 				to parse.
 			</action>
