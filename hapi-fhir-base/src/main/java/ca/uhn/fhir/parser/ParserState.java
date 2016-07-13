@@ -712,11 +712,7 @@ class ParserState<T> {
 			} else if ("deleted-entry".equals(theLocalPart) && verifyNamespace(XmlParser.TOMBSTONES_NS, theNamespaceUri)) {
 				push(new AtomDeletedEntryState(myInstance, myResourceType));
 			} else {
-				if (theNamespaceUri != null) {
-					throw new DataFormatException("Unexpected element: {" + theNamespaceUri + "}" + theLocalPart);
-				} else {
-					throw new DataFormatException("Unexpected element: " + theLocalPart);
-				}
+				logAndSwallowUnexpectedElement(theLocalPart);
 			}
 
 			// TODO: handle category and DSig

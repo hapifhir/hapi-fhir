@@ -71,7 +71,7 @@
 				of changes in this version. Among the enhancements in this release are:
 			</p>
 			<ul>
-				<li>Significant enhancements to FhirConetxt startup performance (especially on Android)</li>
+				<li>Significant enhancements to FhirContext startup performance (especially on Android)</li>
 				<li>Support for STU3 terminology services in the JPA module, including support for importing SNOMED CT and LOINC</li>
 				<li>Update of the STU3 resources and validator to the latest snapshot</li>
 				<li>Plenty of bug fixes</li>

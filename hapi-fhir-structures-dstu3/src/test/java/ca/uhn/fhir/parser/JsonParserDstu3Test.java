@@ -24,11 +24,13 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Communication;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Conformance;
@@ -1044,6 +1046,7 @@ public class JsonParserDstu3Test {
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
 	}
 
+	
 	@Test
 	@Ignore
 	public void testParseAndEncodeBundle() throws Exception {
@@ -1247,6 +1250,21 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, not(containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"")));
 	}
 
+	/**
+	 * See #399
+	 */
+	@Test
+	public void testParseCommunicationWithThreeTypes() throws IOException {
+		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/tara-test.json"));
+		Communication comm = ourCtx.newJsonParser().parseResource(Communication.class, content);
+
+		assertEquals(3, comm.getPayload().size());
+		assertEquals(Attachment.class, comm.getPayload().get(0).getContent().getClass());
+		assertEquals(Reference.class, comm.getPayload().get(1).getContent().getClass());
+		assertEquals(String.class, comm.getPayload().get(2).getContent().getClass());
+	}
+
+	
 	@Test
 	public void testParseAndEncodeComments() throws IOException {
 		//@formatter:off

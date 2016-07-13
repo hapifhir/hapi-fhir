@@ -3,6 +3,8 @@ package ca.uhn.fhir.validation;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -123,6 +125,19 @@ public class QuestionnaireResponseValidatorIntegrationTest {
 		}
 	}
 
+	 @Test
+	  public void testGroup() throws Exception {
+	    Questionnaire q = ourCtx.newJsonParser().parseResource(Questionnaire.class, IOUtils.toString(getClass().getResourceAsStream("/questionnaire-20160712.json")));
+	    QuestionnaireResponse qa = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, IOUtils.toString(getClass().getResourceAsStream("/questionnaire-20160712-response.json")));
+
+	    when(myResourceLoaderMock.load(Mockito.eq(Questionnaire.class), Mockito.any(IdType.class))).thenReturn(q);
+	    ValidationResult errors = myVal.validateWithResult(qa);
+
+	    ourLog.info(errors.toString());
+	    assertEquals(true, errors.isSuccessful());
+	  }
+
+	
 	@Test
 	public void testCodedAnswer() {
 		String questionnaireRef = "http://example.com/Questionnaire/q1";

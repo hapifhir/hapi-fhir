@@ -46,9 +46,19 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
 
+	/**
+	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
+	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 */
+	DaoMethodOutcome create(T theResource);
+
 	DaoMethodOutcome create(T theResource, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
+	/**
+	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
+	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 */
+	DaoMethodOutcome create(T theResource, String theIfNoneExist);
 
 	/**
 	 * @param thePerformIndexing
@@ -58,11 +68,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
+
 	/**
-	 * This method throws an exception if there are delete conflicts
-	 * @param theRequestDetails TODO
+	 * Delete a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
+	 * therefore can not fire any interceptors. Use only for internal system calls 
 	 */
-	DaoMethodOutcome delete(IIdType theResource, RequestDetails theRequestDetails);
+	DaoMethodOutcome delete(IIdType theResource);
 
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
@@ -73,17 +85,19 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * This method throws an exception if there are delete conflicts
-	 * @param theRequestDetails TODO
 	 */
-	DaoMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
+	DaoMethodOutcome delete(IIdType theResource, RequestDetails theRequestDetails);
 
 	/**
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
-	 * @param theRequestDetails TODO
-	 * @return 
 	 */
 	List<ResourceTable> deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
+
+	/**
+	 * This method throws an exception if there are delete conflicts
+	 */
+	DaoMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
 
 	TagList getAllResourceTags(RequestDetails theRequestDetails);
 
@@ -111,15 +125,21 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Not supported in DSTU1!
 	 * @param theRequestDetails TODO
 	 */
-	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
+	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
 	 * @param theRequestDetails TODO
 	 */
-	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails);
+	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
 	Set<Long> processMatchUrl(String theMatchUrl);
+
+	/**
+	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
+	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 */
+	T read(IIdType theId);
 
 	/**
 	 * 
@@ -160,9 +180,19 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
 
+	/**
+	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
+	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 */
+	DaoMethodOutcome update(T theResource);
+
 	DaoMethodOutcome update(T theResource, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails);
+	/**
+	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
+	 * therefore can not fire any interceptors. Use only for internal system calls 
+	 */
+	DaoMethodOutcome update(T theResource, String theMatchUrl);
 
 	/**
 	 * @param thePerformIndexing
@@ -171,6 +201,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theRequestDetails TODO
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails);
+
+	DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!

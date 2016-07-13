@@ -270,7 +270,7 @@ public class SubscriptionWebsocketHandlerDstu2 extends TextWebSocketHandler impl
 					}
 				}
 				
-				IIdType id = mySubscriptionDao.create(subscription, null).getId();
+				IIdType id = mySubscriptionDao.create(subscription).getId();
 
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
