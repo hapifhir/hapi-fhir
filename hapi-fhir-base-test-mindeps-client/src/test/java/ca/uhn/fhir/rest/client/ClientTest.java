@@ -19,7 +19,7 @@ public class ClientTest {
 		Bundle bundle = new Bundle();
 		bundle.addEntry().setResource(new Patient().setId("Patient/unit_test_patient"));
 		
-		IGenericClient client = ctx.newRestfulGenericClient("http://this_is_an_invalid_host_name_yes_it_is/fhir"); // won't connect
+		IGenericClient client = ctx.newRestfulGenericClient("http://127.0.0.1:1/fhir"); // won't connect
 		ITransactionTyped<Bundle> transaction = client.transaction().withBundle(bundle);
 		try {
 			Bundle result = transaction.encodedJson().execute();
