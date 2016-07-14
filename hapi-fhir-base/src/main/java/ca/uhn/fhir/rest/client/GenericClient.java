@@ -887,7 +887,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			for (ICriterionInternal next : this) {
 				String parameterName = next.getParameterName();
 				String parameterValue = next.getParameterValue(myContext);
-				addParam(theParams, parameterName, parameterValue);
+				if (isNotBlank(parameterValue)) {
+					addParam(theParams, parameterName, parameterValue);
+				}
 			}
 		}
 

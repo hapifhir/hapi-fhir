@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -81,10 +83,12 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 		@Override
 		public String getParameterValue(FhirContext theContext) {
 			StringBuilder b = new StringBuilder();
-			if (myPrefix != null && myPrefix != ParamPrefixEnum.EQUAL) {
-				b.append(myPrefix.getValueForContext(theContext));
+			if (isNotBlank(myValue)) {
+				if (myPrefix != null && myPrefix != ParamPrefixEnum.EQUAL) {
+					b.append(myPrefix.getValueForContext(theContext));
+				}
+				b.append(myValue);
 			}
-			b.append(myValue);
 			return b.toString();
 		}
 
