@@ -38,6 +38,10 @@
 				DSTU2 QuestionnaireResponse validator failed with an exception if the
 				QuestionnaireResponse contained certain groups with no content
 			</action>
+			<action type="add" issue="150">
+				Fluent client should ignore parameter values which are null instead of including
+				them as <![CDATA[<code>?foo=null</code>]]>
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
