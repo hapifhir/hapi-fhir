@@ -370,7 +370,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), Charset.forName("UTF-8")));
 		outcome = (OperationOutcome) client.delete().resourceById(new IdDt("Location", "123", "456")).prettyPrint().encodedJson().execute();
 
-		assertEquals("http://example.com/fhir/Location/123?_format=json&_pretty=true", capt.getAllValues().get(1).getURI().toString());
+		assertEquals("http://example.com/fhir/Location/123?_pretty=true", capt.getAllValues().get(1).getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
 		assertEquals(null, outcome);
 
@@ -1542,7 +1542,7 @@ public class GenericClientTest {
 		assertNotNull(ct);
 		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", ct.getValue());
 
-		assertEquals("http://example.com/fhir?_format=json", value.getURI().toString());
+		assertEquals("http://example.com/fhir", value.getURI().toString());
 		assertThat(IOUtils.toString(value.getEntity().getContent()), StringContains.containsString("\"resourceType\""));
 		assertEquals(bundle.getEntries().get(0).getResource().getId(), response.getEntries().get(0).getResource().getId());
 	}

@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.VersionUtil;
@@ -148,13 +149,7 @@ public class ApacheHttpClient implements IHttpClient {
 		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		theHttpRequest.addHeader("Accept-Encoding", "gzip");
 
-		if (theEncoding == null) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
-		} else if (theEncoding == EncodingEnum.JSON) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
-		} else if (theEncoding == EncodingEnum.XML) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
-		}
+		RestfulServerUtils.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
 	}
 
 	private ApacheHttpRequest createHttpRequest(HttpEntity theEntity) {

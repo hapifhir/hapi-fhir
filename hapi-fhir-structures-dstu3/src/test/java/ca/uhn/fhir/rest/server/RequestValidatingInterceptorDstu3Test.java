@@ -136,7 +136,7 @@ public class RequestValidatingInterceptorDstu3Test {
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
-		assertThat(responseContent, containsString("<severity value=\"error\"/>"));
+		assertThat(responseContent, containsString("\"severity\":\"error\""));
 	}
 
 	@Test

@@ -111,7 +111,7 @@ public class ResourceParameter implements IParameter {
 		case BODY_BYTE_ARRAY:
 			return theRequest.loadRequestContents();
 		case ENCODING:
-			return RestfulServerUtils.determineRequestEncoding(theRequest);
+			return RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
 		case RESOURCE:
 		default:
 			return parseResourceFromRequest(theRequest, theMethodBinding, myResourceType);

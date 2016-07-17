@@ -26,9 +26,25 @@
 						Gson (it was ignored by the Glassfish parser we were previously
 						using even though it was invalid)
 					</ul>
-						
 				</ul>
 				]]>
+			</action>
+			<action type="add">
+				Both client and server now support the new Content Types decided in
+				<![CDATA[<a href="http://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_id=677&tracker_item_id=10199">FHIR #10199</a>]]>.
+				<![CDATA[<br/><br/>]]>
+				This means that the server now supports 
+				<![CDATA[<code>application/fhir+xml</code> and <code>application/fhir+json</code>]]>
+				in addition to the older style
+				<![CDATA[<code>application/xml+fhir</code> and <code>application/json+fhir</code>]]>.
+				In order to facilitate migration by implementors, the old style remains the default
+				for now, but the server will respond using the new style if the request contains it. The
+				client now uses an <![CDATA[<code>Accept</code>]]> header value which requests both 
+				styles with a preference given to the new style when running in DSTU3 mode.
+				<![CDATA[<br/><br/>]]>
+				As a part of this change, the server has also been enhanced so that if a request
+				contains a Content-Type header but no Accept header, the response will prefer the
+				encoding specified by the Content-Type header.
 			</action>
 			<action type="fix">
 				Fix issue in DSTU1 Bundle parsing where unexpected elements in the bundle resulted in a failure

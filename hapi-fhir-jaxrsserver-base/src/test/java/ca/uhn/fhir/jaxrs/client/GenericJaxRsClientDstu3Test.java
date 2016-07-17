@@ -137,7 +137,7 @@ public class GenericJaxRsClientDstu3Test {
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
-		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
+		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
 		
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
@@ -173,12 +173,12 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUriAll.get(0));
 		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
+		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
+		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 	}
@@ -1605,7 +1605,7 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals("name=james", ourRequestBodyString);
 
 		assertEquals("application/x-www-form-urlencoded", ourRequestContentType.replace(";char", "; char").toLowerCase());
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON, ourRequestFirstHeaders.get("Accept").getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, ourRequestFirstHeaders.get("Accept").getValue());
 		assertThat(ourRequestFirstHeaders.get("User-Agent").getValue(), not(emptyString()));
 	}
 

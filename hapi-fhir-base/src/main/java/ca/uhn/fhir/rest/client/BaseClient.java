@@ -214,12 +214,14 @@ public abstract class BaseClient implements IRestfulClient {
 		try {
 			Map<String, List<String>> params = createExtraParams();
 
-			if (theEncoding == EncodingEnum.XML) {
-				params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
-			} else if (theEncoding == EncodingEnum.JSON) {
-				params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+			if (clientInvocation instanceof HttpGetClientInvocation) {
+				if (theEncoding == EncodingEnum.XML) {
+					params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
+				} else if (theEncoding == EncodingEnum.JSON) {
+					params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+				}
 			}
-
+			
 			if (theSummaryMode != null) {
 				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(theSummaryMode.getCode()));
 			} else if (mySummary != null) {

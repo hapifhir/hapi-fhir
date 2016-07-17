@@ -104,7 +104,7 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	}
 
 	protected String getParserType() {
-		EncodingEnum encodingEnum = RestfulServerUtils.determineResponseEncodingWithDefault(getRequestDetails());
+		EncodingEnum encodingEnum = RestfulServerUtils.determineResponseEncodingWithDefault(getRequestDetails()).getEncoding();
 		return encodingEnum == EncodingEnum.JSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
 	}
 

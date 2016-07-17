@@ -670,7 +670,7 @@ public class GenericClientDstu2Hl7OrgTest {
                 .execute();
         //@formatter:on
 
-		assertEquals("http://example.com/fhir?_format=json", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
 		assertEquals(2, response.size());
 
 		String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
@@ -723,7 +723,7 @@ public class GenericClientDstu2Hl7OrgTest {
                 .execute();
         //@formatter:on
 
-		assertEquals("http://example.com/fhir?_format=json", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
 		assertEquals(2, response.getEntry().size());
 
 		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());

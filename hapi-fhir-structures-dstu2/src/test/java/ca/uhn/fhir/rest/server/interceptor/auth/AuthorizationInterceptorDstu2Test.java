@@ -75,7 +75,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class AuthorizationInterceptorDstu2Test {
 
-	private static final String ERR403 = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Access denied by default policy (no applicable rules)\"/></issue></OperationOutcome>";
+	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"Access denied by default policy (no applicable rules)\"}]}";
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static boolean ourHitMethod;

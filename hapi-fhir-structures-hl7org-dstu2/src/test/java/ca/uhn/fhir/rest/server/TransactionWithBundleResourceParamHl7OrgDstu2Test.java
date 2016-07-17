@@ -37,9 +37,6 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
 	@Test
@@ -157,7 +154,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		assertEquals(3, bundle.getEntry().size());
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);

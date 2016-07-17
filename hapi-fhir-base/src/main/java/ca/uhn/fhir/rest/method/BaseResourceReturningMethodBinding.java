@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -372,8 +373,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
-				EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
-				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) ? responseEncoding : null;
+				ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
+				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
 
 				boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, null, getResponseBundleType(), includes);

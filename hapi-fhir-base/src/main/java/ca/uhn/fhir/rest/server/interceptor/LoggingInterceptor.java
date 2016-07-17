@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
@@ -283,9 +284,9 @@ public class LoggingInterceptor extends InterceptorAdapter {
 			} else if (theKey.startsWith("remoteAddr")) {
 				return StringUtils.defaultString(myRequest.getRemoteAddr());
 			} else if (theKey.equals("responseEncodingNoDefault")) {
-				EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
+				ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
 				if (encoding != null) {
-					return encoding.name();
+					return encoding.getEncoding().name();
 				} else {
 					return "";
 				}

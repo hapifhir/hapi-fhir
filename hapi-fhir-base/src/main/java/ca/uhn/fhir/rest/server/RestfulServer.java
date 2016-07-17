@@ -68,6 +68,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.ParseAction;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -1163,10 +1164,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			addContentLocationHeaders(theRequest, servletResponse, response, resourceName);
 		}
 		if (outcome != null) {
-			EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest);
+			ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest);
 			servletResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = servletResponse.getWriter();
-			IParser parser = encoding.newParser(getFhirContext());
+			IParser parser = encoding.getEncoding().newParser(getFhirContext());
 			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(this, theRequest));
 			try {
 				outcome.execute(parser, writer);
