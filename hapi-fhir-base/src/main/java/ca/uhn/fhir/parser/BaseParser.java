@@ -667,16 +667,16 @@ public abstract class BaseParser implements IParser {
 		return parseTagList(new StringReader(theString));
 	}
 
-	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition metaChildUncast, IBaseResource theResource, List<? extends IBase> theValues) {
+	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues) {
 		if (myContext.getVersion().getVersion().isRi()) {
 
 			/*
 			 * If we're encoding the meta tag, we do some massaging of the meta values before
-			 * encoding. Buf if there is no meta element at all, we create one since we're possibly going to be
+			 * encoding. But if there is no meta element at all, we create one since we're possibly going to be
 			 * adding things to it
 			 */
-			if (theValues.isEmpty() && metaChildUncast.getElementName().equals("meta")) {
-				BaseRuntimeElementDefinition<?> metaChild = metaChildUncast.getChildByName("meta");
+			if (theValues.isEmpty() && theMetaChildUncast.getElementName().equals("meta")) {
+				BaseRuntimeElementDefinition<?> metaChild = theMetaChildUncast.getChildByName("meta");
 				if (IBaseMetaType.class.isAssignableFrom(metaChild.getImplementingClass())) {
 					IBaseMetaType newType = (IBaseMetaType) metaChild.newInstance();
 					theValues = Collections.singletonList(newType);
@@ -842,7 +842,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected boolean shouldAddSubsettedTag() {
-		return isSummaryMode() || isSuppressNarratives();
+		return isSummaryMode() || isSuppressNarratives() || getEncodeElements() != null;
 	}
 
 	protected boolean shouldEncodeResourceId(IBaseResource theResource) {

@@ -58,6 +58,10 @@
 				Fluent client should ignore parameter values which are null instead of including
 				them as <![CDATA[<code>?foo=null</code>]]>
 			</action>
+			<action type="fix">
+				When using <![CDATA[<code>_elements</code>]]> parameter on server, the server was not
+				automatically adding the <![CDATA[<code>SUBSETTED</code>]]> tag as it should
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">

@@ -590,7 +590,6 @@ public class XmlParser extends BaseParser implements IParser {
 
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent)
 			throws XMLStreamException, DataFormatException {
 		
