@@ -163,9 +163,9 @@ public class JpaServerDemo extends RestfulServer {
 		 * so it is a potential security vulnerability. Consider using an AuthorizationInterceptor
 		 * with this feature.
 		 */
-		if (fhirVersion == FhirVersionEnum.DSTU3) {
-			registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
-		}
+		//if (fhirVersion == FhirVersionEnum.DSTU3) {
+		//	 registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+		//}
 	}
 
 }
