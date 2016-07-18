@@ -32,4 +32,6 @@ public interface IFulltextSearchSvc {
 
 	List<Long> everything(String theResourceName, SearchParameterMap theParams);
 
+	boolean isDisabled();
+
 }

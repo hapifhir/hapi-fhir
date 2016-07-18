@@ -62,6 +62,12 @@
 				When using <![CDATA[<code>_elements</code>]]> parameter on server, the server was not
 				automatically adding the <![CDATA[<code>SUBSETTED</code>]]> tag as it should
 			</action>
+			<action type="fix">
+				JPA server should now automatically detect
+				if Hibernate Search (Lucene) is configured to be
+				disabled and will not attempt to use it. This
+				prevents a crash for some operations.
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
