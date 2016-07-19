@@ -5,14 +5,18 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -67,6 +71,36 @@ public class ServerMimetypeDstu3Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><diagnostics value=\"FAMILY\"/></issue></OperationOutcome>", responseContent);
+	}
+
+	@Test
+	public void testHttpTraceNotEnabled() throws Exception {
+		HttpTrace req = new HttpTrace("http://localhost:" + ourPort + "/Patient");
+		CloseableHttpResponse status = ourClient.execute(req);
+		try {
+			ourLog.info(status.toString());
+			assertEquals(400, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+	}
+
+	@Test
+	public void testHttpTrackNotEnabled() throws Exception {
+		HttpRequestBase req = new HttpRequestBase() {
+			@Override
+			public String getMethod() {
+				return "TRACK";
+			}};
+		req.setURI(new URI("http://localhost:" + ourPort + "/Patient"));
+			
+		CloseableHttpResponse status = ourClient.execute(req);
+		try {
+			ourLog.info(status.toString());
+			assertEquals(400, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
 	}
 
 	@Test
