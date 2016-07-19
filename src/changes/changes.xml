@@ -68,6 +68,16 @@
 				disabled and will not attempt to use it. This
 				prevents a crash for some operations.
 			</action>
+			<action type="add">
+				A new server interceptor "BanUnsupprtedHttpMethodsInterceptor" has been added
+				which causes the server to return an HTTP 405 if an unsupported HTTP
+				verb is received from the client
+			</action>
+			<action type="fix" issue="404">
+				Fix an issue where resource IDs were not correctly set when using
+				DSTU2 HL7org structures with the JAX-RS module. Thanks to Carlo Mion
+				for the pull request!
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
