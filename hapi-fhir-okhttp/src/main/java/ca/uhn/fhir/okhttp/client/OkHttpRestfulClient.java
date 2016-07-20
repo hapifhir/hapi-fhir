@@ -9,10 +9,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.*;
 import okhttp3.internal.Version;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
@@ -60,7 +57,27 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
-        return null;
+        OkHttpRestfulRequest request = new OkHttpRestfulRequest(client, myUrl.toString(), theRequestType);
+        addHeadersToRequest(request, theEncoding, theContext);
+        setFormBodyOnRequest(request, theParams);
+        return request;
+    }
+
+    private void setFormBodyOnRequest(OkHttpRestfulRequest request, Map<String, List<String>> queryParams) {
+        Request.Builder builder = request.getRequest();
+        RequestBody formBody = getFormBodyFromParams(queryParams);
+        builder.post(formBody);
+    }
+
+    private RequestBody getFormBodyFromParams(Map<String, List<String>> queryParams) {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        for (Map.Entry<String, List<String>> paramEntry : queryParams.entrySet()) {
+            for (String value : paramEntry.getValue()) {
+                formBuilder.add(paramEntry.getKey(), value);
+            }
+        }
+
+        return formBuilder.build();
     }
 
     @Override
