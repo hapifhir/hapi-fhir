@@ -2,14 +2,18 @@ package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.internal.Version;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
@@ -21,7 +25,9 @@ import java.util.Map;
 public class OkHttpRestfulClient implements IHttpClient {
 
     private OkHttpClient client;
-    private StringBuilder theUrl;
+    private StringBuilder myUrl;
+    private Map<String, List<String>> myIfNoneExistParams;
+    private String myIfNoneExistString;
     private RequestTypeEnum theRequestType;
     private List<Header> myHeaders;
 
@@ -32,14 +38,24 @@ public class OkHttpRestfulClient implements IHttpClient {
                                RequestTypeEnum theRequestType,
                                List<Header> theHeaders) {
         this.client = client;
-        this.theUrl = theUrl;
+        myUrl = theUrl;
+        myIfNoneExistParams = theIfNoneExistParams;
+        myIfNoneExistString = theIfNoneExistString;
         this.theRequestType = theRequestType;
         myHeaders = theHeaders;
     }
 
     @Override
     public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
-        return null;
+        OkHttpRestfulRequest request = new OkHttpRestfulRequest(client, myUrl.toString(), theRequestType);
+        addHeadersToRequest(request, theEncoding, theContext);
+        setPostBodyOnRequest(request, theContents, theContentType);
+        return request;
+    }
+
+    private void setPostBodyOnRequest(OkHttpRestfulRequest httpRestfulRequest, String theContents, String theContentType) {
+        Request.Builder builder = httpRestfulRequest.getRequest();
+        builder.post(RequestBody.create(MediaType.parse(theContentType), theContents));
     }
 
     @Override
@@ -54,9 +70,9 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
-        OkHttpRestfulRequest okHttpRestfulRequest = new OkHttpRestfulRequest(client, theUrl.toString(), theRequestType);
-        addHeadersToRequest(okHttpRestfulRequest, theEncoding, theContext);
-        return okHttpRestfulRequest;
+        OkHttpRestfulRequest request = new OkHttpRestfulRequest(client, myUrl.toString(), theRequestType);
+        addHeadersToRequest(request, theEncoding, theContext);
+        return request;
     }
 
     public void addHeadersToRequest(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
@@ -66,18 +82,54 @@ public class OkHttpRestfulClient implements IHttpClient {
             }
         }
 
-        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "jax-rs"));
-        theHttpRequest.addHeader("Accept-Charset", "utf-8");
+        addUserAgentHeader(theHttpRequest, theContext);
+        addAcceptCharsetHeader(theHttpRequest);
+        addAcceptHeader(theHttpRequest, theEncoding);
+        addIfNoneExistHeader(theHttpRequest);
+    }
 
+    private void addUserAgentHeader(OkHttpRestfulRequest theHttpRequest, FhirContext theContext) {
+        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, Version.userAgent()));
+    }
+
+    private void addAcceptCharsetHeader(OkHttpRestfulRequest theHttpRequest) {
+        theHttpRequest.addHeader("Accept-Charset", "utf-8");
+    }
+
+    private void addAcceptHeader(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding) {
         Request.Builder builder = theHttpRequest.getRequest();
 
         if (theEncoding == null) {
-            builder.addHeader("Accept", Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
+            builder.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
         } else if (theEncoding == EncodingEnum.JSON) {
-            builder.addHeader("Accept", Constants.CT_FHIR_JSON);
+            builder.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
         } else if (theEncoding == EncodingEnum.XML) {
-            builder.addHeader("Accept", Constants.CT_FHIR_XML);
+            builder.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
         }
+    }
+
+    private void addIfNoneExistHeader(IHttpRequest result) {
+        if (myIfNoneExistParams != null) {
+            StringBuilder sb = newHeaderBuilder(myUrl);
+            BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(myIfNoneExistParams, sb, sb.indexOf("?") == -1);
+            result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
+        }
+
+        if (myIfNoneExistString != null) {
+            StringBuilder sb = newHeaderBuilder(myUrl);
+            sb.append(sb.indexOf("?") == -1 ? '?' : '&');
+            sb.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
+            result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
+        }
+    }
+
+    private StringBuilder newHeaderBuilder(StringBuilder theUrlBase) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(theUrlBase);
+        if (theUrlBase.length() > 0 && theUrlBase.charAt(theUrlBase.length() - 1) == '/') {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb;
     }
 
 }
