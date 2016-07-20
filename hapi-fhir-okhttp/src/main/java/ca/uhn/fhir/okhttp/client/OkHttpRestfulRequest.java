@@ -1,8 +1,13 @@
 package ca.uhn.fhir.okhttp.client;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,6 +34,10 @@ public class OkHttpRestfulRequest implements IHttpRequest {
         requestBuilder = new Request.Builder().url(theUrl);
     }
 
+    public Request.Builder getRequest() {
+        return requestBuilder;
+    }
+
     @Override
     public void addHeader(String theName, String theValue) {
         requestBuilder.addHeader(theName, theValue);
@@ -42,7 +51,7 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public Map<String, List<String>> getAllHeaders() {
-        return null;
+        return requestBuilder.build().headers().toMultimap();
     }
 
     @Override

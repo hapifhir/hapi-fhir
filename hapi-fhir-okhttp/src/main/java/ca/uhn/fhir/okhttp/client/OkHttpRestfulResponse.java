@@ -38,7 +38,6 @@ public class OkHttpRestfulResponse implements IHttpResponse {
             return null;
         }
 
-        // Keep only type and subtype and do not include the parameters such as charset
         return typeAndSubtypeOnly(mediaType).toString();
     }
 
@@ -53,7 +52,7 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public String getStatusInfo() {
-        return null;
+        return response.message();
     }
 
     @Override
@@ -68,7 +67,7 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public void close() {
-
+        response.close();
     }
 
     @Override

@@ -3,10 +3,13 @@ package ca.uhn.fhir.okhttp.client;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
@@ -20,6 +23,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     private OkHttpClient client;
     private StringBuilder theUrl;
     private RequestTypeEnum theRequestType;
+    private List<Header> myHeaders;
 
     public OkHttpRestfulClient(OkHttpClient client,
                                StringBuilder theUrl,
@@ -30,6 +34,7 @@ public class OkHttpRestfulClient implements IHttpClient {
         this.client = client;
         this.theUrl = theUrl;
         this.theRequestType = theRequestType;
+        myHeaders = theHeaders;
     }
 
     @Override
@@ -49,7 +54,30 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
-        return new OkHttpRestfulRequest(client, theUrl.toString(), theRequestType);
+        OkHttpRestfulRequest okHttpRestfulRequest = new OkHttpRestfulRequest(client, theUrl.toString(), theRequestType);
+        addHeadersToRequest(okHttpRestfulRequest, theEncoding, theContext);
+        return okHttpRestfulRequest;
+    }
+
+    public void addHeadersToRequest(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
+        if (myHeaders != null) {
+            for (Header next : myHeaders) {
+                theHttpRequest.addHeader(next.getName(), next.getValue());
+            }
+        }
+
+        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "jax-rs"));
+        theHttpRequest.addHeader("Accept-Charset", "utf-8");
+
+        Request.Builder builder = theHttpRequest.getRequest();
+
+        if (theEncoding == null) {
+            builder.addHeader("Accept", Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
+        } else if (theEncoding == EncodingEnum.JSON) {
+            builder.addHeader("Accept", Constants.CT_FHIR_JSON);
+        } else if (theEncoding == EncodingEnum.XML) {
+            builder.addHeader("Accept", Constants.CT_FHIR_XML);
+        }
     }
 
 }
