@@ -1,7 +1,6 @@
 package ca.uhn.fhir.okhttp;
 
 import ca.uhn.fhir.context.FhirContext;
-//import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -2120,7 +2119,7 @@ public class GenericOkHttpClientDstu2Test {
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 		
-//		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
 		ourLog.info("Starting server on port {}", ourPort);
 		ourServer.setHandler(new AbstractHandler() {

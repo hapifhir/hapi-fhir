@@ -17,13 +17,19 @@ import java.util.Map;
  */
 public class OkHttpRestfulClient implements IHttpClient {
 
+    private OkHttpClient client;
+    private StringBuilder theUrl;
+    private RequestTypeEnum theRequestType;
+
     public OkHttpRestfulClient(OkHttpClient client,
                                StringBuilder theUrl,
                                Map<String, List<String>> theIfNoneExistParams,
                                String theIfNoneExistString,
                                RequestTypeEnum theRequestType,
                                List<Header> theHeaders) {
-
+        this.client = client;
+        this.theUrl = theUrl;
+        this.theRequestType = theRequestType;
     }
 
     @Override
@@ -43,7 +49,7 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
-        return null;
+        return new OkHttpRestfulRequest(client, theUrl.toString(), theRequestType);
     }
 
 }
