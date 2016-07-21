@@ -63,6 +63,13 @@ public class GenericOkHttpClientDstu2Test {
 	private static int ourResponseStatus;
 	private static String ourRequestUri;
 
+	/**
+	 * This suite of tests can be reconfigured to test a different RestfulClientFactory implementation by
+	 * changing the instance returned here.
+	 *
+	 * @param context FhirContext or null
+	 * @return RestfulClientFactory implementation to run tests against
+     */
 	private RestfulClientFactory createNewClientFactoryForTesting(FhirContext context) {
 		if (context == null) {
 			return new OkHttpRestfulClientFactory();
@@ -315,7 +322,7 @@ public class GenericOkHttpClientDstu2Test {
 	private void assertContentTypeEquals(String expectedContentTypeHeader) {
 		// charsets are case-insensitive according to the HTTP spec (e.g. utf-8 == UTF-8):
 		// https://tools.ietf.org/html/rfc2616#section-3.4
-		assertThat(expectedContentTypeHeader, equalToIgnoringCase(getActualContentTypeHeader()));
+		assertThat(getActualContentTypeHeader(), equalToIgnoringCase(expectedContentTypeHeader));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1826,7 +1833,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/", ourRequestUri);
 		assertThat(response, containsString("\"Bundle\""));
-		assertEquals("application/json+fhir; charset=UTF-8", ourRequestFirstHeaders.get("Content-Type").getValue());
+		assertContentTypeEquals("application/json+fhir; charset=UTF-8");
 
 		//@formatter:off
         response = client.transaction()
@@ -1836,8 +1843,7 @@ public class GenericOkHttpClientDstu2Test {
         //@formatter:on
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/?_format=xml", ourRequestUri);
-		assertEquals("application/xml+fhir;charset=UTF-8", ourRequestFirstHeaders.get("Content-Type").getValue());
-
+		assertContentTypeEquals("application/xml+fhir; charset=UTF-8");
 	}
 
 	@Test
