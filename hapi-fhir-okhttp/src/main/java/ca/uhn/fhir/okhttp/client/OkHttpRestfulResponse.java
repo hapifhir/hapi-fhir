@@ -2,12 +2,12 @@ package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import okhttp3.MediaType;
 import okhttp3.Response;
+import org.apache.commons.io.IOUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +17,8 @@ import java.util.Map;
 public class OkHttpRestfulResponse implements IHttpResponse {
 
     private Response response;
+    private boolean myEntityBuffered = false;
+    private byte[] myEntityBytes;
 
     public OkHttpRestfulResponse(Response response) {
         this.response = response;
@@ -63,12 +65,22 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public Reader createReader() throws IOException {
-        return response.body().charStream();
+        if (!myEntityBuffered && response.body() == null) {
+            return new StringReader("");
+        } else {
+            return new InputStreamReader(readEntity());
+        }
     }
 
     @Override
     public InputStream readEntity() throws IOException {
-        return response.body().byteStream();
+        if (this.myEntityBuffered) {
+            return new ByteArrayInputStream(myEntityBytes);
+        } else if (response.body() != null) {
+            return response.body().byteStream();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -78,7 +90,18 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public void bufferEntitity() throws IOException {
-
+        if (myEntityBuffered) {
+            return;
+        }
+        InputStream responseEntity = readEntity();
+        if (responseEntity != null) {
+            myEntityBuffered = true;
+            try {
+                myEntityBytes = IOUtils.toByteArray(responseEntity);
+            } catch (IllegalStateException e) {
+                throw new InternalErrorException(e);
+            }
+        }
     }
 
 }
