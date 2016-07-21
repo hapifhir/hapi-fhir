@@ -27,6 +27,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     private String myIfNoneExistString;
     private RequestTypeEnum theRequestType;
     private List<Header> myHeaders;
+    private OkHttpRestfulRequest request;
 
     public OkHttpRestfulClient(OkHttpClient client,
                                StringBuilder theUrl,
@@ -44,26 +45,34 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
-        OkHttpRestfulRequest request = new OkHttpRestfulRequest(client, myUrl.toString(), theRequestType);
-        addHeadersToRequest(request, theEncoding, theContext);
-        setPostBodyOnRequest(request, theContents, theContentType);
+        initBaseRequest(theContext, theEncoding);
+        setPostBodyOnRequest(theContents, theContentType);
         return request;
     }
 
-    private void setPostBodyOnRequest(OkHttpRestfulRequest httpRestfulRequest, String theContents, String theContentType) {
-        Request.Builder builder = httpRestfulRequest.getRequest();
+    private void initBaseRequest(FhirContext theContext, EncodingEnum theEncoding) {
+        String sanitisedUrl = withTrailingQuestionMarkRemoved(myUrl.toString());
+        request = new OkHttpRestfulRequest(client, sanitisedUrl, theRequestType);
+        addHeadersToRequest(request, theEncoding, theContext);
+    }
+
+    private String withTrailingQuestionMarkRemoved(String input) {
+        return input.replaceAll("\\?$", "");
+    }
+
+    private void setPostBodyOnRequest(String theContents, String theContentType) {
+        Request.Builder builder = request.getRequest();
         builder.post(RequestBody.create(MediaType.parse(theContentType), theContents));
     }
 
     @Override
     public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
-        OkHttpRestfulRequest request = new OkHttpRestfulRequest(client, myUrl.toString(), theRequestType);
-        addHeadersToRequest(request, theEncoding, theContext);
-        setFormBodyOnRequest(request, theParams);
+        initBaseRequest(theContext, theEncoding);
+        setFormBodyOnRequest(theParams);
         return request;
     }
 
-    private void setFormBodyOnRequest(OkHttpRestfulRequest request, Map<String, List<String>> queryParams) {
+    private void setFormBodyOnRequest(Map<String, List<String>> queryParams) {
         Request.Builder builder = request.getRequest();
         RequestBody formBody = getFormBodyFromParams(queryParams);
         builder.post(formBody);
@@ -82,17 +91,17 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
+        // TODO implement binary request with okhttp
         return null;
     }
 
     @Override
     public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
-        OkHttpRestfulRequest request = new OkHttpRestfulRequest(client, myUrl.toString(), theRequestType);
-        addHeadersToRequest(request, theEncoding, theContext);
+        initBaseRequest(theContext, theEncoding);
         return request;
     }
 
-    public void addHeadersToRequest(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
+    private void addHeadersToRequest(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {
         if (myHeaders != null) {
             for (Header next : myHeaders) {
                 theHttpRequest.addHeader(next.getName(), next.getValue());
