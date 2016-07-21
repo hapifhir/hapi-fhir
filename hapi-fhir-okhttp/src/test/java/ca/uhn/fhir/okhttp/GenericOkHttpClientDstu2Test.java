@@ -401,23 +401,17 @@ public class GenericOkHttpClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		
-
 		client.delete().resourceById(new IdDt("Patient/123")).execute();
 		assertEquals("DELETE", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
-		
 
 		client.delete().resourceConditionalByUrl("Patient?name=foo").execute();
 		assertEquals("DELETE", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
-		
 
 		client.delete().resourceConditionalByType("Patient").where(Patient.NAME.matches().value("foo")).execute();
 		assertEquals("DELETE", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
-		
-
 	}
 
 	@SuppressWarnings("deprecation")
@@ -427,23 +421,17 @@ public class GenericOkHttpClientDstu2Test {
 		
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		
-
 		client.delete(Patient.class, new IdDt("Patient/123"));
 		assertEquals("DELETE", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
-		
 
 		client.delete(Patient.class, "123");
 		assertEquals("DELETE", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
-		
-
 	}
 
 	@Test
 	public void testHistory() throws Exception {
-
 		final String msg = getPatientFeedWithOneResult();
 		
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
@@ -451,7 +439,6 @@ public class GenericOkHttpClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		
 		ca.uhn.fhir.model.dstu2.resource.Bundle response;
 
 		//@formatter:off
@@ -535,7 +522,6 @@ public class GenericOkHttpClientDstu2Test {
 		//@formatter:on
 		assertThat(ourRequestUri, containsString("_since=2001-01"));
 		assertEquals(1, response.getEntry().size());
-		
 	}
 
 	@Test
@@ -553,8 +539,6 @@ public class GenericOkHttpClientDstu2Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		
-
 		//@formatter:off
 		MetaDt resp = client
 				.meta()
@@ -567,8 +551,6 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
 		assertEquals("POST", ourRequestMethod);
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>", ourRequestBodyString);
-		
-
 	}
 
 	@Test
@@ -586,8 +568,6 @@ public class GenericOkHttpClientDstu2Test {
 		ourResponseBody = respString;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
-
-		
 
 		//@formatter:off
 		MetaDt resp = client
@@ -641,15 +621,10 @@ public class GenericOkHttpClientDstu2Test {
 		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
 		final String respString = p.encodeResourceToString(outParams);
 
-		
-		
-		
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
 		ourResponseBody = respString;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
-
-		
 
 		//@formatter:off
 		Parameters resp = client
@@ -703,7 +678,6 @@ public class GenericOkHttpClientDstu2Test {
 				.execute();
 		// @formatter:on
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", ourRequestUri);
-		
 	}
 
 	@Test

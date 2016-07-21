@@ -45,14 +45,13 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
-        initBaseRequest(theContext, theEncoding);
-        setPostBodyOnRequest(theContents, theContentType);
+        initBaseRequest(theContext, theEncoding, createPostBody(theContents, theContentType));
         return request;
     }
 
-    private void initBaseRequest(FhirContext theContext, EncodingEnum theEncoding) {
+    private void initBaseRequest(FhirContext theContext, EncodingEnum theEncoding, RequestBody body) {
         String sanitisedUrl = withTrailingQuestionMarkRemoved(myUrl.toString());
-        request = new OkHttpRestfulRequest(client, sanitisedUrl, theRequestType);
+        request = new OkHttpRestfulRequest(client, sanitisedUrl, theRequestType, body);
         addHeadersToRequest(request, theEncoding, theContext);
     }
 
@@ -60,22 +59,14 @@ public class OkHttpRestfulClient implements IHttpClient {
         return input.replaceAll("\\?$", "");
     }
 
-    private void setPostBodyOnRequest(String theContents, String theContentType) {
-        Request.Builder builder = request.getRequest();
-        builder.post(RequestBody.create(MediaType.parse(theContentType), theContents));
+    private RequestBody createPostBody(String theContents, String theContentType) {
+        return RequestBody.create(MediaType.parse(theContentType), theContents);
     }
 
     @Override
     public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
-        initBaseRequest(theContext, theEncoding);
-        setFormBodyOnRequest(theParams);
+        initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams));
         return request;
-    }
-
-    private void setFormBodyOnRequest(Map<String, List<String>> queryParams) {
-        Request.Builder builder = request.getRequest();
-        RequestBody formBody = getFormBodyFromParams(queryParams);
-        builder.post(formBody);
     }
 
     private RequestBody getFormBodyFromParams(Map<String, List<String>> queryParams) {
@@ -97,7 +88,7 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
-        initBaseRequest(theContext, theEncoding);
+        initBaseRequest(theContext, theEncoding, null);
         return request;
     }
 

@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,11 +26,13 @@ public class OkHttpRestfulRequest implements IHttpRequest {
     private OkHttpClient client;
     private String theUrl;
     private RequestTypeEnum requestTypeEnum;
+    private RequestBody body;
 
-    public OkHttpRestfulRequest(OkHttpClient client, String theUrl, RequestTypeEnum requestTypeEnum) {
+    public OkHttpRestfulRequest(OkHttpClient client, String theUrl, RequestTypeEnum requestTypeEnum, RequestBody body) {
         this.client = client;
         this.theUrl = theUrl;
         this.requestTypeEnum = requestTypeEnum;
+        this.body = body;
 
         requestBuilder = new Request.Builder().url(theUrl);
     }
@@ -45,6 +48,7 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public IHttpResponse execute() throws IOException {
+        requestBuilder.method(getHttpVerbName(), body);
         Call call = client.newCall(requestBuilder.build());
         return new OkHttpRestfulResponse(call.execute());
     }
