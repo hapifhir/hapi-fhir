@@ -91,7 +91,8 @@ public class GenericOkHttpClientDstu2Test {
 			ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("JaxRsRestfulClientFactory does not have FhirContext defined. This must be set via JaxRsRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
+			String factoryClassName = clientFactory.getClass().getSimpleName();
+			assertEquals(factoryClassName + " does not have FhirContext defined. This must be set via " + factoryClassName + "#setFhirContext(FhirContext)", e.getMessage());
 		}
 	}
 
