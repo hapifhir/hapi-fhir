@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import okhttp3.OkHttpClient;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +17,11 @@ import java.util.Map;
  */
 public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
-    private OkHttpClient myNativeClient;
+    private OkHttpClient nativeClient;
+
+    public OkHttpRestfulClientFactory() {
+        super();
+    }
 
     public OkHttpRestfulClientFactory(FhirContext theFhirContext) {
         super(theFhirContext);
@@ -28,15 +34,15 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
     @Override
     protected void resetHttpClient() {
-
+        nativeClient = null;
     }
 
     public synchronized OkHttpClient getNativeClient() {
-        if (myNativeClient == null) {
-            myNativeClient = new OkHttpClient();
+        if (nativeClient == null) {
+            nativeClient = new OkHttpClient();
         }
 
-        return myNativeClient;
+        return nativeClient;
     }
 
     @Override
@@ -48,14 +54,21 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
         return new OkHttpRestfulClient(getNativeClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
     }
 
+    /**
+     * Only accepts clients of type {@link OkHttpClient}
+     *
+     * @param okHttpClient
+     */
     @Override
-    public <T> void setHttpClient(T theHttpClient) {
-
+    public void setHttpClient(Object okHttpClient) {
+        nativeClient = (OkHttpClient) okHttpClient;
     }
 
     @Override
     public void setProxy(String theHost, Integer thePort) {
-
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(theHost, thePort));
+        OkHttpClient.Builder builder = getNativeClient().newBuilder().proxy(proxy);
+        setHttpClient(builder.build());
     }
 
 }

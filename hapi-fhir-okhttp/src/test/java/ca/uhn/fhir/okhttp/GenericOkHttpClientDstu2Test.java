@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
@@ -61,23 +62,46 @@ public class GenericOkHttpClientDstu2Test {
 	private static String ourResponseContentType;
 	private static int ourResponseStatus;
 	private static String ourRequestUri;
-	
+
+	private RestfulClientFactory createNewClientFactoryForTesting(FhirContext context) {
+		if (context == null) {
+			return new OkHttpRestfulClientFactory();
+		} else {
+			return new OkHttpRestfulClientFactory(ourCtx);
+		}
+	}
+
 	@Before
 	public void before() {
-		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory(ourCtx);
+		RestfulClientFactory clientFactory = createNewClientFactoryForTesting(ourCtx);
 		clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
-		
+
 		ourCtx.setRestfulClientFactory(clientFactory);
 		ourResponseCount = 0;
 	}
 
+	@Test
+	public void testProviderWhereWeForgotToSetTheContext() throws Exception {
+		RestfulClientFactory clientFactory = createNewClientFactoryForTesting(null);
+		clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+
+		ourCtx.setRestfulClientFactory(clientFactory);
+
+		try {
+			ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("JaxRsRestfulClientFactory does not have FhirContext defined. This must be set via JaxRsRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
+		}
+	}
+
 	private String getPatientFeedWithOneResult() {
 		//@formatter:off
-		String msg = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
-				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
-				"<entry>\n" + 
-				"<resource>" 
-				+ "<Patient>" 
+		String msg = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
+				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" +
+				"<entry>\n" +
+				"<resource>"
+				+ "<Patient>"
 				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
 				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
@@ -85,8 +109,8 @@ public class GenericOkHttpClientDstu2Test {
 				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
 				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
 				+ "</Patient>"
-				+ "</resource>\n"  
-				+ "   </entry>\n"  
+				+ "</resource>\n"
+				+ "   </entry>\n"
 				+ "</Bundle>";
 		//@formatter:on
 		return msg;
@@ -102,28 +126,28 @@ public class GenericOkHttpClientDstu2Test {
 		final String respString = p.encodeResourceToString(conf);
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
 		ourResponseBody = respString;
-		
+
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		
+
 
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
 		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
-		
+
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
 		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
-		
+
 
 		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=xml", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
 		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
-		
+
 	}
 
 	@Test
@@ -194,13 +218,13 @@ public class GenericOkHttpClientDstu2Test {
 		conf.setCopyright("COPY");
 
 		final String respString = p.encodeResourceToString(conf);
-		
+
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
 		ourResponseBody = respString;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
-		
+
 
 		//@formatter:off
 		Conformance resp = (Conformance)client.conformance();
@@ -209,25 +233,10 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
 		assertEquals("COPY", resp.getCopyright());
 		assertEquals("GET", ourRequestMethod);
-		
+
 
 	}
 
-//	@Test
-//	public void testProviderWhereWeForgotToSetTheContext() throws Exception {
-//		JaxRsRestfulClientFactory clientFactory = new JaxRsRestfulClientFactory(); // no ctx
-//		clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
-//
-//		ourCtx.setRestfulClientFactory(clientFactory);
-//
-//		try {
-//			ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
-//			fail();
-//		} catch (IllegalStateException e) {
-//			assertEquals("JaxRsRestfulClientFactory does not have FhirContext defined. This must be set via JaxRsRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
-//		}
-//	}
-	
 	
 	@Test
 	public void testCreate() throws Exception {		
