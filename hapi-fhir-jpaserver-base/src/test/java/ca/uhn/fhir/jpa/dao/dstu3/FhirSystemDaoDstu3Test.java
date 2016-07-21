@@ -18,6 +18,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -80,6 +81,23 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	/**
+	 * See #410
+	 */
+	@Test
+	public void testContainedArePreservedForBug410() throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/bug-410-bundle.xml"));
+		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+
+		Bundle output = mySystemDao.transaction(mySrd, bundle);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		
+		IdType id = new IdType(output.getEntry().get(1).getResponse().getLocation());
+		MedicationOrder mo = myMedicationOrderDao.read(id);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
+	}
+
+	
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/transaction-bundle.xml"));
