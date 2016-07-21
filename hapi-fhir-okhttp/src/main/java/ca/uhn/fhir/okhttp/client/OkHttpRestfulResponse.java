@@ -33,7 +33,12 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public String getMimeType() {
-        MediaType mediaType = MediaType.parse(response.header("Content-Type"));
+        String contentType = response.header("Content-Type");
+        if (contentType == null) {
+            return null;
+        }
+
+        MediaType mediaType = MediaType.parse(contentType);
         if (mediaType == null) {
             return null;
         }
