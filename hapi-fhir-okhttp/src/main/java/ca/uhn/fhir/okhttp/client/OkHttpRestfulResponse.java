@@ -1,6 +1,7 @@
 package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.server.Constants;
 import okhttp3.MediaType;
 import okhttp3.Response;
 
@@ -33,7 +34,7 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public String getMimeType() {
-        String contentType = response.header("Content-Type");
+        String contentType = response.header(Constants.HEADER_CONTENT_TYPE);
         if (contentType == null) {
             return null;
         }

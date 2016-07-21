@@ -60,7 +60,7 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public String getRequestBodyFromStream() throws IOException {
-        return requestBuilder.build().body().toString();
+        return null;
     }
 
     @Override

@@ -753,7 +753,6 @@ public class GenericOkHttpClientDstu2Test {
 
 	@Test
 	public void testOperationWithBundleResponseJson() throws Exception {
-
 		ourResponseContentType = Constants.CT_FHIR_JSON;
 		final String respString = "{\n" + "    \"resourceType\":\"Bundle\",\n" + "    \"id\":\"8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19\",\n" + "    \"base\":\"http://localhost:" + ourPort + "/fhir\"\n" + "}";
 		ourResponseBody = respString;
