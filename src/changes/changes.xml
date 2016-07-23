@@ -78,6 +78,12 @@
 				DSTU2 HL7org structures with the JAX-RS module. Thanks to Carlo Mion
 				for the pull request!
 			</action>
+			<action type="fix">
+				hapi-fhir-testpage-overlay project contained an unneccesary 
+				dependency on hapi-fhir-jpaserver-base module, which resulted in 
+				projects using the overlay having a large number of unnneded
+				JARs included
+			</action>
 			<action type="add" issue="403">
 				It is not possible to configure both the parser and the context to
 				preserve versions in resource references (default behaviour is to 
