@@ -39,6 +39,7 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvc;
@@ -102,6 +103,10 @@ public class BaseConfig implements SchedulingConfigurer {
 	public FhirContext fhirContextDstu3() {
 		if (ourFhirContextDstu3 == null) {
 			ourFhirContextDstu3 = FhirContext.forDstu3();
+			
+			// Don't strip versions in some places
+			ParserOptions parserOptions = ourFhirContextDstu3.getParserOptions();
+			parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
 		}
 		return ourFhirContextDstu3;
 	}

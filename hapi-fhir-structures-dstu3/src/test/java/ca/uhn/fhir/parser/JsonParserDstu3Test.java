@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
@@ -9,6 +10,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -35,15 +38,14 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.EnumFactory;
 import org.hl7.fhir.dstu3.model.Enumeration;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -62,7 +64,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SampledData;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
@@ -83,7 +84,7 @@ import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 public class JsonParserDstu3Test {
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu3Test.class);
 
 	@After
@@ -793,6 +794,151 @@ public class JsonParserDstu3Test {
 		Enumeration<AddressUse> ref = actual.getFoo();
 		assertEquals("home", ref.getValue().toCode());
 
+	}
+
+	@Test
+	public void testEncodeHistoryStripVersionsFromReferences() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		
+		parser.setStripVersionsFromReferences(false);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+
+		ourCtx = FhirContext.forDstu3();
+	}
+	
+	@Test
+	public void testEncodeHistoryStripVersionsFromReferencesFromContext() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		
+		ourCtx.getParserOptions().setStripVersionsFromReferences(false);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+
+		parser.setStripVersionsFromReferences(true);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+
+		ourCtx = FhirContext.forDstu3();
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPath1() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPath2() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPathUsingOptions() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
+		assertThat(ourCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths(), empty());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(Arrays.asList("Patient.managingOrganization"));
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(new HashSet<String>(Arrays.asList("Patient.managingOrganization")));
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPath3() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		
+		AuditEvent auditEvent = new AuditEvent();
+		auditEvent.addEntity().setReference(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		
+		parser.setDontStripVersionsFromReferencesAtPaths(new ArrayList<String>());
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+
+		parser.setDontStripVersionsFromReferencesAtPaths((String[])null);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+
+		parser.setDontStripVersionsFromReferencesAtPaths((List<String>)null);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
 	}
 
 	@Test

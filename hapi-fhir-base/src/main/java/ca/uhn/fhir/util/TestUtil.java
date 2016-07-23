@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
 
@@ -61,6 +63,11 @@ public class TestUtil {
 						next.set(theType, null);
 					} catch (Exception e) {
 						throw new Error(e);
+					}
+				}
+				if (Modifier.isFinal(next.getModifiers())) {
+					if (next.getType().equals(FhirContext.class)) {
+						throw new Error("Test has final field of type FhirContext: " + next);
 					}
 				}
 			}

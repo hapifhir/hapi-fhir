@@ -23,6 +23,7 @@ package ca.uhn.fhir.parser;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
@@ -64,7 +66,7 @@ public interface IParser {
 	 * @return An encoded tag list
 	 */
 	String encodeTagListToString(TagList theTagList);
-	
+
 	/**
 	 * Encodes a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
 	 * Specification</a>.
@@ -75,7 +77,7 @@ public interface IParser {
 	 *           The writer to encode to
 	 */
 	void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException;
-	
+
 	/**
 	 * See {@link #setEncodeElements(Set)}
 	 */
@@ -121,9 +123,11 @@ public interface IParser {
 	 * links. In that case, this value should be set to <code>false</code>.
 	 * 
 	 * @return Returns the parser instance's configuration setting for stripping versions from resource references when
-	 *         encoding. Default is <code>true</code>.
+	 *         encoding. This method will retun <code>null</code> if no value is set, in which case
+	 *         the value from the {@link ParserOptions} will be used (default is <code>true</code>)
+	 * @see ParserOptions
 	 */
-	boolean isStripVersionsFromReferences();
+	Boolean getStripVersionsFromReferences();
 
 	/**
 	 * Is the parser in "summary mode"? See {@link #setSummaryMode(boolean)} for information
@@ -301,21 +305,22 @@ public interface IParser {
 	IParser setParserErrorHandler(IParserErrorHandler theErrorHandler);
 
 	/**
-	 * If set, when parsing resources the parser will try to use the given types when possible, in 
+	 * If set, when parsing resources the parser will try to use the given types when possible, in
 	 * the order that they are provided (from highest to lowest priority). For example, if a custom
-	 * type which declares to implement the Patient resource is passed in here, and the 
+	 * type which declares to implement the Patient resource is passed in here, and the
 	 * parser is parsing a Bundle containing a Patient resource, the parser will use the given
 	 * custom type.
 	 * <p>
-	 * This feature is related to, but not the same as the 
+	 * This feature is related to, but not the same as the
 	 * {@link FhirContext#setDefaultTypeForProfile(String, Class)} feature.
 	 * <code>setDefaultTypeForProfile</code> is used to specify a type to be used
 	 * when a resource explicitly declares support for a given profile. This
 	 * feature specifies a type to be used irrespective of the profile declaration
-	 * in the metadata statement. 
-	 * </p> 
+	 * in the metadata statement.
+	 * </p>
 	 * 
-	 * @param thePreferTypes The preferred types, or <code>null</code>
+	 * @param thePreferTypes
+	 *           The preferred types, or <code>null</code>
 	 */
 	void setPreferTypes(List<Class<? extends IBaseResource>> thePreferTypes);
 
@@ -345,13 +350,17 @@ public interface IParser {
 	 * in most situations, references from one resource to another should be to the resource by ID, not
 	 * by ID and version. In some cases though, it may be desirable to preserve the version in resource
 	 * links. In that case, this value should be set to <code>false</code>.
-	 * 
+	 * <p>
+	 * This method provides the ability to globally disable reference encoding. If finer-grained
+	 * control is needed, use {@link #setDontStripVersionsFromReferencesAtPaths(String...)}
+	 * </p>
 	 * @param theStripVersionsFromReferences
-	 *           Set this to <code>false<code> to prevent the parser from removing
-	 *           resource versions from references.
+	 *           Set this to <code>false<code> to prevent the parser from removing resource versions from references (or <code>null</code> to apply the default setting from the {@link ParserOptions}
+	 * @see #setDontStripVersionsFromReferencesAtPaths(String...)
+	 * @see ParserOptions
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
-	IParser setStripVersionsFromReferences(boolean theStripVersionsFromReferences);
+	IParser setStripVersionsFromReferences(Boolean theStripVersionsFromReferences);
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) only elements marked by the FHIR specification as
@@ -366,4 +375,60 @@ public interface IParser {
 	 * values.
 	 */
 	IParser setSuppressNarratives(boolean theSuppressNarratives);
+
+	/**
+	 * If supplied value(s), any resource references at the specified paths will have their
+	 * resource versions encoded instead of being automatically stripped during the encoding
+	 * process. This setting has no effect on the parsing process.
+	 * <p>
+	 * This method provides a finer-grained level of control than {@link #setStripVersionsFromReferences(Boolean)}
+	 * and any paths specified by this method will be encoded even if {@link #setStripVersionsFromReferences(Boolean)}
+	 * has been set to <code>true</code> (which is the default)
+	 * </p>
+	 *
+	 * @param thePaths
+	 *           A collection of paths for which the resource versions will not be removed automatically
+	 *           when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
+	 *           only resource name and field names with dots separating is allowed here (no repetition
+	 *           indicators, FluentPath expressions, etc.). Set to <code>null</code> to use the value
+	 *           set in the {@link ParserOptions}
+	 * @see #setStripVersionsFromReferences(Boolean)
+	 * @see ParserOptions
+	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
+	 */
+	IParser setDontStripVersionsFromReferencesAtPaths(String... thePaths);
+	
+	/**
+	 * If supplied value(s), any resource references at the specified paths will have their
+	 * resource versions encoded instead of being automatically stripped during the encoding
+	 * process. This setting has no effect on the parsing process.
+	 * <p>
+	 * This method provides a finer-grained level of control than {@link #setStripVersionsFromReferences(Boolean)}
+	 * and any paths specified by this method will be encoded even if {@link #setStripVersionsFromReferences(Boolean)}
+	 * has been set to <code>true</code> (which is the default)
+	 * </p>
+	 *
+	 * @param thePaths
+	 *           A collection of paths for which the resource versions will not be removed automatically
+	 *           when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
+	 *           only resource name and field names with dots separating is allowed here (no repetition
+	 *           indicators, FluentPath expressions, etc.). Set to <code>null</code> to use the value
+	 *           set in the {@link ParserOptions}
+	 * @see #setStripVersionsFromReferences(Boolean)
+	 * @see ParserOptions
+	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
+	 */
+	IParser setDontStripVersionsFromReferencesAtPaths(Collection<String> thePaths);
+
+	/**
+	 * Returns the value supplied to {@link IParser#setDontStripVersionsFromReferencesAtPaths(String...)}
+	 * or <code>null</code> if no value has been set for this parser (in which case the default from 
+	 * the {@link ParserOptions} will be used}
+	 * 
+	 * @see #setDontStripVersionsFromReferencesAtPaths(String...)
+	 * @see #setStripVersionsFromReferences(Boolean)
+	 * @see ParserOptions
+	 */
+	Set<String> getDontStripVersionsFromReferencesAtPaths();
+
 }

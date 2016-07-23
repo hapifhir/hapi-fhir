@@ -41,6 +41,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -436,6 +437,34 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
+	}
+
+	@Test
+	public void testPreserveVersionsOnAuditEvent() {
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = ourClient.create().resource(org).execute().getId();
+		assertEquals("1", orgId.getVersionIdPart());
+		
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.getManagingOrganization().setReference(orgId.toUnqualified().getValue());
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+		assertEquals("1", patientId.getVersionIdPart());
+		
+		AuditEvent ae = new org.hl7.fhir.dstu3.model.AuditEvent();
+		ae.addEntity().getReference().setReference(patientId.toUnqualified().getValue());
+		IIdType aeId = ourClient.create().resource(ae).execute().getId();
+		assertEquals("1", aeId.getVersionIdPart());
+
+		patient = ourClient.read().resource(Patient.class).withId(patientId).execute();
+		assertTrue(patient.getManagingOrganization().getReferenceElement().hasIdPart());
+		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
+		
+		ae = ourClient.read().resource(AuditEvent.class).withId(aeId).execute();
+		assertTrue(ae.getEntityFirstRep().getReference().getReferenceElement().hasIdPart());
+		assertTrue(ae.getEntityFirstRep().getReference().getReferenceElement().hasVersionIdPart());
+		
 	}
 
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {

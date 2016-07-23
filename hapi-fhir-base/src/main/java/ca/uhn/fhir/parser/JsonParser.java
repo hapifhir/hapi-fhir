@@ -152,7 +152,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private boolean addToHeldExtensions(int valueIdx, List<? extends IBaseExtension<?, ?>> ext, ArrayList<ArrayList<HeldExtension>> list, boolean theIsModifier) {
+	private boolean addToHeldExtensions(int valueIdx, List<? extends IBaseExtension<?, ?>> ext, ArrayList<ArrayList<HeldExtension>> list, boolean theIsModifier, CompositeChildElement theChildElem) {
 		if (ext.size() > 0) {
 			list.ensureCapacity(valueIdx);
 			while (list.size() <= valueIdx) {
@@ -162,7 +162,7 @@ public class JsonParser extends BaseParser implements IParser {
 				list.set(valueIdx, new ArrayList<JsonParser.HeldExtension>());
 			}
 			for (IBaseExtension<?, ?> next : ext) {
-				list.get(valueIdx).add(new HeldExtension(next, theIsModifier));
+				list.get(valueIdx).add(new HeldExtension(next, theIsModifier, theChildElem));
 			}
 			return true;
 		} else {
@@ -593,7 +593,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 			if (nextChildElem.getDef().getElementName().equals("extension") || nextChildElem.getDef().getElementName().equals("modifierExtension") || nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {
 				if (!haveWrittenExtensions) {
-					extractAndWriteExtensionsAsDirectChild(theElement, theEventWriter, myContext.getElementDefinition(theElement.getClass()), theResDef, theResource);
+					extractAndWriteExtensionsAsDirectChild(theElement, theEventWriter, myContext.getElementDefinition(theElement.getClass()), theResDef, theResource, nextChildElem);
 					haveWrittenExtensions = true;
 				}
 				continue;
@@ -629,7 +629,7 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-			values = super.preProcessValues(nextChild, theResource, values);
+			values = super.preProcessValues(nextChild, theResource, values, nextChildElem);
 
 			if (values == null || values.isEmpty()) {
 				continue;
@@ -673,20 +673,20 @@ public class JsonParser extends BaseParser implements IParser {
 				if (primitive) {
 					if (nextValue instanceof ISupportsUndeclaredExtensions) {
 						List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
-						force |= addToHeldExtensions(valueIdx, ext, extensions, false);
+						force |= addToHeldExtensions(valueIdx, ext, extensions, false, nextChildElem);
 
 						ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredModifierExtensions();
-						force |= addToHeldExtensions(valueIdx, ext, modifierExtensions, true);
+						force |= addToHeldExtensions(valueIdx, ext, modifierExtensions, true, nextChildElem);
 					} else {
 						if (nextValue instanceof IBaseHasExtensions) {
 							IBaseHasExtensions element = (IBaseHasExtensions) nextValue;
 							List<? extends IBaseExtension<?, ?>> ext = element.getExtension();
-							force |= addToHeldExtensions(valueIdx, ext, extensions, false);
+							force |= addToHeldExtensions(valueIdx, ext, extensions, false, nextChildElem);
 						}
 						if (nextValue instanceof IBaseHasModifierExtensions) {
 							IBaseHasModifierExtensions element = (IBaseHasModifierExtensions) nextValue;
 							List<? extends IBaseExtension<?, ?>> ext = element.getModifierExtension();
-							force |= addToHeldExtensions(valueIdx, ext, extensions, true);
+							force |= addToHeldExtensions(valueIdx, ext, extensions, true, nextChildElem);
 						}
 					}
 					if (nextValue.hasFormatComment()) {
@@ -984,31 +984,32 @@ public class JsonParser extends BaseParser implements IParser {
 	/**
 	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object
 	 * called _name): resource extensions, and extension extensions
+	 * @param theChildElem 
 	 */
-	private void extractAndWriteExtensionsAsDirectChild(IBase theElement, JsonWriter theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IBaseResource theResource) throws IOException {
+	private void extractAndWriteExtensionsAsDirectChild(IBase theElement, JsonWriter theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IBaseResource theResource, CompositeChildElement theChildElem) throws IOException {
 		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
 		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
 
 		// Undeclared extensions
-		extractUndeclaredExtensions(theElement, extensions, modifierExtensions);
+		extractUndeclaredExtensions(theElement, extensions, modifierExtensions, theChildElem);
 
 		// Declared extensions
 		if (theElementDef != null) {
-			extractDeclaredExtensions(theElement, theElementDef, extensions, modifierExtensions);
+			extractDeclaredExtensions(theElement, theElementDef, extensions, modifierExtensions, theChildElem);
 		}
 
 		// Write the extensions
 		writeExtensionsAsDirectChild(theResource, theEventWriter, theResDef, extensions, modifierExtensions);
 	}
 
-	private void extractDeclaredExtensions(IBase theResource, BaseRuntimeElementDefinition<?> resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) {
+	private void extractDeclaredExtensions(IBase theResource, BaseRuntimeElementDefinition<?> resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions, CompositeChildElement theChildElem) {
 		for (RuntimeChildDeclaredExtensionDefinition nextDef : resDef.getExtensionsNonModifier()) {
 			for (IBase nextValue : nextDef.getAccessor().getValues(theResource)) {
 				if (nextValue != null) {
 					if (nextValue == null || nextValue.isEmpty()) {
 						continue;
 					}
-					extensions.add(new HeldExtension(nextDef, nextValue));
+					extensions.add(new HeldExtension(nextDef, nextValue, theChildElem));
 				}
 			}
 		}
@@ -1018,13 +1019,13 @@ public class JsonParser extends BaseParser implements IParser {
 					if (nextValue == null || nextValue.isEmpty()) {
 						continue;
 					}
-					modifierExtensions.add(new HeldExtension(nextDef, nextValue));
+					modifierExtensions.add(new HeldExtension(nextDef, nextValue, theChildElem));
 				}
 			}
 		}
 	}
 
-	private void extractUndeclaredExtensions(IBase theElement, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) {
+	private void extractUndeclaredExtensions(IBase theElement, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions, CompositeChildElement theChildElem) {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions element = (ISupportsUndeclaredExtensions) theElement;
 			List<ExtensionDt> ext = element.getUndeclaredExtensions();
@@ -1032,7 +1033,7 @@ public class JsonParser extends BaseParser implements IParser {
 				if (next == null || next.isEmpty()) {
 					continue;
 				}
-				extensions.add(new HeldExtension(next, false));
+				extensions.add(new HeldExtension(next, false, theChildElem));
 			}
 
 			ext = element.getUndeclaredModifierExtensions();
@@ -1040,7 +1041,7 @@ public class JsonParser extends BaseParser implements IParser {
 				if (next == null || next.isEmpty()) {
 					continue;
 				}
-				modifierExtensions.add(new HeldExtension(next, true));
+				modifierExtensions.add(new HeldExtension(next, true, theChildElem));
 			}
 		} else {
 			if (theElement instanceof IBaseHasExtensions) {
@@ -1050,7 +1051,7 @@ public class JsonParser extends BaseParser implements IParser {
 					if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 						continue;
 					}
-					extensions.add(new HeldExtension(next, false));
+					extensions.add(new HeldExtension(next, false, theChildElem));
 				}
 			}
 			if (theElement instanceof IBaseHasModifierExtensions) {
@@ -1060,7 +1061,7 @@ public class JsonParser extends BaseParser implements IParser {
 					if (next == null || next.isEmpty()) {
 						continue;
 					}
-					modifierExtensions.add(new HeldExtension(next, true));
+					modifierExtensions.add(new HeldExtension(next, true, theChildElem));
 				}
 			}
 		}
@@ -1591,18 +1592,21 @@ public class JsonParser extends BaseParser implements IParser {
 		private boolean myModifier;
 		private IBaseExtension<?, ?> myUndeclaredExtension;
 		private IBase myValue;
+		private CompositeChildElement myChildElem;
 
-		public HeldExtension(IBaseExtension<?, ?> theUndeclaredExtension, boolean theModifier) {
+		public HeldExtension(IBaseExtension<?, ?> theUndeclaredExtension, boolean theModifier, CompositeChildElement theChildElem) {
 			assert theUndeclaredExtension != null;
 			myUndeclaredExtension = theUndeclaredExtension;
 			myModifier = theModifier;
+			myChildElem = theChildElem;
 		}
 
-		public HeldExtension(RuntimeChildDeclaredExtensionDefinition theDef, IBase theValue) {
+		public HeldExtension(RuntimeChildDeclaredExtensionDefinition theDef, IBase theValue, CompositeChildElement theChildElem) {
 			assert theDef != null;
 			assert theValue != null;
 			myDef = theDef;
 			myValue = theValue;
+			myChildElem = theChildElem;
 		}
 
 		@Override
@@ -1626,7 +1630,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 				BaseRuntimeElementDefinition<?> def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
 				if (def.getChildType() == ChildTypeEnum.RESOURCE_BLOCK) {
-					extractAndWriteExtensionsAsDirectChild(myValue, theEventWriter, def, theResDef, theResource);
+					extractAndWriteExtensionsAsDirectChild(myValue, theEventWriter, def, theResDef, theResource, myChildElem);
 				} else {
 					String childName = myDef.getChildNameByDatatype(myValue.getClass());
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName, false, null, false);
@@ -1673,7 +1677,7 @@ public class JsonParser extends BaseParser implements IParser {
 				 * Pre-process value - This is called in case the value is a reference
 				 * since we might modify the text
 				 */
-				value = JsonParser.super.preProcessValues(myDef, theResource, Collections.singletonList(value)).get(0);
+				value = JsonParser.super.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem).get(0);
 
 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
 				String childName = extDef.getChildNameByDatatype(value.getClass());
