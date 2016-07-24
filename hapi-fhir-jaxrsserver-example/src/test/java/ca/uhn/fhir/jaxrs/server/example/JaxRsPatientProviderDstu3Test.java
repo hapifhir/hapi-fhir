@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class JaxRsPatientProviderDstu3Test {
 
