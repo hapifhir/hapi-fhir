@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 
 /*
@@ -37,9 +36,6 @@ public class FhirResourceDaoBundleDstu3 extends FhirResourceDaoDstu3<Bundle> {
 			throw new UnprocessableEntityException(message);
 		}
 
-		for (BundleEntryComponent next : theResource.getEntry()) {
-			next.setFullUrl((String)null);
-		}
 	}
 
 

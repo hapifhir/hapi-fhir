@@ -94,6 +94,12 @@
 				<![CDATA[<code>Tag#setCode(String)</code>]]> did not actually set the code it was supposed to
 				set. Thanks to Tim Tschampel for reporting!
 			</action>
+			<action type="fix" issue="401">
+				JPA server's <![CDATA[<code>/Bundle</code>]]> endpoint cleared 
+				the <![CDATA[<code>Bundle.entry.fullUrl</code>]]> field on stored
+				bundles, resulting in invalid content being saved. Thanks to Mirjam
+				Baltus for reporting!
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
