@@ -206,7 +206,7 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 
 	@Override
 	public IBaseCoding setCode(String theTerm) {
-		setTerm(myTerm);
+		setTerm(theTerm);
 		return this;
 	}
 

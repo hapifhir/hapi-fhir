@@ -90,6 +90,10 @@
 				strip versions from references). Thanks to GitHub user @cknaap
 				for the suggestion!
 			</action>
+			<action type="fix" issue="409">
+				<![CDATA[<code>Tag#setCode(String)</code>]]> did not actually set the code it was supposed to
+				set. Thanks to Tim Tschampel for reporting!
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
