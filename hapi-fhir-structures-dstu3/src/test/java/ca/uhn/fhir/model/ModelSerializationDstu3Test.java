@@ -21,7 +21,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class ModelSerializationDstu3Test {
 
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 
 	/**
 	 * Verify that MaritalStatusCodeEnum (and, by extension, BoundCodeableConcepts in general) are serializable. Author: Nick Peterson (nrpeterson@gmail.com)

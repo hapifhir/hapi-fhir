@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.hamcrest.Matchers;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -12,13 +13,19 @@ import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class MultiVersionXmlParserTest {
 
-	private static final FhirContext ourCtxDstu1 = FhirContext.forDstu1();
-	private static final FhirContext ourCtxDstu2 = FhirContext.forDstu2();
+	private static FhirContext ourCtxDstu1 = FhirContext.forDstu1();
+	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2();
 	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MultiVersionXmlParserTest.class);
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 	@Test
 	public void testEncodeExtensionFromDifferentVersion() {

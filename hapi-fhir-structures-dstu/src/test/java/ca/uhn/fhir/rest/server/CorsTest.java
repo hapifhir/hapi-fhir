@@ -40,7 +40,7 @@ public class CorsTest {
 	private static CloseableHttpClient ourClient;
 	private static Server ourServer;
 	private static String ourBaseUri;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CorsTest.class);
 
 	@Test

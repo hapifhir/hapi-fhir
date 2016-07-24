@@ -35,7 +35,7 @@ public class DeleteConditionalHl7OrgTest {
 	private static CloseableHttpClient ourClient;
 	private static String ourLastConditionalUrl;
 	private static int ourPort;
-	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static Server ourServer;
 	private static IdType ourLastIdParam;
 	

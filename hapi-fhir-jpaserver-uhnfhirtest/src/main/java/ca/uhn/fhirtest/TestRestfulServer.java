@@ -32,7 +32,7 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.BanUnsupprtedHttpMethodsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.TestDstu3Config;
@@ -176,7 +176,7 @@ public class TestRestfulServer extends RestfulServer {
 		 * makes things a little easier for testers.
 		 */
 		registerInterceptor(new ResponseHighlighterInterceptor());
-		registerInterceptor(new BanUnsupprtedHttpMethodsInterceptor());
+		registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
 		
 		/*
 		 * Default to JSON with pretty printing

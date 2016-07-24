@@ -10,7 +10,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -61,6 +60,7 @@ import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -71,16 +71,22 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.TestUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
 public class JsonParserHl7OrgDstu2Test {
-	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgDstu2Test.class);
 
 	@After
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@Test

@@ -1,13 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -24,14 +19,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -45,7 +37,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BanUnsupprtedHttpMethodsInterceptorDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
@@ -127,7 +119,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		servlet = new RestfulServer(ourCtx);
 
 		servlet.setResourceProviders(new DummyPatientResourceProvider());
-		servlet.registerInterceptor(new BanUnsupprtedHttpMethodsInterceptor());
+		servlet.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
 
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

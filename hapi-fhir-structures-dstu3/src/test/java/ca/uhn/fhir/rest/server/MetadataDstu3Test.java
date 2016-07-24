@@ -40,11 +40,12 @@ import ca.uhn.fhir.util.VersionUtil;
 public class MetadataDstu3Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MetadataDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MetadataDstu3Test.class);
+	
 	@Test
 	public void testSummary() throws Exception {
 		String output;

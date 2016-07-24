@@ -34,11 +34,11 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
  * other than those supported by the server with an HTTP 405. This is a requirement
  * of some security assessments.
  */
-public class BanUnsupprtedHttpMethodsInterceptor extends InterceptorAdapter {
+public class BanUnsupportedHttpMethodsInterceptor extends InterceptorAdapter {
 
 	private Set<RequestTypeEnum> myAllowedMethods = new HashSet<RequestTypeEnum>();
 	
-	public BanUnsupprtedHttpMethodsInterceptor() {
+	public BanUnsupportedHttpMethodsInterceptor() {
 		myAllowedMethods.add(RequestTypeEnum.GET);
 		myAllowedMethods.add(RequestTypeEnum.OPTIONS);
 		myAllowedMethods.add(RequestTypeEnum.DELETE);

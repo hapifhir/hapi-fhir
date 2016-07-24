@@ -64,6 +64,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.TestUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderDstu3Test {
@@ -72,7 +73,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	private static IGenericClient client;
 	
 
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final String PATIENT_NAME = "Van Houte";
 
 	private static int ourPort;
@@ -85,6 +86,11 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 	private void compareResultId(int id, IBaseResource resource) {
 		assertEquals(id, Integer.parseInt(resource.getIdElement().getIdPart()));
+	}
+	
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	private void compareResultUrl(String url, IBaseResource resource) {

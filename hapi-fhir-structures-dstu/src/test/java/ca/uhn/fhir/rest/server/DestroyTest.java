@@ -27,7 +27,7 @@ import ca.uhn.fhir.util.TestUtil;
 @RunWith(MockitoJUnitRunner.class)
 public class DestroyTest {
 
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testDestroyCallsAnnotatedMethodsOnProviders() throws ServletException {

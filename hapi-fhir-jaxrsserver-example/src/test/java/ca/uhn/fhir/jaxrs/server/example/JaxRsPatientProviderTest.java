@@ -41,10 +41,15 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 public class JaxRsPatientProviderTest {
 
 	private static IGenericClient client;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final String PATIENT_NAME = "Van Houte";	
 	private static int ourPort;
 	private static Server jettyServer;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 	@BeforeClass
 	public static void setUpClass()
