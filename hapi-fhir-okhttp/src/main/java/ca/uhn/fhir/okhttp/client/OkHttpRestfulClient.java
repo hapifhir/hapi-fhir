@@ -117,7 +117,7 @@ public class OkHttpRestfulClient implements IHttpClient {
         Request.Builder builder = theHttpRequest.getRequest();
 
         if (theEncoding == null) {
-            builder.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
+            builder.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
         } else if (theEncoding == EncodingEnum.JSON) {
             builder.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
         } else if (theEncoding == EncodingEnum.XML) {
