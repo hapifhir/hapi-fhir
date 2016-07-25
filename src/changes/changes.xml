@@ -46,6 +46,24 @@
 				contains a Content-Type header but no Accept header, the response will prefer the
 				encoding specified by the Content-Type header.
 			</action>
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Logback (used in sample projects): 1.1.5 -&gt; 1.1.7</li>
+						<li>Phloc Commons (used by schematron validator): 4.4.4 -&gt; 4.4.5</li>
+						<li>Commons-IO: 2.4 -&gt; 2.5</li>
+						<li>Apache HTTPClient: 4.5.1 -&gt; 4.5.2</li>
+						<li>Apache HTTPCore: 4.4.4 -&gt; 4.4.5</li>
+						<li>Jersey (JAX-RS tests): 2.22.2 -&gt; 2.23.1</li>
+						<li>Spring (JPA, Web Tester): 4.3.0 -&gt; 4.3.1</li>
+						<!--<li>Hibernate ORM (JPA): 5.1.0 -&gt; 5.2.1</li>-->
+						<li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.4</li>
+					</ul>
+				]]>
+			</action>
+	
 			<action type="fix">
 				Fix issue in DSTU1 Bundle parsing where unexpected elements in the bundle resulted in a failure
 				to parse.
@@ -99,6 +117,11 @@
 				the <![CDATA[<code>Bundle.entry.fullUrl</code>]]> field on stored
 				bundles, resulting in invalid content being saved. Thanks to Mirjam
 				Baltus for reporting!
+			</action>
+			<action type="fix">
+				JPA server now returns HTTP 200 instead of HTTP 404 for
+				conditional deletes which did not find any matches,
+				per FHIR-I decision.
 			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">

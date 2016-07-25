@@ -33,8 +33,6 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorResourceProviderDstu3Test.class);
-
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -160,7 +158,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
-			assertEquals(204, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
 		}

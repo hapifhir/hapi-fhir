@@ -901,7 +901,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, BaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
+	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, IBaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
 		private CriterionList myCriterionList;
 		private IIdType myId;
@@ -915,7 +915,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public BaseOperationOutcome execute() {
+		public IBaseOperationOutcome execute() {
 			HttpDeleteClientInvocation invocation;
 			if (myId != null) {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId);
@@ -1627,19 +1627,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {
+	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<IBaseOperationOutcome> {
 
 		@Override
-		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public IBaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
 			}
 			IParser parser = respType.newParser(myContext);
-			BaseOperationOutcome retVal;
+			IBaseOperationOutcome retVal;
 			try {
 				// TODO: handle if something else than OO comes back
-				retVal = (BaseOperationOutcome) parser.parseResource(theResponseReader);
+				retVal = (IBaseOperationOutcome) parser.parseResource(theResponseReader);
 			} catch (DataFormatException e) {
 				ourLog.warn("Failed to parse OperationOutcome response", e);
 				return null;

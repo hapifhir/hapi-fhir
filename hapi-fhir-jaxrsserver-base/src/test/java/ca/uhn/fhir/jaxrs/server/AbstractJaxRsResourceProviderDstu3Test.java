@@ -32,6 +32,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -190,7 +191,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final BaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
+		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 	

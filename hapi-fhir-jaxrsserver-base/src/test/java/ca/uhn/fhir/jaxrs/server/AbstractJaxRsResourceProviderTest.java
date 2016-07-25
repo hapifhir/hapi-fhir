@@ -22,6 +22,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -189,7 +190,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final BaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
+		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 

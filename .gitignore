@@ -123,6 +123,7 @@ tmp/
 *~.nib
 local.properties
 .loadpath
+*.hprof
 
 # External tool builders
 .externalToolBuilders/

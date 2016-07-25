@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -86,7 +87,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	 */
 	@Test
 	public void testContainedArePreservedForBug410() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/bug-410-bundle.xml"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/bug-410-bundle.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle output = mySystemDao.transaction(mySrd, bundle);
@@ -100,7 +101,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/transaction-bundle.xml"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/transaction-bundle.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		Bundle response = mySystemDao.transaction(mySrd, bundle);
 		
@@ -384,7 +385,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
 		myPatientDao.create(patient, mySrd);
 		
-		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		
 		Bundle response = mySystemDao.transaction(mySrd, bundle);
@@ -404,7 +405,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
 		myPatientDao.create(patient, mySrd);
 
-		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		
 		try {
@@ -420,7 +421,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void testTransactionWithInlineMatchUrlNoMatches() throws Exception {
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 
-		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		
 		try {
@@ -803,7 +804,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithPutUsingUrl2() throws Exception {
-		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream("/bundle-dstu3.xml"));
+		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream("/bundle-dstu3.xml"), StandardCharsets.UTF_8);
 		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
 		mySystemDao.transaction(mySrd, request);
 	}
@@ -1128,7 +1129,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		// try {
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(1, resp.getEntry().size());
-		assertEquals("404 Not Found", resp.getEntry().get(0).getResponse().getStatus());
+		assertEquals("204 No Content", resp.getEntry().get(0).getResponse().getStatus());
 		
 		// fail();
 		// } catch (ResourceNotFoundException e) {
@@ -1183,7 +1184,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void testTransactionFromBundle() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
-		String bundleStr = IOUtils.toString(bundleRes);
+		String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, bundleStr);
 
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
@@ -1206,7 +1207,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void testTransactionWithBundledValidationSourceAndTarget() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
-		String bundleStr = IOUtils.toString(bundleRes);
+		String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, bundleStr);
 
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
@@ -1242,7 +1243,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@Test
 	public void testTransactionFromBundle6() throws Exception {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/simone_bundle3.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		Bundle output = mySystemDao.transaction(mySrd, myFhirCtx.newXmlParser().parseResource(Bundle.class, bundle));
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 	}
@@ -1251,7 +1252,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void testTransactionFromBundleJosh() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/josh-bundle.json");
-		String bundleStr = IOUtils.toString(bundleRes);
+		String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, bundleStr);
 
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
@@ -1313,7 +1314,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals("201 Created", resp.getEntry().get(2).getResponse().getStatus());
 		assertThat(resp.getEntry().get(2).getResponse().getLocation(), startsWith("Patient/"));
 		if (pass == 0) {
-			assertEquals("404 Not Found", resp.getEntry().get(3).getResponse().getStatus());
+			assertEquals("204 No Content", resp.getEntry().get(3).getResponse().getStatus());
 		} else {
 			assertEquals("204 No Content", resp.getEntry().get(3).getResponse().getStatus());
 		}
