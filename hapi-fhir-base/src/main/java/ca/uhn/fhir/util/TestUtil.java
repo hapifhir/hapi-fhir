@@ -26,11 +26,13 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
 
 	/**
-	 * THIS IS FOR UNIT TESTS ONLY
+	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
 	 * 
 	 * When we run the unit tests in cobertura, JUnit doesn't seem to clean up static fields which leads to 
 	 * tons of memory being used by the end and the JVM crashes in Travis. Manually clearing all of the
@@ -61,6 +63,11 @@ public class TestUtil {
 						next.set(theType, null);
 					} catch (Exception e) {
 						throw new Error(e);
+					}
+				}
+				if (Modifier.isFinal(next.getModifiers())) {
+					if (next.getType().equals(FhirContext.class)) {
+						throw new Error("Test has final field of type FhirContext: " + next);
 					}
 				}
 			}

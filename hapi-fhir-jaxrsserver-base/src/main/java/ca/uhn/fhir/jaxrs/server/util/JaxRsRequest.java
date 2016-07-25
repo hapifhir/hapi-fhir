@@ -137,7 +137,7 @@ public class JaxRsRequest extends RequestDetails {
          FhirVersionEnum fhirContextVersion = myServer.getFhirContext().getVersion().getVersion();
 
          if (StringUtils.isNotBlank(myVersion)) {
-             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
                  result.setId(
                          new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
              } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
@@ -145,7 +145,7 @@ public class JaxRsRequest extends RequestDetails {
                          new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
              }
          } else if (StringUtils.isNotBlank(myId)) {
-             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
                  result.setId(new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
              } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
                  result.setId(new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
@@ -155,7 +155,7 @@ public class JaxRsRequest extends RequestDetails {
          if (myRestOperation == RestOperationTypeEnum.UPDATE) {
              String contentLocation = result.getHeader(Constants.HEADER_CONTENT_LOCATION);
              if (contentLocation != null) {
-                 if (FhirVersionEnum.DSTU3.equals(fhirContextVersion)) {
+                 if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
                      result.setId(new IdType(contentLocation));
                  } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
                      result.setId(new IdDt(contentLocation));

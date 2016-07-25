@@ -49,7 +49,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class CreateTest {
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateTest.class);
@@ -222,7 +222,7 @@ public class CreateTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Content does not appear to be FHIR JSON, first non-whitespace character was: '&lt;' (must be '{')"));
+		assertThat(responseContent, containsString("Content does not appear to be FHIR JSON, first non-whitespace character was: '<' (must be '{')"));
 	}
 
 	@Test

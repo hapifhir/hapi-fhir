@@ -103,6 +103,28 @@ public class FhirContext {
 	private final IFhirVersion myVersion;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 	private boolean myInitializing;
+	private ParserOptions myParserOptions = new ParserOptions();
+
+	/**
+	 * Returns the parser options object which will be used to supply default
+	 * options to newly created parsers
+	 * 
+	 * @return The parser options - Will not return <code>null</code>
+	 */
+	public ParserOptions getParserOptions() {
+		return myParserOptions;
+	}
+
+	/**
+	 * Sets the parser options object which will be used to supply default
+	 * options to newly created parsers
+	 *  
+	 * @param theParserOptions The parser options object - Must not be <code>null</code>
+	 */
+	public void setParserOptions(ParserOptions theParserOptions) {
+		Validate.notNull(theParserOptions, "theParserOptions must not be null");
+		myParserOptions = theParserOptions;
+	}
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead

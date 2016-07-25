@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,6 +68,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.ParseAction;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -92,6 +93,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+
 	private static final long serialVersionUID = 1L;
 	/**
 	 * Requests will have an HttpServletRequest attribute set with this name, containing the servlet
@@ -260,31 +262,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 		}
 		return resourceMethod;
-	}
-
-	@Override
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(RequestTypeEnum.DELETE, request, response);
-	}
-
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(RequestTypeEnum.GET, request, response);
-	}
-
-	@Override
-	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		handleRequest(RequestTypeEnum.OPTIONS, theReq, theResp);
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(RequestTypeEnum.POST, request, response);
-	}
-
-	@Override
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(RequestTypeEnum.PUT, request, response);
 	}
 
 	/**
@@ -816,7 +793,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				 * an alternate implementation, but this isn't currently possible..
 				 */
 				findResourceMethods(new PageProvider());
-				
+
 			} catch (Exception ex) {
 				ourLog.error("An error occurred while loading request handlers!", ex);
 				throw new ServletException("Failed to initialize FHIR Restful server", ex);
@@ -1070,7 +1047,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					}
 					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
 					if (myTypeToProvider.containsKey(resourceName)) {
-						throw new ConfigurationException("Multiple resource providers return resource type[" + resourceName + "]: First[" + myTypeToProvider.get(resourceName).getClass().getCanonicalName() + "] and Second[" + rsrcProvider.getClass().getCanonicalName() + "]");
+						throw new ConfigurationException("Multiple resource providers return resource type[" + resourceName + "]: First[" + myTypeToProvider.get(resourceName).getClass().getCanonicalName()
+								+ "] and Second[" + rsrcProvider.getClass().getCanonicalName() + "]");
 					}
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);
@@ -1163,10 +1141,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			addContentLocationHeaders(theRequest, servletResponse, response, resourceName);
 		}
 		if (outcome != null) {
-			EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest);
+			ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest);
 			servletResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = servletResponse.getWriter();
-			IParser parser = encoding.newParser(getFhirContext());
+			IParser parser = encoding.getEncoding().newParser(getFhirContext());
 			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(this, theRequest));
 			try {
 				outcome.execute(parser, writer);
@@ -1180,6 +1158,63 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 		// getMethod().in
 		return null;
+	}
+
+	@Override
+	protected void service(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		RequestTypeEnum method;
+		try {
+			method = RequestTypeEnum.valueOf(theReq.getMethod());
+		} catch (IllegalArgumentException e) {
+			super.service(theReq, theResp);
+			return;
+		}
+
+		switch (method) {
+		case DELETE:
+			doDelete(theReq, theResp);
+			break;
+		case GET:
+			doGet(theReq, theResp);
+			break;
+		case OPTIONS:
+			doOptions(theReq, theResp);
+			break;
+		case POST:
+			doPost(theReq, theResp);
+			break;
+		case PUT:
+			doPut(theReq, theResp);
+			break;
+		default:
+			handleRequest(method, theReq, theResp);
+			break;
+		}
+	}
+
+	@Override
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(RequestTypeEnum.DELETE, request, response);
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(RequestTypeEnum.GET, request, response);
+	}
+
+	@Override
+	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		handleRequest(RequestTypeEnum.OPTIONS, theReq, theResp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(RequestTypeEnum.POST, request, response);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(RequestTypeEnum.PUT, request, response);
 	}
 
 	/**

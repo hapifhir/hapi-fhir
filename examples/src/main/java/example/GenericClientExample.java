@@ -3,6 +3,7 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -234,7 +235,7 @@ public class GenericClientExample {
       }
       {
          // START SNIPPET: delete
-          BaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
+          IBaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
 
          // outcome may be null if the server didn't return one
           if (resp != null) {

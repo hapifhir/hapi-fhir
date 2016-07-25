@@ -78,7 +78,7 @@ import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 public class JsonParserDstu2Test {
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
 	@Test

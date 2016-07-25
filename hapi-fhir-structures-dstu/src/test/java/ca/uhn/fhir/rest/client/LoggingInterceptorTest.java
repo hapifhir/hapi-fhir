@@ -43,7 +43,7 @@ import ch.qos.logback.core.Appender;
  */
 public class LoggingInterceptorTest {
 
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
 	private Logger myLoggerRoot;

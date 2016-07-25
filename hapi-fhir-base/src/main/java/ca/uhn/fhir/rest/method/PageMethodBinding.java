@@ -26,8 +26,6 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -45,6 +43,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -74,12 +73,12 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		return handlePagingRequest(theServer, theRequest, null, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
+		return handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 	}
 
 	@Override
 	public ResourceOrDstu1Bundle doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
-		IBase bundle = handlePagingRequest(theServer, theRequest, null, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
+		IBase bundle = handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 		if (bundle instanceof Bundle) {
 			return new ResourceOrDstu1Bundle((Bundle) bundle);
 		} else {
@@ -87,7 +86,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 	}
 	
-	private IBase handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, HttpServletResponse theResponse, String thePagingAction) {
+	private IBase handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
 		IPagingProvider pagingProvider = theServer.getPagingProvider();
 		if (pagingProvider == null) {
 			throw new InvalidRequestException("This server does not support paging");
@@ -112,7 +111,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 		int start = Math.min(offsetI, resultList.size() - 1);
 
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
+		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
@@ -136,7 +135,11 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
 		}
 
-		bundleFactory.initializeBundleFromBundleProvider(theServer, resultList, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, thePagingAction, bundleType, includes);
+		EncodingEnum encodingEnum = null;
+		if (responseEncoding != null) {
+			encodingEnum = responseEncoding.getEncoding();
+		}
+		bundleFactory.initializeBundleFromBundleProvider(theServer, resultList, encodingEnum, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, thePagingAction, bundleType, includes);
 
 		Bundle bundle = bundleFactory.getDstu1Bundle();
 		if (bundle != null) {

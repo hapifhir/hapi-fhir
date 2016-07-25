@@ -590,7 +590,6 @@ public class XmlParser extends BaseParser implements IParser {
 
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent)
 			throws XMLStreamException, DataFormatException {
 		
@@ -633,7 +632,7 @@ public class XmlParser extends BaseParser implements IParser {
 			} else {
 
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-				values = super.preProcessValues(nextChild, theResource, values);
+				values = super.preProcessValues(nextChild, theResource, values, nextChildElem);
 
 				if (values == null || values.isEmpty()) {
 					continue;

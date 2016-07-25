@@ -34,7 +34,9 @@ public class Constants {
 	public static final String CHARSET_UTF8_CTSUFFIX = "; charset=" + CHARSET_NAME_UTF8;
 	public static final String CT_ATOM_XML = "application/atom+xml";
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+	public static final String CT_FHIR_JSON_NEW = "application/fhir+json";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
+	public static final String CT_FHIR_XML_NEW = "application/fhir+xml";
 	public static final String CT_HTML = "text/html";
 	public static final String CT_HTML_WITH_UTF8 = "text/html" + CHARSET_UTF8_CTSUFFIX;
 	public static final String CT_JSON = "application/json";
@@ -50,9 +52,6 @@ public class Constants {
 	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
-	public static final Set<String> FORMAT_VAL_JSON;
-	public static final Map<String, EncodingEnum> FORMAT_VAL_TO_ENCODING;
-	public static final Set<String> FORMAT_VAL_XML;
 	public static final String FORMAT_XML = "xml";
 	/**
 	 * "text/html" and "html"
@@ -62,7 +61,8 @@ public class Constants {
 	public static final String FORMATS_HTML_XML = "html/xml";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
-	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
+	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
+	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
 	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
@@ -167,32 +167,6 @@ public class Constants {
 	public static final String URL_TOKEN_METADATA = "metadata";
 
 	static {
-		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
-
-		HashSet<String> valXml = new HashSet<String>();
-		valXml.add(CT_FHIR_XML);
-		valXml.add(CT_FHIR_XML.replace('+', ' ')); // See #346
-		valXml.add("text/xml");
-		valXml.add("application/xml");
-		valXml.add("xml");
-		FORMAT_VAL_XML = Collections.unmodifiableSet(valXml);
-		for (String string : valXml) {
-			valToEncoding.put(string, EncodingEnum.XML);
-		}
-
-		HashSet<String> valJson = new HashSet<String>();
-		valJson.add(CT_FHIR_JSON);
-		valJson.add(CT_FHIR_JSON.replace('+', ' ')); // See #346
-		valJson.add("text/json");
-		valJson.add("application/json");
-		valJson.add("json");
-		FORMAT_VAL_JSON = Collections.unmodifiableSet(valJson);
-		for (String string : valJson) {
-			valToEncoding.put(string, EncodingEnum.JSON);
-		}
-
-		FORMAT_VAL_TO_ENCODING = Collections.unmodifiableMap(valToEncoding);
-
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
 
 		HashMap<Integer, String> statusNames = new HashMap<Integer, String>();

@@ -8,19 +8,6 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<repositories>
-		<repository>
-			<id>maven.java.net</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<url>https://maven.java.net/service/local/repositories/snapshots/content/</url>
-		</repository>
-	</repositories>
-
 	<artifactId>hapi-fhir-jpaserver-base</artifactId>
 	<packaging>jar</packaging>
 
@@ -112,7 +99,7 @@
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
 		</dependency>
-
+		
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
 		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> 
 			</exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> 

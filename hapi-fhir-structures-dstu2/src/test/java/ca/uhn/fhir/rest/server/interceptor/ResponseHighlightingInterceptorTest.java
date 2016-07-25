@@ -74,7 +74,7 @@ import ca.uhn.fhir.util.UrlUtil;
 public class ResponseHighlightingInterceptorTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlightingInterceptorTest.class);
 	private static int ourPort;
 

@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -379,6 +380,19 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 			return null;
 		}
 
+	}
+
+	@Override
+	public boolean isDisabled() {
+		try {
+			FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+			em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		} catch (Exception e) {
+			ourLog.trace("FullText test failed", e);
+			ourLog.debug("Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
+			return true;
+		}
+		return false;
 	}
 
 }

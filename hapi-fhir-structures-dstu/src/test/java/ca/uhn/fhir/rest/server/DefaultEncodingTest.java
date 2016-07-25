@@ -40,7 +40,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class DefaultEncodingTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static RestfulServer ourRestfulServer;
 	private static Server ourServer;

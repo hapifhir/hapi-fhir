@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.gclient.ITransactionTyped;
 
 public class ClientTest {
 
-	private static final FhirContext ctx = FhirContext.forDstu1();
+	private static FhirContext ctx = FhirContext.forDstu1();
 
 	@Test
 	public void testTransaction() {

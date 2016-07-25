@@ -31,7 +31,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class DeleteDstu2Test {
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static boolean ourInvoked;
 	private static String ourLastConditionalUrl;
 	private static IdDt ourLastIdParam;

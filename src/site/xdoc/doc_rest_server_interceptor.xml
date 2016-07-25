@@ -290,6 +290,18 @@
 				
 			</subsection>
 
+			<subsection name="Rejecting Unsupported HTTP Verbs">
+			
+				<p>
+					Some security audit tools require that servers return an HTTP 405 if
+					an unsupported HTTP verb is received (e.g. TRACE). The 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/BanUnsupprtedHttpMethodsInterceptor.html">BanUnsupprtedHttpMethodsInterceptor</a>
+					(<a href="./xref/ca/uhn/fhir/rest/server/interceptor/BanUnsupprtedHttpMethodsInterceptor.html">code</a>)
+					can be used to accomplish this.
+				</p>
+				
+			</subsection>
+
 		</section>
 				
 		<section name="Creating Interceptors">

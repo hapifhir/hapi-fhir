@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
@@ -119,13 +120,7 @@ public class JaxRsHttpClient implements IHttpClient {
 		Builder request = theHttpRequest.getRequest();
 		request.acceptEncoding("gzip");
 
-		if (theEncoding == null) {
-			request.accept(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
-		} else if (theEncoding == EncodingEnum.JSON) {
-			request.accept(Constants.CT_FHIR_JSON);
-		} else if (theEncoding == EncodingEnum.XML) {
-			request.accept(Constants.CT_FHIR_XML);
-		}
+		RestfulServerUtils.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
 	}
 	
 	private JaxRsHttpRequest createHttpRequest(Entity<?> entity) {

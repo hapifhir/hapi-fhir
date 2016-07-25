@@ -59,7 +59,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class InterceptorUserDataMapDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;

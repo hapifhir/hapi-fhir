@@ -22,6 +22,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -64,6 +65,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.TestUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderTest {
@@ -72,7 +74,7 @@ public class AbstractJaxRsResourceProviderTest {
 	private static IGenericClient client;
 	
 
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final String PATIENT_NAME = "Van Houte";
 
 	private static int ourPort;
@@ -89,6 +91,11 @@ public class AbstractJaxRsResourceProviderTest {
 
 	private void compareResultUrl(String url, IResource resource) {
 		assertEquals(url, resource.getId().getValueAsString().substring(serverBase.length() - 1));
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	private Patient createPatient(long id) {
@@ -183,7 +190,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final BaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
+		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 

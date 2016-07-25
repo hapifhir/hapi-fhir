@@ -62,6 +62,7 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext, theParams, theUrlExtension);
 	}
 
+	@Override
 	protected RequestTypeEnum getRequestType() {
 		return RequestTypeEnum.POST;
 	}

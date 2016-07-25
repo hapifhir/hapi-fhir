@@ -24,7 +24,7 @@ import java.util.List;
  * Created by Bill de Beaubien on 11/1/2014.
  */
 public class ServerProvidedResourceScannerTest extends TestCase {
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Test
     public void testWhenRestfulServerInitialized_annotatedResources_shouldBeAddedToContext() throws ServletException {

@@ -137,7 +137,7 @@ public class GenericJaxRsClientDstu3Test {
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get("Accept").size());
-		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
+		assertThat(ourRequestHeaders.get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY));
 		
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
@@ -173,12 +173,12 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUriAll.get(0));
 		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
+		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY));
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
 		assertThat(ourRequestHeadersAll.get(0).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(1).get("Accept").size());
-		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON));
+		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY));
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_XML));
 		assertThat(ourRequestHeadersAll.get(1).get("Accept").get(0).getValue(), containsString(Constants.CT_FHIR_JSON));
 	}
@@ -1605,7 +1605,7 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals("name=james", ourRequestBodyString);
 
 		assertEquals("application/x-www-form-urlencoded", ourRequestContentType.replace(";char", "; char").toLowerCase());
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON, ourRequestFirstHeaders.get("Accept").getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY, ourRequestFirstHeaders.get("Accept").getValue());
 		assertThat(ourRequestFirstHeaders.get("User-Agent").getValue(), not(emptyString()));
 	}
 
@@ -1635,7 +1635,6 @@ public class GenericJaxRsClientDstu3Test {
 
 		assertThat(ourRequestUri, containsString("http://localhost:" + ourPort + "/fhir/Patient/_search?"));
 		assertThat(ourRequestUri, containsString("_elements=identifier%2Cname"));
-		assertThat(ourRequestUri, containsString("_format=json"));
 
 		//		assertThat(ourRequestUri,
 		//				either(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://localhost:" + ourPort + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
@@ -1793,7 +1792,7 @@ public class GenericJaxRsClientDstu3Test {
                 .execute();
         //@formatter:on
 
-		assertEquals("http://localhost:" + ourPort + "/fhir?_format=json", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
 		assertEquals(2, response.size());
 
 		String requestString = ourRequestBodyString;
@@ -1853,7 +1852,7 @@ public class GenericJaxRsClientDstu3Test {
                 .execute();
         //@formatter:on
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/?_format=xml", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir/", ourRequestUri);
 		assertEquals("application/xml+fhir;charset=UTF-8", ourRequestFirstHeaders.get("Content-Type").getValue());
 
 	}
@@ -1892,7 +1891,7 @@ public class GenericJaxRsClientDstu3Test {
                 .execute();
         //@formatter:on
 
-		assertEquals("http://localhost:" + ourPort + "/fhir?_format=json", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
 		assertEquals(2, response.getEntry().size());
 
 		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
@@ -2063,7 +2062,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		response = client.validate().resource(ourCtx.newXmlParser().encodeResourceToString(p)).execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate?_format=xml", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
 		assertEquals("POST", ourRequestMethod);
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
@@ -2071,7 +2070,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate?_format=json", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
 		assertEquals("POST", ourRequestMethod);
 		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}", ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
@@ -2079,7 +2078,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate?_format=json&_pretty=true", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate?_pretty=true", ourRequestUri);
 		assertEquals("POST", ourRequestMethod);
 		assertThat(ourRequestBodyString, containsString("\"resourceType\": \"Parameters\",\n"));
 		assertNotNull(response.getOperationOutcome());

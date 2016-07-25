@@ -21,7 +21,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 public class ExampleServerIT {
 
 	private static IGenericClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleServerIT.class);
 
 	private static int ourPort;

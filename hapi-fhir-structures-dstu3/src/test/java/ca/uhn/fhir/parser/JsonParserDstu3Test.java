@@ -2,19 +2,16 @@ package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -22,9 +19,11 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -35,15 +34,14 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.EnumFactory;
 import org.hl7.fhir.dstu3.model.Enumeration;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -62,7 +60,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SampledData;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
@@ -78,12 +75,14 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 public class JsonParserDstu3Test {
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu3Test.class);
 
 	@After
@@ -112,29 +111,50 @@ public class JsonParserDstu3Test {
 		ourLog.info(output);
 		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
-	
+
+	@Test
+	public void testValidateCustomStructure() throws Exception {
+		
+		FooMessageHeader.FooMessageSourceComponent source = new FooMessageHeader.FooMessageSourceComponent();
+		source.getMessageHeaderApplicationId().setValue("APPID");
+		source.setName("NAME");
+		source.setEndpoint("http://foo");
+
+		FooMessageHeader header = new FooMessageHeader();
+		header.setTimestamp(new Date());
+		header.getEvent().setSystem("http://system").setCode("value");
+		header.setSource(source);
+
+		FhirValidator val = ourCtx.newValidator();
+		val.setValidateAgainstStandardSchema(true);
+		val.setValidateAgainstStandardSchematron(true);
+		
+		ValidationResult result = val.validateWithResult(header);
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		assertTrue(result.isSuccessful());
+	}
 	
 	@Test
 	public void testEncodeUndeclaredBlock() throws Exception {
 		FooMessageHeader.FooMessageSourceComponent source = new FooMessageHeader.FooMessageSourceComponent();
 		source.getMessageHeaderApplicationId().setValue("APPID");
 		source.setName("NAME");
-		
+
 		FooMessageHeader header = new FooMessageHeader();
 		header.setSource(source);
-		
+
 		Bundle bundle = new Bundle();
 		bundle.addEntry().setResource(header);
-		
-      IParser p = ourCtx.newJsonParser();
-      p.setPrettyPrint(true);
 
-      String encode = p.encodeResourceToString(bundle);
-      ourLog.info(encode);
-      
-      assertThat(encode, containsString("\"value\": \"APPID\""));
+		IParser p = ourCtx.newJsonParser();
+		p.setPrettyPrint(true);
+
+		String encode = p.encodeResourceToString(bundle);
+		ourLog.info(encode);
+
+		assertThat(encode, containsString("\"value\": \"APPID\""));
 	}
-
 
 	/**
 	 * See #344
@@ -727,8 +747,8 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded,
-				stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\"", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\""));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\"",
+				"\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\""));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -796,12 +816,157 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeHistoryStripVersionsFromReferences() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		
+		parser.setStripVersionsFromReferences(false);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+
+		ourCtx = FhirContext.forDstu3();
+	}
+	
+	@Test
+	public void testEncodeHistoryStripVersionsFromReferencesFromContext() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+		
+		ourCtx.getParserOptions().setStripVersionsFromReferences(false);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+
+		parser.setStripVersionsFromReferences(true);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+
+		ourCtx = FhirContext.forDstu3();
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPath1() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPath2() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPathUsingOptions() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
+		assertThat(ourCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths(), empty());
+		
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(Arrays.asList("Patient.managingOrganization"));
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+
+		ourCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(new HashSet<String>(Arrays.asList("Patient.managingOrganization")));
+		enc = parser.setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+	}
+
+	@Test
+	public void testEncodeHistoryEncodeVersionsAtPath3() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		
+		AuditEvent auditEvent = new AuditEvent();
+		auditEvent.addEntity().setReference(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2/_history/1\""));
+		
+		parser.setDontStripVersionsFromReferencesAtPaths(new ArrayList<String>());
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+
+		parser.setDontStripVersionsFromReferencesAtPaths((String[])null);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+
+		parser.setDontStripVersionsFromReferencesAtPaths((List<String>)null);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"reference\": \"http://foo.com/Organization/2\""));
+	}
+
+	@Test
 	public void testEncodeExtendedInfrastructureComponent() {
 		IParser parser = ourCtx.newJsonParser();
 
 		PatientWithExtendedContactDstu3 patient = new PatientWithExtendedContactDstu3();
 		patient.setId("123");
-		
+
 		CustomContactComponent customContactComponent = new CustomContactComponent();
 		customContactComponent.getEyeColour().setValue("EYE");
 		customContactComponent.getName().addFamily("FAMILY");
@@ -809,8 +974,10 @@ public class JsonParserDstu3Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		
-		assertEquals("{\"resourceType\":\"Patient\",\"id\":\"123\",\"contact\":[{\"extension\":[{\"url\":\"http://foo.com/contact-eyecolour\",\"valueIdentifier\":{\"value\":\"EYE\"}}],\"name\":{\"family\":[\"FAMILY\"]}}]}", val);
+
+		assertEquals(
+				"{\"resourceType\":\"Patient\",\"id\":\"123\",\"contact\":[{\"extension\":[{\"url\":\"http://foo.com/contact-eyecolour\",\"valueIdentifier\":{\"value\":\"EYE\"}}],\"name\":{\"family\":[\"FAMILY\"]}}]}",
+				val);
 
 		FhirContext newCtx = FhirContext.forDstu3();
 		PatientWithExtendedContactDstu3 actual = newCtx.newJsonParser().parseResource(PatientWithExtendedContactDstu3.class, val);
@@ -941,7 +1108,7 @@ public class JsonParserDstu3Test {
 			 "  }\n" + 
 			 "}";
 		//@formatter:on
-		
+
 		ExplanationOfBenefit eob = ourCtx.newJsonParser().parseResource(ExplanationOfBenefit.class, input);
 		assertEquals(Reference.class, eob.getCoverage().getCoverage().getClass());
 
@@ -1046,7 +1213,6 @@ public class JsonParserDstu3Test {
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
 	}
 
-	
 	@Test
 	@Ignore
 	public void testParseAndEncodeBundle() throws Exception {
@@ -1264,7 +1430,6 @@ public class JsonParserDstu3Test {
 		assertEquals(StringType.class, comm.getPayload().get(2).getContent().getClass());
 	}
 
-	
 	@Test
 	public void testParseAndEncodeComments() throws IOException {
 		//@formatter:off
@@ -1417,10 +1582,9 @@ public class JsonParserDstu3Test {
 		} catch (DataFormatException e) {
 			assertEquals("Failed to parse JSON content, error was: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
-		
-		
+
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
-		
+
 	}
 
 	@Test
@@ -1486,7 +1650,7 @@ public class JsonParserDstu3Test {
 
 	}
 
-	@Test(expected=DataFormatException.class)
+	@Test(expected = DataFormatException.class)
 	public void testParseWithTrailingContent() throws Exception {
 		//@formatter:off
 		String bundle = "{\n" + 
@@ -1497,7 +1661,7 @@ public class JsonParserDstu3Test {
 
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
 	}
-	
+
 	/**
 	 * See #163
 	 */

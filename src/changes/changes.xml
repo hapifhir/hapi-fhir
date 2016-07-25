@@ -26,10 +26,44 @@
 						Gson (it was ignored by the Glassfish parser we were previously
 						using even though it was invalid)
 					</ul>
-						
 				</ul>
 				]]>
 			</action>
+			<action type="add">
+				Both client and server now support the new Content Types decided in
+				<![CDATA[<a href="http://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_id=677&tracker_item_id=10199">FHIR #10199</a>]]>.
+				<![CDATA[<br/><br/>]]>
+				This means that the server now supports 
+				<![CDATA[<code>application/fhir+xml</code> and <code>application/fhir+json</code>]]>
+				in addition to the older style
+				<![CDATA[<code>application/xml+fhir</code> and <code>application/json+fhir</code>]]>.
+				In order to facilitate migration by implementors, the old style remains the default
+				for now, but the server will respond using the new style if the request contains it. The
+				client now uses an <![CDATA[<code>Accept</code>]]> header value which requests both 
+				styles with a preference given to the new style when running in DSTU3 mode.
+				<![CDATA[<br/><br/>]]>
+				As a part of this change, the server has also been enhanced so that if a request
+				contains a Content-Type header but no Accept header, the response will prefer the
+				encoding specified by the Content-Type header.
+			</action>
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Logback (used in sample projects): 1.1.5 -&gt; 1.1.7</li>
+						<li>Phloc Commons (used by schematron validator): 4.4.4 -&gt; 4.4.5</li>
+						<li>Commons-IO: 2.4 -&gt; 2.5</li>
+						<li>Apache HTTPClient: 4.5.1 -&gt; 4.5.2</li>
+						<li>Apache HTTPCore: 4.4.4 -&gt; 4.4.5</li>
+						<li>Jersey (JAX-RS tests): 2.22.2 -&gt; 2.23.1</li>
+						<li>Spring (JPA, Web Tester): 4.3.0 -&gt; 4.3.1</li>
+						<!--<li>Hibernate ORM (JPA): 5.1.0 -&gt; 5.2.1</li>-->
+						<li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.4</li>
+					</ul>
+				]]>
+			</action>
+	
 			<action type="fix">
 				Fix issue in DSTU1 Bundle parsing where unexpected elements in the bundle resulted in a failure
 				to parse.
@@ -41,6 +75,53 @@
 			<action type="add" issue="150">
 				Fluent client should ignore parameter values which are null instead of including
 				them as <![CDATA[<code>?foo=null</code>]]>
+			</action>
+			<action type="fix">
+				When using <![CDATA[<code>_elements</code>]]> parameter on server, the server was not
+				automatically adding the <![CDATA[<code>SUBSETTED</code>]]> tag as it should
+			</action>
+			<action type="fix">
+				JPA server should now automatically detect
+				if Hibernate Search (Lucene) is configured to be
+				disabled and will not attempt to use it. This
+				prevents a crash for some operations.
+			</action>
+			<action type="add">
+				A new server interceptor "BanUnsupprtedHttpMethodsInterceptor" has been added
+				which causes the server to return an HTTP 405 if an unsupported HTTP
+				verb is received from the client
+			</action>
+			<action type="fix" issue="404">
+				Fix an issue where resource IDs were not correctly set when using
+				DSTU2 HL7org structures with the JAX-RS module. Thanks to Carlo Mion
+				for the pull request!
+			</action>
+			<action type="fix">
+				hapi-fhir-testpage-overlay project contained an unneccesary 
+				dependency on hapi-fhir-jpaserver-base module, which resulted in 
+				projects using the overlay having a large number of unnneded
+				JARs included
+			</action>
+			<action type="add" issue="403">
+				It is not possible to configure both the parser and the context to
+				preserve versions in resource references (default behaviour is to 
+				strip versions from references). Thanks to GitHub user @cknaap
+				for the suggestion!
+			</action>
+			<action type="fix" issue="409">
+				<![CDATA[<code>Tag#setCode(String)</code>]]> did not actually set the code it was supposed to
+				set. Thanks to Tim Tschampel for reporting!
+			</action>
+			<action type="fix" issue="401">
+				JPA server's <![CDATA[<code>/Bundle</code>]]> endpoint cleared 
+				the <![CDATA[<code>Bundle.entry.fullUrl</code>]]> field on stored
+				bundles, resulting in invalid content being saved. Thanks to Mirjam
+				Baltus for reporting!
+			</action>
+			<action type="fix">
+				JPA server now returns HTTP 200 instead of HTTP 404 for
+				conditional deletes which did not find any matches,
+				per FHIR-I decision.
 			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">

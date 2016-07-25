@@ -38,14 +38,20 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.util.TestUtil;
 
 public class JaxRsPatientProviderDstu3Test {
 
 	private static IGenericClient client;
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final String PATIENT_NAME = "Van Houte";	
 	private static int ourPort;
 	private static Server jettyServer;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 	@BeforeClass
 	public static void setUpClass()

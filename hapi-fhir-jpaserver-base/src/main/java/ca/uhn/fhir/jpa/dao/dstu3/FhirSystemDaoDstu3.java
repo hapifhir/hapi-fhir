@@ -414,7 +414,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
 					}
 					if (allDeleted.isEmpty()) {
-						status = Constants.STATUS_HTTP_404_NOT_FOUND;
+						status = Constants.STATUS_HTTP_204_NO_CONTENT;
 					}
 				}
 

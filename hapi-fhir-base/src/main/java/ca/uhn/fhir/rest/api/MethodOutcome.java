@@ -149,6 +149,7 @@ public class MethodOutcome {
 	 * @param theCreated
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
 	public MethodOutcome setCreated(Boolean theCreated) {
 		myCreated = theCreated;
@@ -158,16 +159,20 @@ public class MethodOutcome {
 	/**
 	 * @param theId
 	 *            The ID of the created/updated resource
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
-	public void setId(IIdType theId) {
+	public MethodOutcome setId(IIdType theId) {
 		myId = theId;
+		return this;
 	}
 
 	/**
 	 * Sets the {@link IBaseOperationOutcome} resource to return to the client. Set to <code>null</code> (which is the default) if none.
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
-	public void setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
+	public MethodOutcome setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
 		myOperationOutcome = theBaseOperationOutcome;
+		return this;
 	}
 
 	/**
@@ -178,9 +183,11 @@ public class MethodOutcome {
 	 * This field is optional, but if it is populated the server will return the resource body if requested to
 	 * do so via the HTTP Prefer header.
 	 * </p> 
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
-	public void setResource(IBaseResource theResource) {
+	public MethodOutcome setResource(IBaseResource theResource) {
 		myResource = theResource;
+		return this;
 	}
 
 }
