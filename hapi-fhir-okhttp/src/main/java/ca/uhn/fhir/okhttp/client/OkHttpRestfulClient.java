@@ -55,7 +55,7 @@ public class OkHttpRestfulClient implements IHttpClient {
         addHeadersToRequest(request, theEncoding, theContext);
     }
 
-    private String withTrailingQuestionMarkRemoved(String input) {
+    public static String withTrailingQuestionMarkRemoved(String input) {
         return input.replaceAll("\\?$", "");
     }
 
@@ -127,26 +127,49 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     private void addIfNoneExistHeader(IHttpRequest result) {
         if (myIfNoneExistParams != null) {
-            StringBuilder sb = newHeaderBuilder(myUrl);
-            BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(myIfNoneExistParams, sb, sb.indexOf("?") == -1);
-            result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
-        }
-
-        if (myIfNoneExistString != null) {
-            StringBuilder sb = newHeaderBuilder(myUrl);
-            sb.append(sb.indexOf("?") == -1 ? '?' : '&');
-            sb.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
-            result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
+            addIfNoneExistHeaderFromParams(result, myIfNoneExistParams);
+        } else if (myIfNoneExistString != null) {
+            addIfNoneExistHeaderFromString(result, myIfNoneExistString);
         }
     }
 
-    private StringBuilder newHeaderBuilder(StringBuilder theUrlBase) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(theUrlBase);
-        if (theUrlBase.length() > 0 && theUrlBase.charAt(theUrlBase.length() - 1) == '/') {
-            sb.deleteCharAt(sb.length() - 1);
+    private void addIfNoneExistHeaderFromString(IHttpRequest result, String ifNoneExistString) {
+        StringBuilder sb = newHeaderBuilder(myUrl);
+        boolean shouldAddQuestionMark = !hasQuestionMark(sb);
+        sb.append(shouldAddQuestionMark ? '?' : '&');
+        sb.append(everythingAfterFirstQuestionMark(ifNoneExistString));
+        result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
+    }
+
+    private void addIfNoneExistHeaderFromParams(IHttpRequest result, Map<String, List<String>> ifNoneExistParams) {
+        StringBuilder sb = newHeaderBuilder(myUrl);
+        boolean shouldAddInitialQuestionMark = !hasQuestionMark(sb);
+        BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(ifNoneExistParams, sb, shouldAddInitialQuestionMark);
+        result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
+    }
+
+    public static StringBuilder newHeaderBuilder(StringBuilder baseUrl) {
+        StringBuilder sb = new StringBuilder(baseUrl);
+        if (endsWith(baseUrl, '/')) {
+            deleteLastCharacter(sb);
         }
         return sb;
+    }
+
+    public static String everythingAfterFirstQuestionMark(String input) {
+        return input.substring(input.indexOf('?') + 1);
+    }
+
+    public static void deleteLastCharacter(StringBuilder sb) {
+        sb.deleteCharAt(sb.length() - 1);
+    }
+
+    public static boolean endsWith(StringBuilder theUrlBase, char c) {
+        return theUrlBase.length() > 0 && theUrlBase.charAt(theUrlBase.length() - 1) == c;
+    }
+
+    public static boolean hasQuestionMark(StringBuilder sb) {
+        return sb.indexOf("?") != -1;
     }
 
 }
