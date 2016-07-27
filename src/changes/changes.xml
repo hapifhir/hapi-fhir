@@ -123,6 +123,10 @@
 				conditional deletes which did not find any matches,
 				per FHIR-I decision.
 			</action>
+			<action type="fix">
+				Client that declares explicitly that it is searching/reading/etc for
+				a custom type did not automatically parse into that type.
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">

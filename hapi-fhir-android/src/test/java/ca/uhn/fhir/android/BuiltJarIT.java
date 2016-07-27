@@ -1,15 +1,9 @@
 package ca.uhn.fhir.android;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Observable;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -18,10 +12,7 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ctc.wstx.stax.WstxInputFactory;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -39,7 +30,11 @@ public class BuiltJarIT {
 	
 	@Test
 	public void testParserXml() throws Exception {
-//		fail("*******: " + WstxInputFactory.class.getProtectionDomain().getCodeSource().getLocation().toString());
+		try {
+			Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
+		} catch (ClassNotFoundException e) {
+			return;
+		}
 		
 		FhirContext ctx = FhirContext.forDstu2();
 		
@@ -54,8 +49,6 @@ public class BuiltJarIT {
 	
 	@Test
 	public void testParserJson() {
-		ourLog.info("AAAAA");
-		ourLog.info("AAAAA");
 		
 		FhirContext ctx = FhirContext.forDstu2();
 		
@@ -72,7 +65,6 @@ public class BuiltJarIT {
 		QuantityDt dt = (QuantityDt) p2.getValue();
 		dt.getComparatorElement().getValueAsEnum();
 		
-		QuantityCompararatorEnum.GREATERTHAN.name();
 	}
 
 	/**

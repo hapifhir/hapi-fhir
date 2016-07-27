@@ -116,7 +116,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	}
 
-	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) {
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
 		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
 		if (encoding == null) {
 			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -125,6 +125,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		}
 
 		IParser parser = encoding.newParser(getContext());
+		
+		parser.setPreferTypes(thePreferTypes);
+		
 		return parser;
 	}
 
@@ -325,7 +328,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			ex = new PreconditionFailedException("Server responded with HTTP 412");
 			break;
 		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode);
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode, null);
 			// TODO: handle if something other than OO comes back
 			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseReader);
 			ex = new UnprocessableEntityException(myContext, operationOutcome);

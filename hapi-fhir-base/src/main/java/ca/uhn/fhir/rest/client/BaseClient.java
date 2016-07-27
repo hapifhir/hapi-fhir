@@ -169,15 +169,6 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note
-	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other
-	 * servers which might implement it).
-	 */
-	public Boolean getPrettyPrint() {
-		return myPrettyPrint;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -319,22 +310,6 @@ public abstract class BaseClient implements IRestfulClient {
 				if (handlesBinary.isBinary()) {
 					InputStream reader = response.readEntity();
 					try {
-
-						if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
-							byte[] responseBytes = IOUtils.toByteArray(reader);
-							if (myKeepResponses) {
-								myLastResponse = response;
-								myLastResponseBody = null;
-							}
-							String message = "HTTP " + response.getStatus() + " " + response.getStatusInfo();
-							if (theLogRequestAndResponse) {
-								ourLog.info("Client response: {} - {} bytes", message, responseBytes.length);
-							} else {
-								ourLog.trace("Client response: {} - {} bytes", message, responseBytes.length);
-							}
-							reader = new ByteArrayInputStream(responseBytes);
-						}
-
 						return handlesBinary.invokeClient(mimeType, reader, response.getStatus(), headers);
 					} finally {
 						IOUtils.closeQuietly(reader);
@@ -439,20 +414,6 @@ public abstract class BaseClient implements IRestfulClient {
 	 */
 	public void setKeepResponses(boolean theKeepResponses) {
 		myKeepResponses = theKeepResponses;
-	}
-
-	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
-	 */
-	public void setLastResponse(IHttpResponse theLastResponse) {
-		myLastResponse = theLastResponse;
-	}
-
-	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
-	 */
-	public void setLastResponseBody(String theLastResponseBody) {
-		myLastResponseBody = theLastResponseBody;
 	}
 
 	/**

@@ -8,80 +8,28 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.At;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.annotation.Elements;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.ServerBase;
-import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.TagListParam;
-import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.OperationParameter.IOperationParamConverter;
-import ca.uhn.fhir.rest.param.CollectionBinder;
-import ca.uhn.fhir.rest.param.DateAndListParam;
-import ca.uhn.fhir.rest.param.NumberAndListParam;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.param.ResourceParameter.Mode;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TransactionParameter;
-import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
@@ -121,8 +69,17 @@ public class MethodUtil {
 	
 	private static final String LABEL = "label=\"";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
-
 	private static final String SCHEME = "scheme=\"";
+	private static final Set<String> ourServletRequestTypes = new HashSet<String>();
+	private static final Set<String> ourServletResponseTypes = new HashSet<String>();
+	
+	static {
+		ourServletRequestTypes.add("javax.servlet.ServletRequest");
+		ourServletResponseTypes.add("javax.servlet.ServletResponse");
+		ourServletRequestTypes.add("javax.servlet.http.HttpServletRequest");
+		ourServletResponseTypes.add("javax.servlet.http.HttpServletResponse");
+	}
+	
 
 	static void addTagsToPostOrPut(FhirContext theContext, IBaseResource resource, BaseHttpClientInvocation retVal) {
 		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
@@ -391,16 +348,22 @@ public class MethodUtil {
 					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 				}
 			}
-			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
+			
+			/* 
+			 * Note: for the frst two here, we're using strings instead of static binding
+			 * so that we don't need the java.servlet JAR on the classpath in order to use
+			 * this class 
+			 */
+			if (ourServletRequestTypes.contains(parameterType.getName())) {
 				param = new ServletRequestParameter();
+			} else if (ourServletResponseTypes.contains(parameterType.getName())) {
+				param = new ServletResponseParameter();
 			} else if (parameterType.equals(RequestDetails.class)) {
 				param = new RequestDetailsParameter();
 			} else if (parameterType.equals(IRequestOperationCallback.class)) {
 				param = new RequestOperationCallbackParameter();
 			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
-			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
-				param = new ServletResponseParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];

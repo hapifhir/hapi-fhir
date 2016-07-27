@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -17,6 +18,8 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,8 +34,7 @@ import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
@@ -60,6 +62,62 @@ public class NonGenericClientDstu3Test {
 		return body;
 	}
 
+	@Test
+	public void testValidateCustomTypeFromClientSearch() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Bundle b = new Bundle();
+		
+		MyPatientWithExtensions patient = new MyPatientWithExtensions();
+		patient.setId("123");
+		patient.getText().setDivAsString("OK!");
+		b.addEntry().setResource(patient);
+		
+		
+		final String respString = p.encodeResourceToString(b);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
+		List<MyPatientWithExtensions> list = client.search();
+		
+		assertEquals(1, list.size());
+		assertEquals(MyPatientWithExtensions.class, list.get(0).getClass());
+	}
+	
+	@Test
+	public void testValidateCustomTypeFromClientRead() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		MyPatientWithExtensions patient = new MyPatientWithExtensions();
+		patient.setId("123");
+		patient.getText().setDivAsString("OK!");
+		
+		final String respString = p.encodeResourceToString(patient);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
+		MyPatientWithExtensions read = client.read(new IdType("1"));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", read.getText().getDivAsString());
+	}
+	
 	@Test
 	public void testValidateResourceOnly() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -102,21 +160,31 @@ public class NonGenericClientDstu3Test {
 	}
 
 
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+	
+	@BeforeClass
+	public static void beforeClass() {
+		ourCtx = FhirContext.forDstu3();
+	}
+
 	private interface IClient extends IRestfulClient {
 		
 		@Validate
 		MethodOutcome validate(@ResourceParam IBaseResource theResource, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile);
 		
 	}
-	
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
 
-	@BeforeClass
-	public static void beforeClass() {
-		ourCtx = FhirContext.forDstu3();
+	private interface IClientWithCustomType extends IRestfulClient {
+		
+		@Search
+		List<MyPatientWithExtensions> search();
+
+		@Read
+		MyPatientWithExtensions read(@IdParam IdType theId);
+		
 	}
 
 }

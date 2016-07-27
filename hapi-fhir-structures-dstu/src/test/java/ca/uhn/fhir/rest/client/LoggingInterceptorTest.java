@@ -74,11 +74,14 @@ public class LoggingInterceptorTest {
 	public void testLogger() throws Exception {
 		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
-		client.registerInterceptor(new LoggingInterceptor(true));
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
 		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-		verify(myMockAppender, atLeastOnce()).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
 			public boolean matches(final Object argument) {
 				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
@@ -86,6 +89,22 @@ public class LoggingInterceptorTest {
 				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/xml+fhir;charset=utf-8".toLowerCase());
 			}
 		}));
+
+		// Unregister the interceptor
+		client.unregisterInterceptor(interceptor);
+		
+		patient = client.read(Patient.class, "1");
+		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+
+		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+			@Override
+			public boolean matches(final Object argument) {
+				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+				System.out.println("Verifying: " + formattedMessage);
+				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/xml+fhir;charset=utf-8".toLowerCase());
+			}
+		}));
+
 	}
 
 	@AfterClass

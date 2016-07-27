@@ -26,25 +26,18 @@
 			<scope>test</scope>
 		</dependency>
 	
-	
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>2.0-SNAPSHOT</version>
 			<exclusions>
-				<!--
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpcore</artifactId>
-				</exclusion>
-				-->
 				<exclusion>
 					<groupId>commons-codec</groupId>
 					<artifactId>commons-codec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.woodstox</groupId>
+					<artifactId>woodstox-core-asl</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -90,19 +83,6 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
-
-		<!-- Android does not come with the Servlet API bundled, and MethodUtil 
-			requires it. 
-			
-			We provide a dummy implementation of servlet api to reduce size 
-			and prevent from rewriting the BaseMethodBinding and friends.
-			-->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -118,6 +98,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
+					<!-- 
 					<classpathDependencyScopeExclude>compile+runtime+test+provided</classpathDependencyScopeExclude>
 					<additionalClasspathElements>
 						<additionalClasspathElement>${project.build.directory}/hapi-fhir-android-${project.version}-dstu2.jar</additionalClasspathElement>
@@ -128,6 +109,7 @@
 						<classpathDependencyExclude>javax.json:*</classpathDependencyExclude>
 						<classpathDependencyExclude>org.glassfish:javax.json</classpathDependencyExclude>
 					</classpathDependencyExcludes>
+					-->
 				</configuration>
 				<executions>
 					<execution>
@@ -148,18 +130,6 @@
 					<artifactSet>
 						<includes combine.children="append">
 							<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
-							<include>org.glassfish:javax.json</include>
-							<include>org.codehaus.woodstox:woodstox-core-asl</include>
-							<include>javax.xml.stream:stax-api</include>
-							<include>org.codehaus.woodstox:stax2-api</include>
-							<include>org.glassfish:javax.json</include>
-							<!--
-							<include>net.sourceforge.cobertura:cobertura</include>
-							<include>org.apache.commons:*</include>
-							<include>org.apache.httpcomponents:*</include>
-							<include>commons-codec:commons-codec</include>
-							-->
-							<include>javax.servlet:javax.servlet-api</include>
 						</includes>
 					</artifactSet>
 					<relocations>
