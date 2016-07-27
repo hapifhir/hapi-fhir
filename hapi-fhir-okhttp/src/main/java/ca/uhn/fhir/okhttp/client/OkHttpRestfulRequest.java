@@ -60,6 +60,7 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public String getRequestBodyFromStream() throws IOException {
+        // returning null to indicate this is not supported, as documented in IHttpRequest's contract
         return null;
     }
 

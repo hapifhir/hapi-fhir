@@ -1,6 +1,7 @@
 package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.okhttp.utils.UrlStringUtils;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.api.Header;
@@ -15,6 +16,8 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
 import java.util.Map;
+
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.*;
 
 /**
  * Created by matthewcl on 18/07/16.
@@ -154,26 +157,6 @@ public class OkHttpRestfulClient implements IHttpClient {
             deleteLastCharacter(sb);
         }
         return sb;
-    }
-
-    public static String withTrailingQuestionMarkRemoved(String input) {
-        return input.replaceAll("\\?$", "");
-    }
-
-    public static String everythingAfterFirstQuestionMark(String input) {
-        return input.substring(input.indexOf('?') + 1);
-    }
-
-    public static void deleteLastCharacter(StringBuilder sb) {
-        sb.deleteCharAt(sb.length() - 1);
-    }
-
-    public static boolean endsWith(StringBuilder theUrlBase, char c) {
-        return theUrlBase.length() > 0 && theUrlBase.charAt(theUrlBase.length() - 1) == c;
-    }
-
-    public static boolean hasQuestionMark(StringBuilder sb) {
-        return sb.indexOf("?") != -1;
     }
 
 }
