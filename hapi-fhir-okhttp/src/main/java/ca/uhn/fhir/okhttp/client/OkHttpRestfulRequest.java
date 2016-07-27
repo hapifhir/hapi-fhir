@@ -19,6 +19,7 @@ package ca.uhn.fhir.okhttp.client;
  * limitations under the License.
  * #L%
  */
+
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
