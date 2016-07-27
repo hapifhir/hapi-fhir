@@ -55,10 +55,6 @@ public class OkHttpRestfulClient implements IHttpClient {
         addHeadersToRequest(request, theEncoding, theContext);
     }
 
-    public static String withTrailingQuestionMarkRemoved(String input) {
-        return input.replaceAll("\\?$", "");
-    }
-
     private RequestBody createPostBody(String theContents, String theContentType) {
         return RequestBody.create(MediaType.parse(theContentType), theContents);
     }
@@ -82,8 +78,12 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     @Override
     public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
-        // TODO implement binary request with okhttp
-        return null;
+        initBaseRequest(theContext, null, createPostBody(theBinary.getContent(), theBinary.getContentType()));
+        return request;
+    }
+
+    private RequestBody createPostBody(byte[] theContents, String theContentType) {
+        return RequestBody.create(MediaType.parse(theContentType), theContents);
     }
 
     @Override
@@ -154,6 +154,10 @@ public class OkHttpRestfulClient implements IHttpClient {
             deleteLastCharacter(sb);
         }
         return sb;
+    }
+
+    public static String withTrailingQuestionMarkRemoved(String input) {
+        return input.replaceAll("\\?$", "");
     }
 
     public static String everythingAfterFirstQuestionMark(String input) {
