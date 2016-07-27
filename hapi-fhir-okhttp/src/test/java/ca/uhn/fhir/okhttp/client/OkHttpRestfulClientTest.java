@@ -1,24 +1,10 @@
 package ca.uhn.fhir.okhttp.client;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import okhttp3.OkHttpClient;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
-import static org.junit.Assert.*;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-/**
- * Created by matthewcl on 26/07/16.
- */
 public class OkHttpRestfulClientTest {
 
     @Test

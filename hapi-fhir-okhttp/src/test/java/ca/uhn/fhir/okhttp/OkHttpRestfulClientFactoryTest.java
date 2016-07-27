@@ -5,15 +5,10 @@ import okhttp3.OkHttpClient;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by matthewcl on 21/07/16.
- */
 public class OkHttpRestfulClientFactoryTest {
 
     private OkHttpRestfulClientFactory clientFactory;
