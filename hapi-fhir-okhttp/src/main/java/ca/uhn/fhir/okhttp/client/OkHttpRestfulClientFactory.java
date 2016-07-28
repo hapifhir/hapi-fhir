@@ -51,7 +51,7 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
     @Override
     protected IHttpClient getHttpClient(String theServerBase) {
-        return null;
+        return new OkHttpRestfulClient(getNativeClient(), new StringBuilder(theServerBase), null, null, null, null);
     }
 
     @Override
