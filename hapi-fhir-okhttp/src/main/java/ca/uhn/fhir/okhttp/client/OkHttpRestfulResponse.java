@@ -38,27 +38,27 @@ import java.util.Map;
  */
 public class OkHttpRestfulResponse implements IHttpResponse {
 
-    private Response response;
+    private Response myResponse;
     private boolean myEntityBuffered = false;
     private byte[] myEntityBytes;
 
-    public OkHttpRestfulResponse(Response response) {
-        this.response = response;
+    public OkHttpRestfulResponse(Response theResponse) {
+        this.myResponse = theResponse;
     }
 
     @Override
     public int getStatus() {
-        return response.code();
+        return myResponse.code();
     }
 
     @Override
     public Object getResponse() {
-        return response;
+        return myResponse;
     }
 
     @Override
     public String getMimeType() {
-        String contentType = response.header(Constants.HEADER_CONTENT_TYPE);
+        String contentType = myResponse.header(Constants.HEADER_CONTENT_TYPE);
         if (contentType == null) {
             return null;
         }
@@ -77,17 +77,17 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public Map<String, List<String>> getAllHeaders() {
-        return response.headers().toMultimap();
+        return myResponse.headers().toMultimap();
     }
 
     @Override
     public String getStatusInfo() {
-        return response.message();
+        return myResponse.message();
     }
 
     @Override
     public Reader createReader() throws IOException {
-        if (!myEntityBuffered && response.body() == null) {
+        if (!myEntityBuffered && myResponse.body() == null) {
             return new StringReader("");
         } else {
             return new InputStreamReader(readEntity());
@@ -98,8 +98,8 @@ public class OkHttpRestfulResponse implements IHttpResponse {
     public InputStream readEntity() throws IOException {
         if (this.myEntityBuffered) {
             return new ByteArrayInputStream(myEntityBytes);
-        } else if (response.body() != null) {
-            return response.body().byteStream();
+        } else if (myResponse.body() != null) {
+            return myResponse.body().byteStream();
         } else {
             return null;
         }
@@ -107,7 +107,7 @@ public class OkHttpRestfulResponse implements IHttpResponse {
 
     @Override
     public void close() {
-        response.close();
+        myResponse.close();
     }
 
     @Override

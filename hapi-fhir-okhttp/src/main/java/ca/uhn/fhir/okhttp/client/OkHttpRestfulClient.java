@@ -45,38 +45,38 @@ import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.*;
  */
 public class OkHttpRestfulClient implements IHttpClient {
 
-    private OkHttpClient client;
+    private OkHttpClient myClient;
     private StringBuilder myUrl;
     private Map<String, List<String>> myIfNoneExistParams;
     private String myIfNoneExistString;
-    private RequestTypeEnum theRequestType;
+    private RequestTypeEnum myRequestType;
     private List<Header> myHeaders;
-    private OkHttpRestfulRequest request;
+    private OkHttpRestfulRequest myRequest;
 
-    public OkHttpRestfulClient(OkHttpClient client,
+    public OkHttpRestfulClient(OkHttpClient theClient,
                                StringBuilder theUrl,
                                Map<String, List<String>> theIfNoneExistParams,
                                String theIfNoneExistString,
                                RequestTypeEnum theRequestType,
                                List<Header> theHeaders) {
-        this.client = client;
+        myClient = theClient;
         myUrl = theUrl;
         myIfNoneExistParams = theIfNoneExistParams;
         myIfNoneExistString = theIfNoneExistString;
-        this.theRequestType = theRequestType;
+        myRequestType = theRequestType;
         myHeaders = theHeaders;
     }
 
     @Override
     public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, createPostBody(theContents, theContentType));
-        return request;
+        return myRequest;
     }
 
     private void initBaseRequest(FhirContext theContext, EncodingEnum theEncoding, RequestBody body) {
         String sanitisedUrl = withTrailingQuestionMarkRemoved(myUrl.toString());
-        request = new OkHttpRestfulRequest(client, sanitisedUrl, theRequestType, body);
-        addHeadersToRequest(request, theEncoding, theContext);
+        myRequest = new OkHttpRestfulRequest(myClient, sanitisedUrl, myRequestType, body);
+        addHeadersToRequest(myRequest, theEncoding, theContext);
     }
 
     private RequestBody createPostBody(String theContents, String theContentType) {
@@ -86,7 +86,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     @Override
     public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams));
-        return request;
+        return myRequest;
     }
 
     private RequestBody getFormBodyFromParams(Map<String, List<String>> queryParams) {
@@ -103,7 +103,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     @Override
     public IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary) {
         initBaseRequest(theContext, null, createPostBody(theBinary.getContent(), theBinary.getContentType()));
-        return request;
+        return myRequest;
     }
 
     private RequestBody createPostBody(byte[] theContents, String theContentType) {
@@ -113,7 +113,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     @Override
     public IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, null);
-        return request;
+        return myRequest;
     }
 
     private void addHeadersToRequest(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding, FhirContext theContext) {

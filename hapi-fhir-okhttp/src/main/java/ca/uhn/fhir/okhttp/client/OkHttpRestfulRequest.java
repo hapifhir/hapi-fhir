@@ -39,40 +39,40 @@ import java.util.Map;
  */
 public class OkHttpRestfulRequest implements IHttpRequest {
 
-    private final Request.Builder requestBuilder;
-    private OkHttpClient client;
-    private String theUrl;
-    private RequestTypeEnum requestTypeEnum;
-    private RequestBody body;
+    private final Request.Builder myRequestBuilder;
+    private OkHttpClient myClient;
+    private String myUrl;
+    private RequestTypeEnum myRequestTypeEnum;
+    private RequestBody myRequestBody;
 
-    public OkHttpRestfulRequest(OkHttpClient client, String theUrl, RequestTypeEnum requestTypeEnum, RequestBody body) {
-        this.client = client;
-        this.theUrl = theUrl;
-        this.requestTypeEnum = requestTypeEnum;
-        this.body = body;
+    public OkHttpRestfulRequest(OkHttpClient theClient, String theUrl, RequestTypeEnum theRequestTypeEnum, RequestBody theRequestBody) {
+        myClient = theClient;
+        myUrl = theUrl;
+        myRequestTypeEnum = theRequestTypeEnum;
+        myRequestBody = theRequestBody;
 
-        requestBuilder = new Request.Builder().url(theUrl);
+        myRequestBuilder = new Request.Builder().url(theUrl);
     }
 
     public Request.Builder getRequest() {
-        return requestBuilder;
+        return myRequestBuilder;
     }
 
     @Override
     public void addHeader(String theName, String theValue) {
-        requestBuilder.addHeader(theName, theValue);
+        myRequestBuilder.addHeader(theName, theValue);
     }
 
     @Override
     public IHttpResponse execute() throws IOException {
-        requestBuilder.method(getHttpVerbName(), body);
-        Call call = client.newCall(requestBuilder.build());
+        myRequestBuilder.method(getHttpVerbName(), myRequestBody);
+        Call call = myClient.newCall(myRequestBuilder.build());
         return new OkHttpRestfulResponse(call.execute());
     }
 
     @Override
     public Map<String, List<String>> getAllHeaders() {
-        return requestBuilder.build().headers().toMultimap();
+        return myRequestBuilder.build().headers().toMultimap();
     }
 
     @Override
@@ -83,12 +83,12 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public String getUri() {
-        return theUrl;
+        return myUrl;
     }
 
     @Override
     public String getHttpVerbName() {
-        return requestTypeEnum.name();
+        return myRequestTypeEnum.name();
     }
 
 }

@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
-    private OkHttpClient nativeClient;
+    private OkHttpClient myNativeClient;
 
     public OkHttpRestfulClientFactory() {
         super();
@@ -56,15 +56,15 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
     @Override
     protected void resetHttpClient() {
-        nativeClient = null;
+        myNativeClient = null;
     }
 
     public synchronized OkHttpClient getNativeClient() {
-        if (nativeClient == null) {
-            nativeClient = new OkHttpClient();
+        if (myNativeClient == null) {
+            myNativeClient = new OkHttpClient();
         }
 
-        return nativeClient;
+        return myNativeClient;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
      */
     @Override
     public void setHttpClient(Object okHttpClient) {
-        nativeClient = (OkHttpClient) okHttpClient;
+        myNativeClient = (OkHttpClient) okHttpClient;
     }
 
     @Override
