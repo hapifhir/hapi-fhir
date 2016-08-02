@@ -389,7 +389,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testCreatePrefer() throws Exception {
-
         ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
         IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -857,7 +856,6 @@ public class GenericOkHttpClientDstu2Test {
         assertEquals("POST", ourRequestMethod);
         assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (ourRequestBodyString));
 
-
 		/*
          * Composite type
 		 */
@@ -878,7 +876,6 @@ public class GenericOkHttpClientDstu2Test {
         assertEquals("POST", ourRequestMethod);
         assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>",
                 (ourRequestBodyString));
-
 
 		/*
          * Resource
@@ -1123,7 +1120,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testPageNext() throws Exception {
-
         ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
         ourResponseBody = getPatientFeedWithOneResult();
 
@@ -1158,7 +1154,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testPagePrev() throws Exception {
-
         ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
         ourResponseBody = getPatientFeedWithOneResult();
 
@@ -1198,7 +1193,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testReadByUri() throws Exception {
-
         Patient patient = new Patient();
         patient.addName().addFamily("FAM");
         final String respString = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -1217,7 +1211,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testReadFluentByUri() throws Exception {
-
         Patient patient = new Patient();
         patient.addName().addFamily("FAM");
         final String respString = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -1236,7 +1229,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testReadUpdatedHeaderDoesntOverwriteResourceValue() throws Exception {
-
         //@formatter:off
         final String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
                 "   <id value=\"e2ee823b-ee4d-472d-b79d-495c23f16b99\"/>\n" +
@@ -1359,7 +1351,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testSearchByUrl() throws Exception {
-
         final String msg = getPatientFeedWithOneResult();
 
         ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
@@ -1586,7 +1577,6 @@ public class GenericOkHttpClientDstu2Test {
     @SuppressWarnings("unused")
     @Test
     public void testSearchWithReverseInclude() throws Exception {
-
         String msg = getPatientFeedWithOneResult();
 
         ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
@@ -1628,7 +1618,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testTransactionWithListOfResources() throws Exception {
-
         ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
         resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
         resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
@@ -1678,7 +1667,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testTransactionWithString() throws Exception {
-
         ca.uhn.fhir.model.dstu2.resource.Bundle req = new ca.uhn.fhir.model.dstu2.resource.Bundle();
         Patient patient = new Patient();
         patient.addName().addFamily("PAT_FAMILY");
@@ -1720,7 +1708,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testTransactionWithTransactionResource() throws Exception {
-
         ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
         resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
         resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
@@ -1758,7 +1745,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testUpdateConditional() throws Exception {
-
         ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
         IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -1808,7 +1794,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testUpdateNonFluent() throws Exception {
-
         ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
         IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -1835,7 +1820,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testUpdatePrefer() throws Exception {
-
         ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
         IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -1876,7 +1860,6 @@ public class GenericOkHttpClientDstu2Test {
 
     @Test
     public void testValidateFluent() throws Exception {
-
         OperationOutcome oo = new OperationOutcome();
         oo.addIssue().setDiagnostics("FOOBAR");
         final String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
