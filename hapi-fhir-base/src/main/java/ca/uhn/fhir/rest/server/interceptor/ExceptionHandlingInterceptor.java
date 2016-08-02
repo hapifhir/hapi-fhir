@@ -23,6 +23,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -68,9 +69,9 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		int statusCode = theException.getStatusCode();
 
 		// Add headers associated with the specific error code
-		Map<String, String[]> additional = theException.getAssociatedHeaders();
-		if (additional != null) {
-			for (Entry<String, String[]> next : additional.entrySet()) {
+		if (theException.hasResponseHeaders()) {
+			Map<String, List<String>> additional = theException.getResponseHeaders();
+			for (Entry<String, List<String>> next : additional.entrySet()) {
 				if (isNotBlank(next.getKey()) && next.getValue() != null) {
 					String nextKey = next.getKey();
 					for (String nextValue : next.getValue()) {
@@ -79,7 +80,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 				}
 			}
 		}
-
+		
 		String statusMessage = null;
 		if (theException instanceof UnclassifiedServerFailureException) {
 			String sm = theException.getMessage();
@@ -89,12 +90,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		}
 		
 		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, statusMessage, false, false);
-		// theResponse.setStatus(statusCode);
-		// theRequestDetails.getServer().addHeadersToResponse(theResponse);
-		// theResponse.setContentType("text/plain");
-		// theResponse.setCharacterEncoding("UTF-8");
-		// theResponse.getWriter().append(theException.getMessage());
-		// theResponse.getWriter().close();
+		
 	}
 
 	@Override

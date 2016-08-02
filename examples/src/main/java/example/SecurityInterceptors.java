@@ -53,4 +53,14 @@ public class BasicSecurityInterceptor extends InterceptorAdapter
 }
 //END SNIPPET: basicAuthInterceptor
 	
+
+
+   public void basicAuthInterceptorRealm() {
+      //START SNIPPET: basicAuthInterceptorRealm
+      AuthenticationException ex = new AuthenticationException();
+      ex.addAuthenticateHeaderForRealm("myRealm");
+      throw ex;
+      //END SNIPPET: basicAuthInterceptorRealm
+   }
+
 }

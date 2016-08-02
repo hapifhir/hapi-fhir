@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1522,6 +1523,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private void writeExceptionToResponse(HttpServletResponse theResponse, BaseServerResponseException theException) throws IOException {
 		theResponse.setStatus(theException.getStatusCode());
 		addHeadersToResponse(theResponse);
+		if (theException.hasResponseHeaders()) {
+			for (Entry<String, List<String>> nextEntry : theException.getResponseHeaders().entrySet()) {
+				for (String nextValue : nextEntry.getValue()) {
+					if (isNotBlank(nextValue)) {
+						theResponse.addHeader(nextEntry.getKey(), nextValue);
+					}
+				}
+			}
+		}
 		theResponse.setContentType("text/plain");
 		theResponse.setCharacterEncoding("UTF-8");
 		theResponse.getWriter().write(theException.getMessage());

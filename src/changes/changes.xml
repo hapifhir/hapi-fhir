@@ -127,6 +127,11 @@
 				Client that declares explicitly that it is searching/reading/etc for
 				a custom type did not automatically parse into that type.
 			</action>
+			<action type="add" issue="406">
+				Allow servers to specify the authentication realm of their choosing when 
+				throwing an AuthenticationException. Thanks to GitHub user @allanbrohansen
+				for the suggestion!
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
