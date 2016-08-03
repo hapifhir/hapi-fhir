@@ -236,6 +236,11 @@
 			<id>mion00</id>
 			<name>Carlo Mion</name>
 		</developer>
+		<developer>
+			<id>kiwiandroiddev</id>
+			<name>Matt Clarke</name>
+			<organization>Orion Health</organization>
+		</developer>
 	</developers>
 
 	<licenses>

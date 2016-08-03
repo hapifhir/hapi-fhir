@@ -132,6 +132,14 @@
 				throwing an AuthenticationException. Thanks to GitHub user @allanbrohansen
 				for the suggestion!
 			</action>
+			<action type="add" issue="416">
+				Add a new client implementation which uses the 
+				<![CDATA[<a href="http://square.github.io/okhttp/">OkHttp</a>]]>
+				library as the HTTP client implementation (instead of Apache HttpClient).
+				This is particularly useful for Android (where HttpClient is a pain) but
+				could also be useful in other places too.
+				Thanks to Matt Clarke of Orion Health for the contribution!
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
