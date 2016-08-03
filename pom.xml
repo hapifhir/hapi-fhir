@@ -1577,6 +1577,5 @@
 	</profiles>
 
 	<modules>
-		<module>hapi-fhir-okhttp</module>
 	</modules>
 </project>
