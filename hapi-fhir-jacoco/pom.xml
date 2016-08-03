@@ -56,6 +56,11 @@
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>2.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client-okhttp</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.phloc</groupId>
@@ -226,6 +231,7 @@
 										<include>hapi-fhir-structures-hl7org-dstu2/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-dstu3/target/jacoco.exec</include>
 										<include>hapi-fhir-jpaserver-base/target/jacoco.exec</include>
+										<include>hapi-fhir-client-okhttp/target/jacoco.exec</include>
 									</includes>
 								</fileSet>
 							</fileSets>
@@ -241,12 +247,13 @@
 					<serviceName>travis-ci</serviceName>
 					<serviceJobId>${env.TRAVIS_JOB_ID}</serviceJobId>
 					<sourceDirectories>
+						<sourceDirectory>../hapi-fhir-base/src/main/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-dstu/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-dstu2/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-hl7org-dstu2/src/test/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-structures-dstu3/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-jpaserver-base/src/test/java</sourceDirectory>
-						<sourceDirectory>../hapi-fhir-base/src/main/java</sourceDirectory>
-						<sourceDirectory>../hapi-fhir-jpaserver-base/src/main/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-client-okhttp/src/main/java</sourceDirectory>
 					</sourceDirectories>
 				</configuration>
 			</plugin>
@@ -267,25 +274,6 @@
 							</sources>
 						</configuration>
 					</execution>
-					<!-- 
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>../hapi-fhir-structures-dstu/src/test/java</source>
-								<source>../hapi-fhir-structures-dstu2/src/test/java</source>
-								<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source>
-								<source>../hapi-fhir-structures-dstu3/src/test/java</source>
-								<source>../hapi-fhir-jpaserver-base/src/test/java</source>
-								<source>../hapi-fhir-base/src/test/java</source>
-							</sources>
-						</configuration>
-					</execution>
-					-->
 				</executions>
 			</plugin>
 			<plugin>
@@ -303,47 +291,9 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<resources>
-		</resources>
-		<testResources>
-			<testResource>
-				<directory>../hapi-fhir-base/src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<directory>../hapi-fhir-jpaserver-base/src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<directory>../hapi-fhir-structures-dstu/src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<directory>../hapi-fhir-structures-dstu2/src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<directory>../hapi-fhir-structures-hl7org-dstu2/src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<directory>../hapi-fhir-structures-dstu3/src/test/resources</directory>
-			</testResource>
-		</testResources>
 	</build>
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>cobertura</report>
-						</reports>
-						<configuration>
-							<check>
-								<haltOnFailure>true</haltOnFailure>
-							</check>
-						</configuration>
-					</reportSet>
-				</reportSets>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
