@@ -407,9 +407,9 @@ public class Controller extends BaseController {
 			clientCodeJsonWriter.nullValue();
 		}
 
-		if (client.getPrettyPrint() != null) {
+		if (client.isPrettyPrint()) {
 			clientCodeJsonWriter.name("pretty");
-			clientCodeJsonWriter.value(client.getPrettyPrint().toString());
+			clientCodeJsonWriter.value("true");
 		} else {
 			clientCodeJsonWriter.name("pretty");
 			clientCodeJsonWriter.nullValue();

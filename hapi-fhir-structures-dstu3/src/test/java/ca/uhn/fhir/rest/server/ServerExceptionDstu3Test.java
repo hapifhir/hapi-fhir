@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -27,25 +27,30 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class UnclassifiedServerExceptionDstu3Test {
+public class ServerExceptionDstu3Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UnclassifiedServerExceptionDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerExceptionDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
-	public static UnclassifiedServerFailureException ourException;
+	public static BaseServerResponseException ourException;
 
 	@Test
-	public void testSearch() throws Exception {
+	public void testAddHeadersNotFound() throws Exception {
 		
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
-		ourException = new UnclassifiedServerFailureException(477, "SOME MESSAGE", operationOutcome);
+		
+		ourException = new ResourceNotFoundException("SOME MESSAGE");
+		ourException.addResponseHeader("X-Foo", "BAR BAR");
+		
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -53,9 +58,33 @@ public class UnclassifiedServerExceptionDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertEquals(477, status.getStatusLine().getStatusCode());
-			//assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
-			assertThat(responseContent, stringContainsInOrder("business-rule"));
+			
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertEquals("BAR BAR", status.getFirstHeader("X-Foo").getValue());
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR"));
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testAuthorize() throws Exception {
+		
+		OperationOutcome operationOutcome = new OperationOutcome();
+		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
+		
+		ourException = new AuthenticationException().addAuthenticateHeaderForRealm("REALM");
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(status.getStatusLine().toString());
+			ourLog.info(responseContent);
+			
+			assertEquals(401, status.getStatusLine().getStatusCode());
+			assertEquals("Basic realm=\"REALM\"", status.getFirstHeader("WWW-Authenticate").getValue());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

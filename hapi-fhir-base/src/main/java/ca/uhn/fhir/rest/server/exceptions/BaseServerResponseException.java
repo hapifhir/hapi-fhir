@@ -1,12 +1,14 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -70,13 +72,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	private List<String> myAdditionalMessages = null;
 	private IBaseOperationOutcome myBaseOperationOutcome;
 	private String myResponseBody;
+	private Map<String, List<String>> myResponseHeaders;
 	private String myResponseMimeType;
 	private int myStatusCode;
 
-	public static void main (String[] args) {
-		BaseServerResponseException.class.getName();
-	}
-	
 	/**
 	 * Constructor
 	 * 
@@ -90,7 +89,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;
 	}
-
+	
 	/**
 	 * Constructor
 	 * 
@@ -107,7 +106,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 			myAdditionalMessages = Arrays.asList(Arrays.copyOfRange(theMessages, 1, theMessages.length, String[].class));
 		}
 	}
-
+	
 	/**
 	 * Constructor
 	 * 
@@ -188,15 +187,26 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		myBaseOperationOutcome = theBaseOperationOutcome;
 	}
 
-	public List<String> getAdditionalMessages() {
-		return myAdditionalMessages;
+	/**
+	 * Add a header which will be added to any responses
+	 * 
+	 * @param theName The header name
+	 * @param theValue The header value
+	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 * @since 2.0
+	 */
+	public BaseServerResponseException addResponseHeader(String theName, String theValue) {
+		Validate.notBlank(theName, "theName must not be null or empty");
+		Validate.notBlank(theValue, "theValue must not be null or empty");
+		if (getResponseHeaders().containsKey(theName) == false) {
+			getResponseHeaders().put(theName, new ArrayList<String>());
+		}
+		getResponseHeaders().get(theName).add(theValue);
+		return this;
 	}
 
-	/**
-	 * Returns the HTTP headers associated with this exception.
-	 */
-	public Map<String, String[]> getAssociatedHeaders() {
-		return Collections.emptyMap();
+	public List<String> getAdditionalMessages() {
+		return myAdditionalMessages;
 	}
 
 	/**
@@ -217,6 +227,21 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
+	 * Returns a map containing any headers which should be added to the outgoing
+	 * response. This methos creates the map if none exists, so it will never
+	 * return <code>null</code>
+	 * 
+	 * @since 2.0 (note that this method existed in previous versions of HAPI but the method
+	 * signature has been changed from <code>Map&lt;String, String[]&gt;</code> to <code>Map&lt;String, List&lt;String&gt;&gt;</code> 
+	 */
+	public Map<String, List<String>> getResponseHeaders() {
+		if (myResponseHeaders == null) {
+			myResponseHeaders = new HashMap<String, List<String>>();
+		}
+		return myResponseHeaders;
+	}
+
+	/**
 	 * In a RESTful client, this method will be populated with the HTTP status code that was returned with the HTTP response.
 	 * <p>
 	 * In a restful server, this method is currently ignored.
@@ -231,6 +256,16 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 */
 	public int getStatusCode() {
 		return myStatusCode;
+	}
+
+	/**
+	 * Does the exception have any headers which should be added to the outgoing response?
+	 * 
+	 * @see #getResponseHeaders()
+	 * @since 2.0
+	 */
+	public boolean hasResponseHeaders() {
+		return myResponseHeaders != null && myResponseHeaders.isEmpty() == false;
 	}
 
 	/**

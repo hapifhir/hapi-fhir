@@ -64,6 +64,21 @@
 				<param name="id" value="basicAuthInterceptor" />
 				<param name="file" value="examples/src/main/java/example/SecurityInterceptors.java" />
 			</macro>
+
+			<subsection name="HTTP Basic Auth">
+			
+				<p>
+					Note that if you are implementing HTTP Basic Auth, you may want to 
+					return a <code>WWW-Authenticate</code> header with the response.
+					The following snippet shows how to add such a header with a custom
+					realm:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="basicAuthInterceptorRealm" />
+					<param name="file" value="examples/src/main/java/example/SecurityInterceptors.java" />
+				</macro>
+				
+			</subsection>
 			
 		</section>
 		

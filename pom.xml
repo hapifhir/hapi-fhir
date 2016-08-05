@@ -236,6 +236,11 @@
 			<id>mion00</id>
 			<name>Carlo Mion</name>
 		</developer>
+		<developer>
+			<id>kiwiandroiddev</id>
+			<name>Matt Clarke</name>
+			<organization>Orion Health</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1554,6 +1559,7 @@
 				<module>restful-server-example-test</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
+				<module>hapi-fhir-client-okhttp</module>
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
