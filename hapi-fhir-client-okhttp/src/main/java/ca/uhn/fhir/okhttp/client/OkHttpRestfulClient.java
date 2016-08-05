@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import okhttp3.*;
 import okhttp3.internal.Version;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -125,7 +126,7 @@ public class OkHttpRestfulClient implements IHttpClient {
 
         addUserAgentHeader(theHttpRequest, theContext);
         addAcceptCharsetHeader(theHttpRequest);
-        addAcceptHeader(theHttpRequest, theEncoding);
+        RestfulServerUtils.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
         addIfNoneExistHeader(theHttpRequest);
     }
 
@@ -135,18 +136,6 @@ public class OkHttpRestfulClient implements IHttpClient {
 
     private void addAcceptCharsetHeader(OkHttpRestfulRequest theHttpRequest) {
         theHttpRequest.addHeader("Accept-Charset", "utf-8");
-    }
-
-    private void addAcceptHeader(OkHttpRestfulRequest theHttpRequest, EncodingEnum theEncoding) {
-        Request.Builder builder = theHttpRequest.getRequest();
-
-        if (theEncoding == null) {
-            builder.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
-        } else if (theEncoding == EncodingEnum.JSON) {
-            builder.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
-        } else if (theEncoding == EncodingEnum.XML) {
-            builder.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
-        }
     }
 
     private void addIfNoneExistHeader(IHttpRequest result) {
