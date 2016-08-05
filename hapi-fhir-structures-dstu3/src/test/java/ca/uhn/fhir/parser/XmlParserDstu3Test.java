@@ -57,6 +57,7 @@ import org.hl7.fhir.dstu3.model.DataElement;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.DocumentManifest;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
@@ -119,9 +120,114 @@ public class XmlParserDstu3Test {
 
 	@After
 	public void after() {
+		if (ourCtx == null) {
+			ourCtx = FhirContext.forDstu3();
+		}
 		ourCtx.setNarrativeGenerator(null);
 	}
+
+	@Test
+	public void testEncodeAndParseContainedCustomTypes() {
+		ourCtx = FhirContext.forDstu3();
+		ourCtx.setDefaultTypeForProfile(CustomObservation.PROFILE, CustomObservation.class);
+		ourCtx.setDefaultTypeForProfile(CustomDiagnosticReport.PROFILE, CustomDiagnosticReport.class);
+		
+		CustomObservation obs = new CustomObservation();
+		obs.setStatus(ObservationStatus.FINAL);
+		
+		CustomDiagnosticReport dr = new CustomDiagnosticReport();
+		dr.setStatus(DiagnosticReportStatus.FINAL);
+		dr.addResult().setResource(obs);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setPrettyPrint(true);
+		
+		String output = parser.encodeResourceToString(dr);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output,stringContainsInOrder(
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
+				"<meta>",
+				"<profile value=\"http://custom_DiagnosticReport\"/>",
+				"</meta>",
+				"<contained>",
+					"<Observation xmlns=\"http://hl7.org/fhir\">",
+						"<id value=\"1\"/>",
+						"<meta>",
+							"<profile value=\"http://custom_Observation\"/>",
+						"</meta>",
+						"<status value=\"final\"/>",
+					"</Observation>",
+				"</contained>",
+				"<status value=\"final\"/>",
+				"<result>",
+					"<reference value=\"#1\"/>",
+				"</result>",
+			"</DiagnosticReport>"));
+		//@formatter:on
+		
+		/*
+		 * Now PARSE!
+		 */
+		
+		dr = (CustomDiagnosticReport) parser.parseResource(output);
+		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
+
+		assertEquals("#1", dr.getResult().get(0).getReference());
+		obs = (CustomObservation) dr.getResult().get(0).getResource();
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
+
+		ourCtx = null;
+	}
 	
+	@Test
+	public void testEncodeAndParseContainedNonCustomTypes() {
+		ourCtx = FhirContext.forDstu3();
+		
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setStatus(DiagnosticReportStatus.FINAL);
+		dr.addResult().setResource(obs);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setPrettyPrint(true);
+		
+		String output = parser.encodeResourceToString(dr);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output,stringContainsInOrder(
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
+				"<contained>",
+					"<Observation xmlns=\"http://hl7.org/fhir\">",
+						"<id value=\"1\"/>",
+						"<status value=\"final\"/>",
+					"</Observation>",
+				"</contained>",
+				"<status value=\"final\"/>",
+				"<result>",
+					"<reference value=\"#1\"/>",
+				"</result>",
+			"</DiagnosticReport>"));
+		//@formatter:on
+		
+		/*
+		 * Now PARSE!
+		 */
+		
+		dr = (DiagnosticReport) parser.parseResource(output);
+		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
+
+		assertEquals("#1", dr.getResult().get(0).getReference());
+		obs = (Observation) dr.getResult().get(0).getResource();
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
+
+		ourCtx = null;
+	}
+
 	@Test
 	public void testEncodeHistoryEncodeVersionsAtPath3() {
 		ourCtx = FhirContext.forDstu3();
