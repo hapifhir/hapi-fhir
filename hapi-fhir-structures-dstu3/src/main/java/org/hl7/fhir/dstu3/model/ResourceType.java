@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu3.model;
 
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
 
-// Generated on Fri, Jul 1, 2016 12:24-0400 for FHIR v1.4.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 public enum ResourceType {
     Account,
@@ -32,7 +32,6 @@ public enum ResourceType {
     Contract,
     Coverage,
     DataElement,
-    DecisionSupportRule,
     DecisionSupportServiceModule,
     DetectedIssue,
     Device,
@@ -40,8 +39,8 @@ public enum ResourceType {
     DeviceMetric,
     DeviceUseRequest,
     DeviceUseStatement,
-    DiagnosticOrder,
     DiagnosticReport,
+    DiagnosticRequest,
     DocumentManifest,
     DocumentReference,
     EligibilityRequest,
@@ -77,15 +76,11 @@ public enum ResourceType {
     MedicationOrder,
     MedicationStatement,
     MessageHeader,
-    ModuleDefinition,
     NamingSystem,
-    NutritionOrder,
+    NutritionRequest,
     Observation,
     OperationDefinition,
     OperationOutcome,
-    Order,
-    OrderResponse,
-    OrderSet,
     Organization,
     Parameters,
     Patient,
@@ -99,7 +94,6 @@ public enum ResourceType {
     ProcedureRequest,
     ProcessRequest,
     ProcessResponse,
-    Protocol,
     Provenance,
     Questionnaire,
     QuestionnaireResponse,
@@ -179,8 +173,6 @@ public enum ResourceType {
       return "coverage";
     case DataElement:
       return "dataelement";
-    case DecisionSupportRule:
-      return "decisionsupportrule";
     case DecisionSupportServiceModule:
       return "decisionsupportservicemodule";
     case DetectedIssue:
@@ -195,10 +187,10 @@ public enum ResourceType {
       return "deviceuserequest";
     case DeviceUseStatement:
       return "deviceusestatement";
-    case DiagnosticOrder:
-      return "diagnosticorder";
     case DiagnosticReport:
       return "diagnosticreport";
+    case DiagnosticRequest:
+      return "diagnosticrequest";
     case DocumentManifest:
       return "documentmanifest";
     case DocumentReference:
@@ -269,24 +261,16 @@ public enum ResourceType {
       return "medicationstatement";
     case MessageHeader:
       return "messageheader";
-    case ModuleDefinition:
-      return "moduledefinition";
     case NamingSystem:
       return "namingsystem";
-    case NutritionOrder:
-      return "nutritionorder";
+    case NutritionRequest:
+      return "nutritionrequest";
     case Observation:
       return "observation";
     case OperationDefinition:
       return "operationdefinition";
     case OperationOutcome:
       return "operationoutcome";
-    case Order:
-      return "order";
-    case OrderResponse:
-      return "orderresponse";
-    case OrderSet:
-      return "orderset";
     case Organization:
       return "organization";
     case Parameters:
@@ -313,8 +297,6 @@ public enum ResourceType {
       return "processrequest";
     case ProcessResponse:
       return "processresponse";
-    case Protocol:
-      return "protocol";
     case Provenance:
       return "provenance";
     case Questionnaire:
@@ -417,8 +399,6 @@ public enum ResourceType {
       return Coverage;
     if ("DataElement".equals(code))
       return DataElement;
-    if ("DecisionSupportRule".equals(code))
-      return DecisionSupportRule;
     if ("DecisionSupportServiceModule".equals(code))
       return DecisionSupportServiceModule;
     if ("DetectedIssue".equals(code))
@@ -433,10 +413,10 @@ public enum ResourceType {
       return DeviceUseRequest;
     if ("DeviceUseStatement".equals(code))
       return DeviceUseStatement;
-    if ("DiagnosticOrder".equals(code))
-      return DiagnosticOrder;
     if ("DiagnosticReport".equals(code))
       return DiagnosticReport;
+    if ("DiagnosticRequest".equals(code))
+      return DiagnosticRequest;
     if ("DocumentManifest".equals(code))
       return DocumentManifest;
     if ("DocumentReference".equals(code))
@@ -507,24 +487,16 @@ public enum ResourceType {
       return MedicationStatement;
     if ("MessageHeader".equals(code))
       return MessageHeader;
-    if ("ModuleDefinition".equals(code))
-      return ModuleDefinition;
     if ("NamingSystem".equals(code))
       return NamingSystem;
-    if ("NutritionOrder".equals(code))
-      return NutritionOrder;
+    if ("NutritionRequest".equals(code))
+      return NutritionRequest;
     if ("Observation".equals(code))
       return Observation;
     if ("OperationDefinition".equals(code))
       return OperationDefinition;
     if ("OperationOutcome".equals(code))
       return OperationOutcome;
-    if ("Order".equals(code))
-      return Order;
-    if ("OrderResponse".equals(code))
-      return OrderResponse;
-    if ("OrderSet".equals(code))
-      return OrderSet;
     if ("Organization".equals(code))
       return Organization;
     if ("Parameters".equals(code))
@@ -551,8 +523,6 @@ public enum ResourceType {
       return ProcessRequest;
     if ("ProcessResponse".equals(code))
       return ProcessResponse;
-    if ("Protocol".equals(code))
-      return Protocol;
     if ("Provenance".equals(code))
       return Provenance;
     if ("Questionnaire".equals(code))

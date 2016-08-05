@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -48,6 +48,96 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 @DatatypeDef(name="ParameterDefinition")
 public class ParameterDefinition extends Type implements ICompositeType {
 
+    public enum ParameterUse {
+        /**
+         * This is an input parameter.
+         */
+        IN, 
+        /**
+         * This is an output parameter.
+         */
+        OUT, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static ParameterUse fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("in".equals(codeString))
+          return IN;
+        if ("out".equals(codeString))
+          return OUT;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ParameterUse code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case IN: return "in";
+            case OUT: return "out";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case IN: return "http://hl7.org/fhir/operation-parameter-use";
+            case OUT: return "http://hl7.org/fhir/operation-parameter-use";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case IN: return "This is an input parameter.";
+            case OUT: return "This is an output parameter.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case IN: return "In";
+            case OUT: return "Out";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class ParameterUseEnumFactory implements EnumFactory<ParameterUse> {
+    public ParameterUse fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("in".equals(codeString))
+          return ParameterUse.IN;
+        if ("out".equals(codeString))
+          return ParameterUse.OUT;
+        throw new IllegalArgumentException("Unknown ParameterUse code '"+codeString+"'");
+        }
+        public Enumeration<ParameterUse> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in".equals(codeString))
+          return new Enumeration<ParameterUse>(this, ParameterUse.IN);
+        if ("out".equals(codeString))
+          return new Enumeration<ParameterUse>(this, ParameterUse.OUT);
+        throw new FHIRException("Unknown ParameterUse code '"+codeString+"'");
+        }
+    public String toCode(ParameterUse code) {
+      if (code == ParameterUse.IN)
+        return "in";
+      if (code == ParameterUse.OUT)
+        return "out";
+      return "?";
+      }
+    public String toSystem(ParameterUse code) {
+      return code.getSystem();
+      }
+    }
+
     /**
      * The name of the parameter.
      */
@@ -61,7 +151,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
     @Child(name = "use", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="Whether the parameter is input or output for the module." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-parameter-use")
-    protected CodeType use;
+    protected Enumeration<ParameterUse> use;
 
     /**
      * The minimum number of times this parameter SHALL appear in the request or response.
@@ -104,7 +194,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      */
     protected StructureDefinition profileTarget;
 
-    private static final long serialVersionUID = -1284894445L;
+    private static final long serialVersionUID = 660888127L;
 
   /**
    * Constructor
@@ -116,7 +206,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
   /**
    * Constructor
    */
-    public ParameterDefinition(CodeType use, CodeType type) {
+    public ParameterDefinition(Enumeration<ParameterUse> use, CodeType type) {
       super();
       this.use = use;
       this.type = type;
@@ -174,12 +264,12 @@ public class ParameterDefinition extends Type implements ICompositeType {
     /**
      * @return {@link #use} (Whether the parameter is input or output for the module.). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
      */
-    public CodeType getUseElement() { 
+    public Enumeration<ParameterUse> getUseElement() { 
       if (this.use == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ParameterDefinition.use");
         else if (Configuration.doAutoCreate())
-          this.use = new CodeType(); // bb
+          this.use = new Enumeration<ParameterUse>(new ParameterUseEnumFactory()); // bb
       return this.use;
     }
 
@@ -194,7 +284,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
     /**
      * @param value {@link #use} (Whether the parameter is input or output for the module.). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
      */
-    public ParameterDefinition setUseElement(CodeType value) { 
+    public ParameterDefinition setUseElement(Enumeration<ParameterUse> value) { 
       this.use = value;
       return this;
     }
@@ -202,16 +292,16 @@ public class ParameterDefinition extends Type implements ICompositeType {
     /**
      * @return Whether the parameter is input or output for the module.
      */
-    public String getUse() { 
+    public ParameterUse getUse() { 
       return this.use == null ? null : this.use.getValue();
     }
 
     /**
      * @param value Whether the parameter is input or output for the module.
      */
-    public ParameterDefinition setUse(String value) { 
+    public ParameterDefinition setUse(ParameterUse value) { 
         if (this.use == null)
-          this.use = new CodeType();
+          this.use = new Enumeration<ParameterUse>(new ParameterUseEnumFactory());
         this.use.setValue(value);
       return this;
     }
@@ -463,7 +553,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // CodeType
-        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // CodeType
+        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // Enumeration<ParameterUse>
         case 108114: /*min*/ return this.min == null ? new Base[0] : new Base[] {this.min}; // IntegerType
         case 107876: /*max*/ return this.max == null ? new Base[0] : new Base[] {this.max}; // StringType
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : new Base[] {this.documentation}; // StringType
@@ -481,7 +571,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
           this.name = castToCode(value); // CodeType
           break;
         case 116103: // use
-          this.use = castToCode(value); // CodeType
+          this.use = new ParameterUseEnumFactory().fromType(value); // Enumeration<ParameterUse>
           break;
         case 108114: // min
           this.min = castToInteger(value); // IntegerType
@@ -508,7 +598,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
         if (name.equals("name"))
           this.name = castToCode(value); // CodeType
         else if (name.equals("use"))
-          this.use = castToCode(value); // CodeType
+          this.use = new ParameterUseEnumFactory().fromType(value); // Enumeration<ParameterUse>
         else if (name.equals("min"))
           this.min = castToInteger(value); // IntegerType
         else if (name.equals("max"))
@@ -527,7 +617,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // CodeType
-        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // CodeType
+        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<ParameterUse>
         case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
         case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
         case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType

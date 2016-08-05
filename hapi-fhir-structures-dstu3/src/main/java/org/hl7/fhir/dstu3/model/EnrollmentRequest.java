@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -924,32 +924,6 @@ public class EnrollmentRequest extends DomainResource {
    }
 
  /**
-   * Search parameter: <b>subjectreference</b>
-   * <p>
-   * Description: <b>The party to be enrolled</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EnrollmentRequest.subjectreference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="subjectreference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
-  public static final String SP_SUBJECTREFERENCE = "subjectreference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>subjectreference</b>
-   * <p>
-   * Description: <b>The party to be enrolled</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EnrollmentRequest.subjectreference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECTREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECTREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>EnrollmentRequest:subjectreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECTREFERENCE = new ca.uhn.fhir.model.api.Include("EnrollmentRequest:subjectreference").toLocked();
-
- /**
    * Search parameter: <b>identifier</b>
    * <p>
    * Description: <b>The business identifier of the Enrollment</b><br>
@@ -970,70 +944,96 @@ public class EnrollmentRequest extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>patientidentifier</b>
-   * <p>
-   * Description: <b>The party to be enrolled</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>EnrollmentRequest.subjectidentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="patientidentifier", path="EnrollmentRequest.subject.as(identifier)", description="The party to be enrolled", type="token" )
-  public static final String SP_PATIENTIDENTIFIER = "patientidentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>patientidentifier</b>
-   * <p>
-   * Description: <b>The party to be enrolled</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>EnrollmentRequest.subjectidentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PATIENTIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PATIENTIDENTIFIER);
-
- /**
-   * Search parameter: <b>patientreference</b>
+   * Search parameter: <b>patient-reference</b>
    * <p>
    * Description: <b>The party to be enrolled</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EnrollmentRequest.subjectreference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patientreference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference", target={Patient.class } )
-  public static final String SP_PATIENTREFERENCE = "patientreference";
+  @SearchParamDefinition(name="patient-reference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference", target={Patient.class } )
+  public static final String SP_PATIENT_REFERENCE = "patient-reference";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>patientreference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>patient-reference</b>
    * <p>
    * Description: <b>The party to be enrolled</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EnrollmentRequest.subjectreference</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENTREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENTREFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT_REFERENCE);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>EnrollmentRequest:patientreference</b>".
+   * the path value of "<b>EnrollmentRequest:patient-reference</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENTREFERENCE = new ca.uhn.fhir.model.api.Include("EnrollmentRequest:patientreference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT_REFERENCE = new ca.uhn.fhir.model.api.Include("EnrollmentRequest:patient-reference").toLocked();
 
  /**
-   * Search parameter: <b>subjectidentifier</b>
+   * Search parameter: <b>subject-identifier</b>
    * <p>
    * Description: <b>The party to be enrolled</b><br>
    * Type: <b>token</b><br>
    * Path: <b>EnrollmentRequest.subjectidentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subjectidentifier", path="EnrollmentRequest.subject.as(identifier)", description="The party to be enrolled", type="token" )
-  public static final String SP_SUBJECTIDENTIFIER = "subjectidentifier";
+  @SearchParamDefinition(name="subject-identifier", path="EnrollmentRequest.subject.as(identifier)", description="The party to be enrolled", type="token" )
+  public static final String SP_SUBJECT_IDENTIFIER = "subject-identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>subjectidentifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>subject-identifier</b>
    * <p>
    * Description: <b>The party to be enrolled</b><br>
    * Type: <b>token</b><br>
    * Path: <b>EnrollmentRequest.subjectidentifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SUBJECTIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SUBJECTIDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SUBJECT_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SUBJECT_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>subject-reference</b>
+   * <p>
+   * Description: <b>The party to be enrolled</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>EnrollmentRequest.subjectreference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="subject-reference", path="EnrollmentRequest.subject.as(reference)", description="The party to be enrolled", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  public static final String SP_SUBJECT_REFERENCE = "subject-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject-reference</b>
+   * <p>
+   * Description: <b>The party to be enrolled</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>EnrollmentRequest.subjectreference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EnrollmentRequest:subject-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT_REFERENCE = new ca.uhn.fhir.model.api.Include("EnrollmentRequest:subject-reference").toLocked();
+
+ /**
+   * Search parameter: <b>patient-identifier</b>
+   * <p>
+   * Description: <b>The party to be enrolled</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>EnrollmentRequest.subjectidentifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient-identifier", path="EnrollmentRequest.subject.as(identifier)", description="The party to be enrolled", type="token" )
+  public static final String SP_PATIENT_IDENTIFIER = "patient-identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient-identifier</b>
+   * <p>
+   * Description: <b>The party to be enrolled</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>EnrollmentRequest.subjectidentifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PATIENT_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PATIENT_IDENTIFIER);
 
 
 }

@@ -109,11 +109,11 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 
 		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "active");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("active", "confirmed", "unconfirmed"));
+		assertThat(codes, containsInAnyOrder("active", "active-confirmed"));
 
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "confirmed");
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "active-confirmed");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("confirmed"));
+		assertThat(codes, containsInAnyOrder("active-confirmed"));
 
 		// Unknown code
 		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "FOO");
@@ -135,9 +135,9 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		codes = toCodes(concepts);
 		assertThat(codes, containsInAnyOrder("active"));
 
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "confirmed");
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "active-confirmed");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("active", "confirmed"));
+		assertThat(codes, containsInAnyOrder("active", "active-confirmed"));
 
 		// Unknown code
 		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "FOO");

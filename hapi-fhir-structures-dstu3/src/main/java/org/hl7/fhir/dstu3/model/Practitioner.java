@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -50,7 +50,7 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 public class Practitioner extends DomainResource {
 
     @Block()
-    public static class PractitionerPractitionerRoleComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class PractitionerRoleComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The organization where the Practitioner performs the roles associated.
          */
@@ -66,10 +66,10 @@ public class Practitioner extends DomainResource {
         /**
          * Roles which this practitioner is authorized to perform for the organization.
          */
-        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Roles which this practitioner may perform", formalDefinition="Roles which this practitioner is authorized to perform for the organization." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/practitioner-role")
-        protected CodeableConcept role;
+        protected CodeableConcept code;
 
         /**
          * Specific specialty of the practitioner.
@@ -136,12 +136,12 @@ public class Practitioner extends DomainResource {
         protected List<Endpoint> endpointTarget;
 
 
-        private static final long serialVersionUID = 767367768L;
+        private static final long serialVersionUID = 677139919L;
 
     /**
      * Constructor
      */
-      public PractitionerPractitionerRoleComponent() {
+      public PractitionerRoleComponent() {
         super();
       }
 
@@ -151,7 +151,7 @@ public class Practitioner extends DomainResource {
         public Reference getOrganization() { 
           if (this.organization == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.organization");
+              throw new Error("Attempt to auto-create PractitionerRoleComponent.organization");
             else if (Configuration.doAutoCreate())
               this.organization = new Reference(); // cc
           return this.organization;
@@ -164,7 +164,7 @@ public class Practitioner extends DomainResource {
         /**
          * @param value {@link #organization} (The organization where the Practitioner performs the roles associated.)
          */
-        public PractitionerPractitionerRoleComponent setOrganization(Reference value) { 
+        public PractitionerRoleComponent setOrganization(Reference value) { 
           this.organization = value;
           return this;
         }
@@ -175,7 +175,7 @@ public class Practitioner extends DomainResource {
         public Organization getOrganizationTarget() { 
           if (this.organizationTarget == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.organization");
+              throw new Error("Attempt to auto-create PractitionerRoleComponent.organization");
             else if (Configuration.doAutoCreate())
               this.organizationTarget = new Organization(); // aa
           return this.organizationTarget;
@@ -184,32 +184,32 @@ public class Practitioner extends DomainResource {
         /**
          * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization where the Practitioner performs the roles associated.)
          */
-        public PractitionerPractitionerRoleComponent setOrganizationTarget(Organization value) { 
+        public PractitionerRoleComponent setOrganizationTarget(Organization value) { 
           this.organizationTarget = value;
           return this;
         }
 
         /**
-         * @return {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
+         * @return {@link #code} (Roles which this practitioner is authorized to perform for the organization.)
          */
-        public CodeableConcept getRole() { 
-          if (this.role == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.role");
+              throw new Error("Attempt to auto-create PractitionerRoleComponent.code");
             else if (Configuration.doAutoCreate())
-              this.role = new CodeableConcept(); // cc
-          return this.role;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasRole() { 
-          return this.role != null && !this.role.isEmpty();
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @param value {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
+         * @param value {@link #code} (Roles which this practitioner is authorized to perform for the organization.)
          */
-        public PractitionerPractitionerRoleComponent setRole(CodeableConcept value) { 
-          this.role = value;
+        public PractitionerRoleComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
@@ -225,7 +225,7 @@ public class Practitioner extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PractitionerPractitionerRoleComponent setSpecialty(List<CodeableConcept> theSpecialty) { 
+        public PractitionerRoleComponent setSpecialty(List<CodeableConcept> theSpecialty) { 
           this.specialty = theSpecialty;
           return this;
         }
@@ -247,7 +247,7 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-        public PractitionerPractitionerRoleComponent addSpecialty(CodeableConcept t) { //3
+        public PractitionerRoleComponent addSpecialty(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.specialty == null)
@@ -278,7 +278,7 @@ public class Practitioner extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PractitionerPractitionerRoleComponent setIdentifier(List<Identifier> theIdentifier) { 
+        public PractitionerRoleComponent setIdentifier(List<Identifier> theIdentifier) { 
           this.identifier = theIdentifier;
           return this;
         }
@@ -300,7 +300,7 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-        public PractitionerPractitionerRoleComponent addIdentifier(Identifier t) { //3
+        public PractitionerRoleComponent addIdentifier(Identifier t) { //3
           if (t == null)
             return this;
           if (this.identifier == null)
@@ -331,7 +331,7 @@ public class Practitioner extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PractitionerPractitionerRoleComponent setTelecom(List<ContactPoint> theTelecom) { 
+        public PractitionerRoleComponent setTelecom(List<ContactPoint> theTelecom) { 
           this.telecom = theTelecom;
           return this;
         }
@@ -353,7 +353,7 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-        public PractitionerPractitionerRoleComponent addTelecom(ContactPoint t) { //3
+        public PractitionerRoleComponent addTelecom(ContactPoint t) { //3
           if (t == null)
             return this;
           if (this.telecom == null)
@@ -378,7 +378,7 @@ public class Practitioner extends DomainResource {
         public Period getPeriod() { 
           if (this.period == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.period");
+              throw new Error("Attempt to auto-create PractitionerRoleComponent.period");
             else if (Configuration.doAutoCreate())
               this.period = new Period(); // cc
           return this.period;
@@ -391,7 +391,7 @@ public class Practitioner extends DomainResource {
         /**
          * @param value {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
          */
-        public PractitionerPractitionerRoleComponent setPeriod(Period value) { 
+        public PractitionerRoleComponent setPeriod(Period value) { 
           this.period = value;
           return this;
         }
@@ -408,7 +408,7 @@ public class Practitioner extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PractitionerPractitionerRoleComponent setLocation(List<Reference> theLocation) { 
+        public PractitionerRoleComponent setLocation(List<Reference> theLocation) { 
           this.location = theLocation;
           return this;
         }
@@ -430,7 +430,7 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-        public PractitionerPractitionerRoleComponent addLocation(Reference t) { //3
+        public PractitionerRoleComponent addLocation(Reference t) { //3
           if (t == null)
             return this;
           if (this.location == null)
@@ -483,7 +483,7 @@ public class Practitioner extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PractitionerPractitionerRoleComponent setHealthcareService(List<Reference> theHealthcareService) { 
+        public PractitionerRoleComponent setHealthcareService(List<Reference> theHealthcareService) { 
           this.healthcareService = theHealthcareService;
           return this;
         }
@@ -505,7 +505,7 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-        public PractitionerPractitionerRoleComponent addHealthcareService(Reference t) { //3
+        public PractitionerRoleComponent addHealthcareService(Reference t) { //3
           if (t == null)
             return this;
           if (this.healthcareService == null)
@@ -558,7 +558,7 @@ public class Practitioner extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PractitionerPractitionerRoleComponent setEndpoint(List<Reference> theEndpoint) { 
+        public PractitionerRoleComponent setEndpoint(List<Reference> theEndpoint) { 
           this.endpoint = theEndpoint;
           return this;
         }
@@ -580,7 +580,7 @@ public class Practitioner extends DomainResource {
           return t;
         }
 
-        public PractitionerPractitionerRoleComponent addEndpoint(Reference t) { //3
+        public PractitionerRoleComponent addEndpoint(Reference t) { //3
           if (t == null)
             return this;
           if (this.endpoint == null)
@@ -624,7 +624,7 @@ public class Practitioner extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("organization", "Reference(Organization)", "The organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, organization));
-          childrenList.add(new Property("role", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, role));
+          childrenList.add(new Property("code", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("specialty", "CodeableConcept", "Specific specialty of the practitioner.", 0, java.lang.Integer.MAX_VALUE, specialty));
           childrenList.add(new Property("identifier", "Identifier", "Business Identifiers that are specific to a role/location.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("telecom", "ContactPoint", "Contact details that are specific to the role/location/service.", 0, java.lang.Integer.MAX_VALUE, telecom));
@@ -638,7 +638,7 @@ public class Practitioner extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
-        case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
@@ -657,8 +657,8 @@ public class Practitioner extends DomainResource {
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
           break;
-        case 3506294: // role
-          this.role = castToCodeableConcept(value); // CodeableConcept
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
           break;
         case -1694759682: // specialty
           this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
@@ -690,8 +690,8 @@ public class Practitioner extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("organization"))
           this.organization = castToReference(value); // Reference
-        else if (name.equals("role"))
-          this.role = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("specialty"))
           this.getSpecialty().add(castToCodeableConcept(value));
         else if (name.equals("identifier"))
@@ -714,7 +714,7 @@ public class Practitioner extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 1178922291:  return getOrganization(); // Reference
-        case 3506294:  return getRole(); // CodeableConcept
+        case 3059181:  return getCode(); // CodeableConcept
         case -1694759682:  return addSpecialty(); // CodeableConcept
         case -1618432855:  return addIdentifier(); // Identifier
         case -1429363305:  return addTelecom(); // ContactPoint
@@ -733,9 +733,9 @@ public class Practitioner extends DomainResource {
           this.organization = new Reference();
           return this.organization;
         }
-        else if (name.equals("role")) {
-          this.role = new CodeableConcept();
-          return this.role;
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
         }
         else if (name.equals("specialty")) {
           return addSpecialty();
@@ -763,11 +763,11 @@ public class Practitioner extends DomainResource {
           return super.addChild(name);
       }
 
-      public PractitionerPractitionerRoleComponent copy() {
-        PractitionerPractitionerRoleComponent dst = new PractitionerPractitionerRoleComponent();
+      public PractitionerRoleComponent copy() {
+        PractitionerRoleComponent dst = new PractitionerRoleComponent();
         copyValues(dst);
         dst.organization = organization == null ? null : organization.copy();
-        dst.role = role == null ? null : role.copy();
+        dst.code = code == null ? null : code.copy();
         if (specialty != null) {
           dst.specialty = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : specialty)
@@ -806,10 +806,10 @@ public class Practitioner extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof PractitionerPractitionerRoleComponent))
+        if (!(other instanceof PractitionerRoleComponent))
           return false;
-        PractitionerPractitionerRoleComponent o = (PractitionerPractitionerRoleComponent) other;
-        return compareDeep(organization, o.organization, true) && compareDeep(role, o.role, true) && compareDeep(specialty, o.specialty, true)
+        PractitionerRoleComponent o = (PractitionerRoleComponent) other;
+        return compareDeep(organization, o.organization, true) && compareDeep(code, o.code, true) && compareDeep(specialty, o.specialty, true)
            && compareDeep(identifier, o.identifier, true) && compareDeep(telecom, o.telecom, true) && compareDeep(period, o.period, true)
            && compareDeep(location, o.location, true) && compareDeep(healthcareService, o.healthcareService, true)
            && compareDeep(endpoint, o.endpoint, true);
@@ -819,19 +819,19 @@ public class Practitioner extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof PractitionerPractitionerRoleComponent))
+        if (!(other instanceof PractitionerRoleComponent))
           return false;
-        PractitionerPractitionerRoleComponent o = (PractitionerPractitionerRoleComponent) other;
+        PractitionerRoleComponent o = (PractitionerRoleComponent) other;
         return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, role, specialty
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, code, specialty
           , identifier, telecom, period, location, healthcareService, endpoint);
       }
 
   public String fhirType() {
-    return "Practitioner.practitionerRole";
+    return "Practitioner.role";
 
   }
 
@@ -1198,11 +1198,10 @@ public class Practitioner extends DomainResource {
     protected List<ContactPoint> telecom;
 
     /**
-     * Address(es) of the practitioner that are not role specific (typically home address). 
-Work addresses are not typically entered in this property as they are usually role dependent.
+     * Address(es) of the practitioner that are not role specific (typically home address). Work addresses are not typically entered in this property as they are usually role dependent.
      */
     @Child(name = "address", type = {Address.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Address(es) of the practitioner that are not role specific (typically home address)", formalDefinition="Address(es) of the practitioner that are not role specific (typically home address). \nWork addresses are not typically entered in this property as they are usually role dependent." )
+    @Description(shortDefinition="Address(es) of the practitioner that are not role specific (typically home address)", formalDefinition="Address(es) of the practitioner that are not role specific (typically home address). \rWork addresses are not typically entered in this property as they are usually role dependent." )
     protected List<Address> address;
 
     /**
@@ -1230,9 +1229,9 @@ Work addresses are not typically entered in this property as they are usually ro
     /**
      * The list of roles/organizations that the practitioner is associated with.
      */
-    @Child(name = "practitionerRole", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "role", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Roles/organizations the practitioner is associated with", formalDefinition="The list of roles/organizations that the practitioner is associated with." )
-    protected List<PractitionerPractitionerRoleComponent> practitionerRole;
+    protected List<PractitionerRoleComponent> role;
 
     /**
      * Qualifications obtained by training and certification.
@@ -1246,9 +1245,10 @@ Work addresses are not typically entered in this property as they are usually ro
      */
     @Child(name = "communication", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A language the practitioner is able to use in patient communication", formalDefinition="A language the practitioner is able to use in patient communication." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected List<CodeableConcept> communication;
 
-    private static final long serialVersionUID = 2137859974L;
+    private static final long serialVersionUID = -983959994L;
 
   /**
    * Constructor
@@ -1462,8 +1462,7 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
-     * @return {@link #address} (Address(es) of the practitioner that are not role specific (typically home address). 
-Work addresses are not typically entered in this property as they are usually role dependent.)
+     * @return {@link #address} (Address(es) of the practitioner that are not role specific (typically home address). Work addresses are not typically entered in this property as they are usually role dependent.)
      */
     public List<Address> getAddress() { 
       if (this.address == null)
@@ -1667,56 +1666,56 @@ Work addresses are not typically entered in this property as they are usually ro
     }
 
     /**
-     * @return {@link #practitionerRole} (The list of roles/organizations that the practitioner is associated with.)
+     * @return {@link #role} (The list of roles/organizations that the practitioner is associated with.)
      */
-    public List<PractitionerPractitionerRoleComponent> getPractitionerRole() { 
-      if (this.practitionerRole == null)
-        this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
-      return this.practitionerRole;
+    public List<PractitionerRoleComponent> getRole() { 
+      if (this.role == null)
+        this.role = new ArrayList<PractitionerRoleComponent>();
+      return this.role;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Practitioner setPractitionerRole(List<PractitionerPractitionerRoleComponent> thePractitionerRole) { 
-      this.practitionerRole = thePractitionerRole;
+    public Practitioner setRole(List<PractitionerRoleComponent> theRole) { 
+      this.role = theRole;
       return this;
     }
 
-    public boolean hasPractitionerRole() { 
-      if (this.practitionerRole == null)
+    public boolean hasRole() { 
+      if (this.role == null)
         return false;
-      for (PractitionerPractitionerRoleComponent item : this.practitionerRole)
+      for (PractitionerRoleComponent item : this.role)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public PractitionerPractitionerRoleComponent addPractitionerRole() { //3
-      PractitionerPractitionerRoleComponent t = new PractitionerPractitionerRoleComponent();
-      if (this.practitionerRole == null)
-        this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
-      this.practitionerRole.add(t);
+    public PractitionerRoleComponent addRole() { //3
+      PractitionerRoleComponent t = new PractitionerRoleComponent();
+      if (this.role == null)
+        this.role = new ArrayList<PractitionerRoleComponent>();
+      this.role.add(t);
       return t;
     }
 
-    public Practitioner addPractitionerRole(PractitionerPractitionerRoleComponent t) { //3
+    public Practitioner addRole(PractitionerRoleComponent t) { //3
       if (t == null)
         return this;
-      if (this.practitionerRole == null)
-        this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
-      this.practitionerRole.add(t);
+      if (this.role == null)
+        this.role = new ArrayList<PractitionerRoleComponent>();
+      this.role.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #practitionerRole}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
      */
-    public PractitionerPractitionerRoleComponent getPractitionerRoleFirstRep() { 
-      if (getPractitionerRole().isEmpty()) {
-        addPractitionerRole();
+    public PractitionerRoleComponent getRoleFirstRep() { 
+      if (getRole().isEmpty()) {
+        addRole();
       }
-      return getPractitionerRole().get(0);
+      return getRole().get(0);
     }
 
     /**
@@ -1831,11 +1830,11 @@ Work addresses are not typically entered in this property as they are usually ro
         childrenList.add(new Property("active", "boolean", "Whether this practitioner's record is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("name", "HumanName", "The name(s) associated with the practitioner.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the practitioner, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        childrenList.add(new Property("address", "Address", "Address(es) of the practitioner that are not role specific (typically home address). \nWork addresses are not typically entered in this property as they are usually role dependent.", 0, java.lang.Integer.MAX_VALUE, address));
+        childrenList.add(new Property("address", "Address", "Address(es) of the practitioner that are not role specific (typically home address). \rWork addresses are not typically entered in this property as they are usually role dependent.", 0, java.lang.Integer.MAX_VALUE, address));
         childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
         childrenList.add(new Property("birthDate", "date", "The date of birth for the practitioner.", 0, java.lang.Integer.MAX_VALUE, birthDate));
         childrenList.add(new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo));
-        childrenList.add(new Property("practitionerRole", "", "The list of roles/organizations that the practitioner is associated with.", 0, java.lang.Integer.MAX_VALUE, practitionerRole));
+        childrenList.add(new Property("role", "", "The list of roles/organizations that the practitioner is associated with.", 0, java.lang.Integer.MAX_VALUE, role));
         childrenList.add(new Property("qualification", "", "Qualifications obtained by training and certification.", 0, java.lang.Integer.MAX_VALUE, qualification));
         childrenList.add(new Property("communication", "CodeableConcept", "A language the practitioner is able to use in patient communication.", 0, java.lang.Integer.MAX_VALUE, communication));
       }
@@ -1851,7 +1850,7 @@ Work addresses are not typically entered in this property as they are usually ro
         case -1249512767: /*gender*/ return this.gender == null ? new Base[0] : new Base[] {this.gender}; // Enumeration<AdministrativeGender>
         case -1210031859: /*birthDate*/ return this.birthDate == null ? new Base[0] : new Base[] {this.birthDate}; // DateType
         case 106642994: /*photo*/ return this.photo == null ? new Base[0] : this.photo.toArray(new Base[this.photo.size()]); // Attachment
-        case 221717168: /*practitionerRole*/ return this.practitionerRole == null ? new Base[0] : this.practitionerRole.toArray(new Base[this.practitionerRole.size()]); // PractitionerPractitionerRoleComponent
+        case 3506294: /*role*/ return this.role == null ? new Base[0] : this.role.toArray(new Base[this.role.size()]); // PractitionerRoleComponent
         case -631333393: /*qualification*/ return this.qualification == null ? new Base[0] : this.qualification.toArray(new Base[this.qualification.size()]); // PractitionerQualificationComponent
         case -1035284522: /*communication*/ return this.communication == null ? new Base[0] : this.communication.toArray(new Base[this.communication.size()]); // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
@@ -1886,8 +1885,8 @@ Work addresses are not typically entered in this property as they are usually ro
         case 106642994: // photo
           this.getPhoto().add(castToAttachment(value)); // Attachment
           break;
-        case 221717168: // practitionerRole
-          this.getPractitionerRole().add((PractitionerPractitionerRoleComponent) value); // PractitionerPractitionerRoleComponent
+        case 3506294: // role
+          this.getRole().add((PractitionerRoleComponent) value); // PractitionerRoleComponent
           break;
         case -631333393: // qualification
           this.getQualification().add((PractitionerQualificationComponent) value); // PractitionerQualificationComponent
@@ -1918,8 +1917,8 @@ Work addresses are not typically entered in this property as they are usually ro
           this.birthDate = castToDate(value); // DateType
         else if (name.equals("photo"))
           this.getPhoto().add(castToAttachment(value));
-        else if (name.equals("practitionerRole"))
-          this.getPractitionerRole().add((PractitionerPractitionerRoleComponent) value);
+        else if (name.equals("role"))
+          this.getRole().add((PractitionerRoleComponent) value);
         else if (name.equals("qualification"))
           this.getQualification().add((PractitionerQualificationComponent) value);
         else if (name.equals("communication"))
@@ -1939,7 +1938,7 @@ Work addresses are not typically entered in this property as they are usually ro
         case -1249512767: throw new FHIRException("Cannot make property gender as it is not a complex type"); // Enumeration<AdministrativeGender>
         case -1210031859: throw new FHIRException("Cannot make property birthDate as it is not a complex type"); // DateType
         case 106642994:  return addPhoto(); // Attachment
-        case 221717168:  return addPractitionerRole(); // PractitionerPractitionerRoleComponent
+        case 3506294:  return addRole(); // PractitionerRoleComponent
         case -631333393:  return addQualification(); // PractitionerQualificationComponent
         case -1035284522:  return addCommunication(); // CodeableConcept
         default: return super.makeProperty(hash, name);
@@ -1973,8 +1972,8 @@ Work addresses are not typically entered in this property as they are usually ro
         else if (name.equals("photo")) {
           return addPhoto();
         }
-        else if (name.equals("practitionerRole")) {
-          return addPractitionerRole();
+        else if (name.equals("role")) {
+          return addRole();
         }
         else if (name.equals("qualification")) {
           return addQualification();
@@ -2022,10 +2021,10 @@ Work addresses are not typically entered in this property as they are usually ro
           for (Attachment i : photo)
             dst.photo.add(i.copy());
         };
-        if (practitionerRole != null) {
-          dst.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
-          for (PractitionerPractitionerRoleComponent i : practitionerRole)
-            dst.practitionerRole.add(i.copy());
+        if (role != null) {
+          dst.role = new ArrayList<PractitionerRoleComponent>();
+          for (PractitionerRoleComponent i : role)
+            dst.role.add(i.copy());
         };
         if (qualification != null) {
           dst.qualification = new ArrayList<PractitionerQualificationComponent>();
@@ -2053,7 +2052,7 @@ Work addresses are not typically entered in this property as they are usually ro
         Practitioner o = (Practitioner) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(name, o.name, true)
            && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true) && compareDeep(gender, o.gender, true)
-           && compareDeep(birthDate, o.birthDate, true) && compareDeep(photo, o.photo, true) && compareDeep(practitionerRole, o.practitionerRole, true)
+           && compareDeep(birthDate, o.birthDate, true) && compareDeep(photo, o.photo, true) && compareDeep(role, o.role, true)
            && compareDeep(qualification, o.qualification, true) && compareDeep(communication, o.communication, true)
           ;
       }
@@ -2071,8 +2070,8 @@ Work addresses are not typically entered in this property as they are usually ro
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name
-          , telecom, address, gender, birthDate, photo, practitionerRole, qualification
-          , communication);
+          , telecom, address, gender, birthDate, photo, role, qualification, communication
+          );
       }
 
   @Override
@@ -2085,17 +2084,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>A practitioner's Identifier</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.identifier, Practitioner.practitionerRole.identifier</b><br>
+   * Path: <b>Practitioner.identifier, Practitioner.role.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Practitioner.identifier | Practitioner.practitionerRole.identifier", description="A practitioner's Identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="Practitioner.identifier | Practitioner.role.identifier", description="A practitioner's Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
    * Description: <b>A practitioner's Identifier</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.identifier, Practitioner.practitionerRole.identifier</b><br>
+   * Path: <b>Practitioner.identifier, Practitioner.role.identifier</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
@@ -2125,17 +2124,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>The practitioner has this specialty at an organization</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.practitionerRole.specialty</b><br>
+   * Path: <b>Practitioner.role.specialty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specialty at an organization", type="token" )
+  @SearchParamDefinition(name="specialty", path="Practitioner.role.specialty", description="The practitioner has this specialty at an organization", type="token" )
   public static final String SP_SPECIALTY = "specialty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
    * <p>
    * Description: <b>The practitioner has this specialty at an organization</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.practitionerRole.specialty</b><br>
+   * Path: <b>Practitioner.role.specialty</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIALTY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIALTY);
@@ -2143,17 +2142,17 @@ Work addresses are not typically entered in this property as they are usually ro
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Practitioner.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string" )
+  @SearchParamDefinition(name="address", path="Practitioner.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Practitioner.address</b><br>
    * </p>
@@ -2165,17 +2164,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>The practitioner can perform this role at for the organization</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.practitionerRole.role</b><br>
+   * Path: <b>Practitioner.role.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
+  @SearchParamDefinition(name="role", path="Practitioner.role.code", description="The practitioner can perform this role at for the organization", type="token" )
   public static final String SP_ROLE = "role";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>role</b>
    * <p>
    * Description: <b>The practitioner can perform this role at for the organization</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.practitionerRole.role</b><br>
+   * Path: <b>Practitioner.role.code</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ROLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ROLE);
@@ -2305,17 +2304,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>A value in a phone contact</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.telecom(system=phone), Practitioner.practitionerRole.telecom(system=phone)</b><br>
+   * Path: <b>Practitioner.telecom(system=phone), Practitioner.role.telecom(system=phone)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone') or Practitioner.practitionerRole.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
+  @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone') or Practitioner.role.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>phone</b>
    * <p>
    * Description: <b>A value in a phone contact</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.telecom(system=phone), Practitioner.practitionerRole.telecom(system=phone)</b><br>
+   * Path: <b>Practitioner.telecom(system=phone), Practitioner.role.telecom(system=phone)</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PHONE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PHONE);
@@ -2325,17 +2324,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Practitioner.practitionerRole.organization</b><br>
+   * Path: <b>Practitioner.role.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="organization", path="Practitioner.role.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference", target={Organization.class } )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
    * <p>
    * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Practitioner.practitionerRole.organization</b><br>
+   * Path: <b>Practitioner.role.organization</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
@@ -2349,17 +2348,17 @@ Work addresses are not typically entered in this property as they are usually ro
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A portion of either family or given name</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Practitioner.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
+  @SearchParamDefinition(name="name", path="Practitioner.name", description="A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A portion of either family or given name</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Practitioner.name</b><br>
    * </p>
@@ -2391,17 +2390,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>The value in any kind of contact</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.telecom, Practitioner.practitionerRole.telecom</b><br>
+   * Path: <b>Practitioner.telecom, Practitioner.role.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="Practitioner.telecom | Practitioner.practitionerRole.telecom", description="The value in any kind of contact", type="token" )
+  @SearchParamDefinition(name="telecom", path="Practitioner.telecom | Practitioner.role.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
    * <p>
    * Description: <b>The value in any kind of contact</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.telecom, Practitioner.practitionerRole.telecom</b><br>
+   * Path: <b>Practitioner.telecom, Practitioner.role.telecom</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TELECOM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TELECOM);
@@ -2411,17 +2410,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>One of the locations at which this practitioner provides care</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Practitioner.practitionerRole.location</b><br>
+   * Path: <b>Practitioner.role.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference", target={Location.class } )
+  @SearchParamDefinition(name="location", path="Practitioner.role.location", description="One of the locations at which this practitioner provides care", type="reference", target={Location.class } )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
    * <p>
    * Description: <b>One of the locations at which this practitioner provides care</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Practitioner.practitionerRole.location</b><br>
+   * Path: <b>Practitioner.role.location</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam LOCATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_LOCATION);
@@ -2497,17 +2496,17 @@ Work addresses are not typically entered in this property as they are usually ro
    * <p>
    * Description: <b>A value in an email contact</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.telecom(system=email), Practitioner.practitionerRole.telecom(system=email)</b><br>
+   * Path: <b>Practitioner.telecom(system=email), Practitioner.role.telecom(system=email)</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email') or Practitioner.practitionerRole.telecom.where(system='email')", description="A value in an email contact", type="token" )
+  @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email') or Practitioner.role.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>email</b>
    * <p>
    * Description: <b>A value in an email contact</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>Practitioner.telecom(system=email), Practitioner.practitionerRole.telecom(system=email)</b><br>
+   * Path: <b>Practitioner.telecom(system=email), Practitioner.role.telecom(system=email)</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam EMAIL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EMAIL);

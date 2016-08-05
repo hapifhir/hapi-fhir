@@ -442,7 +442,7 @@
         "substance": {
           "text": "Doxycycline"
         },
-        "status": "confirmed",
+        "status": "active-confirmed",
         "criticality": "high",
         "type": "allergy",
         "event": [

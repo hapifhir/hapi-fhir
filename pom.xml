@@ -810,7 +810,7 @@
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
 						<argLine>-Dfile.encoding=UTF-8 -Xmx712m</argLine>
-						<forkCount>1</forkCount>
+						<forkCount>1.0C</forkCount>
 					</configuration>
 				</plugin>
 				<plugin>

@@ -31,7 +31,7 @@ import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Device;
-import org.hl7.fhir.dstu3.model.DiagnosticOrder;
+import org.hl7.fhir.dstu3.model.DiagnosticRequest;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -154,17 +154,17 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testIndexNoDuplicatesDate() {
-		DiagnosticOrder order = new DiagnosticOrder();
-		order.addItem().addEvent().setDateTimeElement(new DateTimeType("2011-12-11T11:12:12Z"));
-		order.addItem().addEvent().setDateTimeElement(new DateTimeType("2011-12-11T11:12:12Z"));
-		order.addItem().addEvent().setDateTimeElement(new DateTimeType("2011-12-11T11:12:12Z"));
-		order.addItem().addEvent().setDateTimeElement(new DateTimeType("2011-12-12T11:12:12Z"));
-		order.addItem().addEvent().setDateTimeElement(new DateTimeType("2011-12-12T11:12:12Z"));
-		order.addItem().addEvent().setDateTimeElement(new DateTimeType("2011-12-12T11:12:12Z"));
+		Encounter order = new Encounter();
+		order.addLocation().getPeriod().setStartElement(new DateTimeType("2011-12-12T11:12:12Z")).setEndElement(new DateTimeType("2011-12-12T11:12:12Z"));
+		order.addLocation().getPeriod().setStartElement(new DateTimeType("2011-12-12T11:12:12Z")).setEndElement(new DateTimeType("2011-12-12T11:12:12Z"));
+		order.addLocation().getPeriod().setStartElement(new DateTimeType("2011-12-12T11:12:12Z")).setEndElement(new DateTimeType("2011-12-12T11:12:12Z"));
+		order.addLocation().getPeriod().setStartElement(new DateTimeType("2011-12-11T11:12:12Z")).setEndElement(new DateTimeType("2011-12-11T11:12:12Z"));
+		order.addLocation().getPeriod().setStartElement(new DateTimeType("2011-12-11T11:12:12Z")).setEndElement(new DateTimeType("2011-12-11T11:12:12Z"));
+		order.addLocation().getPeriod().setStartElement(new DateTimeType("2011-12-11T11:12:12Z")).setEndElement(new DateTimeType("2011-12-11T11:12:12Z"));
 		
-		IIdType id = myDiagnosticOrderDao.create(order, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = myEncounterDao.create(order, mySrd).getId().toUnqualifiedVersionless();
 		
-		List<IIdType> actual = toUnqualifiedVersionlessIds(myDiagnosticOrderDao.search(DiagnosticOrder.SP_ITEM_DATE, new DateParam("2011-12-12T11:12:12Z")));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myEncounterDao.search(Encounter.SP_LOCATION_PERIOD, new DateParam("2011-12-12T11:12:12Z")));
 		assertThat(actual, contains(id));
 		
 		Class<ResourceIndexedSearchParamDate> type = ResourceIndexedSearchParamDate.class;
@@ -224,20 +224,20 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		pract2.addName().addFamily("SOME PRACT2");
 		myPractitionerDao.update(pract2, mySrd);
 		
-		DiagnosticOrder res = new DiagnosticOrder();
-		res.addEvent().setActor(new Reference("Practitioner/somepract"));
-		res.addEvent().setActor(new Reference("Practitioner/somepract"));
-		res.addEvent().setActor(new Reference("Practitioner/somepract2"));
-		res.addEvent().setActor(new Reference("Practitioner/somepract2"));
+		DiagnosticRequest res = new DiagnosticRequest();
+		res.addReplaces(new Reference("Practitioner/somepract"));
+		res.addReplaces(new Reference("Practitioner/somepract"));
+		res.addReplaces(new Reference("Practitioner/somepract2"));
+		res.addReplaces(new Reference("Practitioner/somepract2"));
 		
-		IIdType id = myDiagnosticOrderDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = myDiagnosticRequestDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 		
 		Class<ResourceLink> type = ResourceLink.class;
 		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 		
-		List<IIdType> actual = toUnqualifiedVersionlessIds(myDiagnosticOrderDao.search(DiagnosticOrder.SP_ACTOR, new ReferenceParam("Practitioner/somepract")));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myDiagnosticRequestDao.search(DiagnosticRequest.SP_REPLACES, new ReferenceParam("Practitioner/somepract")));
 		assertThat(actual, contains(id));
 	}
 	

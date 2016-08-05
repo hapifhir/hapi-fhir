@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
@@ -228,7 +229,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-		
+
 		boolean caseSensitive = true;
 		CodeSystem system = fetchCodeSystem(theSystem);
 		if (system != null) {
@@ -236,19 +237,53 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 				caseSensitive = system.getCaseSensitive();
 			}
 		}
-		
+
 		String wantCode = theCode;
 		if (!caseSensitive) {
 			wantCode = wantCode.toUpperCase();
 		}
+
+		ValueSetExpansionOutcome expandedValueSet = null;
+
+		/*
+		 * The following valueset is a special case, since the BCP codesystem is very difficult to expand
+		 */
+		if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
+			ValueSet expansion = new ValueSet();
+			for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
+				for (ConceptReferenceComponent nextConcept : nextInclude.getConcept()) {
+					expansion.getExpansion().addContains().setCode(nextConcept.getCode()).setDisplay(nextConcept.getDisplay());
+				}
+			}
+			expandedValueSet= new ValueSetExpansionOutcome(expansion);
+		}
+
+		// if (theVs.getCompose().hasExclude() == false) {
+		// if (theVs.getCompose().hasImport() == false) {
+		// if (theVs.getCompose().hasInclude()) {
+		// for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
+		// if (nextInclude.hasFilter() == false) {
+		// if (nextInclude.hasConcept() == false) {
+		// if (nextInclude.hasSystem()) {
+		//
+		// }
+		// }
+		// }
+		// }
+		// }
+		// }
+		// }
+
+		if (expandedValueSet == null) {
+			expandedValueSet = expand(theVs);
+		}
 		
-		ValueSetExpansionOutcome expandedValueSet = expand(theVs);
 		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
 			String nextCode = next.getCode();
 			if (!caseSensitive) {
 				nextCode = nextCode.toUpperCase();
 			}
-			
+
 			if (nextCode.equals(wantCode)) {
 				if (theSystem == null || next.getSystem().equals(theSystem)) {
 					ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
@@ -299,5 +334,5 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	public boolean hasCache() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 }

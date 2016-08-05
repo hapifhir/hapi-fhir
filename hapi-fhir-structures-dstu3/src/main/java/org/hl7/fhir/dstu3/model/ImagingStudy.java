@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -455,7 +455,7 @@ public class ImagingStudy extends DomainResource {
         /**
          * A single SOP Instance within the series, e.g. an image, or presentation state.
          */
-        @Child(name = "instance", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "instance", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A single SOP instance from the series", formalDefinition="A single SOP Instance within the series, e.g. an image, or presentation state." )
         protected List<ImagingStudySeriesInstanceComponent> instance;
 
@@ -1377,28 +1377,28 @@ public class ImagingStudy extends DomainResource {
         /**
          * Formal identifier for this image or other content.
          */
-        @Child(name = "uid", type = {OidType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "uid", type = {OidType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Formal DICOM identifier for this instance", formalDefinition="Formal identifier for this image or other content." )
         protected OidType uid;
 
         /**
          * The number of instance in the series.
          */
-        @Child(name = "number", type = {UnsignedIntType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "number", type = {UnsignedIntType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The number of this instance in the series", formalDefinition="The number of instance in the series." )
         protected UnsignedIntType number;
 
         /**
          * DICOM instance  type.
          */
-        @Child(name = "sopClass", type = {OidType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "sopClass", type = {OidType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="DICOM class type", formalDefinition="DICOM instance  type." )
         protected OidType sopClass;
 
         /**
          * The description of the instance.
          */
-        @Child(name = "title", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "title", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of instance", formalDefinition="The description of the instance." )
         protected StringType title;
 
@@ -1757,7 +1757,7 @@ public class ImagingStudy extends DomainResource {
      * Availability of study (online, offline or nearline).
      */
     @Child(name = "availability", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)", formalDefinition="Availability of study (online, offline or nearline)." )
+    @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE", formalDefinition="Availability of study (online, offline or nearline)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/instance-availability")
     protected Enumeration<InstanceAvailability> availability;
 
@@ -1782,29 +1782,41 @@ public class ImagingStudy extends DomainResource {
     protected Patient patientTarget;
 
     /**
+     * The encounter at which the request is initiated.
+     */
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Originating context", formalDefinition="The encounter at which the request is initiated." )
+    protected Reference context;
+
+    /**
+     * The actual object that is the target of the reference (The encounter at which the request is initiated.)
+     */
+    protected Resource contextTarget;
+
+    /**
      * Date and Time the study started.
      */
-    @Child(name = "started", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "started", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the study was started", formalDefinition="Date and Time the study started." )
     protected DateTimeType started;
 
     /**
-     * A list of the diagnostic orders that resulted in this imaging study being performed.
+     * A list of the diagnostic requests that resulted in this imaging study being performed.
      */
-    @Child(name = "order", type = {DiagnosticOrder.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Order(s) that caused this study to be performed", formalDefinition="A list of the diagnostic orders that resulted in this imaging study being performed." )
-    protected List<Reference> order;
+    @Child(name = "basedOn", type = {ReferralRequest.class, CarePlan.class, DiagnosticRequest.class, ProcedureRequest.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Request fulfilled", formalDefinition="A list of the diagnostic requests that resulted in this imaging study being performed." )
+    protected List<Reference> basedOn;
     /**
-     * The actual objects that are the target of the reference (A list of the diagnostic orders that resulted in this imaging study being performed.)
+     * The actual objects that are the target of the reference (A list of the diagnostic requests that resulted in this imaging study being performed.)
      */
-    protected List<DiagnosticOrder> orderTarget;
+    protected List<Resource> basedOnTarget;
 
 
     /**
      * The requesting/referring physician.
      */
-    @Child(name = "referrer", type = {Practitioner.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Referring physician (0008,0090)", formalDefinition="The requesting/referring physician." )
+    @Child(name = "referrer", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Referring physician", formalDefinition="The requesting/referring physician." )
     protected Reference referrer;
 
     /**
@@ -1815,7 +1827,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * Who read the study and interpreted the images or other content.
      */
-    @Child(name = "interpreter", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "interpreter", type = {Practitioner.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who interpreted images", formalDefinition="Who read the study and interpreted the images or other content." )
     protected Reference interpreter;
 
@@ -1827,28 +1839,28 @@ public class ImagingStudy extends DomainResource {
     /**
      * Methods of accessing  (e.g., retrieving, viewing) the study.
      */
-    @Child(name = "baseLocation", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "baseLocation", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Study access service endpoint", formalDefinition="Methods of accessing  (e.g., retrieving, viewing) the study." )
     protected List<StudyBaseLocationComponent> baseLocation;
 
     /**
      * Number of Series in Study.
      */
-    @Child(name = "numberOfSeries", type = {UnsignedIntType.class}, order=11, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "numberOfSeries", type = {UnsignedIntType.class}, order=12, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Number of Study Related Series", formalDefinition="Number of Series in Study." )
     protected UnsignedIntType numberOfSeries;
 
     /**
      * Number of SOP Instances in Study.
      */
-    @Child(name = "numberOfInstances", type = {UnsignedIntType.class}, order=12, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "numberOfInstances", type = {UnsignedIntType.class}, order=13, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Number of Study Related Instances", formalDefinition="Number of SOP Instances in Study." )
     protected UnsignedIntType numberOfInstances;
 
     /**
      * Type of procedure performed.
      */
-    @Child(name = "procedure", type = {Procedure.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "procedure", type = {Procedure.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type of procedure performed", formalDefinition="Type of procedure performed." )
     protected List<Reference> procedure;
     /**
@@ -1858,20 +1870,27 @@ public class ImagingStudy extends DomainResource {
 
 
     /**
+     * Description of clinical codition indicating why the ImagingStudy was requested.
+     */
+    @Child(name = "reason", type = {CodeableConcept.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Reason for study", formalDefinition="Description of clinical codition indicating why the ImagingStudy was requested." )
+    protected CodeableConcept reason;
+
+    /**
      * Institution-generated description or classification of the Study performed.
      */
-    @Child(name = "description", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Institution-generated description", formalDefinition="Institution-generated description or classification of the Study performed." )
     protected StringType description;
 
     /**
      * Each study has one or more series of images or other content.
      */
-    @Child(name = "series", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "series", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Each study has one or more series of instances", formalDefinition="Each study has one or more series of images or other content." )
     protected List<ImagingStudySeriesComponent> series;
 
-    private static final long serialVersionUID = 1363417483L;
+    private static final long serialVersionUID = -1406371081L;
 
   /**
    * Constructor
@@ -2160,6 +2179,45 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
+     * @return {@link #context} (The encounter at which the request is initiated.)
+     */
+    public Reference getContext() { 
+      if (this.context == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImagingStudy.context");
+        else if (Configuration.doAutoCreate())
+          this.context = new Reference(); // cc
+      return this.context;
+    }
+
+    public boolean hasContext() { 
+      return this.context != null && !this.context.isEmpty();
+    }
+
+    /**
+     * @param value {@link #context} (The encounter at which the request is initiated.)
+     */
+    public ImagingStudy setContext(Reference value) { 
+      this.context = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter at which the request is initiated.)
+     */
+    public Resource getContextTarget() { 
+      return this.contextTarget;
+    }
+
+    /**
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter at which the request is initiated.)
+     */
+    public ImagingStudy setContextTarget(Resource value) { 
+      this.contextTarget = value;
+      return this;
+    }
+
+    /**
      * @return {@link #started} (Date and Time the study started.). This is the underlying object with id, value and extensions. The accessor "getStarted" gives direct access to the value
      */
     public DateTimeType getStartedElement() { 
@@ -2209,78 +2267,66 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #order} (A list of the diagnostic orders that resulted in this imaging study being performed.)
+     * @return {@link #basedOn} (A list of the diagnostic requests that resulted in this imaging study being performed.)
      */
-    public List<Reference> getOrder() { 
-      if (this.order == null)
-        this.order = new ArrayList<Reference>();
-      return this.order;
+    public List<Reference> getBasedOn() { 
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      return this.basedOn;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ImagingStudy setOrder(List<Reference> theOrder) { 
-      this.order = theOrder;
+    public ImagingStudy setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
       return this;
     }
 
-    public boolean hasOrder() { 
-      if (this.order == null)
+    public boolean hasBasedOn() { 
+      if (this.basedOn == null)
         return false;
-      for (Reference item : this.order)
+      for (Reference item : this.basedOn)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addOrder() { //3
+    public Reference addBasedOn() { //3
       Reference t = new Reference();
-      if (this.order == null)
-        this.order = new ArrayList<Reference>();
-      this.order.add(t);
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
       return t;
     }
 
-    public ImagingStudy addOrder(Reference t) { //3
+    public ImagingStudy addBasedOn(Reference t) { //3
       if (t == null)
         return this;
-      if (this.order == null)
-        this.order = new ArrayList<Reference>();
-      this.order.add(t);
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #order}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
      */
-    public Reference getOrderFirstRep() { 
-      if (getOrder().isEmpty()) {
-        addOrder();
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
       }
-      return getOrder().get(0);
+      return getBasedOn().get(0);
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<DiagnosticOrder> getOrderTarget() { 
-      if (this.orderTarget == null)
-        this.orderTarget = new ArrayList<DiagnosticOrder>();
-      return this.orderTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public DiagnosticOrder addOrderTarget() { 
-      DiagnosticOrder r = new DiagnosticOrder();
-      if (this.orderTarget == null)
-        this.orderTarget = new ArrayList<DiagnosticOrder>();
-      this.orderTarget.add(r);
-      return r;
+    public List<Resource> getBasedOnTarget() { 
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<Resource>();
+      return this.basedOnTarget;
     }
 
     /**
@@ -2590,6 +2636,30 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
+     * @return {@link #reason} (Description of clinical codition indicating why the ImagingStudy was requested.)
+     */
+    public CodeableConcept getReason() { 
+      if (this.reason == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImagingStudy.reason");
+        else if (Configuration.doAutoCreate())
+          this.reason = new CodeableConcept(); // cc
+      return this.reason;
+    }
+
+    public boolean hasReason() { 
+      return this.reason != null && !this.reason.isEmpty();
+    }
+
+    /**
+     * @param value {@link #reason} (Description of clinical codition indicating why the ImagingStudy was requested.)
+     */
+    public ImagingStudy setReason(CodeableConcept value) { 
+      this.reason = value;
+      return this;
+    }
+
+    /**
      * @return {@link #description} (Institution-generated description or classification of the Study performed.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
@@ -2699,14 +2769,16 @@ public class ImagingStudy extends DomainResource {
         childrenList.add(new Property("availability", "code", "Availability of study (online, offline or nearline).", 0, java.lang.Integer.MAX_VALUE, availability));
         childrenList.add(new Property("modalityList", "Coding", "A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modalityList));
         childrenList.add(new Property("patient", "Reference(Patient)", "The patient imaged in the study.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter at which the request is initiated.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("started", "dateTime", "Date and Time the study started.", 0, java.lang.Integer.MAX_VALUE, started));
-        childrenList.add(new Property("order", "Reference(DiagnosticOrder)", "A list of the diagnostic orders that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, order));
+        childrenList.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|DiagnosticRequest|ProcedureRequest)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         childrenList.add(new Property("referrer", "Reference(Practitioner)", "The requesting/referring physician.", 0, java.lang.Integer.MAX_VALUE, referrer));
         childrenList.add(new Property("interpreter", "Reference(Practitioner)", "Who read the study and interpreted the images or other content.", 0, java.lang.Integer.MAX_VALUE, interpreter));
         childrenList.add(new Property("baseLocation", "", "Methods of accessing  (e.g., retrieving, viewing) the study.", 0, java.lang.Integer.MAX_VALUE, baseLocation));
         childrenList.add(new Property("numberOfSeries", "unsignedInt", "Number of Series in Study.", 0, java.lang.Integer.MAX_VALUE, numberOfSeries));
         childrenList.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study.", 0, java.lang.Integer.MAX_VALUE, numberOfInstances));
         childrenList.add(new Property("procedure", "Reference(Procedure)", "Type of procedure performed.", 0, java.lang.Integer.MAX_VALUE, procedure));
+        childrenList.add(new Property("reason", "CodeableConcept", "Description of clinical codition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series));
       }
@@ -2720,14 +2792,16 @@ public class ImagingStudy extends DomainResource {
         case 1997542747: /*availability*/ return this.availability == null ? new Base[0] : new Base[] {this.availability}; // Enumeration<InstanceAvailability>
         case -1030238433: /*modalityList*/ return this.modalityList == null ? new Base[0] : this.modalityList.toArray(new Base[this.modalityList.size()]); // Coding
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case -1897185151: /*started*/ return this.started == null ? new Base[0] : new Base[] {this.started}; // DateTimeType
-        case 106006350: /*order*/ return this.order == null ? new Base[0] : this.order.toArray(new Base[this.order.size()]); // Reference
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -722568161: /*referrer*/ return this.referrer == null ? new Base[0] : new Base[] {this.referrer}; // Reference
         case -2008009094: /*interpreter*/ return this.interpreter == null ? new Base[0] : new Base[] {this.interpreter}; // Reference
         case 231778726: /*baseLocation*/ return this.baseLocation == null ? new Base[0] : this.baseLocation.toArray(new Base[this.baseLocation.size()]); // StudyBaseLocationComponent
         case 1920000407: /*numberOfSeries*/ return this.numberOfSeries == null ? new Base[0] : new Base[] {this.numberOfSeries}; // UnsignedIntType
         case -1043544226: /*numberOfInstances*/ return this.numberOfInstances == null ? new Base[0] : new Base[] {this.numberOfInstances}; // UnsignedIntType
         case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : this.procedure.toArray(new Base[this.procedure.size()]); // Reference
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -905838985: /*series*/ return this.series == null ? new Base[0] : this.series.toArray(new Base[this.series.size()]); // ImagingStudySeriesComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -2756,11 +2830,14 @@ public class ImagingStudy extends DomainResource {
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
           break;
+        case 951530927: // context
+          this.context = castToReference(value); // Reference
+          break;
         case -1897185151: // started
           this.started = castToDateTime(value); // DateTimeType
           break;
-        case 106006350: // order
-          this.getOrder().add(castToReference(value)); // Reference
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
           break;
         case -722568161: // referrer
           this.referrer = castToReference(value); // Reference
@@ -2779,6 +2856,9 @@ public class ImagingStudy extends DomainResource {
           break;
         case -1095204141: // procedure
           this.getProcedure().add(castToReference(value)); // Reference
+          break;
+        case -934964668: // reason
+          this.reason = castToCodeableConcept(value); // CodeableConcept
           break;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -2805,10 +2885,12 @@ public class ImagingStudy extends DomainResource {
           this.getModalityList().add(castToCoding(value));
         else if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
+        else if (name.equals("context"))
+          this.context = castToReference(value); // Reference
         else if (name.equals("started"))
           this.started = castToDateTime(value); // DateTimeType
-        else if (name.equals("order"))
-          this.getOrder().add(castToReference(value));
+        else if (name.equals("basedOn"))
+          this.getBasedOn().add(castToReference(value));
         else if (name.equals("referrer"))
           this.referrer = castToReference(value); // Reference
         else if (name.equals("interpreter"))
@@ -2821,6 +2903,8 @@ public class ImagingStudy extends DomainResource {
           this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
         else if (name.equals("procedure"))
           this.getProcedure().add(castToReference(value));
+        else if (name.equals("reason"))
+          this.reason = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
         else if (name.equals("series"))
@@ -2838,14 +2922,16 @@ public class ImagingStudy extends DomainResource {
         case 1997542747: throw new FHIRException("Cannot make property availability as it is not a complex type"); // Enumeration<InstanceAvailability>
         case -1030238433:  return addModalityList(); // Coding
         case -791418107:  return getPatient(); // Reference
+        case 951530927:  return getContext(); // Reference
         case -1897185151: throw new FHIRException("Cannot make property started as it is not a complex type"); // DateTimeType
-        case 106006350:  return addOrder(); // Reference
+        case -332612366:  return addBasedOn(); // Reference
         case -722568161:  return getReferrer(); // Reference
         case -2008009094:  return getInterpreter(); // Reference
         case 231778726:  return addBaseLocation(); // StudyBaseLocationComponent
         case 1920000407: throw new FHIRException("Cannot make property numberOfSeries as it is not a complex type"); // UnsignedIntType
         case -1043544226: throw new FHIRException("Cannot make property numberOfInstances as it is not a complex type"); // UnsignedIntType
         case -1095204141:  return addProcedure(); // Reference
+        case -934964668:  return getReason(); // CodeableConcept
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
         case -905838985:  return addSeries(); // ImagingStudySeriesComponent
         default: return super.makeProperty(hash, name);
@@ -2875,11 +2961,15 @@ public class ImagingStudy extends DomainResource {
           this.patient = new Reference();
           return this.patient;
         }
+        else if (name.equals("context")) {
+          this.context = new Reference();
+          return this.context;
+        }
         else if (name.equals("started")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.started");
         }
-        else if (name.equals("order")) {
-          return addOrder();
+        else if (name.equals("basedOn")) {
+          return addBasedOn();
         }
         else if (name.equals("referrer")) {
           this.referrer = new Reference();
@@ -2900,6 +2990,10 @@ public class ImagingStudy extends DomainResource {
         }
         else if (name.equals("procedure")) {
           return addProcedure();
+        }
+        else if (name.equals("reason")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.description");
@@ -2933,11 +3027,12 @@ public class ImagingStudy extends DomainResource {
             dst.modalityList.add(i.copy());
         };
         dst.patient = patient == null ? null : patient.copy();
+        dst.context = context == null ? null : context.copy();
         dst.started = started == null ? null : started.copy();
-        if (order != null) {
-          dst.order = new ArrayList<Reference>();
-          for (Reference i : order)
-            dst.order.add(i.copy());
+        if (basedOn != null) {
+          dst.basedOn = new ArrayList<Reference>();
+          for (Reference i : basedOn)
+            dst.basedOn.add(i.copy());
         };
         dst.referrer = referrer == null ? null : referrer.copy();
         dst.interpreter = interpreter == null ? null : interpreter.copy();
@@ -2953,6 +3048,7 @@ public class ImagingStudy extends DomainResource {
           for (Reference i : procedure)
             dst.procedure.add(i.copy());
         };
+        dst.reason = reason == null ? null : reason.copy();
         dst.description = description == null ? null : description.copy();
         if (series != null) {
           dst.series = new ArrayList<ImagingStudySeriesComponent>();
@@ -2975,10 +3071,11 @@ public class ImagingStudy extends DomainResource {
         ImagingStudy o = (ImagingStudy) other;
         return compareDeep(uid, o.uid, true) && compareDeep(accession, o.accession, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(availability, o.availability, true) && compareDeep(modalityList, o.modalityList, true)
-           && compareDeep(patient, o.patient, true) && compareDeep(started, o.started, true) && compareDeep(order, o.order, true)
-           && compareDeep(referrer, o.referrer, true) && compareDeep(interpreter, o.interpreter, true) && compareDeep(baseLocation, o.baseLocation, true)
-           && compareDeep(numberOfSeries, o.numberOfSeries, true) && compareDeep(numberOfInstances, o.numberOfInstances, true)
-           && compareDeep(procedure, o.procedure, true) && compareDeep(description, o.description, true) && compareDeep(series, o.series, true)
+           && compareDeep(patient, o.patient, true) && compareDeep(context, o.context, true) && compareDeep(started, o.started, true)
+           && compareDeep(basedOn, o.basedOn, true) && compareDeep(referrer, o.referrer, true) && compareDeep(interpreter, o.interpreter, true)
+           && compareDeep(baseLocation, o.baseLocation, true) && compareDeep(numberOfSeries, o.numberOfSeries, true)
+           && compareDeep(numberOfInstances, o.numberOfInstances, true) && compareDeep(procedure, o.procedure, true)
+           && compareDeep(reason, o.reason, true) && compareDeep(description, o.description, true) && compareDeep(series, o.series, true)
           ;
       }
 
@@ -2996,8 +3093,9 @@ public class ImagingStudy extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, accession, identifier
-          , availability, modalityList, patient, started, order, referrer, interpreter, baseLocation
-          , numberOfSeries, numberOfInstances, procedure, description, series);
+          , availability, modalityList, patient, context, started, basedOn, referrer, interpreter
+          , baseLocation, numberOfSeries, numberOfInstances, procedure, reason, description
+          , series);
       }
 
   @Override
@@ -3026,24 +3124,24 @@ public class ImagingStudy extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>uid</b>
+   * Search parameter: <b>reason</b>
    * <p>
-   * Description: <b>The instance unique identifier</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.series.instance.uid</b><br>
+   * Description: <b>The reason for the study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.reason</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri" )
-  public static final String SP_UID = "uid";
+  @SearchParamDefinition(name="reason", path="ImagingStudy.reason", description="The reason for the study", type="token" )
+  public static final String SP_REASON = "reason";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>uid</b>
+   * <b>Fluent Client</b> search parameter constant for <b>reason</b>
    * <p>
-   * Description: <b>The instance unique identifier</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.series.instance.uid</b><br>
+   * Description: <b>The reason for the study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.reason</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam UID = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_UID);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REASON);
 
  /**
    * Search parameter: <b>study</b>
@@ -3126,6 +3224,66 @@ public class ImagingStudy extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam BODYSITE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_BODYSITE);
 
  /**
+   * Search parameter: <b>started</b>
+   * <p>
+   * Description: <b>When the study was started</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ImagingStudy.started</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
+  public static final String SP_STARTED = "started";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>started</b>
+   * <p>
+   * Description: <b>When the study was started</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ImagingStudy.started</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam STARTED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_STARTED);
+
+ /**
+   * Search parameter: <b>accession</b>
+   * <p>
+   * Description: <b>The accession identifier for the study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.accession</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token" )
+  public static final String SP_ACCESSION = "accession";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>accession</b>
+   * <p>
+   * Description: <b>The accession identifier for the study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.accession</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACCESSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACCESSION);
+
+ /**
+   * Search parameter: <b>uid</b>
+   * <p>
+   * Description: <b>The instance unique identifier</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ImagingStudy.series.instance.uid</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri" )
+  public static final String SP_UID = "uid";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>uid</b>
+   * <p>
+   * Description: <b>The instance unique identifier</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ImagingStudy.series.instance.uid</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam UID = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_UID);
+
+ /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>Who the study is about</b><br>
@@ -3172,70 +3330,56 @@ public class ImagingStudy extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.UriClientParam SERIES = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_SERIES);
 
  /**
-   * Search parameter: <b>started</b>
+   * Search parameter: <b>context</b>
    * <p>
-   * Description: <b>When the study was started</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>ImagingStudy.started</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
-  public static final String SP_STARTED = "started";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>started</b>
-   * <p>
-   * Description: <b>When the study was started</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>ImagingStudy.started</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.DateClientParam STARTED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_STARTED);
-
- /**
-   * Search parameter: <b>accession</b>
-   * <p>
-   * Description: <b>The accession identifier for the study</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImagingStudy.accession</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token" )
-  public static final String SP_ACCESSION = "accession";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>accession</b>
-   * <p>
-   * Description: <b>The accession identifier for the study</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImagingStudy.accession</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACCESSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACCESSION);
-
- /**
-   * Search parameter: <b>order</b>
-   * <p>
-   * Description: <b>The order for the image</b><br>
+   * Description: <b>The context of the study</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingStudy.order</b><br>
+   * Path: <b>ImagingStudy.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference", target={DiagnosticOrder.class } )
-  public static final String SP_ORDER = "order";
+  @SearchParamDefinition(name="context", path="ImagingStudy.context", description="The context of the study", type="reference", target={Encounter.class, EpisodeOfCare.class } )
+  public static final String SP_CONTEXT = "context";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>order</b>
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
    * <p>
-   * Description: <b>The order for the image</b><br>
+   * Description: <b>The context of the study</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingStudy.order</b><br>
+   * Path: <b>ImagingStudy.context</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORDER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ImagingStudy:order</b>".
+   * the path value of "<b>ImagingStudy:context</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORDER = new ca.uhn.fhir.model.api.Include("ImagingStudy:order").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("ImagingStudy:context").toLocked();
+
+ /**
+   * Search parameter: <b>basedon</b>
+   * <p>
+   * Description: <b>The order for the image</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingStudy.basedOn</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="basedon", path="ImagingStudy.basedOn", description="The order for the image", type="reference", target={CarePlan.class, DiagnosticRequest.class, ProcedureRequest.class, ReferralRequest.class } )
+  public static final String SP_BASEDON = "basedon";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>basedon</b>
+   * <p>
+   * Description: <b>The order for the image</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingStudy.basedOn</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam BASEDON = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_BASEDON);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImagingStudy:basedon</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_BASEDON = new ca.uhn.fhir.model.api.Include("ImagingStudy:basedon").toLocked();
 
 
 }

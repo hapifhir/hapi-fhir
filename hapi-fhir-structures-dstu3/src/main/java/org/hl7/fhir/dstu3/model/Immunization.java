@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -47,6 +47,144 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
  */
 @ResourceDef(name="Immunization", profile="http://hl7.org/fhir/Profile/Immunization")
 public class Immunization extends DomainResource {
+
+    public enum ImmunizationStatus {
+        /**
+         * The administration has started but has not yet completed.
+         */
+        INPROGRESS, 
+        /**
+         * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended".
+         */
+        ONHOLD, 
+        /**
+         * All actions that are implied by the administration have occurred.
+         */
+        COMPLETED, 
+        /**
+         * The administration was entered in error and therefore nullified.
+         */
+        ENTEREDINERROR, 
+        /**
+         * Actions implied by the administration have been permanently halted, before all of them occurred.
+         */
+        STOPPED, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static ImmunizationStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("in-progress".equals(codeString))
+          return INPROGRESS;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("completed".equals(codeString))
+          return COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("stopped".equals(codeString))
+          return STOPPED;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ImmunizationStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case INPROGRESS: return "in-progress";
+            case ONHOLD: return "on-hold";
+            case COMPLETED: return "completed";
+            case ENTEREDINERROR: return "entered-in-error";
+            case STOPPED: return "stopped";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case INPROGRESS: return "http://hl7.org/fhir/medication-admin-status";
+            case ONHOLD: return "http://hl7.org/fhir/medication-admin-status";
+            case COMPLETED: return "http://hl7.org/fhir/medication-admin-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/medication-admin-status";
+            case STOPPED: return "http://hl7.org/fhir/medication-admin-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case INPROGRESS: return "The administration has started but has not yet completed.";
+            case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
+            case COMPLETED: return "All actions that are implied by the administration have occurred.";
+            case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";
+            case STOPPED: return "Actions implied by the administration have been permanently halted, before all of them occurred.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case INPROGRESS: return "In Progress";
+            case ONHOLD: return "On Hold";
+            case COMPLETED: return "Completed";
+            case ENTEREDINERROR: return "Entered in Error";
+            case STOPPED: return "Stopped";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class ImmunizationStatusEnumFactory implements EnumFactory<ImmunizationStatus> {
+    public ImmunizationStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("in-progress".equals(codeString))
+          return ImmunizationStatus.INPROGRESS;
+        if ("on-hold".equals(codeString))
+          return ImmunizationStatus.ONHOLD;
+        if ("completed".equals(codeString))
+          return ImmunizationStatus.COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return ImmunizationStatus.ENTEREDINERROR;
+        if ("stopped".equals(codeString))
+          return ImmunizationStatus.STOPPED;
+        throw new IllegalArgumentException("Unknown ImmunizationStatus code '"+codeString+"'");
+        }
+        public Enumeration<ImmunizationStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in-progress".equals(codeString))
+          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.INPROGRESS);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.ONHOLD);
+        if ("completed".equals(codeString))
+          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.ENTEREDINERROR);
+        if ("stopped".equals(codeString))
+          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.STOPPED);
+        throw new FHIRException("Unknown ImmunizationStatus code '"+codeString+"'");
+        }
+    public String toCode(ImmunizationStatus code) {
+      if (code == ImmunizationStatus.INPROGRESS)
+        return "in-progress";
+      if (code == ImmunizationStatus.ONHOLD)
+        return "on-hold";
+      if (code == ImmunizationStatus.COMPLETED)
+        return "completed";
+      if (code == ImmunizationStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == ImmunizationStatus.STOPPED)
+        return "stopped";
+      return "?";
+      }
+    public String toSystem(ImmunizationStatus code) {
+      return code.getSystem();
+      }
+    }
 
     @Block()
     public static class ImmunizationExplanationComponent extends BackboneElement implements IBaseBackboneElement {
@@ -586,7 +724,7 @@ public class Immunization extends DomainResource {
         /**
          * Nominal position in a series.
          */
-        @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Dose number within series", formalDefinition="Nominal position in a series." )
         protected PositiveIntType doseSequence;
 
@@ -659,9 +797,8 @@ public class Immunization extends DomainResource {
     /**
      * Constructor
      */
-      public ImmunizationVaccinationProtocolComponent(PositiveIntType doseSequence, CodeableConcept doseStatus) {
+      public ImmunizationVaccinationProtocolComponent(CodeableConcept doseStatus) {
         super();
-        this.doseSequence = doseSequence;
         this.doseStatus = doseStatus;
       }
 
@@ -1196,7 +1333,7 @@ public class Immunization extends DomainResource {
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="in-progress | on-hold | completed | entered-in-error | stopped", formalDefinition="Indicates the current status of the vaccination event." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-admin-status")
-    protected CodeType status;
+    protected Enumeration<ImmunizationStatus> status;
 
     /**
      * Date vaccine administered or was to be administered.
@@ -1364,7 +1501,7 @@ public class Immunization extends DomainResource {
     @Description(shortDefinition="What protocol was followed", formalDefinition="Contains information about the protocol(s) under which the vaccine was administered." )
     protected List<ImmunizationVaccinationProtocolComponent> vaccinationProtocol;
 
-    private static final long serialVersionUID = 898786200L;
+    private static final long serialVersionUID = -1984038638L;
 
   /**
    * Constructor
@@ -1376,7 +1513,7 @@ public class Immunization extends DomainResource {
   /**
    * Constructor
    */
-    public Immunization(CodeType status, CodeableConcept vaccineCode, Reference patient, BooleanType wasNotGiven, BooleanType reported) {
+    public Immunization(Enumeration<ImmunizationStatus> status, CodeableConcept vaccineCode, Reference patient, BooleanType wasNotGiven, BooleanType reported) {
       super();
       this.status = status;
       this.vaccineCode = vaccineCode;
@@ -1441,12 +1578,12 @@ public class Immunization extends DomainResource {
     /**
      * @return {@link #status} (Indicates the current status of the vaccination event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public CodeType getStatusElement() { 
+    public Enumeration<ImmunizationStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Immunization.status");
         else if (Configuration.doAutoCreate())
-          this.status = new CodeType(); // bb
+          this.status = new Enumeration<ImmunizationStatus>(new ImmunizationStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -1461,7 +1598,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #status} (Indicates the current status of the vaccination event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Immunization setStatusElement(CodeType value) { 
+    public Immunization setStatusElement(Enumeration<ImmunizationStatus> value) { 
       this.status = value;
       return this;
     }
@@ -1469,16 +1606,16 @@ public class Immunization extends DomainResource {
     /**
      * @return Indicates the current status of the vaccination event.
      */
-    public String getStatus() { 
+    public ImmunizationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value Indicates the current status of the vaccination event.
      */
-    public Immunization setStatus(String value) { 
+    public Immunization setStatus(ImmunizationStatus value) { 
         if (this.status == null)
-          this.status = new CodeType();
+          this.status = new Enumeration<ImmunizationStatus>(new ImmunizationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
@@ -2292,7 +2429,7 @@ public class Immunization extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ImmunizationStatus>
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 664556354: /*vaccineCode*/ return this.vaccineCode == null ? new Base[0] : new Base[] {this.vaccineCode}; // CodeableConcept
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
@@ -2324,7 +2461,7 @@ public class Immunization extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           break;
         case -892481550: // status
-          this.status = castToCode(value); // CodeType
+          this.status = new ImmunizationStatusEnumFactory().fromType(value); // Enumeration<ImmunizationStatus>
           break;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
@@ -2393,7 +2530,7 @@ public class Immunization extends DomainResource {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("status"))
-          this.status = castToCode(value); // CodeType
+          this.status = new ImmunizationStatusEnumFactory().fromType(value); // Enumeration<ImmunizationStatus>
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("vaccineCode"))
@@ -2440,7 +2577,7 @@ public class Immunization extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // CodeType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ImmunizationStatus>
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case 664556354:  return getVaccineCode(); // CodeableConcept
         case -791418107:  return getPatient(); // Reference

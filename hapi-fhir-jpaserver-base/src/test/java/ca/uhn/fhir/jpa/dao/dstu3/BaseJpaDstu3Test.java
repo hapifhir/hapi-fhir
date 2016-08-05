@@ -25,7 +25,7 @@ import org.hl7.fhir.dstu3.model.CompartmentDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Device;
-import org.hl7.fhir.dstu3.model.DiagnosticOrder;
+import org.hl7.fhir.dstu3.model.DiagnosticRequest;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Immunization;
@@ -130,8 +130,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myDeviceDaoDstu3")
 	protected IFhirResourceDao<Device> myDeviceDao;
 	@Autowired
-	@Qualifier("myDiagnosticOrderDaoDstu3")
-	protected IFhirResourceDao<DiagnosticOrder> myDiagnosticOrderDao;
+	@Qualifier("myDiagnosticRequestDaoDstu3")
+	protected IFhirResourceDao<DiagnosticRequest> myDiagnosticRequestDao;
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoDstu3")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;

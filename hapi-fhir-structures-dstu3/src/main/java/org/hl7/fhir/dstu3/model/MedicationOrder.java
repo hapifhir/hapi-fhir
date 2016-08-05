@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -198,6 +198,112 @@ public class MedicationOrder extends DomainResource {
       return "?";
       }
     public String toSystem(MedicationOrderStatus code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum MedicationOrderCategory {
+        /**
+         * Includes orders for medications to be administered or consumed in an inpatient or acute care setting
+         */
+        INPATIENT, 
+        /**
+         * Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)
+         */
+        OUTPATIENT, 
+        /**
+         * Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc)
+         */
+        COMMUNITY, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static MedicationOrderCategory fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("inpatient".equals(codeString))
+          return INPATIENT;
+        if ("outpatient".equals(codeString))
+          return OUTPATIENT;
+        if ("community".equals(codeString))
+          return COMMUNITY;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown MedicationOrderCategory code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case INPATIENT: return "inpatient";
+            case OUTPATIENT: return "outpatient";
+            case COMMUNITY: return "community";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case INPATIENT: return "http://hl7.org/fhir/medication-order-category";
+            case OUTPATIENT: return "http://hl7.org/fhir/medication-order-category";
+            case COMMUNITY: return "http://hl7.org/fhir/medication-order-category";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case INPATIENT: return "Includes orders for medications to be administered or consumed in an inpatient or acute care setting";
+            case OUTPATIENT: return "Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)";
+            case COMMUNITY: return "Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc)";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case INPATIENT: return "Inpatient";
+            case OUTPATIENT: return "Outpatient";
+            case COMMUNITY: return "Community";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class MedicationOrderCategoryEnumFactory implements EnumFactory<MedicationOrderCategory> {
+    public MedicationOrderCategory fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("inpatient".equals(codeString))
+          return MedicationOrderCategory.INPATIENT;
+        if ("outpatient".equals(codeString))
+          return MedicationOrderCategory.OUTPATIENT;
+        if ("community".equals(codeString))
+          return MedicationOrderCategory.COMMUNITY;
+        throw new IllegalArgumentException("Unknown MedicationOrderCategory code '"+codeString+"'");
+        }
+        public Enumeration<MedicationOrderCategory> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("inpatient".equals(codeString))
+          return new Enumeration<MedicationOrderCategory>(this, MedicationOrderCategory.INPATIENT);
+        if ("outpatient".equals(codeString))
+          return new Enumeration<MedicationOrderCategory>(this, MedicationOrderCategory.OUTPATIENT);
+        if ("community".equals(codeString))
+          return new Enumeration<MedicationOrderCategory>(this, MedicationOrderCategory.COMMUNITY);
+        throw new FHIRException("Unknown MedicationOrderCategory code '"+codeString+"'");
+        }
+    public String toCode(MedicationOrderCategory code) {
+      if (code == MedicationOrderCategory.INPATIENT)
+        return "inpatient";
+      if (code == MedicationOrderCategory.OUTPATIENT)
+        return "outpatient";
+      if (code == MedicationOrderCategory.COMMUNITY)
+        return "community";
+      return "?";
+      }
+    public String toSystem(MedicationOrderCategory code) {
       return code.getSystem();
       }
     }
@@ -1974,46 +2080,54 @@ public class MedicationOrder extends DomainResource {
     protected List<Annotation> note;
 
     /**
+     * Indicates where type of medication order and where the medication is expected to be consumed or administered.
+     */
+    @Child(name = "category", type = {CodeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Type of medication usage", formalDefinition="Indicates where type of medication order and where the medication is expected to be consumed or administered." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-order-category")
+    protected Enumeration<MedicationOrderCategory> category;
+
+    /**
      * Indicates how the medication is to be used by the patient.
      */
-    @Child(name = "dosageInstruction", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dosageInstruction", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="How medication should be taken", formalDefinition="Indicates how the medication is to be used by the patient." )
     protected List<MedicationOrderDosageInstructionComponent> dosageInstruction;
 
     /**
      * Indicates the specific details for the dispense or medication supply part of a medication order (also known as a Medication Prescription).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.
      */
-    @Child(name = "dispenseRequest", type = {}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "dispenseRequest", type = {}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Medication supply authorization", formalDefinition="Indicates the specific details for the dispense or medication supply part of a medication order (also known as a Medication Prescription).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department." )
     protected MedicationOrderDispenseRequestComponent dispenseRequest;
 
     /**
      * Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.
      */
-    @Child(name = "substitution", type = {}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "substitution", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Any restrictions on medication substitution", formalDefinition="Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done." )
     protected MedicationOrderSubstitutionComponent substitution;
 
     /**
-     * A link to a resource representing an earlier order or prescription that this order supersedes.
+     * A link to a resource representing an earlier order related order or prescription.
      */
-    @Child(name = "priorPrescription", type = {MedicationOrder.class}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="An order/prescription that this supersedes", formalDefinition="A link to a resource representing an earlier order or prescription that this order supersedes." )
+    @Child(name = "priorPrescription", type = {MedicationOrder.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="An order/prescription that this supersedes", formalDefinition="A link to a resource representing an earlier order related order or prescription." )
     protected Reference priorPrescription;
 
     /**
-     * The actual object that is the target of the reference (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     * The actual object that is the target of the reference (A link to a resource representing an earlier order related order or prescription.)
      */
     protected MedicationOrder priorPrescriptionTarget;
 
     /**
      * A summary of the events of interest that have occurred as the request is processed; e.g. when the order was verified or when it was completed.
      */
-    @Child(name = "eventHistory", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "eventHistory", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A list of events of interest in the lifecycle", formalDefinition="A summary of the events of interest that have occurred as the request is processed; e.g. when the order was verified or when it was completed." )
     protected List<MedicationOrderEventHistoryComponent> eventHistory;
 
-    private static final long serialVersionUID = -352434064L;
+    private static final long serialVersionUID = -714737742L;
 
   /**
    * Constructor
@@ -2540,6 +2654,55 @@ public class MedicationOrder extends DomainResource {
     }
 
     /**
+     * @return {@link #category} (Indicates where type of medication order and where the medication is expected to be consumed or administered.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
+     */
+    public Enumeration<MedicationOrderCategory> getCategoryElement() { 
+      if (this.category == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MedicationOrder.category");
+        else if (Configuration.doAutoCreate())
+          this.category = new Enumeration<MedicationOrderCategory>(new MedicationOrderCategoryEnumFactory()); // bb
+      return this.category;
+    }
+
+    public boolean hasCategoryElement() { 
+      return this.category != null && !this.category.isEmpty();
+    }
+
+    public boolean hasCategory() { 
+      return this.category != null && !this.category.isEmpty();
+    }
+
+    /**
+     * @param value {@link #category} (Indicates where type of medication order and where the medication is expected to be consumed or administered.). This is the underlying object with id, value and extensions. The accessor "getCategory" gives direct access to the value
+     */
+    public MedicationOrder setCategoryElement(Enumeration<MedicationOrderCategory> value) { 
+      this.category = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates where type of medication order and where the medication is expected to be consumed or administered.
+     */
+    public MedicationOrderCategory getCategory() { 
+      return this.category == null ? null : this.category.getValue();
+    }
+
+    /**
+     * @param value Indicates where type of medication order and where the medication is expected to be consumed or administered.
+     */
+    public MedicationOrder setCategory(MedicationOrderCategory value) { 
+      if (value == null)
+        this.category = null;
+      else {
+        if (this.category == null)
+          this.category = new Enumeration<MedicationOrderCategory>(new MedicationOrderCategoryEnumFactory());
+        this.category.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #dosageInstruction} (Indicates how the medication is to be used by the patient.)
      */
     public List<MedicationOrderDosageInstructionComponent> getDosageInstruction() { 
@@ -2641,7 +2804,7 @@ public class MedicationOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #priorPrescription} (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     * @return {@link #priorPrescription} (A link to a resource representing an earlier order related order or prescription.)
      */
     public Reference getPriorPrescription() { 
       if (this.priorPrescription == null)
@@ -2657,7 +2820,7 @@ public class MedicationOrder extends DomainResource {
     }
 
     /**
-     * @param value {@link #priorPrescription} (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     * @param value {@link #priorPrescription} (A link to a resource representing an earlier order related order or prescription.)
      */
     public MedicationOrder setPriorPrescription(Reference value) { 
       this.priorPrescription = value;
@@ -2665,7 +2828,7 @@ public class MedicationOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #priorPrescription} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     * @return {@link #priorPrescription} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A link to a resource representing an earlier order related order or prescription.)
      */
     public MedicationOrder getPriorPrescriptionTarget() { 
       if (this.priorPrescriptionTarget == null)
@@ -2677,7 +2840,7 @@ public class MedicationOrder extends DomainResource {
     }
 
     /**
-     * @param value {@link #priorPrescription} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     * @param value {@link #priorPrescription} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource representing an earlier order related order or prescription.)
      */
     public MedicationOrder setPriorPrescriptionTarget(MedicationOrder value) { 
       this.priorPrescriptionTarget = value;
@@ -2749,10 +2912,11 @@ public class MedicationOrder extends DomainResource {
         childrenList.add(new Property("reasonCode", "CodeableConcept", "Can be the reason or the indication for writing the prescription.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         childrenList.add(new Property("reasonReference", "Reference(Condition)", "Condition that supports why the prescription is being written.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         childrenList.add(new Property("note", "Annotation", "Extra information about the prescription that could not be conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("category", "code", "Indicates where type of medication order and where the medication is expected to be consumed or administered.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("dosageInstruction", "", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
         childrenList.add(new Property("dispenseRequest", "", "Indicates the specific details for the dispense or medication supply part of a medication order (also known as a Medication Prescription).  Note that this information is NOT always sent with the order.  There may be in some settings (e.g. hospitals) institutional or system support for completing the dispense details in the pharmacy department.", 0, java.lang.Integer.MAX_VALUE, dispenseRequest));
         childrenList.add(new Property("substitution", "", "Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.", 0, java.lang.Integer.MAX_VALUE, substitution));
-        childrenList.add(new Property("priorPrescription", "Reference(MedicationOrder)", "A link to a resource representing an earlier order or prescription that this order supersedes.", 0, java.lang.Integer.MAX_VALUE, priorPrescription));
+        childrenList.add(new Property("priorPrescription", "Reference(MedicationOrder)", "A link to a resource representing an earlier order related order or prescription.", 0, java.lang.Integer.MAX_VALUE, priorPrescription));
         childrenList.add(new Property("eventHistory", "", "A summary of the events of interest that have occurred as the request is processed; e.g. when the order was verified or when it was completed.", 0, java.lang.Integer.MAX_VALUE, eventHistory));
       }
 
@@ -2769,6 +2933,7 @@ public class MedicationOrder extends DomainResource {
         case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
         case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<MedicationOrderCategory>
         case -1201373865: /*dosageInstruction*/ return this.dosageInstruction == null ? new Base[0] : this.dosageInstruction.toArray(new Base[this.dosageInstruction.size()]); // MedicationOrderDosageInstructionComponent
         case 824620658: /*dispenseRequest*/ return this.dispenseRequest == null ? new Base[0] : new Base[] {this.dispenseRequest}; // MedicationOrderDispenseRequestComponent
         case 826147581: /*substitution*/ return this.substitution == null ? new Base[0] : new Base[] {this.substitution}; // MedicationOrderSubstitutionComponent
@@ -2812,6 +2977,9 @@ public class MedicationOrder extends DomainResource {
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
           break;
+        case 50511102: // category
+          this.category = new MedicationOrderCategoryEnumFactory().fromType(value); // Enumeration<MedicationOrderCategory>
+          break;
         case -1201373865: // dosageInstruction
           this.getDosageInstruction().add((MedicationOrderDosageInstructionComponent) value); // MedicationOrderDosageInstructionComponent
           break;
@@ -2854,6 +3022,8 @@ public class MedicationOrder extends DomainResource {
           this.getReasonReference().add(castToReference(value));
         else if (name.equals("note"))
           this.getNote().add(castToAnnotation(value));
+        else if (name.equals("category"))
+          this.category = new MedicationOrderCategoryEnumFactory().fromType(value); // Enumeration<MedicationOrderCategory>
         else if (name.equals("dosageInstruction"))
           this.getDosageInstruction().add((MedicationOrderDosageInstructionComponent) value);
         else if (name.equals("dispenseRequest"))
@@ -2881,6 +3051,7 @@ public class MedicationOrder extends DomainResource {
         case 722137681:  return addReasonCode(); // CodeableConcept
         case -1146218137:  return addReasonReference(); // Reference
         case 3387378:  return addNote(); // Annotation
+        case 50511102: throw new FHIRException("Cannot make property category as it is not a complex type"); // Enumeration<MedicationOrderCategory>
         case -1201373865:  return addDosageInstruction(); // MedicationOrderDosageInstructionComponent
         case 824620658:  return getDispenseRequest(); // MedicationOrderDispenseRequestComponent
         case 826147581:  return getSubstitution(); // MedicationOrderSubstitutionComponent
@@ -2930,6 +3101,9 @@ public class MedicationOrder extends DomainResource {
         }
         else if (name.equals("note")) {
           return addNote();
+        }
+        else if (name.equals("category")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationOrder.category");
         }
         else if (name.equals("dosageInstruction")) {
           return addDosageInstruction();
@@ -2987,6 +3161,7 @@ public class MedicationOrder extends DomainResource {
           for (Annotation i : note)
             dst.note.add(i.copy());
         };
+        dst.category = category == null ? null : category.copy();
         if (dosageInstruction != null) {
           dst.dosageInstruction = new ArrayList<MedicationOrderDosageInstructionComponent>();
           for (MedicationOrderDosageInstructionComponent i : dosageInstruction)
@@ -3017,7 +3192,7 @@ public class MedicationOrder extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(medication, o.medication, true)
            && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true) && compareDeep(dateWritten, o.dateWritten, true)
            && compareDeep(prescriber, o.prescriber, true) && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
-           && compareDeep(note, o.note, true) && compareDeep(dosageInstruction, o.dosageInstruction, true)
+           && compareDeep(note, o.note, true) && compareDeep(category, o.category, true) && compareDeep(dosageInstruction, o.dosageInstruction, true)
            && compareDeep(dispenseRequest, o.dispenseRequest, true) && compareDeep(substitution, o.substitution, true)
            && compareDeep(priorPrescription, o.priorPrescription, true) && compareDeep(eventHistory, o.eventHistory, true)
           ;
@@ -3030,13 +3205,14 @@ public class MedicationOrder extends DomainResource {
         if (!(other instanceof MedicationOrder))
           return false;
         MedicationOrder o = (MedicationOrder) other;
-        return compareValues(status, o.status, true) && compareValues(dateWritten, o.dateWritten, true);
+        return compareValues(status, o.status, true) && compareValues(dateWritten, o.dateWritten, true) && compareValues(category, o.category, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, medication
           , patient, encounter, dateWritten, prescriber, reasonCode, reasonReference, note
-          , dosageInstruction, dispenseRequest, substitution, priorPrescription, eventHistory
+          , category, dosageInstruction, dispenseRequest, substitution, priorPrescription, eventHistory
           );
       }
 

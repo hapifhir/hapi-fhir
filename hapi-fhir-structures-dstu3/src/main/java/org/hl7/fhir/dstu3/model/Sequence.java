@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1243,76 +1243,97 @@ public class Sequence extends DomainResource {
     @Block()
     public static class SequenceQualityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * Gold standard sequence used for comparing against.
+         */
+        @Child(name = "standardSequence", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Standard sequence for comparison", formalDefinition="Gold standard sequence used for comparing against." )
+        protected CodeableConcept standardSequence;
+
+        /**
          * Start position (inclusive) of the sequence.
          */
-        @Child(name = "start", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "start", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Start position (inclusive) of the sequence", formalDefinition="Start position (inclusive) of the sequence." )
         protected IntegerType start;
 
         /**
          * End position (exclusive) of the sequence.
          */
-        @Child(name = "end", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "end", type = {IntegerType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="End position (exclusive) of the sequence", formalDefinition="End position (exclusive) of the sequence." )
         protected IntegerType end;
 
         /**
          * The score of an experimentally derived feature such as a p-value ([SO:0001685](http://www.sequenceontology.org/browser/current_svn/term/SO:0001685)).
          */
-        @Child(name = "score", type = {Quantity.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "score", type = {Quantity.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Quality score", formalDefinition="The score of an experimentally derived feature such as a p-value ([SO:0001685](http://www.sequenceontology.org/browser/current_svn/term/SO:0001685))." )
         protected Quantity score;
 
         /**
          * Method for quality.
          */
-        @Child(name = "method", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "method", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Method for quality", formalDefinition="Method for quality." )
-        protected StringType method;
+        protected CodeableConcept method;
 
         /**
-         * The number of variants found in the benchmark set that match exactly the test set.
+         * True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        @Child(name = "truePositives", type = {DecimalType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="True positives", formalDefinition="The number of variants found in the benchmark set that match exactly the test set." )
-        protected DecimalType truePositives;
+        @Child(name = "truthTP", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="True positives from the perspective of the truth data", formalDefinition="True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event." )
+        protected DecimalType truthTP;
 
         /**
-         * The number of variants found in the test set that did not match exactly the benchmark set.
+         * True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        @Child(name = "falsePositives", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="False positives", formalDefinition="The number of variants found in the test set that did not match exactly the benchmark set." )
-        protected DecimalType falsePositives;
+        @Child(name = "queryTP", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="True positives from the perspective of the query data", formalDefinition="True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event." )
+        protected DecimalType queryTP;
 
         /**
-         * The number of variants found in the benchmark set that did not match exactly the test set.
+         * False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.
          */
-        @Child(name = "falseNegatives", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="False negatives", formalDefinition="The number of variants found in the benchmark set that did not match exactly the test set." )
-        protected DecimalType falseNegatives;
+        @Child(name = "truthFN", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="False negatives", formalDefinition="False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here." )
+        protected DecimalType truthFN;
 
         /**
-         * (true positives) / (true positives + false positives).
+         * False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.
          */
-        @Child(name = "precision", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Precision (PPV)", formalDefinition="(true positives) / (true positives + false positives)." )
+        @Child(name = "queryFP", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="False positives", formalDefinition="False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here." )
+        protected DecimalType queryFP;
+
+        /**
+         * The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).
+         */
+        @Child(name = "gtFP", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="False positives where the non-REF alleles in the Truth and Query Call Sets match", formalDefinition="The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar)." )
+        protected DecimalType gtFP;
+
+        /**
+         * QUERY.TP / (QUERY.TP + QUERY.FP).
+         */
+        @Child(name = "precision", type = {DecimalType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Precision", formalDefinition="QUERY.TP / (QUERY.TP + QUERY.FP)." )
         protected DecimalType precision;
 
         /**
-         * (true positives) / (true positives + false negatives).
+         * TRUTH.TP / (TRUTH.TP + TRUTH.FN).
          */
-        @Child(name = "recall", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Recall (sensitivity)", formalDefinition="(true positives) / (true positives + false negatives)." )
+        @Child(name = "recall", type = {DecimalType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Recall", formalDefinition="TRUTH.TP / (TRUTH.TP + TRUTH.FN)." )
         protected DecimalType recall;
 
         /**
-         * 2 * precision * recall / (precision + recall).
+         * Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).
          */
-        @Child(name = "fMeasure", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="F-measure", formalDefinition="2 * precision * recall / (precision + recall)." )
-        protected DecimalType fMeasure;
+        @Child(name = "fScore", type = {DecimalType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="F-score", formalDefinition="Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall)." )
+        protected DecimalType fScore;
 
-        private static final long serialVersionUID = 2136977311L;
+        private static final long serialVersionUID = 529445255L;
 
     /**
      * Constructor
@@ -1320,6 +1341,30 @@ public class Sequence extends DomainResource {
       public SequenceQualityComponent() {
         super();
       }
+
+        /**
+         * @return {@link #standardSequence} (Gold standard sequence used for comparing against.)
+         */
+        public CodeableConcept getStandardSequence() { 
+          if (this.standardSequence == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.standardSequence");
+            else if (Configuration.doAutoCreate())
+              this.standardSequence = new CodeableConcept(); // cc
+          return this.standardSequence;
+        }
+
+        public boolean hasStandardSequence() { 
+          return this.standardSequence != null && !this.standardSequence.isEmpty();
+        }
+
+        /**
+         * @param value {@link #standardSequence} (Gold standard sequence used for comparing against.)
+         */
+        public SequenceQualityComponent setStandardSequence(CodeableConcept value) { 
+          this.standardSequence = value;
+          return this;
+        }
 
         /**
          * @return {@link #start} (Start position (inclusive) of the sequence.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
@@ -1436,19 +1481,15 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #method} (Method for quality.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         * @return {@link #method} (Method for quality.)
          */
-        public StringType getMethodElement() { 
+        public CodeableConcept getMethod() { 
           if (this.method == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SequenceQualityComponent.method");
             else if (Configuration.doAutoCreate())
-              this.method = new StringType(); // bb
+              this.method = new CodeableConcept(); // cc
           return this.method;
-        }
-
-        public boolean hasMethodElement() { 
-          return this.method != null && !this.method.isEmpty();
         }
 
         public boolean hasMethod() { 
@@ -1456,237 +1497,350 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #method} (Method for quality.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         * @param value {@link #method} (Method for quality.)
          */
-        public SequenceQualityComponent setMethodElement(StringType value) { 
+        public SequenceQualityComponent setMethod(CodeableConcept value) { 
           this.method = value;
           return this;
         }
 
         /**
-         * @return Method for quality.
+         * @return {@link #truthTP} (True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.). This is the underlying object with id, value and extensions. The accessor "getTruthTP" gives direct access to the value
          */
-        public String getMethod() { 
-          return this.method == null ? null : this.method.getValue();
-        }
-
-        /**
-         * @param value Method for quality.
-         */
-        public SequenceQualityComponent setMethod(String value) { 
-          if (Utilities.noString(value))
-            this.method = null;
-          else {
-            if (this.method == null)
-              this.method = new StringType();
-            this.method.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #truePositives} (The number of variants found in the benchmark set that match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getTruePositives" gives direct access to the value
-         */
-        public DecimalType getTruePositivesElement() { 
-          if (this.truePositives == null)
+        public DecimalType getTruthTPElement() { 
+          if (this.truthTP == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceQualityComponent.truePositives");
+              throw new Error("Attempt to auto-create SequenceQualityComponent.truthTP");
             else if (Configuration.doAutoCreate())
-              this.truePositives = new DecimalType(); // bb
-          return this.truePositives;
+              this.truthTP = new DecimalType(); // bb
+          return this.truthTP;
         }
 
-        public boolean hasTruePositivesElement() { 
-          return this.truePositives != null && !this.truePositives.isEmpty();
+        public boolean hasTruthTPElement() { 
+          return this.truthTP != null && !this.truthTP.isEmpty();
         }
 
-        public boolean hasTruePositives() { 
-          return this.truePositives != null && !this.truePositives.isEmpty();
+        public boolean hasTruthTP() { 
+          return this.truthTP != null && !this.truthTP.isEmpty();
         }
 
         /**
-         * @param value {@link #truePositives} (The number of variants found in the benchmark set that match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getTruePositives" gives direct access to the value
+         * @param value {@link #truthTP} (True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.). This is the underlying object with id, value and extensions. The accessor "getTruthTP" gives direct access to the value
          */
-        public SequenceQualityComponent setTruePositivesElement(DecimalType value) { 
-          this.truePositives = value;
+        public SequenceQualityComponent setTruthTPElement(DecimalType value) { 
+          this.truthTP = value;
           return this;
         }
 
         /**
-         * @return The number of variants found in the benchmark set that match exactly the test set.
+         * @return True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public BigDecimal getTruePositives() { 
-          return this.truePositives == null ? null : this.truePositives.getValue();
+        public BigDecimal getTruthTP() { 
+          return this.truthTP == null ? null : this.truthTP.getValue();
         }
 
         /**
-         * @param value The number of variants found in the benchmark set that match exactly the test set.
+         * @param value True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public SequenceQualityComponent setTruePositives(BigDecimal value) { 
+        public SequenceQualityComponent setTruthTP(BigDecimal value) { 
           if (value == null)
-            this.truePositives = null;
+            this.truthTP = null;
           else {
-            if (this.truePositives == null)
-              this.truePositives = new DecimalType();
-            this.truePositives.setValue(value);
+            if (this.truthTP == null)
+              this.truthTP = new DecimalType();
+            this.truthTP.setValue(value);
           }
           return this;
         }
 
         /**
-         * @param value The number of variants found in the benchmark set that match exactly the test set.
+         * @param value True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public SequenceQualityComponent setTruePositives(long value) { 
-              this.truePositives = new DecimalType();
-            this.truePositives.setValue(value);
+        public SequenceQualityComponent setTruthTP(long value) { 
+              this.truthTP = new DecimalType();
+            this.truthTP.setValue(value);
           return this;
         }
 
         /**
-         * @param value The number of variants found in the benchmark set that match exactly the test set.
+         * @param value True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public SequenceQualityComponent setTruePositives(double value) { 
-              this.truePositives = new DecimalType();
-            this.truePositives.setValue(value);
+        public SequenceQualityComponent setTruthTP(double value) { 
+              this.truthTP = new DecimalType();
+            this.truthTP.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #falsePositives} (The number of variants found in the test set that did not match exactly the benchmark set.). This is the underlying object with id, value and extensions. The accessor "getFalsePositives" gives direct access to the value
+         * @return {@link #queryTP} (True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.). This is the underlying object with id, value and extensions. The accessor "getQueryTP" gives direct access to the value
          */
-        public DecimalType getFalsePositivesElement() { 
-          if (this.falsePositives == null)
+        public DecimalType getQueryTPElement() { 
+          if (this.queryTP == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceQualityComponent.falsePositives");
+              throw new Error("Attempt to auto-create SequenceQualityComponent.queryTP");
             else if (Configuration.doAutoCreate())
-              this.falsePositives = new DecimalType(); // bb
-          return this.falsePositives;
+              this.queryTP = new DecimalType(); // bb
+          return this.queryTP;
         }
 
-        public boolean hasFalsePositivesElement() { 
-          return this.falsePositives != null && !this.falsePositives.isEmpty();
+        public boolean hasQueryTPElement() { 
+          return this.queryTP != null && !this.queryTP.isEmpty();
         }
 
-        public boolean hasFalsePositives() { 
-          return this.falsePositives != null && !this.falsePositives.isEmpty();
+        public boolean hasQueryTP() { 
+          return this.queryTP != null && !this.queryTP.isEmpty();
         }
 
         /**
-         * @param value {@link #falsePositives} (The number of variants found in the test set that did not match exactly the benchmark set.). This is the underlying object with id, value and extensions. The accessor "getFalsePositives" gives direct access to the value
+         * @param value {@link #queryTP} (True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.). This is the underlying object with id, value and extensions. The accessor "getQueryTP" gives direct access to the value
          */
-        public SequenceQualityComponent setFalsePositivesElement(DecimalType value) { 
-          this.falsePositives = value;
+        public SequenceQualityComponent setQueryTPElement(DecimalType value) { 
+          this.queryTP = value;
           return this;
         }
 
         /**
-         * @return The number of variants found in the test set that did not match exactly the benchmark set.
+         * @return True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public BigDecimal getFalsePositives() { 
-          return this.falsePositives == null ? null : this.falsePositives.getValue();
+        public BigDecimal getQueryTP() { 
+          return this.queryTP == null ? null : this.queryTP.getValue();
         }
 
         /**
-         * @param value The number of variants found in the test set that did not match exactly the benchmark set.
+         * @param value True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public SequenceQualityComponent setFalsePositives(BigDecimal value) { 
+        public SequenceQualityComponent setQueryTP(BigDecimal value) { 
           if (value == null)
-            this.falsePositives = null;
+            this.queryTP = null;
           else {
-            if (this.falsePositives == null)
-              this.falsePositives = new DecimalType();
-            this.falsePositives.setValue(value);
+            if (this.queryTP == null)
+              this.queryTP = new DecimalType();
+            this.queryTP.setValue(value);
           }
           return this;
         }
 
         /**
-         * @param value The number of variants found in the test set that did not match exactly the benchmark set.
+         * @param value True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public SequenceQualityComponent setFalsePositives(long value) { 
-              this.falsePositives = new DecimalType();
-            this.falsePositives.setValue(value);
+        public SequenceQualityComponent setQueryTP(long value) { 
+              this.queryTP = new DecimalType();
+            this.queryTP.setValue(value);
           return this;
         }
 
         /**
-         * @param value The number of variants found in the test set that did not match exactly the benchmark set.
+         * @param value True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.
          */
-        public SequenceQualityComponent setFalsePositives(double value) { 
-              this.falsePositives = new DecimalType();
-            this.falsePositives.setValue(value);
+        public SequenceQualityComponent setQueryTP(double value) { 
+              this.queryTP = new DecimalType();
+            this.queryTP.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #falseNegatives} (The number of variants found in the benchmark set that did not match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getFalseNegatives" gives direct access to the value
+         * @return {@link #truthFN} (False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.). This is the underlying object with id, value and extensions. The accessor "getTruthFN" gives direct access to the value
          */
-        public DecimalType getFalseNegativesElement() { 
-          if (this.falseNegatives == null)
+        public DecimalType getTruthFNElement() { 
+          if (this.truthFN == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceQualityComponent.falseNegatives");
+              throw new Error("Attempt to auto-create SequenceQualityComponent.truthFN");
             else if (Configuration.doAutoCreate())
-              this.falseNegatives = new DecimalType(); // bb
-          return this.falseNegatives;
+              this.truthFN = new DecimalType(); // bb
+          return this.truthFN;
         }
 
-        public boolean hasFalseNegativesElement() { 
-          return this.falseNegatives != null && !this.falseNegatives.isEmpty();
+        public boolean hasTruthFNElement() { 
+          return this.truthFN != null && !this.truthFN.isEmpty();
         }
 
-        public boolean hasFalseNegatives() { 
-          return this.falseNegatives != null && !this.falseNegatives.isEmpty();
+        public boolean hasTruthFN() { 
+          return this.truthFN != null && !this.truthFN.isEmpty();
         }
 
         /**
-         * @param value {@link #falseNegatives} (The number of variants found in the benchmark set that did not match exactly the test set.). This is the underlying object with id, value and extensions. The accessor "getFalseNegatives" gives direct access to the value
+         * @param value {@link #truthFN} (False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.). This is the underlying object with id, value and extensions. The accessor "getTruthFN" gives direct access to the value
          */
-        public SequenceQualityComponent setFalseNegativesElement(DecimalType value) { 
-          this.falseNegatives = value;
+        public SequenceQualityComponent setTruthFNElement(DecimalType value) { 
+          this.truthFN = value;
           return this;
         }
 
         /**
-         * @return The number of variants found in the benchmark set that did not match exactly the test set.
+         * @return False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.
          */
-        public BigDecimal getFalseNegatives() { 
-          return this.falseNegatives == null ? null : this.falseNegatives.getValue();
+        public BigDecimal getTruthFN() { 
+          return this.truthFN == null ? null : this.truthFN.getValue();
         }
 
         /**
-         * @param value The number of variants found in the benchmark set that did not match exactly the test set.
+         * @param value False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.
          */
-        public SequenceQualityComponent setFalseNegatives(BigDecimal value) { 
+        public SequenceQualityComponent setTruthFN(BigDecimal value) { 
           if (value == null)
-            this.falseNegatives = null;
+            this.truthFN = null;
           else {
-            if (this.falseNegatives == null)
-              this.falseNegatives = new DecimalType();
-            this.falseNegatives.setValue(value);
+            if (this.truthFN == null)
+              this.truthFN = new DecimalType();
+            this.truthFN.setValue(value);
           }
           return this;
         }
 
         /**
-         * @param value The number of variants found in the benchmark set that did not match exactly the test set.
+         * @param value False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.
          */
-        public SequenceQualityComponent setFalseNegatives(long value) { 
-              this.falseNegatives = new DecimalType();
-            this.falseNegatives.setValue(value);
+        public SequenceQualityComponent setTruthFN(long value) { 
+              this.truthFN = new DecimalType();
+            this.truthFN.setValue(value);
           return this;
         }
 
         /**
-         * @param value The number of variants found in the benchmark set that did not match exactly the test set.
+         * @param value False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.
          */
-        public SequenceQualityComponent setFalseNegatives(double value) { 
-              this.falseNegatives = new DecimalType();
-            this.falseNegatives.setValue(value);
+        public SequenceQualityComponent setTruthFN(double value) { 
+              this.truthFN = new DecimalType();
+            this.truthFN.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #precision} ((true positives) / (true positives + false positives).). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
+         * @return {@link #queryFP} (False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.). This is the underlying object with id, value and extensions. The accessor "getQueryFP" gives direct access to the value
+         */
+        public DecimalType getQueryFPElement() { 
+          if (this.queryFP == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.queryFP");
+            else if (Configuration.doAutoCreate())
+              this.queryFP = new DecimalType(); // bb
+          return this.queryFP;
+        }
+
+        public boolean hasQueryFPElement() { 
+          return this.queryFP != null && !this.queryFP.isEmpty();
+        }
+
+        public boolean hasQueryFP() { 
+          return this.queryFP != null && !this.queryFP.isEmpty();
+        }
+
+        /**
+         * @param value {@link #queryFP} (False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.). This is the underlying object with id, value and extensions. The accessor "getQueryFP" gives direct access to the value
+         */
+        public SequenceQualityComponent setQueryFPElement(DecimalType value) { 
+          this.queryFP = value;
+          return this;
+        }
+
+        /**
+         * @return False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.
+         */
+        public BigDecimal getQueryFP() { 
+          return this.queryFP == null ? null : this.queryFP.getValue();
+        }
+
+        /**
+         * @param value False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.
+         */
+        public SequenceQualityComponent setQueryFP(BigDecimal value) { 
+          if (value == null)
+            this.queryFP = null;
+          else {
+            if (this.queryFP == null)
+              this.queryFP = new DecimalType();
+            this.queryFP.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.
+         */
+        public SequenceQualityComponent setQueryFP(long value) { 
+              this.queryFP = new DecimalType();
+            this.queryFP.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.
+         */
+        public SequenceQualityComponent setQueryFP(double value) { 
+              this.queryFP = new DecimalType();
+            this.queryFP.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #gtFP} (The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).). This is the underlying object with id, value and extensions. The accessor "getGtFP" gives direct access to the value
+         */
+        public DecimalType getGtFPElement() { 
+          if (this.gtFP == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceQualityComponent.gtFP");
+            else if (Configuration.doAutoCreate())
+              this.gtFP = new DecimalType(); // bb
+          return this.gtFP;
+        }
+
+        public boolean hasGtFPElement() { 
+          return this.gtFP != null && !this.gtFP.isEmpty();
+        }
+
+        public boolean hasGtFP() { 
+          return this.gtFP != null && !this.gtFP.isEmpty();
+        }
+
+        /**
+         * @param value {@link #gtFP} (The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).). This is the underlying object with id, value and extensions. The accessor "getGtFP" gives direct access to the value
+         */
+        public SequenceQualityComponent setGtFPElement(DecimalType value) { 
+          this.gtFP = value;
+          return this;
+        }
+
+        /**
+         * @return The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).
+         */
+        public BigDecimal getGtFP() { 
+          return this.gtFP == null ? null : this.gtFP.getValue();
+        }
+
+        /**
+         * @param value The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).
+         */
+        public SequenceQualityComponent setGtFP(BigDecimal value) { 
+          if (value == null)
+            this.gtFP = null;
+          else {
+            if (this.gtFP == null)
+              this.gtFP = new DecimalType();
+            this.gtFP.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).
+         */
+        public SequenceQualityComponent setGtFP(long value) { 
+              this.gtFP = new DecimalType();
+            this.gtFP.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).
+         */
+        public SequenceQualityComponent setGtFP(double value) { 
+              this.gtFP = new DecimalType();
+            this.gtFP.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #precision} (QUERY.TP / (QUERY.TP + QUERY.FP).). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
          */
         public DecimalType getPrecisionElement() { 
           if (this.precision == null)
@@ -1706,7 +1860,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #precision} ((true positives) / (true positives + false positives).). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
+         * @param value {@link #precision} (QUERY.TP / (QUERY.TP + QUERY.FP).). This is the underlying object with id, value and extensions. The accessor "getPrecision" gives direct access to the value
          */
         public SequenceQualityComponent setPrecisionElement(DecimalType value) { 
           this.precision = value;
@@ -1714,14 +1868,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return (true positives) / (true positives + false positives).
+         * @return QUERY.TP / (QUERY.TP + QUERY.FP).
          */
         public BigDecimal getPrecision() { 
           return this.precision == null ? null : this.precision.getValue();
         }
 
         /**
-         * @param value (true positives) / (true positives + false positives).
+         * @param value QUERY.TP / (QUERY.TP + QUERY.FP).
          */
         public SequenceQualityComponent setPrecision(BigDecimal value) { 
           if (value == null)
@@ -1735,7 +1889,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value (true positives) / (true positives + false positives).
+         * @param value QUERY.TP / (QUERY.TP + QUERY.FP).
          */
         public SequenceQualityComponent setPrecision(long value) { 
               this.precision = new DecimalType();
@@ -1744,7 +1898,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value (true positives) / (true positives + false positives).
+         * @param value QUERY.TP / (QUERY.TP + QUERY.FP).
          */
         public SequenceQualityComponent setPrecision(double value) { 
               this.precision = new DecimalType();
@@ -1753,7 +1907,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #recall} ((true positives) / (true positives + false negatives).). This is the underlying object with id, value and extensions. The accessor "getRecall" gives direct access to the value
+         * @return {@link #recall} (TRUTH.TP / (TRUTH.TP + TRUTH.FN).). This is the underlying object with id, value and extensions. The accessor "getRecall" gives direct access to the value
          */
         public DecimalType getRecallElement() { 
           if (this.recall == null)
@@ -1773,7 +1927,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #recall} ((true positives) / (true positives + false negatives).). This is the underlying object with id, value and extensions. The accessor "getRecall" gives direct access to the value
+         * @param value {@link #recall} (TRUTH.TP / (TRUTH.TP + TRUTH.FN).). This is the underlying object with id, value and extensions. The accessor "getRecall" gives direct access to the value
          */
         public SequenceQualityComponent setRecallElement(DecimalType value) { 
           this.recall = value;
@@ -1781,14 +1935,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return (true positives) / (true positives + false negatives).
+         * @return TRUTH.TP / (TRUTH.TP + TRUTH.FN).
          */
         public BigDecimal getRecall() { 
           return this.recall == null ? null : this.recall.getValue();
         }
 
         /**
-         * @param value (true positives) / (true positives + false negatives).
+         * @param value TRUTH.TP / (TRUTH.TP + TRUTH.FN).
          */
         public SequenceQualityComponent setRecall(BigDecimal value) { 
           if (value == null)
@@ -1802,7 +1956,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value (true positives) / (true positives + false negatives).
+         * @param value TRUTH.TP / (TRUTH.TP + TRUTH.FN).
          */
         public SequenceQualityComponent setRecall(long value) { 
               this.recall = new DecimalType();
@@ -1811,7 +1965,7 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value (true positives) / (true positives + false negatives).
+         * @param value TRUTH.TP / (TRUTH.TP + TRUTH.FN).
          */
         public SequenceQualityComponent setRecall(double value) { 
               this.recall = new DecimalType();
@@ -1820,99 +1974,105 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #fMeasure} (2 * precision * recall / (precision + recall).). This is the underlying object with id, value and extensions. The accessor "getFMeasure" gives direct access to the value
+         * @return {@link #fScore} (Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).). This is the underlying object with id, value and extensions. The accessor "getFScore" gives direct access to the value
          */
-        public DecimalType getFMeasureElement() { 
-          if (this.fMeasure == null)
+        public DecimalType getFScoreElement() { 
+          if (this.fScore == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SequenceQualityComponent.fMeasure");
+              throw new Error("Attempt to auto-create SequenceQualityComponent.fScore");
             else if (Configuration.doAutoCreate())
-              this.fMeasure = new DecimalType(); // bb
-          return this.fMeasure;
+              this.fScore = new DecimalType(); // bb
+          return this.fScore;
         }
 
-        public boolean hasFMeasureElement() { 
-          return this.fMeasure != null && !this.fMeasure.isEmpty();
+        public boolean hasFScoreElement() { 
+          return this.fScore != null && !this.fScore.isEmpty();
         }
 
-        public boolean hasFMeasure() { 
-          return this.fMeasure != null && !this.fMeasure.isEmpty();
+        public boolean hasFScore() { 
+          return this.fScore != null && !this.fScore.isEmpty();
         }
 
         /**
-         * @param value {@link #fMeasure} (2 * precision * recall / (precision + recall).). This is the underlying object with id, value and extensions. The accessor "getFMeasure" gives direct access to the value
+         * @param value {@link #fScore} (Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).). This is the underlying object with id, value and extensions. The accessor "getFScore" gives direct access to the value
          */
-        public SequenceQualityComponent setFMeasureElement(DecimalType value) { 
-          this.fMeasure = value;
+        public SequenceQualityComponent setFScoreElement(DecimalType value) { 
+          this.fScore = value;
           return this;
         }
 
         /**
-         * @return 2 * precision * recall / (precision + recall).
+         * @return Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).
          */
-        public BigDecimal getFMeasure() { 
-          return this.fMeasure == null ? null : this.fMeasure.getValue();
+        public BigDecimal getFScore() { 
+          return this.fScore == null ? null : this.fScore.getValue();
         }
 
         /**
-         * @param value 2 * precision * recall / (precision + recall).
+         * @param value Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).
          */
-        public SequenceQualityComponent setFMeasure(BigDecimal value) { 
+        public SequenceQualityComponent setFScore(BigDecimal value) { 
           if (value == null)
-            this.fMeasure = null;
+            this.fScore = null;
           else {
-            if (this.fMeasure == null)
-              this.fMeasure = new DecimalType();
-            this.fMeasure.setValue(value);
+            if (this.fScore == null)
+              this.fScore = new DecimalType();
+            this.fScore.setValue(value);
           }
           return this;
         }
 
         /**
-         * @param value 2 * precision * recall / (precision + recall).
+         * @param value Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).
          */
-        public SequenceQualityComponent setFMeasure(long value) { 
-              this.fMeasure = new DecimalType();
-            this.fMeasure.setValue(value);
+        public SequenceQualityComponent setFScore(long value) { 
+              this.fScore = new DecimalType();
+            this.fScore.setValue(value);
           return this;
         }
 
         /**
-         * @param value 2 * precision * recall / (precision + recall).
+         * @param value Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).
          */
-        public SequenceQualityComponent setFMeasure(double value) { 
-              this.fMeasure = new DecimalType();
-            this.fMeasure.setValue(value);
+        public SequenceQualityComponent setFScore(double value) { 
+              this.fScore = new DecimalType();
+            this.fScore.setValue(value);
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
+          childrenList.add(new Property("standardSequence", "CodeableConcept", "Gold standard sequence used for comparing against.", 0, java.lang.Integer.MAX_VALUE, standardSequence));
           childrenList.add(new Property("start", "integer", "Start position (inclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, start));
           childrenList.add(new Property("end", "integer", "End position (exclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, end));
           childrenList.add(new Property("score", "Quantity", "The score of an experimentally derived feature such as a p-value ([SO:0001685](http://www.sequenceontology.org/browser/current_svn/term/SO:0001685)).", 0, java.lang.Integer.MAX_VALUE, score));
-          childrenList.add(new Property("method", "string", "Method for quality.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("truePositives", "decimal", "The number of variants found in the benchmark set that match exactly the test set.", 0, java.lang.Integer.MAX_VALUE, truePositives));
-          childrenList.add(new Property("falsePositives", "decimal", "The number of variants found in the test set that did not match exactly the benchmark set.", 0, java.lang.Integer.MAX_VALUE, falsePositives));
-          childrenList.add(new Property("falseNegatives", "decimal", "The number of variants found in the benchmark set that did not match exactly the test set.", 0, java.lang.Integer.MAX_VALUE, falseNegatives));
-          childrenList.add(new Property("precision", "decimal", "(true positives) / (true positives + false positives).", 0, java.lang.Integer.MAX_VALUE, precision));
-          childrenList.add(new Property("recall", "decimal", "(true positives) / (true positives + false negatives).", 0, java.lang.Integer.MAX_VALUE, recall));
-          childrenList.add(new Property("fMeasure", "decimal", "2 * precision * recall / (precision + recall).", 0, java.lang.Integer.MAX_VALUE, fMeasure));
+          childrenList.add(new Property("method", "CodeableConcept", "Method for quality.", 0, java.lang.Integer.MAX_VALUE, method));
+          childrenList.add(new Property("truthTP", "decimal", "True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, java.lang.Integer.MAX_VALUE, truthTP));
+          childrenList.add(new Property("queryTP", "decimal", "True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, java.lang.Integer.MAX_VALUE, queryTP));
+          childrenList.add(new Property("truthFN", "decimal", "False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.", 0, java.lang.Integer.MAX_VALUE, truthFN));
+          childrenList.add(new Property("queryFP", "decimal", "False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.", 0, java.lang.Integer.MAX_VALUE, queryFP));
+          childrenList.add(new Property("gtFP", "decimal", "The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).", 0, java.lang.Integer.MAX_VALUE, gtFP));
+          childrenList.add(new Property("precision", "decimal", "QUERY.TP / (QUERY.TP + QUERY.FP).", 0, java.lang.Integer.MAX_VALUE, precision));
+          childrenList.add(new Property("recall", "decimal", "TRUTH.TP / (TRUTH.TP + TRUTH.FN).", 0, java.lang.Integer.MAX_VALUE, recall));
+          childrenList.add(new Property("fScore", "decimal", "Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).", 0, java.lang.Integer.MAX_VALUE, fScore));
         }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case -1861227106: /*standardSequence*/ return this.standardSequence == null ? new Base[0] : new Base[] {this.standardSequence}; // CodeableConcept
         case 109757538: /*start*/ return this.start == null ? new Base[0] : new Base[] {this.start}; // IntegerType
         case 100571: /*end*/ return this.end == null ? new Base[0] : new Base[] {this.end}; // IntegerType
         case 109264530: /*score*/ return this.score == null ? new Base[0] : new Base[] {this.score}; // Quantity
-        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // StringType
-        case -886263892: /*truePositives*/ return this.truePositives == null ? new Base[0] : new Base[] {this.truePositives}; // DecimalType
-        case -1109507145: /*falsePositives*/ return this.falsePositives == null ? new Base[0] : new Base[] {this.falsePositives}; // DecimalType
-        case -31975173: /*falseNegatives*/ return this.falseNegatives == null ? new Base[0] : new Base[] {this.falseNegatives}; // DecimalType
+        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
+        case -1048421849: /*truthTP*/ return this.truthTP == null ? new Base[0] : new Base[] {this.truthTP}; // DecimalType
+        case 655102276: /*queryTP*/ return this.queryTP == null ? new Base[0] : new Base[] {this.queryTP}; // DecimalType
+        case -1048422285: /*truthFN*/ return this.truthFN == null ? new Base[0] : new Base[] {this.truthFN}; // DecimalType
+        case 655101842: /*queryFP*/ return this.queryFP == null ? new Base[0] : new Base[] {this.queryFP}; // DecimalType
+        case 3182199: /*gtFP*/ return this.gtFP == null ? new Base[0] : new Base[] {this.gtFP}; // DecimalType
         case -1376177026: /*precision*/ return this.precision == null ? new Base[0] : new Base[] {this.precision}; // DecimalType
         case -934922479: /*recall*/ return this.recall == null ? new Base[0] : new Base[] {this.recall}; // DecimalType
-        case -18997736: /*fMeasure*/ return this.fMeasure == null ? new Base[0] : new Base[] {this.fMeasure}; // DecimalType
+        case -1295082036: /*fScore*/ return this.fScore == null ? new Base[0] : new Base[] {this.fScore}; // DecimalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1921,6 +2081,9 @@ public class Sequence extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -1861227106: // standardSequence
+          this.standardSequence = castToCodeableConcept(value); // CodeableConcept
+          break;
         case 109757538: // start
           this.start = castToInteger(value); // IntegerType
           break;
@@ -1931,16 +2094,22 @@ public class Sequence extends DomainResource {
           this.score = castToQuantity(value); // Quantity
           break;
         case -1077554975: // method
-          this.method = castToString(value); // StringType
+          this.method = castToCodeableConcept(value); // CodeableConcept
           break;
-        case -886263892: // truePositives
-          this.truePositives = castToDecimal(value); // DecimalType
+        case -1048421849: // truthTP
+          this.truthTP = castToDecimal(value); // DecimalType
           break;
-        case -1109507145: // falsePositives
-          this.falsePositives = castToDecimal(value); // DecimalType
+        case 655102276: // queryTP
+          this.queryTP = castToDecimal(value); // DecimalType
           break;
-        case -31975173: // falseNegatives
-          this.falseNegatives = castToDecimal(value); // DecimalType
+        case -1048422285: // truthFN
+          this.truthFN = castToDecimal(value); // DecimalType
+          break;
+        case 655101842: // queryFP
+          this.queryFP = castToDecimal(value); // DecimalType
+          break;
+        case 3182199: // gtFP
+          this.gtFP = castToDecimal(value); // DecimalType
           break;
         case -1376177026: // precision
           this.precision = castToDecimal(value); // DecimalType
@@ -1948,8 +2117,8 @@ public class Sequence extends DomainResource {
         case -934922479: // recall
           this.recall = castToDecimal(value); // DecimalType
           break;
-        case -18997736: // fMeasure
-          this.fMeasure = castToDecimal(value); // DecimalType
+        case -1295082036: // fScore
+          this.fScore = castToDecimal(value); // DecimalType
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1958,26 +2127,32 @@ public class Sequence extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("start"))
+        if (name.equals("standardSequence"))
+          this.standardSequence = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("start"))
           this.start = castToInteger(value); // IntegerType
         else if (name.equals("end"))
           this.end = castToInteger(value); // IntegerType
         else if (name.equals("score"))
           this.score = castToQuantity(value); // Quantity
         else if (name.equals("method"))
-          this.method = castToString(value); // StringType
-        else if (name.equals("truePositives"))
-          this.truePositives = castToDecimal(value); // DecimalType
-        else if (name.equals("falsePositives"))
-          this.falsePositives = castToDecimal(value); // DecimalType
-        else if (name.equals("falseNegatives"))
-          this.falseNegatives = castToDecimal(value); // DecimalType
+          this.method = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("truthTP"))
+          this.truthTP = castToDecimal(value); // DecimalType
+        else if (name.equals("queryTP"))
+          this.queryTP = castToDecimal(value); // DecimalType
+        else if (name.equals("truthFN"))
+          this.truthFN = castToDecimal(value); // DecimalType
+        else if (name.equals("queryFP"))
+          this.queryFP = castToDecimal(value); // DecimalType
+        else if (name.equals("gtFP"))
+          this.gtFP = castToDecimal(value); // DecimalType
         else if (name.equals("precision"))
           this.precision = castToDecimal(value); // DecimalType
         else if (name.equals("recall"))
           this.recall = castToDecimal(value); // DecimalType
-        else if (name.equals("fMeasure"))
-          this.fMeasure = castToDecimal(value); // DecimalType
+        else if (name.equals("fScore"))
+          this.fScore = castToDecimal(value); // DecimalType
         else
           super.setProperty(name, value);
       }
@@ -1985,16 +2160,19 @@ public class Sequence extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -1861227106:  return getStandardSequence(); // CodeableConcept
         case 109757538: throw new FHIRException("Cannot make property start as it is not a complex type"); // IntegerType
         case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // IntegerType
         case 109264530:  return getScore(); // Quantity
-        case -1077554975: throw new FHIRException("Cannot make property method as it is not a complex type"); // StringType
-        case -886263892: throw new FHIRException("Cannot make property truePositives as it is not a complex type"); // DecimalType
-        case -1109507145: throw new FHIRException("Cannot make property falsePositives as it is not a complex type"); // DecimalType
-        case -31975173: throw new FHIRException("Cannot make property falseNegatives as it is not a complex type"); // DecimalType
+        case -1077554975:  return getMethod(); // CodeableConcept
+        case -1048421849: throw new FHIRException("Cannot make property truthTP as it is not a complex type"); // DecimalType
+        case 655102276: throw new FHIRException("Cannot make property queryTP as it is not a complex type"); // DecimalType
+        case -1048422285: throw new FHIRException("Cannot make property truthFN as it is not a complex type"); // DecimalType
+        case 655101842: throw new FHIRException("Cannot make property queryFP as it is not a complex type"); // DecimalType
+        case 3182199: throw new FHIRException("Cannot make property gtFP as it is not a complex type"); // DecimalType
         case -1376177026: throw new FHIRException("Cannot make property precision as it is not a complex type"); // DecimalType
         case -934922479: throw new FHIRException("Cannot make property recall as it is not a complex type"); // DecimalType
-        case -18997736: throw new FHIRException("Cannot make property fMeasure as it is not a complex type"); // DecimalType
+        case -1295082036: throw new FHIRException("Cannot make property fScore as it is not a complex type"); // DecimalType
         default: return super.makeProperty(hash, name);
         }
 
@@ -2002,7 +2180,11 @@ public class Sequence extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("start")) {
+        if (name.equals("standardSequence")) {
+          this.standardSequence = new CodeableConcept();
+          return this.standardSequence;
+        }
+        else if (name.equals("start")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.start");
         }
         else if (name.equals("end")) {
@@ -2013,16 +2195,23 @@ public class Sequence extends DomainResource {
           return this.score;
         }
         else if (name.equals("method")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Sequence.method");
+          this.method = new CodeableConcept();
+          return this.method;
         }
-        else if (name.equals("truePositives")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Sequence.truePositives");
+        else if (name.equals("truthTP")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.truthTP");
         }
-        else if (name.equals("falsePositives")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Sequence.falsePositives");
+        else if (name.equals("queryTP")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.queryTP");
         }
-        else if (name.equals("falseNegatives")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Sequence.falseNegatives");
+        else if (name.equals("truthFN")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.truthFN");
+        }
+        else if (name.equals("queryFP")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.queryFP");
+        }
+        else if (name.equals("gtFP")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.gtFP");
         }
         else if (name.equals("precision")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.precision");
@@ -2030,8 +2219,8 @@ public class Sequence extends DomainResource {
         else if (name.equals("recall")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.recall");
         }
-        else if (name.equals("fMeasure")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Sequence.fMeasure");
+        else if (name.equals("fScore")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.fScore");
         }
         else
           return super.addChild(name);
@@ -2040,16 +2229,19 @@ public class Sequence extends DomainResource {
       public SequenceQualityComponent copy() {
         SequenceQualityComponent dst = new SequenceQualityComponent();
         copyValues(dst);
+        dst.standardSequence = standardSequence == null ? null : standardSequence.copy();
         dst.start = start == null ? null : start.copy();
         dst.end = end == null ? null : end.copy();
         dst.score = score == null ? null : score.copy();
         dst.method = method == null ? null : method.copy();
-        dst.truePositives = truePositives == null ? null : truePositives.copy();
-        dst.falsePositives = falsePositives == null ? null : falsePositives.copy();
-        dst.falseNegatives = falseNegatives == null ? null : falseNegatives.copy();
+        dst.truthTP = truthTP == null ? null : truthTP.copy();
+        dst.queryTP = queryTP == null ? null : queryTP.copy();
+        dst.truthFN = truthFN == null ? null : truthFN.copy();
+        dst.queryFP = queryFP == null ? null : queryFP.copy();
+        dst.gtFP = gtFP == null ? null : gtFP.copy();
         dst.precision = precision == null ? null : precision.copy();
         dst.recall = recall == null ? null : recall.copy();
-        dst.fMeasure = fMeasure == null ? null : fMeasure.copy();
+        dst.fScore = fScore == null ? null : fScore.copy();
         return dst;
       }
 
@@ -2060,10 +2252,11 @@ public class Sequence extends DomainResource {
         if (!(other instanceof SequenceQualityComponent))
           return false;
         SequenceQualityComponent o = (SequenceQualityComponent) other;
-        return compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(score, o.score, true)
-           && compareDeep(method, o.method, true) && compareDeep(truePositives, o.truePositives, true) && compareDeep(falsePositives, o.falsePositives, true)
-           && compareDeep(falseNegatives, o.falseNegatives, true) && compareDeep(precision, o.precision, true)
-           && compareDeep(recall, o.recall, true) && compareDeep(fMeasure, o.fMeasure, true);
+        return compareDeep(standardSequence, o.standardSequence, true) && compareDeep(start, o.start, true)
+           && compareDeep(end, o.end, true) && compareDeep(score, o.score, true) && compareDeep(method, o.method, true)
+           && compareDeep(truthTP, o.truthTP, true) && compareDeep(queryTP, o.queryTP, true) && compareDeep(truthFN, o.truthFN, true)
+           && compareDeep(queryFP, o.queryFP, true) && compareDeep(gtFP, o.gtFP, true) && compareDeep(precision, o.precision, true)
+           && compareDeep(recall, o.recall, true) && compareDeep(fScore, o.fScore, true);
       }
 
       @Override
@@ -2073,15 +2266,16 @@ public class Sequence extends DomainResource {
         if (!(other instanceof SequenceQualityComponent))
           return false;
         SequenceQualityComponent o = (SequenceQualityComponent) other;
-        return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(method, o.method, true)
-           && compareValues(truePositives, o.truePositives, true) && compareValues(falsePositives, o.falsePositives, true)
-           && compareValues(falseNegatives, o.falseNegatives, true) && compareValues(precision, o.precision, true)
-           && compareValues(recall, o.recall, true) && compareValues(fMeasure, o.fMeasure, true);
+        return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(truthTP, o.truthTP, true)
+           && compareValues(queryTP, o.queryTP, true) && compareValues(truthFN, o.truthFN, true) && compareValues(queryFP, o.queryFP, true)
+           && compareValues(gtFP, o.gtFP, true) && compareValues(precision, o.precision, true) && compareValues(recall, o.recall, true)
+           && compareValues(fScore, o.fScore, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(start, end, score, method
-          , truePositives, falsePositives, falseNegatives, precision, recall, fMeasure);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(standardSequence, start, end
+          , score, method, truthTP, queryTP, truthFN, queryFP, gtFP, precision, recall
+          , fScore);
       }
 
   public String fhirType() {
@@ -3406,11 +3600,11 @@ public class Sequence extends DomainResource {
     /**
      * Structural variant.
      */
-    @Child(name = "structureVariant", type = {}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "structureVariant", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="Structural variant." )
-    protected SequenceStructureVariantComponent structureVariant;
+    protected List<SequenceStructureVariantComponent> structureVariant;
 
-    private static final long serialVersionUID = 1674606659L;
+    private static final long serialVersionUID = -1713460757L;
 
   /**
    * Constructor
@@ -4082,25 +4276,54 @@ public class Sequence extends DomainResource {
     /**
      * @return {@link #structureVariant} (Structural variant.)
      */
-    public SequenceStructureVariantComponent getStructureVariant() { 
+    public List<SequenceStructureVariantComponent> getStructureVariant() { 
       if (this.structureVariant == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Sequence.structureVariant");
-        else if (Configuration.doAutoCreate())
-          this.structureVariant = new SequenceStructureVariantComponent(); // cc
+        this.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
       return this.structureVariant;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Sequence setStructureVariant(List<SequenceStructureVariantComponent> theStructureVariant) { 
+      this.structureVariant = theStructureVariant;
+      return this;
+    }
+
     public boolean hasStructureVariant() { 
-      return this.structureVariant != null && !this.structureVariant.isEmpty();
+      if (this.structureVariant == null)
+        return false;
+      for (SequenceStructureVariantComponent item : this.structureVariant)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public SequenceStructureVariantComponent addStructureVariant() { //3
+      SequenceStructureVariantComponent t = new SequenceStructureVariantComponent();
+      if (this.structureVariant == null)
+        this.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
+      this.structureVariant.add(t);
+      return t;
+    }
+
+    public Sequence addStructureVariant(SequenceStructureVariantComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.structureVariant == null)
+        this.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
+      this.structureVariant.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #structureVariant} (Structural variant.)
+     * @return The first repetition of repeating field {@link #structureVariant}, creating it if it does not already exist
      */
-    public Sequence setStructureVariant(SequenceStructureVariantComponent value) { 
-      this.structureVariant = value;
-      return this;
+    public SequenceStructureVariantComponent getStructureVariantFirstRep() { 
+      if (getStructureVariant().isEmpty()) {
+        addStructureVariant();
+      }
+      return getStructureVariant().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -4139,7 +4362,7 @@ public class Sequence extends DomainResource {
         case -1798816354: /*readCoverage*/ return this.readCoverage == null ? new Base[0] : new Base[] {this.readCoverage}; // IntegerType
         case 1950800714: /*repository*/ return this.repository == null ? new Base[0] : this.repository.toArray(new Base[this.repository.size()]); // SequenceRepositoryComponent
         case -400605635: /*pointer*/ return this.pointer == null ? new Base[0] : this.pointer.toArray(new Base[this.pointer.size()]); // Reference
-        case 757269394: /*structureVariant*/ return this.structureVariant == null ? new Base[0] : new Base[] {this.structureVariant}; // SequenceStructureVariantComponent
+        case 757269394: /*structureVariant*/ return this.structureVariant == null ? new Base[0] : this.structureVariant.toArray(new Base[this.structureVariant.size()]); // SequenceStructureVariantComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -4191,7 +4414,7 @@ public class Sequence extends DomainResource {
           this.getPointer().add(castToReference(value)); // Reference
           break;
         case 757269394: // structureVariant
-          this.structureVariant = (SequenceStructureVariantComponent) value; // SequenceStructureVariantComponent
+          this.getStructureVariant().add((SequenceStructureVariantComponent) value); // SequenceStructureVariantComponent
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -4229,7 +4452,7 @@ public class Sequence extends DomainResource {
         else if (name.equals("pointer"))
           this.getPointer().add(castToReference(value));
         else if (name.equals("structureVariant"))
-          this.structureVariant = (SequenceStructureVariantComponent) value; // SequenceStructureVariantComponent
+          this.getStructureVariant().add((SequenceStructureVariantComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -4251,7 +4474,7 @@ public class Sequence extends DomainResource {
         case -1798816354: throw new FHIRException("Cannot make property readCoverage as it is not a complex type"); // IntegerType
         case 1950800714:  return addRepository(); // SequenceRepositoryComponent
         case -400605635:  return addPointer(); // Reference
-        case 757269394:  return getStructureVariant(); // SequenceStructureVariantComponent
+        case 757269394:  return addStructureVariant(); // SequenceStructureVariantComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -4307,8 +4530,7 @@ public class Sequence extends DomainResource {
           return addPointer();
         }
         else if (name.equals("structureVariant")) {
-          this.structureVariant = new SequenceStructureVariantComponent();
-          return this.structureVariant;
+          return addStructureVariant();
         }
         else
           return super.addChild(name);
@@ -4356,7 +4578,11 @@ public class Sequence extends DomainResource {
           for (Reference i : pointer)
             dst.pointer.add(i.copy());
         };
-        dst.structureVariant = structureVariant == null ? null : structureVariant.copy();
+        if (structureVariant != null) {
+          dst.structureVariant = new ArrayList<SequenceStructureVariantComponent>();
+          for (SequenceStructureVariantComponent i : structureVariant)
+            dst.structureVariant.add(i.copy());
+        };
         return dst;
       }
 
