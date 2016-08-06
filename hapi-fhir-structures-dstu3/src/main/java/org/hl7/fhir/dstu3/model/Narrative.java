@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -58,7 +58,7 @@ public class Narrative extends BaseNarrative implements INarrative {
          */
         EXTENSIONS, 
         /**
-         * The contents of the narrative contain additional information not found in the structured data
+         * The contents of the narrative may contain additional information not found in the structured data. Note that there is no computable way to determine what the extra information is, other than by human inspection
          */
         ADDITIONAL, 
         /**
@@ -107,7 +107,7 @@ public class Narrative extends BaseNarrative implements INarrative {
           switch (this) {
             case GENERATED: return "The contents of the narrative are entirely generated from the structured data in the content.";
             case EXTENSIONS: return "The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions";
-            case ADDITIONAL: return "The contents of the narrative contain additional information not found in the structured data";
+            case ADDITIONAL: return "The contents of the narrative may contain additional information not found in the structured data. Note that there is no computable way to determine what the extra information is, other than by human inspection";
             case EMPTY: return "The contents of the narrative are some equivalent of \"No human-readable text provided in this case\"";
             default: return "?";
           }

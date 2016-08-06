@@ -144,21 +144,20 @@ private Map<String, Object> userData;
   }  
   
   public List<Base> listChildrenByName(String name) throws FHIRException {
-  	List<Base> result = new ArrayList<Base>();
+    List<Base> result = new ArrayList<Base>();
   	for (Base b : listChildrenByName(name, true))
   		if (b != null)
   		  result.add(b);
-  	return result;
+    return result;
   }
-  
+
   public Base[] listChildrenByName(String name, boolean checkValid) throws FHIRException {
   	if (name.equals("*")) {
   		List<Property> children = new ArrayList<Property>();
   		listChildren(children);
   		List<Base> result = new ArrayList<Base>();
   		for (Property c : children)
-  			if (name.equals("*") || c.getName().equals(name) || (c.getName().endsWith("[x]") && c.getName().startsWith(name)))
-  				result.addAll(c.getValues());
+				result.addAll(c.getValues());
   		return result.toArray(new Base[result.size()]);
   	}
   	else
@@ -200,7 +199,7 @@ private Map<String, Object> userData;
 			boolean noLeft = e1 == null || e1.isEmpty();
 			boolean noRight = e2 == null || e2.isEmpty();
 			if (noLeft && noRight) {
-				return true;
+			return true;
 			}
 		}
 		if (e1 == null || e2 == null)
@@ -238,7 +237,7 @@ private Map<String, Object> userData;
 		boolean noLeft = e1 == null || e1.isEmpty();
 		boolean noRight = e2 == null || e2.isEmpty();
       if (noLeft && noRight && allowNull) {
-         return true;
+			return true;
       }
 		if (noLeft != noRight)
 			return false;
@@ -297,7 +296,7 @@ private Map<String, Object> userData;
 			return (UriType) b;
 		else if (b.hasPrimitiveValue())
 			return new UriType(b.primitiveValue());
-		else 
+		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Uri");
 	}
 	
@@ -306,7 +305,7 @@ private Map<String, Object> userData;
 			return (DateType) b;
 		else if (b.hasPrimitiveValue())
 			return new DateType(b.primitiveValue());
-		else	
+		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Date");
 	}
 	
@@ -494,7 +493,7 @@ private Map<String, Object> userData;
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Address");
 	}
-
+	
 	public ContactDetail castToContactDetail(Base b) throws FHIRException {
 		if (b instanceof ContactDetail)
 			return (ContactDetail) b;
@@ -580,20 +579,6 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ElementDefinition");
 	}
 
-	public ModuleMetadata castToModuleMetadata(Base b) throws FHIRException {
-		if (b instanceof ModuleMetadata)
-			return (ModuleMetadata) b;
-		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ModuleMetadata");
-	}
-
-	public ActionDefinition castToActionDefinition(Base b) throws FHIRException {
-		if (b instanceof ActionDefinition)
-			return (ActionDefinition) b;
-		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ActionDefinition");
-	}
-
 	public DataRequirement castToDataRequirement(Base b) throws FHIRException {
 		if (b instanceof DataRequirement)
 			return (DataRequirement) b;
@@ -641,6 +626,10 @@ private Map<String, Object> userData;
   	else
   		return v1.equals(v2);
 	}
+
+  public boolean isResource() {
+    return false;
+  }
 	
 
 }

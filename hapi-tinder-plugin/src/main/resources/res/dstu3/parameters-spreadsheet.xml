@@ -1144,12 +1144,12 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Named part of a parameter (e.g. Tuple)</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Named part of a multi-part parameter</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">A named part of a parameter. In many implementation context, a set of named parts is known as a &quot;Tuple&quot;</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">A named part of a multi-part parameter</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Only one level of Tuples is allowed</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Only one level of nested parameters is allowed</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1173,7 +1173,7 @@ public class ValueSet extends BaseConformance {
          * The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system.
          */
         @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Test to display for this code for this value set", formalDefinition="The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system." )
+        @Description(shortDefinition="Text to display for this code for this value set", formalDefinition="The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system." )
         protected StringType display;
 
         /**
@@ -1473,6 +1473,7 @@ public class ValueSet extends BaseConformance {
          */
         @Child(name = "language", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Human language of the designation", formalDefinition="The language this designation is defined for." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
         protected CodeType language;
 
         /**

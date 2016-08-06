@@ -56,7 +56,7 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Device;
-import org.hl7.fhir.dstu3.model.DiagnosticOrder;
+import org.hl7.fhir.dstu3.model.DiagnosticRequest;
 import org.hl7.fhir.dstu3.model.DocumentManifest;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -100,6 +100,8 @@ import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -925,17 +927,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See issue #52
 	 */
 	@Test
-	public void testDiagnosticOrderResources() throws Exception {
+	public void testDiagnosticRequestResources() throws Exception {
 		IGenericClient client = ourClient;
 
-		int initialSize = client.search().forResource(DiagnosticOrder.class).returnBundle(Bundle.class).execute().getEntry().size();
+		int initialSize = client.search().forResource(DiagnosticRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
-		DiagnosticOrder res = new DiagnosticOrder();
+		DiagnosticRequest res = new DiagnosticRequest();
 		res.addIdentifier().setSystem("urn:foo").setValue("123");
 
 		client.create().resource(res).execute();
 
-		int newSize = client.search().forResource(DiagnosticOrder.class).returnBundle(Bundle.class).execute().getEntry().size();
+		int newSize = client.search().forResource(DiagnosticRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
 		assertEquals(1, newSize - initialSize);
 
@@ -1170,7 +1172,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testEverythingPatientDoesntRepeatPatient() throws Exception {
 		Bundle b;
-		b = myFhirCtx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/bug147-bundle.json")));
+		IParser parser = myFhirCtx.newJsonParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		b = parser.parseResource(Bundle.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/bug147-bundle-dstu3.json")));
 
 		Bundle resp = ourClient.transaction().withBundle(b).execute();
 		List<IdType> ids = new ArrayList<IdType>();
@@ -1261,7 +1265,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		b.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
 		Condition c = new Condition();
-		c.getPatient().setReference("Patient/1");
+		c.getSubject().setReference("Patient/1");
 		b.addEntry().setResource(c).getRequest().setMethod(HTTPVerb.POST);
 
 		Bundle resp = ourClient.transaction().withBundle(b).execute();
@@ -1351,10 +1355,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType p2Id = ourClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
 
 		Condition c1 = new Condition();
-		c1.getPatient().setReferenceElement(p1Id);
+		c1.getSubject().setReferenceElement(p1Id);
 		IIdType c1Id = ourClient.create().resource(c1).execute().getId().toUnqualifiedVersionless();
 		Condition c2 = new Condition();
-		c2.getPatient().setReferenceElement(p2Id);
+		c2.getSubject().setReferenceElement(p2Id);
 		IIdType c2Id = ourClient.create().resource(c2).execute().getId().toUnqualifiedVersionless();
 
 		Condition c3 = new Condition();
@@ -1393,7 +1397,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Condition c = new Condition();
 		c.getCode().setText(methodName);
-		c.getPatient().setReferenceElement(pId);
+		c.getSubject().setReferenceElement(pId);
 		IIdType cId = ourClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
 
 		Thread.sleep(10);

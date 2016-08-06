@@ -74,7 +74,7 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
+import org.hl7.fhir.dstu3.utils.FluentPathEngine;
 import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.dstu3.utils.IWorkerContext.ValidationResult;
 import org.hl7.fhir.dstu3.utils.ProfileUtilities;
@@ -105,7 +105,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   // configuration items
   private CheckDisplayOption checkDisplay;
   private IWorkerContext context;
-  private FHIRPathEngine fpe; 
+  private FluentPathEngine fpe; 
 
   private List<String> extensionDomains = new ArrayList<String>();
 
@@ -128,7 +128,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   public InstanceValidator(IWorkerContext theContext) {
     super();
     this.context = theContext;
-    fpe = new FHIRPathEngine(context);
+    fpe = new FluentPathEngine(context);
     source = Source.InstanceValidator;
   }
 
@@ -2120,7 +2120,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     checkInvariants(errors, stack.getLiteralPath(), profile, definition, null, null, resource, element);
 
     // get the list of direct defined children, including slices
-    List<ElementDefinition> childDefinitions = ProfileUtilities.getChildMap(profile, definition.getName(), definition.getPath(), definition.getContentReference());
+    List<ElementDefinition> childDefinitions = ProfileUtilities.getChildMap(profile, definition);
 
     // 1. List the children, and remember their exact path (convenience)
     List<ElementInfo> children = new ArrayList<InstanceValidator.ElementInfo>();
@@ -2357,6 +2357,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           msg = ex.getMessage(); 
         }
         if (!ok) {
+          ok = fpe.evaluateToBoolean(resource, element, n);
           if (inv.getSeverity() == ConstraintSeverity.ERROR)
             rule(errors, IssueType.INVARIANT, element.line(), element.col(), path, ok, inv.getHuman()+" ("+msg+") ["+inv.getExpression()+"]");
           else if (inv.getSeverity() == ConstraintSeverity.WARNING)

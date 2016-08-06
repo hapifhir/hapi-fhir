@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -48,6 +48,176 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 @ResourceDef(name="PractitionerRole", profile="http://hl7.org/fhir/Profile/PractitionerRole")
 public class PractitionerRole extends DomainResource {
 
+    public enum DaysOfWeek {
+        /**
+         * Monday
+         */
+        MON, 
+        /**
+         * Tuesday
+         */
+        TUE, 
+        /**
+         * Wednesday
+         */
+        WED, 
+        /**
+         * Thursday
+         */
+        THU, 
+        /**
+         * Friday
+         */
+        FRI, 
+        /**
+         * Saturday
+         */
+        SAT, 
+        /**
+         * Sunday
+         */
+        SUN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static DaysOfWeek fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("mon".equals(codeString))
+          return MON;
+        if ("tue".equals(codeString))
+          return TUE;
+        if ("wed".equals(codeString))
+          return WED;
+        if ("thu".equals(codeString))
+          return THU;
+        if ("fri".equals(codeString))
+          return FRI;
+        if ("sat".equals(codeString))
+          return SAT;
+        if ("sun".equals(codeString))
+          return SUN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DaysOfWeek code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case MON: return "mon";
+            case TUE: return "tue";
+            case WED: return "wed";
+            case THU: return "thu";
+            case FRI: return "fri";
+            case SAT: return "sat";
+            case SUN: return "sun";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case MON: return "http://hl7.org/fhir/days-of-week";
+            case TUE: return "http://hl7.org/fhir/days-of-week";
+            case WED: return "http://hl7.org/fhir/days-of-week";
+            case THU: return "http://hl7.org/fhir/days-of-week";
+            case FRI: return "http://hl7.org/fhir/days-of-week";
+            case SAT: return "http://hl7.org/fhir/days-of-week";
+            case SUN: return "http://hl7.org/fhir/days-of-week";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case MON: return "Monday";
+            case TUE: return "Tuesday";
+            case WED: return "Wednesday";
+            case THU: return "Thursday";
+            case FRI: return "Friday";
+            case SAT: return "Saturday";
+            case SUN: return "Sunday";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case MON: return "Monday";
+            case TUE: return "Tuesday";
+            case WED: return "Wednesday";
+            case THU: return "Thursday";
+            case FRI: return "Friday";
+            case SAT: return "Saturday";
+            case SUN: return "Sunday";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class DaysOfWeekEnumFactory implements EnumFactory<DaysOfWeek> {
+    public DaysOfWeek fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("mon".equals(codeString))
+          return DaysOfWeek.MON;
+        if ("tue".equals(codeString))
+          return DaysOfWeek.TUE;
+        if ("wed".equals(codeString))
+          return DaysOfWeek.WED;
+        if ("thu".equals(codeString))
+          return DaysOfWeek.THU;
+        if ("fri".equals(codeString))
+          return DaysOfWeek.FRI;
+        if ("sat".equals(codeString))
+          return DaysOfWeek.SAT;
+        if ("sun".equals(codeString))
+          return DaysOfWeek.SUN;
+        throw new IllegalArgumentException("Unknown DaysOfWeek code '"+codeString+"'");
+        }
+        public Enumeration<DaysOfWeek> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("mon".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.MON);
+        if ("tue".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.TUE);
+        if ("wed".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.WED);
+        if ("thu".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.THU);
+        if ("fri".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.FRI);
+        if ("sat".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.SAT);
+        if ("sun".equals(codeString))
+          return new Enumeration<DaysOfWeek>(this, DaysOfWeek.SUN);
+        throw new FHIRException("Unknown DaysOfWeek code '"+codeString+"'");
+        }
+    public String toCode(DaysOfWeek code) {
+      if (code == DaysOfWeek.MON)
+        return "mon";
+      if (code == DaysOfWeek.TUE)
+        return "tue";
+      if (code == DaysOfWeek.WED)
+        return "wed";
+      if (code == DaysOfWeek.THU)
+        return "thu";
+      if (code == DaysOfWeek.FRI)
+        return "fri";
+      if (code == DaysOfWeek.SAT)
+        return "sat";
+      if (code == DaysOfWeek.SUN)
+        return "sun";
+      return "?";
+      }
+    public String toSystem(DaysOfWeek code) {
+      return code.getSystem();
+      }
+    }
+
     @Block()
     public static class PractitionerRoleAvailableTimeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
@@ -56,7 +226,7 @@ public class PractitionerRole extends DomainResource {
         @Child(name = "daysOfWeek", type = {CodeType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="mon | tue | wed | thu | fri | sat | sun", formalDefinition="Indicates which days of the week are available between the start and end Times." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/days-of-week")
-        protected List<CodeType> daysOfWeek;
+        protected List<Enumeration<DaysOfWeek>> daysOfWeek;
 
         /**
          * Is this always available? (hence times are irrelevant) e.g. 24 hour service.
@@ -79,7 +249,7 @@ public class PractitionerRole extends DomainResource {
         @Description(shortDefinition="Closing time of day (ignored if allDay = true)", formalDefinition="The closing time of day. Note: If the AllDay flag is set, then this time is ignored." )
         protected TimeType availableEndTime;
 
-        private static final long serialVersionUID = 2079379177L;
+        private static final long serialVersionUID = -2139510127L;
 
     /**
      * Constructor
@@ -91,16 +261,16 @@ public class PractitionerRole extends DomainResource {
         /**
          * @return {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
-        public List<CodeType> getDaysOfWeek() { 
+        public List<Enumeration<DaysOfWeek>> getDaysOfWeek() { 
           if (this.daysOfWeek == null)
-            this.daysOfWeek = new ArrayList<CodeType>();
+            this.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
           return this.daysOfWeek;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PractitionerRoleAvailableTimeComponent setDaysOfWeek(List<CodeType> theDaysOfWeek) { 
+        public PractitionerRoleAvailableTimeComponent setDaysOfWeek(List<Enumeration<DaysOfWeek>> theDaysOfWeek) { 
           this.daysOfWeek = theDaysOfWeek;
           return this;
         }
@@ -108,7 +278,7 @@ public class PractitionerRole extends DomainResource {
         public boolean hasDaysOfWeek() { 
           if (this.daysOfWeek == null)
             return false;
-          for (CodeType item : this.daysOfWeek)
+          for (Enumeration<DaysOfWeek> item : this.daysOfWeek)
             if (!item.isEmpty())
               return true;
           return false;
@@ -117,10 +287,10 @@ public class PractitionerRole extends DomainResource {
         /**
          * @return {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
-        public CodeType addDaysOfWeekElement() {//2 
-          CodeType t = new CodeType();
+        public Enumeration<DaysOfWeek> addDaysOfWeekElement() {//2 
+          Enumeration<DaysOfWeek> t = new Enumeration<DaysOfWeek>(new DaysOfWeekEnumFactory());
           if (this.daysOfWeek == null)
-            this.daysOfWeek = new ArrayList<CodeType>();
+            this.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
           this.daysOfWeek.add(t);
           return t;
         }
@@ -128,11 +298,11 @@ public class PractitionerRole extends DomainResource {
         /**
          * @param value {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
-        public PractitionerRoleAvailableTimeComponent addDaysOfWeek(String value) { //1
-          CodeType t = new CodeType();
+        public PractitionerRoleAvailableTimeComponent addDaysOfWeek(DaysOfWeek value) { //1
+          Enumeration<DaysOfWeek> t = new Enumeration<DaysOfWeek>(new DaysOfWeekEnumFactory());
           t.setValue(value);
           if (this.daysOfWeek == null)
-            this.daysOfWeek = new ArrayList<CodeType>();
+            this.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
           this.daysOfWeek.add(t);
           return this;
         }
@@ -140,11 +310,11 @@ public class PractitionerRole extends DomainResource {
         /**
          * @param value {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
-        public boolean hasDaysOfWeek(String value) { 
+        public boolean hasDaysOfWeek(DaysOfWeek value) { 
           if (this.daysOfWeek == null)
             return false;
-          for (CodeType v : this.daysOfWeek)
-            if (v.equals(value)) // code
+          for (Enumeration<DaysOfWeek> v : this.daysOfWeek)
+            if (v.getValue().equals(value)) // code
               return true;
           return false;
         }
@@ -303,7 +473,7 @@ public class PractitionerRole extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 68050338: /*daysOfWeek*/ return this.daysOfWeek == null ? new Base[0] : this.daysOfWeek.toArray(new Base[this.daysOfWeek.size()]); // CodeType
+        case 68050338: /*daysOfWeek*/ return this.daysOfWeek == null ? new Base[0] : this.daysOfWeek.toArray(new Base[this.daysOfWeek.size()]); // Enumeration<DaysOfWeek>
         case -1414913477: /*allDay*/ return this.allDay == null ? new Base[0] : new Base[] {this.allDay}; // BooleanType
         case -1039453818: /*availableStartTime*/ return this.availableStartTime == null ? new Base[0] : new Base[] {this.availableStartTime}; // TimeType
         case 101151551: /*availableEndTime*/ return this.availableEndTime == null ? new Base[0] : new Base[] {this.availableEndTime}; // TimeType
@@ -316,7 +486,7 @@ public class PractitionerRole extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 68050338: // daysOfWeek
-          this.getDaysOfWeek().add(castToCode(value)); // CodeType
+          this.getDaysOfWeek().add(new DaysOfWeekEnumFactory().fromType(value)); // Enumeration<DaysOfWeek>
           break;
         case -1414913477: // allDay
           this.allDay = castToBoolean(value); // BooleanType
@@ -335,7 +505,7 @@ public class PractitionerRole extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("daysOfWeek"))
-          this.getDaysOfWeek().add(castToCode(value));
+          this.getDaysOfWeek().add(new DaysOfWeekEnumFactory().fromType(value));
         else if (name.equals("allDay"))
           this.allDay = castToBoolean(value); // BooleanType
         else if (name.equals("availableStartTime"))
@@ -349,7 +519,7 @@ public class PractitionerRole extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 68050338: throw new FHIRException("Cannot make property daysOfWeek as it is not a complex type"); // CodeType
+        case 68050338: throw new FHIRException("Cannot make property daysOfWeek as it is not a complex type"); // Enumeration<DaysOfWeek>
         case -1414913477: throw new FHIRException("Cannot make property allDay as it is not a complex type"); // BooleanType
         case -1039453818: throw new FHIRException("Cannot make property availableStartTime as it is not a complex type"); // TimeType
         case 101151551: throw new FHIRException("Cannot make property availableEndTime as it is not a complex type"); // TimeType
@@ -380,8 +550,8 @@ public class PractitionerRole extends DomainResource {
         PractitionerRoleAvailableTimeComponent dst = new PractitionerRoleAvailableTimeComponent();
         copyValues(dst);
         if (daysOfWeek != null) {
-          dst.daysOfWeek = new ArrayList<CodeType>();
-          for (CodeType i : daysOfWeek)
+          dst.daysOfWeek = new ArrayList<Enumeration<DaysOfWeek>>();
+          for (Enumeration<DaysOfWeek> i : daysOfWeek)
             dst.daysOfWeek.add(i.copy());
         };
         dst.allDay = allDay == null ? null : allDay.copy();
@@ -669,10 +839,10 @@ public class PractitionerRole extends DomainResource {
     /**
      * Roles which this practitioner is authorized to perform for the organization.
      */
-    @Child(name = "role", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Roles which this practitioner may perform", formalDefinition="Roles which this practitioner is authorized to perform for the organization." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/practitioner-role")
-    protected List<CodeableConcept> role;
+    protected List<CodeableConcept> code;
 
     /**
      * Specific specialty of the practitioner.
@@ -753,7 +923,7 @@ public class PractitionerRole extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = 1307212024L;
+    private static final long serialVersionUID = -1170829137L;
 
   /**
    * Constructor
@@ -949,56 +1119,56 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
+     * @return {@link #code} (Roles which this practitioner is authorized to perform for the organization.)
      */
-    public List<CodeableConcept> getRole() { 
-      if (this.role == null)
-        this.role = new ArrayList<CodeableConcept>();
-      return this.role;
+    public List<CodeableConcept> getCode() { 
+      if (this.code == null)
+        this.code = new ArrayList<CodeableConcept>();
+      return this.code;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public PractitionerRole setRole(List<CodeableConcept> theRole) { 
-      this.role = theRole;
+    public PractitionerRole setCode(List<CodeableConcept> theCode) { 
+      this.code = theCode;
       return this;
     }
 
-    public boolean hasRole() { 
-      if (this.role == null)
+    public boolean hasCode() { 
+      if (this.code == null)
         return false;
-      for (CodeableConcept item : this.role)
+      for (CodeableConcept item : this.code)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeableConcept addRole() { //3
+    public CodeableConcept addCode() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.role == null)
-        this.role = new ArrayList<CodeableConcept>();
-      this.role.add(t);
+      if (this.code == null)
+        this.code = new ArrayList<CodeableConcept>();
+      this.code.add(t);
       return t;
     }
 
-    public PractitionerRole addRole(CodeableConcept t) { //3
+    public PractitionerRole addCode(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.role == null)
-        this.role = new ArrayList<CodeableConcept>();
-      this.role.add(t);
+      if (this.code == null)
+        this.code = new ArrayList<CodeableConcept>();
+      this.code.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
      */
-    public CodeableConcept getRoleFirstRep() { 
-      if (getRole().isEmpty()) {
-        addRole();
+    public CodeableConcept getCodeFirstRep() { 
+      if (getCode().isEmpty()) {
+        addCode();
       }
-      return getRole().get(0);
+      return getCode().get(0);
     }
 
     /**
@@ -1517,7 +1687,7 @@ public class PractitionerRole extends DomainResource {
         childrenList.add(new Property("active", "boolean", "Whether this practitioner's record is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("practitioner", "Reference(Practitioner)", "Practitioner that is able to provide the defined services for the organation.", 0, java.lang.Integer.MAX_VALUE, practitioner));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("role", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, role));
+        childrenList.add(new Property("code", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("specialty", "CodeableConcept", "Specific specialty of the practitioner.", 0, java.lang.Integer.MAX_VALUE, specialty));
         childrenList.add(new Property("location", "Reference(Location)", "The location(s) at which this practitioner provides care.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("healthcareService", "Reference(HealthcareService)", "The list of healthcare services that this worker provides for this role's Organization/Location(s).", 0, java.lang.Integer.MAX_VALUE, healthcareService));
@@ -1536,7 +1706,7 @@ public class PractitionerRole extends DomainResource {
         case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case 574573338: /*practitioner*/ return this.practitioner == null ? new Base[0] : new Base[] {this.practitioner}; // Reference
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
-        case 3506294: /*role*/ return this.role == null ? new Base[0] : this.role.toArray(new Base[this.role.size()]); // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // CodeableConcept
         case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // Reference
         case 1289661064: /*healthcareService*/ return this.healthcareService == null ? new Base[0] : this.healthcareService.toArray(new Base[this.healthcareService.size()]); // Reference
@@ -1566,8 +1736,8 @@ public class PractitionerRole extends DomainResource {
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
           break;
-        case 3506294: // role
-          this.getRole().add(castToCodeableConcept(value)); // CodeableConcept
+        case 3059181: // code
+          this.getCode().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case -1694759682: // specialty
           this.getSpecialty().add(castToCodeableConcept(value)); // CodeableConcept
@@ -1611,8 +1781,8 @@ public class PractitionerRole extends DomainResource {
           this.practitioner = castToReference(value); // Reference
         else if (name.equals("organization"))
           this.organization = castToReference(value); // Reference
-        else if (name.equals("role"))
-          this.getRole().add(castToCodeableConcept(value));
+        else if (name.equals("code"))
+          this.getCode().add(castToCodeableConcept(value));
         else if (name.equals("specialty"))
           this.getSpecialty().add(castToCodeableConcept(value));
         else if (name.equals("location"))
@@ -1642,7 +1812,7 @@ public class PractitionerRole extends DomainResource {
         case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
         case 574573338:  return getPractitioner(); // Reference
         case 1178922291:  return getOrganization(); // Reference
-        case 3506294:  return addRole(); // CodeableConcept
+        case 3059181:  return addCode(); // CodeableConcept
         case -1694759682:  return addSpecialty(); // CodeableConcept
         case 1901043637:  return addLocation(); // Reference
         case 1289661064:  return addHealthcareService(); // Reference
@@ -1673,8 +1843,8 @@ public class PractitionerRole extends DomainResource {
           this.organization = new Reference();
           return this.organization;
         }
-        else if (name.equals("role")) {
-          return addRole();
+        else if (name.equals("code")) {
+          return addCode();
         }
         else if (name.equals("specialty")) {
           return addSpecialty();
@@ -1724,10 +1894,10 @@ public class PractitionerRole extends DomainResource {
         dst.active = active == null ? null : active.copy();
         dst.practitioner = practitioner == null ? null : practitioner.copy();
         dst.organization = organization == null ? null : organization.copy();
-        if (role != null) {
-          dst.role = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : role)
-            dst.role.add(i.copy());
+        if (code != null) {
+          dst.code = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : code)
+            dst.code.add(i.copy());
         };
         if (specialty != null) {
           dst.specialty = new ArrayList<CodeableConcept>();
@@ -1781,7 +1951,7 @@ public class PractitionerRole extends DomainResource {
           return false;
         PractitionerRole o = (PractitionerRole) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(practitioner, o.practitioner, true)
-           && compareDeep(organization, o.organization, true) && compareDeep(role, o.role, true) && compareDeep(specialty, o.specialty, true)
+           && compareDeep(organization, o.organization, true) && compareDeep(code, o.code, true) && compareDeep(specialty, o.specialty, true)
            && compareDeep(location, o.location, true) && compareDeep(healthcareService, o.healthcareService, true)
            && compareDeep(telecom, o.telecom, true) && compareDeep(period, o.period, true) && compareDeep(availableTime, o.availableTime, true)
            && compareDeep(notAvailable, o.notAvailable, true) && compareDeep(availabilityExceptions, o.availabilityExceptions, true)
@@ -1801,7 +1971,7 @@ public class PractitionerRole extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, practitioner
-          , organization, role, specialty, location, healthcareService, telecom, period
+          , organization, code, specialty, location, healthcareService, telecom, period
           , availableTime, notAvailable, availabilityExceptions, endpoint);
       }
 
@@ -1855,17 +2025,17 @@ public class PractitionerRole extends DomainResource {
    * <p>
    * Description: <b>The practitioner can perform this role at for the organization</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>PractitionerRole.role</b><br>
+   * Path: <b>PractitionerRole.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="role", path="PractitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
+  @SearchParamDefinition(name="role", path="PractitionerRole.code", description="The practitioner can perform this role at for the organization", type="token" )
   public static final String SP_ROLE = "role";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>role</b>
    * <p>
    * Description: <b>The practitioner can perform this role at for the organization</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>PractitionerRole.role</b><br>
+   * Path: <b>PractitionerRole.code</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ROLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ROLE);

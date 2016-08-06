@@ -68,7 +68,7 @@
 	</severity>
 	<onsetRange>
 		<low>
-			<value value="0.8595246484876637"/>
+			<value value="0.08595246484876637"/>
 			<comparator value="&lt;"/>
 			<unit value="nOYYJzovcpNk1Xkv0lxPJg=="/>
 			<system value="http://www.example.com/A7CUYaICHEikpE+P3dn/Tw=="/>
@@ -77,9 +77,9 @@
 		<high>
 			<value value="0.6433405008182949"/>
 			<comparator value="&lt;"/>
-			<unit value="Gw/H12dT45hubnfT2Huzag=="/>
-			<system value="http://www.example.com/3IE059a8KnG2sCAltoTe3w=="/>
-			<code value="6U7C4akdF5ebCAzi7yadMA=="/>
+			<unit value="nOYYJzovcpNk1Xkv0lxPJg=="/>
+			<system value="http://www.example.com/A7CUYaICHEikpE+P3dn/Tw=="/>
+			<code value="eURHPiUCEHOjjj8onWeCeQ=="/>
 		</high>
 	</onsetRange>
 	<abatementString value="ULx7Wh1Za6evfMcYlzdaFw=="/>

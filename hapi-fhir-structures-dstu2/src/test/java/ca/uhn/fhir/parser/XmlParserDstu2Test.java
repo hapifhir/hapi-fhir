@@ -20,12 +20,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
@@ -35,6 +30,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -43,60 +39,18 @@ import org.mockito.internal.stubbing.answers.ThrowsException;
 import com.google.common.collect.Sets;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.composite.AnnotationDt;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu2.composite.DurationDt;
-import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt;
+import ca.uhn.fhir.model.dstu2.composite.*;
 import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
-import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
-import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
-import ca.uhn.fhir.model.dstu2.resource.Composition;
-import ca.uhn.fhir.model.dstu2.resource.Condition;
-import ca.uhn.fhir.model.dstu2.resource.DataElement;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Encounter;
-import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.MedicationStatement;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.AddressUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
-import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
-import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierTypeCodesEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu2.valueset.NameUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ObservationRelationshipTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.MarkdownDt;
-import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.dstu2.valueset.*;
+import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
@@ -106,6 +60,13 @@ public class XmlParserDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
 
+	@Before
+	public void before() {
+		if (ourCtx == null) {
+			ourCtx = FhirContext.forDstu2();
+		}
+	}
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
@@ -157,7 +118,7 @@ public class XmlParserDstu2Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		assertThat(encoded, containsString("<valueMarkdown value=\"THIS IS MARKDOWN\"/>"));
 	}
-
+	
 	@Test
 	public void testChoiceTypeWithProfiledType2() {
 		Parameters par = new Parameters();
@@ -175,6 +136,7 @@ public class XmlParserDstu2Test {
 		assertEquals(MarkdownDt.class, par.getParameter().get(1).getValue().getClass());
 	}
 
+	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -347,6 +309,108 @@ public class XmlParserDstu2Test {
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>")));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
 
+	}
+
+	@Test
+	public void testEncodeAndParseContainedCustomTypes() {
+		ourCtx = FhirContext.forDstu2();
+		ourCtx.setDefaultTypeForProfile(CustomObservationDstu2.PROFILE, CustomObservationDstu2.class);
+		ourCtx.setDefaultTypeForProfile(CustomDiagnosticReportDstu2.PROFILE, CustomDiagnosticReportDstu2.class);
+		
+		CustomObservationDstu2 obs = new CustomObservationDstu2();
+		obs.setStatus(ObservationStatusEnum.FINAL);
+		
+		CustomDiagnosticReportDstu2 dr = new CustomDiagnosticReportDstu2();
+		dr.setStatus(DiagnosticReportStatusEnum.FINAL);
+		dr.addResult().setResource(obs);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setPrettyPrint(true);
+		
+		String output = parser.encodeResourceToString(dr);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output,stringContainsInOrder(
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
+				"<meta>",
+				"<profile value=\"http://custom_DiagnosticReport\"/>",
+				"</meta>",
+				"<contained>",
+					"<Observation xmlns=\"http://hl7.org/fhir\">",
+						"<id value=\"1\"/>",
+						"<meta>",
+							"<profile value=\"http://custom_Observation\"/>",
+						"</meta>",
+						"<status value=\"final\"/>",
+					"</Observation>",
+				"</contained>",
+				"<status value=\"final\"/>",
+				"<result>",
+					"<reference value=\"#1\"/>",
+				"</result>",
+			"</DiagnosticReport>"));
+		//@formatter:on
+		
+		/*
+		 * Now PARSE!
+		 */
+		
+		dr = (CustomDiagnosticReportDstu2) parser.parseResource(output);
+		assertEquals(DiagnosticReportStatusEnum.FINAL, dr.getStatusElement().getValueAsEnum());
+
+		assertEquals("#1", dr.getResult().get(0).getReference().getValueAsString());
+		obs = (CustomObservationDstu2) dr.getResult().get(0).getResource();
+		assertEquals(ObservationStatusEnum.FINAL, obs.getStatusElement().getValueAsEnum());
+
+		ourCtx = null;
+	}
+
+	@Test
+	public void testEncodeAndParseContainedNonCustomTypes() {
+		ourCtx = FhirContext.forDstu2();
+		
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatusEnum.FINAL);
+		
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setStatus(DiagnosticReportStatusEnum.FINAL);
+		dr.addResult().setResource(obs);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setPrettyPrint(true);
+		
+		String output = parser.encodeResourceToString(dr);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output,stringContainsInOrder(
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
+				"<contained>",
+					"<Observation xmlns=\"http://hl7.org/fhir\">",
+						"<id value=\"1\"/>",
+						"<status value=\"final\"/>",
+					"</Observation>",
+				"</contained>",
+				"<status value=\"final\"/>",
+				"<result>",
+					"<reference value=\"#1\"/>",
+				"</result>",
+			"</DiagnosticReport>"));
+		//@formatter:on
+		
+		/*
+		 * Now PARSE!
+		 */
+		
+		dr = (DiagnosticReport) parser.parseResource(output);
+		assertEquals(DiagnosticReportStatusEnum.FINAL, dr.getStatusElement().getValueAsEnum());
+
+		assertEquals("#1", dr.getResult().get(0).getReference().getValueAsString());
+		obs = (Observation) dr.getResult().get(0).getResource();
+		assertEquals(ObservationStatusEnum.FINAL, obs.getStatusElement().getValueAsEnum());
+
+		ourCtx = null;
 	}
 
 	/**
@@ -1044,28 +1108,6 @@ public class XmlParserDstu2Test {
 	 * Make sure whitespace is preserved for pre tags
 	 */
 	@Test
-	public void testEncodeDivWithPrePrettyPrint() {
-		
-		Patient p = new Patient();
-		p.getText().setDiv("<div>\n\n<p>A P TAG</p><p><pre>line1\nline2\nline3  <b>BOLD</b></pre></p></div>");
-		
-		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(output);
-		
-		//@formatter:off
-		assertThat(output, stringContainsInOrder(
-			"   <text>",
-			"      <div",
-			"         <pre>line1\nline2\nline3  <b>BOLD</b></pre>"
-		));
-		//@formatter:on
-		
-	}
-
-	/**
-	 * Make sure whitespace is preserved for pre tags
-	 */
-	@Test
 	public void testEncodeDivWithPreNonPrettyPrint() {
 		
 		Patient p = new Patient();
@@ -1079,6 +1121,28 @@ public class XmlParserDstu2Test {
 			"<text><div",
 			"<p>A P TAG</p><p>",
 			"<pre>line1\nline2\nline3  <b>BOLD</b></pre>"
+		));
+		//@formatter:on
+		
+	}
+
+	/**
+	 * Make sure whitespace is preserved for pre tags
+	 */
+	@Test
+	public void testEncodeDivWithPrePrettyPrint() {
+		
+		Patient p = new Patient();
+		p.getText().setDiv("<div>\n\n<p>A P TAG</p><p><pre>line1\nline2\nline3  <b>BOLD</b></pre></p></div>");
+		
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output, stringContainsInOrder(
+			"   <text>",
+			"      <div",
+			"         <pre>line1\nline2\nline3  <b>BOLD</b></pre>"
 		));
 		//@formatter:on
 		

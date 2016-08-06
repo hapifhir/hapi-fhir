@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -170,6 +170,160 @@ public class Composition extends DomainResource {
       }
     }
 
+    public enum DocumentConfidentiality {
+        /**
+         * null
+         */
+        U, 
+        /**
+         * null
+         */
+        L, 
+        /**
+         * null
+         */
+        M, 
+        /**
+         * null
+         */
+        N, 
+        /**
+         * null
+         */
+        R, 
+        /**
+         * null
+         */
+        V, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static DocumentConfidentiality fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("U".equals(codeString))
+          return U;
+        if ("L".equals(codeString))
+          return L;
+        if ("M".equals(codeString))
+          return M;
+        if ("N".equals(codeString))
+          return N;
+        if ("R".equals(codeString))
+          return R;
+        if ("V".equals(codeString))
+          return V;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DocumentConfidentiality code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case U: return "U";
+            case L: return "L";
+            case M: return "M";
+            case N: return "N";
+            case R: return "R";
+            case V: return "V";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case U: return "http://hl7.org/fhir/v3/Confidentiality";
+            case L: return "http://hl7.org/fhir/v3/Confidentiality";
+            case M: return "http://hl7.org/fhir/v3/Confidentiality";
+            case N: return "http://hl7.org/fhir/v3/Confidentiality";
+            case R: return "http://hl7.org/fhir/v3/Confidentiality";
+            case V: return "http://hl7.org/fhir/v3/Confidentiality";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case U: return "";
+            case L: return "";
+            case M: return "";
+            case N: return "";
+            case R: return "";
+            case V: return "";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case U: return "U";
+            case L: return "L";
+            case M: return "M";
+            case N: return "N";
+            case R: return "R";
+            case V: return "V";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class DocumentConfidentialityEnumFactory implements EnumFactory<DocumentConfidentiality> {
+    public DocumentConfidentiality fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("U".equals(codeString))
+          return DocumentConfidentiality.U;
+        if ("L".equals(codeString))
+          return DocumentConfidentiality.L;
+        if ("M".equals(codeString))
+          return DocumentConfidentiality.M;
+        if ("N".equals(codeString))
+          return DocumentConfidentiality.N;
+        if ("R".equals(codeString))
+          return DocumentConfidentiality.R;
+        if ("V".equals(codeString))
+          return DocumentConfidentiality.V;
+        throw new IllegalArgumentException("Unknown DocumentConfidentiality code '"+codeString+"'");
+        }
+        public Enumeration<DocumentConfidentiality> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("U".equals(codeString))
+          return new Enumeration<DocumentConfidentiality>(this, DocumentConfidentiality.U);
+        if ("L".equals(codeString))
+          return new Enumeration<DocumentConfidentiality>(this, DocumentConfidentiality.L);
+        if ("M".equals(codeString))
+          return new Enumeration<DocumentConfidentiality>(this, DocumentConfidentiality.M);
+        if ("N".equals(codeString))
+          return new Enumeration<DocumentConfidentiality>(this, DocumentConfidentiality.N);
+        if ("R".equals(codeString))
+          return new Enumeration<DocumentConfidentiality>(this, DocumentConfidentiality.R);
+        if ("V".equals(codeString))
+          return new Enumeration<DocumentConfidentiality>(this, DocumentConfidentiality.V);
+        throw new FHIRException("Unknown DocumentConfidentiality code '"+codeString+"'");
+        }
+    public String toCode(DocumentConfidentiality code) {
+      if (code == DocumentConfidentiality.U)
+        return "U";
+      if (code == DocumentConfidentiality.L)
+        return "L";
+      if (code == DocumentConfidentiality.M)
+        return "M";
+      if (code == DocumentConfidentiality.N)
+        return "N";
+      if (code == DocumentConfidentiality.R)
+        return "R";
+      if (code == DocumentConfidentiality.V)
+        return "V";
+      return "?";
+      }
+    public String toSystem(DocumentConfidentiality code) {
+      return code.getSystem();
+      }
+    }
+
     public enum CompositionAttestationMode {
         /**
          * The person authenticated the content in their personal capacity.
@@ -288,6 +442,112 @@ public class Composition extends DomainResource {
       return "?";
       }
     public String toSystem(CompositionAttestationMode code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum SectionMode {
+        /**
+         * This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes
+         */
+        WORKING, 
+        /**
+         * This list was prepared as a snapshot. It should not be assumed to be current
+         */
+        SNAPSHOT, 
+        /**
+         * A list that indicates where changes have been made or recommended
+         */
+        CHANGES, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static SectionMode fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("working".equals(codeString))
+          return WORKING;
+        if ("snapshot".equals(codeString))
+          return SNAPSHOT;
+        if ("changes".equals(codeString))
+          return CHANGES;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SectionMode code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case WORKING: return "working";
+            case SNAPSHOT: return "snapshot";
+            case CHANGES: return "changes";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case WORKING: return "http://hl7.org/fhir/list-mode";
+            case SNAPSHOT: return "http://hl7.org/fhir/list-mode";
+            case CHANGES: return "http://hl7.org/fhir/list-mode";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case WORKING: return "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes";
+            case SNAPSHOT: return "This list was prepared as a snapshot. It should not be assumed to be current";
+            case CHANGES: return "A list that indicates where changes have been made or recommended";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case WORKING: return "Working List";
+            case SNAPSHOT: return "Snapshot List";
+            case CHANGES: return "Change List";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class SectionModeEnumFactory implements EnumFactory<SectionMode> {
+    public SectionMode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("working".equals(codeString))
+          return SectionMode.WORKING;
+        if ("snapshot".equals(codeString))
+          return SectionMode.SNAPSHOT;
+        if ("changes".equals(codeString))
+          return SectionMode.CHANGES;
+        throw new IllegalArgumentException("Unknown SectionMode code '"+codeString+"'");
+        }
+        public Enumeration<SectionMode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("working".equals(codeString))
+          return new Enumeration<SectionMode>(this, SectionMode.WORKING);
+        if ("snapshot".equals(codeString))
+          return new Enumeration<SectionMode>(this, SectionMode.SNAPSHOT);
+        if ("changes".equals(codeString))
+          return new Enumeration<SectionMode>(this, SectionMode.CHANGES);
+        throw new FHIRException("Unknown SectionMode code '"+codeString+"'");
+        }
+    public String toCode(SectionMode code) {
+      if (code == SectionMode.WORKING)
+        return "working";
+      if (code == SectionMode.SNAPSHOT)
+        return "snapshot";
+      if (code == SectionMode.CHANGES)
+        return "changes";
+      return "?";
+      }
+    public String toSystem(SectionMode code) {
       return code.getSystem();
       }
     }
@@ -929,7 +1189,7 @@ public class Composition extends DomainResource {
         @Child(name = "mode", type = {CodeType.class}, order=4, min=0, max=1, modifier=true, summary=true)
         @Description(shortDefinition="working | snapshot | changes", formalDefinition="How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-mode")
-        protected CodeType mode;
+        protected Enumeration<SectionMode> mode;
 
         /**
          * Specifies the order applied to the items in the section entries.
@@ -966,7 +1226,7 @@ public class Composition extends DomainResource {
         @Description(shortDefinition="Nested Section", formalDefinition="A nested sub-section within this section." )
         protected List<SectionComponent> section;
 
-        private static final long serialVersionUID = -726390626L;
+        private static final long serialVersionUID = -128426142L;
 
     /**
      * Constructor
@@ -1075,12 +1335,12 @@ public class Composition extends DomainResource {
         /**
          * @return {@link #mode} (How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public CodeType getModeElement() { 
+        public Enumeration<SectionMode> getModeElement() { 
           if (this.mode == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SectionComponent.mode");
             else if (Configuration.doAutoCreate())
-              this.mode = new CodeType(); // bb
+              this.mode = new Enumeration<SectionMode>(new SectionModeEnumFactory()); // bb
           return this.mode;
         }
 
@@ -1095,7 +1355,7 @@ public class Composition extends DomainResource {
         /**
          * @param value {@link #mode} (How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public SectionComponent setModeElement(CodeType value) { 
+        public SectionComponent setModeElement(Enumeration<SectionMode> value) { 
           this.mode = value;
           return this;
         }
@@ -1103,19 +1363,19 @@ public class Composition extends DomainResource {
         /**
          * @return How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
          */
-        public String getMode() { 
+        public SectionMode getMode() { 
           return this.mode == null ? null : this.mode.getValue();
         }
 
         /**
          * @param value How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
          */
-        public SectionComponent setMode(String value) { 
-          if (Utilities.noString(value))
+        public SectionComponent setMode(SectionMode value) { 
+          if (value == null)
             this.mode = null;
           else {
             if (this.mode == null)
-              this.mode = new CodeType();
+              this.mode = new Enumeration<SectionMode>(new SectionModeEnumFactory());
             this.mode.setValue(value);
           }
           return this;
@@ -1303,7 +1563,7 @@ public class Composition extends DomainResource {
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // Narrative
-        case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // CodeType
+        case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<SectionMode>
         case -391079516: /*orderedBy*/ return this.orderedBy == null ? new Base[0] : new Base[] {this.orderedBy}; // CodeableConcept
         case 96667762: /*entry*/ return this.entry == null ? new Base[0] : this.entry.toArray(new Base[this.entry.size()]); // Reference
         case 1140135409: /*emptyReason*/ return this.emptyReason == null ? new Base[0] : new Base[] {this.emptyReason}; // CodeableConcept
@@ -1326,7 +1586,7 @@ public class Composition extends DomainResource {
           this.text = castToNarrative(value); // Narrative
           break;
         case 3357091: // mode
-          this.mode = castToCode(value); // CodeType
+          this.mode = new SectionModeEnumFactory().fromType(value); // Enumeration<SectionMode>
           break;
         case -391079516: // orderedBy
           this.orderedBy = castToCodeableConcept(value); // CodeableConcept
@@ -1354,7 +1614,7 @@ public class Composition extends DomainResource {
         else if (name.equals("text"))
           this.text = castToNarrative(value); // Narrative
         else if (name.equals("mode"))
-          this.mode = castToCode(value); // CodeType
+          this.mode = new SectionModeEnumFactory().fromType(value); // Enumeration<SectionMode>
         else if (name.equals("orderedBy"))
           this.orderedBy = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("entry"))
@@ -1373,7 +1633,7 @@ public class Composition extends DomainResource {
         case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
         case 3059181:  return getCode(); // CodeableConcept
         case 3556653:  return getText(); // Narrative
-        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // CodeType
+        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<SectionMode>
         case -391079516:  return getOrderedBy(); // CodeableConcept
         case 96667762:  return addEntry(); // Reference
         case 1140135409:  return getEmptyReason(); // CodeableConcept
@@ -1524,7 +1784,7 @@ public class Composition extends DomainResource {
     @Child(name = "confidentiality", type = {CodeType.class}, order=6, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="As defined by affinity domain", formalDefinition="The code specifying the level of confidentiality of the Composition." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ConfidentialityClassification")
-    protected CodeType confidentiality;
+    protected Enumeration<DocumentConfidentiality> confidentiality;
 
     /**
      * Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).
@@ -1595,7 +1855,7 @@ public class Composition extends DomainResource {
     @Description(shortDefinition="Composition is broken into sections", formalDefinition="The root of the sections that make up the composition." )
     protected List<SectionComponent> section;
 
-    private static final long serialVersionUID = 2127852326L;
+    private static final long serialVersionUID = 1076817605L;
 
   /**
    * Constructor
@@ -1826,12 +2086,12 @@ public class Composition extends DomainResource {
     /**
      * @return {@link #confidentiality} (The code specifying the level of confidentiality of the Composition.). This is the underlying object with id, value and extensions. The accessor "getConfidentiality" gives direct access to the value
      */
-    public CodeType getConfidentialityElement() { 
+    public Enumeration<DocumentConfidentiality> getConfidentialityElement() { 
       if (this.confidentiality == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Composition.confidentiality");
         else if (Configuration.doAutoCreate())
-          this.confidentiality = new CodeType(); // bb
+          this.confidentiality = new Enumeration<DocumentConfidentiality>(new DocumentConfidentialityEnumFactory()); // bb
       return this.confidentiality;
     }
 
@@ -1846,7 +2106,7 @@ public class Composition extends DomainResource {
     /**
      * @param value {@link #confidentiality} (The code specifying the level of confidentiality of the Composition.). This is the underlying object with id, value and extensions. The accessor "getConfidentiality" gives direct access to the value
      */
-    public Composition setConfidentialityElement(CodeType value) { 
+    public Composition setConfidentialityElement(Enumeration<DocumentConfidentiality> value) { 
       this.confidentiality = value;
       return this;
     }
@@ -1854,19 +2114,19 @@ public class Composition extends DomainResource {
     /**
      * @return The code specifying the level of confidentiality of the Composition.
      */
-    public String getConfidentiality() { 
+    public DocumentConfidentiality getConfidentiality() { 
       return this.confidentiality == null ? null : this.confidentiality.getValue();
     }
 
     /**
      * @param value The code specifying the level of confidentiality of the Composition.
      */
-    public Composition setConfidentiality(String value) { 
-      if (Utilities.noString(value))
+    public Composition setConfidentiality(DocumentConfidentiality value) { 
+      if (value == null)
         this.confidentiality = null;
       else {
         if (this.confidentiality == null)
-          this.confidentiality = new CodeType();
+          this.confidentiality = new Enumeration<DocumentConfidentiality>(new DocumentConfidentialityEnumFactory());
         this.confidentiality.setValue(value);
       }
       return this;
@@ -2248,7 +2508,7 @@ public class Composition extends DomainResource {
         case 94742904: /*class*/ return this.class_ == null ? new Base[0] : new Base[] {this.class_}; // CodeableConcept
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<CompositionStatus>
-        case -1923018202: /*confidentiality*/ return this.confidentiality == null ? new Base[0] : new Base[] {this.confidentiality}; // CodeType
+        case -1923018202: /*confidentiality*/ return this.confidentiality == null ? new Base[0] : new Base[] {this.confidentiality}; // Enumeration<DocumentConfidentiality>
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : this.author.toArray(new Base[this.author.size()]); // Reference
         case 542920370: /*attester*/ return this.attester == null ? new Base[0] : this.attester.toArray(new Base[this.attester.size()]); // CompositionAttesterComponent
@@ -2283,7 +2543,7 @@ public class Composition extends DomainResource {
           this.status = new CompositionStatusEnumFactory().fromType(value); // Enumeration<CompositionStatus>
           break;
         case -1923018202: // confidentiality
-          this.confidentiality = castToCode(value); // CodeType
+          this.confidentiality = new DocumentConfidentialityEnumFactory().fromType(value); // Enumeration<DocumentConfidentiality>
           break;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
@@ -2326,7 +2586,7 @@ public class Composition extends DomainResource {
         else if (name.equals("status"))
           this.status = new CompositionStatusEnumFactory().fromType(value); // Enumeration<CompositionStatus>
         else if (name.equals("confidentiality"))
-          this.confidentiality = castToCode(value); // CodeType
+          this.confidentiality = new DocumentConfidentialityEnumFactory().fromType(value); // Enumeration<DocumentConfidentiality>
         else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
         else if (name.equals("author"))
@@ -2354,7 +2614,7 @@ public class Composition extends DomainResource {
         case 94742904:  return getClass_(); // CodeableConcept
         case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<CompositionStatus>
-        case -1923018202: throw new FHIRException("Cannot make property confidentiality as it is not a complex type"); // CodeType
+        case -1923018202: throw new FHIRException("Cannot make property confidentiality as it is not a complex type"); // Enumeration<DocumentConfidentiality>
         case -1867885268:  return getSubject(); // Reference
         case -1406328437:  return addAuthor(); // Reference
         case 542920370:  return addAttester(); // CompositionAttesterComponent

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -172,10 +172,10 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * The Response business identifier.
+     * The notice business identifier.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Business Identifier", formalDefinition="The Response business identifier." )
+    @Description(shortDefinition="Business Identifier", formalDefinition="The notice business identifier." )
     protected List<Identifier> identifier;
 
     /**
@@ -231,17 +231,17 @@ public class PaymentNotice extends DomainResource {
     protected Type organization;
 
     /**
-     * Reference of resource to reverse.
+     * Reference of resource for which payment is being made.
      */
     @Child(name = "request", type = {Identifier.class, Reference.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Request reference", formalDefinition="Reference of resource to reverse." )
+    @Description(shortDefinition="Request reference", formalDefinition="Reference of resource for which payment is being made." )
     protected Type request;
 
     /**
-     * Reference of response to resource to reverse.
+     * Reference of response to resource for which payment is being made.
      */
     @Child(name = "response", type = {Identifier.class, Reference.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Response reference", formalDefinition="Reference of response to resource to reverse." )
+    @Description(shortDefinition="Response reference", formalDefinition="Reference of response to resource for which payment is being made." )
     protected Type response;
 
     /**
@@ -278,7 +278,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The Response business identifier.)
+     * @return {@link #identifier} (The notice business identifier.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -608,14 +608,14 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #request} (Reference of resource to reverse.)
+     * @return {@link #request} (Reference of resource for which payment is being made.)
      */
     public Type getRequest() { 
       return this.request;
     }
 
     /**
-     * @return {@link #request} (Reference of resource to reverse.)
+     * @return {@link #request} (Reference of resource for which payment is being made.)
      */
     public Identifier getRequestIdentifier() throws FHIRException { 
       if (!(this.request instanceof Identifier))
@@ -628,7 +628,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #request} (Reference of resource to reverse.)
+     * @return {@link #request} (Reference of resource for which payment is being made.)
      */
     public Reference getRequestReference() throws FHIRException { 
       if (!(this.request instanceof Reference))
@@ -645,7 +645,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @param value {@link #request} (Reference of resource to reverse.)
+     * @param value {@link #request} (Reference of resource for which payment is being made.)
      */
     public PaymentNotice setRequest(Type value) { 
       this.request = value;
@@ -653,14 +653,14 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #response} (Reference of response to resource to reverse.)
+     * @return {@link #response} (Reference of response to resource for which payment is being made.)
      */
     public Type getResponse() { 
       return this.response;
     }
 
     /**
-     * @return {@link #response} (Reference of response to resource to reverse.)
+     * @return {@link #response} (Reference of response to resource for which payment is being made.)
      */
     public Identifier getResponseIdentifier() throws FHIRException { 
       if (!(this.response instanceof Identifier))
@@ -673,7 +673,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #response} (Reference of response to resource to reverse.)
+     * @return {@link #response} (Reference of response to resource for which payment is being made.)
      */
     public Reference getResponseReference() throws FHIRException { 
       if (!(this.response instanceof Reference))
@@ -690,7 +690,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @param value {@link #response} (Reference of response to resource to reverse.)
+     * @param value {@link #response} (Reference of response to resource for which payment is being made.)
      */
     public PaymentNotice setResponse(Type value) { 
       this.response = value;
@@ -772,7 +772,7 @@ public class PaymentNotice extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "The notice business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
@@ -780,8 +780,8 @@ public class PaymentNotice extends DomainResource {
         childrenList.add(new Property("target[x]", "Identifier|Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("provider[x]", "Identifier|Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
         childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("request[x]", "Identifier|Reference(Any)", "Reference of resource to reverse.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("response[x]", "Identifier|Reference(Any)", "Reference of response to resource to reverse.", 0, java.lang.Integer.MAX_VALUE, response));
+        childrenList.add(new Property("request[x]", "Identifier|Reference(Any)", "Reference of resource for which payment is being made.", 0, java.lang.Integer.MAX_VALUE, request));
+        childrenList.add(new Property("response[x]", "Identifier|Reference(Any)", "Reference of response to resource for which payment is being made.", 0, java.lang.Integer.MAX_VALUE, response));
         childrenList.add(new Property("paymentStatus", "Coding", "The payment status, typically paid: payment sent, cleared: payment received.", 0, java.lang.Integer.MAX_VALUE, paymentStatus));
         childrenList.add(new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, java.lang.Integer.MAX_VALUE, statusDate));
       }
@@ -1058,44 +1058,56 @@ public class PaymentNotice extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>responseidentifier</b>
+   * Search parameter: <b>request-reference</b>
    * <p>
-   * Description: <b>The ClaimResponse</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.responseIdentifier</b><br>
+   * Description: <b>The Claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.requestReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responseidentifier", path="PaymentNotice.response.as(Identifier)", description="The ClaimResponse", type="token" )
-  public static final String SP_RESPONSEIDENTIFIER = "responseidentifier";
+  @SearchParamDefinition(name="request-reference", path="PaymentNotice.request.as(Reference)", description="The Claim", type="reference" )
+  public static final String SP_REQUEST_REFERENCE = "request-reference";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>responseidentifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-reference</b>
    * <p>
-   * Description: <b>The ClaimResponse</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.responseIdentifier</b><br>
+   * Description: <b>The Claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.requestReference</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RESPONSEIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RESPONSEIDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentNotice:request-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:request-reference").toLocked();
 
  /**
-   * Search parameter: <b>organizationidentifier</b>
+   * Search parameter: <b>organization-reference</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.organizationIdentifier</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.organizationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="PaymentNotice.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
-  public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
+  @SearchParamDefinition(name="organization-reference", path="PaymentNotice.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_ORGANIZATION_REFERENCE = "organization-reference";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>organization-reference</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.organizationIdentifier</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.organizationReference</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATIONIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATIONIDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentNotice:organization-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:organization-reference").toLocked();
 
  /**
    * Search parameter: <b>created</b>
@@ -1118,168 +1130,156 @@ public class PaymentNotice extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
-   * Search parameter: <b>requestidentifier</b>
-   * <p>
-   * Description: <b>The Claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.requestIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestidentifier", path="PaymentNotice.request.as(Identifier)", description="The Claim", type="token" )
-  public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
-   * <p>
-   * Description: <b>The Claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.requestIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUESTIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUESTIDENTIFIER);
-
- /**
-   * Search parameter: <b>paymentstatus</b>
-   * <p>
-   * Description: <b>The type of payment notice</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.paymentStatus</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="paymentstatus", path="PaymentNotice.paymentStatus", description="The type of payment notice", type="token" )
-  public static final String SP_PAYMENTSTATUS = "paymentstatus";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>paymentstatus</b>
-   * <p>
-   * Description: <b>The type of payment notice</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentNotice.paymentStatus</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PAYMENTSTATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PAYMENTSTATUS);
-
- /**
-   * Search parameter: <b>organizationreference</b>
+   * Search parameter: <b>organization-identifier</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.organizationReference</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.organizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="PaymentNotice.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
+  @SearchParamDefinition(name="organization-identifier", path="PaymentNotice.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
+  public static final String SP_ORGANIZATION_IDENTIFIER = "organization-identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>organization-identifier</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.organizationReference</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.organizationIdentifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATIONREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATIONREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentNotice:organizationreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATIONREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:organizationreference").toLocked();
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATION_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATION_IDENTIFIER);
 
  /**
-   * Search parameter: <b>providerreference</b>
-   * <p>
-   * Description: <b>The reference to the provider</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.providerReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="providerreference", path="PaymentNotice.provider.as(Reference)", description="The reference to the provider", type="reference", target={Practitioner.class } )
-  public static final String SP_PROVIDERREFERENCE = "providerreference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>providerreference</b>
-   * <p>
-   * Description: <b>The reference to the provider</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.providerReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROVIDERREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROVIDERREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentNotice:providerreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDERREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:providerreference").toLocked();
-
- /**
-   * Search parameter: <b>responsereference</b>
-   * <p>
-   * Description: <b>The ClaimResponse</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.responseReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="responsereference", path="PaymentNotice.response.as(Reference)", description="The ClaimResponse", type="reference" )
-  public static final String SP_RESPONSEREFERENCE = "responsereference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>responsereference</b>
-   * <p>
-   * Description: <b>The ClaimResponse</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.responseReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RESPONSEREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RESPONSEREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentNotice:responsereference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_RESPONSEREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:responsereference").toLocked();
-
- /**
-   * Search parameter: <b>provideridentifier</b>
+   * Search parameter: <b>provider-identifier</b>
    * <p>
    * Description: <b>The reference to the provider</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PaymentNotice.providerIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provideridentifier", path="PaymentNotice.provider.as(Identifier)", description="The reference to the provider", type="token" )
-  public static final String SP_PROVIDERIDENTIFIER = "provideridentifier";
+  @SearchParamDefinition(name="provider-identifier", path="PaymentNotice.provider.as(Identifier)", description="The reference to the provider", type="token" )
+  public static final String SP_PROVIDER_IDENTIFIER = "provider-identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>provideridentifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>provider-identifier</b>
    * <p>
    * Description: <b>The reference to the provider</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PaymentNotice.providerIdentifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PROVIDERIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PROVIDERIDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PROVIDER_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PROVIDER_IDENTIFIER);
 
  /**
-   * Search parameter: <b>requestreference</b>
+   * Search parameter: <b>request-identifier</b>
    * <p>
    * Description: <b>The Claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.requestReference</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestreference", path="PaymentNotice.request.as(Reference)", description="The Claim", type="reference" )
-  public static final String SP_REQUESTREFERENCE = "requestreference";
+  @SearchParamDefinition(name="request-identifier", path="PaymentNotice.request.as(Identifier)", description="The Claim", type="token" )
+  public static final String SP_REQUEST_IDENTIFIER = "request-identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestreference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-identifier</b>
    * <p>
    * Description: <b>The Claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.requestReference</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.requestIdentifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTREFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>response-reference</b>
+   * <p>
+   * Description: <b>The ClaimResponse</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.responseReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="response-reference", path="PaymentNotice.response.as(Reference)", description="The ClaimResponse", type="reference" )
+  public static final String SP_RESPONSE_REFERENCE = "response-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>response-reference</b>
+   * <p>
+   * Description: <b>The ClaimResponse</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.responseReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RESPONSE_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RESPONSE_REFERENCE);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentNotice:requestreference</b>".
+   * the path value of "<b>PaymentNotice:response-reference</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:requestreference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RESPONSE_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:response-reference").toLocked();
+
+ /**
+   * Search parameter: <b>provider-reference</b>
+   * <p>
+   * Description: <b>The reference to the provider</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.providerReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="provider-reference", path="PaymentNotice.provider.as(Reference)", description="The reference to the provider", type="reference", target={Practitioner.class } )
+  public static final String SP_PROVIDER_REFERENCE = "provider-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>provider-reference</b>
+   * <p>
+   * Description: <b>The reference to the provider</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentNotice.providerReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROVIDER_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROVIDER_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentNotice:provider-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDER_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentNotice:provider-reference").toLocked();
+
+ /**
+   * Search parameter: <b>payment-status</b>
+   * <p>
+   * Description: <b>The type of payment notice</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.paymentStatus</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="payment-status", path="PaymentNotice.paymentStatus", description="The type of payment notice", type="token" )
+  public static final String SP_PAYMENT_STATUS = "payment-status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>payment-status</b>
+   * <p>
+   * Description: <b>The type of payment notice</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.paymentStatus</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PAYMENT_STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PAYMENT_STATUS);
+
+ /**
+   * Search parameter: <b>response-identifier</b>
+   * <p>
+   * Description: <b>The ClaimResponse</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.responseIdentifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="response-identifier", path="PaymentNotice.response.as(Identifier)", description="The ClaimResponse", type="token" )
+  public static final String SP_RESPONSE_IDENTIFIER = "response-identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>response-identifier</b>
+   * <p>
+   * Description: <b>The ClaimResponse</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentNotice.responseIdentifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RESPONSE_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RESPONSE_IDENTIFIER);
 
  /**
    * Search parameter: <b>statusdate</b>

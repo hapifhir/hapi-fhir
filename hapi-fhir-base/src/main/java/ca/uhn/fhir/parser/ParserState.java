@@ -1395,10 +1395,10 @@ class ParserState<T> {
 			if (res.getId() == null || res.getId().isEmpty()) {
 				ourLog.debug("Discarding contained resource with no ID!");
 			} else {
-				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 				if (!res.getId().isLocal()) {
 					res.setId(new IdDt('#' + res.getId().getIdPart()));
 				}
+				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
 			IResource preResCurrentElement = (IResource) getPreResourceState().getCurrentElement();
 
@@ -1435,10 +1435,10 @@ class ParserState<T> {
 			if (res.getIdElement() == null || res.getIdElement().isEmpty()) {
 				ourLog.debug("Discarding contained resource with no ID!");
 			} else {
-				getPreResourceState().getContainedResources().put(res.getIdElement().getValue(), res);
 				if (!res.getIdElement().isLocal()) {
 					res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
 				}
+				getPreResourceState().getContainedResources().put(res.getIdElement().getValue(), res);
 			}
 
 			IBaseResource preResCurrentElement = getPreResourceState().getCurrentElement();
@@ -2121,7 +2121,7 @@ class ParserState<T> {
 						String ref = nextRef.getReference().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
-								IResource target = (IResource) myContainedResources.get(ref.substring(1));
+								IResource target = (IResource) myContainedResources.get(ref);
 								if (target != null) {
 									nextRef.setResource(target);
 								} else {
@@ -2134,7 +2134,7 @@ class ParserState<T> {
 						String ref = nextRef.getReferenceElement().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
-								IBaseResource target = myContainedResources.get(ref.substring(1));
+								IBaseResource target = myContainedResources.get(ref);
 								if (target != null) {
 									nextRef.setResource(target);
 								} else {

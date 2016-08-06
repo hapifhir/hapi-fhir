@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.ExpressionNode.CollectionStatus;
 import org.hl7.fhir.dstu3.model.ExpressionNode.TypeDetails;
+import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.utilities.Utilities;
 
 public class ExpressionNode {
@@ -253,10 +254,21 @@ public class ExpressionNode {
     public void addTypes(Collection<String> n) {
       this.types.addAll(n);      
     }
-    public boolean hasType(String... tn) {
+    public boolean hasType(IWorkerContext context, String... tn) {
       for (String t: tn)
       if (types.contains(t))
         return true;
+      for (String t: tn) {
+        StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+t);
+        while (sd != null) {
+          if (types.contains(sd.getId()))
+            return true;
+          if (sd.hasBaseDefinition())
+            sd = context.fetchResource(StructureDefinition.class, sd.getBaseDefinition());
+          else
+            sd = null;
+        }
+      }
       return false;
     }
     public void update(TypeDetails source) {

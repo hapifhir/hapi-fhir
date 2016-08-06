@@ -61,9 +61,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
-		extraProperties.put("hibernate.search.default.directory_provider" ,"filesystem");
-		extraProperties.put("hibernate.search.default.indexBase", "target/lucene_index_dstu3");
-		extraProperties.put("hibernate.search.lucene_version","LUCENE_CURRENT");
+		extraProperties.put("hibernate.search.default.directory_provider", "ram");
+		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
 		return extraProperties;
 	}

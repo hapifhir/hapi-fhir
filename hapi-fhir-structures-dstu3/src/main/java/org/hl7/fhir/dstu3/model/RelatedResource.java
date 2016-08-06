@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -49,7 +49,7 @@ public class RelatedResource extends Type implements ICompositeType {
 
     public enum RelatedResourceType {
         /**
-         * Additional documentation for the module. This would include additional instructions on usage as well additional information on clinical context or appropriateness
+         * Additional documentation for the module. This would include additional instructions on usage as well as additional information on clinical context or appropriateness
          */
         DOCUMENTATION, 
         /**
@@ -136,7 +136,7 @@ public class RelatedResource extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case DOCUMENTATION: return "Additional documentation for the module. This would include additional instructions on usage as well additional information on clinical context or appropriateness";
+            case DOCUMENTATION: return "Additional documentation for the module. This would include additional instructions on usage as well as additional information on clinical context or appropriateness";
             case JUSTIFICATION: return "A summary of the justification for the artifact including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the module available to the consumer of interventions or results produced by the artifact";
             case CITATION: return "Bibliographic citation for papers, references, or other relevant material for the module. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this module";
             case PREDECESSOR: return "The previous version of the module";
@@ -242,16 +242,37 @@ public class RelatedResource extends Type implements ICompositeType {
     protected Enumeration<RelatedResourceType> type;
 
     /**
+     * A brief description of the document or resource being referenced, suitable for display to a consumer.
+     */
+    @Child(name = "display", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Brief description of the related resource", formalDefinition="A brief description of the document or resource being referenced, suitable for display to a consumer." )
+    protected StringType display;
+
+    /**
+     * A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format.
+     */
+    @Child(name = "citation", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Bibliographic citation for the resource", formalDefinition="A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format." )
+    protected StringType citation;
+
+    /**
+     * A url for the resource that can be followed to access the actual content.
+     */
+    @Child(name = "url", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Url for the related resource", formalDefinition="A url for the resource that can be followed to access the actual content." )
+    protected UriType url;
+
+    /**
      * The document being referenced, represented as an attachment. This is exclusive with the resource element.
      */
-    @Child(name = "document", type = {Attachment.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "document", type = {Attachment.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The related document", formalDefinition="The document being referenced, represented as an attachment. This is exclusive with the resource element." )
     protected Attachment document;
 
     /**
      * The related resource, such as a library, value set, profile, or other module.
      */
-    @Child(name = "resource", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "resource", type = {Reference.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The related resource", formalDefinition="The related resource, such as a library, value set, profile, or other module." )
     protected Reference resource;
 
@@ -260,7 +281,7 @@ public class RelatedResource extends Type implements ICompositeType {
      */
     protected Resource resourceTarget;
 
-    private static final long serialVersionUID = 69386042L;
+    private static final long serialVersionUID = 242024734L;
 
   /**
    * Constructor
@@ -319,6 +340,153 @@ public class RelatedResource extends Type implements ICompositeType {
         if (this.type == null)
           this.type = new Enumeration<RelatedResourceType>(new RelatedResourceTypeEnumFactory());
         this.type.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #display} (A brief description of the document or resource being referenced, suitable for display to a consumer.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+     */
+    public StringType getDisplayElement() { 
+      if (this.display == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RelatedResource.display");
+        else if (Configuration.doAutoCreate())
+          this.display = new StringType(); // bb
+      return this.display;
+    }
+
+    public boolean hasDisplayElement() { 
+      return this.display != null && !this.display.isEmpty();
+    }
+
+    public boolean hasDisplay() { 
+      return this.display != null && !this.display.isEmpty();
+    }
+
+    /**
+     * @param value {@link #display} (A brief description of the document or resource being referenced, suitable for display to a consumer.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+     */
+    public RelatedResource setDisplayElement(StringType value) { 
+      this.display = value;
+      return this;
+    }
+
+    /**
+     * @return A brief description of the document or resource being referenced, suitable for display to a consumer.
+     */
+    public String getDisplay() { 
+      return this.display == null ? null : this.display.getValue();
+    }
+
+    /**
+     * @param value A brief description of the document or resource being referenced, suitable for display to a consumer.
+     */
+    public RelatedResource setDisplay(String value) { 
+      if (Utilities.noString(value))
+        this.display = null;
+      else {
+        if (this.display == null)
+          this.display = new StringType();
+        this.display.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #citation} (A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format.). This is the underlying object with id, value and extensions. The accessor "getCitation" gives direct access to the value
+     */
+    public StringType getCitationElement() { 
+      if (this.citation == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RelatedResource.citation");
+        else if (Configuration.doAutoCreate())
+          this.citation = new StringType(); // bb
+      return this.citation;
+    }
+
+    public boolean hasCitationElement() { 
+      return this.citation != null && !this.citation.isEmpty();
+    }
+
+    public boolean hasCitation() { 
+      return this.citation != null && !this.citation.isEmpty();
+    }
+
+    /**
+     * @param value {@link #citation} (A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format.). This is the underlying object with id, value and extensions. The accessor "getCitation" gives direct access to the value
+     */
+    public RelatedResource setCitationElement(StringType value) { 
+      this.citation = value;
+      return this;
+    }
+
+    /**
+     * @return A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format.
+     */
+    public String getCitation() { 
+      return this.citation == null ? null : this.citation.getValue();
+    }
+
+    /**
+     * @param value A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format.
+     */
+    public RelatedResource setCitation(String value) { 
+      if (Utilities.noString(value))
+        this.citation = null;
+      else {
+        if (this.citation == null)
+          this.citation = new StringType();
+        this.citation.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #url} (A url for the resource that can be followed to access the actual content.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public UriType getUrlElement() { 
+      if (this.url == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RelatedResource.url");
+        else if (Configuration.doAutoCreate())
+          this.url = new UriType(); // bb
+      return this.url;
+    }
+
+    public boolean hasUrlElement() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    public boolean hasUrl() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    /**
+     * @param value {@link #url} (A url for the resource that can be followed to access the actual content.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public RelatedResource setUrlElement(UriType value) { 
+      this.url = value;
+      return this;
+    }
+
+    /**
+     * @return A url for the resource that can be followed to access the actual content.
+     */
+    public String getUrl() { 
+      return this.url == null ? null : this.url.getValue();
+    }
+
+    /**
+     * @param value A url for the resource that can be followed to access the actual content.
+     */
+    public RelatedResource setUrl(String value) { 
+      if (Utilities.noString(value))
+        this.url = null;
+      else {
+        if (this.url == null)
+          this.url = new UriType();
+        this.url.setValue(value);
+      }
       return this;
     }
 
@@ -388,6 +556,9 @@ public class RelatedResource extends Type implements ICompositeType {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "code", "The type of related resource.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("display", "string", "A brief description of the document or resource being referenced, suitable for display to a consumer.", 0, java.lang.Integer.MAX_VALUE, display));
+        childrenList.add(new Property("citation", "string", "A bibliographic citation for the related resource. This text SHOULD be formatted according to an accepted citation format.", 0, java.lang.Integer.MAX_VALUE, citation));
+        childrenList.add(new Property("url", "uri", "A url for the resource that can be followed to access the actual content.", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, java.lang.Integer.MAX_VALUE, document));
         childrenList.add(new Property("resource", "Reference(Any)", "The related resource, such as a library, value set, profile, or other module.", 0, java.lang.Integer.MAX_VALUE, resource));
       }
@@ -396,6 +567,9 @@ public class RelatedResource extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<RelatedResourceType>
+        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
+        case -1442706713: /*citation*/ return this.citation == null ? new Base[0] : new Base[] {this.citation}; // StringType
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
         case 861720859: /*document*/ return this.document == null ? new Base[0] : new Base[] {this.document}; // Attachment
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
         default: return super.getProperty(hash, name, checkValid);
@@ -408,6 +582,15 @@ public class RelatedResource extends Type implements ICompositeType {
         switch (hash) {
         case 3575610: // type
           this.type = new RelatedResourceTypeEnumFactory().fromType(value); // Enumeration<RelatedResourceType>
+          break;
+        case 1671764162: // display
+          this.display = castToString(value); // StringType
+          break;
+        case -1442706713: // citation
+          this.citation = castToString(value); // StringType
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
           break;
         case 861720859: // document
           this.document = castToAttachment(value); // Attachment
@@ -424,6 +607,12 @@ public class RelatedResource extends Type implements ICompositeType {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = new RelatedResourceTypeEnumFactory().fromType(value); // Enumeration<RelatedResourceType>
+        else if (name.equals("display"))
+          this.display = castToString(value); // StringType
+        else if (name.equals("citation"))
+          this.citation = castToString(value); // StringType
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
         else if (name.equals("document"))
           this.document = castToAttachment(value); // Attachment
         else if (name.equals("resource"))
@@ -436,6 +625,9 @@ public class RelatedResource extends Type implements ICompositeType {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<RelatedResourceType>
+        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
+        case -1442706713: throw new FHIRException("Cannot make property citation as it is not a complex type"); // StringType
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
         case 861720859:  return getDocument(); // Attachment
         case -341064690:  return getResource(); // Reference
         default: return super.makeProperty(hash, name);
@@ -447,6 +639,15 @@ public class RelatedResource extends Type implements ICompositeType {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type RelatedResource.type");
+        }
+        else if (name.equals("display")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedResource.display");
+        }
+        else if (name.equals("citation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedResource.citation");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedResource.url");
         }
         else if (name.equals("document")) {
           this.document = new Attachment();
@@ -469,6 +670,9 @@ public class RelatedResource extends Type implements ICompositeType {
         RelatedResource dst = new RelatedResource();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
+        dst.display = display == null ? null : display.copy();
+        dst.citation = citation == null ? null : citation.copy();
+        dst.url = url == null ? null : url.copy();
         dst.document = document == null ? null : document.copy();
         dst.resource = resource == null ? null : resource.copy();
         return dst;
@@ -485,7 +689,8 @@ public class RelatedResource extends Type implements ICompositeType {
         if (!(other instanceof RelatedResource))
           return false;
         RelatedResource o = (RelatedResource) other;
-        return compareDeep(type, o.type, true) && compareDeep(document, o.document, true) && compareDeep(resource, o.resource, true)
+        return compareDeep(type, o.type, true) && compareDeep(display, o.display, true) && compareDeep(citation, o.citation, true)
+           && compareDeep(url, o.url, true) && compareDeep(document, o.document, true) && compareDeep(resource, o.resource, true)
           ;
       }
 
@@ -496,12 +701,13 @@ public class RelatedResource extends Type implements ICompositeType {
         if (!(other instanceof RelatedResource))
           return false;
         RelatedResource o = (RelatedResource) other;
-        return compareValues(type, o.type, true);
+        return compareValues(type, o.type, true) && compareValues(display, o.display, true) && compareValues(citation, o.citation, true)
+           && compareValues(url, o.url, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, document, resource
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, display, citation
+          , url, document, resource);
       }
 
 

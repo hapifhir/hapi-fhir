@@ -351,7 +351,6 @@
 				<configuration>
 					<runOrder>alphabetical</runOrder>
 					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
-					<forkCount>1</forkCount>
 				</configuration>
 			</plugin>
 			<plugin>

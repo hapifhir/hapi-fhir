@@ -52,27 +52,41 @@ public class Property {
 	public String getType(String elementName) {
     if (!definition.getPath().contains("."))
       return definition.getPath();
-		if (definition.getType().size() == 0)
+    ElementDefinition ed = definition;
+    if (definition.hasContentReference()) {
+      if (!definition.getContentReference().startsWith("#"))
+        throw new Error("not handled yet");
+      boolean found = false;
+      for (ElementDefinition d : structure.getSnapshot().getElement()) {
+        if (d.getPath().equals(definition.getContentReference().substring(1))) {
+          found = true;
+          ed = d;
+        }
+      }
+      if (!found)
+        throw new Error("Unable to resolve "+definition.getContentReference());
+    }
+    if (ed.getType().size() == 0)
 			return null;
-		else if (definition.getType().size() > 1) {
-			String t = definition.getType().get(0).getCode();
+    else if (ed.getType().size() > 1) {
+      String t = ed.getType().get(0).getCode();
 			boolean all = true;
-			for (TypeRefComponent tr : definition.getType()) {
+      for (TypeRefComponent tr : ed.getType()) {
 				if (!t.equals(tr.getCode()))
 					all = false;
 			}
 			if (all)
 				return t;
-			String tail = definition.getPath().substring(definition.getPath().lastIndexOf(".")+1);
+      String tail = ed.getPath().substring(ed.getPath().lastIndexOf(".")+1);
       if (tail.endsWith("[x]") && elementName != null && elementName.startsWith(tail.substring(0, tail.length()-3))) {
 				String name = elementName.substring(tail.length()-3);
         return isPrimitive(lowFirst(name)) ? lowFirst(name) : name;        
 			} else
-        throw new Error("logic error, gettype when types > 1, name mismatch for "+elementName+" on at "+definition.getPath());
-    } else if (definition.getType().get(0).getCode() == null) {
+        throw new Error("logic error, gettype when types > 1, name mismatch for "+elementName+" on at "+ed.getPath());
+    } else if (ed.getType().get(0).getCode() == null) {
       return structure.getId();
 		} else
-			return definition.getType().get(0).getCode();
+      return ed.getType().get(0).getCode();
 	}
 
   public boolean hasType(String elementName) {
@@ -112,7 +126,10 @@ public class Property {
 	}
 
 	public boolean isResource() {
+	  if (definition.getType().size() > 0)
 		return definition.getType().size() == 1 && ("Resource".equals(definition.getType().get(0).getCode()) || "DomainResource".equals(definition.getType().get(0).getCode()));
+	  else
+	    return !definition.getPath().contains(".") && structure.getKind() == StructureDefinitionKind.RESOURCE;
 	}
 
 	public boolean isList() {

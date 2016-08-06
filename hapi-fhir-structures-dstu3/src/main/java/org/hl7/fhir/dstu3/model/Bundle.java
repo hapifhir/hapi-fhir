@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -2797,17 +2797,17 @@ public class Bundle extends Resource implements IBaseBundle {
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to searches its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="composition", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference", target={Composition.class } )
+  @SearchParamDefinition(name="composition", path="Bundle.entry[0].resource", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference", target={Composition.class } )
   public static final String SP_COMPOSITION = "composition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>composition</b>
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to searches its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam COMPOSITION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_COMPOSITION);
@@ -2843,17 +2843,17 @@ public class Bundle extends Resource implements IBaseBundle {
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "message" - this is a message header, and this parameter provides access to search its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="message", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference", target={MessageHeader.class } )
+  @SearchParamDefinition(name="message", path="Bundle.entry[0].resource", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference", target={MessageHeader.class } )
   public static final String SP_MESSAGE = "message";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>message</b>
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "message" - this is a message header, and this parameter provides access to search its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam MESSAGE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_MESSAGE);

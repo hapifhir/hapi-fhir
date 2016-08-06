@@ -2079,7 +2079,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Related Resource to this DocumentReference. If both id and ref are present they shall refer to the same thing. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Order, DiagnosticOrder,  Procedure, EligibilityRequest, etc.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Order, DiagnosticRequest,  Procedure, EligibilityRequest, etc.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">./outboundRelationship[typeCode=&quot;PERT&quot; and isNormalActRelationship()] / target[isNormalAct].text.reference</Data><NamedCell

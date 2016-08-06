@@ -9,18 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
-import org.hl7.fhir.dstu3.model.Appointment;
-import org.hl7.fhir.dstu3.model.Claim;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Claim.CoverageComponent;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Practitioner.PractitionerPractitionerRoleComponent;
+import org.hl7.fhir.dstu3.model.Practitioner.PractitionerRoleComponent;
+import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -34,6 +27,11 @@ public class ModelDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 
+	@Test
+	public void testElementHasInterface() {
+		assertTrue(IBaseElement.class.isAssignableFrom(Element.class));
+	}
+	
 	/**
 	 * See #354
 	 */
@@ -60,8 +58,8 @@ public class ModelDstu3Test {
 	@Test
 	public void testDontUseBoundCodeForExampleBinding() {
 		Practitioner p = new Practitioner();
-		PractitionerPractitionerRoleComponent role = p.addPractitionerRole();
-		CodeableConcept roleField = role.getRole();
+		PractitionerRoleComponent role = p.addRole();
+		CodeableConcept roleField = role.getCode();
 		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
 

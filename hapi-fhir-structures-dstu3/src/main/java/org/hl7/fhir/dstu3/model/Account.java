@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -58,6 +58,10 @@ public class Account extends DomainResource {
          */
         INACTIVE, 
         /**
+         * This instance should not have been part of this patient's medical record.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -68,6 +72,8 @@ public class Account extends DomainResource {
           return ACTIVE;
         if ("inactive".equals(codeString))
           return INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -77,6 +83,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "active";
             case INACTIVE: return "inactive";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -84,6 +91,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "http://hl7.org/fhir/account-status";
             case INACTIVE: return "http://hl7.org/fhir/account-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/account-status";
             default: return "?";
           }
         }
@@ -91,6 +99,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "This account is active and may be used.";
             case INACTIVE: return "This account is inactive and should not be used to track financial information.";
+            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";
           }
         }
@@ -98,6 +107,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "Active";
             case INACTIVE: return "Inactive";
+            case ENTEREDINERROR: return "Entered in error";
             default: return "?";
           }
         }
@@ -112,6 +122,8 @@ public class Account extends DomainResource {
           return AccountStatus.ACTIVE;
         if ("inactive".equals(codeString))
           return AccountStatus.INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return AccountStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown AccountStatus code '"+codeString+"'");
         }
         public Enumeration<AccountStatus> fromType(Base code) throws FHIRException {
@@ -124,6 +136,8 @@ public class Account extends DomainResource {
           return new Enumeration<AccountStatus>(this, AccountStatus.ACTIVE);
         if ("inactive".equals(codeString))
           return new Enumeration<AccountStatus>(this, AccountStatus.INACTIVE);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
         }
     public String toCode(AccountStatus code) {
@@ -131,6 +145,8 @@ public class Account extends DomainResource {
         return "active";
       if (code == AccountStatus.INACTIVE)
         return "inactive";
+      if (code == AccountStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(AccountStatus code) {
@@ -163,16 +179,17 @@ public class Account extends DomainResource {
      * Indicates whether the account is presently used/useable or not.
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | inactive", formalDefinition="Indicates whether the account is presently used/useable or not." )
+    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/useable or not." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
     protected Enumeration<AccountStatus> status;
 
     /**
-     * Indicates the period of time over which the account is allowed.
+     * Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.
      */
-    @Child(name = "activePeriod", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Valid from..to", formalDefinition="Indicates the period of time over which the account is allowed." )
-    protected Period activePeriod;
+    @Child(name = "active", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Time window that transactions may be posted to this account", formalDefinition="Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur." )
+    protected Period active;
 
     /**
      * Identifies the currency to which transactions must be converted when crediting or debiting the account.
@@ -189,16 +206,32 @@ public class Account extends DomainResource {
     protected Money balance;
 
     /**
+     * The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.
+     */
+    @Child(name = "coverage", type = {Coverage.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The party(s) that are responsible for covering the payment of this account", formalDefinition="The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing." )
+    protected List<Reference> coverage;
+    /**
+     * The actual objects that are the target of the reference (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+     */
+    protected List<Coverage> coverageTarget;
+
+
+    /**
      * Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.
      */
-    @Child(name = "coveragePeriod", type = {Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "coveragePeriod", type = {Period.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc." )
     protected Period coveragePeriod;
 
     /**
      * Identifies the patient, device, practitioner, location or other object the account is associated with.
      */
-    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What is account tied to?", formalDefinition="Identifies the patient, device, practitioner, location or other object the account is associated with." )
     protected Reference subject;
 
@@ -210,7 +243,7 @@ public class Account extends DomainResource {
     /**
      * Indicates the organization, department, etc. with responsibility for the account.
      */
-    @Child(name = "owner", type = {Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "owner", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who is responsible?", formalDefinition="Indicates the organization, department, etc. with responsibility for the account." )
     protected Reference owner;
 
@@ -222,11 +255,11 @@ public class Account extends DomainResource {
     /**
      * Provides additional information about what the account tracks and how it is used.
      */
-    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Explanation of purpose/use", formalDefinition="Provides additional information about what the account tracks and how it is used." )
     protected StringType description;
 
-    private static final long serialVersionUID = -1926153194L;
+    private static final long serialVersionUID = -143220425L;
 
   /**
    * Constructor
@@ -411,26 +444,28 @@ public class Account extends DomainResource {
     }
 
     /**
-     * @return {@link #activePeriod} (Indicates the period of time over which the account is allowed.)
+     * @return {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.)
      */
-    public Period getActivePeriod() { 
-      if (this.activePeriod == null)
+    public Period getActive() { 
+      if (this.active == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.activePeriod");
+          throw new Error("Attempt to auto-create Account.active");
         else if (Configuration.doAutoCreate())
-          this.activePeriod = new Period(); // cc
-      return this.activePeriod;
+          this.active = new Period(); // cc
+      return this.active;
     }
 
-    public boolean hasActivePeriod() { 
-      return this.activePeriod != null && !this.activePeriod.isEmpty();
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
     }
 
     /**
-     * @param value {@link #activePeriod} (Indicates the period of time over which the account is allowed.)
+     * @param value {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.)
      */
-    public Account setActivePeriod(Period value) { 
-      this.activePeriod = value;
+    public Account setActive(Period value) { 
+      this.active = value;
       return this;
     }
 
@@ -480,6 +515,83 @@ public class Account extends DomainResource {
     public Account setBalance(Money value) { 
       this.balance = value;
       return this;
+    }
+
+    /**
+     * @return {@link #coverage} (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+     */
+    public List<Reference> getCoverage() { 
+      if (this.coverage == null)
+        this.coverage = new ArrayList<Reference>();
+      return this.coverage;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Account setCoverage(List<Reference> theCoverage) { 
+      this.coverage = theCoverage;
+      return this;
+    }
+
+    public boolean hasCoverage() { 
+      if (this.coverage == null)
+        return false;
+      for (Reference item : this.coverage)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addCoverage() { //3
+      Reference t = new Reference();
+      if (this.coverage == null)
+        this.coverage = new ArrayList<Reference>();
+      this.coverage.add(t);
+      return t;
+    }
+
+    public Account addCoverage(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.coverage == null)
+        this.coverage = new ArrayList<Reference>();
+      this.coverage.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     */
+    public Reference getCoverageFirstRep() { 
+      if (getCoverage().isEmpty()) {
+        addCoverage();
+      }
+      return getCoverage().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Coverage> getCoverageTarget() { 
+      if (this.coverageTarget == null)
+        this.coverageTarget = new ArrayList<Coverage>();
+      return this.coverageTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Coverage addCoverageTarget() { 
+      Coverage r = new Coverage();
+      if (this.coverageTarget == null)
+        this.coverageTarget = new ArrayList<Coverage>();
+      this.coverageTarget.add(r);
+      return r;
     }
 
     /**
@@ -644,9 +756,10 @@ public class Account extends DomainResource {
         childrenList.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("status", "code", "Indicates whether the account is presently used/useable or not.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("activePeriod", "Period", "Indicates the period of time over which the account is allowed.", 0, java.lang.Integer.MAX_VALUE, activePeriod));
+        childrenList.add(new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("currency", "Coding", "Identifies the currency to which transactions must be converted when crediting or debiting the account.", 0, java.lang.Integer.MAX_VALUE, currency));
         childrenList.add(new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, java.lang.Integer.MAX_VALUE, balance));
+        childrenList.add(new Property("coverage", "Reference(Coverage)", "The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.", 0, java.lang.Integer.MAX_VALUE, coverage));
         childrenList.add(new Property("coveragePeriod", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, java.lang.Integer.MAX_VALUE, coveragePeriod));
         childrenList.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, owner));
@@ -660,9 +773,10 @@ public class Account extends DomainResource {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<AccountStatus>
-        case 1325532263: /*activePeriod*/ return this.activePeriod == null ? new Base[0] : new Base[] {this.activePeriod}; // Period
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // Period
         case 575402001: /*currency*/ return this.currency == null ? new Base[0] : new Base[] {this.currency}; // Coding
         case -339185956: /*balance*/ return this.balance == null ? new Base[0] : new Base[] {this.balance}; // Money
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // Reference
         case 1024117193: /*coveragePeriod*/ return this.coveragePeriod == null ? new Base[0] : new Base[] {this.coveragePeriod}; // Period
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
@@ -687,14 +801,17 @@ public class Account extends DomainResource {
         case -892481550: // status
           this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
           break;
-        case 1325532263: // activePeriod
-          this.activePeriod = castToPeriod(value); // Period
+        case -1422950650: // active
+          this.active = castToPeriod(value); // Period
           break;
         case 575402001: // currency
           this.currency = castToCoding(value); // Coding
           break;
         case -339185956: // balance
           this.balance = castToMoney(value); // Money
+          break;
+        case -351767064: // coverage
+          this.getCoverage().add(castToReference(value)); // Reference
           break;
         case 1024117193: // coveragePeriod
           this.coveragePeriod = castToPeriod(value); // Period
@@ -723,12 +840,14 @@ public class Account extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("status"))
           this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
-        else if (name.equals("activePeriod"))
-          this.activePeriod = castToPeriod(value); // Period
+        else if (name.equals("active"))
+          this.active = castToPeriod(value); // Period
         else if (name.equals("currency"))
           this.currency = castToCoding(value); // Coding
         else if (name.equals("balance"))
           this.balance = castToMoney(value); // Money
+        else if (name.equals("coverage"))
+          this.getCoverage().add(castToReference(value));
         else if (name.equals("coveragePeriod"))
           this.coveragePeriod = castToPeriod(value); // Period
         else if (name.equals("subject"))
@@ -748,9 +867,10 @@ public class Account extends DomainResource {
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
         case 3575610:  return getType(); // CodeableConcept
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<AccountStatus>
-        case 1325532263:  return getActivePeriod(); // Period
+        case -1422950650:  return getActive(); // Period
         case 575402001:  return getCurrency(); // Coding
         case -339185956:  return getBalance(); // Money
+        case -351767064:  return addCoverage(); // Reference
         case 1024117193:  return getCoveragePeriod(); // Period
         case -1867885268:  return getSubject(); // Reference
         case 106164915:  return getOwner(); // Reference
@@ -775,9 +895,9 @@ public class Account extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Account.status");
         }
-        else if (name.equals("activePeriod")) {
-          this.activePeriod = new Period();
-          return this.activePeriod;
+        else if (name.equals("active")) {
+          this.active = new Period();
+          return this.active;
         }
         else if (name.equals("currency")) {
           this.currency = new Coding();
@@ -786,6 +906,9 @@ public class Account extends DomainResource {
         else if (name.equals("balance")) {
           this.balance = new Money();
           return this.balance;
+        }
+        else if (name.equals("coverage")) {
+          return addCoverage();
         }
         else if (name.equals("coveragePeriod")) {
           this.coveragePeriod = new Period();
@@ -822,9 +945,14 @@ public class Account extends DomainResource {
         dst.name = name == null ? null : name.copy();
         dst.type = type == null ? null : type.copy();
         dst.status = status == null ? null : status.copy();
-        dst.activePeriod = activePeriod == null ? null : activePeriod.copy();
+        dst.active = active == null ? null : active.copy();
         dst.currency = currency == null ? null : currency.copy();
         dst.balance = balance == null ? null : balance.copy();
+        if (coverage != null) {
+          dst.coverage = new ArrayList<Reference>();
+          for (Reference i : coverage)
+            dst.coverage.add(i.copy());
+        };
         dst.coveragePeriod = coveragePeriod == null ? null : coveragePeriod.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.owner = owner == null ? null : owner.copy();
@@ -844,8 +972,8 @@ public class Account extends DomainResource {
           return false;
         Account o = (Account) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(type, o.type, true)
-           && compareDeep(status, o.status, true) && compareDeep(activePeriod, o.activePeriod, true) && compareDeep(currency, o.currency, true)
-           && compareDeep(balance, o.balance, true) && compareDeep(coveragePeriod, o.coveragePeriod, true)
+           && compareDeep(status, o.status, true) && compareDeep(active, o.active, true) && compareDeep(currency, o.currency, true)
+           && compareDeep(balance, o.balance, true) && compareDeep(coverage, o.coverage, true) && compareDeep(coveragePeriod, o.coveragePeriod, true)
            && compareDeep(subject, o.subject, true) && compareDeep(owner, o.owner, true) && compareDeep(description, o.description, true)
           ;
       }
@@ -863,7 +991,7 @@ public class Account extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, type, status
-          , activePeriod, currency, balance, coveragePeriod, subject, owner, description
+          , active, currency, balance, coverage, coveragePeriod, subject, owner, description
           );
       }
 
@@ -1053,17 +1181,17 @@ public class Account extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>active | inactive</b><br>
+   * Description: <b>active | inactive | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Account.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive", type="token" )
+  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>active | inactive</b><br>
+   * Description: <b>active | inactive | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Account.status</b><br>
    * </p>

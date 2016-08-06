@@ -779,7 +779,7 @@ public class RestfulServerUtils {
 
 	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest, FhirContext theContext) {
 		if (theEncoding == null) {
-			if (!theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 			} else {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);

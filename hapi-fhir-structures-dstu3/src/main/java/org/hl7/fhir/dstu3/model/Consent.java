@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -402,18 +402,18 @@ public class Consent extends DomainResource {
     @Block()
     public static class ExceptComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * How the exception is statement is applied, as adding additional consent, ore removing.
+         * Action  to take - permit or deny - when the exception conditions are met.
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="deny | permit", formalDefinition="How the exception is statement is applied, as adding additional consent, ore removing." )
+        @Description(shortDefinition="deny | permit", formalDefinition="Action  to take - permit or deny - when the exception conditions are met." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/consent-except-type")
         protected Enumeration<ConsentExceptType> type;
 
         /**
-         * Relevant time or time-period when this Consent Exception is applicable.
+         * The timeframe in which data is controlled by this exception.
          */
         @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Consent Exception Effective Time", formalDefinition="Relevant time or time-period when this Consent Exception is applicable." )
+        @Description(shortDefinition="Timeframe for data controlled by this exception", formalDefinition="The timeframe in which data is controlled by this exception." )
         protected Period period;
 
         /**
@@ -440,11 +440,11 @@ public class Consent extends DomainResource {
         protected List<Coding> securityLabel;
 
         /**
-         * A set of security labels that define the context of which actions are controlled by this exception. If more than one label is specified, operations must have all the specified labels.
+         * The context of the activities a user is taking - why the user is accessing the data - that are controlled by this exception.
          */
         @Child(name = "purpose", type = {Coding.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Security Labels for the operation/context", formalDefinition="A set of security labels that define the context of which actions are controlled by this exception. If more than one label is specified, operations must have all the specified labels." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/security-labels")
+        @Description(shortDefinition="Context of activities covered by this exception", formalDefinition="The context of the activities a user is taking - why the user is accessing the data - that are controlled by this exception." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
         protected List<Coding> purpose;
 
         /**
@@ -488,7 +488,7 @@ public class Consent extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (How the exception is statement is applied, as adding additional consent, ore removing.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @return {@link #type} (Action  to take - permit or deny - when the exception conditions are met.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public Enumeration<ConsentExceptType> getTypeElement() { 
           if (this.type == null)
@@ -508,7 +508,7 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (How the exception is statement is applied, as adding additional consent, ore removing.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @param value {@link #type} (Action  to take - permit or deny - when the exception conditions are met.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public ExceptComponent setTypeElement(Enumeration<ConsentExceptType> value) { 
           this.type = value;
@@ -516,14 +516,14 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @return How the exception is statement is applied, as adding additional consent, ore removing.
+         * @return Action  to take - permit or deny - when the exception conditions are met.
          */
         public ConsentExceptType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
-         * @param value How the exception is statement is applied, as adding additional consent, ore removing.
+         * @param value Action  to take - permit or deny - when the exception conditions are met.
          */
         public ExceptComponent setType(ConsentExceptType value) { 
             if (this.type == null)
@@ -533,7 +533,7 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @return {@link #period} (Relevant time or time-period when this Consent Exception is applicable.)
+         * @return {@link #period} (The timeframe in which data is controlled by this exception.)
          */
         public Period getPeriod() { 
           if (this.period == null)
@@ -549,7 +549,7 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @param value {@link #period} (Relevant time or time-period when this Consent Exception is applicable.)
+         * @param value {@link #period} (The timeframe in which data is controlled by this exception.)
          */
         public ExceptComponent setPeriod(Period value) { 
           this.period = value;
@@ -716,7 +716,7 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @return {@link #purpose} (A set of security labels that define the context of which actions are controlled by this exception. If more than one label is specified, operations must have all the specified labels.)
+         * @return {@link #purpose} (The context of the activities a user is taking - why the user is accessing the data - that are controlled by this exception.)
          */
         public List<Coding> getPurpose() { 
           if (this.purpose == null)
@@ -929,12 +929,12 @@ public class Consent extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "How the exception is statement is applied, as adding additional consent, ore removing.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("period", "Period", "Relevant time or time-period when this Consent Exception is applicable.", 0, java.lang.Integer.MAX_VALUE, period));
+          childrenList.add(new Property("type", "code", "Action  to take - permit or deny - when the exception conditions are met.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("period", "Period", "The timeframe in which data is controlled by this exception.", 0, java.lang.Integer.MAX_VALUE, period));
           childrenList.add(new Property("actor", "", "Who or what is controlled by this Exception. Use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, actor));
           childrenList.add(new Property("action", "CodeableConcept", "Actions controlled by this Exception.", 0, java.lang.Integer.MAX_VALUE, action));
           childrenList.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this exception. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
-          childrenList.add(new Property("purpose", "Coding", "A set of security labels that define the context of which actions are controlled by this exception. If more than one label is specified, operations must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, purpose));
+          childrenList.add(new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this exception.", 0, java.lang.Integer.MAX_VALUE, purpose));
           childrenList.add(new Property("class", "Coding", "The class of information covered by this exception. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to.", 0, java.lang.Integer.MAX_VALUE, class_));
           childrenList.add(new Property("code", "Coding", "If this code is found in an instance, then the exception applies. TODO: where do you not have to look? This is a problematic element.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("data", "", "The resources controlled by this exception, if specific resources are referenced.", 0, java.lang.Integer.MAX_VALUE, data));
@@ -1665,25 +1665,33 @@ public class Consent extends DomainResource {
     protected UriType policy;
 
     /**
-     * Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement.
+     * Actor whose access is controlled by this consent under the terms of the policy and exceptions.
      */
     @Child(name = "recipient", type = {Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, CareTeam.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Who|what the consent is in regard to", formalDefinition="Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement." )
+    @Description(shortDefinition="Whose access is controlled by the policy", formalDefinition="Actor whose access is controlled by this consent under the terms of the policy and exceptions." )
     protected List<Reference> recipient;
     /**
-     * The actual objects that are the target of the reference (Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement.)
+     * The actual objects that are the target of the reference (Actor whose access is controlled by this consent under the terms of the policy and exceptions.)
      */
     protected List<Resource> recipientTarget;
 
 
     /**
-     * An exception to the base policy of this Consent.
+     * The context of the activities a user is taking - why the user is accessing the data - that are controlled by this consent.
      */
-    @Child(name = "except", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Consent Exception", formalDefinition="An exception to the base policy of this Consent." )
+    @Child(name = "purpose", type = {Coding.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Context of activities for which the agreement is made", formalDefinition="The context of the activities a user is taking - why the user is accessing the data - that are controlled by this consent." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
+    protected List<Coding> purpose;
+
+    /**
+     * An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.
+     */
+    @Child(name = "except", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Additional rule -  addition or removal of permissions", formalDefinition="An exception to the base policy of this consent. An exception can be an addition or removal of access permissions." )
     protected List<ExceptComponent> except;
 
-    private static final long serialVersionUID = 1122839630L;
+    private static final long serialVersionUID = -453805974L;
 
   /**
    * Constructor
@@ -2152,7 +2160,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #recipient} (Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement.)
+     * @return {@link #recipient} (Actor whose access is controlled by this consent under the terms of the policy and exceptions.)
      */
     public List<Reference> getRecipient() { 
       if (this.recipient == null)
@@ -2215,7 +2223,60 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #except} (An exception to the base policy of this Consent.)
+     * @return {@link #purpose} (The context of the activities a user is taking - why the user is accessing the data - that are controlled by this consent.)
+     */
+    public List<Coding> getPurpose() { 
+      if (this.purpose == null)
+        this.purpose = new ArrayList<Coding>();
+      return this.purpose;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Consent setPurpose(List<Coding> thePurpose) { 
+      this.purpose = thePurpose;
+      return this;
+    }
+
+    public boolean hasPurpose() { 
+      if (this.purpose == null)
+        return false;
+      for (Coding item : this.purpose)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Coding addPurpose() { //3
+      Coding t = new Coding();
+      if (this.purpose == null)
+        this.purpose = new ArrayList<Coding>();
+      this.purpose.add(t);
+      return t;
+    }
+
+    public Consent addPurpose(Coding t) { //3
+      if (t == null)
+        return this;
+      if (this.purpose == null)
+        this.purpose = new ArrayList<Coding>();
+      this.purpose.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #purpose}, creating it if it does not already exist
+     */
+    public Coding getPurposeFirstRep() { 
+      if (getPurpose().isEmpty()) {
+        addPurpose();
+      }
+      return getPurpose().get(0);
+    }
+
+    /**
+     * @return {@link #except} (An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.)
      */
     public List<ExceptComponent> getExcept() { 
       if (this.except == null)
@@ -2279,8 +2340,9 @@ public class Consent extends DomainResource {
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization that manages the consent, and the framework within which it is executed.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("policy", "uri", "A reference to the policy that this consents to. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy));
-        childrenList.add(new Property("recipient", "Reference(Device|Group|Organization|Patient|Practitioner|RelatedPerson|CareTeam)", "Who or what is this Consent statement is intended for - which entity is being targeted for the consent statement.", 0, java.lang.Integer.MAX_VALUE, recipient));
-        childrenList.add(new Property("except", "", "An exception to the base policy of this Consent.", 0, java.lang.Integer.MAX_VALUE, except));
+        childrenList.add(new Property("recipient", "Reference(Device|Group|Organization|Patient|Practitioner|RelatedPerson|CareTeam)", "Actor whose access is controlled by this consent under the terms of the policy and exceptions.", 0, java.lang.Integer.MAX_VALUE, recipient));
+        childrenList.add(new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("except", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, java.lang.Integer.MAX_VALUE, except));
       }
 
       @Override
@@ -2297,6 +2359,7 @@ public class Consent extends DomainResource {
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Type
         case -982670030: /*policy*/ return this.policy == null ? new Base[0] : new Base[] {this.policy}; // UriType
         case 820081177: /*recipient*/ return this.recipient == null ? new Base[0] : this.recipient.toArray(new Base[this.recipient.size()]); // Reference
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : this.purpose.toArray(new Base[this.purpose.size()]); // Coding
         case -1289550567: /*except*/ return this.except == null ? new Base[0] : this.except.toArray(new Base[this.except.size()]); // ExceptComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2339,6 +2402,9 @@ public class Consent extends DomainResource {
         case 820081177: // recipient
           this.getRecipient().add(castToReference(value)); // Reference
           break;
+        case -220463842: // purpose
+          this.getPurpose().add(castToCoding(value)); // Coding
+          break;
         case -1289550567: // except
           this.getExcept().add((ExceptComponent) value); // ExceptComponent
           break;
@@ -2371,6 +2437,8 @@ public class Consent extends DomainResource {
           this.policy = castToUri(value); // UriType
         else if (name.equals("recipient"))
           this.getRecipient().add(castToReference(value));
+        else if (name.equals("purpose"))
+          this.getPurpose().add(castToCoding(value));
         else if (name.equals("except"))
           this.getExcept().add((ExceptComponent) value);
         else
@@ -2391,6 +2459,7 @@ public class Consent extends DomainResource {
         case -1698413947:  return getSource(); // Type
         case -982670030: throw new FHIRException("Cannot make property policy as it is not a complex type"); // UriType
         case 820081177:  return addRecipient(); // Reference
+        case -220463842:  return addPurpose(); // Coding
         case -1289550567:  return addExcept(); // ExceptComponent
         default: return super.makeProperty(hash, name);
         }
@@ -2445,6 +2514,9 @@ public class Consent extends DomainResource {
         else if (name.equals("recipient")) {
           return addRecipient();
         }
+        else if (name.equals("purpose")) {
+          return addPurpose();
+        }
         else if (name.equals("except")) {
           return addExcept();
         }
@@ -2483,6 +2555,11 @@ public class Consent extends DomainResource {
           for (Reference i : recipient)
             dst.recipient.add(i.copy());
         };
+        if (purpose != null) {
+          dst.purpose = new ArrayList<Coding>();
+          for (Coding i : purpose)
+            dst.purpose.add(i.copy());
+        };
         if (except != null) {
           dst.except = new ArrayList<ExceptComponent>();
           for (ExceptComponent i : except)
@@ -2506,7 +2583,7 @@ public class Consent extends DomainResource {
            && compareDeep(dateTime, o.dateTime, true) && compareDeep(period, o.period, true) && compareDeep(patient, o.patient, true)
            && compareDeep(consentor, o.consentor, true) && compareDeep(organization, o.organization, true)
            && compareDeep(source, o.source, true) && compareDeep(policy, o.policy, true) && compareDeep(recipient, o.recipient, true)
-           && compareDeep(except, o.except, true);
+           && compareDeep(purpose, o.purpose, true) && compareDeep(except, o.except, true);
       }
 
       @Override
@@ -2523,7 +2600,7 @@ public class Consent extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, category
           , dateTime, period, patient, consentor, organization, source, policy, recipient
-          , except);
+          , purpose, except);
       }
 
   @Override
@@ -2620,17 +2697,17 @@ public class Consent extends DomainResource {
  /**
    * Search parameter: <b>purpose</b>
    * <p>
-   * Description: <b>Security Labels for the operation/context</b><br>
+   * Description: <b>Context of activities covered by this exception</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Consent.except.purpose</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="purpose", path="Consent.except.purpose", description="Security Labels for the operation/context", type="token" )
+  @SearchParamDefinition(name="purpose", path="Consent.except.purpose", description="Context of activities covered by this exception", type="token" )
   public static final String SP_PURPOSE = "purpose";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>purpose</b>
    * <p>
-   * Description: <b>Security Labels for the operation/context</b><br>
+   * Description: <b>Context of activities covered by this exception</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Consent.except.purpose</b><br>
    * </p>
@@ -2764,17 +2841,17 @@ public class Consent extends DomainResource {
  /**
    * Search parameter: <b>recipient</b>
    * <p>
-   * Description: <b>Who|what the consent is in regard to</b><br>
+   * Description: <b>Whose access is controlled by the policy</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Consent.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="Consent.recipient", description="Who|what the consent is in regard to", type="reference", target={CareTeam.class, Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="recipient", path="Consent.recipient", description="Whose access is controlled by the policy", type="reference", target={CareTeam.class, Device.class, Group.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
    * <p>
-   * Description: <b>Who|what the consent is in regard to</b><br>
+   * Description: <b>Whose access is controlled by the policy</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Consent.recipient</b><br>
    * </p>

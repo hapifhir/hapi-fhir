@@ -396,6 +396,8 @@ public class GenericClientDstu3Test {
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		
 		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
 	}
 

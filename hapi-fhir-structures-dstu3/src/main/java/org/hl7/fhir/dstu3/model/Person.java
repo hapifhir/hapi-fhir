@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -1215,17 +1215,17 @@ public class Person extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Person.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string" )
+  @SearchParamDefinition(name="address", path="Person.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Person.address</b><br>
    * </p>
@@ -1505,17 +1505,17 @@ public class Person extends DomainResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A portion of name in any name part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Person.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string" )
+  @SearchParamDefinition(name="name", path="Person.name", description="A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A portion of name in any name part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Person.name</b><br>
    * </p>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -664,11 +664,11 @@ public class Task extends DomainResource {
     @Block()
     public static class ParameterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The name of the input parameter.
+         * A code or description indicating how the input is intended to be used as part of the task execution.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Input Name", formalDefinition="The name of the input parameter." )
-        protected StringType name;
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Label for the input", formalDefinition="A code or description indicating how the input is intended to be used as part of the task execution." )
+        protected CodeableConcept type;
 
         /**
          * The value of the input parameter as a basic type.
@@ -677,7 +677,7 @@ public class Task extends DomainResource {
         @Description(shortDefinition="Input Value", formalDefinition="The value of the input parameter as a basic type." )
         protected org.hl7.fhir.dstu3.model.Type value;
 
-        private static final long serialVersionUID = 342865819L;
+        private static final long serialVersionUID = -852629026L;
 
     /**
      * Constructor
@@ -689,54 +689,33 @@ public class Task extends DomainResource {
     /**
      * Constructor
      */
-      public ParameterComponent(StringType name, org.hl7.fhir.dstu3.model.Type value) {
+      public ParameterComponent(CodeableConcept type, org.hl7.fhir.dstu3.model.Type value) {
         super();
-        this.name = name;
+        this.type = type;
         this.value = value;
       }
 
         /**
-         * @return {@link #name} (The name of the input parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #type} (A code or description indicating how the input is intended to be used as part of the task execution.)
          */
-        public StringType getNameElement() { 
-          if (this.name == null)
+        public CodeableConcept getType() { 
+          if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ParameterComponent.name");
+              throw new Error("Attempt to auto-create ParameterComponent.type");
             else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
+              this.type = new CodeableConcept(); // cc
+          return this.type;
         }
 
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
         }
 
         /**
-         * @param value {@link #name} (The name of the input parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #type} (A code or description indicating how the input is intended to be used as part of the task execution.)
          */
-        public ParameterComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of the input parameter.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of the input parameter.
-         */
-        public ParameterComponent setName(String value) { 
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
+        public ParameterComponent setType(CodeableConcept value) { 
+          this.type = value;
           return this;
         }
 
@@ -761,14 +740,14 @@ public class Task extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of the input parameter.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("type", "CodeableConcept", "A code or description indicating how the input is intended to be used as part of the task execution.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // org.hl7.fhir.dstu3.model.Type
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -778,8 +757,8 @@ public class Task extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
           break;
         case 111972721: // value
           this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
@@ -791,8 +770,8 @@ public class Task extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
+        if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("value[x]"))
           this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
         else
@@ -802,7 +781,7 @@ public class Task extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 3575610:  return getType(); // CodeableConcept
         case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
         default: return super.makeProperty(hash, name);
         }
@@ -811,8 +790,9 @@ public class Task extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Task.name");
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
         }
         else if (name.equals("valueBoolean")) {
           this.value = new BooleanType();
@@ -953,7 +933,7 @@ public class Task extends DomainResource {
       public ParameterComponent copy() {
         ParameterComponent dst = new ParameterComponent();
         copyValues(dst);
-        dst.name = name == null ? null : name.copy();
+        dst.type = type == null ? null : type.copy();
         dst.value = value == null ? null : value.copy();
         return dst;
       }
@@ -965,7 +945,7 @@ public class Task extends DomainResource {
         if (!(other instanceof ParameterComponent))
           return false;
         ParameterComponent o = (ParameterComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
+        return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
       }
 
       @Override
@@ -975,11 +955,11 @@ public class Task extends DomainResource {
         if (!(other instanceof ParameterComponent))
           return false;
         ParameterComponent o = (ParameterComponent) other;
-        return compareValues(name, o.name, true);
+        return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value);
       }
 
   public String fhirType() {
@@ -994,9 +974,9 @@ public class Task extends DomainResource {
         /**
          * The name of the Output parameter.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Output Name", formalDefinition="The name of the Output parameter." )
-        protected StringType name;
+        protected CodeableConcept type;
 
         /**
          * The value of the Output parameter as a basic type.
@@ -1005,7 +985,7 @@ public class Task extends DomainResource {
         @Description(shortDefinition="Output Value", formalDefinition="The value of the Output parameter as a basic type." )
         protected org.hl7.fhir.dstu3.model.Type value;
 
-        private static final long serialVersionUID = 342865819L;
+        private static final long serialVersionUID = -852629026L;
 
     /**
      * Constructor
@@ -1017,54 +997,33 @@ public class Task extends DomainResource {
     /**
      * Constructor
      */
-      public TaskOutputComponent(StringType name, org.hl7.fhir.dstu3.model.Type value) {
+      public TaskOutputComponent(CodeableConcept type, org.hl7.fhir.dstu3.model.Type value) {
         super();
-        this.name = name;
+        this.type = type;
         this.value = value;
       }
 
         /**
-         * @return {@link #name} (The name of the Output parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #type} (The name of the Output parameter.)
          */
-        public StringType getNameElement() { 
-          if (this.name == null)
+        public CodeableConcept getType() { 
+          if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TaskOutputComponent.name");
+              throw new Error("Attempt to auto-create TaskOutputComponent.type");
             else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
+              this.type = new CodeableConcept(); // cc
+          return this.type;
         }
 
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
         }
 
         /**
-         * @param value {@link #name} (The name of the Output parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #type} (The name of the Output parameter.)
          */
-        public TaskOutputComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of the Output parameter.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of the Output parameter.
-         */
-        public TaskOutputComponent setName(String value) { 
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
+        public TaskOutputComponent setType(CodeableConcept value) { 
+          this.type = value;
           return this;
         }
 
@@ -1089,14 +1048,14 @@ public class Task extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of the Output parameter.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("type", "CodeableConcept", "The name of the Output parameter.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // org.hl7.fhir.dstu3.model.Type
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1106,8 +1065,8 @@ public class Task extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
           break;
         case 111972721: // value
           this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
@@ -1119,8 +1078,8 @@ public class Task extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
+        if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("value[x]"))
           this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
         else
@@ -1130,7 +1089,7 @@ public class Task extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 3575610:  return getType(); // CodeableConcept
         case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
         default: return super.makeProperty(hash, name);
         }
@@ -1139,8 +1098,9 @@ public class Task extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Task.name");
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
         }
         else if (name.equals("valueBoolean")) {
           this.value = new BooleanType();
@@ -1281,7 +1241,7 @@ public class Task extends DomainResource {
       public TaskOutputComponent copy() {
         TaskOutputComponent dst = new TaskOutputComponent();
         copyValues(dst);
-        dst.name = name == null ? null : name.copy();
+        dst.type = type == null ? null : type.copy();
         dst.value = value == null ? null : value.copy();
         return dst;
       }
@@ -1293,7 +1253,7 @@ public class Task extends DomainResource {
         if (!(other instanceof TaskOutputComponent))
           return false;
         TaskOutputComponent o = (TaskOutputComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
+        return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
       }
 
       @Override
@@ -1303,11 +1263,11 @@ public class Task extends DomainResource {
         if (!(other instanceof TaskOutputComponent))
           return false;
         TaskOutputComponent o = (TaskOutputComponent) other;
-        return compareValues(name, o.name, true);
+        return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value);
       }
 
   public String fhirType() {
@@ -1328,7 +1288,7 @@ public class Task extends DomainResource {
      * Identifies a plan, proposal or order that this task has been created in fulfillment of.
      */
     @Child(name = "basedOn", type = {Reference.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Request fulfilled by this request", formalDefinition="Identifies a plan, proposal or order that this task has been created in fulfillment of." )
+    @Description(shortDefinition="Request fulfilled by this task", formalDefinition="Identifies a plan, proposal or order that this task has been created in fulfillment of." )
     protected List<Reference> basedOn;
     /**
      * The actual objects that are the target of the reference (Identifies a plan, proposal or order that this task has been created in fulfillment of.)
@@ -1340,7 +1300,7 @@ public class Task extends DomainResource {
      * An identifier that links together multiple tasks and other requests that were created in the same context.
      */
     @Child(name = "requisition", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Composite request this is part of", formalDefinition="An identifier that links together multiple tasks and other requests that were created in the same context." )
+    @Description(shortDefinition="Requisition or grouper id", formalDefinition="An identifier that links together multiple tasks and other requests that were created in the same context." )
     protected Identifier requisition;
 
     /**
@@ -1401,10 +1361,10 @@ public class Task extends DomainResource {
     protected Enumeration<TaskPriority> priority;
 
     /**
-     * A description of this task.
+     * A free-text description of what is to be performed.
      */
     @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Task Description", formalDefinition="A description of this task." )
+    @Description(shortDefinition="Human-readable explanation of task", formalDefinition="A free-text description of what is to be performed." )
     protected StringType description;
 
     /**
@@ -1511,17 +1471,17 @@ public class Task extends DomainResource {
     protected TaskFulfillmentComponent fulfillment;
 
     /**
-     * A reference to a formal or informal definition of the task.
+     * A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.
      */
     @Child(name = "definition", type = {UriType.class}, order=22, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Task Definition", formalDefinition="A reference to a formal or informal definition of the task." )
+    @Description(shortDefinition="Task Definition", formalDefinition="A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc." )
     protected UriType definition;
 
     /**
-     * Inputs to the task.
+     * Additional information that may be needed in the execution of the task.
      */
     @Child(name = "input", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Task Input", formalDefinition="Inputs to the task." )
+    @Description(shortDefinition="Supporting information", formalDefinition="Additional information that may be needed in the execution of the task." )
     protected List<ParameterComponent> input;
 
     /**
@@ -1929,7 +1889,7 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (A description of this task.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free-text description of what is to be performed.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -1949,7 +1909,7 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (A description of this task.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free-text description of what is to be performed.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public Task setDescriptionElement(StringType value) { 
       this.description = value;
@@ -1957,14 +1917,14 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return A description of this task.
+     * @return A free-text description of what is to be performed.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A description of this task.
+     * @param value A free-text description of what is to be performed.
      */
     public Task setDescription(String value) { 
       if (Utilities.noString(value))
@@ -2417,7 +2377,7 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #definition} (A reference to a formal or informal definition of the task.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     * @return {@link #definition} (A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
      */
     public UriType getDefinitionElement() { 
       if (this.definition == null)
@@ -2437,7 +2397,7 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @param value {@link #definition} (A reference to a formal or informal definition of the task.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+     * @param value {@link #definition} (A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
      */
     public Task setDefinitionElement(UriType value) { 
       this.definition = value;
@@ -2445,14 +2405,14 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return A reference to a formal or informal definition of the task.
+     * @return A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.
      */
     public String getDefinition() { 
       return this.definition == null ? null : this.definition.getValue();
     }
 
     /**
-     * @param value A reference to a formal or informal definition of the task.
+     * @param value A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.
      */
     public Task setDefinition(String value) { 
       if (Utilities.noString(value))
@@ -2466,7 +2426,7 @@ public class Task extends DomainResource {
     }
 
     /**
-     * @return {@link #input} (Inputs to the task.)
+     * @return {@link #input} (Additional information that may be needed in the execution of the task.)
      */
     public List<ParameterComponent> getInput() { 
       if (this.input == null)
@@ -2583,7 +2543,7 @@ public class Task extends DomainResource {
         childrenList.add(new Property("stage", "CodeableConcept", "Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.", 0, java.lang.Integer.MAX_VALUE, stage));
         childrenList.add(new Property("code", "CodeableConcept", "A name or code (or both) briefly describing what the task involves.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("priority", "code", "The priority of the task among other tasks of the same type.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("description", "string", "A description of this task.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "string", "A free-text description of what is to be performed.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("focus", "Reference(Any)", "The request being actioned or the resource being manipulated by this task.", 0, java.lang.Integer.MAX_VALUE, focus));
         childrenList.add(new Property("for", "Reference(Any)", "The entity who benefits from the performance of the service specified in the task (e.g., the patient).", 0, java.lang.Integer.MAX_VALUE, for_));
         childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.", 0, java.lang.Integer.MAX_VALUE, context));
@@ -2595,8 +2555,8 @@ public class Task extends DomainResource {
         childrenList.add(new Property("reason", "CodeableConcept", "A description or code indicating why this task needs to be performed.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("note", "Annotation", "Free-text information captured about the task as it progresses.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("fulfillment", "", "Identifies any limitations on what part of a referenced task subject request should be actioned.", 0, java.lang.Integer.MAX_VALUE, fulfillment));
-        childrenList.add(new Property("definition", "uri", "A reference to a formal or informal definition of the task.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("input", "", "Inputs to the task.", 0, java.lang.Integer.MAX_VALUE, input));
+        childrenList.add(new Property("definition", "uri", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, java.lang.Integer.MAX_VALUE, definition));
+        childrenList.add(new Property("input", "", "Additional information that may be needed in the execution of the task.", 0, java.lang.Integer.MAX_VALUE, input));
         childrenList.add(new Property("output", "", "Outputs produced by the Task.", 0, java.lang.Integer.MAX_VALUE, output));
       }
 

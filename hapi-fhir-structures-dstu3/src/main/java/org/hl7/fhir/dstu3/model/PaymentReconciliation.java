@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -191,9 +191,9 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * The claim response resource.
          */
-        @Child(name = "responce", type = {Identifier.class, Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "response", type = {Identifier.class, Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Claim Response", formalDefinition="The claim response resource." )
-        protected Type responce;
+        protected Type response;
 
         /**
          * The Organization which submitted the invoice or financial transaction.
@@ -223,7 +223,7 @@ public class PaymentReconciliation extends DomainResource {
         @Description(shortDefinition="Detail amount", formalDefinition="Amount paid for this detail." )
         protected Money amount;
 
-        private static final long serialVersionUID = 1706468339L;
+        private static final long serialVersionUID = 1799271907L;
 
     /**
      * Constructor
@@ -310,47 +310,47 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #responce} (The claim response resource.)
+         * @return {@link #response} (The claim response resource.)
          */
-        public Type getResponce() { 
-          return this.responce;
+        public Type getResponse() { 
+          return this.response;
         }
 
         /**
-         * @return {@link #responce} (The claim response resource.)
+         * @return {@link #response} (The claim response resource.)
          */
-        public Identifier getResponceIdentifier() throws FHIRException { 
-          if (!(this.responce instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.responce.getClass().getName()+" was encountered");
-          return (Identifier) this.responce;
+        public Identifier getResponseIdentifier() throws FHIRException { 
+          if (!(this.response instanceof Identifier))
+            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.response.getClass().getName()+" was encountered");
+          return (Identifier) this.response;
         }
 
-        public boolean hasResponceIdentifier() { 
-          return this.responce instanceof Identifier;
+        public boolean hasResponseIdentifier() { 
+          return this.response instanceof Identifier;
         }
 
         /**
-         * @return {@link #responce} (The claim response resource.)
+         * @return {@link #response} (The claim response resource.)
          */
-        public Reference getResponceReference() throws FHIRException { 
-          if (!(this.responce instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.responce.getClass().getName()+" was encountered");
-          return (Reference) this.responce;
+        public Reference getResponseReference() throws FHIRException { 
+          if (!(this.response instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.response.getClass().getName()+" was encountered");
+          return (Reference) this.response;
         }
 
-        public boolean hasResponceReference() { 
-          return this.responce instanceof Reference;
+        public boolean hasResponseReference() { 
+          return this.response instanceof Reference;
         }
 
-        public boolean hasResponce() { 
-          return this.responce != null && !this.responce.isEmpty();
+        public boolean hasResponse() { 
+          return this.response != null && !this.response.isEmpty();
         }
 
         /**
-         * @param value {@link #responce} (The claim response resource.)
+         * @param value {@link #response} (The claim response resource.)
          */
-        public DetailsComponent setResponce(Type value) { 
-          this.responce = value;
+        public DetailsComponent setResponse(Type value) { 
+          this.response = value;
           return this;
         }
 
@@ -521,7 +521,7 @@ public class PaymentReconciliation extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "Coding", "Code to indicate the nature of the payment, adjustment, funds advance, etc.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("request[x]", "Identifier|Reference(Any)", "The claim or financial resource.", 0, java.lang.Integer.MAX_VALUE, request));
-          childrenList.add(new Property("responce[x]", "Identifier|Reference(Any)", "The claim response resource.", 0, java.lang.Integer.MAX_VALUE, responce));
+          childrenList.add(new Property("response[x]", "Identifier|Reference(Any)", "The claim response resource.", 0, java.lang.Integer.MAX_VALUE, response));
           childrenList.add(new Property("submitter[x]", "Identifier|Reference(Organization)", "The Organization which submitted the invoice or financial transaction.", 0, java.lang.Integer.MAX_VALUE, submitter));
           childrenList.add(new Property("payee[x]", "Identifier|Reference(Organization)", "The organization which is receiving the payment.", 0, java.lang.Integer.MAX_VALUE, payee));
           childrenList.add(new Property("date", "date", "The date of the invoice or financial resource.", 0, java.lang.Integer.MAX_VALUE, date));
@@ -533,7 +533,7 @@ public class PaymentReconciliation extends DomainResource {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Type
-        case -340323759: /*responce*/ return this.responce == null ? new Base[0] : new Base[] {this.responce}; // Type
+        case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Type
         case 348678409: /*submitter*/ return this.submitter == null ? new Base[0] : new Base[] {this.submitter}; // Type
         case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // Type
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateType
@@ -552,8 +552,8 @@ public class PaymentReconciliation extends DomainResource {
         case 1095692943: // request
           this.request = (Type) value; // Type
           break;
-        case -340323759: // responce
-          this.responce = (Type) value; // Type
+        case -340323263: // response
+          this.response = (Type) value; // Type
           break;
         case 348678409: // submitter
           this.submitter = (Type) value; // Type
@@ -578,8 +578,8 @@ public class PaymentReconciliation extends DomainResource {
           this.type = castToCoding(value); // Coding
         else if (name.equals("request[x]"))
           this.request = (Type) value; // Type
-        else if (name.equals("responce[x]"))
-          this.responce = (Type) value; // Type
+        else if (name.equals("response[x]"))
+          this.response = (Type) value; // Type
         else if (name.equals("submitter[x]"))
           this.submitter = (Type) value; // Type
         else if (name.equals("payee[x]"))
@@ -597,7 +597,7 @@ public class PaymentReconciliation extends DomainResource {
         switch (hash) {
         case 3575610:  return getType(); // Coding
         case 37106577:  return getRequest(); // Type
-        case 1832772751:  return getResponce(); // Type
+        case 1847549087:  return getResponse(); // Type
         case -2047315241:  return getSubmitter(); // Type
         case 1375276088:  return getPayee(); // Type
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateType
@@ -621,13 +621,13 @@ public class PaymentReconciliation extends DomainResource {
           this.request = new Reference();
           return this.request;
         }
-        else if (name.equals("responceIdentifier")) {
-          this.responce = new Identifier();
-          return this.responce;
+        else if (name.equals("responseIdentifier")) {
+          this.response = new Identifier();
+          return this.response;
         }
-        else if (name.equals("responceReference")) {
-          this.responce = new Reference();
-          return this.responce;
+        else if (name.equals("responseReference")) {
+          this.response = new Reference();
+          return this.response;
         }
         else if (name.equals("submitterIdentifier")) {
           this.submitter = new Identifier();
@@ -661,7 +661,7 @@ public class PaymentReconciliation extends DomainResource {
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.request = request == null ? null : request.copy();
-        dst.responce = responce == null ? null : responce.copy();
+        dst.response = response == null ? null : response.copy();
         dst.submitter = submitter == null ? null : submitter.copy();
         dst.payee = payee == null ? null : payee.copy();
         dst.date = date == null ? null : date.copy();
@@ -676,7 +676,7 @@ public class PaymentReconciliation extends DomainResource {
         if (!(other instanceof DetailsComponent))
           return false;
         DetailsComponent o = (DetailsComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(request, o.request, true) && compareDeep(responce, o.responce, true)
+        return compareDeep(type, o.type, true) && compareDeep(request, o.request, true) && compareDeep(response, o.response, true)
            && compareDeep(submitter, o.submitter, true) && compareDeep(payee, o.payee, true) && compareDeep(date, o.date, true)
            && compareDeep(amount, o.amount, true);
       }
@@ -692,7 +692,7 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, request, responce
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, request, response
           , submitter, payee, date, amount);
       }
 
@@ -2013,46 +2013,6 @@ public class PaymentReconciliation extends DomainResource {
    }
 
  /**
-   * Search parameter: <b>requestprovideridentifier</b>
-   * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestprovideridentifier", path="PaymentReconciliation.requestProvider.as(Identifier)", description="The reference to the provider who sumbitted the claim", type="token" )
-  public static final String SP_REQUESTPROVIDERIDENTIFIER = "requestprovideridentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestprovideridentifier</b>
-   * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUESTPROVIDERIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUESTPROVIDERIDENTIFIER);
-
- /**
-   * Search parameter: <b>requestorganizationidentifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestorganizationidentifier", path="PaymentReconciliation.requestOrganization.as(Identifier)", description="The organization who generated this resource", type="token" )
-  public static final String SP_REQUESTORGANIZATIONIDENTIFIER = "requestorganizationidentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestorganizationidentifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUESTORGANIZATIONIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUESTORGANIZATIONIDENTIFIER);
-
- /**
    * Search parameter: <b>identifier</b>
    * <p>
    * Description: <b>The business identifier of the Explanation of Benefit</b><br>
@@ -2071,6 +2031,32 @@ public class PaymentReconciliation extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>request-reference</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="request-reference", path="PaymentReconciliation.request.as(Reference)", description="The reference to the claim", type="reference", target={ProcessRequest.class } )
+  public static final String SP_REQUEST_REFERENCE = "request-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>request-reference</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:request-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request-reference").toLocked();
 
  /**
    * Search parameter: <b>disposition</b>
@@ -2093,24 +2079,76 @@ public class PaymentReconciliation extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DISPOSITION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DISPOSITION);
 
  /**
-   * Search parameter: <b>organizationidentifier</b>
+   * Search parameter: <b>request-provider-identifier</b>
    * <p>
-   * Description: <b>The organization who generated this resource</b><br>
+   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.organizationIdentifier</b><br>
+   * Path: <b>PaymentReconciliation.requestProviderIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationidentifier", path="PaymentReconciliation.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
-  public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
+  @SearchParamDefinition(name="request-provider-identifier", path="PaymentReconciliation.requestProvider.as(Identifier)", description="The reference to the provider who sumbitted the claim", type="token" )
+  public static final String SP_REQUEST_PROVIDER_IDENTIFIER = "request-provider-identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-provider-identifier</b>
    * <p>
-   * Description: <b>The organization who generated this resource</b><br>
+   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.organizationIdentifier</b><br>
+   * Path: <b>PaymentReconciliation.requestProviderIdentifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATIONIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATIONIDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_PROVIDER_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_PROVIDER_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>request-organization-reference</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestOrganizationReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="request-organization-reference", path="PaymentReconciliation.requestOrganization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_REQUEST_ORGANIZATION_REFERENCE = "request-organization-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>request-organization-reference</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestOrganizationReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_ORGANIZATION_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_ORGANIZATION_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:request-organization-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_ORGANIZATION_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request-organization-reference").toLocked();
+
+ /**
+   * Search parameter: <b>organization-reference</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.organizationReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="organization-reference", path="PaymentReconciliation.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_ORGANIZATION_REFERENCE = "organization-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>organization-reference</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.organizationReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:organization-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:organization-reference").toLocked();
 
  /**
    * Search parameter: <b>created</b>
@@ -2133,128 +2171,64 @@ public class PaymentReconciliation extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
-   * Search parameter: <b>requestidentifier</b>
+   * Search parameter: <b>organization-identifier</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentReconciliation.organizationIdentifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="organization-identifier", path="PaymentReconciliation.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
+  public static final String SP_ORGANIZATION_IDENTIFIER = "organization-identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>organization-identifier</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentReconciliation.organizationIdentifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATION_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATION_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>request-identifier</b>
    * <p>
    * Description: <b>The reference to the claim</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PaymentReconciliation.requestIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestidentifier", path="PaymentReconciliation.request.as(Identifier)", description="The reference to the claim", type="token" )
-  public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
+  @SearchParamDefinition(name="request-identifier", path="PaymentReconciliation.request.as(Identifier)", description="The reference to the claim", type="token" )
+  public static final String SP_REQUEST_IDENTIFIER = "request-identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-identifier</b>
    * <p>
    * Description: <b>The reference to the claim</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PaymentReconciliation.requestIdentifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUESTIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUESTIDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_IDENTIFIER);
 
  /**
-   * Search parameter: <b>organizationreference</b>
+   * Search parameter: <b>request-organization-identifier</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.organizationReference</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentReconciliation.requestOrganizationIdentifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="PaymentReconciliation.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
+  @SearchParamDefinition(name="request-organization-identifier", path="PaymentReconciliation.requestOrganization.as(Identifier)", description="The organization who generated this resource", type="token" )
+  public static final String SP_REQUEST_ORGANIZATION_IDENTIFIER = "request-organization-identifier";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-organization-identifier</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.organizationReference</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PaymentReconciliation.requestOrganizationIdentifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATIONREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATIONREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:organizationreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATIONREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:organizationreference").toLocked();
-
- /**
-   * Search parameter: <b>requestproviderreference</b>
-   * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestproviderreference", path="PaymentReconciliation.requestProvider.as(Reference)", description="The reference to the provider who sumbitted the claim", type="reference", target={Practitioner.class } )
-  public static final String SP_REQUESTPROVIDERREFERENCE = "requestproviderreference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestproviderreference</b>
-   * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTPROVIDERREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTPROVIDERREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:requestproviderreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTPROVIDERREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestproviderreference").toLocked();
-
- /**
-   * Search parameter: <b>requestorganizationreference</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestorganizationreference", path="PaymentReconciliation.requestOrganization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_REQUESTORGANIZATIONREFERENCE = "requestorganizationreference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestorganizationreference</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTORGANIZATIONREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTORGANIZATIONREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:requestorganizationreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTORGANIZATIONREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestorganizationreference").toLocked();
-
- /**
-   * Search parameter: <b>requestreference</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestreference", path="PaymentReconciliation.request.as(Reference)", description="The reference to the claim", type="reference", target={ProcessRequest.class } )
-  public static final String SP_REQUESTREFERENCE = "requestreference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestreference</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:requestreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestreference").toLocked();
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_ORGANIZATION_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_ORGANIZATION_IDENTIFIER);
 
  /**
    * Search parameter: <b>outcome</b>
@@ -2275,6 +2249,32 @@ public class PaymentReconciliation extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam OUTCOME = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_OUTCOME);
+
+ /**
+   * Search parameter: <b>request-provider-reference</b>
+   * <p>
+   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestProviderReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="request-provider-reference", path="PaymentReconciliation.requestProvider.as(Reference)", description="The reference to the provider who sumbitted the claim", type="reference", target={Practitioner.class } )
+  public static final String SP_REQUEST_PROVIDER_REFERENCE = "request-provider-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>request-provider-reference</b>
+   * <p>
+   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestProviderReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_PROVIDER_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_PROVIDER_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:request-provider-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_PROVIDER_REFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request-provider-reference").toLocked();
 
 
 }

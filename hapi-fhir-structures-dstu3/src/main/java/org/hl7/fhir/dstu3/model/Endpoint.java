@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
 
 import java.util.*;
 
@@ -66,6 +66,10 @@ public class Endpoint extends DomainResource {
          */
         OFF, 
         /**
+         * This instance should not have been part of this patient's medical record.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -80,6 +84,8 @@ public class Endpoint extends DomainResource {
           return ERROR;
         if ("off".equals(codeString))
           return OFF;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -91,6 +97,7 @@ public class Endpoint extends DomainResource {
             case SUSPENDED: return "suspended";
             case ERROR: return "error";
             case OFF: return "off";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -100,6 +107,7 @@ public class Endpoint extends DomainResource {
             case SUSPENDED: return "http://hl7.org/fhir/endpoint-status";
             case ERROR: return "http://hl7.org/fhir/endpoint-status";
             case OFF: return "http://hl7.org/fhir/endpoint-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/endpoint-status";
             default: return "?";
           }
         }
@@ -109,6 +117,7 @@ public class Endpoint extends DomainResource {
             case SUSPENDED: return "This endpoint is temporarily unavailable";
             case ERROR: return "This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken";
             case OFF: return "This endpoint is no longer to be used";
+            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";
           }
         }
@@ -118,6 +127,7 @@ public class Endpoint extends DomainResource {
             case SUSPENDED: return "Suspended";
             case ERROR: return "Error";
             case OFF: return "Off";
+            case ENTEREDINERROR: return "Entered in error";
             default: return "?";
           }
         }
@@ -136,6 +146,8 @@ public class Endpoint extends DomainResource {
           return EndpointStatus.ERROR;
         if ("off".equals(codeString))
           return EndpointStatus.OFF;
+        if ("entered-in-error".equals(codeString))
+          return EndpointStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown EndpointStatus code '"+codeString+"'");
         }
         public Enumeration<EndpointStatus> fromType(Base code) throws FHIRException {
@@ -152,6 +164,8 @@ public class Endpoint extends DomainResource {
           return new Enumeration<EndpointStatus>(this, EndpointStatus.ERROR);
         if ("off".equals(codeString))
           return new Enumeration<EndpointStatus>(this, EndpointStatus.OFF);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<EndpointStatus>(this, EndpointStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown EndpointStatus code '"+codeString+"'");
         }
     public String toCode(EndpointStatus code) {
@@ -163,6 +177,8 @@ public class Endpoint extends DomainResource {
         return "error";
       if (code == EndpointStatus.OFF)
         return "off";
+      if (code == EndpointStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(EndpointStatus code) {
@@ -181,7 +197,7 @@ public class Endpoint extends DomainResource {
      * active | suspended | error | off.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | suspended | error | off", formalDefinition="active | suspended | error | off." )
+    @Description(shortDefinition="active | suspended | error | off | entered-in-error", formalDefinition="active | suspended | error | off." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/endpoint-status")
     protected Enumeration<EndpointStatus> status;
 
@@ -242,10 +258,10 @@ public class Endpoint extends DomainResource {
     protected UriType address;
 
     /**
-     * The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
+     * The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the mime type is blank, then there is no payload in the notification, just a notification.
      */
     @Child(name = "payloadFormat", type = {StringType.class}, order=9, min=1, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Mimetype to send, or blank for no payload", formalDefinition="The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification." )
+    @Description(shortDefinition="Mimetype to send, or blank for no payload", formalDefinition="The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the mime type is blank, then there is no payload in the notification, just a notification." )
     protected StringType payloadFormat;
 
     /**
@@ -681,7 +697,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return {@link #payloadFormat} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayloadFormat" gives direct access to the value
+     * @return {@link #payloadFormat} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayloadFormat" gives direct access to the value
      */
     public StringType getPayloadFormatElement() { 
       if (this.payloadFormat == null)
@@ -701,7 +717,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @param value {@link #payloadFormat} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayloadFormat" gives direct access to the value
+     * @param value {@link #payloadFormat} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayloadFormat" gives direct access to the value
      */
     public Endpoint setPayloadFormatElement(StringType value) { 
       this.payloadFormat = value;
@@ -709,14 +725,14 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
+     * @return The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the mime type is blank, then there is no payload in the notification, just a notification.
      */
     public String getPayloadFormat() { 
       return this.payloadFormat == null ? null : this.payloadFormat.getValue();
     }
 
     /**
-     * @param value The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
+     * @param value The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the mime type is blank, then there is no payload in the notification, just a notification.
      */
     public Endpoint setPayloadFormat(String value) { 
         if (this.payloadFormat == null)
@@ -899,7 +915,7 @@ public class Endpoint extends DomainResource {
         childrenList.add(new Property("method", "Coding", "The http verb to be used when calling this endpoint.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("address", "uri", "The uri that describes the actual end-point to send messages to.", 0, java.lang.Integer.MAX_VALUE, address));
-        childrenList.add(new Property("payloadFormat", "string", "The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payloadFormat));
+        childrenList.add(new Property("payloadFormat", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the mime type is blank, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payloadFormat));
         childrenList.add(new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType));
         childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         childrenList.add(new Property("publicKey", "string", "The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available.", 0, java.lang.Integer.MAX_VALUE, publicKey));

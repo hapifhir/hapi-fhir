@@ -220,11 +220,13 @@ public class Element extends Base {
   	}
   		
   	List<Base> result = new ArrayList<Base>();
+  	if (children != null) {
   	for (Element child : children) {
   		if (child.getName().equals(name))
   			result.add(child);
   		if (child.getName().startsWith(name) && child.getProperty().isChoice() && child.getProperty().getName().equals(name+"[x]"))
   			result.add(child);
+  	}
   	}
   	if (result.isEmpty() && checkValid) {
 //  		throw new FHIRException("not determined yet");
@@ -233,10 +235,19 @@ public class Element extends Base {
 	}
 
 	@Override
-	protected void listChildren(
-	    List<org.hl7.fhir.dstu3.model.Property> result) {
-	// TODO Auto-generated method stub
+	protected void listChildren(List<org.hl7.fhir.dstu3.model.Property> childProps) {
+	  if (children != null) {
+	  for (Element c : children) {
+	    childProps.add(new org.hl7.fhir.dstu3.model.Property(c.getName(), c.fhirType(), c.getProperty().getDefinition().getDefinition(), c.getProperty().getDefinition().getMin(), maxToInt(c.getProperty().getDefinition().getMax()), c));
+	  }
+  }
+  }
 	
+	private int maxToInt(String max) {
+    if (max.equals("*"))
+      return Integer.MAX_VALUE;
+    else
+      return Integer.parseInt(max);
 	}
 
 	@Override
@@ -244,6 +255,11 @@ public class Element extends Base {
 		return type != null ? property.isPrimitive(type) : property.isPrimitive(property.getType(name));
 	}
 	
+  @Override
+  public boolean isResource() {
+    return property.isResource();
+  }
+  
 
 	@Override
 	public boolean hasPrimitiveValue() {
@@ -357,6 +373,11 @@ public class Element extends Base {
 
   public boolean hasChild(String name) {
     return getNamedChild(name) != null;
+  }
+
+  @Override
+  public String toString() {
+    return name+"="+fhirType() + "["+(children == null || hasValue() ? value : Integer.toString(children.size())+" children")+"]";
   }
 
 //  @Override
