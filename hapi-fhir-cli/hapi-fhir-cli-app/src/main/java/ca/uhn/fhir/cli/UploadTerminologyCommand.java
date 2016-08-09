@@ -3,76 +3,20 @@ package ca.uhn.fhir.cli;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.fusesource.jansi.Ansi;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.omg.Dynamic.Parameter;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryRequest;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 
 public class UploadTerminologyCommand extends BaseCommand {
 
@@ -111,6 +55,10 @@ public class UploadTerminologyCommand extends BaseCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
+		opt = new Option("b", "bearer-token", true, "Bearer token to add to the request");
+		opt.setRequired(false);
+		options.addOption(opt);
+
 		return options;
 	}
 
@@ -134,7 +82,10 @@ public class UploadTerminologyCommand extends BaseCommand {
 		if (datafile == null || datafile.length == 0) {
 			throw new ParseException("No data file provided");
 		}
+		
+		String bearerToken = theCommandLine.getOptionValue("b");
 
+		
 		IGenericClient client = super.newClient(ctx, targetServer);
 		IBaseParameters inputParameters;
 		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -148,6 +99,10 @@ public class UploadTerminologyCommand extends BaseCommand {
 			throw new ParseException("This command does not support FHIR version " + ctx.getVersion().getVersion());
 		}
 
+		if (isNotBlank(bearerToken)) {
+			client.registerInterceptor(new BearerTokenAuthInterceptor(bearerToken));
+		}
+		
 		ourLog.info("Beginning upload - This may take a while...");
 		IBaseParameters response = client
 			.operation()

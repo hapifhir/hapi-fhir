@@ -65,6 +65,13 @@ public class TermCodeSystemVersion implements Serializable {
 	@Column(name = "RES_VERSION_ID", nullable = false, updatable = false)
 	private Long myResourceVersionId;
 
+	/**
+	 * Constructor
+	 */
+	public TermCodeSystemVersion() {
+		super();
+	}
+
 	public Collection<TermConcept> getConcepts() {
 		if (myConcepts == null) {
 			myConcepts = new ArrayList<TermConcept>();

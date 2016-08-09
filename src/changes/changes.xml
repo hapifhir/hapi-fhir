@@ -151,6 +151,11 @@
 				populated with the actual target resource instance. Thanks to
 				Neal Acharya for reporting!
 			</action>
+			<action type="add">
+				hapi-fhir-cli upload-terminology command now has an argument
+				"-b FOO" that lets you add an authorization header in the form
+				<![CDATA[<code>Authorization: Bearer FOO</code>]]>
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
