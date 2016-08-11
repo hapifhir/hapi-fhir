@@ -93,6 +93,11 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.parser.json.GsonStructure;
+import ca.uhn.fhir.parser.json.JsonLikeArray;
+import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
@@ -170,7 +175,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void assertObjectOfType(JsonElement theResourceTypeObj, Object theValueType, String thePosition) {
+//	private void assertObjectOfType(JsonElement theResourceTypeObj, Object theValueType, String thePosition) {
 //		if (theResourceTypeObj == null) {
 //			throw new DataFormatException("Invalid JSON content detected, missing required element: '" + thePosition + "'");
 //		}
@@ -178,7 +183,7 @@ public class JsonParser extends BaseParser implements IParser {
 //		if (theResourceTypeObj.getValueType() != theValueType) {
 //			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
 //		}
-	}
+//	}
 
 	private JsonWriter createJsonWriter(Writer theWriter) {
 		JsonWriter retVal = new JsonWriter(theWriter);
@@ -211,10 +216,19 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
-			JsonObject object = parse(theReader);
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		jsonStructure.load(theReader);
+		
+		T retVal = doParseResource(theResourceType, jsonStructure);
+		
+		return retVal;
+	}
 
-			JsonPrimitive resourceTypeObj = object.getAsJsonPrimitive("resourceType");
-			if (resourceTypeObj == null || isBlank(resourceTypeObj.getAsString())) {
+	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, JsonLikeStructure theJsonStructure) {
+			JsonLikeObject object = theJsonStructure.getRootObject();
+		
+			JsonLikeValue resourceTypeObj = object.get("resourceType");
+			if (resourceTypeObj == null || !resourceTypeObj.isString()) {
 				throw new DataFormatException("Invalid JSON content detected, missing required element: 'resourceType'");
 			}
 			
@@ -234,36 +248,36 @@ public class JsonParser extends BaseParser implements IParser {
 			return retVal;
 	}
 
-	private JsonObject parse(Reader theReader) {
-
-		PushbackReader pbr = new PushbackReader(theReader);
-		JsonObject object;
-		try {
-			while(true) {
-				int nextInt;
-					nextInt = pbr.read();
-				if (nextInt == -1) {
-					throw new DataFormatException("Did not find any content to parse");
-				}
-				if (nextInt == '{') {
-					pbr.unread('{');
-					break;
-				}
-				if (Character.isWhitespace(nextInt)) {
-					continue;
-				}
-				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
-			}
-		
-			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-		
-			object = gson.fromJson(pbr, JsonObject.class);
-		} catch (Exception e) {
-			throw new DataFormatException("Failed to parse JSON content, error was: " + e.getMessage(), e);
-		}
-		
-		return object;
-	}
+//	private JsonObject parse(Reader theReader) {
+//
+//		PushbackReader pbr = new PushbackReader(theReader);
+//		JsonObject object;
+//		try {
+//			while(true) {
+//				int nextInt;
+//					nextInt = pbr.read();
+//				if (nextInt == -1) {
+//					throw new DataFormatException("Did not find any content to parse");
+//				}
+//				if (nextInt == '{') {
+//					pbr.unread('{');
+//					break;
+//				}
+//				if (Character.isWhitespace(nextInt)) {
+//					continue;
+//				}
+//				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
+//			}
+//		
+//			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+//		
+//			object = gson.fromJson(pbr, JsonObject.class);
+//		} catch (Exception e) {
+//			throw new DataFormatException("Failed to parse JSON content, error was: " + e.getMessage(), e);
+//		}
+//		
+//		return object;
+//	}
 
 	private void encodeBundleToWriterInDstu1Format(Bundle theBundle, JsonWriter theEventWriter) throws IOException {
 		theEventWriter.beginObject();
@@ -1072,24 +1086,24 @@ public class JsonParser extends BaseParser implements IParser {
 		return EncodingEnum.JSON;
 	}
 
-	private JsonArray grabJsonArray(JsonObject theObject, String nextName, String thePosition) {
-		JsonElement object = theObject.get(nextName);
-		if (object == null || object instanceof JsonNull) {
+	private JsonLikeArray grabJsonArray(JsonLikeObject theObject, String nextName, String thePosition) {
+		JsonLikeValue object = theObject.get(nextName);
+		if (object == null || object.isNull()) {
 			return null;
 		}
-		if (!(object instanceof JsonArray)) {
-			throw new DataFormatException("Syntax error parsing JSON FHIR structure: Expected ARRAY at element '" + thePosition + "', found '" + object.getClass().getSimpleName() + "'");
+		if (!object.isArray()) {
+			throw new DataFormatException("Syntax error parsing JSON FHIR structure: Expected ARRAY at element '" + thePosition + "', found '" + object.getJsonType() + "'");
 		}
-		return (JsonArray) object;
+		return object.getAsArray();
 	}
 
-	private void parseAlternates(JsonElement theAlternateVal, ParserState<?> theState, String theElementName) {
-		if (theAlternateVal == null || theAlternateVal instanceof JsonNull) {
+	private void parseAlternates(JsonLikeValue theAlternateVal, ParserState<?> theState, String theElementName) {
+		if (theAlternateVal == null || theAlternateVal.isNull()) {
 			return;
 		}
 
-		if (theAlternateVal instanceof JsonArray) {
-			JsonArray array = (JsonArray) theAlternateVal;
+		if (theAlternateVal.isArray()) {
+			JsonLikeArray array = theAlternateVal.getAsArray();
 			if (array.size() > 1) {
 				throw new DataFormatException("Unexpected array of length " + array.size() + " (expected 0 or 1) for element: " + theElementName);
 			}
@@ -1100,43 +1114,45 @@ public class JsonParser extends BaseParser implements IParser {
 			return;
 		}
 
-		JsonObject alternate = (JsonObject) theAlternateVal;
-		for (Entry<String, JsonElement> nextEntry : alternate.entrySet()) {
-			String nextKey = nextEntry.getKey();
-			JsonElement nextVal = nextEntry.getValue();
+		JsonLikeObject alternate = theAlternateVal.getAsObject();
+		for (String nextKey : alternate.keySet()) {
+			JsonLikeValue nextVal = alternate.get(nextKey);
 			if ("extension".equals(nextKey)) {
 				boolean isModifier = false;
-				JsonArray array = (JsonArray) nextEntry.getValue();
+				JsonLikeArray array = nextVal.getAsArray();
 				parseExtension(theState, array, isModifier);
 			} else if ("modifierExtension".equals(nextKey)) {
 				boolean isModifier = true;
-				JsonArray array = (JsonArray) nextEntry.getValue();
+				JsonLikeArray array = nextVal.getAsArray();
 				parseExtension(theState, array, isModifier);
 			} else if ("id".equals(nextKey)) {
-				if (nextVal instanceof JsonPrimitive) {
-					theState.attributeValue("id", ((JsonPrimitive) nextVal).getAsString());
+				if (nextVal.isString() || nextVal.isNumber()) {
+					theState.attributeValue("id", nextVal.getAsString());
 				}
 			} else if ("fhir_comments".equals(nextKey)) {
-				parseFhirComments(nextEntry.getValue(), theState);
+				parseFhirComments(nextVal, theState);
 			}
 		}
 	}
 
 	@Override
 	public <T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
-		JsonObject object;
-
-		try {
-			object = parse(theReader);
-		} catch (JsonSyntaxException e) {
-			if (e.getMessage().startsWith("Unexpected char 39")) {
-				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
-			}
-			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		jsonStructure.load(theReader);
+		
+		Bundle retVal = parseBundle(theResourceType, jsonStructure);
+		
+		return retVal;
+	}
+	
+	public <T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, JsonLikeStructure theJsonStructure) {
+		JsonLikeObject object = theJsonStructure.getRootObject();
+		
+		JsonLikeValue resourceTypeObj = object.get("resourceType");
+		if (resourceTypeObj == null || !resourceTypeObj.isString()) {
+			throw new DataFormatException("Invalid JSON content detected, missing required element: 'resourceType'");
 		}
-		JsonElement resourceTypeObj = object.get("resourceType");
-		assertObjectOfType(resourceTypeObj, JsonPrimitive.class, "resourceType");
-		String resourceType = ((JsonPrimitive) resourceTypeObj).getAsString();
+		String resourceType = resourceTypeObj.getAsString();
 		if (!"Bundle".equals(resourceType)) {
 			throw new DataFormatException("Trying to parse bundle but found resourceType other than 'Bundle'. Found: '" + resourceType + "'");
 		}
@@ -1158,27 +1174,28 @@ public class JsonParser extends BaseParser implements IParser {
 		return retVal;
 	}
 
-	private void parseBundleChildren(JsonObject theObject, ParserState<?> theState) {
-		for (Entry<String, JsonElement> nextEntry : theObject.entrySet()) {
-			String nextName = nextEntry.getKey();
+	private void parseBundleChildren(JsonLikeObject theObject, ParserState<?> theState) {
+		for (String nextName : theObject.keySet()) {
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("entry".equals(nextName)) {
-				JsonArray entries = grabJsonArray(theObject, nextName, "entry");
-				for (JsonElement JsonElement : entries) {
+				JsonLikeArray entries = grabJsonArray(theObject, nextName, "entry");
+				for (int i = 0; i < entries.size(); i++) {
+					JsonLikeValue jsonValue = entries.get(i);
 					theState.enteringNewElement(null, "entry");
-					parseBundleChildren((JsonObject) JsonElement, theState);
+					parseBundleChildren(jsonValue.getAsObject(), theState);
 					theState.endingElement();
 				}
 				continue;
 			} else if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				if ("link".equals(nextName)) {
-					JsonArray entries = grabJsonArray(theObject, nextName, "link");
-					for (JsonElement JsonElement : entries) {
+					JsonLikeArray entries = grabJsonArray(theObject, nextName, "link");
+					for (int i = 0; i < entries.size(); i++) {
+						JsonLikeValue jsonValue = entries.get(i);
 						theState.enteringNewElement(null, "link");
-						JsonObject linkObj = (JsonObject) JsonElement;
-						String rel = linkObj.get("rel").getAsString();
-						String href = linkObj.get("href").getAsString();
+						JsonLikeObject linkObj = jsonValue.getAsObject();
+						String rel = linkObj.getString("rel", null);
+						String href = linkObj.getString("href", null);
 						theState.attributeValue("rel", rel);
 						theState.attributeValue("href", href);
 						theState.endingElement();
@@ -1186,8 +1203,8 @@ public class JsonParser extends BaseParser implements IParser {
 					continue;
 				} else if (BUNDLE_TEXTNODE_CHILDREN_DSTU1.contains(nextName)) {
 					theState.enteringNewElement(null, nextName);
-					JsonElement jsonElement = theObject.get(nextName);
-					if (jsonElement instanceof JsonPrimitive) {
+					JsonLikeValue jsonElement = theObject.get(nextName);
+					if (jsonElement.isScalar()) {
 						theState.string(jsonElement.getAsString());
 					}
 					theState.endingElement();
@@ -1195,12 +1212,13 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 			} else {
 				if ("link".equals(nextName)) {
-					JsonArray entries = grabJsonArray(theObject, nextName, "link");
-					for (JsonElement JsonElement : entries) {
+					JsonLikeArray entries = grabJsonArray(theObject, nextName, "link");
+					for (int i = 0; i < entries.size(); i++) {
+						JsonLikeValue jsonValue = entries.get(i);
 						theState.enteringNewElement(null, "link");
-						JsonObject linkObj = (JsonObject) JsonElement;
-						String rel = linkObj.get("relation").getAsString();
-						String href = linkObj.get("url").getAsString();
+						JsonLikeObject linkObj = jsonValue.getAsObject();
+						String rel = linkObj.getString("relation", null);
+						String href = linkObj.getString("url", null);
 						theState.enteringNewElement(null, "relation");
 						theState.attributeValue("value", rel);
 						theState.endingElement();
@@ -1214,10 +1232,10 @@ public class JsonParser extends BaseParser implements IParser {
 					theState.enteringNewElement(null, nextName);
 					// String obj = theObject.getString(nextName, null);
 
-					JsonElement obj = theObject.get(nextName);
-					if (obj == null) {
+					JsonLikeValue obj = theObject.get(nextName);
+					if (obj == null || obj.isNull()) {
 						theState.attributeValue("value", null);
-					} else if (obj instanceof JsonPrimitive) {
+					} else if (obj.isScalar()) {
 						theState.attributeValue("value", obj.getAsString());
 					} else {
 						throw new DataFormatException("Unexpected JSON object for entry '" + nextName + "'");
@@ -1228,29 +1246,27 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 			}
 
-			JsonElement nextVal = theObject.get(nextName);
+			JsonLikeValue nextVal = theObject.get(nextName);
 			parseChildren(theState, nextName, nextVal, null, null);
 
 		}
 	}
 
-	private void parseChildren(JsonObject theObject, ParserState<?> theState) {
-		Set<Entry<String, JsonElement>> entrySet = theObject.entrySet();
+	private void parseChildren(JsonLikeObject theObject, ParserState<?> theState) {
+		Set<String> keySet = theObject.keySet();
 
 		int allUnderscoreNames = 0;
 		int handledUnderscoreNames = 0;
 
-		for (Entry<String, JsonElement> nextEntry : entrySet) {
-			String nextName = nextEntry.getKey();
-			JsonElement nextObject = nextEntry.getValue();
+		for (String nextName : keySet) {
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("extension".equals(nextName)) {
-				JsonArray array = grabJsonArray(theObject, nextName, "extension");
+				JsonLikeArray array = grabJsonArray(theObject, nextName, "extension");
 				parseExtension(theState, array, false);
 				continue;
 			} else if ("modifierExtension".equals(nextName)) {
-				JsonArray array = grabJsonArray(theObject, nextName, "modifierExtension");
+				JsonLikeArray array = grabJsonArray(theObject, nextName, "modifierExtension");
 				parseExtension(theState, array, true);
 				continue;
 			} else if (nextName.equals("fhir_comments")) {
@@ -1261,9 +1277,9 @@ public class JsonParser extends BaseParser implements IParser {
 				continue;
 			}
 
-			JsonElement nextVal = theObject.get(nextName);
+			JsonLikeValue nextVal = theObject.get(nextName);
 			String alternateName = '_' + nextName;
-			JsonElement alternateVal = theObject.get(alternateName);
+			JsonLikeValue alternateVal = theObject.get(alternateName);
 			if (alternateVal != null) {
 				handledUnderscoreNames++;
 			}
@@ -1288,11 +1304,10 @@ public class JsonParser extends BaseParser implements IParser {
 		 * for example.
 		 */
 		if (allUnderscoreNames > handledUnderscoreNames) {
-			for (Entry<String, JsonElement> nextEntry : entrySet) {
-				String alternateName = nextEntry.getKey();
+			for (String alternateName : keySet) {
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
-					JsonElement nextValue = theObject.get(alternateName);
-					if (nextValue instanceof JsonObject) {
+					JsonLikeValue nextValue = theObject.get(alternateName);
+					if (nextValue != null && nextValue.isObject()) {
 						String nextName = alternateName.substring(1);
 						if (theObject.get(nextName) == null) {
 							theState.enteringNewElement(null, nextName);
@@ -1306,26 +1321,26 @@ public class JsonParser extends BaseParser implements IParser {
 
 	}
 
-	private void parseChildren(ParserState<?> theState, String theName, JsonElement theJsonVal, JsonElement theAlternateVal, String theAlternateName) {
-		if (theJsonVal instanceof JsonArray) {
-			JsonArray nextArray = (JsonArray) theJsonVal;
-			JsonArray nextAlternateArray = (JsonArray) theAlternateVal;
+	private void parseChildren(ParserState<?> theState, String theName, JsonLikeValue theJsonVal, JsonLikeValue theAlternateVal, String theAlternateName) {
+		if (theJsonVal.isArray()) {
+			JsonLikeArray nextArray = theJsonVal.getAsArray();
+			JsonLikeArray nextAlternateArray = JsonLikeValue.asArray(theAlternateVal); // could be null
 			for (int i = 0; i < nextArray.size(); i++) {
-				JsonElement nextObject = nextArray.get(i);
-				JsonElement nextAlternate = null;
+				JsonLikeValue nextObject = nextArray.get(i);
+				JsonLikeValue nextAlternate = null;
 				if (nextAlternateArray != null) {
 					nextAlternate = nextAlternateArray.get(i);
 				}
 				parseChildren(theState, theName, nextObject, nextAlternate, theAlternateName);
 			}
-		} else if (theJsonVal instanceof JsonObject) {
+		} else if (theJsonVal.isObject()) {
 			theState.enteringNewElement(null, theName);
 			parseAlternates(theAlternateVal, theState, theAlternateName);
-			JsonObject nextObject = (JsonObject) theJsonVal;
+			JsonLikeObject nextObject = theJsonVal.getAsObject();
 			boolean preResource = false;
 			if (theState.isPreResource()) {
-				JsonPrimitive resType = nextObject.getAsJsonPrimitive("resourceType");
-				if (resType == null || isBlank(resType.getAsString())) {
+				JsonLikeValue resType = nextObject.get("resourceType");
+				if (resType == null || !resType.isString()) {
 					throw new DataFormatException("Missing required element 'resourceType' from JSON resource object, unable to parse");
 				}
 				theState.enteringNewElement(null, resType.getAsString());
@@ -1336,36 +1351,35 @@ public class JsonParser extends BaseParser implements IParser {
 				theState.endingElement();
 			}
 			theState.endingElement();
-		} else if (theJsonVal instanceof JsonNull) {
+		} else if (theJsonVal.isNull()) {
 			theState.enteringNewElement(null, theName);
 			parseAlternates(theAlternateVal, theState, theAlternateName);
 			theState.endingElement();
 		} else {
-			JsonPrimitive nextValStr = (JsonPrimitive)theJsonVal;
+			// must be a SCALAR
 			theState.enteringNewElement(null, theName);
-			theState.attributeValue("value", nextValStr.getAsString());
+			theState.attributeValue("value", theJsonVal.getAsString());
 			parseAlternates(theAlternateVal, theState, theAlternateName);
 			theState.endingElement();
 		}
 	}
 
-	private void parseExtension(ParserState<?> theState, JsonArray theValues, boolean theIsModifier) {
+	private void parseExtension(ParserState<?> theState, JsonLikeArray theValues, boolean theIsModifier) {
 		for (int i = 0; i < theValues.size(); i++) {
-			JsonObject nextExtObj = (JsonObject) theValues.get(i);
-			String url = nextExtObj.get("url").getAsString();
+			JsonLikeObject nextExtObj = JsonLikeValue.asObject(theValues.get(i));
+			String url = nextExtObj.getString("url"); // fails if missing
 			theState.enteringNewElementExtension(null, url, theIsModifier);
-			for (Iterator<Entry<String, JsonElement>> iter = nextExtObj.entrySet().iterator(); iter.hasNext();) {
-				String next = iter.next().getKey();
+			for (String next : nextExtObj.keySet()) {
 				if ("url".equals(next)) {
 					continue;
 				} else if ("extension".equals(next)) {
-					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
 					parseExtension(theState, jsonVal, false);
 				} else if ("modifierExtension".equals(next)) {
-					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
 					parseExtension(theState, jsonVal, true);
 				} else {
-					JsonElement jsonVal = nextExtObj.get(next);
+					JsonLikeValue jsonVal = nextExtObj.get(next);
 					parseChildren(theState, next, jsonVal, null, null);
 				}
 			}
@@ -1373,11 +1387,13 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void parseFhirComments(JsonElement theObject, ParserState<?> theState) {
-		if (theObject instanceof JsonArray) {
-			for (JsonElement nextComment : ((JsonArray) theObject)) {
-				if (nextComment instanceof JsonPrimitive) {
-					String commentText = ((JsonPrimitive) nextComment).getAsString();
+	private void parseFhirComments(JsonLikeValue theObject, ParserState<?> theState) {
+		if (theObject.isArray()) {
+			JsonLikeArray comments = theObject.getAsArray();
+			for (int i = 0; i < comments.size(); i++) {
+				JsonLikeValue nextComment = comments.get(i);
+				if (nextComment.isString()) {
+					String commentText = nextComment.getAsString();
 					if (commentText != null) {
 						theState.commentPre(commentText);
 					}
@@ -1388,9 +1404,18 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public TagList parseTagList(Reader theReader) {
-		JsonObject object = parse(theReader);
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		jsonStructure.load(theReader);
+		
+		TagList retVal = parseTagList(jsonStructure);
+		
+		return retVal;
+	}
+	
+	public TagList parseTagList(JsonLikeStructure theJsonStructure) {
+		JsonLikeObject object = theJsonStructure.getRootObject();
 
-		JsonPrimitive resourceTypeObj = object.getAsJsonPrimitive("resourceType");
+		JsonLikeValue resourceTypeObj = object.get("resourceType");
 		String resourceType = resourceTypeObj.getAsString();
 
 		ParserState<TagList> state = ParserState.getPreTagListInstance(this, myContext, true, getErrorHandler());

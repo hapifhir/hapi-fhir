@@ -147,6 +147,7 @@
 							com.phloc.commons;resolution:=optional;-remove-attribute:=version,
 							com.phloc.*;resolution:=optional;-remove-attribute:=version,
 							javassist;-remove-attribute:=version,
+							javax.json.*;resolution:=optional;-remove-attribute:=version,
 							javax.*;-remove-attribute:=version,
 							net.sf.saxon;resolution:=optional,
 							org.apache.commons.*;-remove-attribute:=version,
