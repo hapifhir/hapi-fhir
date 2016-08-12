@@ -10,13 +10,12 @@ package ca.uhn.fhir.parser.json;
 
 import java.io.PushbackReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.json.JsonValue;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -36,6 +35,7 @@ public class GsonStructure implements JsonLikeStructure {
 
 	private JsonObject nativeObject;
 	private JsonLikeObject jsonLikeObject = null;
+	private GsonWriter jsonLikeWriter = null;
 	
 	public GsonStructure() {
 		super();
@@ -48,6 +48,11 @@ public class GsonStructure implements JsonLikeStructure {
 	
 	public void setNativeObject (JsonObject json) {
 		this.nativeObject = json;
+	}
+
+	@Override
+	public JsonLikeStructure getInstance() {
+		return new GsonStructure();
 	}
 
 	@Override
@@ -81,6 +86,14 @@ public class GsonStructure implements JsonLikeStructure {
 		} catch (Exception e) {
 			throw new DataFormatException("Failed to parse JSON content, error was: " + e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public JsonLikeWriter getJsonLikeWriter (Writer writer) {
+		if (null == jsonLikeWriter) {
+			jsonLikeWriter = new GsonWriter(writer);
+		}
+		return jsonLikeWriter;
 	}
 
 	@Override

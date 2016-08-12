@@ -9,6 +9,7 @@
 package ca.uhn.fhir.parser.json;
 
 import java.io.Reader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -55,6 +56,7 @@ public class JsonpStructure implements JsonLikeStructure {
 	
 	private JsonObject nativeObject;
 	private JsonLikeObject jsonLikeObject = null;
+	private JsonpWriter jsonLikeWriter = null;
 	
 	public JsonpStructure() {
 		super();
@@ -70,6 +72,11 @@ public class JsonpStructure implements JsonLikeStructure {
 	}
 
 	@Override
+	public JsonLikeStructure getInstance() {
+		return new JsonpStructure();
+	}
+
+	@Override
 	public void load(Reader theReader) throws DataFormatException {
 		try {
 			JsonReader reader = Json.createReader(theReader);
@@ -80,6 +87,14 @@ public class JsonpStructure implements JsonLikeStructure {
 			}
 			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public JsonLikeWriter getJsonLikeWriter (Writer writer) {
+		if (null == jsonLikeWriter) {
+			jsonLikeWriter = new JsonpWriter(writer);
+		}
+		return jsonLikeWriter;
 	}
 
 	@Override

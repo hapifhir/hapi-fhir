@@ -9,6 +9,7 @@
 package ca.uhn.fhir.parser.json;
 
 import java.io.Reader;
+import java.io.Writer;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -17,6 +18,8 @@ import ca.uhn.fhir.parser.DataFormatException;
  *
  */
 public interface JsonLikeStructure {
+	public JsonLikeStructure getInstance();
 	public void load (Reader theReader) throws DataFormatException;
 	public JsonLikeObject getRootObject ();
+	public JsonLikeWriter getJsonLikeWriter (Writer writer);
 }
