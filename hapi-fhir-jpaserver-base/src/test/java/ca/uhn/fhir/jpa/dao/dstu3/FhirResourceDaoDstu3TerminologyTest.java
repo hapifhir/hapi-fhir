@@ -259,6 +259,30 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testReindex() {
+		createLocalCsAndVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("ZZZZ");
+
+		mySystemDao.markAllResourcesForReindexing();
+		mySystemDao.performReindexingPass(null);
+		myTermSvc.saveDeferred();
+		mySystemDao.performReindexingPass(null);
+		myTermSvc.saveDeferred();
+		
+		// Again
+		mySystemDao.markAllResourcesForReindexing();
+		mySystemDao.performReindexingPass(null);
+		myTermSvc.saveDeferred();
+		mySystemDao.performReindexingPass(null);
+		myTermSvc.saveDeferred();
+
+	}
+
+	@Test
 	public void testExpandWithNoResultsInLocalValueSet2() {
 		createLocalCsAndVs();
 
