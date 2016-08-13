@@ -1,17 +1,30 @@
-/**
- * This software has been produced by Akana, Inc. under a professional services
- * agreement with our customer. This work may contain material that is confidential 
- * and proprietary information of Akana, Inc. and is subject to copyright 
- * protection under laws of the United States of America and other countries. 
- * Akana, Inc. grants the customer non-exclusive rights to this material without
- * any warranty expressed or implied. 
- */
 package ca.uhn.fhir.parser.json;
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2016 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.HashSet;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,10 +40,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
-/**
- * @author Akana, Inc. Professional Services
- *
- */
 public class GsonStructure implements JsonLikeStructure {
 
 	private JsonObject nativeObject;
@@ -104,7 +113,7 @@ public class GsonStructure implements JsonLikeStructure {
 		return jsonLikeObject;
 	}
 
-	private class GsonJsonObject extends JsonLikeObject {
+	private static class GsonJsonObject extends JsonLikeObject {
 		private JsonObject nativeObject;
 		private Set<String> keySet = null;
 		private Map<String,JsonLikeValue> jsonLikeMap = new LinkedHashMap<String,JsonLikeValue>();
@@ -116,8 +125,9 @@ public class GsonStructure implements JsonLikeStructure {
 		@Override
 		public Set<String> keySet() {
 			if (null == keySet) {
-				keySet = new HashSet<String>();
-				for (Entry<String,?> entry : nativeObject.entrySet()) {
+				Set<Entry<String, JsonElement>> entrySet = nativeObject.entrySet();
+				keySet = new EntryOrderedSet<String>(entrySet.size());
+				for (Entry<String,?> entry : entrySet) {
 					keySet.add(entry.getKey());
 				}
 			}
@@ -126,16 +136,21 @@ public class GsonStructure implements JsonLikeStructure {
 
 		@Override
 		public JsonLikeValue get(String key) {
-			JsonLikeValue result = jsonLikeMap.get(key);
-			if (null == result) {
-				result = new GsonJsonValue(nativeObject.get(key));
+			JsonLikeValue result = null;
+			if (jsonLikeMap.containsKey(key)) {
+				result = jsonLikeMap.get(key); 
+			} else {
+				JsonElement child = nativeObject.get(key);
+				if (child != null) {
+					result = new GsonJsonValue(child);
+				}
 				jsonLikeMap.put(key, result);
 			}
 			return result;
 		}
 	}
 	
-	private class GsonJsonArray extends JsonLikeArray {
+	private static class GsonJsonArray extends JsonLikeArray {
 		private JsonArray nativeArray;
 		private Map<Integer,JsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer,JsonLikeValue>();
 		
@@ -151,16 +166,21 @@ public class GsonStructure implements JsonLikeStructure {
 		@Override
 		public JsonLikeValue get(int index) {
 			Integer key = Integer.valueOf(index);
-			JsonLikeValue result = jsonLikeMap.get(key);
-			if (null == result) {
-				result = new GsonJsonValue(nativeArray.get(index));
+			JsonLikeValue result = null;
+			if (jsonLikeMap.containsKey(key)) {
+				result = jsonLikeMap.get(key); 
+			} else {
+				JsonElement child = nativeArray.get(index);
+				if (child != null) {
+					result = new GsonJsonValue(child);
+				}
 				jsonLikeMap.put(key, result);
 			}
 			return result;
 		}
 	}
 	
-	private class GsonJsonValue extends JsonLikeValue {
+	private static class GsonJsonValue extends JsonLikeValue {
 		private JsonElement nativeValue;
 		private JsonLikeObject jsonLikeObject = null;
 		private JsonLikeArray jsonLikeArray = null;
@@ -204,7 +224,7 @@ public class GsonStructure implements JsonLikeStructure {
 
 		@Override
 		public JsonLikeArray getAsArray() {
-			if (nativeValue.isJsonArray()) {
+			if (nativeValue != null && nativeValue.isJsonArray()) {
 				if (null == jsonLikeArray) {
 					jsonLikeArray = new GsonJsonArray((JsonArray)nativeValue);
 				}
@@ -214,7 +234,7 @@ public class GsonStructure implements JsonLikeStructure {
 
 		@Override
 		public JsonLikeObject getAsObject() {
-			if (nativeValue.isJsonObject()) {
+			if (nativeValue != null && nativeValue.isJsonObject()) {
 				if (null == jsonLikeObject) {
 					jsonLikeObject = new GsonJsonObject((JsonObject)nativeValue);
 				}
@@ -224,15 +244,66 @@ public class GsonStructure implements JsonLikeStructure {
 
 		@Override
 		public String getAsString() {
-			return nativeValue.getAsString();
+			return nativeValue != null ? nativeValue.getAsString() : null;
 		}
 
 		@Override
 		public boolean getAsBoolean() {
-			if (nativeValue.isJsonPrimitive() && ((JsonPrimitive)nativeValue).isBoolean()) {
+			if (nativeValue != null && nativeValue.isJsonPrimitive() && ((JsonPrimitive)nativeValue).isBoolean()) {
 				return nativeValue.getAsBoolean();
 			}
 			return super.getAsBoolean();
 		}
+	}
+	
+	private static class EntryOrderedSet<T> extends AbstractSet<T> {
+		private transient ArrayList<T> data = null;
+		
+		public EntryOrderedSet (int initialCapacity) {
+			data = new ArrayList<T>(initialCapacity);
+		}
+		@SuppressWarnings("unused")
+		public EntryOrderedSet () {
+			data = new ArrayList<T>();
+		}
+		
+		@Override
+		public int size() {
+			return data.size();
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			return data.contains(o);
+		}
+
+		@SuppressWarnings("unused")  // not really.. just not here
+		public T get(int index) {
+			return data.get(index);
+		}
+		
+		@Override
+		public boolean add(T element) {
+			if (data.contains(element)) {
+				return false;
+			}
+			return data.add(element);
+		}
+		
+		@Override
+		public boolean remove(Object o) {
+			return data.remove(o);
+		}
+
+		@Override
+		public void clear() {
+			data.clear();
+		}
+		
+		@Override
+		public Iterator<T> iterator() {
+			return data.iterator();
+		}
+		
 	}
 }
