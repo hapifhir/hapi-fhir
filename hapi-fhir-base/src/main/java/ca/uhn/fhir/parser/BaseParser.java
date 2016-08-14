@@ -623,13 +623,15 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
 
+		/* 
+		 * We do this so that the context can verify that the structure is for
+		 * the correct FHIR version
+		 */
 		if (theResourceType != null) {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
-			if (def.getStructureVersion() != myContext.getVersion().getVersion()) {
-				throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not parse a structure for version " + def.getStructureVersion());
-			}
+			myContext.getResourceDefinition(theResourceType);
 		}
 
+		// Actually do the parse
 		T retVal = doParseResource(theResourceType, theReader);
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);

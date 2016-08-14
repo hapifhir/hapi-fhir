@@ -2,12 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -144,6 +139,16 @@ public class GenericClientDstu3Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		MyPatientWithExtensions read = client.read().resource(MyPatientWithExtensions.class).withId(new IdType("1")).execute();
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", read.getText().getDivAsString());
+		
+		// Ensure that we haven't overridden the default type for the name
+		assertFalse(MyPatientWithExtensions.class.isAssignableFrom(Patient.class));
+		assertFalse(Patient.class.isAssignableFrom(MyPatientWithExtensions.class));
+		Patient pt = new Patient();
+		pt.getText().setDivAsString("A PATIENT");
+		IParser parser = ourCtx.newXmlParser();
+		String encoded = parser.encodeResourceToString(pt);
+		pt = (Patient) parser.parseResource(encoded);
+		
 	}
 
 	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {

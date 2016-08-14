@@ -760,7 +760,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testDocumentManifestResources() throws Exception {
 		myFhirCtx.getResourceDefinition(Practitioner.class);
-		myFhirCtx.getResourceDefinition(ca.uhn.fhir.model.dstu.resource.DocumentManifest.class);
+		myFhirCtx.getResourceDefinition(DocumentManifest.class);
 
 		IGenericClient client = ourClient;
 
@@ -2254,7 +2254,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		input.addParameter().setName("resource").setResource(patient);
 
 		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
-		ourLog.info(inputStr);
+//		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));

@@ -9,9 +9,6 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -24,7 +21,7 @@ public class FhirContextDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-	
+		
 	/**
 	 * See #344
 	 */
