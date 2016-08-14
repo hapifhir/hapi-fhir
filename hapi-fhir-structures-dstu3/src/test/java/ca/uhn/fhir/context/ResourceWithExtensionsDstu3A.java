@@ -31,6 +31,7 @@ public class ResourceWithExtensionsDstu3A extends BaseResource {
 	 * so check the unit tests immediately after any changes 
 	 */
 	
+	private static final long serialVersionUID = 1L;
 
 	@Child(name = "foo1", type = StringType.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	@Extension(url = "http://foo/#f1", definedLocally=true, isModifier=false)
@@ -197,11 +198,6 @@ public class ResourceWithExtensionsDstu3A extends BaseResource {
 
 	
 	
-	@Override
-	public FhirVersionEnum getStructureFhirVersionEnum() {
-		return FhirVersionEnum.DSTU1;
-	}
-
 	@Override
 	public String getId() {
 		return null;

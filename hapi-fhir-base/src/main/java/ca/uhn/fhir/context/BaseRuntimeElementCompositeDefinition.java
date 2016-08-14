@@ -72,19 +72,59 @@ import ca.uhn.fhir.util.ReflectionUtil;
 public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> extends BaseRuntimeElementDefinition<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseRuntimeElementCompositeDefinition.class);
+	private Map<String, Integer> forcedOrder = null;
 	private List<BaseRuntimeChildDefinition> myChildren = new ArrayList<BaseRuntimeChildDefinition>();
 	private List<BaseRuntimeChildDefinition> myChildrenAndExtensions;
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions;
 	private FhirContext myContext;
 	private Map<String, BaseRuntimeChildDefinition> myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
-
+	private List<ScannedField> myScannedFields = new ArrayList<BaseRuntimeElementCompositeDefinition.ScannedField>();
 	private volatile boolean mySealed;
 
+	@SuppressWarnings("unchecked")
 	public BaseRuntimeElementCompositeDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType, FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super(theName, theImplementingClass, theStandardType);
 		
 		myContext = theContext;
 		myClassToElementDefinitions = theClassToElementDefinitions;
+		
+		/*
+		 * We scan classes for annotated fields in the class but also all of its superclasses
+		 */
+		Class<? extends IBase> current = theImplementingClass;
+		LinkedList<Class<? extends IBase>> classes = new LinkedList<Class<? extends IBase>>();
+		do {
+			if (forcedOrder == null) {
+				ChildOrder childOrder = current.getAnnotation(ChildOrder.class);
+				if (childOrder != null) {
+					forcedOrder = new HashMap<String, Integer>();
+					for (int i = 0; i < childOrder.names().length; i++) {
+						forcedOrder.put(childOrder.names()[i], i);
+					}
+				}
+			}
+			classes .push(current);
+			if (IBase.class.isAssignableFrom(current.getSuperclass())) {
+				current = (Class<? extends IBase>) current.getSuperclass();
+			} else {
+				current = null;
+			}
+		} while (current != null);
+
+		Set<Field> fields = new HashSet<Field>();
+		for (Class<? extends IBase> nextClass : classes) {
+			int fieldIndexInClass = 0;
+			for (Field next : nextClass.getDeclaredFields()) {
+				if (fields.add(next)) {
+					ScannedField scannedField = new ScannedField(next, theImplementingClass, fieldIndexInClass == 0);
+					if (scannedField.getChildAnnotation() != null) {
+						myScannedFields.add(scannedField);
+						fieldIndexInClass++;
+					}
+				}
+			}
+		}
+
 	}
 
 	void addChild(BaseRuntimeChildDefinition theNext) {
@@ -116,13 +156,14 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		validateSealed();
 		return myChildren;
 	}
-
+	
+	
 	public List<BaseRuntimeChildDefinition> getChildrenAndExtension() {
 		validateSealed();
 		return myChildrenAndExtensions;
 	}
-	
-	
+
+
 	/**
 	 * Has this class been sealed
 	 */
@@ -130,41 +171,28 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		return mySealed;
 	}
 
-
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends IBase> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition) {
+	void populateScanAlso(Set<Class<? extends IBase>> theScanAlso) {
+		for (ScannedField next : myScannedFields) {
+			if (IBase.class.isAssignableFrom(next.getElementType())) {
+				if (next.getElementType().isInterface() == false && Modifier.isAbstract(next.getElementType().getModifiers()) == false) {
+					theScanAlso.add((Class<? extends IBase>) next.getElementType());
+				}
+			}
+			for (Class<? extends IBase> nextChildType : next.getChoiceTypes()) {
+				if (nextChildType.isInterface() == false && Modifier.isAbstract(nextChildType.getModifiers()) == false) {
+					theScanAlso.add(nextChildType);
+				}
+			}
+		}
+	}
+	
+	private void scanCompositeElementForChildren() {
 		Set<String> elementNames = new HashSet<String>();
 		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
 		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
 
-		LinkedList<Class<? extends IBase>> classes = new LinkedList<Class<? extends IBase>>();
-
-		/*
-		 * We scan classes for annotated fields in the class but also all of its superclasses
-		 */
-		Class<? extends IBase> current = theClass;
-		Map<String, Integer> forcedOrder = null;
-		do {
-			if (forcedOrder == null) {
-				ChildOrder childOrder = current.getAnnotation(ChildOrder.class);
-				if (childOrder != null) {
-					forcedOrder = new HashMap<String, Integer>();
-					for (int i = 0; i < childOrder.names().length; i++) {
-						forcedOrder.put(childOrder.names()[i], i);
-					}
-				}
-			}
-			classes.push(current);
-			if (IBase.class.isAssignableFrom(current.getSuperclass())) {
-				current = (Class<? extends IBase>) current.getSuperclass();
-			} else {
-				current = null;
-			}
-		} while (current != null);
-
-		for (Class<? extends IBase> next : classes) {
-			scanCompositeElementForChildren(next, elementNames, orderToElementDef, orderToExtensionDef);
-		}
+		scanCompositeElementForChildren(elementNames, orderToElementDef, orderToExtensionDef);
 
 		if (forcedOrder != null) {
 			/* 
@@ -207,42 +235,38 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		for (Integer i : orders) {
 			BaseRuntimeChildDefinition nextChild = orderToElementDef.get(i);
 			if (nextChild != null) {
-				theDefinition.addChild(nextChild);
+				this.addChild(nextChild);
 			}
 			BaseRuntimeDeclaredChildDefinition nextExt = orderToExtensionDef.get(i);
 			if (nextExt != null) {
-				theDefinition.addExtension((RuntimeChildDeclaredExtensionDefinition) nextExt);
+				this.addExtension((RuntimeChildDeclaredExtensionDefinition) nextExt);
 			}
 		}
 
 	}
-
+	
 	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends IBase> theClass, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
+	private void scanCompositeElementForChildren(Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
-		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
+		int baseElementOrder = 0; 
 
-		for (Field next : theClass.getDeclaredFields()) {
-
-			if (Modifier.isFinal(next.getModifiers())) {
-				ourLog.trace("Ignoring constant {} on target type {}", next.getName(), theClass);
-				continue;
+		for (ScannedField next : myScannedFields) {
+			if (next.isFirstFieldInNewClass()) {
+				baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
 			}
+			
+			Class<?> declaringClass = next.getField().getDeclaringClass(); 
 
-			Child childAnnotation = ModelScanner.pullAnnotation(next, Child.class);
-			if (childAnnotation == null) {
-				ourLog.trace("Ignoring non @Child field {} on target type {}", next.getName(), theClass);
-				continue;
-			}
-
-			Description descriptionAnnotation = ModelScanner.pullAnnotation(next, Description.class);
+			Description descriptionAnnotation = ModelScanner.pullAnnotation(next.getField(), Description.class);
 
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
-			Extension extensionAttr = ModelScanner.pullAnnotation(next, Extension.class);
+			Extension extensionAttr = ModelScanner.pullAnnotation(next.getField(), Extension.class);
 			if (extensionAttr != null) {
 				orderMap = theOrderToExtensionDef;
 			}
 
+			Child childAnnotation = next.getChildAnnotation();
+			Field nextField = next.getField();
 			String elementName = childAnnotation.name();
 			int order = childAnnotation.order();
 			boolean childIsChoiceType = false;
@@ -265,8 +289,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						}
 					}
 					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
-								+ ") but no parent element with extension URL " + extensionAttr.url() + " could be found on type " + next.getDeclaringClass().getSimpleName());
+						throw new ConfigurationException("Field " + nextField.getName() + "' on target type " + declaringClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
+								+ ") but no parent element with extension URL " + extensionAttr.url() + " could be found on type " + nextField.getDeclaringClass().getSimpleName());
 					}
 
 				} else {
@@ -291,8 +315,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						}
 					}
 					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
-								+ ") but no parent element with name " + elementName + " could be found on type " + next.getDeclaringClass().getSimpleName());
+						throw new ConfigurationException("Field " + nextField.getName() + "' on target type " + declaringClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
+								+ ") but no parent element with name " + elementName + " could be found on type " + nextField.getDeclaringClass().getSimpleName());
 					}
 
 				}
@@ -300,7 +324,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			}
 			
 			if (order < 0 && order != Child.ORDER_UNKNOWN) {
-				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
+				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + nextField.getName() + "' on target type: " + declaringClass);
 			}
 			
 			if (order != Child.ORDER_UNKNOWN && !orderIsReplaceParent) {
@@ -319,40 +343,37 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 				}
 			}
 
-			List<Class<? extends IBase>> choiceTypes = new ArrayList<Class<? extends IBase>>();
-			for (Class<? extends IBase> nextChoiceType : childAnnotation.type()) {
-				choiceTypes.add(nextChoiceType);
-			}
-
+			List<Class<? extends IBase>> choiceTypes = next.getChoiceTypes();
+			
 			if (orderMap.containsKey(order)) {
-				throw new ConfigurationException("Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "' - Already had: " + orderMap.get(order).getElementName());
+				throw new ConfigurationException("Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "' - Already had: " + orderMap.get(order).getElementName());
 			}
 
 			if (elementNames.contains(elementName)) {
-				throw new ConfigurationException("Detected duplicate field name '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
+				throw new ConfigurationException("Detected duplicate field name '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "'");
 			}
 
-			Class<?> nextElementType = ModelScanner.determineElementType(next);
+			Class<?> nextElementType = next.getElementType();
 
 			BaseRuntimeDeclaredChildDefinition def;
 			if (childAnnotation.name().equals("extension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
-				def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
+				def = new RuntimeChildExtension(nextField, childAnnotation.name(), childAnnotation, descriptionAnnotation);
 			} else if (childAnnotation.name().equals("modifierExtension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
-				def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
+				def = new RuntimeChildExtension(nextField, childAnnotation.name(), childAnnotation, descriptionAnnotation);
 			} else if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IBaseResource.class.isAssignableFrom(nextElementType))) {
 				/*
 				 * Child is contained resources
 				 */
-				def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
+				def = new RuntimeChildContainedResources(nextField, childAnnotation, descriptionAnnotation, elementName);
 			} else if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
 				/*
 				 * Child is a resource as a direct child, as in Bundle.entry.resource
 				 */
-				def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
+				def = new RuntimeChildDirectResource(nextField, childAnnotation, descriptionAnnotation, elementName);
 			} else {
 				childIsChoiceType |= choiceTypes.size() > 1;
 				if (childIsChoiceType && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
-					def = new RuntimeChildChoiceDefinition(next, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
+					def = new RuntimeChildChoiceDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
 				} else if (extensionAttr != null) {
 					/*
 					 * Child is an extension
@@ -361,13 +382,13 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 
 					Object binder = null;
 					if (BoundCodeDt.class.isAssignableFrom(nextElementType) || IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
-						binder = ModelScanner.getBoundCodeBinder(next);
+						binder = ModelScanner.getBoundCodeBinder(nextField);
 					}
 
-					def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et,							binder);
+					def = new RuntimeChildDeclaredExtensionDefinition(nextField, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et,							binder);
 
 					if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-						((RuntimeChildDeclaredExtensionDefinition)def).setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next));
+						((RuntimeChildDeclaredExtensionDefinition)def).setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(nextField));
 					}
 				} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || IBaseReference.class.isAssignableFrom(nextElementType)) {
 					/*
@@ -379,11 +400,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 							refTypesList.add(myContext.getVersion().getVersion().isRi() ? IAnyResource.class : IResource.class);
 							continue;
 						} else if (IBaseResource.class.isAssignableFrom(nextType) == false) {
-							throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
+							throw new ConfigurationException("Field '" + nextField.getName() + "' in class '" + nextField.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
 						}
 						refTypesList.add((Class<? extends IBaseResource>) nextType);
 					}
-					def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
+					def = new RuntimeChildResourceDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, refTypesList);
 
 				} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBaseBackboneElement.class.isAssignableFrom(nextElementType)
 						|| IBaseDatatypeElement.class.isAssignableFrom(nextElementType)) {
@@ -392,43 +413,43 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					 */
 
 					Class<? extends IBase> blockDef = (Class<? extends IBase>) nextElementType;
-					def = new RuntimeChildResourceBlockDefinition(myContext, next, childAnnotation, descriptionAnnotation, elementName, blockDef);
+					def = new RuntimeChildResourceBlockDefinition(myContext, nextField, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "Type".equals(nextElementType.getSimpleName())
 						|| IBaseDatatype.class.equals(nextElementType)) {
 
-					def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
+					def = new RuntimeChildAny(nextField, elementName, childAnnotation, descriptionAnnotation);
 				} else if (IDatatype.class.isAssignableFrom(nextElementType) || IPrimitiveType.class.isAssignableFrom(nextElementType) || ICompositeType.class.isAssignableFrom(nextElementType)
 						|| IBaseDatatype.class.isAssignableFrom(nextElementType) || IBaseExtension.class.isAssignableFrom(nextElementType)) {
 					Class<? extends IBase> nextDatatype = (Class<? extends IBase>) nextElementType;
 
 					if (IPrimitiveType.class.isAssignableFrom(nextElementType)) {
 						if (nextElementType.equals(BoundCodeDt.class)) {
-							IValueSetEnumBinder<Enum<?>> binder = ModelScanner.getBoundCodeBinder(next);
-							Class<? extends Enum<?>> enumType = ModelScanner.determineEnumTypeForBoundField(next);
-							def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
+							IValueSetEnumBinder<Enum<?>> binder = ModelScanner.getBoundCodeBinder(nextField);
+							Class<? extends Enum<?>> enumType = ModelScanner.determineEnumTypeForBoundField(nextField);
+							def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
 						} else if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-							Class<? extends Enum<?>> binderType = ModelScanner.determineEnumTypeForBoundField(next);
-							def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
+							Class<? extends Enum<?>> binderType = ModelScanner.determineEnumTypeForBoundField(nextField);
+							def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
 						} else {
-							def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
+							def = new RuntimeChildPrimitiveDatatypeDefinition(nextField, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 						}
 					} else {
 						if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
-							IValueSetEnumBinder<Enum<?>> binder = ModelScanner.getBoundCodeBinder(next);
-							Class<? extends Enum<?>> enumType = ModelScanner.determineEnumTypeForBoundField(next);
-							def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
+							IValueSetEnumBinder<Enum<?>> binder = ModelScanner.getBoundCodeBinder(nextField);
+							Class<? extends Enum<?>> enumType = ModelScanner.determineEnumTypeForBoundField(nextField);
+							def = new RuntimeChildCompositeBoundDatatypeDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
 						} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || INarrative.class.isAssignableFrom(nextElementType)) {
-							def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
+							def = new RuntimeChildNarrativeDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 						} else {
-							def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
+							def = new RuntimeChildCompositeDatatypeDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 						}
 					}
 
 				} else {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a valid child type: " + nextElementType);
+					throw new ConfigurationException("Field '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "' is not a valid child type: " + nextElementType);
 				}
 
-				Binding bindingAnnotation = ModelScanner.pullAnnotation(next, Binding.class);
+				Binding bindingAnnotation = ModelScanner.pullAnnotation(nextField, Binding.class);
 				if (bindingAnnotation != null) {
 					if (isNotBlank(bindingAnnotation.valueSet())) {
 						def.setBindingValueSet(bindingAnnotation.valueSet());
@@ -448,7 +469,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		}
 		mySealed = true;
 
-		scanCompositeElementForChildren(getImplementingClass(), this);
+		scanCompositeElementForChildren();
 		
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
@@ -537,5 +558,54 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		return index;
 	}
 
+	private static class ScannedField {
+		private Child myChildAnnotation;
+
+		private List<Class<? extends IBase>> myChoiceTypes = new ArrayList<Class<? extends IBase>>();
+		private Class<?> myElementType;
+		private Field myField;
+		private boolean myFirstFieldInNewClass;
+		public ScannedField(Field theField, Class<?> theClass, boolean theFirstFieldInNewClass) {
+			myField = theField;
+			myFirstFieldInNewClass = theFirstFieldInNewClass;
+
+			Child childAnnotation = ModelScanner.pullAnnotation(theField, Child.class);
+			if (childAnnotation == null) {
+				ourLog.trace("Ignoring non @Child field {} on target type {}", theField.getName(), theClass);
+				return;
+			}
+			if (Modifier.isFinal(theField.getModifiers())) {
+				ourLog.trace("Ignoring constant {} on target type {}", theField.getName(), theClass);
+				return;
+			}
+			
+			myChildAnnotation = childAnnotation;
+			myElementType = ModelScanner.determineElementType(theField);
+			
+			for (Class<? extends IBase> nextChoiceType : childAnnotation.type()) {
+				myChoiceTypes.add(nextChoiceType);
+			}
+		}
+		
+		public Child getChildAnnotation() {
+			return myChildAnnotation;
+		}
+
+		public List<Class<? extends IBase>> getChoiceTypes() {
+			return myChoiceTypes;
+		}
+
+		public Class<?> getElementType() {
+			return myElementType;
+		}
+
+		public Field getField() {
+			return myField;
+		}
+
+		public boolean isFirstFieldInNewClass() {
+			return myFirstFieldInNewClass;
+		}
+	}
 
 }

@@ -956,7 +956,7 @@ public class RestfulServerMethodTest {
 
 		IdDt id = new IdDt("Profile", "observation");
 		Profile profile = profileProvider.getProfileById(createHttpServletRequest(), id);
-		assertNull(profile);
+		assertNotNull(profile);
 		
 		id = new IdDt("Profile", "patient");
 		profile = profileProvider.getProfileById(createHttpServletRequest(), id);

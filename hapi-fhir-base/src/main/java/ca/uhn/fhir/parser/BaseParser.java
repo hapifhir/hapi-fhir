@@ -705,11 +705,12 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected <T extends IBaseResource> void preParseResource (Class<T> theResourceType) {
+		/* 
+		 * We do this so that the context can verify that the structure is for
+		 * the correct FHIR version
+		 */
 		if (theResourceType != null) {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
-			if (def.getStructureVersion() != myContext.getVersion().getVersion()) {
-				throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not parse a structure for version " + def.getStructureVersion());
-			}
+			myContext.getResourceDefinition(theResourceType);
 		}
 	}
 		
@@ -718,6 +719,7 @@ public abstract class BaseParser implements IParser {
 
 		preParseResource(theResourceType);
 
+		// Actually do the parse
 		T retVal = null;
 		if (isJsonParser() && myJsonLikeStructure != null) {
 			JsonLikeStructure jsonStructure = myJsonLikeStructure.getInstance();

@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
@@ -313,7 +314,7 @@ public class FhirContext {
 
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
-			retVal = scanResourceType((Class<? extends IResource>) theResourceType);
+			retVal = scanResourceType(theResourceType);
 		}
 		return retVal;
 	}
@@ -329,7 +330,8 @@ public class FhirContext {
 		Map<String, Class<? extends IBaseResource>> nameToType = myVersionToNameToResourceType.get(theVersion);
 		if (nameToType == null) {
 			nameToType = new HashMap<String, Class<? extends IBaseResource>>();
-			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion);
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = Collections.emptyMap();
+			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion, existing);
 
 			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>>();
 			newVersionToNameToResourceType.putAll(myVersionToNameToResourceType);
@@ -585,7 +587,7 @@ public class FhirContext {
 		return defs.get(theResourceType);
 	}
 
-	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
+	private RuntimeResourceDefinition scanResourceType(Class<? extends IBaseResource> theResourceType) {
 		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<Class<? extends IElement>>();
 		resourceTypes.add(theResourceType);
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
@@ -611,11 +613,19 @@ public class FhirContext {
 
 		Map<String, BaseRuntimeElementDefinition<?>> nameToElementDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		nameToElementDefinition.putAll(myNameToElementDefinition);
-		nameToElementDefinition.putAll(scanner.getNameToElementDefinitions());
+		for (Entry<String, BaseRuntimeElementDefinition<?>> next : scanner.getNameToElementDefinitions().entrySet()) {
+			if (!nameToElementDefinition.containsKey(next.getKey())) {
+				nameToElementDefinition.put(next.getKey(), next.getValue());
+			}
+		}
 
 		Map<String, RuntimeResourceDefinition> nameToResourceDefinition = new HashMap<String, RuntimeResourceDefinition>();
 		nameToResourceDefinition.putAll(myNameToResourceDefinition);
-		nameToResourceDefinition.putAll(scanner.getNameToResourceDefinition());
+		for (Entry<String, RuntimeResourceDefinition> next : scanner.getNameToResourceDefinition().entrySet()) {
+			if (!nameToResourceDefinition.containsKey(next.getKey())) {
+				nameToResourceDefinition.put(next.getKey(), next.getValue());
+			}
+		}
 
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 		classToElementDefinition.putAll(myClassToElementDefinition);

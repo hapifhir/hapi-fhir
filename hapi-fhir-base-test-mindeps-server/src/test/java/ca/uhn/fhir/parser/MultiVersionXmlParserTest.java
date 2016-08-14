@@ -8,6 +8,7 @@ import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -64,14 +65,14 @@ public class MultiVersionXmlParserTest {
 		try {
 			ourCtxDstu1.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("This parser is for FHIR version DSTU1 - Can not parse a structure for version DSTU2", e.getMessage());
+		} catch (ConfigurationException e) {
+			assertEquals("This context is for FHIR version \"DSTU1\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
 		}
 		try {
 			ourCtxDstu2.newXmlParser().parseResource(ca.uhn.fhir.model.dstu.resource.Patient.class, res);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("This parser is for FHIR version DSTU2 - Can not parse a structure for version DSTU1", e.getMessage());
+		} catch (ConfigurationException e) {
+			assertEquals("This context is for FHIR version \"DSTU2\" but the class \"ca.uhn.fhir.model.dstu.resource.Patient\" is for version \"DSTU1\"", e.getMessage());
 		}
 		
 	}

@@ -53,12 +53,15 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();
 
+		IBaseResource instance;
 		try {
-			IBaseResource instance = theClass.newInstance();
-			myStructureVersion = instance.getStructureFhirVersionEnum();
-			assert myStructureVersion != null;
+			instance = theClass.newInstance();
 		} catch (Exception e) {
 			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
+		}
+		myStructureVersion = instance.getStructureFhirVersionEnum();
+		if (myStructureVersion != theContext.getVersion().getVersion()) {
+			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "typeWrongVersion", theContext.getVersion().getVersion(), theClass.getName(), myStructureVersion));
 		}
 
 	}

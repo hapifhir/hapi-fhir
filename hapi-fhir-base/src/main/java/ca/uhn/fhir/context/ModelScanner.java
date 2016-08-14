@@ -150,7 +150,7 @@ class ModelScanner {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
-	private void init(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IBase>> theDatatypes) {
+	private void init(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IBase>> theTypesToScan) {
 		if (theExistingDefinitions != null) {
 			myClassToElementDefinitions.putAll(theExistingDefinitions);
 		}
@@ -159,17 +159,11 @@ class ModelScanner {
 		long start = System.currentTimeMillis();
 		Map<String, Class<? extends IBaseResource>> resourceTypes = myNameToResourceType;
 
-		myVersionTypes = scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
-
-		// toScan.add(DateDt.class);
-		// toScan.add(CodeDt.class);
-		// toScan.add(DecimalDt.class);
-		// toScan.add(AttachmentDt.class);
-		// toScan.add(ResourceReferenceDt.class);
-		// toScan.add(QuantityDt.class);
+		Set<Class<? extends IBase>> typesToScan = theTypesToScan;
+		myVersionTypes = scanVersionPropertyFile(typesToScan, resourceTypes, myVersion, myClassToElementDefinitions);
 
 		do {
-			for (Class<? extends IBase> nextClass : theDatatypes) {
+			for (Class<? extends IBase> nextClass : typesToScan) {
 				scan(nextClass);
 			}
 			for (Iterator<Class<? extends IBase>> iter = myScanAlso.iterator(); iter.hasNext();) {
@@ -177,10 +171,10 @@ class ModelScanner {
 					iter.remove();
 				}
 			}
-			theDatatypes.clear();
-			theDatatypes.addAll(myScanAlso);
+			typesToScan.clear();
+			typesToScan.addAll(myScanAlso);
 			myScanAlso.clear();
-		} while (!theDatatypes.isEmpty());
+		} while (!typesToScan.isEmpty());
 
 		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> nextEntry : myClassToElementDefinitions.entrySet()) {
 			if (theExistingDefinitions != null && theExistingDefinitions.containsKey(nextEntry.getKey())) {
@@ -237,6 +231,7 @@ class ModelScanner {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseResource> resClass = (Class<? extends IBaseResource>) theClass;
 			scanResource(resClass, resourceDefinition);
+			return;
 		}
 
 		DatatypeDef datatypeDefinition = pullAnnotation(theClass, DatatypeDef.class);
@@ -249,11 +244,9 @@ class ModelScanner {
 				@SuppressWarnings({ "unchecked" })
 				Class<? extends IPrimitiveType<?>> resClass = (Class<? extends IPrimitiveType<?>>) theClass;
 				scanPrimitiveDatatype(resClass, datatypeDefinition);
-			} else {
-				return;
-				// throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " +
-				// theClass.getCanonicalName());
-			}
+			} 
+				
+			return;
 		}
 
 		Block blockDefinition = pullAnnotation(theClass, Block.class);
@@ -297,6 +290,13 @@ class ModelScanner {
 		}
 		myClassToElementDefinitions.put(theClass, elementDef);
 		myNameToElementDefinitions.put(elementDef.getName().toLowerCase(), elementDef);
+
+		/*
+		 * See #423:
+		 * If the type contains a field that has a custom type, we want to make
+		 * sure that this type gets scanned as well
+		 */
+		elementDef.populateScanAlso(myScanAlso);
 	}
 
 
@@ -364,7 +364,8 @@ class ModelScanner {
 			}
 		}
 
-		Class<? extends IBaseResource> builtInType = myNameToResourceType.get(resourceName.toLowerCase());
+		String resourceNameLowerCase = resourceName.toLowerCase();
+		Class<? extends IBaseResource> builtInType = myNameToResourceType.get(resourceNameLowerCase);
 		boolean standardType = builtInType != null && builtInType.equals(theClass) == true;
 		if (primaryNameProvider) {
 			if (builtInType != null && builtInType.equals(theClass) == false) {
@@ -384,13 +385,20 @@ class ModelScanner {
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {
 			if (resourceDef.getStructureVersion() == myVersion) {
-				myNameToResourceDefinitions.put(resourceName.toLowerCase(), resourceDef);
+				myNameToResourceDefinitions.put(resourceNameLowerCase, resourceDef);
 			}
 		}
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);
 
 		scanResourceForSearchParams(theClass, resourceDef);
+
+		/*
+		 * See #423:
+		 * If the type contains a field that has a custom type, we want to make
+		 * sure that this type gets scanned as well
+		 */
+		resourceDef.populateScanAlso(myScanAlso);
 
 		return resourceName;
 	}
@@ -482,10 +490,10 @@ class ModelScanner {
 		return type;
 	}
 
-	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum version) {
+	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingElementDefinitions) {
 		Set<Class<? extends IBase>> retVal = new HashSet<Class<? extends IBase>>();
 
-		InputStream str = version.getVersionImplementation().getFhirVersionPropertiesFile();
+		InputStream str = theVersion.getVersionImplementation().getFhirVersionPropertiesFile();
 		Properties prop = new Properties();
 		try {
 			prop.load(str);
@@ -500,6 +508,9 @@ class ModelScanner {
 
 							@SuppressWarnings("unchecked")
 							Class<? extends IBase> dtType = (Class<? extends IBase>) Class.forName(nextValue);
+							if (theExistingElementDefinitions.containsKey(dtType)) {
+								continue;
+							}
 							retVal.add(dtType);
 
 							if (IElement.class.isAssignableFrom(dtType)) {
@@ -525,6 +536,9 @@ class ModelScanner {
 					try {
 						@SuppressWarnings("unchecked")
 						Class<? extends IBaseResource> nextClass = (Class<? extends IBaseResource>) Class.forName(nextValue);
+						if (theExistingElementDefinitions.containsKey(nextClass)) {
+							continue;
+						}
 						if (!IBaseResource.class.isAssignableFrom(nextClass)) {
 							throw new ConfigurationException("Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
 						}
