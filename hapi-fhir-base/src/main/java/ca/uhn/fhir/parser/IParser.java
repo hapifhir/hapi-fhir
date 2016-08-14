@@ -37,6 +37,8 @@ import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**
@@ -53,9 +55,13 @@ public interface IParser {
 
 	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
 
+	void encodeBundleToJsonLikeWriter(Bundle theBundle, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
+
 	String encodeResourceToString(IBaseResource theResource) throws DataFormatException;
 
 	void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
+
+	void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
 
 	/**
 	 * Encodes a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
@@ -77,6 +83,8 @@ public interface IParser {
 	 *           The writer to encode to
 	 */
 	void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException;
+
+	void encodeTagListToJsonLikeWriter(TagList theTagList, JsonLikeWriter theJsonLikeWriter) throws IOException;
 
 	/**
 	 * See {@link #setEncodeElements(Set)}
@@ -148,6 +156,22 @@ public interface IParser {
 	 * {@link #parseResource(Class, Reader)} with the Bundle class found in the
 	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
 	 */
+	<T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, String theMessageString);
+
+	/**
+	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
+	 * {@link #parseResource(Class, Reader)} with the Bundle class found in the
+	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
+	 * 
+	 * Only useful with the JSON parser. The XML parser will throw a IllegalArgumentException
+	 */
+	<T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure);
+
+	/**
+	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
+	 * {@link #parseResource(Class, Reader)} with the Bundle class found in the
+	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
+	 */
 	Bundle parseBundle(Reader theReader);
 
 	/**
@@ -156,6 +180,15 @@ public interface IParser {
 	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
 	 */
 	Bundle parseBundle(String theMessageString) throws ConfigurationException, DataFormatException;
+
+	/**
+	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you should use
+	 * {@link #parseResource(Class, String)} with the Bundle class found in the
+	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
+	 * 
+	 * Only useful with the JSON parser. The XML parser will throw a IllegalArgumentException
+	 */
+	Bundle parseBundle(JsonLikeStructure theJsonLikeStructure) throws ConfigurationException, DataFormatException;
 
 	/**
 	 * Parses a resource
@@ -186,6 +219,24 @@ public interface IParser {
 	<T extends IBaseResource> T parseResource(Class<T> theResourceType, String theString) throws DataFormatException;
 
 	/**
+	 * Parses a resource from a JSON-like data structure
+	 * 
+	 * Only useful with the JSON parser. The XML parser will throw a IllegalArgumentException
+	 * 
+	 * @param theResourceType
+	 *           The resource type to use. This can be used to explicitly specify a class which extends a built-in type
+	 *           (e.g. a custom type extending the default Patient class)
+	 * @param theJsonLikeStructure
+	 *           The JSON-like structure to parse
+	 * @return A parsed resource
+	 * @throws ConfigurationException
+	 *            If this method is called on non-JSON parsers
+	 * @throws DataFormatException
+	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
+	 */
+	<T extends IBaseResource> T parseResource(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
+
+	/**
 	 * Parses a resource
 	 * 
 	 * @param theReader
@@ -210,6 +261,22 @@ public interface IParser {
 	IBaseResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
 
 	/**
+	 * Parses a resource from a JSON-like data structure
+	 * 
+	 * Only useful with the JSON parser. The XML parser will throw a IllegalArgumentException
+	 * 
+	 * @param theJsonLikeStructure
+	 *           The JSON-like structure to parse
+	 * @return A parsed resource. Note that the returned object will be an instance of {@link IResource} or
+	 *         {@link IAnyResource} depending on the specific FhirContext which created this parser.
+	 * @throws ConfigurationException
+	 *            If this method is called on non-JSON parsers
+	 * @throws DataFormatException
+	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
+	 */
+	IBaseResource parseResource(JsonLikeStructure theJsonLikeStructure) throws ConfigurationException, DataFormatException;
+
+	/**
 	 * Parses a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR
 	 * Specification</a>.
 	 * 
@@ -228,6 +295,17 @@ public interface IParser {
 	 * @return A parsed tag list
 	 */
 	TagList parseTagList(String theString);
+
+	/**
+	 * Parses a tag list from a JSON-like data structure
+	 * 
+	 * Only useful with the JSON parser. The XML parser will throw a IllegalArgumentException
+	 * 
+	 * @param theJsonLikeStructure
+	 *           The JSON-like structure to parse
+	 * @return A parsed tag list
+	 */
+	TagList parseTagList(JsonLikeStructure theJsonLikeStructure);
 
 	/**
 	 * If provided, specifies the elements which should NOT be encoded. Valid values for this
@@ -282,6 +360,16 @@ public interface IParser {
 	 * When encoding, force this resource ID to be encoded as the resource ID
 	 */
 	IParser setEncodeForceResourceId(IIdType theForceResourceId);
+
+	/**
+	 * Set an externally defined abstraction of the JSON-like
+	 * data structure that will be read from and written to
+	 * by the parser. This only applies to the JSON Parser.
+	 *  
+	 * @param theJsonLikeStructure
+	 * 			The user-defined structure of JSON-like data
+	 */
+	IParser setJsonLikeStructure(JsonLikeStructure theJsonLikeStructure);
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the ID of any resources being encoded will not be
