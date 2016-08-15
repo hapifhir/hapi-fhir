@@ -70,7 +70,6 @@ import ca.uhn.fhir.util.TestUtil;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractJaxRsResourceProviderTest.class);
 	private static IGenericClient client;
 	
 
@@ -372,9 +371,8 @@ public class AbstractJaxRsResourceProviderTest {
         when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
         client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-        assertEquals("1", patientCaptor.getValue().getId().getIdPart());
+        assertEquals(null, patientCaptor.getValue().getId().getIdPart());
         assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
-        compareResultId(1, patientCaptor.getValue());
     }
     
 	@SuppressWarnings("unchecked")

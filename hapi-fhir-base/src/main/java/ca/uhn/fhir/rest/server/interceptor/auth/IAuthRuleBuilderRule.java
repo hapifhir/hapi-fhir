@@ -23,9 +23,37 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 public interface IAuthRuleBuilderRule {
 
 	/**
+	 * This rule applies to <code>create</code> operations with a <code>conditional</code>
+	 * URL as a part of the request. Note that this rule will allow the conditional
+	 * operation to proceed, but the server is expected to determine the actual target
+	 * of the conditional request and send a subsequent event to the {@link AuthorizationInterceptor}
+	 * in order to authorize the actual target.
+	 * <p>
+	 * In other words, if the server is configured correctly, this chain will allow the
+	 * client to perform a conditional update, but a different rule is required to actually
+	 * authorize the target that the conditional update is determined to match.
+	 * </p>
+	 */
+	IAuthRuleBuilderRuleConditional createConditional();
+
+	/**
 	 * This rule applies to the FHIR delete operation
 	 */
 	IAuthRuleBuilderRuleOp delete();
+
+	/**
+	 * This rule applies to <code>create</code> operations with a <code>conditional</code>
+	 * URL as a part of the request. Note that this rule will allow the conditional
+	 * operation to proceed, but the server is expected to determine the actual target
+	 * of the conditional request and send a subsequent event to the {@link AuthorizationInterceptor}
+	 * in order to authorize the actual target.
+	 * <p>
+	 * In other words, if the server is configured correctly, this chain will allow the
+	 * client to perform a conditional update, but a different rule is required to actually
+	 * authorize the target that the conditional update is determined to match.
+	 * </p>
+	 */
+	IAuthRuleBuilderRuleConditional deleteConditional();
 
 	/**
 	 * This rules applies to the metadata operation (retrieve the
@@ -35,6 +63,11 @@ public interface IAuthRuleBuilderRule {
 	 * </p>
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished metadata();
+
+	/**
+	 * This rule applies to a FHIR operation (e.g. <code>$validate</code>)
+	 */
+	IAuthRuleBuilderOperation operation();
 
 	/**
 	 * This rule applies to any FHIR operation involving reading, including
@@ -50,14 +83,23 @@ public interface IAuthRuleBuilderRule {
 	IAuthRuleBuilderRuleTransaction transaction();
 
 	/**
+	 * This rule applies to <code>update</code> operations with a <code>conditional</code>
+	 * URL as a part of the request. Note that this rule will allow the conditional
+	 * operation to proceed, but the server is expected to determine the actual target
+	 * of the conditional request and send a subsequent event to the {@link AuthorizationInterceptor}
+	 * in order to authorize the actual target.
+	 * <p>
+	 * In other words, if the server is configured correctly, this chain will allow the
+	 * client to perform a conditional update, but a different rule is required to actually
+	 * authorize the target that the conditional update is determined to match.
+	 * </p>
+	 */
+	IAuthRuleBuilderRuleConditional updateConditional();
+
+	/**
 	 * This rule applies to any FHIR operation involving writing, including
 	 * <code>create</code>, and <code>update</code>
 	 */
 	IAuthRuleBuilderRuleOp write();
-
-	/**
-	 * This rule applies to a FHIR operation (e.g. <code>$validate</code>)
-	 */
-	IAuthRuleBuilderOperation operation();
 
 }

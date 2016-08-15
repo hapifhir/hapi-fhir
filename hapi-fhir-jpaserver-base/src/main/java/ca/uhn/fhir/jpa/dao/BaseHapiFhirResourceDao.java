@@ -166,9 +166,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart());
 					throw new InvalidRequestException(message, createErrorOperationOutcome(message, "processing"));
 				}
-			} else {
+			} else if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 				String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
 				throw new InvalidRequestException(message, createErrorOperationOutcome(message, "processing"));
+			} else {
+				// As of DSTU3, ID and version in the body should be ignored for a create/update
+				theResource.setId("");
 			}
 		}
 

@@ -307,6 +307,8 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			myId = (IdDt) theId;
 		} else if (theId != null) {
 			myId = new IdDt(theId.getValue());
+		} else {
+			myId = null;
 		}
 		return this;
 	}

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,31 +22,6 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
-
-abstract class BaseRule implements IAuthRule {
-	private String myName;
-	private PolicyEnum myMode;
-
-	BaseRule(String theRuleName) {
-		myName = theRuleName;
-	}
-	
-	@Override
-	public String getName() {
-		return myName;
-	}
-	
-	void setMode(PolicyEnum theRuleMode) {
-		myMode = theRuleMode;
-	}
-
-	Verdict newVerdict() {
-		return new Verdict(myMode, this);
-	}
-
-	PolicyEnum getMode() {
-		return myMode;
-	}
-
+public interface IAuthRuleBuilderRuleConditionalClassifier extends IAuthRuleFinished {
+	// nothing
 }

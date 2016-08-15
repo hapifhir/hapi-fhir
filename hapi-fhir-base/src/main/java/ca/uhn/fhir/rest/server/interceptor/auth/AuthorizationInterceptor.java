@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -78,8 +79,8 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		setDefaultPolicy(theDefaultPolicy);
 	}
 
-	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
-		Verdict decision = applyRulesAndReturnDecision(theOperation, theRequestDetails, theInputResource, theOutputResource);
+	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
+		Verdict decision = applyRulesAndReturnDecision(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 		
 		if (decision.getDecision() == PolicyEnum.ALLOW) {
 			return;
@@ -89,13 +90,13 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 
 	@Override
-	public Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
+	public Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
 		List<IAuthRule> rules = buildRuleList(theRequestDetails);
 		ourLog.trace("Applying {} rules to render an auth decision for operation {}", rules.size(), theOperation);
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
-			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theOutputResource, this);
+			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
 				break;
@@ -126,7 +127,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 
 	
-	private OperationExamineDirection determineOperationDirection(RestOperationTypeEnum theOperation) {
+	private OperationExamineDirection determineOperationDirection(RestOperationTypeEnum theOperation, IBaseResource theRequestResource) {
 		switch (theOperation) {
 		case ADD_TAGS:
 		case DELETE_TAGS:
@@ -147,6 +148,13 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 			
 		case CREATE:
 		case UPDATE:
+//			if (theRequestResource != null) {
+//				if (theRequestResource.getIdElement() != null) {
+//					if (theRequestResource.getIdElement().hasIdPart() == false) {
+//						return OperationExamineDirection.IN_UNCATEGORIZED;
+//					}
+//				}
+//			}
 			return OperationExamineDirection.IN;
 
 		case META:
@@ -204,14 +212,26 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 	
 	private void handleUserOperation(RequestDetails theRequest, IBaseResource theResource, RestOperationTypeEnum operation) {
-		applyRulesAndFailIfDeny(operation, theRequest, theResource, null);
+		applyRulesAndFailIfDeny(operation, theRequest, theResource, theResource.getIdElement(), null);
 	}
 	
 	@Override
 	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest) {
-		switch (determineOperationDirection(theOperation)) {
+		IBaseResource inputResource = null;
+		IIdType inputResourceId = null;
+		
+		switch (determineOperationDirection(theOperation, theProcessedRequest.getResource())) {
+		case IN_UNCATEGORIZED:
+			inputResourceId = theProcessedRequest.getId();
+			if (inputResourceId == null || inputResourceId.hasIdPart() == false) {
+				return;
+			} else {
+				break;
+			}
 		case IN:
 		case BOTH:
+			inputResource = theProcessedRequest.getResource();
+			inputResourceId = theProcessedRequest.getId();
 			break;
 		case NONE:
 		case OUT:
@@ -219,7 +239,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 
 		RequestDetails requestDetails = theProcessedRequest.getRequestDetails();
-		applyRulesAndFailIfDeny(theOperation, requestDetails, theProcessedRequest.getResource(), null);
+		applyRulesAndFailIfDeny(theOperation, requestDetails, inputResource, inputResourceId, null);
 	}
 	
 	@Override
@@ -236,7 +256,9 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
-		switch (determineOperationDirection(theRequestDetails.getRestOperationType())) {
+		switch (determineOperationDirection(theRequestDetails.getRestOperationType(), null)) {
+		case IN_UNCATEGORIZED:
+			return true;
 		case IN:
 		case NONE:
 			return true;
@@ -246,8 +268,6 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 
 		FhirContext fhirContext = theRequestDetails.getServer().getFhirContext();
-		List<IAuthRule> rules = buildRuleList(theRequestDetails);
-		
 		List<IBaseResource> resources = Collections.emptyList();
 		
 		switch (theRequestDetails.getRestOperationType()) {
@@ -272,7 +292,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 		
 		for (IBaseResource nextResponse : resources) {
-			applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, nextResponse);
+			applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, nextResponse);
 		}
 
 		return true;
@@ -334,9 +354,10 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 
 	private enum OperationExamineDirection {
 		IN,
+		IN_UNCATEGORIZED,
 		NONE,
 		OUT, 
-		BOTH
+		BOTH, 
 	}
 
 	public static class Verdict {

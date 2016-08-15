@@ -88,6 +88,10 @@ public enum FhirVersionEnum {
 		return ordinal() > theVersion.ordinal();
 	}
 	
+	public boolean isOlderThan(FhirVersionEnum theVersion) {
+		return ordinal() < theVersion.ordinal();
+	}
+
 	/**
 	 * Returns true if the given version is present on the classpath
 	 */

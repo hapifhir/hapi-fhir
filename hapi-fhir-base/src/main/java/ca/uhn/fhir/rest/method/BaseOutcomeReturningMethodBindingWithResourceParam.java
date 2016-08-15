@@ -104,6 +104,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				resource.setId(urlId);
 			} else {
+				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+					resource.setId(theRequest.getId());
+				}
+
 				String matchUrl = null;
 				if (myConditionalUrlIndex != -1) {
 					matchUrl = (String) theParams[myConditionalUrlIndex];

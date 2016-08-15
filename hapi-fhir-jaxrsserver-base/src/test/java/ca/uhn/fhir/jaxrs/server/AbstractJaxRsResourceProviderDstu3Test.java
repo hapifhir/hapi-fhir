@@ -386,9 +386,9 @@ public class AbstractJaxRsResourceProviderDstu3Test {
         when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
         client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-        compareResultId(1, patientCaptor.getValue());
+        assertEquals(null, patientCaptor.getValue().getIdElement().getIdPart());
+        assertEquals(null, patientCaptor.getValue().getIdElement().getVersionIdPart());
         assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
-        compareResultId(1, patientCaptor.getValue());
     }	
 	
 	@SuppressWarnings("unchecked")

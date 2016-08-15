@@ -91,8 +91,10 @@
 			<p>
 				This interceptor can help with the complicated task of determining whether a user
 				has the appropriate permission to perform a given task on a FHIR server. This is
-				done by declaring
+				done by declaring a set of rules that can selectively allow (whitelist) and/or selectively
+				block (blacklist) requests.
 			</p>
+
 			<p class="doc_info_bubble">
 				AuthorizationInterceptor is a new feature in HAPI FHIR, and has not yet
 				been heavily tested. Use with caution, and do lots of testing! We welcome
