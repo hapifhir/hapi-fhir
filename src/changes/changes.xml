@@ -176,6 +176,11 @@
 				which allow user code to declare support for conditional
 				create, update, and delete. 
 			</action>
+			<action type="fix">
+				When encoding a resource with a reference to another resource
+				that has a placeholder ID (e.g. urn:uuid:foo), the urn prefix
+				was incorrectly stripped from the reference.
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
