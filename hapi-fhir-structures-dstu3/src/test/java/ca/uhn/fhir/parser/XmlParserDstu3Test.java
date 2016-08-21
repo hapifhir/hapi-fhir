@@ -66,6 +66,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.FooMessageHeaderWithExplicitField.FooMessageSourceComponent;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+import ca.uhn.fhir.parser.PatientWithCustomCompositeExtension.FooParentExtension;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
@@ -81,159 +82,6 @@ public class XmlParserDstu3Test {
 		}
 		ourCtx.setNarrativeGenerator(null);
 	}
-
-	@Test
-	public void testEncodeReferenceWithUuid() {
-		
-		Practitioner pract = new Practitioner();
-		pract.setId(IdType.newRandomUuid());
-		pract.addName().addFamily("PRACT FAMILY");
-		
-		Patient patient = new Patient();
-		patient.addGeneralPractitioner().setResource(pract);
-		
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(encoded);
-		
-		assertThat(pract.getId(), startsWith("urn:uuid:"));
-		assertThat(encoded, containsString("<reference value=\"" + pract.getId() + "\"/>"));
-	}
-	
-	@Test
-	public void testEncodeAndParseContainedCustomTypes() {
-		ourCtx = FhirContext.forDstu3();
-		ourCtx.setDefaultTypeForProfile(CustomObservation.PROFILE, CustomObservation.class);
-		ourCtx.setDefaultTypeForProfile(CustomDiagnosticReport.PROFILE, CustomDiagnosticReport.class);
-		
-		CustomObservation obs = new CustomObservation();
-		obs.setStatus(ObservationStatus.FINAL);
-		
-		CustomDiagnosticReport dr = new CustomDiagnosticReport();
-		dr.setStatus(DiagnosticReportStatus.FINAL);
-		dr.addResult().setResource(obs);
-		
-		IParser parser = ourCtx.newXmlParser();
-		parser.setPrettyPrint(true);
-		
-		String output = parser.encodeResourceToString(dr);
-		ourLog.info(output);
-		
-		//@formatter:off
-		assertThat(output,stringContainsInOrder(
-			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
-				"<meta>",
-				"<profile value=\"http://custom_DiagnosticReport\"/>",
-				"</meta>",
-				"<contained>",
-					"<Observation xmlns=\"http://hl7.org/fhir\">",
-						"<id value=\"1\"/>",
-						"<meta>",
-							"<profile value=\"http://custom_Observation\"/>",
-						"</meta>",
-						"<status value=\"final\"/>",
-					"</Observation>",
-				"</contained>",
-				"<status value=\"final\"/>",
-				"<result>",
-					"<reference value=\"#1\"/>",
-				"</result>",
-			"</DiagnosticReport>"));
-		//@formatter:on
-		
-		/*
-		 * Now PARSE!
-		 */
-		
-		dr = (CustomDiagnosticReport) parser.parseResource(output);
-		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
-
-		assertEquals("#1", dr.getResult().get(0).getReference());
-		obs = (CustomObservation) dr.getResult().get(0).getResource();
-		assertEquals(ObservationStatus.FINAL, obs.getStatus());
-
-		ourCtx = null;
-	}
-	
-	@Test
-	public void testEncodeAndParseContainedNonCustomTypes() {
-		ourCtx = FhirContext.forDstu3();
-		
-		Observation obs = new Observation();
-		obs.setStatus(ObservationStatus.FINAL);
-		
-		DiagnosticReport dr = new DiagnosticReport();
-		dr.setStatus(DiagnosticReportStatus.FINAL);
-		dr.addResult().setResource(obs);
-		
-		IParser parser = ourCtx.newXmlParser();
-		parser.setPrettyPrint(true);
-		
-		String output = parser.encodeResourceToString(dr);
-		ourLog.info(output);
-		
-		//@formatter:off
-		assertThat(output,stringContainsInOrder(
-			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
-				"<contained>",
-					"<Observation xmlns=\"http://hl7.org/fhir\">",
-						"<id value=\"1\"/>",
-						"<status value=\"final\"/>",
-					"</Observation>",
-				"</contained>",
-				"<status value=\"final\"/>",
-				"<result>",
-					"<reference value=\"#1\"/>",
-				"</result>",
-			"</DiagnosticReport>"));
-		//@formatter:on
-		
-		/*
-		 * Now PARSE!
-		 */
-		
-		dr = (DiagnosticReport) parser.parseResource(output);
-		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
-
-		assertEquals("#1", dr.getResult().get(0).getReference());
-		obs = (Observation) dr.getResult().get(0).getResource();
-		assertEquals(ObservationStatus.FINAL, obs.getStatus());
-
-		ourCtx = null;
-	}
-
-	@Test
-	public void testEncodeHistoryEncodeVersionsAtPath3() {
-		ourCtx = FhirContext.forDstu3();
-		
-		assertNull(ourCtx.newXmlParser().getStripVersionsFromReferences());
-		
-		AuditEvent auditEvent = new AuditEvent();
-		auditEvent.addEntity().setReference(new Reference("http://foo.com/Organization/2/_history/1"));
-		
-		IParser parser = ourCtx.newXmlParser();
-		
-		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
-		String enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
-		ourLog.info(enc);
-		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2/_history/1\"/>"));
-		
-		parser.setDontStripVersionsFromReferencesAtPaths(new ArrayList<String>());
-		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
-		ourLog.info(enc);
-		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2\"/>"));
-
-		parser.setDontStripVersionsFromReferencesAtPaths((String[])null);
-		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
-		ourLog.info(enc);
-		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2\"/>"));
-
-		parser.setDontStripVersionsFromReferencesAtPaths((List<String>)null);
-		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
-		ourLog.info(enc);
-		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2\"/>"));
-		
-	}
-
 
 	@Test
 	public void testBundleWithBinary() {
@@ -265,7 +113,7 @@ public class XmlParserDstu3Test {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 
 	}
-
+	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -287,7 +135,7 @@ public class XmlParserDstu3Test {
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
 	}
-
+	
 	@Test
 	public void testDuration() {
 		Encounter enc = new Encounter();
@@ -301,7 +149,7 @@ public class XmlParserDstu3Test {
 		assertThat(str, not(containsString("meta")));
 		assertThat(str, containsString("<length><value value=\"123\"/><unit value=\"day\"/></length>"));
 	}
-
+	
 	@Test
 	public void testEncodeAndParseBundleWithResourceRefs() {
 
@@ -338,6 +186,24 @@ public class XmlParserDstu3Test {
 		assertEquals("Organization/orgid", pt.getManagingOrganization().getReferenceElement().getValue());
 		assertSame(org, pt.getManagingOrganization().getResource());
 	}
+
+	@Test
+	public void testEncodeAndParseCompositeExtension() {
+		PatientWithCustomCompositeExtension pat = new PatientWithCustomCompositeExtension();
+		pat.setId("123");
+		pat.setFooParentExtension(new FooParentExtension());
+		pat.getFooParentExtension().setChildA(new StringType("ValueA"));
+		pat.getFooParentExtension().setChildB(new StringType("ValueB"));
+		
+		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pat);
+		ourLog.info(enc);
+		
+		pat = ourCtx.newXmlParser().parseResource(PatientWithCustomCompositeExtension.class, enc);
+		
+		assertEquals("ValueA", pat.getFooParentExtension().getChildA().getValue());
+		assertEquals("ValueB", pat.getFooParentExtension().getChildB().getValue());
+	}
+
 
 	@Test
 	public void testEncodeAndParseContained() {
@@ -406,6 +272,108 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>")));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
 
+	}
+
+	@Test
+	public void testEncodeAndParseContainedCustomTypes() {
+		ourCtx = FhirContext.forDstu3();
+		ourCtx.setDefaultTypeForProfile(CustomObservation.PROFILE, CustomObservation.class);
+		ourCtx.setDefaultTypeForProfile(CustomDiagnosticReport.PROFILE, CustomDiagnosticReport.class);
+		
+		CustomObservation obs = new CustomObservation();
+		obs.setStatus(ObservationStatus.FINAL);
+		
+		CustomDiagnosticReport dr = new CustomDiagnosticReport();
+		dr.setStatus(DiagnosticReportStatus.FINAL);
+		dr.addResult().setResource(obs);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setPrettyPrint(true);
+		
+		String output = parser.encodeResourceToString(dr);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output,stringContainsInOrder(
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
+				"<meta>",
+				"<profile value=\"http://custom_DiagnosticReport\"/>",
+				"</meta>",
+				"<contained>",
+					"<Observation xmlns=\"http://hl7.org/fhir\">",
+						"<id value=\"1\"/>",
+						"<meta>",
+							"<profile value=\"http://custom_Observation\"/>",
+						"</meta>",
+						"<status value=\"final\"/>",
+					"</Observation>",
+				"</contained>",
+				"<status value=\"final\"/>",
+				"<result>",
+					"<reference value=\"#1\"/>",
+				"</result>",
+			"</DiagnosticReport>"));
+		//@formatter:on
+		
+		/*
+		 * Now PARSE!
+		 */
+		
+		dr = (CustomDiagnosticReport) parser.parseResource(output);
+		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
+
+		assertEquals("#1", dr.getResult().get(0).getReference());
+		obs = (CustomObservation) dr.getResult().get(0).getResource();
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
+
+		ourCtx = null;
+	}
+
+	@Test
+	public void testEncodeAndParseContainedNonCustomTypes() {
+		ourCtx = FhirContext.forDstu3();
+		
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setStatus(DiagnosticReportStatus.FINAL);
+		dr.addResult().setResource(obs);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setPrettyPrint(true);
+		
+		String output = parser.encodeResourceToString(dr);
+		ourLog.info(output);
+		
+		//@formatter:off
+		assertThat(output,stringContainsInOrder(
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
+				"<contained>",
+					"<Observation xmlns=\"http://hl7.org/fhir\">",
+						"<id value=\"1\"/>",
+						"<status value=\"final\"/>",
+					"</Observation>",
+				"</contained>",
+				"<status value=\"final\"/>",
+				"<result>",
+					"<reference value=\"#1\"/>",
+				"</result>",
+			"</DiagnosticReport>"));
+		//@formatter:on
+		
+		/*
+		 * Now PARSE!
+		 */
+		
+		dr = (DiagnosticReport) parser.parseResource(output);
+		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
+
+		assertEquals("#1", dr.getResult().get(0).getReference());
+		obs = (Observation) dr.getResult().get(0).getResource();
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
+
+		ourCtx = null;
 	}
 
 	@Test
@@ -1113,6 +1081,30 @@ public class XmlParserDstu3Test {
 		ourLog.info(parser.encodeResourceToString(gr));
 	}
 
+	@Test
+	public void testEncodeDeclaredBlock() throws Exception {
+		FooMessageSourceComponent source = new FooMessageHeaderWithExplicitField.FooMessageSourceComponent();
+		source.getMessageHeaderApplicationId().setValue("APPID");
+		source.setName("NAME");
+
+		FooMessageHeaderWithExplicitField header = new FooMessageHeaderWithExplicitField();
+		header.setSourceNew(source);
+
+		header.addDestination().setName("DEST");
+
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(header);
+
+		IParser p = ourCtx.newXmlParser();
+		p.setPrettyPrint(true);
+
+		String encode = p.encodeResourceToString(bundle);
+		ourLog.info(encode);
+
+		assertThat(encode, containsString("<value value=\"APPID\"/>"));
+		assertThat(encode, stringContainsInOrder("<source", "<dest"));
+	}
+
 	/**
 	 * Make sure whitespace is preserved for pre tags
 	 */
@@ -1342,6 +1334,39 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeHistoryEncodeVersionsAtPath3() {
+		ourCtx = FhirContext.forDstu3();
+		
+		assertNull(ourCtx.newXmlParser().getStripVersionsFromReferences());
+		
+		AuditEvent auditEvent = new AuditEvent();
+		auditEvent.addEntity().setReference(new Reference("http://foo.com/Organization/2/_history/1"));
+		
+		IParser parser = ourCtx.newXmlParser();
+		
+		parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		String enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2/_history/1\"/>"));
+		
+		parser.setDontStripVersionsFromReferencesAtPaths(new ArrayList<String>());
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2\"/>"));
+
+		parser.setDontStripVersionsFromReferencesAtPaths((String[])null);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2\"/>"));
+
+		parser.setDontStripVersionsFromReferencesAtPaths((List<String>)null);
+		enc = parser.setPrettyPrint(true).encodeResourceToString(auditEvent);
+		ourLog.info(enc);
+		assertThat(enc, containsString("<reference value=\"http://foo.com/Organization/2\"/>"));
+		
+	}
+
+	@Test
 	public void testEncodeNarrativeSuppressed() {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
@@ -1472,6 +1497,23 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeReferenceWithUuid() {
+		
+		Practitioner pract = new Practitioner();
+		pract.setId(IdType.newRandomUuid());
+		pract.addName().addFamily("PRACT FAMILY");
+		
+		Patient patient = new Patient();
+		patient.addGeneralPractitioner().setResource(pract);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		assertThat(pract.getId(), startsWith("urn:uuid:"));
+		assertThat(encoded, containsString("<reference value=\"" + pract.getId() + "\"/>"));
+	}
+
+	@Test
 	public void testEncodeSummary() {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
@@ -1518,30 +1560,6 @@ public class XmlParserDstu3Test {
 
 		FooMessageHeader header = new FooMessageHeader();
 		header.setSource(source);
-
-		header.addDestination().setName("DEST");
-
-		Bundle bundle = new Bundle();
-		bundle.addEntry().setResource(header);
-
-		IParser p = ourCtx.newXmlParser();
-		p.setPrettyPrint(true);
-
-		String encode = p.encodeResourceToString(bundle);
-		ourLog.info(encode);
-
-		assertThat(encode, containsString("<value value=\"APPID\"/>"));
-		assertThat(encode, stringContainsInOrder("<source", "<dest"));
-	}
-
-	@Test
-	public void testEncodeDeclaredBlock() throws Exception {
-		FooMessageSourceComponent source = new FooMessageHeaderWithExplicitField.FooMessageSourceComponent();
-		source.getMessageHeaderApplicationId().setValue("APPID");
-		source.setName("NAME");
-
-		FooMessageHeaderWithExplicitField header = new FooMessageHeaderWithExplicitField();
-		header.setSourceNew(source);
 
 		header.addDestination().setName("DEST");
 

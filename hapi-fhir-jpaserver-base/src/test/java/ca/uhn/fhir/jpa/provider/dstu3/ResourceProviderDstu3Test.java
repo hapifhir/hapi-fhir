@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -95,9 +96,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.core.NestedExceptionUtils;
 
 import com.google.common.collect.Lists;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -128,6 +131,47 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 
+	@Test
+	public void testSearchPagingKeepsOldSearches() throws Exception {
+		String methodName = "testSearchPagingKeepsOldSearches";
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("0");
+			patient.addName().addFamily(methodName).addGiven("Joe");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		for (int i = 1; i <= 20; i++) {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(Integer.toString(i));
+			patient.addName().addFamily(methodName).addGiven("Joe");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		List<String> linkNext = Lists.newArrayList(); 
+		for (int i = 0 ; i < 100; i++) {
+			Bundle bundle = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+			assertTrue(isNotBlank(bundle.getLink("next").getUrl()));
+			assertEquals(5, bundle.getEntry().size());
+			linkNext.add(bundle.getLink("next").getUrl());
+		}
+
+		int index = 0;
+		for (String nextLink : linkNext) {
+			ourLog.info("Fetching index {}", index++);
+			Bundle b = ourClient.fetchResourceFromUrl(Bundle.class, nextLink);
+			assertEquals(5, b.getEntry().size());
+		}
+	}
+
+	
 	@Test
 	public void testHasParameter() throws Exception {
 		IIdType pid0;

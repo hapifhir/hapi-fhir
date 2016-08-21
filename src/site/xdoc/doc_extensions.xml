@@ -240,6 +240,36 @@
 				</macro>
 
 			</subsection>
+
+			<subsection name="Custom Type Examples: Composite Extensions">
+			
+				<p>
+					The following example shows a resource containing a composite
+					extension.
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="resource" />
+					<param name="file" value="examples/src/main/java/example/customtype/CustomCompositeExtension.java" />
+				</macro>
+			
+				<p>
+					This could be used to create a resource such as the
+					following:
+				</p>
+				<source><![CDATA[<Patient xmlns="http://hl7.org/fhir">
+   <id value="123"/>
+   <extension url="http://acme.org/fooParent">
+      <extension url="http://acme.org/fooChildA">
+         <valueString value="ValueA"/>
+      </extension>
+      <extension url="http://acme.org/fooChildB">
+         <valueString value="ValueB"/>
+      </extension>
+   </extension>
+</Patient>]]></source>
+			
+			</subsection>
 			
 		</section>
 			

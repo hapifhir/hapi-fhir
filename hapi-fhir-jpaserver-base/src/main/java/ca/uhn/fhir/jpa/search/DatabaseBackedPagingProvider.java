@@ -58,7 +58,7 @@ public class DatabaseBackedPagingProvider extends FifoMemoryPagingProvider {
 			if (!provider.ensureSearchEntityLoaded()) {
 				return null;
 			}
-			return provider;
+			retVal = provider;
 		}
 		return retVal;
 	}
