@@ -181,6 +181,13 @@
 				that has a placeholder ID (e.g. urn:uuid:foo), the urn prefix
 				was incorrectly stripped from the reference.
 			</action>
+			<action type="fix">
+				Servers for STU3 (or newer) will no longer include a 
+				<![CDATA[<code>Location:</code>]]> header on responses for 
+				<![CDATA[<code>read</code>]]> operations. This header was
+				required in earlier versions of FHIR but has been removed
+				from the specification.
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
