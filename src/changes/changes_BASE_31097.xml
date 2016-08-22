@@ -161,30 +161,6 @@
 				if it contained custom fields that also used custom
 				types. Thanks to GitHub user @sjanic for reporting!
 			</action>
-			<action type="add">
-				Inprove handling of _text and _content searches in JPA server to do better
-				matching on partial strings
-			</action>
-			<action type="add">
-				Servers in STU3 mode will now ignore any ID or VersionID found in the
-				resource body provided by the client when processing FHIR
-				<![CDATA[<code>update</code>]]> operations. This change has been made
-				because the FHIR specification now requires servers to ignore
-				these values. Note that as a result of this change, resources passed
-				to <![CDATA[<code>@Update</code>]]> methods will always have 
-				<![CDATA[<code>null</code>]]> ID
-			</action>
-			<action type="add">
-				Add new methods to 
-				<![CDATA[<code>AuthorizationInterceptor</code>]]>
-				which allow user code to declare support for conditional
-				create, update, and delete. 
-			</action>
-			<action type="fix">
-				When encoding a resource with a reference to another resource
-				that has a placeholder ID (e.g. urn:uuid:foo), the urn prefix
-				was incorrectly stripped from the reference.
-			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">

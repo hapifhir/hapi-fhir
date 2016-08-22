@@ -162,10 +162,10 @@
 				types. Thanks to GitHub user @sjanic for reporting!
 			</action>
 			<action type="add">
+<<<<<<< HEAD
 				Inprove handling of _text and _content searches in JPA server to do better
 				matching on partial strings
-			</action>
-			<action type="add">
+=======
 				Servers in STU3 mode will now ignore any ID or VersionID found in the
 				resource body provided by the client when processing FHIR
 				<![CDATA[<code>update</code>]]> operations. This change has been made
@@ -184,6 +184,7 @@
 				When encoding a resource with a reference to another resource
 				that has a placeholder ID (e.g. urn:uuid:foo), the urn prefix
 				was incorrectly stripped from the reference.
+>>>>>>> da8abca1ffdaa4dcae3d931b2e4732e437951cac
 			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">

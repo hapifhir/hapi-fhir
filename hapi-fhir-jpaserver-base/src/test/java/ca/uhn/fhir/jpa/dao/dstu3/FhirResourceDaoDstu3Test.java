@@ -634,17 +634,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testCreateTextIdFails() {
+	public void testCreateTextIdDoesntFail() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateTextIdFails");
 		p.addName().addFamily("Hello");
 		p.setId("Patient/ABC");
-		try {
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not create resource with ID[ABC], ID must not be supplied"));
-		}
+		String id = myPatientDao.create(p, mySrd).getId().getIdPart();
+		assertNotEquals("ABC", id);
 	}
 
 	@Test
@@ -676,20 +672,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		params = new SearchParameterMap();
 		params.add(CarePlan.SP_ACTIVITYDATE, new DateRangeParam("2012-01-01T10:00:00Z", null));
 		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params)), empty());
-	}
-
-	@Test
-	public void testCreateWithIdFails() {
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
-		p.addName().addFamily("Hello");
-		p.setId("Patient/abc");
-		try {
-			myPatientDao.create(p, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not create resource with ID[abc], ID must not be supplied"));
-		}
 	}
 
 	@Test

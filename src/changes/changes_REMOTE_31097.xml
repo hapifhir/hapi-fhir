@@ -162,10 +162,6 @@
 				types. Thanks to GitHub user @sjanic for reporting!
 			</action>
 			<action type="add">
-				Inprove handling of _text and _content searches in JPA server to do better
-				matching on partial strings
-			</action>
-			<action type="add">
 				Servers in STU3 mode will now ignore any ID or VersionID found in the
 				resource body provided by the client when processing FHIR
 				<![CDATA[<code>update</code>]]> operations. This change has been made

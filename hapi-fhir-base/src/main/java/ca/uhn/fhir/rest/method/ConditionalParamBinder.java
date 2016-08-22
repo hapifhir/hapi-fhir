@@ -67,29 +67,7 @@ class ConditionalParamBinder implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-
-		if (myOperationType == RestOperationTypeEnum.CREATE) {
-			String retVal = theRequest.getHeader(Constants.HEADER_IF_NONE_EXIST);
-			if (isBlank(retVal)) {
-				return null;
-			}
-			if (retVal.startsWith(theRequest.getFhirServerBase())) {
-				retVal = retVal.substring(theRequest.getFhirServerBase().length());
-			}
-			return retVal;
-		} else if (myOperationType != RestOperationTypeEnum.DELETE && myOperationType != RestOperationTypeEnum.UPDATE) {
-			return null;
-		}
-		
-		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
-			return null;
-		}
-		
-		int questionMarkIndex = theRequest.getCompleteUrl().indexOf('?');
-		if (questionMarkIndex == -1) {
-			return null;
-		}
-		return theRequest.getResourceName() + theRequest.getCompleteUrl().substring(questionMarkIndex);
+		return theRequest.getConditionalUrl(myOperationType);
 	}
 
 }

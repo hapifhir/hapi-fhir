@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -95,9 +96,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.core.NestedExceptionUtils;
 
 import com.google.common.collect.Lists;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -128,6 +131,47 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 
+	@Test
+	public void testSearchPagingKeepsOldSearches() throws Exception {
+		String methodName = "testSearchPagingKeepsOldSearches";
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("0");
+			patient.addName().addFamily(methodName).addGiven("Joe");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		for (int i = 1; i <= 20; i++) {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(Integer.toString(i));
+			patient.addName().addFamily(methodName).addGiven("Joe");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		List<String> linkNext = Lists.newArrayList(); 
+		for (int i = 0 ; i < 100; i++) {
+			Bundle bundle = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
+			assertTrue(isNotBlank(bundle.getLink("next").getUrl()));
+			assertEquals(5, bundle.getEntry().size());
+			linkNext.add(bundle.getLink("next").getUrl());
+		}
+
+		int index = 0;
+		for (String nextLink : linkNext) {
+			ourLog.info("Fetching index {}", index++);
+			Bundle b = ourClient.fetchResourceFromUrl(Bundle.class, nextLink);
+			assertEquals(5, b.getEntry().size());
+		}
+	}
+
+	
 	@Test
 	public void testHasParameter() throws Exception {
 		IIdType pid0;
@@ -568,6 +612,107 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			response.close();
 		}
 
+	}
+
+	@Test
+	public void testIdAndVersionInBodyForCreate() throws IOException {
+		String methodName = "testIdAndVersionInBodyForCreate";
+
+		Patient pt = new Patient();
+		pt.setId("Patient/AAA/_history/4");
+		pt.addName().addFamily(methodName);
+		String resource = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pt);
+
+		ourLog.info("Input: {}", resource);
+		
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdType id;
+		try {
+			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", respString);
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdType(newIdString);
+		} finally {
+			response.close();
+		}
+
+		assertEquals("1", id.getVersionIdPart());
+		assertNotEquals("AAA", id.getIdPart());
+		
+		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", respString);
+			assertThat(respString, containsString("<id value=\"" + id.getIdPart() + "\"/>"));
+			assertThat(respString, containsString("<versionId value=\"1\"/>"));
+		} finally {
+			response.close();
+		}
+	}
+
+	@Test
+	public void testIdAndVersionInBodyForUpdate() throws IOException {
+		String methodName = "testIdAndVersionInBodyForUpdate";
+
+		Patient pt = new Patient();
+		pt.setId("Patient/AAA/_history/4");
+		pt.addName().addFamily(methodName);
+		String resource = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pt);
+
+		ourLog.info("Input: {}", resource);
+		
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdType id;
+		try {
+			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", respString);
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdType(newIdString);
+		} finally {
+			response.close();
+		}
+
+		assertEquals("1", id.getVersionIdPart());
+		assertNotEquals("AAA", id.getIdPart());
+		
+		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart() + "/_history/1");
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		response = ourHttpClient.execute(put);
+		try {
+			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", respString);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdType(newIdString);
+		} finally {
+			response.close();
+		}
+
+		assertEquals("2", id.getVersionIdPart());
+		assertNotEquals("AAA", id.getIdPart());
+		
+		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", respString);
+			assertThat(respString, containsString("<id value=\"" + id.getIdPart() + "\"/>"));
+			assertThat(respString, containsString("<versionId value=\"2\"/>"));
+		} finally {
+			response.close();
+		}
 	}
 
 	@Test
@@ -2493,9 +2638,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		put.addHeader("Accept", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse response = ourHttpClient.execute(put);
 		try {
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
-			assertEquals("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""+p1id.getIdPart()+"\"", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
 		}
@@ -2722,16 +2865,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().addFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut post = new HttpPut(ourServerBase + "/Patient/2");
+		HttpPut post = new HttpPut(ourServerBase + "/Patient/A2");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString(
-					"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"2\""));
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(responseString, containsString("/A2/"));
+			assertThat(responseString, not(containsString("333")));
 		} finally {
 			response.close();
 		}

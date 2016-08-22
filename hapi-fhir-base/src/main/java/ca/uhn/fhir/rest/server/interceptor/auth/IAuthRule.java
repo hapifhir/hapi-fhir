@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -37,6 +38,7 @@ public interface IAuthRule {
 	 *           The request
 	 * @param theInputResource
 	 *           The resource being input by the client, or <code>null</code>
+	 * @param theInputResourceId TODO
 	 * @param theOutputResource
 	 *           The resource being returned by the server, or <code>null</code>
 	 * @param theRuleApplier
@@ -44,7 +46,7 @@ public interface IAuthRule {
 	 *           nested objects in the request, such as nested requests in a transaction)
 	 * @return Returns a policy decision, or <code>null</code> if the rule does not apply
 	 */
-	Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource, IRuleApplier theRuleApplier);
+	Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier);
 
 	/**
 	 * Returns a name for this rule, to be used in logs and error messages

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -38,6 +40,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -52,6 +55,7 @@ public abstract class RequestDetails {
 	private String myOperation;
 	private Map<String, String[]> myParameters;
 	private byte[] myRequestContents;
+	private IRequestOperationCallback myRequestOperationCallback = new RequestOperationCallback();
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
@@ -59,7 +63,6 @@ public abstract class RequestDetails {
 	private IRestfulResponse myResponse;
 	private RestOperationTypeEnum myRestOperationType;
 	private String mySecondaryOperation;
-	private IRequestOperationCallback myRequestOperationCallback = new RequestOperationCallback();
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
 	protected abstract byte[] getByteStreamRequestContents();
@@ -74,6 +77,40 @@ public abstract class RequestDetails {
 
 	public String getCompleteUrl() {
 		return myCompleteUrl;
+	}
+
+	/**
+	 * Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise. For an
+	 * update or delete method, this is the part of the URL after the <code>?</code>. For a create, this
+	 * is the value of the <code>If-None-Exist</code> header.
+	 * 
+	 * @param theOperationType The operation type to find the conditional URL for
+	 * @return Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise
+	 */
+	public String getConditionalUrl(RestOperationTypeEnum theOperationType) {
+		if (theOperationType == RestOperationTypeEnum.CREATE) {
+			String retVal = this.getHeader(Constants.HEADER_IF_NONE_EXIST);
+			if (isBlank(retVal)) {
+				return null;
+			}
+			if (retVal.startsWith(this.getFhirServerBase())) {
+				retVal = retVal.substring(this.getFhirServerBase().length());
+			}
+			return retVal;
+		} else if (theOperationType != RestOperationTypeEnum.DELETE && theOperationType != RestOperationTypeEnum.UPDATE) {
+			return null;
+		}
+
+		if (this.getId() != null && this.getId().hasIdPart()) {
+			return null;
+		}
+		
+		int questionMarkIndex = this.getCompleteUrl().indexOf('?');
+		if (questionMarkIndex == -1) {
+			return null;
+		}
+		
+		return this.getResourceName() + this.getCompleteUrl().substring(questionMarkIndex);
 	}
 
 	/**
@@ -139,6 +176,15 @@ public abstract class RequestDetails {
 	public abstract Reader getReader() throws IOException;
 
 	/**
+	 * Returns an invoker that can be called from user code to advise the server interceptors
+	 * of any nested operations being invoked within operations. This invoker acts as a proxy for
+	 * all interceptors  
+	 */
+	public IRequestOperationCallback getRequestOperationCallback() {
+		return myRequestOperationCallback;
+	}
+
+	/**
 	 * The part of the request URL that comes after the server base.
 	 * <p>
 	 * Will not contain a leading '/'
@@ -174,15 +220,6 @@ public abstract class RequestDetails {
 	 * Returns the server base URL (with no trailing '/') for a given request
 	 */
 	public abstract String getServerBaseForRequest();
-
-	/**
-	 * Returns an invoker that can be called from user code to advise the server interceptors
-	 * of any nested operations being invoked within operations. This invoker acts as a proxy for
-	 * all interceptors  
-	 */
-	public IRequestOperationCallback getRequestOperationCallback() {
-		return myRequestOperationCallback;
-	}
 
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
 		return myUnqualifiedToQualifiedNames;
@@ -290,12 +327,19 @@ public abstract class RequestDetails {
 	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
 		myRestOperationType = theRestOperationType;
 	}
-
+	
 	public void setSecondaryOperation(String theSecondaryOperation) {
 		mySecondaryOperation = theSecondaryOperation;
 	}
-	
+
 	private class RequestOperationCallback implements IRequestOperationCallback {
+
+		private List<IServerInterceptor> getInterceptors() {
+			if (getServer() == null) {
+				return Collections.emptyList();
+			}
+			return getServer().getInterceptors();
+		}
 
 		@Override
 		public void resourceCreated(IBaseResource theResource) {
@@ -306,27 +350,11 @@ public abstract class RequestDetails {
 			}
 		}
 
-		private List<IServerInterceptor> getInterceptors() {
-			if (getServer() == null) {
-				return Collections.emptyList();
-			}
-			return getServer().getInterceptors();
-		}
-
 		@Override
 		public void resourceDeleted(IBaseResource theResource) {
 			for (IServerInterceptor next : getInterceptors()) {
 				if (next instanceof IServerOperationInterceptor) {
 					((IServerOperationInterceptor) next).resourceDeleted(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourceUpdated(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
 				}
 			}
 		}
@@ -349,6 +377,15 @@ public abstract class RequestDetails {
 		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
 			for (IBaseResource next : theResource) {
 				resourceUpdated(next);
+			}
+		}
+
+		@Override
+		public void resourceUpdated(IBaseResource theResource) {
+			for (IServerInterceptor next : getInterceptors()) {
+				if (next instanceof IServerOperationInterceptor) {
+					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
+				}
 			}
 		}
 

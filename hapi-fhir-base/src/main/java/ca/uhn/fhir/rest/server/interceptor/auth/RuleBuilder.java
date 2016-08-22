@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import java.util.ArrayList;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -12,7 +10,7 @@ import java.util.ArrayList;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,16 +19,13 @@ import java.util.ArrayList;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 
 public class RuleBuilder implements IAuthRuleBuilder {
 
@@ -39,7 +34,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 	public RuleBuilder() {
 		myRules = new ArrayList<IAuthRule>();
 	}
-	
+
 	@Override
 	public IAuthRuleBuilderRule allow() {
 		return allow(null);
@@ -57,7 +52,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 	@Override
 	public IAuthRuleBuilderRuleOpClassifierFinished allowAll(String theRuleName) {
-		myRules.add(new Rule(theRuleName).setOp(RuleOpEnum.ALLOW_ALL));
+		myRules.add(new RuleImplOp(theRuleName).setOp(RuleOpEnum.ALLOW_ALL));
 		return new RuleBuilderFinished();
 	}
 
@@ -83,20 +78,29 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 	@Override
 	public IAuthRuleBuilderRuleOpClassifierFinished denyAll(String theRuleName) {
-		myRules.add(new Rule(theRuleName).setOp(RuleOpEnum.DENY_ALL));
+		myRules.add(new RuleImplOp(theRuleName).setOp(RuleOpEnum.DENY_ALL));
 		return new RuleBuilderFinished();
 	}
 
-	private final class RuleBuilderFinished implements IAuthRuleBuilderRuleOpClassifierFinished {
+	private class RuleBuilderFinished implements IAuthRuleFinished, IAuthRuleBuilderRuleOpClassifierFinished {
 
 		@Override
 		public IAuthRuleBuilder andThen() {
+			doBuildRule();
 			return RuleBuilder.this;
 		}
 
 		@Override
 		public List<IAuthRule> build() {
+			doBuildRule();
 			return myRules;
+		}
+
+		/**
+		 * Subclasses may override
+		 */
+		protected void doBuildRule() {
+			// nothing
 		}
 	}
 
@@ -112,14 +116,24 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		@Override
+		public IAuthRuleBuilderRuleConditional createConditional() {
+			return new RuleBuilderRuleConditional(RestOperationTypeEnum.CREATE);
+		}
+
+		@Override
 		public IAuthRuleBuilderRuleOp delete() {
 			myRuleOp = RuleOpEnum.DELETE;
 			return new RuleBuilderRuleOp();
 		}
-		
+
+		@Override
+		public IAuthRuleBuilderRuleConditional deleteConditional() {
+			return new RuleBuilderRuleConditional(RestOperationTypeEnum.DELETE);
+		}
+
 		@Override
 		public RuleBuilderFinished metadata() {
-			Rule rule = new Rule(myRuleName);
+			RuleImplOp rule = new RuleImplOp(myRuleName);
 			rule.setOp(RuleOpEnum.METADATA);
 			rule.setMode(myRuleMode);
 			myRules.add(rule);
@@ -127,21 +141,72 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		@Override
+		public IAuthRuleBuilderOperation operation() {
+			return new RuleBuilderRuleOperation();
+		}
+
+		@Override
 		public IAuthRuleBuilderRuleOp read() {
 			myRuleOp = RuleOpEnum.READ;
 			return new RuleBuilderRuleOp();
 		}
-		
+
 		@Override
 		public IAuthRuleBuilderRuleTransaction transaction() {
 			myRuleOp = RuleOpEnum.TRANSACTION;
 			return new RuleBuilderRuleTransaction();
 		}
-		
+
+		@Override
+		public IAuthRuleBuilderRuleConditional updateConditional() {
+			return new RuleBuilderRuleConditional(RestOperationTypeEnum.UPDATE);
+		}
+
 		@Override
 		public IAuthRuleBuilderRuleOp write() {
 			myRuleOp = RuleOpEnum.WRITE;
 			return new RuleBuilderRuleOp();
+		}
+
+		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
+
+			private AppliesTypeEnum myAppliesTo;
+
+			private Set<?> myAppliesToTypes;
+			private RestOperationTypeEnum myOperationType;
+
+			public RuleBuilderRuleConditional(RestOperationTypeEnum theOperationType) {
+				myOperationType = theOperationType;
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleConditionalClassifier allResources() {
+				myAppliesTo = AppliesTypeEnum.ALL_RESOURCES;
+				return new RuleBuilderRuleConditionalClassifier();
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleConditionalClassifier resourcesOfType(Class<? extends IBaseResource> theType) {
+				Validate.notNull(theType, "theType must not be null");
+				myAppliesTo = AppliesTypeEnum.TYPES;
+				myAppliesToTypes = Collections.singleton(theType);
+				return new RuleBuilderRuleConditionalClassifier();
+			}
+
+			public class RuleBuilderRuleConditionalClassifier extends RuleBuilderFinished implements IAuthRuleBuilderRuleConditionalClassifier {
+
+				@Override
+				protected void doBuildRule() {
+					RuleImplConditional rule = new RuleImplConditional(myRuleName);
+					rule.setMode(myRuleMode);
+					rule.setOperationType(myOperationType);
+					rule.setAppliesTo(myAppliesTo);
+					rule.setAppliesToTypes(myAppliesToTypes);
+					myRules.add(rule);
+
+				}
+			}
+
 		}
 
 		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp {
@@ -170,8 +235,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private Collection<? extends IIdType> myInCompartmentOwners;
 
 				private IAuthRuleBuilderRuleOpClassifierFinished finished() {
-					
-					Rule rule = new Rule(myRuleName);
+
+					RuleImplOp rule = new RuleImplOp(myRuleName);
 					rule.setMode(myRuleMode);
 					rule.setOp(myRuleOp);
 					rule.setAppliesTo(myAppliesTo);
@@ -180,7 +245,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					rule.setClassifierCompartmentName(myInCompartmentName);
 					rule.setClassifierCompartmentOwners(myInCompartmentOwners);
 					myRules.add(rule);
-					
+
 					return new RuleBuilderFinished();
 				}
 
@@ -222,29 +287,18 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		}
 
-		private class RuleBuilderRuleTransaction implements IAuthRuleBuilderRuleTransaction {
+		private class RuleBuilderRuleOperation implements IAuthRuleBuilderOperation {
 
 			@Override
-			public IAuthRuleBuilderRuleTransactionOp withAnyOperation() {
-				return new RuleBuilderRuleTransactionOp();
+			public IAuthRuleBuilderOperationNamed named(String theOperationName) {
+				Validate.notBlank(theOperationName, "theOperationName must not be null or empty");
+				return new RuleBuilderRuleOperationNamed(theOperationName);
 			}
-			private class RuleBuilderRuleTransactionOp implements IAuthRuleBuilderRuleTransactionOp {
 
-				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished andApplyNormalRules() {
-					Rule rule = new Rule(myRuleName);
-					rule.setMode(myRuleMode);
-					rule.setOp(myRuleOp);
-					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
-					myRules.add(rule);
-					return new RuleBuilderFinished();
-				}
-				
+			@Override
+			public IAuthRuleBuilderOperationNamed withAnyName() {
+				return new RuleBuilderRuleOperationNamed(null);
 			}
-			
-		}
-
-		private class RuleBuilderRuleOperation implements IAuthRuleBuilderOperation {
 
 			private class RuleBuilderRuleOperationNamed implements IAuthRuleBuilderOperationNamed {
 
@@ -258,14 +312,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					}
 				}
 
-				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onServer() {
-					OperationRule rule = createRule();
-					rule.appliesToServer();
-					myRules.add(rule);
-					return new RuleBuilderFinished();
-				}
-
 				private OperationRule createRule() {
 					OperationRule rule = new OperationRule(myRuleName);
 					rule.setOperationName(myOperationName);
@@ -274,23 +320,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onType(Class<? extends IBaseResource> theType) {
-					Validate.notNull(theType, "theType must not be null");
-					
-					OperationRule rule = createRule();
-					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
-					appliesToTypes.add(theType);
-					rule.appliesToTypes(appliesToTypes);					
-					myRules.add(rule);
-					return new RuleBuilderFinished();
-				}
-
-				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished onInstance(IIdType theInstanceId) {
 					Validate.notNull(theInstanceId, "theInstanceId must not be null");
 					Validate.notBlank(theInstanceId.getResourceType(), "theInstanceId does not have a resource type");
 					Validate.notBlank(theInstanceId.getIdPart(), "theInstanceId does not have an ID part");
-					
+
 					OperationRule rule = createRule();
 					ArrayList<IIdType> ids = new ArrayList<IIdType>();
 					ids.add(theInstanceId);
@@ -298,26 +332,54 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myRules.add(rule);
 					return new RuleBuilderFinished();
 				}
-				
-			}
-			
-			@Override
-			public IAuthRuleBuilderOperationNamed named(String theOperationName) {
-				Validate.notBlank(theOperationName, "theOperationName must not be null or empty");
-				return new RuleBuilderRuleOperationNamed(theOperationName);
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onServer() {
+					OperationRule rule = createRule();
+					rule.appliesToServer();
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onType(Class<? extends IBaseResource> theType) {
+					Validate.notNull(theType, "theType must not be null");
+
+					OperationRule rule = createRule();
+					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
+					appliesToTypes.add(theType);
+					rule.appliesToTypes(appliesToTypes);
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
 			}
 
-			@Override
-			public IAuthRuleBuilderOperationNamed withAnyName() {
-				return new RuleBuilderRuleOperationNamed(null);
-			}
-			
 		}
 
-		@Override
-		public IAuthRuleBuilderOperation operation() {
-			return new RuleBuilderRuleOperation();
+		private class RuleBuilderRuleTransaction implements IAuthRuleBuilderRuleTransaction {
+
+			@Override
+			public IAuthRuleBuilderRuleTransactionOp withAnyOperation() {
+				return new RuleBuilderRuleTransactionOp();
+			}
+
+			private class RuleBuilderRuleTransactionOp implements IAuthRuleBuilderRuleTransactionOp {
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished andApplyNormalRules() {
+					RuleImplOp rule = new RuleImplOp(myRuleName);
+					rule.setMode(myRuleMode);
+					rule.setOp(myRuleOp);
+					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
+			}
+
 		}
+
 	}
 
 }

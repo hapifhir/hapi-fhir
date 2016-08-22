@@ -70,6 +70,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/" + output1.getId().getIdPart())).andThen()
+					.allow().updateConditional().allResources()
 					.build();
 				//@formatter:on
 			}
