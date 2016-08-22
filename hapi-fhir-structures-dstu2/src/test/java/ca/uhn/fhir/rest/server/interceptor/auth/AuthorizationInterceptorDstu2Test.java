@@ -1053,7 +1053,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 	}
@@ -1078,11 +1078,13 @@ public class AuthorizationInterceptorDstu2Test {
 		HttpResponse status;
 		String response;
 
+		ourReturn = Arrays.asList(createPatient(1));
+
 		ourHitMethod = false;
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
 		status = ourClient.execute(httpDelete);
 		response = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(204, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 	}

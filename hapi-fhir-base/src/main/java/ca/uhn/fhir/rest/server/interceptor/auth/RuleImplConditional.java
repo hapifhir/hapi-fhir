@@ -27,7 +27,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 			return null;
 		}
 		
-		if (theOperation == RestOperationTypeEnum.UPDATE) {
+		if (theOperation == myOperationType) {
 			switch (myAppliesTo) {
 			case ALL_RESOURCES:
 				break;
