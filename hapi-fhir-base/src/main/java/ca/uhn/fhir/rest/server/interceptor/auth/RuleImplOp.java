@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
 
-class Rule extends BaseRule implements IAuthRule {
+class RuleImplOp extends BaseRule implements IAuthRule {
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<?> myAppliesToTypes;
@@ -49,34 +49,37 @@ class Rule extends BaseRule implements IAuthRule {
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 
-	public Rule(String theRuleName) {
+	public RuleImplOp(String theRuleName) {
 		super(theRuleName);
 	}
 
 	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
+	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		IBaseResource appliesTo;
+		IBaseResource appliesToResource;
+		IIdType appliesToResourceId = null;
 		switch (myOp) {
 		case READ:
 			if (theOutputResource == null) {
 				return null;
 			}
-			appliesTo = theOutputResource;
+			appliesToResource = theOutputResource;
 			break;
 		case WRITE:
-			if (theInputResource == null) {
+			if (theInputResource == null && theInputResourceId == null) {
 				return null;
 			}
-			appliesTo = theInputResource;
+			appliesToResource = theInputResource;
+			appliesToResourceId = theInputResourceId;
 			break;
 		case DELETE:
 			if (theOperation == RestOperationTypeEnum.DELETE) {
 				if (theInputResource == null) {
 					return newVerdict();
 				} else {
-					appliesTo = theInputResource;
+					appliesToResource = theInputResource;
 				}
 			} else {
 				return null;
@@ -115,7 +118,7 @@ class Rule extends BaseRule implements IAuthRule {
 							throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
 						}
 
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null);
+						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null);
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {
@@ -133,7 +136,7 @@ class Rule extends BaseRule implements IAuthRule {
 					if (nextPart.getResource() == null) {
 						continue;
 					}
-					Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, nextPart.getResource());
+					Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextPart.getResource());
 					if (newVerdict == null) {
 						continue;
 					} else if (verdict == null) {
@@ -165,8 +168,16 @@ class Rule extends BaseRule implements IAuthRule {
 		case ALL_RESOURCES:
 			break;
 		case TYPES:
-			if (myAppliesToTypes.contains(appliesTo.getClass()) == false) {
-				return null;
+			if (appliesToResource != null) {
+				if (myAppliesToTypes.contains(appliesToResource.getClass()) == false) {
+					return null;
+				}
+			}
+			if (appliesToResourceId != null) {
+				Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceId.getResourceType()).getImplementingClass();
+				if (myAppliesToTypes.contains(type) == false) {
+					return null;
+				}
 			}
 			break;
 		default:
@@ -180,9 +191,17 @@ class Rule extends BaseRule implements IAuthRule {
 			FhirTerser t = ctx.newTerser();
 			boolean foundMatch = false;
 			for (IIdType next : myClassifierCompartmentOwners) {
-				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, appliesTo, next)) {
-					foundMatch = true;
-					break;
+				if (appliesToResource != null) {
+					if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, appliesToResource, next)) {
+						foundMatch = true;
+						break;
+					}
+				}
+				if (appliesToResourceId != null && appliesToResourceId.hasResourceType() && appliesToResourceId.hasIdPart()) {
+					if (appliesToResourceId.toUnqualifiedVersionless().getValue().equals(next.toUnqualifiedVersionless().getValue())) {
+						foundMatch = true;
+						break;
+					}
 				}
 			}
 			if (!foundMatch) {
@@ -195,7 +214,6 @@ class Rule extends BaseRule implements IAuthRule {
 
 		return newVerdict();
 	}
-
 
 	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
 		if (!"Bundle".equals(theContext.getResourceDefinition(theInputResource).getName())) {
@@ -238,8 +256,7 @@ class Rule extends BaseRule implements IAuthRule {
 		myClassifierType = theClassifierType;
 	}
 
-
-	public Rule setOp(RuleOpEnum theRuleOp) {
+	public RuleImplOp setOp(RuleOpEnum theRuleOp) {
 		myOp = theRuleOp;
 		return this;
 	}

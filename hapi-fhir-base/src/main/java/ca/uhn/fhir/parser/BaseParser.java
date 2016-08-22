@@ -10,7 +10,7 @@ package ca.uhn.fhir.parser;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -288,13 +288,17 @@ public abstract class BaseParser implements IParser {
 					IIdType refId = theRef.getResource().getIdElement();
 					if (refId != null) {
 						if (refId.hasIdPart()) {
-							if (!refId.hasResourceType()) {
-								refId = refId.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
-							}
-							if (isStripVersionsFromReferences(theCompositeChildElement)) {
-								reference = refId.toVersionless().getValue();
-							} else {
+							if (refId.getValue().startsWith("urn:")) {
 								reference = refId.getValue();
+							} else {
+								if (!refId.hasResourceType()) {
+									refId = refId.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
+								}
+								if (isStripVersionsFromReferences(theCompositeChildElement)) {
+									reference = refId.toVersionless().getValue();
+								} else {
+									reference = refId.getValue();
+								}
 							}
 						}
 					}
@@ -417,7 +421,8 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theWriter, "theWriter can not be null");
 
 		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
-			throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+			throw new IllegalArgumentException(
+					"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
 		if (isJsonParser() && myJsonLikeStructure != null) {
@@ -486,9 +491,9 @@ public abstract class BaseParser implements IParser {
 		String childName = theChild.getChildNameByDatatype(type);
 		BaseRuntimeElementDefinition<?> childDef = theChild.getChildElementDefinitionByDatatype(type);
 		if (childDef == null) {
-			//			if (theValue instanceof IBaseExtension) {
-			//				return null;
-			//			}
+			// if (theValue instanceof IBaseExtension) {
+			// return null;
+			// }
 
 			/*
 			 * For RI structures Enumeration class, this replaces the child def
@@ -634,7 +639,8 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected boolean isChildContained(BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource) {
-		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false && theIncludedResource == false;
+		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false
+				&& theIncludedResource == false;
 	}
 	
 	protected boolean isJsonParser() {
@@ -729,12 +735,12 @@ public abstract class BaseParser implements IParser {
 			retVal = doParseResource(theResourceType, theReader);
 		}
 
-		postParseResource(theResourceType, retVal);
+		postParseResource(retVal);
 
 		return retVal;
 	}
 
-	protected <T extends IBaseResource> void postParseResource(Class<T> theResourceType, T theResource) {
+	protected <T extends IBaseResource> void postParseResource(T theResource) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		if ("Bundle".equals(def.getName())) {
 
@@ -783,7 +789,7 @@ public abstract class BaseParser implements IParser {
 	
 		T retVal = doParseResource(theResourceType, theJsonStructure);
 	
-		postParseResource(theResourceType, retVal);
+		postParseResource(retVal);
 	
 		return retVal;
 	}
@@ -830,7 +836,8 @@ public abstract class BaseParser implements IParser {
 		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
 	}
 
-	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues, CompositeChildElement theCompositeChildElement) {
+	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues,
+			CompositeChildElement theCompositeChildElement) {
 		if (myContext.getVersion().getVersion().isRi()) {
 
 			/*
@@ -1294,11 +1301,11 @@ public abstract class BaseParser implements IParser {
 					retVal = !checkIfParentShouldNotBeEncodedAndBuildPath(new StringBuilder(), true);
 				}
 			}
-			//			if (retVal == false && myEncodeElements.contains("*.(mandatory)")) {
-			//				if (myDef.getMin() > 0) {
-			//					retVal = true;
-			//				}
-			//			}
+			// if (retVal == false && myEncodeElements.contains("*.(mandatory)")) {
+			// if (myDef.getMin() > 0) {
+			// retVal = true;
+			// }
+			// }
 
 			return retVal;
 		}

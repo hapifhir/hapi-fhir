@@ -54,7 +54,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	}
 
 	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
+	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		boolean applies = false;
@@ -67,7 +67,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		case EXTENDED_OPERATION_TYPE:
 			if (myAppliesToTypes != null) {
 				for (Class<? extends IBaseResource> next : myAppliesToTypes) {
-					String resName = ctx.getResourceDefinition(theRequestDetails.getResourceName()).getName();
+					String resName = ctx.getResourceDefinition(next).getName();
 					if (resName.equals(theRequestDetails.getResourceName())) {
 						applies = true;
 						break;

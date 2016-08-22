@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -77,6 +78,7 @@ public class AuthorizationInterceptorDstu2Test {
 
 	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"Access denied by default policy (no applicable rules)\"}]}";
 	private static CloseableHttpClient ourClient;
+	private static String ourConditionalCreateId;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static boolean ourHitMethod;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorDstu2Test.class);
@@ -84,6 +86,7 @@ public class AuthorizationInterceptorDstu2Test {
 	private static List<IResource> ourReturn;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
+
 
 	@Before
 	public void before() {
@@ -93,8 +96,8 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 		ourReturn = null;
 		ourHitMethod = false;
+		ourConditionalCreateId = "1123";
 	}
-
 
 	private HttpEntity createFhirResourceEntity(IBaseResource theResource) {
 		String out = ourCtx.newJsonParser().encodeResourceToString(theResource);
@@ -173,286 +176,6 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
-	}
-
-	@Test
-	public void testOperationServerLevel() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
-				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onServer().andThen()
-					.build();
-				//@formatter:on
-			}
-		});
-
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		// Type
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		// Instance
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-	}
-
-	@Test
-	public void testOperationInstanceLevel() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
-				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onInstance(new IdDt("http://example.com/Patient/1/_history/2")).andThen()
-					.build();
-				//@formatter:on
-			}
-		});
-
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		// Type
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		// Instance
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-		
-		// Wrong instance
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-	}
-
-	@Test
-	public void testOperationAnyName() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
-				return new RuleBuilder()
-					.allow("RULE 1").operation().withAnyName().onServer().andThen()
-					.build();
-				//@formatter:on
-			}
-		});
-
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-		
-	}
-
-	@Test
-	public void testOperationTypeLevel() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
-				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onType(Patient.class).andThen()
-					.build();
-				//@formatter:on
-			}
-		});
-
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		// Type
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		// Wrong type
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		// Wrong name
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		// Instance
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by default policy"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-	}
-
-	@Test
-	public void testDenyAll() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
-				return new RuleBuilder()
-					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
-					.denyAll("Default Rule")
-					.build();
-				//@formatter:on
-		}
-		});
-
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourHitMethod = false;
-		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by rule: Default Rule"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response, containsString("Access denied by rule: Default Rule"));
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-	}
-	
-	@Test
-	public void testMetadataAllow() throws Exception {
-		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
-				return new RuleBuilder()
-					.allow("Rule 1").metadata()
-					.build();
-				//@formatter:on
-			}
-		});
-
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourReturn = Arrays.asList(createPatient(2));
-		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -565,6 +288,77 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testDenyAll() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("Default Rule")
+					.build();
+				//@formatter:on
+		}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Default Rule"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Default Rule"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+	
+	@Test
+	public void testMetadataAllow() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").metadata()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
 	public void testMetadataDeny() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
@@ -588,7 +382,216 @@ public class AuthorizationInterceptorDstu2Test {
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 	}
+
+	@Test
+	public void testOperationAnyName() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().withAnyName().onServer().andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+		
+	}
+
+	@Test
+	public void testOperationInstanceLevel() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("opName").onInstance(new IdDt("http://example.com/Patient/1/_history/2")).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+		
+		// Wrong instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+	}
+
+	@Test
+	public void testOperationServerLevel() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("opName").onServer().andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
 	
+	@Test
+	public void testOperationTypeLevel() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("opName").onType(Patient.class).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Wrong type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Wrong name
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName2");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
 	@Test
 	public void testReadByAnyId() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -689,6 +692,7 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
+	
 	@Test
 	public void testReadByCompartmentWrong() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -749,7 +753,6 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testTransactionWriteGood() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -803,14 +806,15 @@ public class AuthorizationInterceptorDstu2Test {
 
 		HttpEntityEnclosingRequestBase httpPost;
 		HttpResponse status;
+		String response;
 
 		ourHitMethod = false;
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
-		String response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
+		response = extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
 		assertFalse(ourHitMethod);
 
 		// Conditional
@@ -820,8 +824,8 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
 		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
@@ -829,8 +833,8 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/2")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
 		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
@@ -891,13 +895,14 @@ public class AuthorizationInterceptorDstu2Test {
 		});
 
 		HttpEntityEnclosingRequestBase httpPost;
+		String response;
 		HttpResponse status;
 
 		ourHitMethod = false;
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
 		httpPost.setEntity(createFhirResourceEntity(createPatient(2)));
 		status = ourClient.execute(httpPost);
-		String response = extractResponseAndClose(status);
+		response = extractResponseAndClose(status);
 		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
@@ -907,7 +912,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
-		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		// Conditional
@@ -918,7 +923,16 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(99)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(ERR403, response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/Observation/10");
@@ -937,10 +951,184 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
-
 	
 	
 
+	@Test
+	public void testWriteByCompartmentUpdateConditionalResolvesToInvalid() throws Exception {
+		ourConditionalCreateId = "1123";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 3").updateConditional().resourcesOfType(Patient.class)
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpEntityEnclosingRequestBase httpPost;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertTrue(ourHitMethod);
+
+	}
+
+	
+	@Test
+	public void testWriteByCompartmentUpdateConditionalResolvesToValid() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 3").updateConditional().resourcesOfType(Patient.class)
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpEntityEnclosingRequestBase httpPost;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Observation?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/12")));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+	}
+
+	@Test
+	public void testWriteByCompartmentCreateConditionalResolvesToValid() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").createConditional().resourcesOfType(Patient.class)
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpEntityEnclosingRequestBase httpPost;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+	@Test
+	public void testWriteByCompartmentDeleteConditionalResolvesToValid() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").deleteConditional().resourcesOfType(Patient.class)
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpDelete httpDelete;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList(createPatient(1));
+
+		ourHitMethod = false;
+		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
+		status = ourClient.execute(httpDelete);
+		response = extractResponseAndClose(status);
+		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+	@Test
+	public void testWriteByCompartmentUpdateConditionalResolvesToValidAllTypes() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.allow("Rule 3").updateConditional().allResources()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpEntityEnclosingRequestBase httpPost;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpPost = new HttpPut("http://localhost:" + ourPort + "/Observation?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/12")));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertTrue(ourHitMethod);
+
+	}
+	
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -977,7 +1165,7 @@ public class AuthorizationInterceptorDstu2Test {
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
 		@Create()
-		public MethodOutcome create(@ResourceParam Observation theResource) {
+		public MethodOutcome create(@ResourceParam Observation theResource, @ConditionalUrlParam String theConditionalUrl) {
 			ourHitMethod = true;
 			theResource.setId("Observation/1/_history/1");
 			MethodOutcome retVal = new MethodOutcome();
@@ -998,49 +1186,64 @@ public class AuthorizationInterceptorDstu2Test {
 			return Observation.class;
 		}
 
-		@Read(version = true)
-		public Observation read(@IdParam IdDt theId) {
-			ourHitMethod = true;
-			return (Observation) ourReturn.get(0);
-		}
-
-		@Search()
-		public List<IResource> search() {
-			ourHitMethod = true;
-			return ourReturn;
-		}
-
-		@Update()
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Observation theResource) {
-			ourHitMethod = true;
-			theResource.setId(theId.withVersion("2"));
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setCreated(true);
-			retVal.setResource(theResource);
-			return retVal;
-		}
 		@Operation(name="opName", idempotent=true)
 		public Parameters operation() {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
+
 		@Operation(name="opName", idempotent=true)
 		public Parameters operation(@IdParam IdDt theId) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
 
+		@Read(version = true)
+		public Observation read(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			return (Observation) ourReturn.get(0);
+		}
+		@Search()
+		public List<IResource> search() {
+			ourHitMethod = true;
+			return ourReturn;
+		}
+		@Update()
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Observation theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+			ourHitMethod = true;
+			
+			if (isNotBlank(theConditionalUrl)) {
+				IdDt actual = new IdDt("Observation", ourConditionalCreateId);
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
+				theResource.setId(actual);
+			} else {
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, theResource);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
+				theResource.setId(theId.withVersion("2"));
+			}
+			
+			MethodOutcome retVal = new MethodOutcome();
+			retVal.setCreated(true);
+			retVal.setResource(theResource);
+			return retVal;
+		}
+
 
 	}
-
+	
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
 
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			
 			if (isNotBlank(theConditionalUrl)) {
-				IdDt actual = new IdDt("Patient", "1123");
+				IdDt actual = new IdDt("Patient", ourConditionalCreateId);
 				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.CREATE);
+			} else {
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, theResource);
 				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.CREATE);
 			}
 			
@@ -1054,7 +1257,7 @@ public class AuthorizationInterceptorDstu2Test {
 
 
 		@Delete()
-		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdDt theId) {
+		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 			for (IBaseResource next : ourReturn) {
 				theRequestOperationCallback.resourceDeleted(next);
@@ -1063,58 +1266,11 @@ public class AuthorizationInterceptorDstu2Test {
 			return retVal;
 		}
 
-		@Validate
-		public MethodOutcome validate(@ResourceParam Patient theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-				@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
-			ourHitMethod = true;
-			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setDiagnostics("OK");
-			return new MethodOutcome(oo);
-		}
-			
-		@Validate
-		public MethodOutcome validate(@ResourceParam Patient theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-				@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
-			ourHitMethod = true;
-			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setDiagnostics("OK");
-			return new MethodOutcome(oo);
-		}
-		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-
-		@Read(version = true)
-		public Patient read(@IdParam IdDt theId) {
-			ourHitMethod = true;
-			return (Patient) ourReturn.get(0);
-		}
-
-		@Search()
-		public List<IResource> search() {
-			ourHitMethod = true;
-			return ourReturn;
-		}
-
-		@Update()
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
-			ourHitMethod = true;
-
-			if (isNotBlank(theConditionalUrl)) {
-				IdDt actual = new IdDt("Patient", "1123");
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
-				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
-			}
 			
-			theResource.setId(theId.withVersion("2"));
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setCreated(true);
-			retVal.setResource(theResource);
-			return retVal;
-		}
-		
 		@Operation(name="opName", idempotent=true)
 		public Parameters operation() {
 			ourHitMethod = true;
@@ -1131,6 +1287,56 @@ public class AuthorizationInterceptorDstu2Test {
 		public Parameters operation2(@IdParam IdDt theId) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
+		}
+
+		@Read(version = true)
+		public Patient read(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			return (Patient) ourReturn.get(0);
+		}
+
+		@Search()
+		public List<IResource> search() {
+			ourHitMethod = true;
+			return ourReturn;
+		}
+		
+		@Update()
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+			ourHitMethod = true;
+
+			if (isNotBlank(theConditionalUrl)) {
+				IdDt actual = new IdDt("Patient", ourConditionalCreateId);
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
+				theResource.setId(actual);
+			} else {
+				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, theResource);
+				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
+				theResource.setId(theId.withVersion("2"));
+			}
+
+			MethodOutcome retVal = new MethodOutcome();
+			retVal.setResource(theResource);
+			return retVal;
+		}
+		
+		@Validate
+		public MethodOutcome validate(@ResourceParam Patient theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+				@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+			ourHitMethod = true;
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue().setDiagnostics("OK");
+			return new MethodOutcome(oo);
+		}
+
+		@Validate
+		public MethodOutcome validate(@ResourceParam Patient theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+				@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+			ourHitMethod = true;
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue().setDiagnostics("OK");
+			return new MethodOutcome(oo);
 		}
 
 	}

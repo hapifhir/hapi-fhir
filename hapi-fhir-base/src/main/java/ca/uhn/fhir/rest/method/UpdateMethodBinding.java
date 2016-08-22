@@ -11,7 +11,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -62,7 +63,8 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			id.setValue(locationHeader);
 			if (isNotBlank(id.getResourceType())) {
 				if (!getResourceName().equals(id.getResourceType())) {
-					throw new InvalidRequestException("Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
+					throw new InvalidRequestException(
+							"Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
 				}
 			}
 		}
@@ -140,17 +142,20 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
 				throw new InvalidRequestException(msg);
 			}
-			if (isBlank(theResourceId)) {
-//				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
-				ourLog.warn("No resource ID found in resource body for update");
-				theResource.setId(theUrlId);				
-			} else {
-				if (!theResourceId.equals(theUrlId)) {
-					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
-					throw new InvalidRequestException(msg);
+			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				if (isBlank(theResourceId)) {
+					ourLog.warn("No resource ID found in resource body for update");
+					theResource.setId(theUrlId);
+				} else {
+					if (!theResourceId.equals(theUrlId)) {
+						String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
+						throw new InvalidRequestException(msg);
+					}
 				}
 			}
+		} else {
+			theResource.setId((IIdType)null);
 		}
+		
 	}
-
 }

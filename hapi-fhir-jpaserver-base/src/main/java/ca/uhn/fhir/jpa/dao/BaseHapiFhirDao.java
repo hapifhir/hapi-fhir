@@ -1077,7 +1077,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@SuppressWarnings("unchecked")
 	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 			boolean theUpdateVersion, Date theUpdateTime) {
-		ourLog.info("Starting entity update");
+		ourLog.debug("Starting entity update");
 
 		/*
 		 * This should be the very first thing..
@@ -1094,7 +1094,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		if (theEntity.getPublished() == null) {
-			ourLog.info("Entity has published time: {}", new InstantDt(theUpdateTime));
+			ourLog.debug("Entity has published time: {}", new InstantDt(theUpdateTime));
 
 			theEntity.setPublished(theUpdateTime);
 		}

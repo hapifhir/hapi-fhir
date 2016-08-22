@@ -606,7 +606,9 @@ public class RestfulServerUtils {
 		}
 
 		if (theAddContentLocationHeader && fullId != null) {
-			restUtil.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
+			if (theServer.getFhirContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				restUtil.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
+			}
 			restUtil.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 		}
 

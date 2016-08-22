@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -25,7 +27,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -52,7 +53,7 @@ public class UpdateDstu3Test {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -61,7 +62,7 @@ public class UpdateDstu3Test {
 		assertEquals("OODETAILS", oo.getIssue().get(0).getDiagnostics());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals(null, status.getFirstHeader("location"));
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
 	}
@@ -78,7 +79,7 @@ public class UpdateDstu3Test {
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
@@ -101,7 +102,7 @@ public class UpdateDstu3Test {
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
@@ -117,28 +118,22 @@ public class UpdateDstu3Test {
 	public void testUpdateWrongUrlInBody() throws Exception {
 
 		Patient patient = new Patient();
-		patient.setId("3");
+		patient.setId("Patient/3/_history/4");
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/1/_history/2");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals(
-				"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"3\" does not match URL ID of \"001\"",
-				oo.getIssue().get(0).getDiagnostics());
-
-		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader("location"));
-		assertNull(status.getFirstHeader("content-location"));
-
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/002", status.getFirstHeader("content-location").getValue());
+		assertEquals("Patient/1/_history/2", ourId.getValue());
 	}
 
 	@AfterClass

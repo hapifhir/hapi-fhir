@@ -35,7 +35,7 @@ abstract class BaseRule implements IAuthRule {
 		return myName;
 	}
 	
-	public void setMode(PolicyEnum theRuleMode) {
+	void setMode(PolicyEnum theRuleMode) {
 		myMode = theRuleMode;
 	}
 
@@ -43,7 +43,7 @@ abstract class BaseRule implements IAuthRule {
 		return new Verdict(myMode, this);
 	}
 
-	public PolicyEnum getMode() {
+	PolicyEnum getMode() {
 		return myMode;
 	}
 
