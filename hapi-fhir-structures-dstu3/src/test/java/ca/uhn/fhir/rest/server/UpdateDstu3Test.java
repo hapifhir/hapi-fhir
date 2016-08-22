@@ -62,7 +62,7 @@ public class UpdateDstu3Test {
 		assertEquals("OODETAILS", oo.getIssue().get(0).getDiagnostics());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals(null, status.getFirstHeader("location"));
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
 	}
@@ -132,7 +132,7 @@ public class UpdateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/002", status.getFirstHeader("content-location").getValue());
 		assertEquals("Patient/1/_history/2", ourId.getValue());
 	}
 
