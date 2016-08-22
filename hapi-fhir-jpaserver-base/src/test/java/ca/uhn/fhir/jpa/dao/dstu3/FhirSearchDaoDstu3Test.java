@@ -126,6 +126,11 @@ public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
 			patient.getText().setDivAsString("<div>AAAB<p>FOO</p> CCC    </div>");
 			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
+		{
+			Patient patient = new Patient();
+			patient.getText().setDivAsString("<div>ZZYZXY</div>");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
+		}
 
 		SearchParameterMap map = new SearchParameterMap();
 		String resourceName = "Patient";

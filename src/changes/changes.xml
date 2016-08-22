@@ -161,6 +161,10 @@
 				if it contained custom fields that also used custom
 				types. Thanks to GitHub user @sjanic for reporting!
 			</action>
+			<action type="add">
+				Inprove handling of _text and _content searches in JPA server to do better
+				matching on partial strings
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
