@@ -34,6 +34,8 @@ public abstract class JsonLikeValue {
 	
 	public abstract ScalarType getDataType ();
 	
+	public abstract Object getValue ();
+	
 	public boolean isArray () {
 		return this.getJsonType() == ValueType.ARRAY;
 	}
@@ -66,6 +68,9 @@ public abstract class JsonLikeValue {
 	}
 	public String getAsString () {
 		return this.toString();
+	}
+	public Number getAsNumber () {
+		return this.isNumber() ? (Number)this.getValue() : null;
 	}
 	public boolean getAsBoolean () {
 		return !isNull();
@@ -109,6 +114,11 @@ public abstract class JsonLikeValue {
 		}
 
 		@Override
+		public Object getValue() {
+			 return null;
+		}
+
+		@Override
         public boolean equals (Object obj) {
             if (this == obj){
                 return true;
@@ -140,6 +150,11 @@ public abstract class JsonLikeValue {
         public ScalarType getDataType() {
             return ScalarType.BOOLEAN;
         }
+
+		  @Override
+		  public Object getValue() {
+			   return Boolean.TRUE;
+		  }
 
         @Override
         public boolean equals(Object obj) {
@@ -175,6 +190,11 @@ public abstract class JsonLikeValue {
         public ScalarType getDataType() {
             return ScalarType.BOOLEAN;
         }
+
+		  @Override
+		  public Object getValue() {
+			   return Boolean.FALSE;
+		  }
 
         @Override
         public boolean equals(Object obj) {

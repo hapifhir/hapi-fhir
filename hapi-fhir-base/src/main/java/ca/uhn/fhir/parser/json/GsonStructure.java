@@ -106,6 +106,14 @@ public class GsonStructure implements JsonLikeStructure {
 	}
 
 	@Override
+	public JsonLikeWriter getJsonLikeWriter () {
+		if (null == jsonLikeWriter) {
+			jsonLikeWriter = new GsonWriter();
+		}
+		return jsonLikeWriter;
+	}
+
+	@Override
 	public JsonLikeObject getRootObject() {
 		if (null == jsonLikeObject) {
 			jsonLikeObject = new GsonJsonObject(nativeObject);
@@ -120,6 +128,11 @@ public class GsonStructure implements JsonLikeStructure {
 		
 		public GsonJsonObject (JsonObject json) {
 			this.nativeObject = json;
+		}
+
+		@Override
+		public Object getValue() {
+			return null;
 		}
 
 		@Override
@@ -159,6 +172,11 @@ public class GsonStructure implements JsonLikeStructure {
 		}
 
 		@Override
+		public Object getValue() {
+			return null;
+		}
+
+		@Override
 		public int size() {
 			return nativeArray.size();
 		}
@@ -189,6 +207,20 @@ public class GsonStructure implements JsonLikeStructure {
 			this.nativeValue = json;
 		}
 
+		@Override
+		public Object getValue() {
+			if (nativeValue != null && nativeValue.isJsonPrimitive()) {
+				if (((JsonPrimitive)nativeValue).isNumber()) {
+					return nativeValue.getAsNumber();
+				}
+				if (((JsonPrimitive)nativeValue).isBoolean()) {
+					return Boolean.valueOf(nativeValue.getAsBoolean());
+				}
+				return nativeValue.getAsString();
+			}
+			return null;
+		}
+		
 		@Override
 		public ValueType getJsonType() {
 			if (null == nativeValue || nativeValue.isJsonNull()) {
@@ -240,6 +272,11 @@ public class GsonStructure implements JsonLikeStructure {
 				}
 			}
 			return jsonLikeObject;
+		}
+
+		@Override
+		public Number getAsNumber() {
+			return nativeValue != null ? nativeValue.getAsNumber() : null;
 		}
 
 		@Override

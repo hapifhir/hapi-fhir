@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser.json;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -27,12 +28,20 @@ import java.math.BigInteger;
 public abstract class JsonLikeWriter {
 
 	private boolean prettyPrint;
+	private Writer writer;
 	
 	public void setPrettyPrint (boolean tf) {
 		prettyPrint = tf; 
 	}
 	public boolean isPrettyPrint () {
 		return prettyPrint;
+	}
+	
+	public void setWriter (Writer writer) {
+		this.writer = writer;
+	}
+	public Writer getWriter () {
+		return writer;
 	}
 	
 	public abstract JsonLikeWriter init () throws IOException;

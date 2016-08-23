@@ -34,7 +34,6 @@ import com.google.gson.stream.JsonWriter;
 public class GsonWriter extends JsonLikeWriter {
 	private static final Logger log = LoggerFactory.getLogger(GsonWriter.class);
 
-	private Writer writer;
 	private JsonWriter eventWriter;
 	private enum BlockType {
 		NONE, OBJECT, ARRAY
@@ -46,19 +45,12 @@ public class GsonWriter extends JsonLikeWriter {
 		super();
 	}
 	public GsonWriter (Writer writer) {
-		this.writer = writer;
-	}
-	
-	public Writer getWriter() {
-		return writer;
-	}
-	public void setWriter(Writer writer) {
-		this.writer = writer;
+		setWriter(writer);
 	}
 
 	@Override
 	public JsonLikeWriter init() throws IOException {
-		eventWriter = new JsonWriter(writer);
+		eventWriter = new JsonWriter(getWriter());
 		eventWriter.setSerializeNulls(true);
 		if (isPrettyPrint()) {
 			eventWriter.setIndent("  ");
@@ -74,14 +66,14 @@ public class GsonWriter extends JsonLikeWriter {
 			log.error("JsonLikeStreamWriter.flush() called but JSON document is not finished");
 		}
 		eventWriter.flush();
-		writer.flush();
+		getWriter().flush();
 		return this;
 	}
 
 	@Override
 	public void close() throws IOException {
 		eventWriter.close();
-		writer.close();
+		getWriter().close();
 	}
 
 	@Override

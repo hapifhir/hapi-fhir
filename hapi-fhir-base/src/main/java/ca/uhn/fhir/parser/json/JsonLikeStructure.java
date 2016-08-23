@@ -29,5 +29,6 @@ public interface JsonLikeStructure {
 	public JsonLikeStructure getInstance();
 	public void load (Reader theReader) throws DataFormatException;
 	public JsonLikeObject getRootObject ();
+	public JsonLikeWriter getJsonLikeWriter ();
 	public JsonLikeWriter getJsonLikeWriter (Writer writer);
 }
