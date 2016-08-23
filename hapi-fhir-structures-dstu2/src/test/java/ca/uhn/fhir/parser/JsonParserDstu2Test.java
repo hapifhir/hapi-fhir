@@ -15,7 +15,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.lang.reflect.GenericDeclaration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,6 +29,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.internal.stubbing.answers.ThrowsException;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
@@ -73,6 +74,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
@@ -81,46 +84,6 @@ public class JsonParserDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
-	@Test
-	public void testEncodeNarrativeShouldIncludeNamespace() {
-		
-		Patient p = new Patient();
-		p.getText().setDivAsString("<div>VALUE</div>");
-		
-		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(output);
-		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
-	}
-	
-	/**
-	 * See #390
-	 */
-	@Test
-	public void testEncodeAndParseBundleWithNoEntries() {
-		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		b.setId("123");
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
-		ourLog.info(encoded);
-		
-		assertThat(encoded, containsString("123"));
-		assertThat(encoded, not(containsString("entry")));
-		
-		b = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, encoded);
-		assertEquals("123", b.getId().getIdPart());
-		assertEquals(0, b.getEntry().size());
-	}
-	
-	@Test
-	public void testEncodeNarrativeShouldIncludeNamespaceWithProcessingInstruction() {
-		
-		Patient p = new Patient();
-		p.getText().setDivAsString("<?xml version=\"1.0\" encoding=\"UTF-8\"?><div>VALUE</div>");
-		
-		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(output);
-		assertThat(output, containsString("\"div\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
-	}
-	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -142,7 +105,9 @@ public class JsonParserDstu2Test {
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
 	}
+	
 
+	
 	/**
 	 * See #308
 	 */
@@ -160,7 +125,24 @@ public class JsonParserDstu2Test {
 		obs = p.parseResource(ReportObservation.class, encoded);
 		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
-
+	
+	/**
+	 * See #390
+	 */
+	@Test
+	public void testEncodeAndParseBundleWithNoEntries() {
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.setId("123");
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, containsString("123"));
+		assertThat(encoded, not(containsString("entry")));
+		
+		b = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, encoded);
+		assertEquals("123", b.getId().getIdPart());
+		assertEquals(0, b.getEntry().size());
+	}
 	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -246,7 +228,23 @@ public class JsonParserDstu2Test {
 		assertEquals("CHILD", ((StringDt) given2ext2.getValue()).getValue());
 
 	}
-
+	
+	@Test
+	public void testEncodeAndParseLanguage() {
+		Patient p = new Patient();
+		p.setLanguage(new CodeDt("en_CA"));
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		ourLog.info(encoded);
+		
+		assertEquals("{\"resourceType\":\"Patient\",\"language\":\"en_CA\"}", encoded);
+		
+		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
+		assertEquals("en_CA", p.getLanguage().getValue());
+		
+		p = (Patient) ourCtx.newJsonParser().parseResource("{\"resourceType\":\"Patient\",\"language\":[\"en_CA\"]}");
+		assertEquals("en_CA", p.getLanguage().getValue());
+	}
 
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
@@ -361,7 +359,8 @@ public class JsonParserDstu2Test {
 		assertEquals(null, name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getElementSpecificId());
 
 	}
-	
+
+
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -425,6 +424,7 @@ public class JsonParserDstu2Test {
 		assertEquals("DISPLAY2", label.getDisplay());
 		assertEquals("VERSION2", label.getVersion());
 	}
+
 	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
@@ -446,7 +446,7 @@ public class JsonParserDstu2Test {
 		assertThat(val, not(containsString("text")));
 
 	}
-
+	
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
 
@@ -465,7 +465,7 @@ public class JsonParserDstu2Test {
 		assertEquals(1, b.getEntries().size());
 
 	}
-
+	
 	/**
 	 * Fixing #89
 	 */
@@ -501,7 +501,6 @@ public class JsonParserDstu2Test {
 		assertEquals("{\"resourceType\":\"Binary\"}", output);
 	}
 
-	
 	/**
 	 * #158
 	 */
@@ -516,24 +515,6 @@ public class JsonParserDstu2Test {
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertThat(encoded, not(containsString("tag")));
-	}
-
-
-	@Test
-	public void testEncodeAndParseLanguage() {
-		Patient p = new Patient();
-		p.setLanguage(new CodeDt("en_CA"));
-		
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
-		ourLog.info(encoded);
-		
-		assertEquals("{\"resourceType\":\"Patient\",\"language\":\"en_CA\"}", encoded);
-		
-		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
-		assertEquals("en_CA", p.getLanguage().getValue());
-		
-		p = (Patient) ourCtx.newJsonParser().parseResource("{\"resourceType\":\"Patient\",\"language\":[\"en_CA\"]}");
-		assertEquals("en_CA", p.getLanguage().getValue());
 	}
 
 	/**
@@ -554,6 +535,7 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, not(containsString("Label")));
 	}
 
+	
 	@Test
 	public void testEncodeExtensionInPrimitiveElement() {
 
@@ -582,6 +564,7 @@ public class JsonParserDstu2Test {
 		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"elements\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 	}
+
 
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifier() {
@@ -664,6 +647,28 @@ public class JsonParserDstu2Test {
 		assertEquals("sub_ext_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getExtension().get(0).getValue()).getValue());
 	}
 
+	/**
+	 * See #428
+	 */
+	@Test
+	public void testEncodeExtensionWithCodeableConcept() {
+		Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		Level initialLevel = logger.getLevel();
+		logger.setLevel(Level.TRACE);
+		try {
+			Patient p = new Patient();
+			
+			CodeableConceptDt cc = new CodeableConceptDt();
+			cc.addCoding().setCode("123").setSystem("http://foo").setDisplay("AAA");
+			
+			p.addUndeclaredExtension(false, "http://extension", cc);
+			
+			ourLog.info(ourCtx.newJsonParser().encodeResourceToString(p));
+		} finally {
+			logger.setLevel(initialLevel);
+		}
+	}
+
 	@Test
 	public void testEncodeForceResourceId() {
 		Patient p = new Patient();
@@ -678,6 +683,28 @@ public class JsonParserDstu2Test {
 
 		assertThat(encoded, containsString("222"));
 		assertThat(encoded, not(containsString("111")));
+	}
+
+	@Test
+	public void testEncodeNarrativeShouldIncludeNamespace() {
+		
+		Patient p = new Patient();
+		p.getText().setDivAsString("<div>VALUE</div>");
+		
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
+	}
+
+	@Test
+	public void testEncodeNarrativeShouldIncludeNamespaceWithProcessingInstruction() {
+		
+		Patient p = new Patient();
+		p.getText().setDivAsString("<?xml version=\"1.0\" encoding=\"UTF-8\"?><div>VALUE</div>");
+		
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(output);
+		assertThat(output, containsString("\"div\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?><div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 
 	@Test
