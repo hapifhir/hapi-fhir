@@ -26,7 +26,12 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.slf4j.LoggerFactory;
+
 import ca.uhn.fhir.context.FhirContext;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
@@ -71,6 +76,7 @@ public class TestUtil {
 					}
 				}
 			}
+
 		}
 
 		/*
@@ -94,6 +100,16 @@ public class TestUtil {
 		String timeZone = availableTimeZones[(int)(Math.random() * availableTimeZones.length)];
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
+
+		/*
+		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage
+		 * on trace blocks 
+		 */
+		if ("true".equals(System.getProperty("ci"))) {
+			for (Logger next : ((LoggerContext)LoggerFactory.getILoggerFactory()).getLoggerList()) {
+				next.setLevel(Level.TRACE);
+			}
+		}
 		
 	}
 	

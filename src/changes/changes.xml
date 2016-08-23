@@ -192,6 +192,10 @@
 				required in earlier versions of FHIR but has been removed
 				from the specification.
 			</action>
+			<action type="fix" issue="428">
+				Fix NullPointerException when encoding an extension containing CodeableConcept
+				with log level set to TRACE. Thanks to Bill Denton for the report!
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
