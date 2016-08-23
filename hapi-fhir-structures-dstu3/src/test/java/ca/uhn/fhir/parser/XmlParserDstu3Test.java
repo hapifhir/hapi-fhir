@@ -1784,7 +1784,7 @@ public class XmlParserDstu3Test {
 		String output = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(output);
 
-		assertThat(output, containsString("<text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> John <b>SMITH </b>"));
+		assertThat(output, containsString("<text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">John <b>SMITH </b>"));
 	}
 
 	@Test

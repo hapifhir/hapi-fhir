@@ -64,6 +64,7 @@
 						<li>Spring (JPA, Web Tester): 4.3.0 -&gt; 4.3.1</li>
 						<!--<li>Hibernate ORM (JPA): 5.1.0 -&gt; 5.2.1</li>-->
 						<li>Hibernate Search (JPA): 5.5.2 -&gt; 5.5.4</li>
+						<li>Thymeleaf (Narrative Generator / Web Tester): 2.1.4 -&gt;3.0.1</li> 
 					</ul>
 				]]>
 			</action>

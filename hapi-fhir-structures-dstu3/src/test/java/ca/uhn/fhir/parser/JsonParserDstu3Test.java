@@ -1045,7 +1045,7 @@ public class JsonParserDstu3Test {
 		String output = ourCtx.newJsonParser().encodeResourceToString(p);
 		ourLog.info(output);
 
-		assertThat(output, containsString("\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><div class=\\\"hapiHeaderText\\\"> John <b>SMITH </b></div>"));
+		assertThat(output, containsString("\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><div class=\\\"hapiHeaderText\\\">John <b>SMITH </b></div>"));
 	}
 
 	@Test

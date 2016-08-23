@@ -73,7 +73,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		myGen.generateNarrative(ourCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
 
 	}
 
