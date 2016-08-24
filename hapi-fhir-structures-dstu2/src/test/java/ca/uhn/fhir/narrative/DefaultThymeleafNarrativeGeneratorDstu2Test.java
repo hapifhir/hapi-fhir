@@ -1,6 +1,7 @@
 package ca.uhn.fhir.narrative;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -89,7 +90,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.generateNarrative(ourCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("No narrative template available"));
+		assertThat(output, not(containsString("narrative")));
 
 	}
 

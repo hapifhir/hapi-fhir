@@ -21,7 +21,10 @@ package ca.uhn.fhir.narrative;
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -36,7 +39,6 @@ import org.thymeleaf.cache.ICacheEntryValidity;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
-import org.thymeleaf.model.IModel;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.IProcessor;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
@@ -45,7 +47,6 @@ import org.thymeleaf.standard.StandardDialect;
 import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
-import org.thymeleaf.standard.processor.AbstractStandardExpressionAttributeTagProcessor;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.DefaultTemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
@@ -54,106 +55,15 @@ import org.thymeleaf.templateresource.StringTemplateResource;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator.NarrativeAttributeProcessor;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.Constants;
 
 public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 
-	public class NarrativeAttributeProcessor extends AbstractAttributeTagProcessor {
-
-		protected NarrativeAttributeProcessor(FhirContext theContext, String theDialectPrefix) {
-			super(TemplateMode.XML, theDialectPrefix, null, false, "narrative", true, 0, true);
-			myContext = theContext;
-		}
-
-		private FhirContext myContext;
-
-		@Override
-		protected void doProcess(ITemplateContext theContext, IProcessableElementTag theTag, AttributeName theAttributeName, String theAttributeValue, IElementTagStructureHandler theStructureHandler) {
-			IEngineConfiguration configuration = theContext.getConfiguration();
-			IStandardExpressionParser expressionParser = StandardExpressions.getExpressionParser(configuration);
-
-			final IStandardExpression expression = expressionParser.parseExpression(theContext, theAttributeValue);
-			final Object value = expression.execute(theContext);
-
-			if (value == null) {
-				return;
-			}
-
-			Context context = new Context();
-			context.setVariable("fhirVersion", myContext.getVersion().getVersion().name());
-			context.setVariable("resource", value);
-
-			String name = null;
-			if (value != null) {
-				Class<? extends Object> nextClass = value.getClass();
-				do {
-					name = myClassToName.get(nextClass);
-					nextClass = nextClass.getSuperclass();
-				} while (name == null && nextClass.equals(Object.class) == false);
-
-				if (name == null) {
-					if (value instanceof IBaseResource) {
-						name = myContext.getResourceDefinition((Class<? extends IBaseResource>) value).getName();
-					} else if (value instanceof IDatatype) {
-						name = value.getClass().getSimpleName();
-						name = name.substring(0, name.length() - 2);
-					} else if (value instanceof IBaseDatatype) {
-						name = value.getClass().getSimpleName();
-						if (name.endsWith("Type")) {
-							name = name.substring(0, name.length() - 4);
-						}
-					} else {
-						throw new DataFormatException("Don't know how to determine name for type: " + value.getClass());
-					}
-					name = name.toLowerCase();
-					if (!myNameToNarrativeTemplate.containsKey(name)) {
-						name = null;
-					}
-				}
-			}
-
-			if (name == null) {
-				if (myIgnoreMissingTemplates) {
-					ourLog.debug("No narrative template available for type: {}", value.getClass());
-					return;
-				} else {
-					throw new DataFormatException("No narrative template for class " + value.getClass());
-				}
-			}
-
-			String result = myProfileTemplateEngine.process(name, context);
-			String trim = result.trim();
-			
-			theStructureHandler.setBody(trim, true);
-			
-//			if (!isBlank(trim + "AAA")) {
-//				Document dom = getXhtmlDOMFor(new StringReader(trim));
-//
-//				Element firstChild = (Element) dom.getFirstChild();
-//				for (int i = 0; i < firstChild.getChildren().size(); i++) {
-//					Node next = firstChild.getChildren().get(i);
-//					if (i == 0 && firstChild.getChildren().size() == 1) {
-//						if (next instanceof org.thymeleaf.dom.Text) {
-//							org.thymeleaf.dom.Text nextText = (org.thymeleaf.dom.Text) next;
-//							nextText.setContent(nextText.getContent().trim());
-//						}
-//					}
-//					theElement.addChild(next);
-//				}
-//
-//			}
-//
-//			return ProcessorResult.ok();
-		}
-
-	}
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGenerator.class);
-	// private static final XhtmlAndHtml5NonValidatingSAXTemplateParser PARSER = new XhtmlAndHtml5NonValidatingSAXTemplateParser(1);
 
 	private boolean myApplyDefaultDatatypeTemplates = true;
+
 	private HashMap<Class<?>, String> myClassToName;
 	private boolean myCleanWhitespace = true;
 	private boolean myIgnoreFailures = true;
@@ -162,12 +72,11 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	private HashMap<String, String> myNameToNarrativeTemplate;
 	private TemplateEngine myProfileTemplateEngine;
 
+	/**
+	 * Constructor
+	 */
 	public BaseThymeleafNarrativeGenerator() {
-		// myThymeleafConfig = new Configuration();
-		// myThymeleafConfig.addTemplateResolver(new ClassLoaderTemplateResolver());
-		// myThymeleafConfig.addMessageResolver(new StandardMessageResolver());
-		// myThymeleafConfig.setTemplateModeHandlers(StandardTemplateModeHandlers.ALL_TEMPLATE_MODE_HANDLERS);
-		// myThymeleafConfig.initialize();
+		super();
 	}
 
 	@Override
@@ -187,12 +96,6 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		if (name == null || !myNameToNarrativeTemplate.containsKey(name)) {
 			if (myIgnoreMissingTemplates) {
 				ourLog.debug("No narrative template available for resorce: {}", name);
-				try {
-					theNarrative.setDivAsString("<div>No narrative template available for resource : " + name + "</div>");
-				} catch (Exception e) {
-					// last resort..
-				}
-				theNarrative.setStatusAsString("empty");
 				return;
 			} else {
 				throw new DataFormatException("No narrative template for class " + theResource.getClass().getCanonicalName());
@@ -236,15 +139,6 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	protected abstract List<String> getPropertyFile();
-
-	// private Document getXhtmlDOMFor(final Reader source) {
-	// final Configuration configuration1 = myThymeleafConfig;
-	// try {
-	// return PARSER.parseTemplate(configuration1, "input", source);
-	// } catch (final Exception e) {
-	// throw new TemplateInputException("Exception during parsing of source", e);
-	// }
-	// }
 
 	private synchronized void initialize(final FhirContext theContext) {
 		if (myInitialized) {
@@ -497,6 +391,79 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		return b.toString();
 	}
 
+	public class NarrativeAttributeProcessor extends AbstractAttributeTagProcessor {
+
+		private FhirContext myContext;
+
+		protected NarrativeAttributeProcessor(FhirContext theContext, String theDialectPrefix) {
+			super(TemplateMode.XML, theDialectPrefix, null, false, "narrative", true, 0, true);
+			myContext = theContext;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void doProcess(ITemplateContext theContext, IProcessableElementTag theTag, AttributeName theAttributeName, String theAttributeValue, IElementTagStructureHandler theStructureHandler) {
+			IEngineConfiguration configuration = theContext.getConfiguration();
+			IStandardExpressionParser expressionParser = StandardExpressions.getExpressionParser(configuration);
+
+			final IStandardExpression expression = expressionParser.parseExpression(theContext, theAttributeValue);
+			final Object value = expression.execute(theContext);
+
+			if (value == null) {
+				return;
+			}
+
+			Context context = new Context();
+			context.setVariable("fhirVersion", myContext.getVersion().getVersion().name());
+			context.setVariable("resource", value);
+
+			String name = null;
+			if (value != null) {
+				Class<? extends Object> nextClass = value.getClass();
+				do {
+					name = myClassToName.get(nextClass);
+					nextClass = nextClass.getSuperclass();
+				} while (name == null && nextClass.equals(Object.class) == false);
+
+				if (name == null) {
+					if (value instanceof IBaseResource) {
+						name = myContext.getResourceDefinition((Class<? extends IBaseResource>) value).getName();
+					} else if (value instanceof IDatatype) {
+						name = value.getClass().getSimpleName();
+						name = name.substring(0, name.length() - 2);
+					} else if (value instanceof IBaseDatatype) {
+						name = value.getClass().getSimpleName();
+						if (name.endsWith("Type")) {
+							name = name.substring(0, name.length() - 4);
+						}
+					} else {
+						throw new DataFormatException("Don't know how to determine name for type: " + value.getClass());
+					}
+					name = name.toLowerCase();
+					if (!myNameToNarrativeTemplate.containsKey(name)) {
+						name = null;
+					}
+				}
+			}
+
+			if (name == null) {
+				if (myIgnoreMissingTemplates) {
+					ourLog.debug("No narrative template available for type: {}", value.getClass());
+					return;
+				} else {
+					throw new DataFormatException("No narrative template for class " + value.getClass());
+				}
+			}
+
+			String result = myProfileTemplateEngine.process(name, context);
+			String trim = result.trim();
+
+			theStructureHandler.setBody(trim, true);
+
+		}
+
+	}
+
 	// public class NarrativeAttributeProcessor extends AbstractAttributeTagProcessor {
 	//
 	// private FhirContext myContext;
@@ -618,14 +585,14 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 
 		@Override
-		protected ITemplateResource computeTemplateResource(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
-			String template = myNameToNarrativeTemplate.get(theTemplate);
-			return new StringTemplateResource(template);
+		protected TemplateMode computeTemplateMode(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
+			return TemplateMode.XML;
 		}
 
 		@Override
-		protected TemplateMode computeTemplateMode(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
-			return TemplateMode.XML;
+		protected ITemplateResource computeTemplateResource(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
+			String template = myNameToNarrativeTemplate.get(theTemplate);
+			return new StringTemplateResource(template);
 		}
 
 		@Override
