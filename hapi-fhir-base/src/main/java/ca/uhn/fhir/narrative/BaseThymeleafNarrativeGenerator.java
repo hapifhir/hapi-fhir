@@ -184,7 +184,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			name = theContext.getResourceDefinition(theResource).getName().toLowerCase();
 		}
 
-		if (name == null) {
+		if (name == null || !myNameToNarrativeTemplate.containsKey(name)) {
 			if (myIgnoreMissingTemplates) {
 				ourLog.debug("No narrative template available for resorce: {}", name);
 				try {
