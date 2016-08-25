@@ -10,7 +10,7 @@ package ca.uhn.fhir.parser;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,6 +105,7 @@ class ParserState<T> {
 	private final IParser myParser;
 	private IBase myPreviousElement;
 	private BaseState myState;
+
 	private ParserState(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
 		myParser = theParser;
 		myContext = theContext;
@@ -223,7 +224,8 @@ class ParserState<T> {
 		}
 	}
 
-	static ParserState<Bundle> getPreAtomInstance(IParser theParser, FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+	static ParserState<Bundle> getPreAtomInstance(IParser theParser, FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler)
+			throws DataFormatException {
 		ParserState<Bundle> retVal = new ParserState<Bundle>(theParser, theContext, theJsonMode, theErrorHandler);
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			retVal.push(retVal.new PreAtomState(theResourceType));
@@ -237,7 +239,8 @@ class ParserState<T> {
 	 * @param theResourceType
 	 *           May be null
 	 */
-	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(IParser theParser, Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(IParser theParser, Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler)
+			throws DataFormatException {
 		ParserState<T> retVal = new ParserState<T>(theParser, theContext, theJsonMode, theErrorHandler);
 		if (theResourceType == null) {
 			if (theContext.getVersion().getVersion().isRi()) {
@@ -1389,7 +1392,7 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-			
+
 			IResource res = (IResource) getCurrentElement();
 			assert res != null;
 			if (res.getId() == null || res.getId().isEmpty()) {
@@ -1582,7 +1585,7 @@ class ParserState<T> {
 						return;
 					}
 				}
-				
+
 				/*
 				 * This means we've found an element that doesn't exist on the structure. If the error handler doesn't throw
 				 * an exception, swallow the element silently along with any child elements
@@ -1742,10 +1745,10 @@ class ParserState<T> {
 			}
 			if ("id".equals(theName)) {
 				if (getCurrentElement() instanceof IBaseElement) {
-					((IBaseElement)getCurrentElement()).setId(theValue);
+					((IBaseElement) getCurrentElement()).setId(theValue);
 					return;
 				} else if (getCurrentElement() instanceof IIdentifiableElement) {
-					((IIdentifiableElement)getCurrentElement()).setElementSpecificId(theValue);
+					((IIdentifiableElement) getCurrentElement()).setElementSpecificId(theValue);
 					return;
 				}
 			}
@@ -1773,42 +1776,35 @@ class ParserState<T> {
 			}
 			
 			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
-			if (target == null) {
-				myErrorHandler.unknownElement(null, theLocalPart);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
-				return;
+			
+			if (target != null) {
+				switch (target.getChildType()) {
+				case COMPOSITE_DATATYPE: {
+					BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
+					ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance();
+					myExtension.setValue(newChildInstance);
+					ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
+					push(newState);
+					return;
+				}
+				case ID_DATATYPE:
+				case PRIMITIVE_DATATYPE: {
+					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
+					IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
+					myExtension.setValue(newChildInstance);
+					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
+					push(newState);
+					return;
+				}
+				}
 			}
 
-			switch (target.getChildType()) {
-			case COMPOSITE_DATATYPE: {
-				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-				ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance();
-				myExtension.setValue(newChildInstance);
-				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
-				push(newState);
-				return;
-			}
-			case PRIMITIVE_DATATYPE: {
-				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
-				myExtension.setValue(newChildInstance);
-				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
-				push(newState);
-				return;
-			}
-			case PRIMITIVE_XHTML:
-			case RESOURCE:
-			case RESOURCE_BLOCK:
-			case UNDECL_EXT:
-			case EXTENSION_DECLARED:
-			case CONTAINED_RESOURCES:
-			case CONTAINED_RESOURCE_LIST:
-			case ID_DATATYPE:
-			case PRIMITIVE_XHTML_HL7ORG:
-				break;
-			}
+			// We hit an invalid type for the extension
+			myErrorHandler.unknownElement(null, theLocalPart);
+			push(new SwallowChildrenWholeState(getPreResourceState()));
+			return;
 		}
-
+		
 		@Override
 		protected IBaseExtension<?, ?> getCurrentElement() {
 			return myExtension;
@@ -2135,11 +2131,11 @@ class ParserState<T> {
 						}
 					}
 				}
-	
+
 				if (wantedProfileType != null && !wantedProfileType.equals(myInstance.getClass())) {
 					if (myResourceType == null || myResourceType.isAssignableFrom(wantedProfileType)) {
-						ourLog.debug("Converting resource of type {} to type defined for profile \"{}\": {}", new Object[] {myInstance.getClass().getName(), usedProfile, wantedProfileType});
-						
+						ourLog.debug("Converting resource of type {} to type defined for profile \"{}\": {}", new Object[] { myInstance.getClass().getName(), usedProfile, wantedProfileType });
+
 						/*
 						 * This isn't the most efficient thing really.. If we want a specific
 						 * type we just re-parse into that type. The problem is that we don't know
@@ -2162,7 +2158,7 @@ class ParserState<T> {
 		private void stitchBundleCrossReferences() {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 			if (bundle) {
-				
+
 				/*
 				 * Stitch together resource references
 				 */
@@ -2200,7 +2196,7 @@ class ParserState<T> {
 						}
 					}
 				}
-				
+
 			}
 		}
 
@@ -2229,11 +2225,11 @@ class ParserState<T> {
 			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
 
-//		@Override
-//		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-//			super.enteringNewElement(theNamespaceUri, theLocalPart);
-//			populateTarget();
-//		}
+		// @Override
+		// public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
+		// super.enteringNewElement(theNamespaceUri, theLocalPart);
+		// populateTarget();
+		// }
 
 		@Override
 		protected void populateTarget() {

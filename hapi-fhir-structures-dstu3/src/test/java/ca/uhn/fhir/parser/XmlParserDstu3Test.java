@@ -185,7 +185,7 @@ public class XmlParserDstu3Test {
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
 	}
-	
+
 	@Test
 	public void testDuration() {
 		Encounter enc = new Encounter();
@@ -236,7 +236,7 @@ public class XmlParserDstu3Test {
 		assertEquals("Organization/orgid", pt.getManagingOrganization().getReferenceElement().getValue());
 		assertSame(org, pt.getManagingOrganization().getResource());
 	}
-
+	
 	@Test
 	public void testEncodeAndParseCompositeExtension() {
 		PatientWithCustomCompositeExtension pat = new PatientWithCustomCompositeExtension();
@@ -253,8 +253,7 @@ public class XmlParserDstu3Test {
 		assertEquals("ValueA", pat.getFooParentExtension().getChildA().getValue());
 		assertEquals("ValueB", pat.getFooParentExtension().getChildB().getValue());
 	}
-
-
+	
 	@Test
 	public void testEncodeAndParseContained() {
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -378,6 +377,7 @@ public class XmlParserDstu3Test {
 
 		ourCtx = null;
 	}
+
 
 	@Test
 	public void testEncodeAndParseContainedNonCustomTypes() {
@@ -2740,6 +2740,62 @@ public class XmlParserDstu3Test {
 		 * @Child(name = "p", type = {Attachment.class, ValueSet.class}, order=1, min=1, max=1, modifier=false, summary=true)
 		 */
 		assertNotNull(((Reference) actual.getContent().get(0).getP()).getResource());
+	}
+
+	/**
+	 * See #426
+	 */
+	@Test
+	public void testParseExtensionWithIdType() {
+		//@formatter:off
+		String input = 
+				"<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"    <extension url=\"http://aaa.ch/fhir/Patient#mangedcare\">\n" + 
+				"        <extension url=\"http://aaa.ch/fhir/Patient#mangedcare-aaa-id\">\n" + 
+				"           <valueId value=\"mc1\"/>\n" + 
+				"        </extension>\n" + 
+				"    </extension>\n" + 
+				"    <identifier>\n" + 
+				"        <value value=\"ais111\"/>\n" + 
+				"    </identifier>\n" +
+				"</Patient>";
+		//@formatter:on
+		Patient pt = ourCtx.newXmlParser().parseResource(Patient.class, input);
+		
+		List<Extension> extList = pt.getExtensionsByUrl("http://aaa.ch/fhir/Patient#mangedcare");
+		extList = extList.get(0).getExtensionsByUrl("http://aaa.ch/fhir/Patient#mangedcare-aaa-id");
+		Extension ext = extList.get(0);
+		IdType value = (IdType) ext.getValue();
+		assertEquals("mc1", value.getValueAsString());
+	}
+
+	/**
+	 * See #426
+	 * 
+	 * Value type of FOO isn't a valid datatype
+	 */
+	@Test
+	public void testParseExtensionWithInvalidType() {
+		//@formatter:off
+		String input = 
+				"<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"    <extension url=\"http://aaa.ch/fhir/Patient#mangedcare\">\n" + 
+				"        <extension url=\"http://aaa.ch/fhir/Patient#mangedcare-aaa-id\">\n" + 
+				"           <valueFOO value=\"mc1\"/>\n" + 
+				"        </extension>\n" + 
+				"    </extension>\n" + 
+				"    <identifier>\n" + 
+				"        <value value=\"ais111\"/>\n" + 
+				"    </identifier>\n" +
+				"</Patient>";
+		//@formatter:on
+		Patient pt = ourCtx.newXmlParser().parseResource(Patient.class, input);
+		
+		List<Extension> extList = pt.getExtensionsByUrl("http://aaa.ch/fhir/Patient#mangedcare");
+		extList = extList.get(0).getExtensionsByUrl("http://aaa.ch/fhir/Patient#mangedcare-aaa-id");
+		Extension ext = extList.get(0);
+		IdType value = (IdType) ext.getValue();
+		assertEquals(null, value);
 	}
 
 	/**

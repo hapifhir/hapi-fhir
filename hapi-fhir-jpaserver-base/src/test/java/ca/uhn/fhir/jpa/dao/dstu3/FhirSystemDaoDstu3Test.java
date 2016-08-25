@@ -803,6 +803,21 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
+	public void testTransactionCreateWithPutUsingAbsoluteUrl() {
+		String methodName = "testTransactionCreateWithPutUsingAbsoluteUrl";
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("http://localhost/server/base/Patient/" + methodName);
+
+		mySystemDao.transaction(mySrd, request);
+		
+		myPatientDao.read(new IdType("Patient/" + methodName), mySrd);
+	}
+
+	@Test
 	public void testTransactionCreateWithPutUsingUrl2() throws Exception {
 		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream("/bundle-dstu3.xml"), StandardCharsets.UTF_8);
 		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);

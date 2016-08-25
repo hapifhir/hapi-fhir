@@ -31,7 +31,7 @@
 			</action>
 			<action type="add">
 				STU3 structure definitions have been updated to the 
-				STU3 ballot candidate versions (1.5.0 - SVN 9395)
+				STU3 ballot candidate versions (1.6.0 - SVN 9395)
 			</action>
 			<action type="add">
 				Both client and server now support the new Content Types decided in
@@ -205,6 +205,10 @@
 			<action type="add">
 				Improve performance when parsing resources containing contained resources
 				by eliminating a step where references were woven twice
+			</action>
+			<action type="fix" issue="426">
+				Parser failed to parse resources containing an extension with a value type of
+				"id". Thanks to Raphael Mäder for reporting!  
 			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
@@ -1457,7 +1461,7 @@
 				search. This is experimental, since it is not a part of the core
 				FHIR specification.
 			</action>
-			<action type="add" fix="250">
+			<action type="add" issue="250">
 				Process "Accept: text/xml" and "Accept: text/json" headers was
 				wanting the equivalent FHIR encoding styles. These are not 
 				correct, but the intention is clear so we will honour them
@@ -1468,13 +1472,13 @@
 				codes (specifically, ValueSets which defined concepts containing
 				child concepts did not result in Enum values for the child concepts)
 			</action>
-			<action type="fix" fix="253">
+			<action type="fix" issue="253">
 				In the JPA server, order of transaction processing should be 
 				DELETE, POST, PUT, GET, and the order should not matter
 				within entries with the same verb. Thanks to Bill de Beaubien
 				for reporting!
 			</action>
-			<action type="add" fix="254">
+			<action type="add" issue="254">
 				Add the ability to wire JPA conformance providers
 				using Spring (basically, add default constructors
 				and setters to the conformance providers). Thanks
@@ -1571,11 +1575,11 @@
 			<action type="add">
 				JPA server now implements the $validate-code operation
 			</action>
-			<action type="add" fix="125">
+			<action type="add" issue="125">
 				HAPI-FHIR now has support for _summary and _elements parameters, in server, client,
 				and JPA server.
 			</action>
-			<action type="fix" fix="209">
+			<action type="fix" issue="209">
 				_revinclude results from JPA server should have a Bundle.entry.search.mode of
 				"include" and not "match". Thanks to Josh Mandel for reporting!
 			</action>
@@ -1785,7 +1789,7 @@
 				Generic/fluent client and JPA server now both support _lastUpdated search parameter
 				which was added in DSTU2
 			</action>
-			<action name="fix" issue="188">
+			<action type="fix" issue="188">
 				JPA server now supports sorting on reference parameters. Thanks to
 				Vishal Kachroo for reporting that this wasn't working!
 			</action>
@@ -1869,7 +1873,7 @@
 				the new syntax required in DSTU2: [resource name]:[search param NAME]
 				insead of the DSTU1 style [resource name].[search param PATH]
 			</action>
-			<action type="add" fix="124">
+			<action type="add" issue="124">
 				When encoding resources, the parser will now convert any resource
 				references to versionless references automatically (i.e. it will 
 				omit the version part automatically if one is present in the reference)
@@ -1878,7 +1882,7 @@
 				reference if the base matches the base for the server giving
 				the response.
 			</action>
-			<action type="fix" fix="130">
+			<action type="fix" issue="130">
 				Narrative generator incorrectly sets the Resource.text.status to 'generated' even if the
 				given resource type does not have a template (and therefore no narrative is actually generated).
 				Thanks to Bill de Beaubien for reporting!
@@ -1886,7 +1890,7 @@
 			<action type="fix">
 				Searching in JPA server with no search parameter returns deleted resources when it should exclude them.
 			</action>
-			<action type="add" fix="135">
+			<action type="add" issue="135">
 				Remove Eclipse and IntelliJ artifacts (.project, *.iml, etc) from version control. Thanks
 				to Doug Martin for the suggestion!
 			</action>
@@ -2075,7 +2079,7 @@
 				the method type was a custom resource definition type (instead of a built-in
 				HAPI type). Thanks to Neal Acharya for the analysis. 
 			</action>
-			<action type="add" fix="79">
+			<action type="add" issue="79">
 				JPA server module now supports 
 				<![CDATA[<code>_include</code>]]> 
 				value of 
