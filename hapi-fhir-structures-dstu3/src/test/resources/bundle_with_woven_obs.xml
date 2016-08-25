@@ -1,0 +1,317 @@
+<Bundle xmlns="http://hl7.org/fhir">
+  <id value="fe7ff16d-8bdf-47a5-9de3-20165c6fe440" />
+  <meta>
+    <lastUpdated value="2016-08-25T12:17:12.159-04:00" />
+  </meta>
+  <type value="searchset" />
+  <total value="208" />
+  <link>
+    <relation value="self" />
+    <url value="http://foo.uhn.on.ca:25180/uhn-fhir-service-2.1/DiagnosticReport?_format=xml&amp;_include=DiagnosticReport%3Aencounter&amp;_include=Encounter%3AfacilityLocation&amp;_include=Observation%3Aperformer&amp;_include=DiagnosticReport%3Aresult&amp;_include=Encounter%3Alocation&amp;_include=Location.partOf&amp;_include=Encounter%3Aparticipant&amp;_include=DiagnosticReport%3Apatient&amp;subject%3Aidentifier=urn%3Aoid%3A2.16.840.1.113883.3.239.18.148%7C7000135" />
+  </link>
+ <entry>
+    <fullUrl value="http://uhnvesb01d.uhn.on.ca:25180/uhn-fhir-service-2.1/DiagnosticReport/7162221" />
+    <resource>
+      <DiagnosticReport xmlns="http://hl7.org/fhir">
+        <id value="7162221" />
+        <meta>
+          <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+          <profile value="http://fhir.uhn.ca/Profile/diagnosticreport" />
+        </meta>
+        <contained>
+          <Observation xmlns="http://hl7.org/fhir">
+            <id value="1" />
+            <meta>
+              <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+              <profile value="http://fhir.uhn.ca/Profile/observation" />
+            </meta>
+            <extension url="http://fhir.uhn.ca/Profile/observation#source_system_status">
+
+              <valueString value="F" />
+            </extension>
+            <status value="final" />
+            <code>
+              <coding>
+                <system value="urn:oid:1.3.6.1.4.1.12201.102.6" />
+                <code value="10017.1" />
+              </coding>
+              <text value="Date Dictated" />
+            </code>
+            <subject>
+              <reference value="Patient/5556918" />
+            </subject>
+            <issued value="2014-09-26T11:55:33.000-04:00" />
+            <valueString value="Fri, 26 Sep 2014" />
+            <interpretation>
+              <coding>
+                <system value="urn:uhn:qcpr:interpretation_codes" />
+                <code value="N" />
+              </coding>
+            </interpretation>
+          </Observation>
+        </contained>
+        <contained>
+          <Observation xmlns="http://hl7.org/fhir">
+            <id value="2" />
+            <meta>
+              <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+              <profile value="http://fhir.uhn.ca/Profile/observation" />
+            </meta>
+            <extension url="http://fhir.uhn.ca/Profile/observation#source_system_status">
+
+              <valueString value="F" />
+            </extension>
+            <status value="final" />
+            <code>
+              <coding>
+                <system value="urn:oid:1.3.6.1.4.1.12201.102.6" />
+                <code value="1126527.2" />
+              </coding>
+              <text value="Dictated by" />
+            </code>
+            <subject>
+              <reference value="Patient/5556918" />
+            </subject>
+            <issued value="2014-09-26T11:55:33.000-04:00" />
+            <performer>
+              <reference value="#3" />
+            </performer>
+            <valueString value="Gered Trystan King" />
+            <interpretation>
+              <coding>
+                <system value="urn:uhn:qcpr:interpretation_codes" />
+                <code value="normal" />
+              </coding>
+            </interpretation>
+          </Observation>
+        </contained>
+        <contained>
+          <Practitioner xmlns="http://hl7.org/fhir">
+            <id value="3" />
+            <identifier>
+              <system value="urn:uhn:qcpr:user_ids" />
+              <value value="160920" />
+            </identifier>
+            <name>
+              <family value="Gered Trystan King" />
+            </name>
+          </Practitioner>
+        </contained>
+        <contained>
+          <Observation xmlns="http://hl7.org/fhir">
+            <id value="4" />
+            <meta>
+              <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+              <profile value="http://fhir.uhn.ca/Profile/observation" />
+            </meta>
+            <extension url="http://fhir.uhn.ca/Profile/observation#source_system_status">
+
+              <valueString value="F" />
+            </extension>
+            <status value="final" />
+            <code>
+              <coding>
+                <system value="urn:oid:1.3.6.1.4.1.12201.102.6" />
+                <code value="14002.3" />
+              </coding>
+              <text value="Attending/Staff" />
+            </code>
+            <subject>
+              <reference value="Patient/5556918" />
+            </subject>
+            <issued value="2014-09-26T11:55:33.000-04:00" />
+            <performer>
+              <reference value="#5" />
+            </performer>
+            <valueString value="Gered Trystan King" />
+            <interpretation>
+              <coding>
+                <system value="urn:uhn:qcpr:interpretation_codes" />
+                <code value="normal" />
+              </coding>
+            </interpretation>
+          </Observation>
+        </contained>
+        <contained>
+          <Practitioner xmlns="http://hl7.org/fhir">
+            <id value="5" />
+            <identifier>
+              <system value="urn:uhn:qcpr:user_ids" />
+              <value value="160920" />
+            </identifier>
+            <name>
+              <family value="Gered Trystan King" />
+            </name>
+          </Practitioner>
+        </contained>
+        <contained>
+          <Observation xmlns="http://hl7.org/fhir">
+            <id value="6" />
+            <meta>
+              <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+              <profile value="http://fhir.uhn.ca/Profile/observation" />
+            </meta>
+            <extension url="http://fhir.uhn.ca/Profile/observation#source_system_status">
+
+              <valueString value="F" />
+            </extension>
+            <status value="final" />
+            <code>
+              <coding>
+                <system value="urn:oid:1.3.6.1.4.1.12201.102.6" />
+                <code value="10063.4" />
+              </coding>
+              <text value="Distribute Y/N?" />
+            </code>
+            <subject>
+              <reference value="Patient/5556918" />
+            </subject>
+            <issued value="2014-09-26T11:55:33.000-04:00" />
+            <valueString value="yes" />
+            <interpretation>
+              <coding>
+                <system value="urn:uhn:qcpr:interpretation_codes" />
+                <code value="N" />
+              </coding>
+            </interpretation>
+          </Observation>
+        </contained>
+        <contained>
+          <Observation xmlns="http://hl7.org/fhir">
+            <id value="7" />
+            <meta>
+              <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+              <profile value="http://fhir.uhn.ca/Profile/observation" />
+            </meta>
+            <extension url="http://fhir.uhn.ca/Profile/observation#source_system_status">
+
+              <valueString value="F" />
+            </extension>
+            <status value="final" />
+            <code>
+              <coding>
+                <system value="urn:oid:1.3.6.1.4.1.12201.102.6" />
+                <code value="14001.5" />
+              </coding>
+              <text value="Medical Records Report" />
+            </code>
+            <subject>
+              <reference value="Patient/5556918" />
+            </subject>
+            <issued value="2014-09-26T11:55:33.000-04:00" />
+            <valueString value="Medical Records Report" />
+          </Observation>
+        </contained>
+        <contained>
+          <Observation xmlns="http://hl7.org/fhir">
+            <id value="8" />
+            <meta>
+              <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+              <profile value="http://fhir.uhn.ca/Profile/observation" />
+            </meta>
+            <extension url="http://fhir.uhn.ca/Profile/observation#source_system_status">
+
+              <valueString value="F" />
+            </extension>
+            <status value="final" />
+            <code>
+              <coding>
+                <system value="urn:oid:1.3.6.1.4.1.12201.102.6" />
+                <code value="10060.6" />
+              </coding>
+              <text value="Report Type" />
+            </code>
+            <subject>
+              <reference value="Patient/5556918" />
+            </subject>
+            <issued value="2014-09-26T11:55:33.000-04:00" />
+            <valueString value="Unscheduled Discharge Summary" />
+            <interpretation>
+              <coding>
+                <system value="urn:uhn:qcpr:interpretation_codes" />
+                <code value="N" />
+              </coding>
+            </interpretation>
+          </Observation>
+        </contained>
+        <contained>
+          <Observation xmlns="http://hl7.org/fhir">
+            <id value="9" />
+            <meta>
+              <lastUpdated value="2014-09-26T11:55:33.000-04:00" />
+              <profile value="http://fhir.uhn.ca/Profile/observation" />
+            </meta>
+            <extension url="http://fhir.uhn.ca/Profile/observation#source_system_status">
+
+              <valueString value="F" />
+            </extension>
+            <status value="final" />
+            <code>
+              <coding>
+                <system value="urn:oid:1.3.6.1.4.1.12201.102.6" />
+                <code value="10064.7" />
+              </coding>
+              <text value="Review/Query?" />
+            </code>
+            <subject>
+              <reference value="Patient/5556918" />
+            </subject>
+            <issued value="2014-09-26T11:55:33.000-04:00" />
+            <valueString value="no" />
+            <interpretation>
+              <coding>
+                <system value="urn:uhn:qcpr:interpretation_codes" />
+                <code value="N" />
+              </coding>
+            </interpretation>
+          </Observation>
+        </contained>
+        <extension url="http://fhir.uhn.ca/Profile/diagnosticreport#source_system_status">
+
+          <valueString value="F" />
+        </extension>
+        <identifier>
+          <system value="urn:uhn:qcpr:order_ids" />
+          <value value="GI93#discharge_5677961273802d07ad7d079141525bba" />
+        </identifier>
+        <status value="final" />
+        <code>
+          <coding>
+            <system value="urn:oid:1.3.6.1.4.1.12201.102.5" />
+            <code value="5053" />
+          </coding>
+          <text value="Unscheduled Discharge Summary" />
+        </code>
+        <subject>
+          <reference value="Patient/5556918" />
+        </subject>
+        <encounter>
+          <reference value="Encounter/5885735" />
+        </encounter>
+        <effectiveDateTime value="2014-09-26T11:55:00-04:00" />
+        <issued value="2014-09-26T11:55:33.000-04:00" />
+        <result>
+          <reference value="#1" />
+        </result>
+        <result>
+          <reference value="#2" />
+        </result>
+        <result>
+          <reference value="#4" />
+        </result>
+        <result>
+          <reference value="#6" />
+        </result>
+        <result>
+          <reference value="#7" />
+        </result>
+        <result>
+          <reference value="#8" />
+        </result>
+        <result>
+          <reference value="#9" />
+        </result>
+      </DiagnosticReport>
+    </resource>
+  </entry>
+</Bundle>

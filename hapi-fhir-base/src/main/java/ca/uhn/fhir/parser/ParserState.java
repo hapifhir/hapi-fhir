@@ -1393,7 +1393,9 @@ class ParserState<T> {
 			IResource res = (IResource) getCurrentElement();
 			assert res != null;
 			if (res.getId() == null || res.getId().isEmpty()) {
-				ourLog.debug("Discarding contained resource with no ID!");
+				// If there is no ID, we don't keep the resource because it's useless (contained resources
+				// need an ID to be referred to)
+				myErrorHandler.containedResourceWithNoId(null);
 			} else {
 				if (!res.getId().isLocal()) {
 					res.setId(new IdDt('#' + res.getId().getIdPart()));
@@ -1433,11 +1435,11 @@ class ParserState<T> {
 			IBaseResource res = getCurrentElement();
 			assert res != null;
 			if (res.getIdElement() == null || res.getIdElement().isEmpty()) {
-				ourLog.debug("Discarding contained resource with no ID!");
+				// If there is no ID, we don't keep the resource because it's useless (contained resources
+				// need an ID to be referred to)
+				myErrorHandler.containedResourceWithNoId(null);
 			} else {
-				if (!res.getIdElement().isLocal()) {
-					res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
-				}
+				res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
 				getPreResourceState().getContainedResources().put(res.getIdElement().getValue(), res);
 			}
 
@@ -1989,11 +1991,54 @@ class ParserState<T> {
 
 		@Override
 		public void endingElement() throws DataFormatException {
-//			postProcess();
 			stitchBundleCrossReferences();
 			pop();
 		}
 
+		protected void weaveContainedResources() {
+			FhirTerser terser = myContext.newTerser();
+			terser.visit(myInstance, new IModelVisitor() {
+
+				@Override
+				public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+					if (theElement instanceof BaseResourceReferenceDt) {
+						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
+						String ref = nextRef.getReference().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IResource target = (IResource) myContainedResources.get(ref);
+								if (target != null) {
+									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
+									nextRef.setResource(target);
+								} else {
+									myErrorHandler.unknownReference(null, ref);
+								}
+							}
+						}
+					} else if (theElement instanceof IBaseReference) {
+						IBaseReference nextRef = (IBaseReference) theElement;
+						String ref = nextRef.getReferenceElement().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IBaseResource target = myContainedResources.get(ref);
+								if (target != null) {
+									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
+									nextRef.setResource(target);
+								} else {
+									myErrorHandler.unknownReference(null, ref);
+								}
+							}
+						}
+					}
+				}
+
+				@Override
+				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+					acceptElement(theNextExt.getValue(), null, null, null);
+				}
+			});
+		}
+		
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition;
@@ -2111,46 +2156,6 @@ class ParserState<T> {
 				}
 			}
 			
-			FhirTerser terser = myContext.newTerser();
-			terser.visit(myInstance, new IModelVisitor() {
-
-				@Override
-				public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
-					if (theElement instanceof BaseResourceReferenceDt) {
-						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
-						String ref = nextRef.getReference().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IResource target = (IResource) myContainedResources.get(ref);
-								if (target != null) {
-									nextRef.setResource(target);
-								} else {
-									ourLog.warn("Resource contains unknown local ref: " + ref);
-								}
-							}
-						}
-					} else if (theElement instanceof IBaseReference) {
-						IBaseReference nextRef = (IBaseReference) theElement;
-						String ref = nextRef.getReferenceElement().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IBaseResource target = myContainedResources.get(ref);
-								if (target != null) {
-									nextRef.setResource(target);
-								} else {
-									ourLog.warn("Resource contains unknown local ref: " + ref);
-								}
-							}
-						}
-					}
-				}
-
-				@Override
-				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
-					acceptElement(theNextExt.getValue(), null, null, null);
-				}
-			});
-
 			populateTarget();
 		}
 
@@ -2232,6 +2237,7 @@ class ParserState<T> {
 
 		@Override
 		protected void populateTarget() {
+			weaveContainedResources();
 			if (myEntry != null) {
 				myEntry.setResource((IResource) getCurrentElement());
 			}
@@ -2277,6 +2283,7 @@ class ParserState<T> {
 
 		@Override
 		protected void populateTarget() {
+			weaveContainedResources();
 			if (myMutator != null) {
 				myMutator.setValue(myTarget, getCurrentElement());
 			}

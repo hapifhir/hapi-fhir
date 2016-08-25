@@ -197,6 +197,15 @@
 				Fix NullPointerException when encoding an extension containing CodeableConcept
 				with log level set to TRACE. Thanks to Bill Denton for the report!
 			</action>
+			<action type="add">
+				Add two new methods to the parser error handler that let users trap
+				invalid contained resources with no ID, as well as references to contained
+				resource that do not exist.
+			</action>
+			<action type="add">
+				Improve performance when parsing resources containing contained resources
+				by eliminating a step where references were woven twice
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">

@@ -71,4 +71,18 @@ public class LenientErrorHandler implements IParserErrorHandler {
 		}
 	}
 
+	@Override
+	public void containedResourceWithNoId(IParseLocation theLocation) {
+		if (myLogErrors) {
+			ourLog.warn("Resource has contained child resource with no ID");
+		}
+	}
+
+	@Override
+	public void unknownReference(IParseLocation theLocation, String theReference) {
+		if (myLogErrors) {
+			ourLog.warn("Resource has invalid reference: {}", theReference);
+		}
+	}
+
 }

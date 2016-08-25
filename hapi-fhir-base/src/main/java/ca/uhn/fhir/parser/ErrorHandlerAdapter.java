@@ -10,7 +10,7 @@ package ca.uhn.fhir.parser;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,14 @@ package ca.uhn.fhir.parser;
  * Adapter implementation with NOP implementations of all {@link IParserErrorHandler} methods.
  */
 public class ErrorHandlerAdapter implements IParserErrorHandler {
-	
+
 	@Override
-	public void unknownElement(IParseLocation theLocation, String theElementName) {
+	public void containedResourceWithNoId(IParseLocation theLocation) {
+		// NOP
+	}
+
+	@Override
+	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
 		// NOP
 	}
 
@@ -36,7 +41,12 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 	}
 
 	@Override
-	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+	public void unknownElement(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
+
+	@Override
+	public void unknownReference(IParseLocation theLocation, String theReference) {
 		// NOP
 	}
 
