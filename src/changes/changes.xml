@@ -197,6 +197,10 @@
 				Fix NullPointerException when encoding an extension containing CodeableConcept
 				with log level set to TRACE. Thanks to Bill Denton for the report!
 			</action>
+			<action type="fix" issue="426">
+				Parser failed to parse resources containing an extension with a value type of
+				"id". Thanks to Raphael Mäder for reporting!  
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
