@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -66,6 +67,64 @@ public class XmlParserDstu2Test {
 			ourCtx = FhirContext.forDstu2();
 		}
 	}
+	
+	/**
+	 * If a contained resource refers to a contained resource that comes after it, it should still be successfully
+	 * woven together.
+	 */
+	@Test
+	public void testParseWovenContainedResources() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_woven_obs.xml"), StandardCharsets.UTF_8);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+		
+		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
+		Observation obs = (Observation) resource.getResult().get(1).getResource();
+		assertEquals("#2", obs.getId().getValue());
+		ResourceReferenceDt performerFirstRep = obs.getPerformer().get(0);
+		Practitioner performer = (Practitioner) performerFirstRep.getResource();
+		assertEquals("#3", performer.getId().getValue());
+	}
+	
+	@Test(expected=DataFormatException.class)
+	public void testContainedResourceWithNoId() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+	}
+
+	
+	@Test()
+	public void testContainedResourceWithNoIdLenient() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+	}
+
+	@Test(expected=DataFormatException.class)
+	public void testParseWithInvalidLocalRef() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+	}
+
+	@Test()
+	public void testParseWithInvalidLocalRefLenient() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
+	}
+
 	
 	@Test
 	public void testBundleWithBinary() {
