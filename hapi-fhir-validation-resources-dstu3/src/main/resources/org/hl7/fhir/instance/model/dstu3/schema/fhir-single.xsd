@@ -27,9 +27,9 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0 
+  Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.5.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.6.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
   <xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="fhir-xhtml.xsd"/>
@@ -2528,7 +2528,7 @@
           </xs:element>
           <xs:element name="expression" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation xml:lang="en">A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.</xs:documentation>
+              <xs:documentation xml:lang="en">A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="xpath" type="string" minOccurs="1" maxOccurs="1">
@@ -3905,6 +3905,11 @@ A coverage may only be resposible for specific types of charges, and the sequenc
           <xs:documentation xml:lang="en">Medication</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="biologic">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Biologic</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="environment">
         <xs:annotation>
           <xs:documentation xml:lang="en">Environment</xs:documentation>
@@ -5183,7 +5188,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
               <xs:documentation xml:lang="en">Identifies CarePlans with some sort of formal relationship to the current plan.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="careTeam" minOccurs="0" maxOccurs="1" type="Reference">
+          <xs:element name="careTeam" minOccurs="0" maxOccurs="unbounded" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.</xs:documentation>
            </xs:annotation>
@@ -17173,7 +17178,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
           </xs:element>
           <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.5.0 for this version.</xs:documentation>
+              <xs:documentation xml:lang="en">The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.6.0 for this version.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="dependency" type="ImplementationGuide.Dependency" minOccurs="0" maxOccurs="unbounded">
@@ -19568,7 +19573,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
   </xs:simpleType>
   <xs:complexType name="MedicationDispenseStatus">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A code specifying the state of the dispense event.</xs:documentation>
+      <xs:documentation xml:lang="en">A coded concept specifying the state of the dispense event.</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -19880,7 +19885,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
   </xs:simpleType>
   <xs:complexType name="MedicationOrderStatus">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A code specifying the state of the prescribing event. Describes the lifecycle of the prescription.</xs:documentation>
+      <xs:documentation xml:lang="en">A coded concept specifying the state of the prescribing event. Describes the lifecycle of the prescription.</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -19910,7 +19915,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
   </xs:simpleType>
   <xs:complexType name="MedicationOrderCategory">
     <xs:annotation>
-      <xs:documentation xml:lang="en">Codes identifying where the medication ordered is expected to be consumed or administered</xs:documentation>
+      <xs:documentation xml:lang="en">A coded concept identifying where the medication ordered is expected to be consumed or administered</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -20121,7 +20126,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
   </xs:simpleType>
   <xs:complexType name="MedicationStatementStatus">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A set of codes indicating the current status of a MedicationStatement.</xs:documentation>
+      <xs:documentation xml:lang="en">A coded concept indicating the current status of a MedicationStatement.</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -20156,7 +20161,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
   </xs:simpleType>
   <xs:complexType name="MedicationStatementCategory">
     <xs:annotation>
-      <xs:documentation xml:lang="en">Codes identifying where the medication included in the is expected to be consumed or administered</xs:documentation>
+      <xs:documentation xml:lang="en">A coded concept identifying where the medication included in the is expected to be consumed or administered</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -26479,7 +26484,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           </xs:element>
           <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.5.0 for this version.</xs:documentation>
+              <xs:documentation xml:lang="en">The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.6.0 for this version.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="mapping" type="StructureDefinition.Mapping" minOccurs="0" maxOccurs="unbounded">

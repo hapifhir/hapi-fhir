@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -82,6 +82,7 @@ public class Meta extends Type implements IBaseMetaType {
      */
     @Child(name = "tag", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Tags applied to this resource", formalDefinition="Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/common-tags")
     protected List<Coding> tag;
 
     private static final long serialVersionUID = 867134915L;

@@ -149,7 +149,7 @@ public class FluentPathEngine {
    *  - a simple name (which may be the base of a name with [] e.g. value[x])
    *  - a name with a type replacement e.g. valueCodeableConcept
    *  - * which means all children
-   *  - ** which means all descendents
+   *  - ** which means all descendants
    *  
    * @param item
    * @param name
@@ -756,7 +756,7 @@ public class FluentPathEngine {
     case Replace: return checkParamCount(lexer, location, exp, 2);
     case Length: return checkParamCount(lexer, location, exp, 0);
     case Children: return checkParamCount(lexer, location, exp, 0);
-    case Descendents: return checkParamCount(lexer, location, exp, 0);
+    case Descendants: return checkParamCount(lexer, location, exp, 0);
     case MemberOf: return checkParamCount(lexer, location, exp, 1);
     case Trace: return checkParamCount(lexer, location, exp, 1);
     case Today: return checkParamCount(lexer, location, exp, 0);
@@ -1816,7 +1816,7 @@ public class FluentPathEngine {
     }
     case Children : 
       return childTypes(focus, "*");
-    case Descendents : 
+    case Descendants : 
       return childTypes(focus, "**");
     case MemberOf : {
       checkContextCoded(focus, "memberOf");
@@ -1943,7 +1943,7 @@ public class FluentPathEngine {
     case Replace : return funcReplace(context, focus, exp);
     case Length : return funcLength(context, focus, exp);
     case Children : return funcChildren(context, focus, exp);
-    case Descendents : return funcDescendents(context, focus, exp);
+    case Descendants : return funcDescendants(context, focus, exp);
     case MemberOf : return funcMemberOf(context, focus, exp);
     case Trace : return funcTrace(context, focus, exp);
     case Today : return funcToday(context, focus, exp);
@@ -2024,7 +2024,7 @@ public class FluentPathEngine {
   }
 
 
-  private List<Base> funcDescendents(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
+  private List<Base> funcDescendants(ExecutionContext context, List<Base> focus, ExpressionNode exp) throws FHIRException {
     List<Base> result = new ArrayList<Base>();
     List<Base> current = new ArrayList<Base>();
     current.addAll(focus);

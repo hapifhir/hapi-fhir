@@ -9,7 +9,7 @@
   <Author>Grahame</Author>
   <LastAuthor>Rob Hausam</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-07-18T20:11:53Z</LastSaved>
+  <LastSaved>2016-08-06T00:15:54Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -17,7 +17,7 @@
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
   <WindowHeight>9045</WindowHeight>
-  <WindowWidth>21300</WindowWidth>
+  <WindowWidth>17625</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
@@ -1153,7 +1153,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">food | medication | environment</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">food | medication | biologic | environment</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Category of the identified substance</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -3819,9 +3819,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>15</TopRowBottomPane>
+   <TopRowBottomPane>5</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>13</LeftColumnRightPane>
+   <LeftColumnRightPane>6</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3837,8 +3837,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>16</ActiveRow>
-     <ActiveCol>14</ActiveCol>
+     <ActiveCol>13</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8817,15 +8816,15 @@
     <Cell ss:StyleID="s137"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"/>
-    <Cell ss:StyleID="s127"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="String">biologic</Data></Cell>
+    <Cell ss:StyleID="s127"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s149"/>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">medication</Data></Cell>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">Biologic</Data></Cell>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">A preparation that is synthesized from living organisms or their products, especially a human or animal protein, such as a hormone or antitoxin, that is used as a diagnostic, preventive, or therapeutic agent. Also called biological drug.  Examples of biological products include: vaccines; blood and blood products for transfusion and/or manufacturing into other products; allergenic extracts, which are used for both diagnosis and treatment (for example, allergy shots); human cells and tissues used for transplantation (for example, tendons, ligaments and bone); gene therapies; cellular therapies; tests to screen potential blood donors for infectious agents such as HIV.</Data></Cell>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s127"/>
-    <Cell ss:StyleID="s137"/>
+    <Cell ss:StyleID="s137"><Data ss:Type="String">What is a biological product? (FDA): http://www.fda.gov/AboutFDA/Transparency/Basics/ucm194516.htm&#10;&#10;What are &quot;Biologics&quot; Questions and Answers? (FDA): http://www.fda.gov/AboutFDA/CentersOffices/OfficeofMedicalProductsandTobacco/CBER/ucm133077.htm&#10;&#10;There is a greater potential for immune reactions to biologics than to chemical drugs. The molecules in chemical drugs are too small to be considered immunogenic and generally are not recognized by the immune system as “invaders.” With biologics, depending on the drug, the human immune system can quickly identify the molecule and then mount an immune response to clear away a large molecule that it considers a foreign substance. This can destroy — or in rare cases, enhance — the activity of the biopharmaceutical. (http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3564302/)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s136"/>
@@ -9325,7 +9324,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>3</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -9333,13 +9332,14 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
+     <ActiveRow>4</ActiveRow>
      <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>

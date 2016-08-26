@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -2303,17 +2303,17 @@ public class MedicationStatement extends DomainResource {
  /**
    * Search parameter: <b>code</b>
    * <p>
-   * Description: <b>Return administrations of this medication code</b><br>
+   * Description: <b>Return statements of this medication code</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationStatement.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token" )
+  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return statements of this medication code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
    * <p>
-   * Description: <b>Return administrations of this medication code</b><br>
+   * Description: <b>Return statements of this medication code</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationStatement.medicationCodeableConcept</b><br>
    * </p>
@@ -2349,17 +2349,17 @@ public class MedicationStatement extends DomainResource {
  /**
    * Search parameter: <b>medication</b>
    * <p>
-   * Description: <b>Return administrations of this medication reference</b><br>
+   * Description: <b>Return statements of this medication reference</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationStatement.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class } )
+  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return statements of this medication reference", type="reference", target={Medication.class } )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
    * <p>
-   * Description: <b>Return administrations of this medication reference</b><br>
+   * Description: <b>Return statements of this medication reference</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationStatement.medicationReference</b><br>
    * </p>

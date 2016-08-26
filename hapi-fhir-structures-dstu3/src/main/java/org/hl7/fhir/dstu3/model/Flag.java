@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -224,7 +224,7 @@ public class Flag extends DomainResource {
      * The coded value or textual component of the flag to display to the user.
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition="The coded value or textual component of the flag to display to the user." )
+    @Description(shortDefinition="Message to display to user", formalDefinition="The coded value or textual component of the flag to display to the user." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-code")
     protected CodeableConcept code;
 

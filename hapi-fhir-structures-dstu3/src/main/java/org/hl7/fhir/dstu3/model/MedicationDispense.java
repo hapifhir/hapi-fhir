@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -1711,7 +1711,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
      * The time when the dispensed product was packaged and reviewed.
      */
     @Child(name = "whenPrepared", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Dispense processing time", formalDefinition="The time when the dispensed product was packaged and reviewed." )
+    @Description(shortDefinition="When product was packaged and reviewed", formalDefinition="The time when the dispensed product was packaged and reviewed." )
     protected DateTimeType whenPrepared;
 
     /**
@@ -2963,17 +2963,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
  /**
    * Search parameter: <b>receiver</b>
    * <p>
-   * Description: <b>Who collected the medication</b><br>
+   * Description: <b>The identity of a receiver to list dispenses for</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.receiver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="receiver", path="MedicationDispense.receiver", description="Who collected the medication", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Patient.class, Practitioner.class } )
+  @SearchParamDefinition(name="receiver", path="MedicationDispense.receiver", description="The identity of a receiver to list dispenses for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Patient.class, Practitioner.class } )
   public static final String SP_RECEIVER = "receiver";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
    * <p>
-   * Description: <b>Who collected the medication</b><br>
+   * Description: <b>The identity of a receiver to list dispenses for</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.receiver</b><br>
    * </p>
@@ -3041,17 +3041,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
  /**
    * Search parameter: <b>responsibleparty</b>
    * <p>
-   * Description: <b>Return all dispenses with the specified responsible party</b><br>
+   * Description: <b>Return dispenses with the specified responsible party</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return dispenses with the specified responsible party", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsibleparty</b>
    * <p>
-   * Description: <b>Return all dispenses with the specified responsible party</b><br>
+   * Description: <b>Return dispenses with the specified responsible party</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
    * </p>
@@ -3067,17 +3067,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
  /**
    * Search parameter: <b>type</b>
    * <p>
-   * Description: <b>Return all dispenses of a specific type</b><br>
+   * Description: <b>Return dispenses of a specific type</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return all dispenses of a specific type", type="token" )
+  @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return dispenses of a specific type", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
-   * Description: <b>Return all dispenses of a specific type</b><br>
+   * Description: <b>Return dispenses of a specific type</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.type</b><br>
    * </p>
@@ -3087,17 +3087,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
  /**
    * Search parameter: <b>whenhandedover</b>
    * <p>
-   * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br>
+   * Description: <b>Returns dispenses handed over on this date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>MedicationDispense.whenHandedOver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date" )
+  @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Returns dispenses handed over on this date", type="date" )
   public static final String SP_WHENHANDEDOVER = "whenhandedover";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>whenhandedover</b>
    * <p>
-   * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br>
+   * Description: <b>Returns dispenses handed over on this date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>MedicationDispense.whenHandedOver</b><br>
    * </p>
@@ -3107,17 +3107,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
  /**
    * Search parameter: <b>whenprepared</b>
    * <p>
-   * Description: <b>Date when medication prepared</b><br>
+   * Description: <b>Returns dispenses prepared on this date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>MedicationDispense.whenPrepared</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="whenprepared", path="MedicationDispense.whenPrepared", description="Date when medication prepared", type="date" )
+  @SearchParamDefinition(name="whenprepared", path="MedicationDispense.whenPrepared", description="Returns dispenses prepared on this date", type="date" )
   public static final String SP_WHENPREPARED = "whenprepared";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>whenprepared</b>
    * <p>
-   * Description: <b>Date when medication prepared</b><br>
+   * Description: <b>Returns dispenses prepared on this date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>MedicationDispense.whenPrepared</b><br>
    * </p>
@@ -3127,17 +3127,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
  /**
    * Search parameter: <b>dispenser</b>
    * <p>
-   * Description: <b>Return all dispenses performed by a specific individual</b><br>
+   * Description: <b>Return dispenses performed by a specific individual</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.dispenser</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific individual", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return dispenses performed by a specific individual", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_DISPENSER = "dispenser";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dispenser</b>
    * <p>
-   * Description: <b>Return all dispenses performed by a specific individual</b><br>
+   * Description: <b>Return dispenses performed by a specific individual</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.dispenser</b><br>
    * </p>
@@ -3205,17 +3205,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>Status of the dispense</b><br>
+   * Description: <b>Return dispenses with a specified dispense status</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Status of the dispense", type="token" )
+  @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Return dispenses with a specified dispense status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>Status of the dispense</b><br>
+   * Description: <b>Return dispenses with a specified dispense status</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.status</b><br>
    * </p>

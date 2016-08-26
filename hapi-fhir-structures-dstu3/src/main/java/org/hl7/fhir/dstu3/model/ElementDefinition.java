@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -1754,10 +1754,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected StringType human;
 
         /**
-         * A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.
+         * A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
          */
         @Child(name = "expression", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="FluentPath expression of constraint", formalDefinition="A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met." )
+        @Description(shortDefinition="FluentPath expression of constraint", formalDefinition="A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met." )
         protected StringType expression;
 
         /**
@@ -1972,7 +1972,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #expression} (A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @return {@link #expression} (A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public StringType getExpressionElement() { 
           if (this.expression == null)
@@ -1992,7 +1992,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #expression} (A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @param value {@link #expression} (A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public ElementDefinitionConstraintComponent setExpressionElement(StringType value) { 
           this.expression = value;
@@ -2000,14 +2000,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.
+         * @return A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
          */
         public String getExpression() { 
           return this.expression == null ? null : this.expression.getValue();
         }
 
         /**
-         * @param value A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.
+         * @param value A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.
          */
         public ElementDefinitionConstraintComponent setExpression(String value) { 
           if (Utilities.noString(value))
@@ -2071,7 +2071,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           childrenList.add(new Property("requirements", "string", "Description of why this constraint is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, requirements));
           childrenList.add(new Property("severity", "code", "Identifies the impact constraint violation has on the conformance of the instance.", 0, java.lang.Integer.MAX_VALUE, severity));
           childrenList.add(new Property("human", "string", "Text that can be used to describe the constraint in messages identifying that the constraint has been violated.", 0, java.lang.Integer.MAX_VALUE, human));
-          childrenList.add(new Property("expression", "string", "A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, expression));
+          childrenList.add(new Property("expression", "string", "A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, expression));
           childrenList.add(new Property("xpath", "string", "An XPath expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, xpath));
         }
 

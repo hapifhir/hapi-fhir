@@ -16,6 +16,7 @@
       <sch:assert test="count(f:representation) &lt;= 0">representation: maximum cardinality of 'representation' is 0</sch:assert>
       <sch:assert test="count(f:slicing) &lt;= 0">slicing: maximum cardinality of 'slicing' is 0</sch:assert>
       <sch:assert test="count(f:short) &lt;= 0">short: maximum cardinality of 'short' is 0</sch:assert>
+      <sch:assert test="count(f:contentReference) &lt;= 0">contentReference: maximum cardinality of 'contentReference' is 0</sch:assert>
       <sch:assert test="count(f:fixed[x]) &lt;= 0">fixed[x]: maximum cardinality of 'fixed[x]' is 0</sch:assert>
       <sch:assert test="count(f:pattern[x]) &lt;= 0">pattern[x]: maximum cardinality of 'pattern[x]' is 0</sch:assert>
       <sch:assert test="count(f:isModifier) &lt;= 0">isModifier: maximum cardinality of 'isModifier' is 0</sch:assert>
@@ -25,6 +26,7 @@
   <sch:pattern>
     <sch:title>ElementDefinition</sch:title>
     <sch:rule context="f:ElementDefinition">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) &gt;= f:min/@value)">Min &lt;= Max (inherited)</sch:assert>
       <sch:assert test="not(exists(f:contentReference) and (exists(f:type) or exists(f:*[starts-with(local-name(.), 'value')]) or exists(f:*[starts-with(local-name(.), 'defaultValue')])  or exists(f:*[starts-with(local-name(.), 'fixed')]) or exists(f:*[starts-with(local-name(.), 'pattern')]) or exists(f:*[starts-with(local-name(.), 'example')]) or exists(f:*[starts-with(local-name(.), 'f:minValue')]) or exists(f:*[starts-with(local-name(.), 'f:maxValue')]) or exists(f:maxLength) or exists(f:binding)))">if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)&lt;=1)">Pattern may only be specified if there is one type (inherited)</sch:assert>
@@ -34,6 +36,15 @@
       <sch:assert test="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))">Constraints must be unique by key (inherited)</sch:assert>
       <sch:assert test="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))">Types must be unique by the combination of code and profile (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">default value and meaningWhenMissing are mutually exclusive (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
+    <sch:title>ElementDefinition.extension</sch:title>
+    <sch:rule context="f:ElementDefinition/f:extension">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+      <sch:assert test="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])">Must have either extensions or value[x], not both (inherited)</sch:assert>
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+      <sch:assert test="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])">Must have either extensions or value[x], not both (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>

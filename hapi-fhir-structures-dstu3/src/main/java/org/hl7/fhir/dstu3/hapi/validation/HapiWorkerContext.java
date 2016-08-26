@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +21,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -34,6 +37,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.dstu3.validation.IResourceValidator;
+import org.hl7.fhir.exceptions.TerminologyServiceException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -44,6 +48,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	private final FhirContext myCtx;
 	private Map<String, Resource> myFetchedResourceCache = new HashMap<String, Resource>();
 	private IValidationSupport myValidationSupport;
+	private ExpansionProfile myExpansionProfile;
 
 	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
 		Validate.notNull(theCtx, "theCtx must not be null");
@@ -55,33 +60,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public List<StructureDefinition> allStructures() {
 		return myValidationSupport.fetchAllStructureDefinitions(myCtx);
-	}
-
-	@Override
-	public ValueSetExpansionOutcome expand(ValueSet theSource) {
-		ValueSetExpansionOutcome vso;
-		try {
-			vso = getExpander().expand(theSource);
-		} catch (InvalidRequestException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new InternalErrorException(e);
-		}
-		if (vso.getError() != null) {
-			throw new InvalidRequestException(vso.getError());
-		} else {
-			return vso;
-		}
-	}
-
-	@Override
-	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
-		return myValidationSupport.expandValueSet(myCtx, theInc);
-	}
-
-	@Override
-	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk) {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -275,7 +253,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		// }
 
 		if (expandedValueSet == null) {
-			expandedValueSet = expand(theVs);
+			expandedValueSet = expand(theVs, null);
 		}
 		
 		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
@@ -332,6 +310,48 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	@CoverageIgnore
 	public boolean hasCache() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expand(ValueSet theSource, ExpansionProfile theProfile) {
+		ValueSetExpansionOutcome vso;
+		try {
+			vso = getExpander().expand(theSource, theProfile);
+		} catch (InvalidRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
+		if (vso.getError() != null) {
+			throw new InvalidRequestException(vso.getError());
+		} else {
+			return vso;
+		}
+	}
+
+	@Override
+	public ExpansionProfile getExpansionProfile() {
+		return myExpansionProfile;
+	}
+
+	@Override
+	public void setExpansionProfile(ExpansionProfile theExpProfile) {
+		myExpansionProfile = theExpProfile;
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHeiarchical) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHeiarchical) throws TerminologyServiceException {
+		return myValidationSupport.expandValueSet(myCtx, theInc);
+	}
+
+	@Override
+	public void setLogger(ILoggingService theLogger) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -15,12 +15,12 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>15960</WindowHeight>
-  <WindowWidth>28160</WindowWidth>
-  <WindowTopX>-4740</WindowTopX>
-  <WindowTopY>-19320</WindowTopY>
+  <WindowHeight>16680</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>460</WindowTopY>
   <TabRatio>719</TabRatio>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -1437,7 +1437,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Dispense processing time</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">When product was packaged and reviewed</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">The time when the dispensed product was packaged and reviewed.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2147,7 +2147,8 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">This is not the same as an audit trail. It is a view of the important things that happened in the past. Typically, there would only be one entry for any given status, and systems may not record all the status events</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Not Mapped</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2180,7 +2181,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Not Mapped</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2213,7 +2215,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Not Mapped</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2245,7 +2248,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Not Mapped</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2277,7 +2281,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Not Mapped</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2310,7 +2315,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Not Mapped</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4034,13 +4040,12 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <PageLayoutZoom>0</PageLayoutZoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>29</TopRowBottomPane>
+   <TopRowBottomPane>28</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>15</LeftColumnRightPane>
+   <LeftColumnRightPane>16</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4654,7 +4659,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s89"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">MedicationDispense.dispenser</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Return all dispenses performed by a specific individual</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Return dispenses performed by a specific individual</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"><Data ss:Type="String">identifier</Data></Cell>
@@ -4696,42 +4701,42 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s89"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">MedicationDispense.substitution.responsibleParty</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Return all dispenses with the specified responsible party</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Return dispenses with the specified responsible party</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"><Data ss:Type="String">status</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">MedicationDispense.status</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Status of the dispense</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Return dispenses with a specified dispense status</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"><Data ss:Type="String">type</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">MedicationDispense.type</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Return all dispenses of a specific type</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Return dispenses of a specific type</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s119"><Data ss:Type="String">whenhandedover</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s89"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">MedicationDispense.whenHandedOver</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Returns dispenses handed over on this date</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s119"><Data ss:Type="String">whenprepared</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s89"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">MedicationDispense.whenPrepared</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Date when medication prepared</Data></Cell>
+    <Cell><Data ss:Type="String">Returns dispenses prepared on this date</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"><Data ss:Type="String">receiver</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s89"/>
     <Cell ss:StyleID="s122"><Data ss:Type="String">MedicationDispense.receiver</Data></Cell>
-    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">The identity of a receiver to list dispenses for</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"/>
@@ -4867,6 +4872,7 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <PageLayoutZoom>0</PageLayoutZoom>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4886,7 +4892,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>6</ActiveRow>
+     <ActiveRow>12</ActiveRow>
      <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
@@ -5533,6 +5539,9 @@
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R2C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -6134,6 +6143,9 @@
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C4" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -6616,7 +6628,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s149"><Data ss:Type="String">MedicationDispenseStatus</Data></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">A code specifying the state of the dispense event.</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">A coded concept specifying the state of the dispense event.</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">#medication-dispense-status</Data></Cell>
@@ -6723,7 +6735,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s89"><Data ss:Type="String">AdditionalInstructions</Data></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Codes identifying additional instructions such as &quot;take with water&quot; or &quot;avoid operating heavy machinery&quot;</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">A coded concept identifying additional instructions such as &quot;take with water&quot; or &quot;avoid operating heavy machinery&quot;</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="Default"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/additional-instructions-codes</Data></Cell>
@@ -6738,7 +6750,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">MedicationCode</Data></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Codes identifying which substance or product can be dispensed</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">A coded concept identifying which substance or product can be dispensed</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s150" ss:HRef="http://hl7.org/fhir/ValueSet/medication-codes"><Data
@@ -7072,7 +7084,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>13</ActiveRow>
+     <ActiveRow>10</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8362,6 +8374,9 @@
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -8999,6 +9014,9 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
+   <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>
    <x:Print>    </x:Print>

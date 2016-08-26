@@ -4617,7 +4617,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If the structure defines an extension then the structure must have context information</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">type != 'Extension' or derivation = 'specialization' or (context.exists() and contextType.exists())</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">not(f:type/@value = 'extension') or (f:derivation/@value = 'constraint') or (exists(f:context) and exists(f:contextType))</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">not(f:type/@value = 'extension') or (f:derivation/@value = 'specialization') or (exists(f:context) and exists(f:contextType))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s108"><Data ss:Type="Number">6</Data><NamedCell
@@ -5018,7 +5018,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>7</TopRowBottomPane>
+   <TopRowBottomPane>5</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
    <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5036,7 +5036,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>14</ActiveRow>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>6</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

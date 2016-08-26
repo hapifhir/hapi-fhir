@@ -16,12 +16,12 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>9384</WindowHeight>
-  <WindowWidth>23040</WindowWidth>
+  <WindowHeight>12396</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>670</TabRatio>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -4127,7 +4127,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5024,7 +5023,7 @@
     <Cell><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Reference(Device | Organization | Patient | Practitioner | RelatedPerson )</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">Reference(Device|Organization|Patient|Practitioner|RelatedPerson)</Data></Cell>
     <Cell ss:StyleID="s116"/>
     <Cell ss:StyleID="s116"/>
     <Cell ss:StyleID="s133"><Data ss:Type="String">The entity who is to be assigned ownership of this task.</Data></Cell>
@@ -5046,7 +5045,7 @@
     <Cell ss:StyleID="s116"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">0</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s116"><Data ss:Type="String">Reference(Device | Organization | Patient | Practitioner | RelatedPerson )</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">Reference(Device|Organization|Patient|Practitioner|RelatedPerson)</Data></Cell>
     <Cell ss:StyleID="s116"/>
     <Cell ss:StyleID="s116"/>
     <Cell ss:StyleID="s133"><Data ss:Type="String">The entity who is to be assigned ownership of this task.  If no entity is provided, the ownership of the task remains unchanged.</Data></Cell>
@@ -5567,10 +5566,11 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>4</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5583,12 +5583,11 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>21</ActiveRow>
-     <ActiveCol>6</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

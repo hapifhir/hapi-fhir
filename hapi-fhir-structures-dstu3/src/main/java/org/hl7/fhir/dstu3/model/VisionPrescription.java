@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -354,14 +354,14 @@ public class VisionPrescription extends DomainResource {
          * Special color or pattern.
          */
         @Child(name = "color", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Lens add", formalDefinition="Special color or pattern." )
+        @Description(shortDefinition="Color required", formalDefinition="Special color or pattern." )
         protected StringType color;
 
         /**
          * Brand recommendations or restrictions.
          */
         @Child(name = "brand", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Lens add", formalDefinition="Brand recommendations or restrictions." )
+        @Description(shortDefinition="Brand required", formalDefinition="Brand recommendations or restrictions." )
         protected StringType brand;
 
         /**

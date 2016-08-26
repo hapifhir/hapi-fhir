@@ -46,7 +46,7 @@ public class ExpressionNode {
     
     Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Item /*implicit from name[]*/, As, Is, Single,
     First, Last, Tail, Skip, Take, Iif, ToInteger, ToDecimal, ToString, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
-    Children, Descendents, MemberOf, Trace, Today, Now, Resolve, Extension;
+    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension;
 
     public static Function fromCode(String name) {
       if (name.equals("empty")) return Function.Empty;
@@ -83,7 +83,7 @@ public class ExpressionNode {
       if (name.equals("replace")) return Function.Replace;
       if (name.equals("length")) return Function.Length;
       if (name.equals("children")) return Function.Children;
-      if (name.equals("descendents")) return Function.Descendents;
+      if (name.equals("descendants")) return Function.Descendants;
       if (name.equals("memberOf")) return Function.MemberOf;
       if (name.equals("trace")) return Function.Trace;
       if (name.equals("today")) return Function.Today;
@@ -128,7 +128,7 @@ public class ExpressionNode {
       case Replace : return "replace";
       case Length : return "length";
       case Children : return "children";
-      case Descendents : return "descendents";
+      case Descendants : return "descendants";
       case MemberOf : return "memberOf";
       case Trace : return "trace";
       case Today : return "today";

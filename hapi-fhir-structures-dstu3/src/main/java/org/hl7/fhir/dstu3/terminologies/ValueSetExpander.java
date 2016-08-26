@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.terminologies;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.dstu3.model.ValueSet;
 
 public interface ValueSetExpander {
@@ -59,6 +60,15 @@ public interface ValueSetExpander {
 
 
   }
-
-  public ValueSetExpansionOutcome expand(ValueSet source) throws ETooCostly, FileNotFoundException, IOException;
+/**
+ * 
+ * @param source the value set definition to expand
+ * @param profile a profile affecting the outcome. If you don't supply a profile, the default internal expansion profile will be used.
+ *  
+ * @return
+ * @throws ETooCostly
+ * @throws FileNotFoundException
+ * @throws IOException
+ */
+  public ValueSetExpansionOutcome expand(ValueSet source, ExpansionProfile profile) throws ETooCostly, FileNotFoundException, IOException;
 }

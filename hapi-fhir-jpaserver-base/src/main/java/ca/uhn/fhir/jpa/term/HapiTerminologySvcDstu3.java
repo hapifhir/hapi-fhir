@@ -271,7 +271,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 			ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
 
 			HapiWorkerContext worker = new HapiWorkerContext(myContext, myValidationSupport);
-			ValueSetExpansionOutcome outcome = worker.expand(source);
+			ValueSetExpansionOutcome outcome = worker.expand(source, null);
 			for (ValueSetExpansionContainsComponent next : outcome.getValueset().getExpansion().getContains()) {
 				retVal.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
 			}

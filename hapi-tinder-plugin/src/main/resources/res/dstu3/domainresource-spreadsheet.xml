@@ -3602,7 +3602,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">DomainResource</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">contained.where(('#'+id in %resource.descendents().reference).not()).empty()</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">contained.where(('#'+id in %resource.descendants().reference).not()).empty()</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">

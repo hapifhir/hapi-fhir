@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -302,6 +302,10 @@ public class AllergyIntolerance extends DomainResource {
          */
         MEDICATION, 
         /**
+         * A preparation that is synthesized from living organisms or their products, especially a human or animal protein, such as a hormone or antitoxin, that is used as a diagnostic, preventive, or therapeutic agent. Also called biological drug.  Examples of biological products include: vaccines; blood and blood products for transfusion and/or manufacturing into other products; allergenic extracts, which are used for both diagnosis and treatment (for example, allergy shots); human cells and tissues used for transplantation (for example, tendons, ligaments and bone); gene therapies; cellular therapies; tests to screen potential blood donors for infectious agents such as HIV.
+         */
+        BIOLOGIC, 
+        /**
          * Substances that are encountered in the environment.
          */
         ENVIRONMENT, 
@@ -316,6 +320,8 @@ public class AllergyIntolerance extends DomainResource {
           return FOOD;
         if ("medication".equals(codeString))
           return MEDICATION;
+        if ("biologic".equals(codeString))
+          return BIOLOGIC;
         if ("environment".equals(codeString))
           return ENVIRONMENT;
         if (Configuration.isAcceptInvalidEnums())
@@ -327,6 +333,7 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case FOOD: return "food";
             case MEDICATION: return "medication";
+            case BIOLOGIC: return "biologic";
             case ENVIRONMENT: return "environment";
             default: return "?";
           }
@@ -335,6 +342,7 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case FOOD: return "http://hl7.org/fhir/allergy-intolerance-category";
             case MEDICATION: return "http://hl7.org/fhir/allergy-intolerance-category";
+            case BIOLOGIC: return "http://hl7.org/fhir/allergy-intolerance-category";
             case ENVIRONMENT: return "http://hl7.org/fhir/allergy-intolerance-category";
             default: return "?";
           }
@@ -343,6 +351,7 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case FOOD: return "Any substance consumed to provide nutritional support for the body.";
             case MEDICATION: return "Substances administered to achieve a physiological effect.";
+            case BIOLOGIC: return "A preparation that is synthesized from living organisms or their products, especially a human or animal protein, such as a hormone or antitoxin, that is used as a diagnostic, preventive, or therapeutic agent. Also called biological drug.  Examples of biological products include: vaccines; blood and blood products for transfusion and/or manufacturing into other products; allergenic extracts, which are used for both diagnosis and treatment (for example, allergy shots); human cells and tissues used for transplantation (for example, tendons, ligaments and bone); gene therapies; cellular therapies; tests to screen potential blood donors for infectious agents such as HIV.";
             case ENVIRONMENT: return "Substances that are encountered in the environment.";
             default: return "?";
           }
@@ -351,6 +360,7 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case FOOD: return "Food";
             case MEDICATION: return "Medication";
+            case BIOLOGIC: return "Biologic";
             case ENVIRONMENT: return "Environment";
             default: return "?";
           }
@@ -366,6 +376,8 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceCategory.FOOD;
         if ("medication".equals(codeString))
           return AllergyIntoleranceCategory.MEDICATION;
+        if ("biologic".equals(codeString))
+          return AllergyIntoleranceCategory.BIOLOGIC;
         if ("environment".equals(codeString))
           return AllergyIntoleranceCategory.ENVIRONMENT;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
@@ -380,6 +392,8 @@ public class AllergyIntolerance extends DomainResource {
           return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.FOOD);
         if ("medication".equals(codeString))
           return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.MEDICATION);
+        if ("biologic".equals(codeString))
+          return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.BIOLOGIC);
         if ("environment".equals(codeString))
           return new Enumeration<AllergyIntoleranceCategory>(this, AllergyIntoleranceCategory.ENVIRONMENT);
         throw new FHIRException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
@@ -389,6 +403,8 @@ public class AllergyIntolerance extends DomainResource {
         return "food";
       if (code == AllergyIntoleranceCategory.MEDICATION)
         return "medication";
+      if (code == AllergyIntoleranceCategory.BIOLOGIC)
+        return "biologic";
       if (code == AllergyIntoleranceCategory.ENVIRONMENT)
         return "environment";
       return "?";
@@ -1352,7 +1368,7 @@ public class AllergyIntolerance extends DomainResource {
      * Category of the identified substance.
      */
     @Child(name = "category", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="food | medication | environment", formalDefinition="Category of the identified substance." )
+    @Description(shortDefinition="food | medication | biologic | environment", formalDefinition="Category of the identified substance." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/allergy-intolerance-category")
     protected Enumeration<AllergyIntoleranceCategory> category;
 
@@ -2645,17 +2661,17 @@ public class AllergyIntolerance extends DomainResource {
  /**
    * Search parameter: <b>category</b>
    * <p>
-   * Description: <b>food | medication | environment</b><br>
+   * Description: <b>food | medication | biologic | environment</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AllergyIntolerance.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment", type="token" )
+  @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | biologic | environment", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
    * <p>
-   * Description: <b>food | medication | environment</b><br>
+   * Description: <b>food | medication | biologic | environment</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AllergyIntolerance.category</b><br>
    * </p>

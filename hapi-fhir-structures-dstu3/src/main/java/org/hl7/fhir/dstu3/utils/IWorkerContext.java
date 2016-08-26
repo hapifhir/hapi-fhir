@@ -3,11 +3,13 @@ package org.hl7.fhir.dstu3.utils;
 import java.util.List;
 import java.util.Set;
 
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -18,6 +20,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.dstu3.utils.IWorkerContext.ILoggingService;
 import org.hl7.fhir.dstu3.validation.IResourceValidator;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 
@@ -145,6 +148,9 @@ public interface IWorkerContext {
   
   // -- Terminology services ------------------------------------------------------
 
+  public ExpansionProfile getExpansionProfile();
+  public void setExpansionProfile(ExpansionProfile expProfile);
+
   // these are the terminology services used internally by the tools
   /**
    * Find the code system definition for the nominated system uri. 
@@ -184,7 +190,7 @@ public interface IWorkerContext {
    * @param source
    * @return
    */
-  public ValueSetExpansionOutcome expandVS(ValueSet source, boolean cacheOk);
+  public ValueSetExpansionOutcome expandVS(ValueSet source, boolean cacheOk, boolean heiarchical);
   
   /**
    * Value set expanion inside the internal expansion engine - used 
@@ -193,8 +199,9 @@ public interface IWorkerContext {
    * 
    * @param inc
    * @return
+   * @throws FHIRException 
    */
-  public ValueSetExpansionComponent expandVS(ConceptSetComponent inc);
+  public ValueSetExpansionComponent expandVS(ConceptSetComponent inc, boolean heiarchical) throws TerminologyServiceException;
   
   public class ValidationResult {
     private ConceptDefinitionComponent definition;
@@ -301,5 +308,10 @@ public interface IWorkerContext {
 
   public boolean hasCache();
 
+  public interface ILoggingService {
+    public void logMessage(String message); // status messages, always display
+    public void logDebugMessage(String message); // verbose; only when debugging 
+  }
 
+  public void setLogger(ILoggingService logger);
 }

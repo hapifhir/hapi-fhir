@@ -1193,7 +1193,7 @@
     <Cell ss:StyleID="s93"><Data ss:Type="String">Identifiers assigned to this order instance by the orderer and/or  the receiver and/or order fulfiller.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">The identifier.type element is used to distinguish between the identifiers assigned by the orderer (known as the 'Placer' in HL7 v2) and the producer of the observations in response to the order (known as the 'Filler' in HL7 v2). For further discussion and examples see the [notes section](DiagnosticRequest.html#4.22.4) below.</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">The identifier.type element is used to distinguish between the identifiers assigned by the orderer (known as the 'Placer' in HL7 v2) and the producer of the observations in response to the order (known as the 'Filler' in HL7 v2). For further discussion and examples see the [notes section](diagnosticrequest.html#4.22.4) below.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><Data ss:Type="String">.id</Data><NamedCell
@@ -1723,7 +1723,7 @@
     <Cell ss:StyleID="s93"><Data ss:Type="String">The desired perfomer for doing the diagnostic testing.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Use the standard [XXX extension]() for listing alternative  alternative performers and/or roles and/or preference.</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Use an [extension] (extensibility.html) or listing alternative alternative performers and/or roles and/or preference.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><Data ss:Type="String">.participation[AUT or PFM]</Data><NamedCell

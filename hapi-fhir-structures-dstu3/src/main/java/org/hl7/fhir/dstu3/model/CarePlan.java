@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -2395,14 +2395,14 @@ public class CarePlan extends DomainResource {
     /**
      * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
      */
-    @Child(name = "careTeam", type = {CareTeam.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "careTeam", type = {CareTeam.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Who's involved in plan?", formalDefinition="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan." )
-    protected Reference careTeam;
-
+    protected List<Reference> careTeam;
     /**
-     * The actual object that is the target of the reference (Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.)
+     * The actual objects that are the target of the reference (Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.)
      */
-    protected CareTeam careTeamTarget;
+    protected List<CareTeam> careTeamTarget;
+
 
     /**
      * Describes the intended objective(s) of carrying out the care plan.
@@ -2430,7 +2430,7 @@ public class CarePlan extends DomainResource {
     @Description(shortDefinition="Comments about the plan", formalDefinition="General notes about the care plan not covered elsewhere." )
     protected Annotation note;
 
-    private static final long serialVersionUID = -1194811130L;
+    private static final long serialVersionUID = -771228688L;
 
   /**
    * Constructor
@@ -3055,45 +3055,76 @@ public class CarePlan extends DomainResource {
     /**
      * @return {@link #careTeam} (Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.)
      */
-    public Reference getCareTeam() { 
+    public List<Reference> getCareTeam() { 
       if (this.careTeam == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CarePlan.careTeam");
-        else if (Configuration.doAutoCreate())
-          this.careTeam = new Reference(); // cc
+        this.careTeam = new ArrayList<Reference>();
       return this.careTeam;
     }
 
-    public boolean hasCareTeam() { 
-      return this.careTeam != null && !this.careTeam.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CarePlan setCareTeam(List<Reference> theCareTeam) { 
+      this.careTeam = theCareTeam;
+      return this;
     }
 
-    /**
-     * @param value {@link #careTeam} (Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.)
-     */
-    public CarePlan setCareTeam(Reference value) { 
-      this.careTeam = value;
+    public boolean hasCareTeam() { 
+      if (this.careTeam == null)
+        return false;
+      for (Reference item : this.careTeam)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addCareTeam() { //3
+      Reference t = new Reference();
+      if (this.careTeam == null)
+        this.careTeam = new ArrayList<Reference>();
+      this.careTeam.add(t);
+      return t;
+    }
+
+    public CarePlan addCareTeam(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.careTeam == null)
+        this.careTeam = new ArrayList<Reference>();
+      this.careTeam.add(t);
       return this;
     }
 
     /**
-     * @return {@link #careTeam} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.)
+     * @return The first repetition of repeating field {@link #careTeam}, creating it if it does not already exist
      */
-    public CareTeam getCareTeamTarget() { 
+    public Reference getCareTeamFirstRep() { 
+      if (getCareTeam().isEmpty()) {
+        addCareTeam();
+      }
+      return getCareTeam().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<CareTeam> getCareTeamTarget() { 
       if (this.careTeamTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CarePlan.careTeam");
-        else if (Configuration.doAutoCreate())
-          this.careTeamTarget = new CareTeam(); // aa
+        this.careTeamTarget = new ArrayList<CareTeam>();
       return this.careTeamTarget;
     }
 
     /**
-     * @param value {@link #careTeam} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
-    public CarePlan setCareTeamTarget(CareTeam value) { 
-      this.careTeamTarget = value;
-      return this;
+    @Deprecated
+    public CareTeam addCareTeamTarget() { 
+      CareTeam r = new CareTeam();
+      if (this.careTeamTarget == null)
+        this.careTeamTarget = new ArrayList<CareTeam>();
+      this.careTeamTarget.add(r);
+      return r;
     }
 
     /**
@@ -3283,7 +3314,7 @@ public class CarePlan extends DomainResource {
         case 874544034: /*addresses*/ return this.addresses == null ? new Base[0] : this.addresses.toArray(new Base[this.addresses.size()]); // Reference
         case -1854767153: /*support*/ return this.support == null ? new Base[0] : this.support.toArray(new Base[this.support.size()]); // Reference
         case 1112903156: /*relatedPlan*/ return this.relatedPlan == null ? new Base[0] : this.relatedPlan.toArray(new Base[this.relatedPlan.size()]); // CarePlanRelatedPlanComponent
-        case -7323378: /*careTeam*/ return this.careTeam == null ? new Base[0] : new Base[] {this.careTeam}; // Reference
+        case -7323378: /*careTeam*/ return this.careTeam == null ? new Base[0] : this.careTeam.toArray(new Base[this.careTeam.size()]); // Reference
         case 3178259: /*goal*/ return this.goal == null ? new Base[0] : this.goal.toArray(new Base[this.goal.size()]); // Reference
         case -1655966961: /*activity*/ return this.activity == null ? new Base[0] : this.activity.toArray(new Base[this.activity.size()]); // CarePlanActivityComponent
         case 3387378: /*note*/ return this.note == null ? new Base[0] : new Base[] {this.note}; // Annotation
@@ -3332,7 +3363,7 @@ public class CarePlan extends DomainResource {
           this.getRelatedPlan().add((CarePlanRelatedPlanComponent) value); // CarePlanRelatedPlanComponent
           break;
         case -7323378: // careTeam
-          this.careTeam = castToReference(value); // Reference
+          this.getCareTeam().add(castToReference(value)); // Reference
           break;
         case 3178259: // goal
           this.getGoal().add(castToReference(value)); // Reference
@@ -3375,7 +3406,7 @@ public class CarePlan extends DomainResource {
         else if (name.equals("relatedPlan"))
           this.getRelatedPlan().add((CarePlanRelatedPlanComponent) value);
         else if (name.equals("careTeam"))
-          this.careTeam = castToReference(value); // Reference
+          this.getCareTeam().add(castToReference(value));
         else if (name.equals("goal"))
           this.getGoal().add(castToReference(value));
         else if (name.equals("activity"))
@@ -3401,7 +3432,7 @@ public class CarePlan extends DomainResource {
         case 874544034:  return addAddresses(); // Reference
         case -1854767153:  return addSupport(); // Reference
         case 1112903156:  return addRelatedPlan(); // CarePlanRelatedPlanComponent
-        case -7323378:  return getCareTeam(); // Reference
+        case -7323378:  return addCareTeam(); // Reference
         case 3178259:  return addGoal(); // Reference
         case -1655966961:  return addActivity(); // CarePlanActivityComponent
         case 3387378:  return getNote(); // Annotation
@@ -3452,8 +3483,7 @@ public class CarePlan extends DomainResource {
           return addRelatedPlan();
         }
         else if (name.equals("careTeam")) {
-          this.careTeam = new Reference();
-          return this.careTeam;
+          return addCareTeam();
         }
         else if (name.equals("goal")) {
           return addGoal();
@@ -3513,7 +3543,11 @@ public class CarePlan extends DomainResource {
           for (CarePlanRelatedPlanComponent i : relatedPlan)
             dst.relatedPlan.add(i.copy());
         };
-        dst.careTeam = careTeam == null ? null : careTeam.copy();
+        if (careTeam != null) {
+          dst.careTeam = new ArrayList<Reference>();
+          for (Reference i : careTeam)
+            dst.careTeam.add(i.copy());
+        };
         if (goal != null) {
           dst.goal = new ArrayList<Reference>();
           for (Reference i : goal)

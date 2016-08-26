@@ -43,6 +43,11 @@ private Map<String, Object> userData;
     userData.put(name, value);
   }
 
+  public void clearUserData(String name) {
+    if (userData != null)
+      userData.remove(name);
+  }
+  
   public void setUserDataINN(String name, Object value) {
     if (value == null)
       return;

@@ -50,7 +50,7 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
     ValueSet vs = context.fetchResource(ValueSet.class, uri);
     if (vs == null) 
       return false ; // we can't tell
-    return codeInExpansion(factory.getExpander().expand(vs), system, code);
+    return codeInExpansion(factory.getExpander().expand(vs, null), system, code);
   }
 
   private boolean codeInExpansion(ValueSetExpansionOutcome vso, String system, String code) throws EOperationOutcome, Exception {

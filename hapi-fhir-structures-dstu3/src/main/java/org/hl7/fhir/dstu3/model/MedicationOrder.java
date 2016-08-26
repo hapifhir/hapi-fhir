@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Wed, Aug 3, 2016 09:39-0400 for FHIR v1.5.0
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 
 import java.util.*;
 
@@ -3224,17 +3224,17 @@ public class MedicationOrder extends DomainResource {
  /**
    * Search parameter: <b>prescriber</b>
    * <p>
-   * Description: <b>Who ordered the initial medication(s)</b><br>
+   * Description: <b>Returns prescriptions prescribed by this prescriber</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationOrder.prescriber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="prescriber", path="MedicationOrder.prescriber", description="Who ordered the initial medication(s)", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="prescriber", path="MedicationOrder.prescriber", description="Returns prescriptions prescribed by this prescriber", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_PRESCRIBER = "prescriber";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>prescriber</b>
    * <p>
-   * Description: <b>Who ordered the initial medication(s)</b><br>
+   * Description: <b>Returns prescriptions prescribed by this prescriber</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationOrder.prescriber</b><br>
    * </p>
@@ -3270,17 +3270,17 @@ public class MedicationOrder extends DomainResource {
  /**
    * Search parameter: <b>code</b>
    * <p>
-   * Description: <b>Return administrations of this medication code</b><br>
+   * Description: <b>Return prescriptions of this medication code</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationOrder.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationOrder.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token" )
+  @SearchParamDefinition(name="code", path="MedicationOrder.medication.as(CodeableConcept)", description="Return prescriptions of this medication code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
    * <p>
-   * Description: <b>Return administrations of this medication code</b><br>
+   * Description: <b>Return prescriptions of this medication code</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationOrder.medicationCodeableConcept</b><br>
    * </p>
@@ -3336,17 +3336,17 @@ public class MedicationOrder extends DomainResource {
  /**
    * Search parameter: <b>medication</b>
    * <p>
-   * Description: <b>Return administrations of this medication reference</b><br>
+   * Description: <b>Return prescriptions of this medication reference</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationOrder.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationOrder.medication.as(Reference)", description="Return administrations of this medication reference", type="reference", target={Medication.class } )
+  @SearchParamDefinition(name="medication", path="MedicationOrder.medication.as(Reference)", description="Return prescriptions of this medication reference", type="reference", target={Medication.class } )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
    * <p>
-   * Description: <b>Return administrations of this medication reference</b><br>
+   * Description: <b>Return prescriptions of this medication reference</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationOrder.medicationReference</b><br>
    * </p>
