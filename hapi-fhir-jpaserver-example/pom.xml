@@ -1,8 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- Note: HAPI projects use the "hapi-fhir" POM as their base to provide easy management. You do not need to use this in your own projects, so the "parent" tag and it's contents below may be removed 
-		if you are using this file as a basis for your own project. -->
+	<!-- 
+	Note: HAPI projects use the "hapi-fhir" POM as their base to provide easy management. 
+	You do not need to use this in your own projects, so the "parent" tag and it's 
+	contents below may be removed 
+	if you are using this file as a basis for your own project. 
+	-->
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>

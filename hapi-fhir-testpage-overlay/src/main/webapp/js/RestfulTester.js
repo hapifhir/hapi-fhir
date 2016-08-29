@@ -167,7 +167,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 			$('<br clear="all" />'), 
 			$('<div />', { 'class': 'col-sm-1' }),
 			$('<div />', { 'class': 'col-sm-1' }).append(
-	        	$('<i class="glyphicon glyphicon-link" style="margin-left: 20px; margin-top: 10px;"/>')
+	        	$('<i class="glyphicon glyphicon-link" style="margin-left: 20px; margin-top: 10px;"></i>')
 	    	),
 			$('<div />', { 'class': 'col-sm-4' }).append(
 				select

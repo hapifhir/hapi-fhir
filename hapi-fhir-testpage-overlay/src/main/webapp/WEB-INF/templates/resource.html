@@ -41,7 +41,7 @@
 							</div>
 							<div class="panel-body">
 								This page contains various operations for interacting with
-								the <th:block th:text="${resourceName}"/> resource.
+								the <th:block th:text="${resourceName}"></th:block> resource.
 							</div>
 						</div>
 						
@@ -137,7 +137,7 @@
 									<div class="row-fluid">
 										<span th:each="include : ${includes}" class="includeCheckContainer">
 											<span class="includeCheckCheck">
-												<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}" />
+												<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}"></input>
 											</span>
 											<span class="includeCheckName" th:text="${include}"/>
 										</span>
@@ -161,7 +161,7 @@
 											<ul class="dropdown-menu" role="menu">
 												<li><a href="javascript:updateSort('');">Default Sort</a></li>
 												<li class="divider"></li>
-												<li th:each="param : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${param} + '\');'" th:text="${param}"></a></li>
+												<li th:each="nextParam : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${nextParam} + '\');'" th:text="${nextParam}"></a></li>
 											</ul>
 										</div>
 										&nbsp;&nbsp;&nbsp;
