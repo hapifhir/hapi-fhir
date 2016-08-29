@@ -217,6 +217,11 @@
 				IDs were not substituted with viewing
 				resources using the _history operation
 			</action>
+			<action type="add">
+				HAPI root pom shouldn't include animal-sniffer plugin,
+				since that causes any projects which extend this to 
+				be held to Java 6 compliance.
+			</action>
 		</release>
 		<release version="1.6" date="2016-07-07">
 			<action type="fix">
