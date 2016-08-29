@@ -1262,13 +1262,15 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(2, resp.getEntry().size());
+		
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		Entry nextEntry = resp.getEntry().get(0);
 		assertEquals("200 OK", nextEntry.getResponse().getStatus());
 		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getId().toVersionless());
-		assertNotEquals(id, p.getId());
 		assertThat(p.getId().toString(), endsWith("/_history/2"));
+		assertNotEquals(id, p.getId());
 
 		nextEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());

@@ -72,6 +72,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
 
+	public ResourceHistoryTable() {
+		super();
+	}
+	
+	
 	public void addTag(ResourceHistoryTag theTag) {
 		for (ResourceHistoryTag next : getTags()) {
 			if (next.getTag().equals(theTag)) {
