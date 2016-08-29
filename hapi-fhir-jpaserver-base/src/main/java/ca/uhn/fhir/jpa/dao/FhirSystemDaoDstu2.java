@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -39,6 +40,7 @@ import java.util.Set;
 import javax.persistence.TypedQuery;
 
 import org.apache.http.NameValuePair;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -315,7 +317,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		
 		List<IIdType> deletedResources = new ArrayList<IIdType>();
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
-		
+		Map<Entry, ResourceTable> entriesToProcess = new IdentityHashMap<Entry, ResourceTable>();
+		Set<ResourceTable> nonUpdatedEntities = new HashSet<ResourceTable>();
+
 		/*
 		 * Loop through the request and process any entries of type
 		 * PUT, POST or DELETE
@@ -381,6 +385,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				DaoMethodOutcome outcome;
 				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
+				entriesToProcess.put(nextRespEntry, outcome.getEntity());
+				if (outcome.getCreated() == false) {
+					nonUpdatedEntities.add(outcome.getEntity());
+				}
 				break;
 			}
 			case DELETE: {
@@ -426,6 +434,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				}
 
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
+				entriesToProcess.put(nextRespEntry, outcome.getEntity());
 				break;
 			}
 			}
@@ -474,7 +483,8 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-			updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, updateTime);
+			boolean shouldUpdate = !nonUpdatedEntities.contains(nextOutcome.getEntity());
+			updateEntity(nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, shouldUpdate, updateTime);
 		}
 
 		myEntityManager.flush();
@@ -578,6 +588,11 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		ourLog.info("Flushing context after {}", theActionName);
 		myEntityManager.flush();
 		
+		for (java.util.Map.Entry<Entry, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
+			nextEntry.getKey().getResponse().setLocation(nextEntry.getValue().getIdDt().toUnqualified().getValue());
+			nextEntry.getKey().getResponse().setEtag(nextEntry.getValue().getIdDt().getVersionIdPart());
+		}
+		
 		long delay = System.currentTimeMillis() - start;
 		int numEntries = theRequest.getEntry().size();
 		long delayPer = delay / numEntries;
@@ -606,8 +621,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		} else {
 			newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
-		newEntry.getResponse().setLocation(outcome.getId().toUnqualified().getValue());
-		newEntry.getResponse().setEtag(outcome.getId().getVersionIdPart());
 		newEntry.getResponse().setLastModified(ResourceMetadataKeyEnum.UPDATED.get(theRes));
 	}
 

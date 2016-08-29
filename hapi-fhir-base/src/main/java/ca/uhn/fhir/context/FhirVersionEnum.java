@@ -40,6 +40,8 @@ public enum FhirVersionEnum {
 	
 	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2, true, "1.0.2"), 
 	
+	DSTU2_1("NONE", null, true, "1.4.0"), 
+
 	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true, "1.6.0");
 
 	private final FhirVersionEnum myEquivalent;

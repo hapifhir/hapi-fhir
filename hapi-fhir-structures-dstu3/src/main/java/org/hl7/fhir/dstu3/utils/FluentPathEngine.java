@@ -649,7 +649,7 @@ public class FluentPathEngine {
         ExpressionNode node = group;
         focus = group.getOpNext();
         if (focus != null) { 
-          while (focus == null && !ops.contains(focus.getOperation())) {
+          while (focus != null && !ops.contains(focus.getOperation())) {
             node = focus;
             focus = focus.getOpNext();
           }
