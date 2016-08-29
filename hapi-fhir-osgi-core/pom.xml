@@ -94,7 +94,9 @@
 						<configuration>
 							<target>
 								<copy todir="target/sources">
-									<fileset dir="../hapi-fhir-base/src/main/java" />
+									<fileset dir="../hapi-fhir-base/src/main/java">
+										<exclude name="**/TestUtil.java"/>
+									</fileset>
 									<fileset dir="../hapi-fhir-structures-dstu/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu/target/generated-sources/tinder" />
 									<fileset dir="../hapi-fhir-structures-dstu2/src/main/java" />
