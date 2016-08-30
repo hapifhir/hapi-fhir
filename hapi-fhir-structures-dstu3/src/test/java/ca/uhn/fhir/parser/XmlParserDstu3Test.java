@@ -76,6 +76,37 @@ public class XmlParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testEncodeChainedContainedResourcer() {
+		Organization gp = new Organization();
+		gp.setName("grandparent");
+		
+		Organization parent = new Organization();
+		parent.setName("parent");
+		parent.getPartOf().setResource(gp);
+		
+		Organization child = new Organization();
+		child.setName("child");
+		child.getPartOf().setResource(parent);
+		
+		Patient patient = new Patient();
+		patient.getManagingOrganization().setResource(child);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		patient = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
+		
+		child = (Organization) patient.getManagingOrganization().getResource();
+		assertEquals("child", child.getName());
+		
+		parent = (Organization) child.getPartOf().getResource();
+		assertEquals("parent", parent.getName());
+		
+		gp = (Organization)parent.getPartOf().getResource();
+		assertEquals("grandparent", gp.getName());
+	}
+	
 	/**
 	 * If a contained resource refers to a contained resource that comes after it, it should still be successfully
 	 * woven together.
@@ -646,9 +677,9 @@ public class XmlParserDstu3Test {
 		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
 		List<UriType> gotLabels = parsed.getMeta().getProfile();
 		assertEquals(2, gotLabels.size());
-		UriType label = (UriType) gotLabels.get(0);
+		UriType label = gotLabels.get(0);
 		assertEquals("http://foo/Profile1", label.getValue());
-		label = (UriType) gotLabels.get(1);
+		label = gotLabels.get(1);
 		assertEquals("http://foo/Profile2", label.getValue());
 
 		List<Coding> tagList = parsed.getMeta().getTag();
@@ -841,13 +872,13 @@ public class XmlParserDstu3Test {
 
 		assertEquals(2, gotLabels.size());
 
-		Coding label = (Coding) gotLabels.get(0);
+		Coding label = gotLabels.get(0);
 		assertEquals("SYSTEM1", label.getSystem());
 		assertEquals("CODE1", label.getCode());
 		assertEquals("DISPLAY1", label.getDisplay());
 		assertEquals("VERSION1", label.getVersion());
 
-		label = (Coding) gotLabels.get(1);
+		label = gotLabels.get(1);
 		assertEquals("SYSTEM2", label.getSystem());
 		assertEquals("CODE2", label.getCode());
 		assertEquals("DISPLAY2", label.getDisplay());
@@ -1953,7 +1984,7 @@ public class XmlParserDstu3Test {
 	@Test
 	@Ignore
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"));
+		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1989,7 +2020,7 @@ public class XmlParserDstu3Test {
 	@Test
 	@Ignore
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"));
+		String content = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
 		IParser newXmlParser = ourCtx.newXmlParser();
 		Bundle parsed = newXmlParser.parseResource(Bundle.class, content);
@@ -2641,7 +2672,7 @@ public class XmlParserDstu3Test {
 	 */
 	@Test
 	public void testParseBundleWithLinksOfUnknownRelation() throws Exception {
-		String input = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle_orion.xml"));
+		String input = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle_orion.xml"), StandardCharsets.UTF_8);
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		BundleLinkComponent link = parsed.getLink().get(0);

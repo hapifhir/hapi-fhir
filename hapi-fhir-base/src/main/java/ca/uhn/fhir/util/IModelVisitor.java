@@ -10,7 +10,7 @@ package ca.uhn.fhir.util;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,20 +36,15 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 public interface IModelVisitor {
 
 	/**
-	 * 
+	 * @param theResource
+	 *           The resource being visited (note that generally this will be the resource upon which
+	 *           visit was originally called, but in the case of descending into contained resources this will be the contained resource instead)
 	 * @param theElement
-	 * @param theChildDefinition May be null if this is a root element
+	 *           The element
+	 * @param theChildDefinition
+	 *           May be null if this is a root element
 	 * @param theDefinition
 	 */
-	void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
-
-	/**
-	 * @deprecated As of HAPI FHIR 1.5, this method is not recommended to be used. It will be removed from
-	 * this interface in HAPI FHIR 2.0. Previously, undeclared extensions were handled differently but as of 1.5
-	 * they will also be called back via {@link #acceptElement(IBase, List, BaseRuntimeChildDefinition, BaseRuntimeElementDefinition)} 
-	 * like any other child.
-	 */
-	@Deprecated
-	void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt);
+	void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
 
 }

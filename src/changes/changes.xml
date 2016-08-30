@@ -6,6 +6,13 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="2.1" date="TBD">
+			<action type="fix">
+				In server, when returning a list of resources, the server sometimes failed to add
+				<![CDATA[<code>_include</code>]]> resources to the response bundle if they were
+				referred to by a contained reosurce. Thanks to Neal Acharya for reporting!				
+			</action>
+		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
 				JSON parsing in HAPI FHIR has been switched from using JSR353 (javax.json) to

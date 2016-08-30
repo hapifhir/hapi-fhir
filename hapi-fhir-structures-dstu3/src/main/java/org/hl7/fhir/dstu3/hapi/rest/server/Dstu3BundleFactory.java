@@ -35,13 +35,10 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
@@ -91,11 +88,11 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 				}
 			}
 			
-			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
+			List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
 			do {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
-				for (BaseResourceReferenceDt nextRef : references) {
+				for (IBaseReference nextRef : references) {
 					IAnyResource nextRes = (IAnyResource) nextRef.getResource();
 					if (nextRes != null) {
 						if (nextRes.getIdElement().hasIdPart()) {
@@ -120,9 +117,9 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 				}
 
 				// Linked resources may themselves have linked resources
-				references = new ArrayList<BaseResourceReferenceDt>();
+				references = new ArrayList<IBaseReference>();
 				for (IAnyResource iResource : addedResourcesThisPass) {
-					List<BaseResourceReferenceDt> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
+					List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
 					references.addAll(newReferences);
 				}
 
@@ -185,8 +182,9 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes))
-						continue;
+					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
+						continue; 
+					}
 
 					IAnyResource nextRes = (IAnyResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
