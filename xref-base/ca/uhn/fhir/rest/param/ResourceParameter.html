@@ -119,7 +119,7 @@
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<strong class="jxr_keyword">case</strong> BODY_BYTE_ARRAY:
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 			<strong class="jxr_keyword">return</strong> theRequest.loadRequestContents();
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<strong class="jxr_keyword">case</strong> ENCODING:
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			<strong class="jxr_keyword">return</strong> RestfulServerUtils.determineRequestEncoding(theRequest);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			<strong class="jxr_keyword">return</strong> RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 		<strong class="jxr_keyword">case</strong> RESOURCE:
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 		<strong class="jxr_keyword">default</strong>:
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 			<strong class="jxr_keyword">return</strong> parseResourceFromRequest(theRequest, theMethodBinding, myResourceType);

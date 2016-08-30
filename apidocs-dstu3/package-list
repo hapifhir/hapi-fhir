@@ -5,7 +5,6 @@ org.hl7.fhir.dstu3.hapi.ctx
 org.hl7.fhir.dstu3.hapi.rest.server
 org.hl7.fhir.dstu3.hapi.validation
 org.hl7.fhir.dstu3.model
-org.hl7.fhir.dstu3.model.valuesets
 org.hl7.fhir.dstu3.terminologies
 org.hl7.fhir.dstu3.utils
 org.hl7.fhir.dstu3.validation

@@ -279,7 +279,7 @@
 <a class="jxr_linenumber" name="L271" href="#L271">271</a> 			ArrayList&lt;VersionIndependentConcept&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;VersionIndependentConcept&gt;();
 <a class="jxr_linenumber" name="L272" href="#L272">272</a> 
 <a class="jxr_linenumber" name="L273" href="#L273">273</a> 			HapiWorkerContext worker = <strong class="jxr_keyword">new</strong> HapiWorkerContext(myContext, myValidationSupport);
-<a class="jxr_linenumber" name="L274" href="#L274">274</a> 			ValueSetExpansionOutcome outcome = worker.expand(source);
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 			ValueSetExpansionOutcome outcome = worker.expand(source, <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L275" href="#L275">275</a> 			<strong class="jxr_keyword">for</strong> (ValueSetExpansionContainsComponent next : outcome.getValueset().getExpansion().getContains()) {
 <a class="jxr_linenumber" name="L276" href="#L276">276</a> 				retVal.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/term/VersionIndependentConcept.html">VersionIndependentConcept</a>(next.getSystem(), next.getCode()));
 <a class="jxr_linenumber" name="L277" href="#L277">277</a> 			}

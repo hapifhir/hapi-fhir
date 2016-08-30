@@ -76,20 +76,20 @@
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			TokenAndListParam theIdentifier, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"The organization who generated this request"</span>)
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"organizationidentifier"</span>)
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			TokenAndListParam theOrganizationidentifier, 
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"organization-identifier"</span>)
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			TokenAndListParam theOrganization_identifier, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"The organization who generated this request"</span>)
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"organizationreference"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			ReferenceAndListParam theOrganizationreference, 
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"organization-reference"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			ReferenceAndListParam theOrganization_reference, 
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>    
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"The provider who regenerated this request"</span>)
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"provideridentifier"</span>)
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			TokenAndListParam theProvideridentifier, 
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"provider-identifier"</span>)
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			TokenAndListParam theProvider_identifier, 
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>    
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  			@Description(shortDefinition=<span class="jxr_string">"The provider who regenerated this request"</span>)
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"providerreference"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			ReferenceAndListParam theProviderreference, 
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"provider-reference"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			ReferenceAndListParam theProvider_reference, 
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>    
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"The action requested by this resource"</span>)
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"action"</span>)
@@ -102,7 +102,7 @@
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  					<span class="jxr_string">"ProcessRequest:organizationreference"</span> , 					<span class="jxr_string">"ProcessRequest:providerreference"</span> , 						<span class="jxr_string">"ProcessRequest:organizationreference"</span> , 					<span class="jxr_string">"ProcessRequest:providerreference"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  					<span class="jxr_string">"ProcessRequest:organization-reference"</span> , 					<span class="jxr_string">"ProcessRequest:provider-reference"</span> , 						<span class="jxr_string">"ProcessRequest:organization-reference"</span> , 					<span class="jxr_string">"ProcessRequest:provider-reference"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  			}) 
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			
@@ -124,10 +124,10 @@
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants.PARAM_PROFILE, theSearchForProfile);
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 			paramMap.add(<span class="jxr_string">"_has"</span>, theHas);
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			paramMap.add(<span class="jxr_string">"organizationidentifier"</span>, theOrganizationidentifier);
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			paramMap.add(<span class="jxr_string">"organizationreference"</span>, theOrganizationreference);
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			paramMap.add(<span class="jxr_string">"provideridentifier"</span>, theProvideridentifier);
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			paramMap.add(<span class="jxr_string">"providerreference"</span>, theProviderreference);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			paramMap.add(<span class="jxr_string">"organization-identifier"</span>, theOrganization_identifier);
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			paramMap.add(<span class="jxr_string">"organization-reference"</span>, theOrganization_reference);
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			paramMap.add(<span class="jxr_string">"provider-identifier"</span>, theProvider_identifier);
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			paramMap.add(<span class="jxr_string">"provider-reference"</span>, theProvider_reference);
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 			paramMap.add(<span class="jxr_string">"action"</span>, theAction);
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 			paramMap.setRevIncludes(theRevIncludes);
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> 			paramMap.setLastUpdated(theLastUpdated);

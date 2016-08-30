@@ -75,7 +75,7 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"identifier"</span>)
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			TokenAndListParam theIdentifier, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"A portion of either family or given name of the patient"</span>)
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text"</span>)
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"name"</span>)
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			StringAndListParam theName, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
@@ -103,7 +103,7 @@
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"email"</span>)
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			TokenAndListParam theEmail, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"An address in any kind of address/part of the patient"</span>)
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text"</span>)
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"address"</span>)
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			StringAndListParam theAddress, 
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>   
@@ -143,9 +143,9 @@
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 			@OptionalParam(name=<span class="jxr_string">"organization"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> 			ReferenceAndListParam theOrganization, 
 <a class="jxr_linenumber" name="L137" href="#L137">137</a>   
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			@Description(shortDefinition=<span class="jxr_string">"Patient's nominated care provider, could be a care manager, not the organization that manages the record"</span>)
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			@OptionalParam(name=<span class="jxr_string">"careprovider"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			ReferenceAndListParam theCareprovider, 
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			@Description(shortDefinition=<span class="jxr_string">"Patient's nominated general practitioner, not the organization that manages the record"</span>)
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			@OptionalParam(name=<span class="jxr_string">"general-practitioner"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			ReferenceAndListParam theGeneral_practitioner, 
 <a class="jxr_linenumber" name="L141" href="#L141">141</a>   
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 			@Description(shortDefinition=<span class="jxr_string">"Whether the patient record is active"</span>)
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 			@OptionalParam(name=<span class="jxr_string">"active"</span>)
@@ -178,7 +178,7 @@
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 					<span class="jxr_string">"Patient:careprovider"</span> , 					<span class="jxr_string">"Patient:link"</span> , 					<span class="jxr_string">"Patient:organization"</span> , 						<span class="jxr_string">"Patient:careprovider"</span> , 					<span class="jxr_string">"Patient:link"</span> , 					<span class="jxr_string">"Patient:organization"</span> , 						<span class="jxr_string">"Patient:careprovider"</span> , 					<span class="jxr_string">"Patient:link"</span> , 					<span class="jxr_string">"Patient:organization"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 					<span class="jxr_string">"Patient:general-practitioner"</span> , 					<span class="jxr_string">"Patient:link"</span> , 					<span class="jxr_string">"Patient:organization"</span> , 						<span class="jxr_string">"Patient:general-practitioner"</span> , 					<span class="jxr_string">"Patient:link"</span> , 					<span class="jxr_string">"Patient:organization"</span> , 						<span class="jxr_string">"Patient:general-practitioner"</span> , 					<span class="jxr_string">"Patient:link"</span> , 					<span class="jxr_string">"Patient:organization"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L174" href="#L174">174</a> 			}) 
 <a class="jxr_linenumber" name="L175" href="#L175">175</a> 			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> 			
@@ -217,7 +217,7 @@
 <a class="jxr_linenumber" name="L209" href="#L209">209</a> 			paramMap.add(<span class="jxr_string">"language"</span>, theLanguage);
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 			paramMap.add(<span class="jxr_string">"birthdate"</span>, theBirthdate);
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> 			paramMap.add(<span class="jxr_string">"organization"</span>, theOrganization);
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 			paramMap.add(<span class="jxr_string">"careprovider"</span>, theCareprovider);
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 			paramMap.add(<span class="jxr_string">"general-practitioner"</span>, theGeneral_practitioner);
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> 			paramMap.add(<span class="jxr_string">"active"</span>, theActive);
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 			paramMap.add(<span class="jxr_string">"animal-species"</span>, theAnimal_species);
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> 			paramMap.add(<span class="jxr_string">"animal-breed"</span>, theAnimal_breed);

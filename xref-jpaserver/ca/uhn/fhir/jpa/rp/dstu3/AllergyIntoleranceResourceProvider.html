@@ -72,8 +72,8 @@
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>    
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  			@Description(shortDefinition=<span class="jxr_string">""</span>)
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"substance"</span>)
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			TokenAndListParam theSubstance, 
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"code"</span>)
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			TokenAndListParam theCode, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">""</span>)
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"status"</span>)
@@ -159,7 +159,7 @@
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants.PARAM_SECURITY, theSearchForSecurity);
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants.PARAM_PROFILE, theSearchForProfile);
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(<span class="jxr_string">"_has"</span>, theHas);
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"substance"</span>, theSubstance);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"code"</span>, theCode);
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"criticality"</span>, theCriticality);
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"type"</span>, theType);

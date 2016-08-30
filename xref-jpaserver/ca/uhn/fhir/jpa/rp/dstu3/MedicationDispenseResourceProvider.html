@@ -75,7 +75,7 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"destination"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			ReferenceAndListParam theDestination, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Return all dispenses performed by a specific individual"</span>)
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Return dispenses performed by a specific individual"</span>)
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"dispenser"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			ReferenceAndListParam theDispenser, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
@@ -99,27 +99,27 @@
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"prescription"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			ReferenceAndListParam thePrescription, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"Return all dispenses with the specified responsible party"</span>)
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"Return dispenses with the specified responsible party"</span>)
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"responsibleparty"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			ReferenceAndListParam theResponsibleparty, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"Status of the dispense"</span>)
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"Return dispenses with a specified dispense status"</span>)
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"status"</span>)
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			TokenAndListParam theStatus, 
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>   
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"Return all dispenses of a specific type"</span>)
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"Return dispenses of a specific type"</span>)
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 			@OptionalParam(name=<span class="jxr_string">"type"</span>)
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 			TokenAndListParam theType, 
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>   
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)"</span>)
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"Returns dispenses handed over on this date"</span>)
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@OptionalParam(name=<span class="jxr_string">"whenhandedover"</span>)
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 			DateRangeParam theWhenhandedover, 
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>   
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"Date when medication prepared"</span>)
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"Returns dispenses prepared on this date"</span>)
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 			@OptionalParam(name=<span class="jxr_string">"whenprepared"</span>)
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 			DateRangeParam theWhenprepared, 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>   
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">""</span>)
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"The identity of a receiver to list dispenses for"</span>)
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"receiver"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 			ReferenceAndListParam theReceiver, 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 

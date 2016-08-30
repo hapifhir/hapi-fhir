@@ -75,7 +75,7 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"identifier"</span>)
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			TokenAndListParam theIdentifier, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"A (portion of the) name of the location"</span>)
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"A (portion of the) name of the location or alias"</span>)
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"name"</span>)
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			StringAndListParam theName, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
@@ -115,13 +115,13 @@
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@OptionalParam(name=<span class="jxr_string">"partof"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 			ReferenceAndListParam thePartof, 
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>   
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)"</span>)
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). Requires the near-distance parameter to be provided also"</span>)
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 			@OptionalParam(name=<span class="jxr_string">"near"</span>)
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 			TokenAndListParam theNear, 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>   
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"A distance quantity to limit the near search to locations within a specific distance"</span>)
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"A distance quantity to limit the near search to locations within a specific distanceRequires the near parameter to be included also"</span>)
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"near-distance"</span>)
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			TokenAndListParam theNear_distance, 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			QuantityAndListParam theNear_distance, 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>   
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 			@Description(shortDefinition=<span class="jxr_string">"Searches for locations that are managed by the provided organization"</span>)
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 			@OptionalParam(name=<span class="jxr_string">"organization"</span>, targetTypes={  } )
