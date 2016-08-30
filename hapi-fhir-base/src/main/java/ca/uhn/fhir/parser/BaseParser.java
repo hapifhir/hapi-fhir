@@ -75,6 +75,8 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -92,6 +94,7 @@ public abstract class BaseParser implements IParser {
 	private boolean myEncodeElementsIncludesStars;
 	private IIdType myEncodeForceResourceId;
 	private IParserErrorHandler myErrorHandler;
+	private JsonLikeStructure myJsonLikeStructure;
 	private boolean myOmitResourceId;
 	private List<Class<? extends IBaseResource>> myPreferTypes;
 	private String myServerBaseUrl;
@@ -348,10 +351,22 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected abstract void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
+	
+	protected void doEncodeBundleToJsonLikeWriter(Bundle theBundle, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException {
+		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
+	}
 
 	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
+	
+	protected void doEncodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException {
+		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
+	}
 
 	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
+	
+	protected <T extends IBaseResource> T doParseResource(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure) throws DataFormatException {
+		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
+	}
 
 	@Override
 	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
@@ -372,7 +387,21 @@ public abstract class BaseParser implements IParser {
 	public final void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException {
 		Validate.notNull(theBundle, "theBundle must not be null");
 		Validate.notNull(theWriter, "theWriter must not be null");
-		doEncodeBundleToWriter(theBundle, theWriter);
+
+		if (isJsonParser() && myJsonLikeStructure != null) {
+			JsonLikeWriter jsonWriter = myJsonLikeStructure.getJsonLikeWriter(theWriter);
+			doEncodeBundleToJsonLikeWriter(theBundle, jsonWriter);
+		} else {
+			doEncodeBundleToWriter(theBundle, theWriter);
+		}
+	}
+
+	@Override
+	public void encodeBundleToJsonLikeWriter(Bundle theBundle, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException {
+		Validate.notNull(theBundle, "theBundle must not be null");
+		Validate.notNull(theJsonLikeWriter, "theJsonLikeWriter must not be null");
+
+		doEncodeBundleToJsonLikeWriter(theBundle, theJsonLikeWriter);
 	}
 
 	@Override
@@ -396,18 +425,45 @@ public abstract class BaseParser implements IParser {
 					"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
-		doEncodeResourceToWriter(theResource, theWriter);
+		if (isJsonParser() && myJsonLikeStructure != null) {
+			JsonLikeWriter jsonWriter = myJsonLikeStructure.getJsonLikeWriter(theWriter);
+			doEncodeResourceToJsonLikeWriter(theResource, jsonWriter);
+		} else {
+			doEncodeResourceToWriter(theResource, theWriter);
+		}
+	}
+
+	@Override
+	public void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException {
+		Validate.notNull(theResource, "theResource can not be null");
+		Validate.notNull(theJsonLikeWriter, "theJsonLikeWriter can not be null");
+
+		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
+			throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+		}
+
+		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter);
 	}
 
 	@Override
 	public String encodeTagListToString(TagList theTagList) {
 		Writer stringWriter = new StringWriter();
 		try {
-			encodeTagListToWriter(theTagList, stringWriter);
+			if (isJsonParser() && myJsonLikeStructure != null) {
+				JsonLikeWriter jsonWriter = myJsonLikeStructure.getJsonLikeWriter(stringWriter);
+				encodeTagListToJsonLikeWriter(theTagList, jsonWriter);
+			} else {
+				encodeTagListToWriter(theTagList, stringWriter);
+			}
 		} catch (IOException e) {
 			throw new Error("Encountered IOException during write to string - This should not happen!");
 		}
 		return stringWriter.toString();
+	}
+
+	@Override
+	public void encodeTagListToJsonLikeWriter(TagList theTagList, JsonLikeWriter theJsonLikeWriter) throws IOException {
+		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
 	}
 
 	private void filterCodingsWithNoCodeOrSystem(List<? extends IBaseCoding> tagList) {
@@ -586,6 +642,10 @@ public abstract class BaseParser implements IParser {
 		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false
 				&& theIncludedResource == false;
 	}
+	
+	protected boolean isJsonParser() {
+		return false;
+	}
 
 	@Override
 	public boolean isOmitResourceId() {
@@ -617,7 +677,15 @@ public abstract class BaseParser implements IParser {
 		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU2_HL7ORG) {
 			throw new IllegalStateException("Can't parse DSTU1 (Atom) bundle in HL7.org DSTU2 mode. Use parseResource(Bundle.class, foo) instead.");
 		}
-		return parseBundle(null, theReader);
+		Bundle retVal = null;
+		if (isJsonParser() && myJsonLikeStructure != null) {
+			JsonLikeStructure jsonStructure = myJsonLikeStructure.getInstance();
+			jsonStructure.load(theReader);
+			retVal = parseBundle(null, jsonStructure);
+		} else {
+			retVal = parseBundle(null, theReader);
+		}
+		return retVal;
 	}
 
 	@Override
@@ -627,25 +695,58 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
+	public Bundle parseBundle(JsonLikeStructure theJsonLikeStructure) throws ConfigurationException, DataFormatException {
+		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
+	}
 
-		/*
+	@Override
+	public <T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, String theString) {
+		StringReader reader = new StringReader(theString);
+		return parseBundle(theResourceType, reader);
+	}
+
+	@Override
+	public <T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure) throws ConfigurationException {
+		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
+	}
+
+	protected <T extends IBaseResource> void preParseResource (Class<T> theResourceType) {
+		/* 
 		 * We do this so that the context can verify that the structure is for
 		 * the correct FHIR version
 		 */
 		if (theResourceType != null) {
 			myContext.getResourceDefinition(theResourceType);
 		}
+	}
+		
+	@Override
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
+
+		preParseResource(theResourceType);
 
 		// Actually do the parse
-		T retVal = doParseResource(theResourceType, theReader);
+		T retVal = null;
+		if (isJsonParser() && myJsonLikeStructure != null) {
+			JsonLikeStructure jsonStructure = myJsonLikeStructure.getInstance();
+			jsonStructure.load(theReader);
+			retVal = doParseResource(theResourceType, jsonStructure);
+		} else {
+			retVal = doParseResource(theResourceType, theReader);
+		}
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
+		postParseResource(retVal);
+
+		return retVal;
+	}
+
+	protected <T extends IBaseResource> void postParseResource(T theResource) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		if ("Bundle".equals(def.getName())) {
 
 			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
 			BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
-			List<IBase> entries = entryChild.getAccessor().getValues(retVal);
+			List<IBase> entries = entryChild.getAccessor().getValues(theResource);
 			if (entries != null) {
 				for (IBase nextEntry : entries) {
 
@@ -678,7 +779,18 @@ public abstract class BaseParser implements IParser {
 			}
 
 		}
+	}
 
+	
+	@Override
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, JsonLikeStructure theJsonStructure) throws DataFormatException {
+	
+		preParseResource(theResourceType);
+	
+		T retVal = doParseResource(theResourceType, theJsonStructure);
+	
+		postParseResource(retVal);
+	
 		return retVal;
 	}
 
@@ -700,8 +812,28 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
+	public IBaseResource parseResource(JsonLikeStructure theJsonLikeStructure) throws ConfigurationException, DataFormatException {
+		return parseResource(null, theJsonLikeStructure);
+	}
+
+	@Override
 	public TagList parseTagList(String theString) {
-		return parseTagList(new StringReader(theString));
+		StringReader reader = new StringReader(theString);
+		
+		TagList retVal = null;
+		if (isJsonParser() && myJsonLikeStructure != null) {
+			JsonLikeStructure jsonStructure = myJsonLikeStructure.getInstance();
+			jsonStructure.load(reader);
+			retVal = parseTagList(jsonStructure);
+		} else {
+			retVal = parseTagList(reader);
+		}
+		return retVal;
+	}
+
+	@Override
+	public TagList parseTagList(JsonLikeStructure theJsonLikeStructure) {
+		throw new IllegalArgumentException("JsonLikeStructures can only be used with the JSON Parser");
 	}
 
 	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues,
@@ -834,6 +966,12 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public BaseParser setEncodeForceResourceId(IIdType theEncodeForceResourceId) {
 		myEncodeForceResourceId = theEncodeForceResourceId;
+		return this;
+	}
+
+	@Override
+	public IParser setJsonLikeStructure(JsonLikeStructure theJsonLikeStructure) {
+		myJsonLikeStructure = theJsonLikeStructure;
 		return this;
 	}
 
