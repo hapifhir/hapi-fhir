@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package org.hl7.fhir.dstu3.model;
 
 /*
@@ -184,6 +185,194 @@ public class Account extends DomainResource {
     protected Enumeration<AccountStatus> status;
 
     /**
+=======
+package org.hl7.fhir.dstu3.model;
+
+/*
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+*/
+
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
+
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
+/**
+ * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
+ */
+@ResourceDef(name="Account", profile="http://hl7.org/fhir/Profile/Account")
+public class Account extends DomainResource {
+
+    public enum AccountStatus {
+        /**
+         * This account is active and may be used.
+         */
+        ACTIVE, 
+        /**
+         * This account is inactive and should not be used to track financial information.
+         */
+        INACTIVE, 
+        /**
+         * This instance should not have been part of this patient's medical record.
+         */
+        ENTEREDINERROR, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static AccountStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("inactive".equals(codeString))
+          return INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ACTIVE: return "active";
+            case INACTIVE: return "inactive";
+            case ENTEREDINERROR: return "entered-in-error";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ACTIVE: return "http://hl7.org/fhir/account-status";
+            case INACTIVE: return "http://hl7.org/fhir/account-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/account-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ACTIVE: return "This account is active and may be used.";
+            case INACTIVE: return "This account is inactive and should not be used to track financial information.";
+            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ACTIVE: return "Active";
+            case INACTIVE: return "Inactive";
+            case ENTEREDINERROR: return "Entered in error";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class AccountStatusEnumFactory implements EnumFactory<AccountStatus> {
+    public AccountStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return AccountStatus.ACTIVE;
+        if ("inactive".equals(codeString))
+          return AccountStatus.INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return AccountStatus.ENTEREDINERROR;
+        throw new IllegalArgumentException("Unknown AccountStatus code '"+codeString+"'");
+        }
+        public Enumeration<AccountStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.ACTIVE);
+        if ("inactive".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.INACTIVE);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
+        }
+    public String toCode(AccountStatus code) {
+      if (code == AccountStatus.ACTIVE)
+        return "active";
+      if (code == AccountStatus.INACTIVE)
+        return "inactive";
+      if (code == AccountStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      return "?";
+      }
+    public String toSystem(AccountStatus code) {
+      return code.getSystem();
+      }
+    }
+
+    /**
+     * Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Account number", formalDefinition="Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number)." )
+    protected List<Identifier> identifier;
+
+    /**
+     * Name used for the account when displaying it to humans in reports, etc.
+     */
+    @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Human-readable label", formalDefinition="Name used for the account when displaying it to humans in reports, etc." )
+    protected StringType name;
+
+    /**
+     * Categorizes the account for reporting and searching purposes.
+     */
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="E.g. patient, expense, depreciation", formalDefinition="Categorizes the account for reporting and searching purposes." )
+    protected CodeableConcept type;
+
+    /**
+     * Indicates whether the account is presently used/useable or not.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/useable or not." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
+    protected Enumeration<AccountStatus> status;
+
+    /**
+>>>>>>> refs/heads/master
      * Indicates the period of time over which the account is allowed to have transactions posted to it.
 This period may be different to the coveragePeriod which is the duration of time that services may occur.
      */

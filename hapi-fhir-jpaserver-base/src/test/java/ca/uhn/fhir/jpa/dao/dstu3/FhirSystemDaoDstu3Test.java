@@ -24,6 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import javax.mail.Quota.Resource;
+
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -98,7 +100,59 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
 	}
 
+	@Test
+	public void testTransactionDoesNotAllowDanglingTemporaryIds() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		
+		BundleEntryComponent entry = bundle.addEntry();
+		Patient p = new Patient();
+		p.getManagingOrganization().setReference("urn:uuid:30ce60cf-f7cb-4196-961f-cadafa8b7ff5");
+		entry.setResource(p);
+		entry.getRequest().setMethod(HTTPVerb.POST);
+		entry.getRequest().setUrl("Patient");
+		
+		try {
+			mySystemDao.transaction(mySrd, bundle);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to satisfy placeholder ID: urn:uuid:30ce60cf-f7cb-4196-961f-cadafa8b7ff5", e.getMessage());
+		}
+	}
 	
+	@Test
+	public void testTransactionDoesNotLeavePlaceholderIds() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		mySystemDao.transaction(mySrd, bundle);
+		
+		IBundleProvider history = mySystemDao.history(null, null, null);
+		Bundle list = toBundle(history);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list));
+		
+		assertEquals(6, list.getEntry().size());
+		
+		Patient p = find(list, Patient.class, 0);
+		assertTrue(p.getIdElement().isIdPartValidLong());
+		assertTrue(p.getGeneralPractitionerFirstRep().getReferenceElement().isIdPartValidLong());
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T extends org.hl7.fhir.dstu3.model.Resource> T find(Bundle theBundle, Class<T> theType, int theIndex) {
+		int count = 0;
+		for (BundleEntryComponent nextEntry : theBundle.getEntry()) {
+			if (nextEntry.getResource() != null && theType.isAssignableFrom(nextEntry.getResource().getClass())) {
+				if (count == theIndex) {
+					T t = (T) nextEntry.getResource();
+					return t;
+				}
+				count++;
+			}
+		}
+		fail();
+		return null;
+	}
+
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/transaction-bundle.xml"), StandardCharsets.UTF_8);
@@ -799,6 +853,21 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		mySystemDao.transaction(mySrd, request);
 		
 		myObservationDao.read(new IdType("Observation/a" + methodName), mySrd);
+		myPatientDao.read(new IdType("Patient/" + methodName), mySrd);
+	}
+
+	@Test
+	public void testTransactionCreateWithPutUsingAbsoluteUrl() {
+		String methodName = "testTransactionCreateWithPutUsingAbsoluteUrl";
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("http://localhost/server/base/Patient/" + methodName);
+
+		mySystemDao.transaction(mySrd, request);
+		
 		myPatientDao.read(new IdType("Patient/" + methodName), mySrd);
 	}
 

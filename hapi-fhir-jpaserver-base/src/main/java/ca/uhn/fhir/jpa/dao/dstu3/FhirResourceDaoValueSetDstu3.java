@@ -79,7 +79,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
 
-		ValueSetExpansionOutcome outcome = workerContext.expand(theSource);
+		ValueSetExpansionOutcome outcome = workerContext.expand(theSource, null);
 
 		ValueSet retVal = outcome.getValueset();
 		retVal.setStatus(ConformanceResourceStatus.ACTIVE);

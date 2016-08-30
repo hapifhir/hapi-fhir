@@ -162,7 +162,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			String responseString = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info("Response: {}", responseString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/QuestionnaireResponse/"));
 			id2 = new IdType(newIdString);
 		} finally {

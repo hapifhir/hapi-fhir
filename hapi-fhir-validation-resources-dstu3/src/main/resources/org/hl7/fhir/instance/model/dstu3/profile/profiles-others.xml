@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="profiles-others"/>
  <meta>
-  <lastUpdated value="2016-08-03T09:39:24.070-04:00"/>
+  <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -21,7 +21,7 @@
     </contact>
     <date value="2012-06-24"/>
     <description value="XDSDocumentEntry"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -86,7 +86,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -1916,7 +1916,7 @@
     </contact>
     <date value="2012-06-24"/>
     <description value="SubmissionSet"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -1980,7 +1980,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -2854,16 +2854,16 @@
     </contact>
     <date value="2013-10-02"/>
     <description value="Adds additional information to a family member history supporting both the capture of mother/father relationships as well as additional observations necessary to enable genetics-based risk analysis for patients"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -2913,7 +2913,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -3714,9 +3714,9 @@
     <name value="Shareable ValueSet"/>
     <status value="draft"/>
     <publisher value="HL7"/>
-    <date value="2016-08-03T09:39:24-04:00"/>
+    <date value="2016-08-25T23:04:39-04:00"/>
     <description value="Enforces the minimum information set for the value set metadata required by HL7 and other organisations that share and publish value sets"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -3780,7 +3780,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -5759,7 +5759,7 @@
     </contact>
     <date value="2015-10-20"/>
     <description value="Describes how the DiagnosticRequest resource is used to for genetics"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -5818,7 +5818,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -6020,7 +6020,7 @@
       <path value="DiagnosticRequest.identifier"/>
       <short value="Identifiers assigned to this order"/>
       <definition value="Identifiers assigned to this order instance by the orderer and/or  the receiver and/or order fulfiller."/>
-      <comments value="The identifier.type element is used to distinguish between the identifiers assigned by the orderer (known as the 'Placer' in HL7 v2) and the producer of the observations in response to the order (known as the 'Filler' in HL7 v2). For further discussion and examples see the [notes section](DiagnosticRequest.html#4.22.4) below."/>
+      <comments value="The identifier.type element is used to distinguish between the identifiers assigned by the orderer (known as the 'Placer' in HL7 v2) and the producer of the observations in response to the order (known as the 'Filler' in HL7 v2). For further discussion and examples see the [notes section](diagnosticrequest.html#4.22.4) below."/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -6387,7 +6387,7 @@
       <path value="DiagnosticRequest.performer"/>
       <short value="Requested perfomer"/>
       <definition value="The desired perfomer for doing the diagnostic testing."/>
-      <comments value="Use the standard [XXX extension]() for listing alternative  alternative performers and/or roles and/or preference."/>
+      <comments value="Use an [extension] (extensibility.html) or listing alternative alternative performers and/or roles and/or preference."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -6553,9 +6553,9 @@
     <name value="Shareable CodeSystem"/>
     <status value="draft"/>
     <publisher value="HL7"/>
-    <date value="2016-08-03T09:39:24-04:00"/>
+    <date value="2016-08-25T23:04:39-04:00"/>
     <description value="Enforces the minimum information set for the value set metadata required by HL7 and other organisations that share and publish value sets"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -6619,14 +6619,14 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
        <key value="csd-1"/>
        <severity value="error"/>
        <human value="Within a code system definition, all the codes SHALL be unique"/>
-       <expression value="(concept.code | descendents().concept.code).isDistinct()"/>
+       <expression value="(concept.code | descendants().concept.code).isDistinct()"/>
        <xpath value="count(distinct-values(descendant::f:concept/f:code/@value))=count(descendant::f:concept)"/>
       </constraint>
       <mapping>
@@ -8238,7 +8238,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="devicemetricobservation"/>
     <url value="http://hl7.org/fhir/StructureDefinition/devicemetricobservation"/>
-    <name value="Device Metric Observation"/>
+    <name value="Device Metric Observation Profile"/>
     <status value="draft"/>
     <publisher value="Health Level Seven International (Health Care Devices)"/>
     <contact>
@@ -8249,16 +8249,16 @@
     </contact>
     <date value="2014-11-17"/>
     <description value="This profile describes the direct or derived, qualitative or quantitative physiological measurement, setting, or calculation data produced by a medical device or a device component."/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -8313,7 +8313,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -9986,16 +9986,16 @@
     </contact>
     <date value="2016-03-14"/>
     <description value="Describes how the observation resource is used to report structured genetic test results"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -10050,7 +10050,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -12245,7 +12245,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="vitalsigns"/>
     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-summary">
-     <valueMarkdown value="#### Complete Summary of the Mandatory Requirements  1.  One status in `Observation.status` 2.  One category in `Observation.category` which must have:     -   a fixed         `Observation.category.coding.system`=**“http://hl7.org/fhir/observation-category”**     -   a fixed `Observation.category.coding.code`=**“vital-signs”**  3.  One code in `Observation.code` which must have     -   a fixed `Observation.code.coding.system`=**“http://loinc.org”**     -   a LOINC code in `Observation.code.coding.code` which must be taken             from the [Vital Signs] valueset     -   Other additional codes are allowed - e.g. method specific LOINC         Codes, SNOMED CT concepts, system specific codes. All codes         SHALL have an system value  4.  Either one `Observation.valueQuantity` or, if there is no value,     one code in `Observation.DataAbsentReason` (Note: See the comments     in the table for exceptions)     -   Each Observation.valueQuantity must have:         -   One numeric value in `Observation.valueQuantity.value`         -   a fixed             `Observation.valueQuantity.system`=**“http://unitsofmeasure.org”**         -   a UCUM unit code in `Observation.valueQuantity.code` which must be taken             from the [Vital Signs Units] valueset     -   Observation.DataAbsentReason should be taken from the [Observation         Value Absent Reason] Valueset  5.  When using a panel code to group component observations (Note: See     the comments regarding blood pressure in the table), one or more     `Observation.component.code` each of which must have:     -   a fixed         `Observation.component.code.coding.system`=**“http://loinc.org”**     -   a LOINC code in `Observation.component.code.coding.code` taken         from the column labeled “LOINC code” in the table  6.  Either one `Observation.component.valueQuantity` or, if there is     no value, one code in `Observation.component.DataAbsentReason`     -   Each Observation.component.valueQuantity must have:         -   One numeric value in             `Observation.component.valueQuantity.value`         -   a fixed             `Observation.component.valueQuantity.system`=**“http://unitsofmeasure.org”**         -   a UCUM unit code in             `Observation.component.valueQuantity.code` which must be taken             from the [Vital Signs Units] valueset     -   The `Observation.component.DataAbsentReason.code.coding.code` should be taken from the [Observation         Value Absent Reason] Valueset  7.  When using a panel code to group observations, one or more reference     to Observations in `Observation.related.target`(Note: See the     comments for Vital Signs in the table)     -   a fixed `Observation.related.type`=**“has-member”**  8.  One patient in `Observation.subject` 9.  A date and time in `Observation.effectiveDateTime` or `Observation.effectivePeriod`    [Observation Value Absent Reason]: valueset-observation-valueabsentreason.html   [Vital Signs Units]:valueset-ucum-vitals-common.html   [Vital Signs]:/valueset-observation-vitalsignresult.html"/>
+     <valueMarkdown value="#### Complete Summary of the Mandatory Requirements  1.  One status in `Observation.status` 2.  One category in `Observation.category` which must have:     -   a fixed         `Observation.category.coding.system`=**“http://hl7.org/fhir/observation-category”**     -   a fixed `Observation.category.coding.code`=**“vital-signs”**  3.  One code in `Observation.code` which must have     -   a fixed `Observation.code.coding.system`=**“http://loinc.org”**     -   a LOINC code in `Observation.code.coding.code` which must be taken             from the [Vital Signs] valueset     -   Other additional codes are allowed - e.g. method specific LOINC         Codes, SNOMED CT concepts, system specific codes. All codes         SHALL have an system value  4.  Either one `Observation.valueQuantity` or, if there is no value,     one code in `Observation.DataAbsentReason` (Note: See the comments     in the table for exceptions)     -   Each Observation.valueQuantity must have:         -   One numeric value in `Observation.valueQuantity.value`         -   a fixed             `Observation.valueQuantity.system`=**“http://unitsofmeasure.org”**         -   a UCUM unit code in `Observation.valueQuantity.code` which must be taken             from the [Vital Signs Units] valueset     -   Observation.DataAbsentReason should be taken from the [Observation         Value Absent Reason] Valueset  5.  When using a panel code to group component observations (Note: See     the comments regarding blood pressure in the table), one or more     `Observation.component.code` each of which must have:     -   a fixed         `Observation.component.code.coding.system`=**“http://loinc.org”**     -   a LOINC code in `Observation.component.code.coding.code` taken         from the column labeled “LOINC code” in the table  6.  Either one `Observation.component.valueQuantity` or, if there is     no value, one code in `Observation.component.DataAbsentReason`     -   Each Observation.component.valueQuantity must have:         -   One numeric value in             `Observation.component.valueQuantity.value`         -   a fixed             `Observation.component.valueQuantity.system`=**“http://unitsofmeasure.org”**         -   a UCUM unit code in             `Observation.component.valueQuantity.code` which must be taken             from the [Vital Signs Units] valueset     -   The `Observation.component.DataAbsentReason.code.coding.code` should be taken from the [Observation         Value Absent Reason] Valueset  7.  When using a panel code to group observations, one or more reference     to Observations in `Observation.related.target`(Note: See the     comments for Vital Signs in the table)     -   a fixed `Observation.related.type`=**“has-member”**  8.  One patient in `Observation.subject` 9.  A date and time in `Observation.effectiveDateTime` or `Observation.effectivePeriod`    [Observation Value Absent Reason]: valueset-observation-valueabsentreason.html   [Vital Signs Units]:valueset-ucum-vitals-common.html   [Vital Signs]:valueset-observation-vitalsignresult.html"/>
     </extension>
     <url value="http://hl7.org/fhir/StructureDefinition/vitalsigns"/>
     <name value="Vital Signs Profile"/>
@@ -12260,16 +12260,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="Defines constraints and extensions on the Observation resource for use in querying and retrieving Vital Signs information."/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -12324,7 +12324,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -15226,16 +15226,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Body Weight Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -15290,7 +15290,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -18037,16 +18037,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Respiratory Rate Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -18101,7 +18101,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -20839,16 +20839,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Heart Rate Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -20903,7 +20903,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -23641,16 +23641,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Body Temperature Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -23705,7 +23705,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -26452,16 +26452,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Body Height Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -26516,7 +26516,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -29263,16 +29263,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Head Circumference Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -29327,7 +29327,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -32074,16 +32074,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Oxygen Saturation Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -32138,7 +32138,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -34876,16 +34876,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Body Mass Index (BMI) Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -34940,7 +34940,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -37678,16 +37678,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Mean Blood Pressure Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -37742,7 +37742,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -40480,16 +40480,16 @@
     </contact>
     <date value="2016-03-25"/>
     <description value="FHIR Blood Pressure Profile"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -40544,7 +40544,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -44652,16 +44652,16 @@
     </contact>
     <date value="2012-05-12"/>
     <description value="Lipid Lab Report"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -44718,7 +44718,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -45863,16 +45863,16 @@
     </contact>
     <date value="2012-05-12"/>
     <description value="Describes how the lab report is used for a standard Lipid Profile - Cholesterol, Triglyceride and Cholesterol fractions. Uses LOINC codes"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -45927,7 +45927,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -47733,16 +47733,16 @@
     </contact>
     <date value="2012-05-12"/>
     <description value="Triglyceride Result"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -47797,7 +47797,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -49334,16 +49334,16 @@
     </contact>
     <date value="2012-05-12"/>
     <description value="HDL Cholesterol Result"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -49398,7 +49398,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -50970,16 +50970,16 @@
     </contact>
     <date value="2012-05-12"/>
     <description value="LDL Cholesterol Result"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -51034,7 +51034,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
@@ -52620,16 +52620,16 @@
     </contact>
     <date value="2015-10-09"/>
     <description value="Describes how the DiagnosticReport resource is used to report structured genetic test results"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -52686,7 +52686,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -53704,16 +53704,16 @@
     </contact>
     <date value="2015-10-09"/>
     <description value="Describes how the HLA genotyping results"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="w5"/>
@@ -53770,7 +53770,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -54824,7 +54824,7 @@
     </contact>
     <date value="2015-03-17"/>
     <description value="The base Composition is a general resource for compositions or documents about any kind of subject that might be encountered in healthcare including such things as guidelines, medicines, etc. A clinical document is focused on documents related to the provision of care process, where the subject is a patient, a group of patients, or a closely related concept. A clinical document has additional reqiurements around confidentiality that do not apply in the same way to other kinds of documents"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -54884,7 +54884,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -56209,12 +56209,7 @@
     </contact>
     <date value="2015-02-28"/>
     <description value="Identifies how the ElementDefinition data type is used when it appears within a data element"/>
-    <fhirVersion value="1.5.0"/>
-    <mapping>
-     <identity value="rim"/>
-     <uri value="http://hl7.org/v3"/>
-     <name value="RIM Mapping"/>
-    </mapping>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="dex"/>
      <uri value="http://wiki.ihe.net/index.php?title=Data_Element_Exchange"/>
@@ -56224,6 +56219,11 @@
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
      <name value="HL7 v2 Mapping"/>
+    </mapping>
+    <mapping>
+     <identity value="rim"/>
+     <uri value="http://hl7.org/v3"/>
+     <name value="RIM Mapping"/>
     </mapping>
     <mapping>
      <identity value="iso11179"/>
@@ -58254,7 +58254,7 @@
      <element id="ElementDefinition:elementdefinition-de.constraint.expression">
       <path value="ElementDefinition.constraint.expression"/>
       <short value="FluentPath expression of constraint"/>
-      <definition value="A [FluentPath](fluentpath.html) expression of constraint that can be executed to see if this constraint is met."/>
+      <definition value="A [FluentPath](http://hl7.org/fluentpath) expression of constraint that can be executed to see if this constraint is met."/>
       <requirements value="Used by validation tooling tests of the validity of the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -58800,7 +58800,7 @@
     </contact>
     <date value="2014-12-04"/>
     <description value="Defines the elements to be supported within the AuditEvent resource in order to conform with the Electronic Health Record System Functional Model Record Lifecycle Event standard"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -58870,7 +58870,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -60873,7 +60873,7 @@
     </contact>
     <date value="2014-01-31"/>
     <description value="Defines the elements to be supported within the Provenance resource in order to conform with the Electronic Health Record System Functional Model Record Lifecycle Event standard"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -60941,7 +60941,7 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <mapping>
@@ -62084,7 +62084,7 @@
     </contact>
     <date value="2015-05-30"/>
     <description value="A questionnaire with the ability to specify behavior associated with questions or groups of questions"/>
-    <fhirVersion value="1.5.0"/>
+    <fhirVersion value="1.6.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -62146,14 +62146,14 @@
        <key value="dom-3"/>
        <severity value="error"/>
        <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
-       <expression value="contained.where(('#'+id in %resource.descendents().reference).not()).empty()"/>
+       <expression value="contained.where(('#'+id in %resource.descendants().reference).not()).empty()"/>
        <xpath value="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))"/>
       </constraint>
       <constraint>
        <key value="que-2"/>
        <severity value="error"/>
        <human value="The link ids for groups and questions must be unique within the questionnaire"/>
-       <expression value="descendents().linkId.isDistinct()"/>
+       <expression value="descendants().linkId.isDistinct()"/>
        <xpath value="count(descendant::f:linkId/@value)=count(distinct-values(descendant::f:linkId/@value))"/>
       </constraint>
       <mapping>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package org.hl7.fhir.dstu3.model;
 
 /*
@@ -714,6 +715,724 @@ public class Bundle extends Resource implements IBaseBundle {
         protected List<BundleLinkComponent> link;
 
         /**
+=======
+package org.hl7.fhir.dstu3.model;
+
+/*
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+*/
+
+// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
+
+import java.util.*;
+
+import java.math.*;
+import org.hl7.fhir.utilities.Utilities;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
+/**
+ * A container for a collection of resources.
+ */
+@ResourceDef(name="Bundle", profile="http://hl7.org/fhir/Profile/Bundle")
+public class Bundle extends Resource implements IBaseBundle {
+
+    public enum BundleType {
+        /**
+         * The bundle is a document. The first resource is a Composition.
+         */
+        DOCUMENT, 
+        /**
+         * The bundle is a message. The first resource is a MessageHeader.
+         */
+        MESSAGE, 
+        /**
+         * The bundle is a transaction - intended to be processed by a server as an atomic commit.
+         */
+        TRANSACTION, 
+        /**
+         * The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.
+         */
+        TRANSACTIONRESPONSE, 
+        /**
+         * The bundle is a transaction - intended to be processed by a server as a group of actions.
+         */
+        BATCH, 
+        /**
+         * The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.
+         */
+        BATCHRESPONSE, 
+        /**
+         * The bundle is a list of resources from a history interaction on a server.
+         */
+        HISTORY, 
+        /**
+         * The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.
+         */
+        SEARCHSET, 
+        /**
+         * The bundle is a set of resources collected into a single document for ease of distribution.
+         */
+        COLLECTION, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static BundleType fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("document".equals(codeString))
+          return DOCUMENT;
+        if ("message".equals(codeString))
+          return MESSAGE;
+        if ("transaction".equals(codeString))
+          return TRANSACTION;
+        if ("transaction-response".equals(codeString))
+          return TRANSACTIONRESPONSE;
+        if ("batch".equals(codeString))
+          return BATCH;
+        if ("batch-response".equals(codeString))
+          return BATCHRESPONSE;
+        if ("history".equals(codeString))
+          return HISTORY;
+        if ("searchset".equals(codeString))
+          return SEARCHSET;
+        if ("collection".equals(codeString))
+          return COLLECTION;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown BundleType code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case DOCUMENT: return "document";
+            case MESSAGE: return "message";
+            case TRANSACTION: return "transaction";
+            case TRANSACTIONRESPONSE: return "transaction-response";
+            case BATCH: return "batch";
+            case BATCHRESPONSE: return "batch-response";
+            case HISTORY: return "history";
+            case SEARCHSET: return "searchset";
+            case COLLECTION: return "collection";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case DOCUMENT: return "http://hl7.org/fhir/bundle-type";
+            case MESSAGE: return "http://hl7.org/fhir/bundle-type";
+            case TRANSACTION: return "http://hl7.org/fhir/bundle-type";
+            case TRANSACTIONRESPONSE: return "http://hl7.org/fhir/bundle-type";
+            case BATCH: return "http://hl7.org/fhir/bundle-type";
+            case BATCHRESPONSE: return "http://hl7.org/fhir/bundle-type";
+            case HISTORY: return "http://hl7.org/fhir/bundle-type";
+            case SEARCHSET: return "http://hl7.org/fhir/bundle-type";
+            case COLLECTION: return "http://hl7.org/fhir/bundle-type";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case DOCUMENT: return "The bundle is a document. The first resource is a Composition.";
+            case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader.";
+            case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit.";
+            case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.";
+            case BATCH: return "The bundle is a transaction - intended to be processed by a server as a group of actions.";
+            case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.";
+            case HISTORY: return "The bundle is a list of resources from a history interaction on a server.";
+            case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.";
+            case COLLECTION: return "The bundle is a set of resources collected into a single document for ease of distribution.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case DOCUMENT: return "Document";
+            case MESSAGE: return "Message";
+            case TRANSACTION: return "Transaction";
+            case TRANSACTIONRESPONSE: return "Transaction Response";
+            case BATCH: return "Batch";
+            case BATCHRESPONSE: return "Batch Response";
+            case HISTORY: return "History List";
+            case SEARCHSET: return "Search Results";
+            case COLLECTION: return "Collection";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class BundleTypeEnumFactory implements EnumFactory<BundleType> {
+    public BundleType fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("document".equals(codeString))
+          return BundleType.DOCUMENT;
+        if ("message".equals(codeString))
+          return BundleType.MESSAGE;
+        if ("transaction".equals(codeString))
+          return BundleType.TRANSACTION;
+        if ("transaction-response".equals(codeString))
+          return BundleType.TRANSACTIONRESPONSE;
+        if ("batch".equals(codeString))
+          return BundleType.BATCH;
+        if ("batch-response".equals(codeString))
+          return BundleType.BATCHRESPONSE;
+        if ("history".equals(codeString))
+          return BundleType.HISTORY;
+        if ("searchset".equals(codeString))
+          return BundleType.SEARCHSET;
+        if ("collection".equals(codeString))
+          return BundleType.COLLECTION;
+        throw new IllegalArgumentException("Unknown BundleType code '"+codeString+"'");
+        }
+        public Enumeration<BundleType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("document".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.DOCUMENT);
+        if ("message".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.MESSAGE);
+        if ("transaction".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.TRANSACTION);
+        if ("transaction-response".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.TRANSACTIONRESPONSE);
+        if ("batch".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.BATCH);
+        if ("batch-response".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.BATCHRESPONSE);
+        if ("history".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.HISTORY);
+        if ("searchset".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.SEARCHSET);
+        if ("collection".equals(codeString))
+          return new Enumeration<BundleType>(this, BundleType.COLLECTION);
+        throw new FHIRException("Unknown BundleType code '"+codeString+"'");
+        }
+    public String toCode(BundleType code) {
+      if (code == BundleType.DOCUMENT)
+        return "document";
+      if (code == BundleType.MESSAGE)
+        return "message";
+      if (code == BundleType.TRANSACTION)
+        return "transaction";
+      if (code == BundleType.TRANSACTIONRESPONSE)
+        return "transaction-response";
+      if (code == BundleType.BATCH)
+        return "batch";
+      if (code == BundleType.BATCHRESPONSE)
+        return "batch-response";
+      if (code == BundleType.HISTORY)
+        return "history";
+      if (code == BundleType.SEARCHSET)
+        return "searchset";
+      if (code == BundleType.COLLECTION)
+        return "collection";
+      return "?";
+      }
+    public String toSystem(BundleType code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum SearchEntryMode {
+        /**
+         * This resource matched the search specification.
+         */
+        MATCH, 
+        /**
+         * This resource is returned because it is referred to from another resource in the search set.
+         */
+        INCLUDE, 
+        /**
+         * An OperationOutcome that provides additional information about the processing of a search.
+         */
+        OUTCOME, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static SearchEntryMode fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("match".equals(codeString))
+          return MATCH;
+        if ("include".equals(codeString))
+          return INCLUDE;
+        if ("outcome".equals(codeString))
+          return OUTCOME;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SearchEntryMode code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case MATCH: return "match";
+            case INCLUDE: return "include";
+            case OUTCOME: return "outcome";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case MATCH: return "http://hl7.org/fhir/search-entry-mode";
+            case INCLUDE: return "http://hl7.org/fhir/search-entry-mode";
+            case OUTCOME: return "http://hl7.org/fhir/search-entry-mode";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case MATCH: return "This resource matched the search specification.";
+            case INCLUDE: return "This resource is returned because it is referred to from another resource in the search set.";
+            case OUTCOME: return "An OperationOutcome that provides additional information about the processing of a search.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case MATCH: return "Match";
+            case INCLUDE: return "Include";
+            case OUTCOME: return "Outcome";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class SearchEntryModeEnumFactory implements EnumFactory<SearchEntryMode> {
+    public SearchEntryMode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("match".equals(codeString))
+          return SearchEntryMode.MATCH;
+        if ("include".equals(codeString))
+          return SearchEntryMode.INCLUDE;
+        if ("outcome".equals(codeString))
+          return SearchEntryMode.OUTCOME;
+        throw new IllegalArgumentException("Unknown SearchEntryMode code '"+codeString+"'");
+        }
+        public Enumeration<SearchEntryMode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("match".equals(codeString))
+          return new Enumeration<SearchEntryMode>(this, SearchEntryMode.MATCH);
+        if ("include".equals(codeString))
+          return new Enumeration<SearchEntryMode>(this, SearchEntryMode.INCLUDE);
+        if ("outcome".equals(codeString))
+          return new Enumeration<SearchEntryMode>(this, SearchEntryMode.OUTCOME);
+        throw new FHIRException("Unknown SearchEntryMode code '"+codeString+"'");
+        }
+    public String toCode(SearchEntryMode code) {
+      if (code == SearchEntryMode.MATCH)
+        return "match";
+      if (code == SearchEntryMode.INCLUDE)
+        return "include";
+      if (code == SearchEntryMode.OUTCOME)
+        return "outcome";
+      return "?";
+      }
+    public String toSystem(SearchEntryMode code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum HTTPVerb {
+        /**
+         * HTTP GET
+         */
+        GET, 
+        /**
+         * HTTP POST
+         */
+        POST, 
+        /**
+         * HTTP PUT
+         */
+        PUT, 
+        /**
+         * HTTP DELETE
+         */
+        DELETE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static HTTPVerb fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("GET".equals(codeString))
+          return GET;
+        if ("POST".equals(codeString))
+          return POST;
+        if ("PUT".equals(codeString))
+          return PUT;
+        if ("DELETE".equals(codeString))
+          return DELETE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown HTTPVerb code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case GET: return "GET";
+            case POST: return "POST";
+            case PUT: return "PUT";
+            case DELETE: return "DELETE";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case GET: return "http://hl7.org/fhir/http-verb";
+            case POST: return "http://hl7.org/fhir/http-verb";
+            case PUT: return "http://hl7.org/fhir/http-verb";
+            case DELETE: return "http://hl7.org/fhir/http-verb";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case GET: return "HTTP GET";
+            case POST: return "HTTP POST";
+            case PUT: return "HTTP PUT";
+            case DELETE: return "HTTP DELETE";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case GET: return "GET";
+            case POST: return "POST";
+            case PUT: return "PUT";
+            case DELETE: return "DELETE";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class HTTPVerbEnumFactory implements EnumFactory<HTTPVerb> {
+    public HTTPVerb fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("GET".equals(codeString))
+          return HTTPVerb.GET;
+        if ("POST".equals(codeString))
+          return HTTPVerb.POST;
+        if ("PUT".equals(codeString))
+          return HTTPVerb.PUT;
+        if ("DELETE".equals(codeString))
+          return HTTPVerb.DELETE;
+        throw new IllegalArgumentException("Unknown HTTPVerb code '"+codeString+"'");
+        }
+        public Enumeration<HTTPVerb> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("GET".equals(codeString))
+          return new Enumeration<HTTPVerb>(this, HTTPVerb.GET);
+        if ("POST".equals(codeString))
+          return new Enumeration<HTTPVerb>(this, HTTPVerb.POST);
+        if ("PUT".equals(codeString))
+          return new Enumeration<HTTPVerb>(this, HTTPVerb.PUT);
+        if ("DELETE".equals(codeString))
+          return new Enumeration<HTTPVerb>(this, HTTPVerb.DELETE);
+        throw new FHIRException("Unknown HTTPVerb code '"+codeString+"'");
+        }
+    public String toCode(HTTPVerb code) {
+      if (code == HTTPVerb.GET)
+        return "GET";
+      if (code == HTTPVerb.POST)
+        return "POST";
+      if (code == HTTPVerb.PUT)
+        return "PUT";
+      if (code == HTTPVerb.DELETE)
+        return "DELETE";
+      return "?";
+      }
+    public String toSystem(HTTPVerb code) {
+      return code.getSystem();
+      }
+    }
+
+    @Block()
+    public static class BundleLinkComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
+         */
+        @Child(name = "relation", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="http://www.iana.org/assignments/link-relations/link-relations.xhtml", formalDefinition="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]." )
+        protected StringType relation;
+
+        /**
+         * The reference details for the link.
+         */
+        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Reference details for the link", formalDefinition="The reference details for the link." )
+        protected UriType url;
+
+        private static final long serialVersionUID = -1010386066L;
+
+    /**
+     * Constructor
+     */
+      public BundleLinkComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public BundleLinkComponent(StringType relation, UriType url) {
+        super();
+        this.relation = relation;
+        this.url = url;
+      }
+
+        /**
+         * @return {@link #relation} (A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].). This is the underlying object with id, value and extensions. The accessor "getRelation" gives direct access to the value
+         */
+        public StringType getRelationElement() { 
+          if (this.relation == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create BundleLinkComponent.relation");
+            else if (Configuration.doAutoCreate())
+              this.relation = new StringType(); // bb
+          return this.relation;
+        }
+
+        public boolean hasRelationElement() { 
+          return this.relation != null && !this.relation.isEmpty();
+        }
+
+        public boolean hasRelation() { 
+          return this.relation != null && !this.relation.isEmpty();
+        }
+
+        /**
+         * @param value {@link #relation} (A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].). This is the underlying object with id, value and extensions. The accessor "getRelation" gives direct access to the value
+         */
+        public BundleLinkComponent setRelationElement(StringType value) { 
+          this.relation = value;
+          return this;
+        }
+
+        /**
+         * @return A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
+         */
+        public String getRelation() { 
+          return this.relation == null ? null : this.relation.getValue();
+        }
+
+        /**
+         * @param value A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
+         */
+        public BundleLinkComponent setRelation(String value) { 
+            if (this.relation == null)
+              this.relation = new StringType();
+            this.relation.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #url} (The reference details for the link.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public UriType getUrlElement() { 
+          if (this.url == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create BundleLinkComponent.url");
+            else if (Configuration.doAutoCreate())
+              this.url = new UriType(); // bb
+          return this.url;
+        }
+
+        public boolean hasUrlElement() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        public boolean hasUrl() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        /**
+         * @param value {@link #url} (The reference details for the link.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public BundleLinkComponent setUrlElement(UriType value) { 
+          this.url = value;
+          return this;
+        }
+
+        /**
+         * @return The reference details for the link.
+         */
+        public String getUrl() { 
+          return this.url == null ? null : this.url.getValue();
+        }
+
+        /**
+         * @param value The reference details for the link.
+         */
+        public BundleLinkComponent setUrl(String value) { 
+            if (this.url == null)
+              this.url = new UriType();
+            this.url.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("relation", "string", "A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].", 0, java.lang.Integer.MAX_VALUE, relation));
+          childrenList.add(new Property("url", "uri", "The reference details for the link.", 0, java.lang.Integer.MAX_VALUE, url));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -554436100: /*relation*/ return this.relation == null ? new Base[0] : new Base[] {this.relation}; // StringType
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -554436100: // relation
+          this.relation = castToString(value); // StringType
+          break;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("relation"))
+          this.relation = castToString(value); // StringType
+        else if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -554436100: throw new FHIRException("Cannot make property relation as it is not a complex type"); // StringType
+        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("relation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Bundle.relation");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Bundle.url");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public BundleLinkComponent copy() {
+        BundleLinkComponent dst = new BundleLinkComponent();
+        copyValues(dst);
+        dst.relation = relation == null ? null : relation.copy();
+        dst.url = url == null ? null : url.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof BundleLinkComponent))
+          return false;
+        BundleLinkComponent o = (BundleLinkComponent) other;
+        return compareDeep(relation, o.relation, true) && compareDeep(url, o.url, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof BundleLinkComponent))
+          return false;
+        BundleLinkComponent o = (BundleLinkComponent) other;
+        return compareValues(relation, o.relation, true) && compareValues(url, o.url, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(relation, url);
+      }
+
+  public String fhirType() {
+    return "Bundle.link";
+
+  }
+
+  }
+
+    @Block()
+    public static class BundleEntryComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * A series of links that provide context to this entry.
+         */
+        @Child(name = "link", type = {BundleLinkComponent.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Links related to this entry", formalDefinition="A series of links that provide context to this entry." )
+        protected List<BundleLinkComponent> link;
+
+        /**
+>>>>>>> refs/heads/master
          * The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
 * fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
 * Results from operations might involve resources that are not identified.

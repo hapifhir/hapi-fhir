@@ -378,12 +378,13 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * 
 	 * @throws DataFormatException
 	 */
-	public void setPrecision(TemporalPrecisionEnum thePrecision) throws DataFormatException {
+	public BaseDateTimeDt setPrecision(TemporalPrecisionEnum thePrecision) throws DataFormatException {
 		if (thePrecision == null) {
 			throw new NullPointerException("Precision may not be null");
 		}
 		myPrecision = thePrecision;
 		updateStringValue();
+		return this;
 	}
 
 	private BaseDateTimeDt setTimeZone(String theWholeValue, String theValue) {

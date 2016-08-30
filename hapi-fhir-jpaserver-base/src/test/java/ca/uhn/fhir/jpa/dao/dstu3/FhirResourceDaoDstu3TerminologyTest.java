@@ -771,7 +771,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		try {
 			myObservationDao.search(params);
 		} catch(InvalidRequestException e) {
-			assertEquals("Unable to expand imported value set \"http://example.com/my_value_set\" - Error was: Unable to find imported value set http://non_existant_VS", e.getMessage());
+			assertEquals("Unable to expand imported value set: Unable to find imported value set http://non_existant_VS", e.getMessage());
 		}
 
 		// Now let's update 

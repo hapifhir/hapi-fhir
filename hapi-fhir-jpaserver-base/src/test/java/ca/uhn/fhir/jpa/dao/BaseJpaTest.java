@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -76,6 +77,14 @@ public abstract class BaseJpaTest {
 	@SuppressWarnings({ "rawtypes" })
 	protected List toList(IBundleProvider theSearch) {
 		return theSearch.getResources(0, theSearch.size());
+	}
+
+	protected org.hl7.fhir.dstu3.model.Bundle toBundle(IBundleProvider theSearch) {
+		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+			bundle.addEntry().setResource((Resource) next);
+		}
+		return bundle;
 	}
 
 	protected abstract FhirContext getContext();

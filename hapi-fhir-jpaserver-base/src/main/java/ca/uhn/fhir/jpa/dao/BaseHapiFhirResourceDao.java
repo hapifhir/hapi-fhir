@@ -369,7 +369,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Perform actual DB update
-		updateEntity(theResource, entity, null, thePerformIndexing, true, theUpdateTime);
+		updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime);
 		theResource.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
@@ -1080,7 +1080,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, true, new Date());
+		ResourceTable savedEntity = updateEntity(theResource, entity, null, thePerformIndexing, thePerformIndexing, new Date());
 
 		// Notify interceptors
 		if (theRequestDetails != null) {

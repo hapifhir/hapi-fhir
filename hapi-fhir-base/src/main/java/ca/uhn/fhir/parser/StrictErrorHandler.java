@@ -46,5 +46,15 @@ public class StrictErrorHandler implements IParserErrorHandler {
 		throw new DataFormatException("Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
 	}
 
+	@Override
+	public void containedResourceWithNoId(IParseLocation theLocation) {
+		throw new DataFormatException("Resource has contained child resource with no ID");
+	}
+
+	@Override
+	public void unknownReference(IParseLocation theLocation, String theReference) {
+		throw new DataFormatException("Resource has invalid reference: " + theReference);
+	}
+
 
 }

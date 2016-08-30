@@ -1,5 +1,3 @@
-<div>
-	<th:block th:if="${!resource.startElement.empty} and ${!resource.endElement.empty}" th:text="${resource.startElement.value} + ' - ' + ${resource.endElement.value}"/>
-	<th:block th:if="${!resource.startElement.empty} and ${resource.endElement.empty}" th:text="${resource.startElement.value} + ' - ?'"/>
-	<th:block th:if="${resource.startElement.empty} and ${!resource.endElement.empty}" th:text="'? - ' + ${resource.endElement.value}"/>
-</div>
+<th:block th:if="${!resource.startElement.empty} and ${!resource.endElement.empty}" th:text="${resource.startElement.value} + ' - ' + ${resource.endElement.value}"/>
+<th:block th:if="${!resource.startElement.empty} and ${resource.endElement.empty}" th:text="${resource.startElement.value} + ' - ?'"/>
+<th:block th:if="${resource.startElement.empty} and ${!resource.endElement.empty}" th:text="'? - ' + ${resource.endElement.value}"/>

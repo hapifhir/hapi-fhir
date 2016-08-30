@@ -34,7 +34,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HapiLocalizer {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
 	private List<ResourceBundle> myBundle = new ArrayList<ResourceBundle>();
+
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<String, MessageFormat>();
 
 	public HapiLocalizer() {
@@ -45,6 +47,24 @@ public class HapiLocalizer {
 		for (String nextName : theBundleNames) {
 			myBundle.add(ResourceBundle.getBundle(nextName));
 		}
+	}
+
+	private String findFormatString(String theQualifiedKey) {
+		String formatString = null;
+		for (ResourceBundle nextBundle : myBundle) {
+			if (nextBundle.containsKey(theQualifiedKey)) {
+				formatString = nextBundle.getString(theQualifiedKey);
+			}
+			if (isNotBlank(formatString)) {
+				break;
+			}
+		}
+
+		if (formatString == null) {
+			ourLog.warn("Unknown localization key: {}", theQualifiedKey);
+			formatString = "!MESSAGE!";
+		}
+		return formatString;
 	}
 
 	public String getMessage(Class<?> theType, String theKey, Object... theParameters) {
@@ -68,22 +88,4 @@ public class HapiLocalizer {
 			return retVal;
 		}
 	}
-
-	private String findFormatString(String theQualifiedKey) {
-		String formatString = null;
-		for (ResourceBundle nextBundle : myBundle) {
-			if (nextBundle.containsKey(theQualifiedKey)) {
-				formatString = nextBundle.getString(theQualifiedKey);
-			}
-			if (isNotBlank(formatString)) {
-				break;
-			}
-		}
-
-		if (formatString == null) {
-			formatString = "!MESSAGE!";
-		}
-		return formatString;
-	}
-
 }

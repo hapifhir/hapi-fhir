@@ -1213,13 +1213,15 @@ public abstract class BaseParser implements IParser {
 				StringBuilder b = new StringBuilder();
 				b.append(myResDef.getName());
 				return b;
-			} else {
+			} else if (myParent != null) {
 				StringBuilder b = myParent.buildPath();
 				if (b != null && myDef != null) {
 					b.append('.');
 					b.append(myDef.getElementName());
 				}
 				return b;
+			} else {
+				return null;
 			}
 		}
 
