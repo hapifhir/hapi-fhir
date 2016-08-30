@@ -53,16 +53,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonWriter;
-
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
@@ -93,6 +83,12 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.parser.json.GsonStructure;
+import ca.uhn.fhir.parser.json.JsonLikeArray;
+import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
+import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
@@ -170,7 +166,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void assertObjectOfType(JsonElement theResourceTypeObj, Object theValueType, String thePosition) {
+//	private void assertObjectOfType(JsonElement theResourceTypeObj, Object theValueType, String thePosition) {
 //		if (theResourceTypeObj == null) {
 //			throw new DataFormatException("Invalid JSON content detected, missing required element: '" + thePosition + "'");
 //		}
@@ -178,43 +174,71 @@ public class JsonParser extends BaseParser implements IParser {
 //		if (theResourceTypeObj.getValueType() != theValueType) {
 //			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
 //		}
-	}
+//	}
 
-	private JsonWriter createJsonWriter(Writer theWriter) {
-		JsonWriter retVal = new JsonWriter(theWriter);
-		retVal.setSerializeNulls(true);
-		if (myPrettyPrint) {
-			retVal.setIndent("  ");
-		}
-		return retVal;
-	}
+//	private JsonLikeStreamWriter createJsonWriter(Writer theWriter) {
+//		JsonLikeStreamWriter retVal = new JsonLikeStreamWriter(theWriter);
+//		retVal.setSerializeNulls(true);
+//		if (myPrettyPrint) {
+//			retVal.setIndent("  ");
+//		}
+//		return retVal;
+//	}
 
 	@Override
 	public void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException {
-		JsonWriter eventWriter = createJsonWriter(theWriter);
-		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-			encodeBundleToWriterInDstu2Format(theBundle, eventWriter);
-		} else {
-			encodeBundleToWriterInDstu1Format(theBundle, eventWriter);
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeWriter eventWriter = jsonStructure.getJsonLikeWriter(theWriter);
+		
+		doEncodeBundleToJsonLikeWriter(theBundle, eventWriter);
+	}
+	
+	public void doEncodeBundleToJsonLikeWriter(Bundle theBundle, JsonLikeWriter theEventWriter) throws IOException { 
+		if (myPrettyPrint) {
+			theEventWriter.setPrettyPrint(myPrettyPrint);
 		}
-		eventWriter.flush();
+		theEventWriter.init();
+		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			encodeBundleToWriterInDstu2Format(theBundle, theEventWriter);
+		} else {
+			encodeBundleToWriterInDstu1Format(theBundle, theEventWriter);
+		}
+		theEventWriter.flush();
 	}
 
 	@Override
 	protected void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException {
-		JsonWriter eventWriter = createJsonWriter(theWriter);
-
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeWriter eventWriter = jsonStructure.getJsonLikeWriter(theWriter);
+		
+		doEncodeResourceToJsonLikeWriter(theResource, eventWriter);
+	}
+	
+	public void doEncodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theEventWriter) throws IOException { 
+		if (myPrettyPrint) {
+			theEventWriter.setPrettyPrint(myPrettyPrint);
+		}
+		theEventWriter.init();
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null, false);
-		eventWriter.flush();
+		encodeResourceToJsonStreamWriter(resDef, theResource, theEventWriter, null, false);
+		theEventWriter.flush();
 	}
 
 	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
-			JsonObject object = parse(theReader);
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		jsonStructure.load(theReader);
+		
+		T retVal = doParseResource(theResourceType, jsonStructure);
+		
+		return retVal;
+	}
 
-			JsonPrimitive resourceTypeObj = object.getAsJsonPrimitive("resourceType");
-			if (resourceTypeObj == null || isBlank(resourceTypeObj.getAsString())) {
+	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, JsonLikeStructure theJsonStructure) {
+			JsonLikeObject object = theJsonStructure.getRootObject();
+		
+			JsonLikeValue resourceTypeObj = object.get("resourceType");
+			if (resourceTypeObj == null || !resourceTypeObj.isString()) {
 				throw new DataFormatException("Invalid JSON content detected, missing required element: 'resourceType'");
 			}
 			
@@ -234,38 +258,38 @@ public class JsonParser extends BaseParser implements IParser {
 			return retVal;
 	}
 
-	private JsonObject parse(Reader theReader) {
+//	private JsonObject parse(Reader theReader) {
+//
+//		PushbackReader pbr = new PushbackReader(theReader);
+//		JsonObject object;
+//		try {
+//			while(true) {
+//				int nextInt;
+//					nextInt = pbr.read();
+//				if (nextInt == -1) {
+//					throw new DataFormatException("Did not find any content to parse");
+//				}
+//				if (nextInt == '{') {
+//					pbr.unread('{');
+//					break;
+//				}
+//				if (Character.isWhitespace(nextInt)) {
+//					continue;
+//				}
+//				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
+//			}
+//		
+//			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+//		
+//			object = gson.fromJson(pbr, JsonObject.class);
+//		} catch (Exception e) {
+//			throw new DataFormatException("Failed to parse JSON content, error was: " + e.getMessage(), e);
+//		}
+//		
+//		return object;
+//	}
 
-		PushbackReader pbr = new PushbackReader(theReader);
-		JsonObject object;
-		try {
-			while(true) {
-				int nextInt;
-					nextInt = pbr.read();
-				if (nextInt == -1) {
-					throw new DataFormatException("Did not find any content to parse");
-				}
-				if (nextInt == '{') {
-					pbr.unread('{');
-					break;
-				}
-				if (Character.isWhitespace(nextInt)) {
-					continue;
-				}
-				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
-			}
-		
-			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-		
-			object = gson.fromJson(pbr, JsonObject.class);
-		} catch (Exception e) {
-			throw new DataFormatException("Failed to parse JSON content, error was: " + e.getMessage(), e);
-		}
-		
-		return object;
-	}
-
-	private void encodeBundleToWriterInDstu1Format(Bundle theBundle, JsonWriter theEventWriter) throws IOException {
+	private void encodeBundleToWriterInDstu1Format(Bundle theBundle, JsonLikeWriter theEventWriter) throws IOException {
 		theEventWriter.beginObject();
 
 		write(theEventWriter, "resourceType", "Bundle");
@@ -334,7 +358,7 @@ public class JsonParser extends BaseParser implements IParser {
 		theEventWriter.endObject(); // resource object
 	}
 
-	private void encodeBundleToWriterInDstu2Format(Bundle theBundle, JsonWriter theEventWriter) throws IOException {
+	private void encodeBundleToWriterInDstu2Format(Bundle theBundle, JsonLikeWriter theEventWriter) throws IOException {
 		theEventWriter.beginObject();
 
 		write(theEventWriter, "resourceType", "Bundle");
@@ -431,7 +455,7 @@ public class JsonParser extends BaseParser implements IParser {
 		theEventWriter.endObject(); // resource object
 	}
 
-	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonWriter theEventWriter, IBase theNextValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName, boolean theContainedResource, CompositeChildElement theChildElem,
+	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, IBase theNextValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName, boolean theContainedResource, CompositeChildElement theChildElem,
 			boolean theForceEmpty) throws IOException {
 
 		switch (theChildDef.getChildType()) {
@@ -444,7 +468,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (theChildName != null) {
 				write(theEventWriter, theChildName, encodedValue);
 			} else {
-				theEventWriter.value(encodedValue);
+				theEventWriter.write(encodedValue);
 			}
 			break;
 		}
@@ -452,7 +476,7 @@ public class JsonParser extends BaseParser implements IParser {
 			final IPrimitiveType<?> value = (IPrimitiveType<?>) theNextValue;
 			if (isBlank(value.getValueAsString())) {
 				if (theForceEmpty) {
-					theEventWriter.nullValue();
+					theEventWriter.writeNull();
 				}
 				break;
 			}
@@ -461,7 +485,7 @@ public class JsonParser extends BaseParser implements IParser {
 				if (theChildName != null) {
 					write(theEventWriter, theChildName, ((IBaseIntegerDatatype) value).getValue());
 				} else {
-					theEventWriter.value(((IBaseIntegerDatatype) value).getValue());
+					theEventWriter.write(((IBaseIntegerDatatype) value).getValue());
 				}
 			} else if (value instanceof IBaseDecimalDatatype) {
 				BigDecimal decimalValue = ((IBaseDecimalDatatype) value).getValue();
@@ -476,7 +500,7 @@ public class JsonParser extends BaseParser implements IParser {
 				if (theChildName != null) {
 					write(theEventWriter, theChildName, decimalValue);
 				} else {
-					theEventWriter.value(decimalValue);
+					theEventWriter.write(decimalValue);
 				}
 			} else if (value instanceof IBaseBooleanDatatype) {
 				if (theChildName != null) {
@@ -484,7 +508,7 @@ public class JsonParser extends BaseParser implements IParser {
 				} else {
 					Boolean booleanValue = ((IBaseBooleanDatatype) value).getValue();
 					if (booleanValue != null) {
-						theEventWriter.value(booleanValue.booleanValue());
+						theEventWriter.write(booleanValue.booleanValue());
 					}
 				}
 			} else {
@@ -492,7 +516,7 @@ public class JsonParser extends BaseParser implements IParser {
 				if (theChildName != null) {
 					write(theEventWriter, theChildName, valueStr);
 				} else {
-					theEventWriter.value(valueStr);
+					theEventWriter.write(valueStr);
 				}
 			}
 			break;
@@ -500,8 +524,7 @@ public class JsonParser extends BaseParser implements IParser {
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
 			if (theChildName != null) {
-				theEventWriter.name(theChildName);
-				theEventWriter.beginObject();
+				theEventWriter.beginObject(theChildName);
 			} else {
 				theEventWriter.beginObject();
 			}
@@ -537,13 +560,13 @@ public class JsonParser extends BaseParser implements IParser {
 				if (theChildName != null) {
 					write(theEventWriter, theChildName, dt.getValueAsString());
 				} else {
-					theEventWriter.value(dt.getValueAsString());
+					theEventWriter.write(dt.getValueAsString());
 				}
 			} else {
 				if (theChildName != null) {
 					// do nothing
 				} else {
-					theEventWriter.nullValue();
+					theEventWriter.writeNull();
 				}
 			}
 			break;
@@ -560,24 +583,21 @@ public class JsonParser extends BaseParser implements IParser {
 
 	}
 
-	private void write(JsonWriter theEventWriter, String theChildName, Boolean theValue) throws IOException {
+	private void write(JsonLikeWriter theEventWriter, String theChildName, Boolean theValue) throws IOException {
 		if (theValue != null) {
-			theEventWriter.name(theChildName);
-			theEventWriter.value(theValue.booleanValue());
+			theEventWriter.write(theChildName, theValue.booleanValue());
 		}
 	}
 
-	private void write(JsonWriter theEventWriter, String theChildName, BigDecimal theDecimalValue) throws IOException {
-		theEventWriter.name(theChildName);
-		theEventWriter.value(theDecimalValue);
+	private void write(JsonLikeWriter theEventWriter, String theChildName, BigDecimal theDecimalValue) throws IOException {
+		theEventWriter.write(theChildName, theDecimalValue);
 	}
 
-	private void write(JsonWriter theEventWriter, String theChildName, Integer theValue) throws IOException {
-		theEventWriter.name(theChildName);
-		theEventWriter.value(theValue);
+	private void write(JsonLikeWriter theEventWriter, String theChildName, Integer theValue) throws IOException {
+		theEventWriter.write(theChildName, theValue);
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, JsonWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent) throws IOException {
+	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, JsonLikeWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent) throws IOException {
 
 		{
 			String elementId = getCompositeElementId(theElement);
@@ -765,7 +785,7 @@ public class JsonParser extends BaseParser implements IParser {
 					}
 
 					if (!haveContent) {
-						theEventWriter.nullValue();
+						theEventWriter.writeNull();
 					} else {
 						if (inArray) {
 							theEventWriter.beginObject();
@@ -776,7 +796,7 @@ public class JsonParser extends BaseParser implements IParser {
 						if (nextComments != null && !nextComments.isEmpty()) {
 							beginArray(theEventWriter, "fhir_comments");
 							for (String next : nextComments) {
-								theEventWriter.value(next);
+								theEventWriter.write(next);
 							}
 							theEventWriter.endArray();
 						}
@@ -806,13 +826,13 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent) throws IOException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonLikeWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent) throws IOException, DataFormatException {
 
 		writeCommentsPreAndPost(theNextValue, theEventWriter);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theNextValue, theEventWriter, theContainedResource, theParent);
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonWriter theEventWriter, String theObjectNameOrNull, boolean theContainedResource) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, String theObjectNameOrNull, boolean theContainedResource) throws IOException {
 		IIdType resourceId = null;
 		//		if (theResource instanceof IResource) {
 		//			IResource res = (IResource) theResource;
@@ -851,7 +871,7 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theContainedResource, resourceId);
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonWriter theEventWriter, String theObjectNameOrNull, boolean theContainedResource, IIdType theResourceId) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, String theObjectNameOrNull, boolean theContainedResource, IIdType theResourceId) throws IOException {
 		if (!theContainedResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -899,7 +919,7 @@ public class JsonParser extends BaseParser implements IParser {
 					beginArray(theEventWriter, "profile");
 					for (IIdType profile : profiles) {
 						if (profile != null && isNotBlank(profile.getValue())) {
-							theEventWriter.value(profile.getValue());
+							theEventWriter.write(profile.getValue());
 						}
 					}
 					theEventWriter.endArray();
@@ -953,7 +973,17 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException {
-		JsonWriter theEventWriter = createJsonWriter(theWriter);
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		JsonLikeWriter eventWriter = jsonStructure.getJsonLikeWriter(theWriter);
+		
+		encodeTagListToJsonLikeWriter(theTagList, eventWriter);
+	}
+	
+	public void encodeTagListToJsonLikeWriter(TagList theTagList, JsonLikeWriter theEventWriter) throws IOException { 
+		if (myPrettyPrint) {
+			theEventWriter.setPrettyPrint(myPrettyPrint);
+		}
+		theEventWriter.init();
 
 		theEventWriter.beginObject();
 
@@ -986,7 +1016,7 @@ public class JsonParser extends BaseParser implements IParser {
 	 * called _name): resource extensions, and extension extensions
 	 * @param theChildElem 
 	 */
-	private void extractAndWriteExtensionsAsDirectChild(IBase theElement, JsonWriter theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IBaseResource theResource, CompositeChildElement theChildElem) throws IOException {
+	private void extractAndWriteExtensionsAsDirectChild(IBase theElement, JsonLikeWriter theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IBaseResource theResource, CompositeChildElement theChildElem) throws IOException {
 		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
 		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
 
@@ -1072,24 +1102,29 @@ public class JsonParser extends BaseParser implements IParser {
 		return EncodingEnum.JSON;
 	}
 
-	private JsonArray grabJsonArray(JsonObject theObject, String nextName, String thePosition) {
-		JsonElement object = theObject.get(nextName);
-		if (object == null || object instanceof JsonNull) {
+	private JsonLikeArray grabJsonArray(JsonLikeObject theObject, String nextName, String thePosition) {
+		JsonLikeValue object = theObject.get(nextName);
+		if (object == null || object.isNull()) {
 			return null;
 		}
-		if (!(object instanceof JsonArray)) {
-			throw new DataFormatException("Syntax error parsing JSON FHIR structure: Expected ARRAY at element '" + thePosition + "', found '" + object.getClass().getSimpleName() + "'");
+		if (!object.isArray()) {
+			throw new DataFormatException("Syntax error parsing JSON FHIR structure: Expected ARRAY at element '" + thePosition + "', found '" + object.getJsonType() + "'");
 		}
-		return (JsonArray) object;
+		return object.getAsArray();
+	}
+	
+	@Override
+	protected boolean isJsonParser() {
+		return true;
 	}
 
-	private void parseAlternates(JsonElement theAlternateVal, ParserState<?> theState, String theElementName) {
-		if (theAlternateVal == null || theAlternateVal instanceof JsonNull) {
+	private void parseAlternates(JsonLikeValue theAlternateVal, ParserState<?> theState, String theElementName) {
+		if (theAlternateVal == null || theAlternateVal.isNull()) {
 			return;
 		}
 
-		if (theAlternateVal instanceof JsonArray) {
-			JsonArray array = (JsonArray) theAlternateVal;
+		if (theAlternateVal.isArray()) {
+			JsonLikeArray array = theAlternateVal.getAsArray();
 			if (array.size() > 1) {
 				throw new DataFormatException("Unexpected array of length " + array.size() + " (expected 0 or 1) for element: " + theElementName);
 			}
@@ -1100,43 +1135,51 @@ public class JsonParser extends BaseParser implements IParser {
 			return;
 		}
 
-		JsonObject alternate = (JsonObject) theAlternateVal;
-		for (Entry<String, JsonElement> nextEntry : alternate.entrySet()) {
-			String nextKey = nextEntry.getKey();
-			JsonElement nextVal = nextEntry.getValue();
+		JsonLikeObject alternate = theAlternateVal.getAsObject();
+		for (String nextKey : alternate.keySet()) {
+			JsonLikeValue nextVal = alternate.get(nextKey);
 			if ("extension".equals(nextKey)) {
 				boolean isModifier = false;
-				JsonArray array = (JsonArray) nextEntry.getValue();
+				JsonLikeArray array = nextVal.getAsArray();
 				parseExtension(theState, array, isModifier);
 			} else if ("modifierExtension".equals(nextKey)) {
 				boolean isModifier = true;
-				JsonArray array = (JsonArray) nextEntry.getValue();
+				JsonLikeArray array = nextVal.getAsArray();
 				parseExtension(theState, array, isModifier);
 			} else if ("id".equals(nextKey)) {
-				if (nextVal instanceof JsonPrimitive) {
-					theState.attributeValue("id", ((JsonPrimitive) nextVal).getAsString());
+				if (nextVal.isString() || nextVal.isNumber()) {
+					theState.attributeValue("id", nextVal.getAsString());
 				}
 			} else if ("fhir_comments".equals(nextKey)) {
-				parseFhirComments(nextEntry.getValue(), theState);
+				parseFhirComments(nextVal, theState);
 			}
 		}
 	}
 
 	@Override
 	public <T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
-		JsonObject object;
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		jsonStructure.load(theReader);
+		
+		Bundle retVal = parseBundle(theResourceType, jsonStructure);
+		
+		return retVal;
+	}
 
-		try {
-			object = parse(theReader);
-		} catch (JsonSyntaxException e) {
-			if (e.getMessage().startsWith("Unexpected char 39")) {
-				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
-			}
-			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+	@Override
+	public Bundle parseBundle (JsonLikeStructure theJsonLikeStructure) throws ConfigurationException, DataFormatException {
+		return parseBundle(null, theJsonLikeStructure);
+	}
+
+	@Override
+	public <T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, JsonLikeStructure theJsonStructure) {
+		JsonLikeObject object = theJsonStructure.getRootObject();
+		
+		JsonLikeValue resourceTypeObj = object.get("resourceType");
+		if (resourceTypeObj == null || !resourceTypeObj.isString()) {
+			throw new DataFormatException("Invalid JSON content detected, missing required element: 'resourceType'");
 		}
-		JsonElement resourceTypeObj = object.get("resourceType");
-		assertObjectOfType(resourceTypeObj, JsonPrimitive.class, "resourceType");
-		String resourceType = ((JsonPrimitive) resourceTypeObj).getAsString();
+		String resourceType = resourceTypeObj.getAsString();
 		if (!"Bundle".equals(resourceType)) {
 			throw new DataFormatException("Trying to parse bundle but found resourceType other than 'Bundle'. Found: '" + resourceType + "'");
 		}
@@ -1158,27 +1201,28 @@ public class JsonParser extends BaseParser implements IParser {
 		return retVal;
 	}
 
-	private void parseBundleChildren(JsonObject theObject, ParserState<?> theState) {
-		for (Entry<String, JsonElement> nextEntry : theObject.entrySet()) {
-			String nextName = nextEntry.getKey();
+	private void parseBundleChildren(JsonLikeObject theObject, ParserState<?> theState) {
+		for (String nextName : theObject.keySet()) {
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("entry".equals(nextName)) {
-				JsonArray entries = grabJsonArray(theObject, nextName, "entry");
-				for (JsonElement JsonElement : entries) {
+				JsonLikeArray entries = grabJsonArray(theObject, nextName, "entry");
+				for (int i = 0; i < entries.size(); i++) {
+					JsonLikeValue jsonValue = entries.get(i);
 					theState.enteringNewElement(null, "entry");
-					parseBundleChildren((JsonObject) JsonElement, theState);
+					parseBundleChildren(jsonValue.getAsObject(), theState);
 					theState.endingElement();
 				}
 				continue;
 			} else if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				if ("link".equals(nextName)) {
-					JsonArray entries = grabJsonArray(theObject, nextName, "link");
-					for (JsonElement JsonElement : entries) {
+					JsonLikeArray entries = grabJsonArray(theObject, nextName, "link");
+					for (int i = 0; i < entries.size(); i++) {
+						JsonLikeValue jsonValue = entries.get(i);
 						theState.enteringNewElement(null, "link");
-						JsonObject linkObj = (JsonObject) JsonElement;
-						String rel = linkObj.get("rel").getAsString();
-						String href = linkObj.get("href").getAsString();
+						JsonLikeObject linkObj = jsonValue.getAsObject();
+						String rel = linkObj.getString("rel", null);
+						String href = linkObj.getString("href", null);
 						theState.attributeValue("rel", rel);
 						theState.attributeValue("href", href);
 						theState.endingElement();
@@ -1186,8 +1230,8 @@ public class JsonParser extends BaseParser implements IParser {
 					continue;
 				} else if (BUNDLE_TEXTNODE_CHILDREN_DSTU1.contains(nextName)) {
 					theState.enteringNewElement(null, nextName);
-					JsonElement jsonElement = theObject.get(nextName);
-					if (jsonElement instanceof JsonPrimitive) {
+					JsonLikeValue jsonElement = theObject.get(nextName);
+					if (jsonElement.isScalar()) {
 						theState.string(jsonElement.getAsString());
 					}
 					theState.endingElement();
@@ -1195,12 +1239,13 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 			} else {
 				if ("link".equals(nextName)) {
-					JsonArray entries = grabJsonArray(theObject, nextName, "link");
-					for (JsonElement JsonElement : entries) {
+					JsonLikeArray entries = grabJsonArray(theObject, nextName, "link");
+					for (int i = 0; i < entries.size(); i++) {
+						JsonLikeValue jsonValue = entries.get(i);
 						theState.enteringNewElement(null, "link");
-						JsonObject linkObj = (JsonObject) JsonElement;
-						String rel = linkObj.get("relation").getAsString();
-						String href = linkObj.get("url").getAsString();
+						JsonLikeObject linkObj = jsonValue.getAsObject();
+						String rel = linkObj.getString("relation", null);
+						String href = linkObj.getString("url", null);
 						theState.enteringNewElement(null, "relation");
 						theState.attributeValue("value", rel);
 						theState.endingElement();
@@ -1214,10 +1259,10 @@ public class JsonParser extends BaseParser implements IParser {
 					theState.enteringNewElement(null, nextName);
 					// String obj = theObject.getString(nextName, null);
 
-					JsonElement obj = theObject.get(nextName);
-					if (obj == null) {
+					JsonLikeValue obj = theObject.get(nextName);
+					if (obj == null || obj.isNull()) {
 						theState.attributeValue("value", null);
-					} else if (obj instanceof JsonPrimitive) {
+					} else if (obj.isScalar()) {
 						theState.attributeValue("value", obj.getAsString());
 					} else {
 						throw new DataFormatException("Unexpected JSON object for entry '" + nextName + "'");
@@ -1228,29 +1273,27 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 			}
 
-			JsonElement nextVal = theObject.get(nextName);
+			JsonLikeValue nextVal = theObject.get(nextName);
 			parseChildren(theState, nextName, nextVal, null, null);
 
 		}
 	}
 
-	private void parseChildren(JsonObject theObject, ParserState<?> theState) {
-		Set<Entry<String, JsonElement>> entrySet = theObject.entrySet();
+	private void parseChildren(JsonLikeObject theObject, ParserState<?> theState) {
+		Set<String> keySet = theObject.keySet();
 
 		int allUnderscoreNames = 0;
 		int handledUnderscoreNames = 0;
 
-		for (Entry<String, JsonElement> nextEntry : entrySet) {
-			String nextName = nextEntry.getKey();
-			JsonElement nextObject = nextEntry.getValue();
+		for (String nextName : keySet) {
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("extension".equals(nextName)) {
-				JsonArray array = grabJsonArray(theObject, nextName, "extension");
+				JsonLikeArray array = grabJsonArray(theObject, nextName, "extension");
 				parseExtension(theState, array, false);
 				continue;
 			} else if ("modifierExtension".equals(nextName)) {
-				JsonArray array = grabJsonArray(theObject, nextName, "modifierExtension");
+				JsonLikeArray array = grabJsonArray(theObject, nextName, "modifierExtension");
 				parseExtension(theState, array, true);
 				continue;
 			} else if (nextName.equals("fhir_comments")) {
@@ -1261,9 +1304,9 @@ public class JsonParser extends BaseParser implements IParser {
 				continue;
 			}
 
-			JsonElement nextVal = theObject.get(nextName);
+			JsonLikeValue nextVal = theObject.get(nextName);
 			String alternateName = '_' + nextName;
-			JsonElement alternateVal = theObject.get(alternateName);
+			JsonLikeValue alternateVal = theObject.get(alternateName);
 			if (alternateVal != null) {
 				handledUnderscoreNames++;
 			}
@@ -1288,11 +1331,10 @@ public class JsonParser extends BaseParser implements IParser {
 		 * for example.
 		 */
 		if (allUnderscoreNames > handledUnderscoreNames) {
-			for (Entry<String, JsonElement> nextEntry : entrySet) {
-				String alternateName = nextEntry.getKey();
+			for (String alternateName : keySet) {
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
-					JsonElement nextValue = theObject.get(alternateName);
-					if (nextValue instanceof JsonObject) {
+					JsonLikeValue nextValue = theObject.get(alternateName);
+					if (nextValue != null && nextValue.isObject()) {
 						String nextName = alternateName.substring(1);
 						if (theObject.get(nextName) == null) {
 							theState.enteringNewElement(null, nextName);
@@ -1306,26 +1348,26 @@ public class JsonParser extends BaseParser implements IParser {
 
 	}
 
-	private void parseChildren(ParserState<?> theState, String theName, JsonElement theJsonVal, JsonElement theAlternateVal, String theAlternateName) {
-		if (theJsonVal instanceof JsonArray) {
-			JsonArray nextArray = (JsonArray) theJsonVal;
-			JsonArray nextAlternateArray = (JsonArray) theAlternateVal;
+	private void parseChildren(ParserState<?> theState, String theName, JsonLikeValue theJsonVal, JsonLikeValue theAlternateVal, String theAlternateName) {
+		if (theJsonVal.isArray()) {
+			JsonLikeArray nextArray = theJsonVal.getAsArray();
+			JsonLikeArray nextAlternateArray = JsonLikeValue.asArray(theAlternateVal); // could be null
 			for (int i = 0; i < nextArray.size(); i++) {
-				JsonElement nextObject = nextArray.get(i);
-				JsonElement nextAlternate = null;
+				JsonLikeValue nextObject = nextArray.get(i);
+				JsonLikeValue nextAlternate = null;
 				if (nextAlternateArray != null) {
 					nextAlternate = nextAlternateArray.get(i);
 				}
 				parseChildren(theState, theName, nextObject, nextAlternate, theAlternateName);
 			}
-		} else if (theJsonVal instanceof JsonObject) {
+		} else if (theJsonVal.isObject()) {
 			theState.enteringNewElement(null, theName);
 			parseAlternates(theAlternateVal, theState, theAlternateName);
-			JsonObject nextObject = (JsonObject) theJsonVal;
+			JsonLikeObject nextObject = theJsonVal.getAsObject();
 			boolean preResource = false;
 			if (theState.isPreResource()) {
-				JsonPrimitive resType = nextObject.getAsJsonPrimitive("resourceType");
-				if (resType == null || isBlank(resType.getAsString())) {
+				JsonLikeValue resType = nextObject.get("resourceType");
+				if (resType == null || !resType.isString()) {
 					throw new DataFormatException("Missing required element 'resourceType' from JSON resource object, unable to parse");
 				}
 				theState.enteringNewElement(null, resType.getAsString());
@@ -1336,36 +1378,35 @@ public class JsonParser extends BaseParser implements IParser {
 				theState.endingElement();
 			}
 			theState.endingElement();
-		} else if (theJsonVal instanceof JsonNull) {
+		} else if (theJsonVal.isNull()) {
 			theState.enteringNewElement(null, theName);
 			parseAlternates(theAlternateVal, theState, theAlternateName);
 			theState.endingElement();
 		} else {
-			JsonPrimitive nextValStr = (JsonPrimitive)theJsonVal;
+			// must be a SCALAR
 			theState.enteringNewElement(null, theName);
-			theState.attributeValue("value", nextValStr.getAsString());
+			theState.attributeValue("value", theJsonVal.getAsString());
 			parseAlternates(theAlternateVal, theState, theAlternateName);
 			theState.endingElement();
 		}
 	}
 
-	private void parseExtension(ParserState<?> theState, JsonArray theValues, boolean theIsModifier) {
+	private void parseExtension(ParserState<?> theState, JsonLikeArray theValues, boolean theIsModifier) {
 		for (int i = 0; i < theValues.size(); i++) {
-			JsonObject nextExtObj = (JsonObject) theValues.get(i);
-			String url = nextExtObj.get("url").getAsString();
+			JsonLikeObject nextExtObj = JsonLikeValue.asObject(theValues.get(i));
+			String url = nextExtObj.getString("url"); // fails if missing
 			theState.enteringNewElementExtension(null, url, theIsModifier);
-			for (Iterator<Entry<String, JsonElement>> iter = nextExtObj.entrySet().iterator(); iter.hasNext();) {
-				String next = iter.next().getKey();
+			for (String next : nextExtObj.keySet()) {
 				if ("url".equals(next)) {
 					continue;
 				} else if ("extension".equals(next)) {
-					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
 					parseExtension(theState, jsonVal, false);
 				} else if ("modifierExtension".equals(next)) {
-					JsonArray jsonVal = (JsonArray) nextExtObj.get(next);
+					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
 					parseExtension(theState, jsonVal, true);
 				} else {
-					JsonElement jsonVal = nextExtObj.get(next);
+					JsonLikeValue jsonVal = nextExtObj.get(next);
 					parseChildren(theState, next, jsonVal, null, null);
 				}
 			}
@@ -1373,11 +1414,13 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void parseFhirComments(JsonElement theObject, ParserState<?> theState) {
-		if (theObject instanceof JsonArray) {
-			for (JsonElement nextComment : ((JsonArray) theObject)) {
-				if (nextComment instanceof JsonPrimitive) {
-					String commentText = ((JsonPrimitive) nextComment).getAsString();
+	private void parseFhirComments(JsonLikeValue theObject, ParserState<?> theState) {
+		if (theObject.isArray()) {
+			JsonLikeArray comments = theObject.getAsArray();
+			for (int i = 0; i < comments.size(); i++) {
+				JsonLikeValue nextComment = comments.get(i);
+				if (nextComment.isString()) {
+					String commentText = nextComment.getAsString();
 					if (commentText != null) {
 						theState.commentPre(commentText);
 					}
@@ -1388,9 +1431,19 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public TagList parseTagList(Reader theReader) {
-		JsonObject object = parse(theReader);
+		JsonLikeStructure jsonStructure = new GsonStructure();
+		jsonStructure.load(theReader);
+		
+		TagList retVal = parseTagList(jsonStructure);
+		
+		return retVal;
+	}
+	
+	@Override
+	public TagList parseTagList(JsonLikeStructure theJsonStructure) {
+		JsonLikeObject object = theJsonStructure.getRootObject();
 
-		JsonPrimitive resourceTypeObj = object.getAsJsonPrimitive("resourceType");
+		JsonLikeValue resourceTypeObj = object.get("resourceType");
 		String resourceType = resourceTypeObj.getAsString();
 
 		ParserState<TagList> state = ParserState.getPreTagListInstance(this, myContext, true, getErrorHandler());
@@ -1436,12 +1489,11 @@ public class JsonParser extends BaseParser implements IParser {
 		return this;
 	}
 
-	private boolean writeAtomLinkInDstu1Format(JsonWriter theEventWriter, String theRel, StringDt theLink, boolean theStarted) throws IOException {
+	private boolean writeAtomLinkInDstu1Format(JsonLikeWriter theEventWriter, String theRel, StringDt theLink, boolean theStarted) throws IOException {
 		boolean retVal = theStarted;
 		if (isNotBlank(theLink.getValue())) {
 			if (theStarted == false) {
-				theEventWriter.name("link");
-				theEventWriter.beginArray();
+				theEventWriter.beginArray("link");
 				retVal = true;
 			}
 
@@ -1453,12 +1505,11 @@ public class JsonParser extends BaseParser implements IParser {
 		return retVal;
 	}
 
-	private boolean writeAtomLinkInDstu2Format(JsonWriter theEventWriter, String theRel, StringDt theLink, boolean theStarted) throws IOException {
+	private boolean writeAtomLinkInDstu2Format(JsonLikeWriter theEventWriter, String theRel, StringDt theLink, boolean theStarted) throws IOException {
 		boolean retVal = theStarted;
 		if (isNotBlank(theLink.getValue())) {
 			if (theStarted == false) {
-				theEventWriter.name("link");
-				theEventWriter.beginArray();
+				theEventWriter.beginArray("link");
 				retVal = true;
 			}
 
@@ -1470,7 +1521,7 @@ public class JsonParser extends BaseParser implements IParser {
 		return retVal;
 	}
 
-	private void writeAuthor(BaseBundle theBundle, JsonWriter theEventWriter) throws IOException {
+	private void writeAuthor(BaseBundle theBundle, JsonLikeWriter theEventWriter) throws IOException {
 		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
 			beginArray(theEventWriter, "author");
 			theEventWriter.beginObject();
@@ -1481,20 +1532,17 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void beginArray(JsonWriter theEventWriter, String arrayName) throws IOException {
-		theEventWriter.name(arrayName);
-		theEventWriter.beginArray();
+	private void beginArray(JsonLikeWriter theEventWriter, String arrayName) throws IOException {
+		theEventWriter.beginArray(arrayName);
 	}
 
-	private void beginObject(JsonWriter theEventWriter, String arrayName) throws IOException {
-		theEventWriter.name(arrayName);
-		theEventWriter.beginObject();
+	private void beginObject(JsonLikeWriter theEventWriter, String arrayName) throws IOException {
+		theEventWriter.beginObject(arrayName);
 	}
 
-	private void writeCategories(JsonWriter theEventWriter, TagList categories) throws IOException {
+	private void writeCategories(JsonLikeWriter theEventWriter, TagList categories) throws IOException {
 		if (categories != null && categories.size() > 0) {
-			theEventWriter.name("category");
-			theEventWriter.beginArray();
+			theEventWriter.beginArray("category");
 			for (Tag next : categories) {
 				theEventWriter.beginObject();
 				write(theEventWriter, "term", defaultString(next.getTerm()));
@@ -1506,26 +1554,26 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeCommentsPreAndPost(IBase theNextValue, JsonWriter theEventWriter) throws IOException {
+	private void writeCommentsPreAndPost(IBase theNextValue, JsonLikeWriter theEventWriter) throws IOException {
 		if (theNextValue.hasFormatComment()) {
 			beginArray(theEventWriter, "fhir_comments");
 			List<String> pre = theNextValue.getFormatCommentsPre();
 			if (pre.isEmpty() == false) {
 				for (String next : pre) {
-					theEventWriter.value(next);
+					theEventWriter.write(next);
 				}
 			}
 			List<String> post = theNextValue.getFormatCommentsPost();
 			if (post.isEmpty() == false) {
 				for (String next : post) {
-					theEventWriter.value(next);
+					theEventWriter.write(next);
 				}
 			}
 			theEventWriter.endArray();
 		}
 	}
 
-	private void writeExtensionsAsDirectChild(IBaseResource theResource, JsonWriter theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) throws IOException {
+	private void writeExtensionsAsDirectChild(IBaseResource theResource, JsonLikeWriter theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) throws IOException {
 		if (extensions.isEmpty() == false) {
 			beginArray(theEventWriter, "extension");
 			for (HeldExtension next : extensions) {
@@ -1542,19 +1590,19 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeOptionalTagWithDecimalNode(JsonWriter theEventWriter, String theElementName, DecimalDt theValue) throws IOException {
+	private void writeOptionalTagWithDecimalNode(JsonLikeWriter theEventWriter, String theElementName, DecimalDt theValue) throws IOException {
 		if (theValue != null && theValue.isEmpty() == false) {
 			write(theEventWriter, theElementName, theValue.getValue());
 		}
 	}
 
-	private void writeOptionalTagWithNumberNode(JsonWriter theEventWriter, String theElementName, IntegerDt theValue) throws IOException {
+	private void writeOptionalTagWithNumberNode(JsonLikeWriter theEventWriter, String theElementName, IntegerDt theValue) throws IOException {
 		if (theValue != null && theValue.isEmpty() == false) {
 			write(theEventWriter, theElementName, theValue.getValue().intValue());
 		}
 	}
 
-	private void writeOptionalTagWithTextNode(JsonWriter theEventWriter, String theElementName, IPrimitiveDatatype<?> thePrimitive) throws IOException {
+	private void writeOptionalTagWithTextNode(JsonLikeWriter theEventWriter, String theElementName, IPrimitiveDatatype<?> thePrimitive) throws IOException {
 		if (thePrimitive == null) {
 			return;
 		}
@@ -1562,22 +1610,21 @@ public class JsonParser extends BaseParser implements IParser {
 		writeOptionalTagWithTextNode(theEventWriter, theElementName, str);
 	}
 
-	private void writeOptionalTagWithTextNode(JsonWriter theEventWriter, String theElementName, String theValue) throws IOException {
+	private void writeOptionalTagWithTextNode(JsonLikeWriter theEventWriter, String theElementName, String theValue) throws IOException {
 		if (StringUtils.isNotBlank(theValue)) {
 			write(theEventWriter, theElementName, theValue);
 		}
 	}
 
-	private void writeTagWithTextNode(JsonWriter theEventWriter, String theElementName, IPrimitiveDatatype<?> theIdDt) throws IOException {
+	private void writeTagWithTextNode(JsonLikeWriter theEventWriter, String theElementName, IPrimitiveDatatype<?> theIdDt) throws IOException {
 		if (theIdDt != null && !theIdDt.isEmpty()) {
 			write(theEventWriter, theElementName, theIdDt.getValueAsString());
 		} else {
-			theEventWriter.name(theElementName);
-			theEventWriter.nullValue();
+			theEventWriter.writeNull(theElementName);
 		}
 	}
 
-	private void writeTagWithTextNode(JsonWriter theEventWriter, String theElementName, StringDt theStringDt) throws IOException {
+	private void writeTagWithTextNode(JsonLikeWriter theEventWriter, String theElementName, StringDt theStringDt) throws IOException {
 		if (StringUtils.isNotBlank(theStringDt.getValue())) {
 			write(theEventWriter, theElementName, theStringDt.getValue());
 		}
@@ -1618,7 +1665,7 @@ public class JsonParser extends BaseParser implements IParser {
 			return url1.compareTo(url2);
 		}
 
-		public void write(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonWriter theEventWriter) throws IOException {
+		public void write(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter) throws IOException {
 			if (myUndeclaredExtension != null) {
 				writeUndeclaredExtension(theResDef, theResource, theEventWriter, myUndeclaredExtension);
 			} else {
@@ -1641,7 +1688,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		
-		private void writeUndeclaredExtension(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonWriter theEventWriter, IBaseExtension<?, ?> ext) throws IOException {
+		private void writeUndeclaredExtension(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, IBaseExtension<?, ?> ext) throws IOException {
 			IBase value = ext.getValue();
 			String extensionUrl = ext.getUrl();
 
@@ -1698,9 +1745,8 @@ public class JsonParser extends BaseParser implements IParser {
 
 	}
 	
-	private static void write(JsonWriter theWriter, String theName, String theValue) throws IOException {
-		theWriter.name(theName);
-		theWriter.value(theValue);
+	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {
+		theWriter.write(theName, theValue);
 	}
 
 }
