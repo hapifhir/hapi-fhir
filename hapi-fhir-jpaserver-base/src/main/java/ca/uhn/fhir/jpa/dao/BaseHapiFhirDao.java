@@ -194,7 +194,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	private FhirContext myContext;
 
-	// @PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
@@ -669,7 +668,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	private String parseContentTextIntoWords(IBaseResource theResource) {
+	public String parseContentTextIntoWords(IBaseResource theResource) {
 		StringBuilder retVal = new StringBuilder();
 		@SuppressWarnings("rawtypes")
 		List<IPrimitiveType> childElements = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
@@ -684,6 +683,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 		return retVal.toString();
+	}
+
+	@Override
+	public void populateFullTextFields(final IBaseResource theResource, ResourceTable theEntity) {
+		if (theEntity.getDeleted() != null) {
+			theEntity.setNarrativeTextParsedIntoWords(null);
+			theEntity.setContentTextParsedIntoWords(null);
+		} else {
+			theEntity.setNarrativeTextParsedIntoWords(parseNarrativeTextIntoWords(theResource));
+			theEntity.setContentTextParsedIntoWords(parseContentTextIntoWords(theResource));
+		}
 	}
 
 	private void populateResourceId(final IBaseResource theResource, BaseHasResource theEntity) {
@@ -931,10 +941,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		throw new NotImplementedException("");
 	}
 
-	public void setConfig(DaoConfig theConfig) {
-		myConfig = theConfig;
-	}
-
 	// protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
 	// MetaDt retVal = new MetaDt();
 	// for (TagDefinition next : tagDefinitions) {
@@ -952,6 +958,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	// }
 	// return retVal;
 	// }
+
+	public void setConfig(DaoConfig theConfig) {
+		myConfig = theConfig;
+	}
 
 	@Autowired
 	public void setContext(FhirContext theContext) {
@@ -1273,8 +1283,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
-				theEntity.setNarrativeTextParsedIntoWords(parseNarrativeTextIntoWords(theResource));
-				theEntity.setContentTextParsedIntoWords(parseContentTextIntoWords(theResource));
+				populateFullTextFields(theResource, theEntity);
 
 			} else {
 
@@ -1397,53 +1406,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime);
 	}
 
-	protected void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
-		if (theDeleteConflicts.isEmpty()) {
-			return;
-		}
-
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		for (DeleteConflict next : theDeleteConflicts) {
-			String msg = "Unable to delete " + next.getTargetId().toUnqualifiedVersionless().getValue()
-					+ " because at least one resource has a reference to this resource. First reference found was resource " + next.getTargetId().toUnqualifiedVersionless().getValue() + " in path "
-					+ next.getSourcePath();
-			OperationOutcomeUtil.addIssue(getContext(), oo, OO_SEVERITY_ERROR, msg, null, "processing");
-		}
-
-		throw new ResourceVersionConflictException("Delete failed because of constraint failure", oo);
-	}
-
-	/**
-	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow the DAO to ensure that it is valid for persistence. By default, checks for the
-	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
-	 * 
-	 * @param theResource
-	 *           The resource that is about to be persisted
-	 * @param theEntityToSave
-	 *           TODO
-	 */
-	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
-		Object tag = null;
-		if (theResource instanceof IResource) {
-			IResource res = (IResource) theResource;
-			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
-			if (tagList != null) {
-				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
-			}
-		} else {
-			IAnyResource res = (IAnyResource) theResource;
-			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
-		}
-
-		if (tag != null) {
-			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
-		}
-
-		String resName = getContext().getResourceDefinition(theResource).getName();
-		validateChildReferences(theResource, resName);
-
-	}
-
 	private void validateChildReferences(IBase theElement, String thePath) {
 		if (theElement == null) {
 			return;
@@ -1497,6 +1459,53 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			}
 		}
+	}
+
+	protected void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
+		if (theDeleteConflicts.isEmpty()) {
+			return;
+		}
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		for (DeleteConflict next : theDeleteConflicts) {
+			String msg = "Unable to delete " + next.getTargetId().toUnqualifiedVersionless().getValue()
+					+ " because at least one resource has a reference to this resource. First reference found was resource " + next.getTargetId().toUnqualifiedVersionless().getValue() + " in path "
+					+ next.getSourcePath();
+			OperationOutcomeUtil.addIssue(getContext(), oo, OO_SEVERITY_ERROR, msg, null, "processing");
+		}
+
+		throw new ResourceVersionConflictException("Delete failed because of constraint failure", oo);
+	}
+
+	/**
+	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow the DAO to ensure that it is valid for persistence. By default, checks for the
+	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
+	 * 
+	 * @param theResource
+	 *           The resource that is about to be persisted
+	 * @param theEntityToSave
+	 *           TODO
+	 */
+	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
+		Object tag = null;
+		if (theResource instanceof IResource) {
+			IResource res = (IResource) theResource;
+			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
+			if (tagList != null) {
+				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+			}
+		} else {
+			IAnyResource res = (IAnyResource) theResource;
+			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+		}
+
+		if (tag != null) {
+			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
+		}
+
+		String resName = getContext().getResourceDefinition(theResource).getName();
+		validateChildReferences(theResource, resName);
+
 	}
 
 	protected static boolean isValidPid(IIdType theId) {

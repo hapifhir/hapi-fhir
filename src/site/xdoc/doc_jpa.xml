@@ -239,6 +239,18 @@ public DaoConfig daoConfig() {
 			
 		</section>
 		
+		<section name="Additional Information">
+		
+			<ul>
+				<li>
+					<a href="https://www.openhealthhub.org/t/hapi-terminology-server-uk-snomed-ct-import/592">This page</a>
+					has information on loading national editions (UK specifically) of SNOMED CT files into
+					the database.
+				</li>
+			</ul>
+			
+		</section>
+		
 		<!-- 
 		alter table hfj_res_link ALTER COLUMN "TARGET_RESOURCE_ID" NULL;
 		

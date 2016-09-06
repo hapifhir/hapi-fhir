@@ -30,6 +30,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -49,6 +52,36 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchNoFtTest.class);
 
+	@Test
+	public void testSearchWithRevIncludes() {
+		final String methodName = "testSearchWithRevIncludes";
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		IIdType pid = txTemplate.execute(new TransactionCallback<IIdType>() {
+
+			@Override
+			public IIdType doInTransaction(TransactionStatus theStatus) {
+				org.hl7.fhir.dstu3.model.Patient p = new org.hl7.fhir.dstu3.model.Patient();
+				p.addName().addFamily(methodName);
+				IIdType pid = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+				
+				org.hl7.fhir.dstu3.model.Condition c = new org.hl7.fhir.dstu3.model.Condition();
+				c.getSubject().setReferenceElement(pid);
+				myConditionDao.create(c);
+				
+				return pid;
+			}
+		});
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_RES_ID, new StringParam(pid.getIdPart()));
+		map.addRevInclude(Condition.INCLUDE_PATIENT);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IBaseResource> foundResources = results.getResources(0, results.size());
+		assertEquals(Patient.class, foundResources.get(0).getClass());
+		assertEquals(Condition.class, foundResources.get(1).getClass());
+	}
+	
 	@Test
 	public void testCodeSearch() {
 		Subscription subs = new Subscription();
@@ -276,7 +309,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHasParameter() {
-		IIdType pid0, pid1;
+		IIdType pid0;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -287,7 +320,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().addFamily("Tester").addGiven("Joe");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
 			Observation obs = new Observation();
@@ -907,6 +940,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testSearchLastUpdatedParamWithComparator() throws InterruptedException {
 		IIdType id0;
@@ -2339,7 +2373,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		ValueSet vs2 = new ValueSet();
 		vs2.setUrl("http://hl7.org/foo/bar");
-		IIdType id2 = myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
+		myValueSetDao.create(vs2, mySrd).getId().toUnqualifiedVersionless();
 		
 		IBundleProvider result;
 		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/basic-resource-type"));

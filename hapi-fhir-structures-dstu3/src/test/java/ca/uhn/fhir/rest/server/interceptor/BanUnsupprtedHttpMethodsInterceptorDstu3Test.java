@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -9,10 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
+import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -56,6 +55,19 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		}
 	}
 
+	@Test
+	public void testHeadJson() throws Exception {
+		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");
+		HttpResponse status = ourClient.execute(httpGet);
+		assertEquals(null, status.getEntity());
+
+		ourLog.info(status.toString());
+		
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
+	}
+
+	
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
 		HttpRequestBase req = new HttpRequestBase() {

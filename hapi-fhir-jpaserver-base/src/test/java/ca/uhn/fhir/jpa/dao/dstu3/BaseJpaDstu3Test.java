@@ -220,6 +220,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	@Autowired
+	protected PlatformTransactionManager myTransactionMgr;
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;

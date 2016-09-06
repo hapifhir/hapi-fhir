@@ -77,7 +77,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
 	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
 	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS") 
+	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS")
 })
 @AnalyzerDefs({
 	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",

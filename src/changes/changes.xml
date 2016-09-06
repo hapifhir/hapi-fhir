@@ -12,6 +12,18 @@
 				<![CDATA[<code>_include</code>]]> resources to the response bundle if they were
 				referred to by a contained reosurce. Thanks to Neal Acharya for reporting!				
 			</action>
+			<action type="fix">
+				Fix regression in web testing UI where "prev" and "next" buttons don't work
+				when showing a result bundle
+			</action>
+			<action type="fix">
+				JPA server should not attempt to resolve built-in FHIR StructureDefinitions from the 
+				database (this causes a significant performance hit when validating)
+			</action>
+			<action type="fix">
+				BanUnsupportedHttpMethodsInterceptor was erroring out when a client
+				attempts HTTP HEAD requests
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

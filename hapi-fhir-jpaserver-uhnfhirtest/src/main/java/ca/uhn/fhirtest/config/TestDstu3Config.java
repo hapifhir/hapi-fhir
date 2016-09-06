@@ -10,11 +10,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -23,10 +19,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 
@@ -116,33 +110,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;
-	}
-
-	/**
-	 * Bean which validates outgoing responses
-	 */
-	@Bean
-	@Lazy
-	public ResponseValidatingInterceptor responseValidatingInterceptor() {
-		ResponseValidatingInterceptor responseValidator = new ResponseValidatingInterceptor();
-		responseValidator.setResponseHeaderValueNoIssues("Validation did not detect any issues");
-		responseValidator.setFailOnSeverity(null);
-		responseValidator.setAddResponseHeaderOnSeverity(null);
-		responseValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.METADATA);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.GET_PAGE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_INSTANCE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_SYSTEM);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_TYPE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_SYSTEM);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_TYPE);
-		responseValidator.addValidatorModule(instanceValidatorDstu3());
-		responseValidator.setIgnoreValidatorExceptions(true);
-		
-		return responseValidator;
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
