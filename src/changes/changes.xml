@@ -28,6 +28,10 @@
 				Conditional URLs in JPA server (e.g. for delete or update) did not support the
 				<![CDATA[<code>_has</code>]]> parameter
 			</action>
+			<action type="add" issue="440">
+				Remove Maven dependency on Saxon library, as it is not actually used. Thanks
+				to Lem Edmondson for the suggestion!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

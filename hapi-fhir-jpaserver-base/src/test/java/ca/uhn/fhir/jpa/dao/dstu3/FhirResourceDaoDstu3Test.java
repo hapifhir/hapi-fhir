@@ -3314,7 +3314,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	public static void assertConflictException(ResourceVersionConflictException e) {
-		assertThat(e.getMessage(), matchesPattern("Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource Observation/[0-9]+ in path DiagnosticReport.result"));
+		assertThat(e.getMessage(), matchesPattern("Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
 	}
 
 	private static List<String> toStringList(List<UriType> theUriType) {
