@@ -24,6 +24,10 @@
 				BanUnsupportedHttpMethodsInterceptor was erroring out when a client
 				attempts HTTP HEAD requests
 			</action>
+			<action type="fix">
+				Conditional URLs in JPA server (e.g. for delete or update) did not support the
+				<![CDATA[<code>_has</code>]]> parameter
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

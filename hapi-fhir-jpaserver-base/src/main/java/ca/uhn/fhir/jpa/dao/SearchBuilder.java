@@ -1917,7 +1917,7 @@ public class SearchBuilder {
 
 				addPredicateLanguage(nextParamEntry.getValue());
 
-			} else if (nextParamName.equals("_has")) {
+			} else if (nextParamName.equals(Constants.PARAM_HAS)) {
 
 				addPredicateHas(nextParamEntry.getValue(), theLastUpdated);
 

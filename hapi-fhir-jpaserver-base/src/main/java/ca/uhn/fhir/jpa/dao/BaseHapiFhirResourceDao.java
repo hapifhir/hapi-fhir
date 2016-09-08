@@ -294,7 +294,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		List<ResourceTable> deletedResources = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
 
 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-
 		
 		IBaseOperationOutcome oo;
 		if (deletedResources.isEmpty()) {

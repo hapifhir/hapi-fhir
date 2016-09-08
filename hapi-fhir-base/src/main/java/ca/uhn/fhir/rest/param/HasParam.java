@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
@@ -64,7 +65,7 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 	void doSetValueAsQueryToken(String theQualifier, String theValue) {
 		String qualifier = defaultString(theQualifier);
 		if (!qualifier.startsWith(":")) {
-			throwInvalidSyntaxException("_has" + qualifier);
+			throwInvalidSyntaxException(Constants.PARAM_HAS + qualifier);
 		}
 		int colonIndex0 = qualifier.indexOf(':', 1);
 		validateColon(qualifier, colonIndex0);

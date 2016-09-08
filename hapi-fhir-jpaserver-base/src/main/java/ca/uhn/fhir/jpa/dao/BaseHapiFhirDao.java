@@ -130,13 +130,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriAndListParam;
-import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -1467,14 +1461,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		String firstMsg = null;
 		for (DeleteConflict next : theDeleteConflicts) {
-			String msg = "Unable to delete " + next.getTargetId().toUnqualifiedVersionless().getValue()
-					+ " because at least one resource has a reference to this resource. First reference found was resource " + next.getTargetId().toUnqualifiedVersionless().getValue() + " in path "
-					+ next.getSourcePath();
+			StringBuilder b = new StringBuilder();
+			b.append("Unable to delete ");
+			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
+			b.append(" because at least one resource has a reference to this resource. First reference found was resource ");
+			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
+			b.append(" in path ");
+			b.append(next.getSourcePath());
+			String msg = b.toString();
+			if (firstMsg == null) {
+				firstMsg = msg;
+			}
 			OperationOutcomeUtil.addIssue(getContext(), oo, OO_SEVERITY_ERROR, msg, null, "processing");
 		}
 
-		throw new ResourceVersionConflictException("Delete failed because of constraint failure", oo);
+		throw new ResourceVersionConflictException(firstMsg, oo);
 	}
 
 	/**
@@ -1694,6 +1697,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				continue;
 			}
 
+			if (Constants.PARAM_HAS.equals(nextParamName)) {
+				IQueryParameterAnd<?> param = MethodUtil.parseQueryParams(RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
+				paramMap.add(nextParamName, param);
+				continue;
+			}
+			
 			if (Constants.PARAM_COUNT.equals(nextParamName)) {
 				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);

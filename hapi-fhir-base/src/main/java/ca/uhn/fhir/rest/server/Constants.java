@@ -115,6 +115,7 @@ public class Constants {
 	public static final String PARAM_DELETE = "_delete";
 	public static final String PARAM_ELEMENTS = "_elements";
 	public static final String PARAM_FORMAT = "_format";
+	public static final String PARAM_HAS = "_has";
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
@@ -157,8 +158,8 @@ public class Constants {
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
 	public static final int STATUS_HTTP_410_GONE = 410;
 	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
-	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	
+	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";

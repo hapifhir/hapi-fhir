@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -61,6 +62,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.NamingSystem;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
@@ -81,6 +83,7 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.valuesets.ObservationCategory;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -141,6 +144,35 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
+	}
+	
+	@Test
+	public void testDeleteWithHas() {
+		Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+		
+		Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport rpt = new DiagnosticReport();
+		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
+		rpt.addResult(new Reference(obs2id));
+		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
+		
+		myObservationDao.read(obs1id);
+		myObservationDao.read(obs2id);
+		
+		try {
+			myObservationDao.deleteByUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", mySrd);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), matchesPattern("Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource Observation/[0-9]+ in path DiagnosticReport.result"));
+		}
+		
+		myObservationDao.read(obs1id);
+		myObservationDao.read(obs2id);		
 	}
 	
 	@Test
