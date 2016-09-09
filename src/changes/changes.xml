@@ -32,6 +32,10 @@
 				Remove Maven dependency on Saxon library, as it is not actually used. Thanks
 				to Lem Edmondson for the suggestion!
 			</action>
+			<action type="fix" issue="444">
+				Times before 1970 with fractional milliseconds were parsed incorrectly. Thanks
+				to GitHub user @CarthageKing for reporting!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

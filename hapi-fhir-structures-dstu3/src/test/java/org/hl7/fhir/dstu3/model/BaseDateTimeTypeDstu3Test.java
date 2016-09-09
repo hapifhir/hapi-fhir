@@ -11,6 +11,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -19,6 +21,7 @@ import java.util.TimeZone;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,6 +30,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -54,6 +58,7 @@ public class BaseDateTimeTypeDstu3Test {
 	/**
 	 * Test for #57
 	 */
+	@SuppressWarnings("unused")
 	@Test
 	public void testConstructorRejectsInvalidPrecision() {
 		try {
@@ -100,7 +105,7 @@ public class BaseDateTimeTypeDstu3Test {
 		verifyFails("2016-0");
 		verifyFails("2016-02-0");
 	}
-	
+
 	/**
 	 * Test for #57
 	 */
@@ -157,7 +162,7 @@ public class BaseDateTimeTypeDstu3Test {
 		verifyFails("1974-12-25T22:11:Z");
 		verifyFails("1974-12-25T22:11:1Z");
 	}
-
+	
 	@Test
 	public void testDateTimeFormatsInvalidMillis() {
 		verifyFails("1974-12-01T00:00:00.AZ");
@@ -283,14 +288,41 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals("1990-01-03T02:22Z", date.getValueAsString());
 	}
 
-
-
 	@Test
 	public void testNewInstance() throws InterruptedException {
 		InstantType now = InstantType.withCurrentTime();
 		Thread.sleep(100);
 		InstantType then = InstantType.withCurrentTime();
 		assertTrue(now.getValue().before(then.getValue()));
+	}
+
+
+
+	/**
+	 * See #444
+	 */
+	@Test
+	public void testParseAndEncodeDateBefore1970() {
+		LocalDateTime ldt = LocalDateTime.of(1960, 9, 7, 0, 44, 25, 12387401);
+		Date from = Date.from(ldt.toInstant(ZoneOffset.UTC));
+		InstantType type = (InstantType) new InstantType(from).setTimeZoneZulu(true);
+		String encoded = type.asStringValue();
+		
+		ourLog.info("LDT:      "+ ldt.toString());
+		ourLog.info("Expected: "+"1960-09-07T00:44:25.012");
+		ourLog.info("Actual:   "+encoded);
+		
+		assertEquals("1960-09-07T00:44:25.012Z", encoded);
+		
+		type = new InstantType(encoded);
+		assertEquals(1960, type.getYear().intValue());
+		assertEquals(8, type.getMonth().intValue()); // 0-indexed unlike LocalDateTime.of
+		assertEquals(7, type.getDay().intValue());
+		assertEquals(0, type.getHour().intValue());
+		assertEquals(44, type.getMinute().intValue());
+		assertEquals(25, type.getSecond().intValue());
+		assertEquals(12, type.getMillis().intValue());
+
 	}
 
 	@Test

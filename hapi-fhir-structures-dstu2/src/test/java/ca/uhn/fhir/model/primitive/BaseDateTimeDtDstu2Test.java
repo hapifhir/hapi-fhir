@@ -3,22 +3,21 @@ package ca.uhn.fhir.model.primitive;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.hamcrest.Matchers;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -34,6 +33,33 @@ public class BaseDateTimeDtDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
 	private SimpleDateFormat myDateInstantParser;
 	private FastDateFormat myDateInstantZoneParser;
+
+	/**
+	 * See #444
+	 */
+	@Test
+	public void testParseAndEncodeDateBefore1970() {
+		LocalDateTime ldt = LocalDateTime.of(1960, 9, 7, 0, 44, 25, 12387401);
+		Date from = Date.from(ldt.toInstant(ZoneOffset.UTC));
+		InstantDt type = (InstantDt) new InstantDt(from).setTimeZoneZulu(true);
+		String encoded = type.getValueAsString();
+		
+		ourLog.info("LDT:      "+ ldt.toString());
+		ourLog.info("Expected: "+"1960-09-07T00:44:25.012");
+		ourLog.info("Actual:   "+encoded);
+		
+		assertEquals("1960-09-07T00:44:25.012Z", encoded);
+		
+		type = new InstantDt(encoded);
+		assertEquals(1960, type.getYear().intValue());
+		assertEquals(8, type.getMonth().intValue()); // 0-indexed unlike LocalDateTime.of
+		assertEquals(7, type.getDay().intValue());
+		assertEquals(0, type.getHour().intValue());
+		assertEquals(44, type.getMinute().intValue());
+		assertEquals(25, type.getSecond().intValue());
+		assertEquals(12, type.getMillis().intValue());
+
+	}
 
 	@Test
 	public void testFromTime() {

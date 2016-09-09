@@ -449,7 +449,12 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		myPrecision = thePrecision;
 		myFractionalSeconds = "";
 		if (theValue != null) {
-			String fractionalSeconds = Integer.toString((int) (theValue.getTime() % 1000));
+			long millis = theValue.getTime() % 1000;
+			if (millis < 0) {
+				// This is for times before 1970 (see bug #444)
+				millis = 1000 + millis;
+			}
+			String fractionalSeconds = Integer.toString((int) millis);
 			myFractionalSeconds = StringUtils.leftPad(fractionalSeconds, 3, '0');
 		}
 		super.setValue(theValue);
