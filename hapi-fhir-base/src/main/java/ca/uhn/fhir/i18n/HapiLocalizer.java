@@ -39,13 +39,19 @@ public class HapiLocalizer {
 	private List<ResourceBundle> myBundle = new ArrayList<ResourceBundle>();
 
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<String, MessageFormat>();
+	private String[] myBundleNames;
 
 	public HapiLocalizer() {
 		this(HapiLocalizer.class.getPackage().getName() + ".hapi-messages");
 	}
 
 	public HapiLocalizer(String... theBundleNames) {
-		for (String nextName : theBundleNames) {
+		myBundleNames = theBundleNames;
+		init();
+	}
+
+	protected void init() {
+		for (String nextName : myBundleNames) {
 			myBundle.add(ResourceBundle.getBundle(nextName));
 		}
 	}
