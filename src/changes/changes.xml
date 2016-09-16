@@ -42,6 +42,13 @@
 				default type for profile is used. Thanks to
 				Filip Domazet for the pull request!
 			</action>
+			<action type="fix" issue="445">
+				STU3 servers were adding the old MimeType
+				strings to the 
+				<![CDATA[<code>Conformance.format</code>]]>
+				part of the generated server conformance
+				statement
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
