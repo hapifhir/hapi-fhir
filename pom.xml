@@ -241,6 +241,10 @@
 			<name>Matt Clarke</name>
 			<organization>Orion Health</organization>
 		</developer>
+		<developer>
+			<id>FilipDomazet</id>
+			<name>Filip Domazet</name>
+		</developer>
 	</developers>
 
 	<licenses>

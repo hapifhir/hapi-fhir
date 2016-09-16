@@ -36,6 +36,12 @@
 				Times before 1970 with fractional milliseconds were parsed incorrectly. Thanks
 				to GitHub user @CarthageKing for reporting!
 			</action>
+			<action type="fix" issue="448">
+				Prevent crash in parser when parsing resource
+				with multiple profile declarations when
+				default type for profile is used. Thanks to
+				Filip Domazet for the pull request!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
