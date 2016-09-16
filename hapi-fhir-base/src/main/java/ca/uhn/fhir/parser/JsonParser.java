@@ -205,7 +205,7 @@ public class JsonParser extends BaseParser implements IParser {
 		JsonWriter eventWriter = createJsonWriter(theWriter);
 
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null, false);
+		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null, false, false);
 		eventWriter.flush();
 	}
 
@@ -320,7 +320,7 @@ public class JsonParser extends BaseParser implements IParser {
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
-				encodeResourceToJsonStreamWriter(resDef, resource, theEventWriter, "content", false);
+				encodeResourceToJsonStreamWriter(resDef, resource, theEventWriter, "content", false, true);
 			}
 
 			if (nextEntry.getSummary().isEmpty() == false) {
@@ -374,7 +374,7 @@ public class JsonParser extends BaseParser implements IParser {
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
-				encodeResourceToJsonStreamWriter(resDef, resource, theEventWriter, "resource", false);
+				encodeResourceToJsonStreamWriter(resDef, resource, theEventWriter, "resource", false, true);
 			}
 
 			if (nextEntry.getSearchMode().isEmpty() == false || nextEntry.getScore().isEmpty() == false) {
@@ -551,7 +551,7 @@ public class JsonParser extends BaseParser implements IParser {
 		case RESOURCE:
 			IBaseResource resource = (IBaseResource) theNextValue;
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
-			encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, false);
+			encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, false, true);
 			break;
 		case UNDECL_EXT:
 		default:
@@ -812,7 +812,7 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theNextValue, theEventWriter, theContainedResource, theParent);
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonWriter theEventWriter, String theObjectNameOrNull, boolean theContainedResource) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonWriter theEventWriter, String theObjectNameOrNull, boolean theContainedResource, boolean theSubResource) throws IOException {
 		IIdType resourceId = null;
 		//		if (theResource instanceof IResource) {
 		//			IResource res = (IResource) theResource;
@@ -843,7 +843,7 @@ public class JsonParser extends BaseParser implements IParser {
 		if (!theContainedResource) {
 			if (super.shouldEncodeResourceId(theResource) == false) {
 				resourceId = null;
-			} else if (getEncodeForceResourceId() != null) {
+			} else if (!theSubResource && getEncodeForceResourceId() != null) {
 				resourceId = getEncodeForceResourceId();
 			}
 		}

@@ -49,6 +49,12 @@
 				part of the generated server conformance
 				statement
 			</action>
+			<action type="fix" issue="446">
+				When performing an update using the client on a resource that
+				contains other resources (e.g. Bundle update), all child resources in the
+				parent bundle were incorrectly given the ID of the parent. Thanks
+				to Filip Domazet for reporting!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

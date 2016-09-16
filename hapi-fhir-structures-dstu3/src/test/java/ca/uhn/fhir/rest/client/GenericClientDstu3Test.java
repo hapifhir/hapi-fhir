@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -26,6 +27,7 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
@@ -735,6 +737,93 @@ public class GenericClientDstu3Test {
 		}
 	}
 
+	@Test
+	public void testPutDoesntForceAllIdsXml() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+		
+		Patient patient = new Patient();
+		patient.setId("PATIENT1");
+		patient.addName().addFamily("PATIENT1");
+		
+		Bundle bundle = new Bundle();
+		bundle.setId("BUNDLE1");
+		bundle.addEntry().setResource(patient);
+		
+		final String encoded = p.encodeResourceToString(bundle);
+		assertEquals("<Bundle xmlns=\"http://hl7.org/fhir\"><id value=\"BUNDLE1\"/><entry><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"PATIENT1\"/><name><family value=\"PATIENT1\"/></name></Patient></resource></entry></Bundle>", encoded);
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(encoded), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		//@formatter:off
+		client
+			.update()
+			.resource(bundle)
+			.prefer(PreferReturnEnum.REPRESENTATION)
+			.execute();
+		
+		HttpPut httpRequest = (HttpPut) capt.getValue();
+		assertEquals("http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
+		
+		String requestString = IOUtils.toString(httpRequest.getEntity().getContent(), StandardCharsets.UTF_8);
+		assertEquals(encoded, requestString);
+	}
+	
+	@Test
+	public void testPutDoesntForceAllIdsJson() throws Exception {
+		IParser p = ourCtx.newJsonParser();
+		
+		Patient patient = new Patient();
+		patient.setId("PATIENT1");
+		patient.addName().addFamily("PATIENT1");
+		
+		Bundle bundle = new Bundle();
+		bundle.setId("BUNDLE1");
+		bundle.addEntry().setResource(patient);
+		
+		final String encoded = p.encodeResourceToString(bundle);
+		assertEquals("{\"resourceType\":\"Bundle\",\"id\":\"BUNDLE1\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"PATIENT1\",\"name\":[{\"family\":[\"PATIENT1\"]}]}}]}", encoded);
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(encoded), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		//@formatter:off
+		client
+			.update()
+			.resource(bundle)
+			.prefer(PreferReturnEnum.REPRESENTATION)
+			.encodedJson()
+			.execute();
+		
+		HttpPut httpRequest = (HttpPut) capt.getValue();
+		assertEquals("http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
+		
+		String requestString = IOUtils.toString(httpRequest.getEntity().getContent(), StandardCharsets.UTF_8);
+		assertEquals(encoded, requestString);
+	}
+	
 	@Test
 	public void testResponseHasContentTypeMissing() throws Exception {
 		IParser p = ourCtx.newXmlParser();
