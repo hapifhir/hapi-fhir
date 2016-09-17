@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+
 public interface IPatchTyped extends IPatchExecutable {
 
 	IPatchExecutable withId(IIdType theId);
@@ -42,5 +44,18 @@ public interface IPatchTyped extends IPatchExecutable {
 	 * @since HAPI 0.9 / FHIR DSTU 2
 	 */
 	IPatchWithQuery conditional();
+	
+	/**
+	 * Specifies the format of the patch (either XML or JSON)
+	 * @param patchType 
+	 */
+	IPatchTyped patchType(PatchTypeEnum patchType);
+	
+	/**
+	 * The body of the patch document serialized in either XML or JSON which conforms to
+	 * http://jsonpatch.com/ or http://tools.ietf.org/html/rfc5261
+	 * @param patchBody
+	 */
+	IPatchTyped patchBody(String patchBody);
 
 }

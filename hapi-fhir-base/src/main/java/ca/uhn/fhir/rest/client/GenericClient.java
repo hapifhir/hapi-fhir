@@ -69,6 +69,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -2327,6 +2328,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
+		private PatchTypeEnum myPatchType;
+		private String myPatchBody;
 
 		@Override
 		public IPatchWithQueryTyped and(ICriterion<?> theCriterion) {
@@ -2356,22 +2359,23 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (getParamEncoding() != null) {
 				myResourceBody = null;
 			}
-
-			BaseHttpClientInvocation invocation;
-			if (mySearchUrl != null) {
-				invocation = MethodUtil.createPatchInvocation(myContext, myResource, myResourceBody, mySearchUrl);
-			} else if (myCriterionList != null) {
-				invocation = MethodUtil.createPatchInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
-			} else {
-				if (myId == null) {
-					myId = myResource.getIdElement();
-				}
-
-				if (myId == null || myId.hasIdPart() == false) {
-					throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
-				}
-				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+			
+			if (myPatchType == null) {
+				throw new InvalidRequestException("No patch type supplied, cannot invoke server");
 			}
+			if (myPatchBody == null) {
+				throw new InvalidRequestException("No patch body supplied, cannot invoke server");
+			}
+
+			
+			if (myId == null) {
+				myId = myResource.getIdElement();
+			}
+
+			if (myId == null || myId.hasIdPart() == false) {
+				throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
+			}
+			BaseHttpClientInvocation invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
 
 			addPreferHeader(myPrefer, invocation);
 
@@ -2432,6 +2436,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
 			}
 			myId = new IdDt(theId);
+			return this;
+		}
+
+		@Override
+		public IPatchTyped patchType(PatchTypeEnum patchType) {
+			myPatchType = patchType;
+			return this;
+		}
+
+		@Override
+		public IPatchTyped patchBody(String patchBody) {
+			myPatchBody = patchBody;
 			return this;
 		}
 
