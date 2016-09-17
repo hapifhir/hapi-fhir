@@ -1589,11 +1589,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		Set<String> expectedIds = new HashSet<String>();
-		expectedIds.add(p1Id.getValue());
-		expectedIds.add(p2Id.getValue());
+		expectedIds.add(p1Id.getIdPart());
+		expectedIds.add(p2Id.getIdPart());
 		Set<String> actualIds = new HashSet<String>();
 		for (BundleEntry ele : actual.getEntries()) {
-			actualIds.add(ele.getResource().getId().getValue());
+			actualIds.add(ele.getResource().getId().getIdPart());
 		}
 		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
 	}
