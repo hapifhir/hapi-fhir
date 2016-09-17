@@ -22,7 +22,7 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 		super(theMethod, theContext, theMethodAnnotationType, theProvider);
 
 		Class<? extends IBaseResource> resourceType = theResourceTypeFromAnnotation;
-		if (resourceType != IResource.class) {
+		if (resourceType != IBaseResource.class) {
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
 			myResourceName = def.getName();
 		} else {

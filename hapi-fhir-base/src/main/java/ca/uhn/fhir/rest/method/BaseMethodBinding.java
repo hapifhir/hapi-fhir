@@ -402,7 +402,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from type " + theMethod.getDeclaringClass().getCanonicalName() + " is annotated with @"
 						+ GetTags.class.getSimpleName() + " but does not return type " + TagList.class.getName());
 			}
-		} else if (MethodOutcome.class.equals(returnTypeFromMethod)) {
+		} else if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a method outcome
 		} else if (IBundleProvider.class.equals(returnTypeFromMethod)) {
 			// returns a bundle provider

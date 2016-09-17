@@ -2359,9 +2359,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			BaseHttpClientInvocation invocation;
 			if (mySearchUrl != null) {
-				invocation = MethodUtil.createPatchInvocation(myContext, myResource, myResourceBody, mySearchUrl);
+				invocation = null;//MethodUtil.createPatchInvocation(myContext, myResource, myResourceBody, mySearchUrl);
 			} else if (myCriterionList != null) {
-				invocation = MethodUtil.createPatchInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
+				invocation = null;//MethodUtil.createPatchInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
 			} else {
 				if (myId == null) {
 					myId = myResource.getIdElement();

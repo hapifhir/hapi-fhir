@@ -99,7 +99,18 @@
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
 		</dependency>
-		
+
+		<!-- Patch Dependencies -->
+		<dependency>
+			<groupId>net.riotopsys</groupId>
+			<artifactId>json_patch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.dnault</groupId>
+			<artifactId>xml-patch</artifactId>
+			<version>0.3.0</version>
+		</dependency>
+
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
 		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> 
 			</exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> 

@@ -40,6 +40,17 @@
 		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
 	</scm>
 
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>bintray-dnault-maven</id>
+			<name>bintray</name>
+			<url>http://dl.bintray.com/dnault/maven</url>
+		</repository>
+	</repositories>
+
 	<description>
 	</description>
 
@@ -303,6 +314,11 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>1.1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.dnault</groupId>
+				<artifactId>xml-patch</artifactId>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
