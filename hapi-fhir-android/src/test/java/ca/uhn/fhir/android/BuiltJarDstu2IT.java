@@ -1,11 +1,13 @@
 package ca.uhn.fhir.android;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import javax.naming.ConfigurationException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -19,52 +21,49 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 
-public class BuiltJarIT {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarIT.class);
+public class BuiltJarDstu2IT {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2IT.class);
 
 	@BeforeClass
 	public static void beforeClass() {
-		System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
-		System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+		System.setProperty("javax.xml.stream.XMLInputFactory", "FOO");
+		System.setProperty("javax.xml.stream.XMLOutputFactory", "FOO");
 	}
-	
+
 	@Test
 	public void testParserXml() throws Exception {
-		try {
-			Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
-		} catch (ClassNotFoundException e) {
-			return;
-		}
-		
+
 		FhirContext ctx = FhirContext.forDstu2();
-		
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("system");
-		
-		String str = ctx.newXmlParser().encodeResourceToString(p);
-		Patient p2 = ctx.newXmlParser().parseResource(Patient.class, str);
-		
-		assertEquals("system", p2.getIdentifierFirstRep().getSystemElement().getValueAsString());
+
+		try {
+			ctx.newXmlParser().encodeResourceToString(p);
+			fail();
+		} catch (ca.uhn.fhir.context.ConfigurationException e) {
+			assertEquals("Unable to initialize StAX - XML processing is disabled",e.getMessage());
+		}
 	}
-	
+
 	@Test
 	public void testParserJson() {
-		
+
 		FhirContext ctx = FhirContext.forDstu2();
-		
+
 		Observation o = new Observation();
 		o.getCode().setText("TEXT");
 		o.setValue(new QuantityDt(123));
 		o.addIdentifier().setSystem("system");
-		
+
 		String str = ctx.newJsonParser().encodeResourceToString(o);
 		Observation p2 = ctx.newJsonParser().parseResource(Observation.class, str);
-		
+
 		assertEquals("TEXT", p2.getCode().getText());
-		
+
 		QuantityDt dt = (QuantityDt) p2.getValue();
 		dt.getComparatorElement().getValueAsEnum();
-		
+
 	}
 
 	/**
@@ -74,6 +73,7 @@ public class BuiltJarIT {
 	 * Disabled for now - TODO: add the old version of the apache client (the one that
 	 * android uses) and see if this passes
 	 */
+	@SuppressWarnings("deprecation")
 	public void testClient() {
 		FhirContext ctx = FhirContext.forDstu2();
 		try {
@@ -83,7 +83,7 @@ public class BuiltJarIT {
 			// this is good
 		}
 	}
-	
+
 	/**
 	 * Android does not like duplicate entries in the JAR
 	 */
@@ -105,15 +105,15 @@ public class BuiltJarIT {
 			if (file.getName().contains("original.jar")) {
 				continue;
 			}
-			
+
 			ourLog.info("Testing file: {}", file);
 
 			ZipFile zip = new ZipFile(file);
-			
+
 			int totalClasses = 0;
 			int totalMethods = 0;
 			TreeSet<ClassMethodCount> topMethods = new TreeSet<ClassMethodCount>();
-			
+
 			try {
 				Set<String> names = new HashSet<String>();
 				for (Enumeration<? extends ZipEntry> iter = zip.entries(); iter.hasMoreElements();) {
@@ -122,16 +122,16 @@ public class BuiltJarIT {
 					if (!names.add(nextName)) {
 						throw new Exception("File " + file + " contains duplicate contents: " + nextName);
 					}
-					
+
 					if (nextName.contains("$") == false) {
 						if (nextName.endsWith(".class")) {
 							String className = nextName.replace("/", ".").replace(".class", "");
 							try {
-							Class<?> clazz = Class.forName(className);
-							int methodCount = clazz.getMethods().length;
-							topMethods.add(new ClassMethodCount(className, methodCount));
-							totalClasses++;
-							totalMethods += methodCount;
+								Class<?> clazz = Class.forName(className);
+								int methodCount = clazz.getMethods().length;
+								topMethods.add(new ClassMethodCount(className, methodCount));
+								totalClasses++;
+								totalMethods += methodCount;
 							} catch (NoClassDefFoundError e) {
 								// ignore
 							} catch (ClassNotFoundException e) {
@@ -140,11 +140,11 @@ public class BuiltJarIT {
 						}
 					}
 				}
-				
+
 				ourLog.info("File {} contains {} entries", file, names.size());
 				ourLog.info("Total classes {} - Total methods {}", totalClasses, totalMethods);
-				ourLog.info("Top classes {}", new ArrayList<ClassMethodCount>(topMethods).subList(Math.max(0,topMethods.size() - 10), topMethods.size()));
-				
+				ourLog.info("Top classes {}", new ArrayList<ClassMethodCount>(topMethods).subList(Math.max(0, topMethods.size() - 10), topMethods.size()));
+
 			} finally {
 				zip.close();
 			}
@@ -155,7 +155,7 @@ public class BuiltJarIT {
 
 		private String myClassName;
 		private int myMethodCount;
-		
+
 		public ClassMethodCount(String theClassName, int theMethodCount) {
 			myClassName = theClassName;
 			myMethodCount = theMethodCount;
@@ -186,7 +186,7 @@ public class BuiltJarIT {
 		public void setMethodCount(int theMethodCount) {
 			myMethodCount = theMethodCount;
 		}
-		
+
 	}
-	
+
 }

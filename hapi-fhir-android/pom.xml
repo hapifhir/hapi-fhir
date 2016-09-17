@@ -35,10 +35,6 @@
 					<groupId>commons-codec</groupId>
 					<artifactId>commons-codec</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.codehaus.woodstox</groupId>
-					<artifactId>woodstox-core-asl</artifactId>
-				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -60,6 +56,11 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>woodstox-core-asl</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient-android</artifactId>
 		</dependency>
@@ -74,10 +75,6 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -98,25 +95,59 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
-					<!-- 
-					<classpathDependencyScopeExclude>compile+runtime+test+provided</classpathDependencyScopeExclude>
-					<additionalClasspathElements>
-						<additionalClasspathElement>${project.build.directory}/hapi-fhir-android-${project.version}-dstu2.jar</additionalClasspathElement>
-					</additionalClasspathElements>
-					<classpathDependencyExcludes>
-						<classpathDependencyExclude>ca.uhn.hapi.fhir:hapi-fhir-base</classpathDependencyExclude>
-						<classpathDependencyExclude>org.codehaus.woodstox:*</classpathDependencyExclude>
-						<classpathDependencyExclude>javax.json:*</classpathDependencyExclude>
-						<classpathDependencyExclude>org.glassfish:javax.json</classpathDependencyExclude>
-					</classpathDependencyExcludes>
-					-->
 				</configuration>
 				<executions>
 					<execution>
+						<id>dstu2_shade</id>
 						<goals>
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+						<configuration>
+							<includes>
+								<include>**/*Dstu2ShadeIT.java</include>
+							</includes>
+							<additionalClasspathElements>
+								<additionalClasspathElement>${basedir}/target/hapi-fhir-android-${project.version}-dstu2.jar</additionalClasspathElement>
+							</additionalClasspathElements>
+							<classpathDependencyExcludes>
+								<classpathDependencyExclude>ca.uhn.hapi.fhir:*</classpathDependencyExclude>
+								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
+								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
+							</classpathDependencyExcludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>dstu2</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>**/*Dstu2IT.java</include>
+							</includes>
+							<classpathDependencyExcludes>
+								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
+								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
+							</classpathDependencyExcludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>dstu3</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>**/*Dstu3IT.java</include>
+							</includes>
+							<classpathDependencyExcludes>
+								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
+								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
+							</classpathDependencyExcludes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -130,6 +161,9 @@
 					<artifactSet>
 						<includes combine.children="append">
 							<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
+							<include>org.codehaus.woodstox:woodstox-core-asl</include>
+							<include>javax.xml.stream:stax-api</include>
+							<include>org.codehaus.woodstox:stax2-api</include>
 						</includes>
 					</artifactSet>
 					<relocations>
@@ -140,6 +174,10 @@
 						<relocation>
 							<pattern>javax.json</pattern>
 							<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>com.ctc.wstx.stax</pattern>
+							<shadedPattern>ca.uhn.fhir.repackage.com.ctc.wstx.stax</shadedPattern>
 						</relocation>
 					</relocations>
 					<filters combine.children="append">
@@ -182,8 +220,8 @@
 						<phase>package</phase> 
  						<goals> 
  							<goal>shade</goal> 
- 						</goals>						
-					</execution>		
+ 						</goals>
+					</execution>
 					<!-- dstu jar -->
 					<execution>
 						<id>dstu</id>
@@ -258,6 +296,27 @@
 								</filter>
 							</filters-->
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<classFolders>
+						<classFolder>${basedir}/target/classes</classFolder>
+					</classFolders>
+					<sourceFolders>
+						<sourceFolder>${basedir}/src/main/java</sourceFolder>
+					</sourceFolders>
+					<dumpOnExit>true</dumpOnExit>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>

@@ -63,6 +63,8 @@ public class Constants {
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
+	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
+	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY = CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
 	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";

@@ -55,6 +55,13 @@
 				parent bundle were incorrectly given the ID of the parent. Thanks
 				to Filip Domazet for reporting!
 			</action>
+			<action type="add">
+				STU clients now use an Accept header which 
+				indicates support for both the old MimeTypes
+				(e.g. <![CDATA[<code>application/xml+fhir</code>]]>)
+				and the new MimeTypes
+				(e.g. <![CDATA[<code>application/fhir+xml</code>]]>)
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

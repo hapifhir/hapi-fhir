@@ -1644,7 +1644,7 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals("name=james", ourRequestBodyString);
 
 		assertEquals("application/x-www-form-urlencoded", ourRequestContentType);
-		assertEquals(Constants.CT_FHIR_JSON, ourRequestFirstHeaders.get("Accept").getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, ourRequestFirstHeaders.get("Accept").getValue());
 	}
 
 	@Test

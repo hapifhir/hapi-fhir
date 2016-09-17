@@ -64,6 +64,7 @@ import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.TestUtil;
@@ -204,7 +205,7 @@ public class GenericClientDstu3Test {
 		validateUserAgent(capt);
 
 		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		Binary output = ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
@@ -296,7 +297,7 @@ public class GenericClientDstu3Test {
 		validateUserAgent(capt);
 
 		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
 
 	}
@@ -1284,6 +1285,48 @@ public class GenericClientDstu3Test {
 	}
 
 	@Test
+	public void testAcceptHeaderWithEncodingSpecified() throws Exception {
+		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		//@formatter:off
+		client.setEncoding(EncodingEnum.JSON);
+		client.search()
+			.forResource("Device")
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Device?_format=json", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		idx++;
+		
+		//@formatter:off
+		client.setEncoding(EncodingEnum.XML);
+		client.search()
+			.forResource("Device")
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		idx++;
+		
+	}
+
+	@Test
 	public void testSearchForUnknownType() throws Exception {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
@@ -1458,7 +1501,7 @@ public class GenericClientDstu3Test {
 		validateUserAgent(capt);
 
 		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		String body = extractBodyAsString(capt);
 		assertThat(body, containsString("<id value=\"111\"/>"));
 	}
