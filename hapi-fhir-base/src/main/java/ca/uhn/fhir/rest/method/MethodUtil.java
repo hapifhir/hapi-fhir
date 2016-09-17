@@ -158,6 +158,90 @@ public class MethodUtil {
 		retVal.setIfNoneExistString(theIfNoneExistUrl);
 		return retVal;
 	}
+	
+	/** Patch **/
+	
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
+		StringBuilder b = new StringBuilder();
+
+		String resourceType = theContext.getResourceDefinition(theResource).getName();
+		b.append(resourceType);
+
+		boolean haveQuestionMark = false;
+		for (Entry<String, List<String>> nextEntry : theMatchParams.entrySet()) {
+			for (String nextValue : nextEntry.getValue()) {
+				b.append(haveQuestionMark ? '&' : '?');
+				haveQuestionMark = true;
+				b.append(UrlUtil.escape(nextEntry.getKey()));
+				b.append('=');
+				b.append(UrlUtil.escape(nextValue));
+			}
+		}
+
+		HttpPatchClientInvocation retVal;
+		if (StringUtils.isBlank(theResourceBody)) {
+			retVal = new HttpPatchClientInvocation(theContext, theResource, b.toString());
+		} else {
+			retVal = new HttpPatchClientInvocation(theContext, theResourceBody, false, b.toString());
+		}
+
+		addTagsToPostOrPut(theContext, theResource, retVal);
+
+		return retVal;
+	}
+
+	
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, String theMatchUrl) {
+		HttpPatchClientInvocation retVal;
+		if (StringUtils.isBlank(theResourceBody)) {
+			retVal = new HttpPatchClientInvocation(theContext, theResource, theMatchUrl);
+		} else {
+			retVal = new HttpPatchClientInvocation(theContext, theResourceBody, false, theMatchUrl);
+		}
+
+		addTagsToPostOrPut(theContext, theResource, retVal);
+
+		return retVal;
+	}
+
+	public static HttpPatchClientInvocation createPatchInvocation(IBaseResource theResource, String theResourceBody, IIdType theId, FhirContext theContext) {
+		String resourceName = theContext.getResourceDefinition(theResource).getName();
+		StringBuilder urlBuilder = new StringBuilder();
+		urlBuilder.append(resourceName);
+		urlBuilder.append('/');
+		urlBuilder.append(theId.getIdPart());
+		String urlExtension = urlBuilder.toString();
+
+		HttpPatchClientInvocation retVal;
+		if (StringUtils.isBlank(theResourceBody)) {
+			retVal = new HttpPatchClientInvocation(theContext, theResource, urlExtension);
+		} else {
+			retVal = new HttpPatchClientInvocation(theContext, theResourceBody, false, urlExtension);
+		}
+		
+		retVal.setForceResourceId(theId);
+
+		if (theId.hasVersionIdPart()) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
+			} else {
+				String versionId = theId.getVersionIdPart();
+				if (StringUtils.isNotBlank(versionId)) {
+					urlBuilder.append('/');
+					urlBuilder.append(Constants.PARAM_HISTORY);
+					urlBuilder.append('/');
+					urlBuilder.append(versionId);
+					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
+				}
+			}
+		}
+
+		addTagsToPostOrPut(theContext, theResource, retVal);
+		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+
+		return retVal;
+	}
+	/** End Patch **/
 
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
 		StringBuilder b = new StringBuilder();
@@ -188,6 +272,7 @@ public class MethodUtil {
 		return retVal;
 	}
 
+	
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, String theMatchUrl) {
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
