@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IHistory;
 import ca.uhn.fhir.rest.gclient.IMeta;
 import ca.uhn.fhir.rest.gclient.IOperation;
+import ca.uhn.fhir.rest.gclient.IPatch;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
@@ -253,6 +254,35 @@ public interface IGenericClient extends IRestfulClient {
 	@Override
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
+
+	/**
+	 * Fluent method for the "patch" operation, which performs a logical patch on a server resource
+	 */
+	IPatch patch();
+
+	/**
+	 * Implementation of the "instance patch" method.
+	 * 
+	 * @param theId
+	 *            The ID to update
+	 * @param theResource
+	 *            The new resource body
+	 * @return An outcome containing the results and possibly the new version ID
+	 */
+	MethodOutcome patch(IdDt theId, IBaseResource theResource);
+
+	/**
+	 * Implementation of the "instance update" method.
+	 * 
+	 * @param theId
+	 *            The ID to update
+	 * @param theResource
+	 *            The new resource body
+	 * @return An outcome containing the results and possibly the new version ID
+	 */
+	MethodOutcome patch(String theId, IBaseResource theResource);
+
+	
 	/**
 	 * Search for resources matching a given set of criteria. Searching is a very powerful
 	 * feature in FHIR with many features for specifying exactly what should be seaerched for 
