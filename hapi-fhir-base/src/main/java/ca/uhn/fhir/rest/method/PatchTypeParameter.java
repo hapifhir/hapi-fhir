@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -28,33 +30,43 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-class ServletRequestParameter implements IParameter {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletRequestParameter.class);
-
-	ServletRequestParameter() {
-		super();
-	}
-	
+class PatchTypeParameter implements IParameter {
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
-		/*
-		 * Does nothing, since we just ignore HttpServletRequest arguments
-		 */
-		ourLog.trace("Ignoring HttpServletRequest argument: {}", theSourceClientArgument);
+		// nothing
 	}
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		return ((ServletRequestDetails) theRequest).getServletRequest();
+		return getTypeForRequestOrThrowInvalidRequestException(theRequest);
 	}
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore
+	}
+
+	public static PatchTypeEnum getTypeForRequestOrThrowInvalidRequestException(RequestDetails theRequest) {
+		String contentTypeAll = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
+		String contentType = contentTypeAll;
+		int semiColonIdx = contentType.indexOf(';');
+		if (semiColonIdx != -1) {
+			contentType = contentTypeAll.substring(0, semiColonIdx);
+		}
+		contentType = contentType.trim();
+		if (Constants.CT_JSON_PATCH.equals(contentType)) {
+			return PatchTypeEnum.JSON_PATCH;
+		} else if (Constants.CT_XML_PATCH.equals(contentType)) {
+			return PatchTypeEnum.XML_PATCH;
+		} else {
+			throw new InvalidRequestException("Invalid Content-Type for PATCH operation: " + contentTypeAll);
+		}
 	}
 
 }

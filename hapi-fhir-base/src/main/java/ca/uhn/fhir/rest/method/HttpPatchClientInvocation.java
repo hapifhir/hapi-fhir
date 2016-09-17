@@ -28,29 +28,34 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
-public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
+public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 
 	private String myUrlPath;
 	private Map<String, List<String>> myParams;
+	private String myContents;
+	private String myContentType;
 
-	public HttpDeleteClientInvocation(FhirContext theContext, IIdType theId) {
+	public HttpPatchClientInvocation(FhirContext theContext, IIdType theId, String theContentType, String theContents) {
 		super(theContext);
 		myUrlPath = theId.toUnqualifiedVersionless().getValue();
+		myContentType = theContentType;
+		myContents = theContents;
 	}
-
-	public HttpDeleteClientInvocation(FhirContext theContext, String theSearchUrl) {
-		super(theContext);
-		myUrlPath = theSearchUrl;
-	}
-
-	public HttpDeleteClientInvocation(FhirContext theContext, String theResourceType, Map<String, List<String>> theParams) {
-		super(theContext);
-		myUrlPath = theResourceType;
-		myParams = theParams;
-	}
+//
+//	public HttpDeleteClientInvocation(FhirContext theContext, String theSearchUrl) {
+//		super(theContext);
+//		myUrlPath = theSearchUrl;
+//	}
+//
+//	public HttpDeleteClientInvocation(FhirContext theContext, String theResourceType, Map<String, List<String>> theParams) {
+//		super(theContext);
+//		myUrlPath = theResourceType;
+//		myParams = theParams;
+//	}
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
@@ -64,13 +69,16 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
-		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.DELETE);
+		
+		
+		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.PATCH);
 	}
 
 	@Override
 	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		// TODO Auto-generated method stub
-		return super.createHttpRequest(theUrl, theEncoding, theRequestType);
+		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, getHeaders());
+		return httpClient.createByteRequest(getContext(), myContents, myContentType, null);
 	}
 
+	
 }

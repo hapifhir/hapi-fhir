@@ -168,6 +168,8 @@ public class Constants {
 	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
+	public static final String CT_JSON_PATCH = "application/json-patch+json";
+	public static final String CT_XML_PATCH = "application/xml-patch+xml";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.annotation;
 
+import java.lang.annotation.ElementType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -10,7 +12,7 @@ package ca.uhn.fhir.rest.annotation;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,34 +22,32 @@ package ca.uhn.fhir.rest.annotation;
  * #L%
  */
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
-
 /**
- * RESTful method annotation to be used for the FHIR
- * <a href="http://hl7.org/implement/standards/fhir/http.html#delete">delete</a> method.
+ * RESTful method annotation to be used for the proposed FHIR
+ * PATCH method
  * 
  * <p>
- * Delete is used to remove an existing resource, meaning that any attempts to
- * do a non-version-specific read of that resource will fail.
+ * Patch is used to apply a differential to a resource in either
+ * XML or JSON format
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.METHOD)
-public @interface Delete {
-	
+@Target({ ElementType.METHOD })
+public @interface Patch {
+
 	/**
 	 * The return type for this search method. This generally does not need
 	 * to be populated for a server implementation, since servers will return
 	 * only one resource per class, but generally does need to be populated
-	 * for client implementations. 
+	 * for client implementations.
 	 */
 	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
-	Class<? extends IBaseResource> type() default IBaseResource.class;	
+	Class<? extends IBaseResource> type() default IBaseResource.class;
+
 }
