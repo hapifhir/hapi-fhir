@@ -1,12 +1,13 @@
 package ca.uhn.fhir.rest.method;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.ListIterator;
+import java.util.Set;
 
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.xml.ResourceEntityResolver;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -17,7 +18,6 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -34,14 +34,16 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	public PatchMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, theProvider, Patch.class, theMethod.getAnnotation(Patch.class).type());
 
-		for (ListIterator<Parameter> iter = Arrays.asList(theMethod.getParameters()).listIterator(); iter.hasNext();) {
+		for (ListIterator<Class<?>> iter = Arrays.asList(theMethod.getParameterTypes()).listIterator(); iter.hasNext();) {
 			int nextIndex = iter.nextIndex();
-			Parameter next = iter.next();
-			if (next.getType().equals(PatchTypeEnum.class)) {
+			Class<?> next = iter.next();
+			if (next.equals(PatchTypeEnum.class)) {
 				myPatchTypeParameterIndex = nextIndex;
 			}
-			if (next.getAnnotation(ResourceParam.class) != null) {
-				myResourceParamIndex = nextIndex;
+			for (Annotation nextAnnotation : theMethod.getParameterAnnotations()[nextIndex]) {
+				if (nextAnnotation instanceof ResourceParam) {
+					myResourceParamIndex = nextIndex;
+				}
 			}
 		}
 
@@ -100,9 +102,9 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 
 		PatchTypeEnum patchType = (PatchTypeEnum) theArgs[myPatchTypeParameterIndex];
 		String body = (String) theArgs[myResourceParamIndex];
-		
+
 		HttpPatchClientInvocation retVal = createPatchInvocation(getContext(), idDt, patchType, body);
-		
+
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
 			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
@@ -118,7 +120,9 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-		theParams[getIdParameterIndex()] = theRequest.getId();
+		IIdType id = theRequest.getId();
+		id = UpdateMethodBinding.applyETagAsVersion(theRequest, id);
+		theParams[getIdParameterIndex()] = id;
 	}
 
 	@Override

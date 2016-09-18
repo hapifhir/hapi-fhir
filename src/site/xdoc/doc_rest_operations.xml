@@ -218,7 +218,24 @@
 				<param name="id" value="updatePrefer" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
+			
+			<h4>Contention Aware Updating</h4>
 
+			<p>
+				As of FHIR DSTU2, FHIR uses the <code>ETag</code> header to
+				provide "conention aware updating". Under this scheme, a client
+				may create a request that contains an ETag specifying the version,
+				and the server will fail if the given version is not the latest 
+				version.
+			</p>
+			<p>
+				Such a request is shown below. In the following example, the update will
+				only be applied if resource "Patient/123" is currently at version "3".
+				Otherwise, 
+			</p>
+			<pre><![CDATA[PUT [serverBase]/Patient/123
+If-Match: W/"3"]]></pre>
+			
 			<a name="instance_delete" />
 		</section>
 

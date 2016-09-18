@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -40,6 +41,7 @@ public class PatchDstu3Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static String ourLastMethod;
+	private static PatchTypeEnum ourLastPatchType;
 
 	@Before
 	public void before() {
@@ -67,6 +69,7 @@ public class PatchDstu3Test {
 		assertEquals("patientPatch", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.getValue());
 		assertEquals(requestContents, ourLastBody);
+		assertEquals(PatchTypeEnum.JSON_PATCH, ourLastPatchType);
 	}
 
 	@Test
@@ -88,6 +91,7 @@ public class PatchDstu3Test {
 		assertEquals("patientPatch", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.getValue());
 		assertEquals(requestContents, ourLastBody);
+		assertEquals(PatchTypeEnum.XML_PATCH, ourLastPatchType);
 	}
 
 	@Test
@@ -171,10 +175,11 @@ public class PatchDstu3Test {
 
 		//@formatter:off
 		@Patch
-		public OperationOutcome patientPatch(@IdParam IdType theId, @ResourceParam String theBody) {
+		public OperationOutcome patientPatch(@IdParam IdType theId, PatchTypeEnum thePatchType, @ResourceParam String theBody) {
 			ourLastMethod = "patientPatch";
 			ourLastBody = theBody;
 			ourLastId = theId;
+			ourLastPatchType = thePatchType;
 			OperationOutcome retVal = new OperationOutcome();
 			retVal.getText().setDivAsString("<div>OK</div>");
 			return retVal;

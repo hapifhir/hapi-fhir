@@ -1078,8 +1078,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails) {
 		ResourceTable entityToUpdate = readEntityLatestVersion(theId);
-		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
-			throw new PreconditionFailedException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
+		if (theId.hasVersionIdPart()) {
+			if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
+				throw new PreconditionFailedException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
+			}
 		}
 		
 		validateResourceType(entityToUpdate);

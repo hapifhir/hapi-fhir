@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util.xmlpatch;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.github.dnault.xmlpatch.Patcher;
-import com.phloc.commons.io.streams.StringInputStream;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -23,7 +23,7 @@ public class XmlPatchUtils {
 		
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
 		try {
-			Patcher.patch(new StringInputStream(inputResource, StandardCharsets.UTF_8), new StringInputStream(thePatchBody, StandardCharsets.UTF_8), result);
+			Patcher.patch(new ByteArrayInputStream(inputResource.getBytes(StandardCharsets.UTF_8)), new ByteArrayInputStream(thePatchBody.getBytes(StandardCharsets.UTF_8)), result);
 		} catch (IOException e) {
 			throw new InternalErrorException(e);
 		}
