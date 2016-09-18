@@ -84,7 +84,7 @@
 			<action type="fix">
 				Server history operation did not populate the Bundle.entry.request.url
 				field, which is required in order for the bundle to pass validation.
-				Thanks to Richard Kavanaugh for spotting this!  
+				Thanks to Richard Ettema for spotting this!  
 			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -59,9 +60,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class LoggingInterceptorDstu2Test {
 
 	private static CloseableHttpClient ourClient;
@@ -70,6 +68,7 @@ public class LoggingInterceptorDstu2Test {
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
+	private static int ourDelayMs;
 	private static Exception ourThrowException;
 
 	@Before
@@ -77,6 +76,7 @@ public class LoggingInterceptorDstu2Test {
 		myInterceptor = mock(IServerInterceptor.class);
 		servlet.setInterceptors(Collections.singletonList(myInterceptor));
 		ourThrowException = null;
+		ourDelayMs=0;
 	}
 
 	@Test
@@ -158,6 +158,27 @@ public class LoggingInterceptorDstu2Test {
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertEquals("read -  - Patient/1 - ", captor.getValue());
+	}
+
+	@Test
+	public void testProcessingTime() throws Exception {
+		ourDelayMs = 110;
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${processingTimeMillis}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertThat(captor.getValue(), matchesPattern("[0-9]{3}"));
 	}
 
 	@Test
@@ -386,7 +407,11 @@ public class LoggingInterceptorDstu2Test {
 		 * @return The resource
 		 */
 		@Read()
-		public Patient getResourceById(@IdParam IdDt theId) {
+		public Patient getResourceById(@IdParam IdDt theId) throws InterruptedException {
+			if (ourDelayMs>0) {
+				Thread.sleep(ourDelayMs);
+			}
+			
 			if (theId.getIdPart().equals("EX")) {
 				throw new InvalidRequestException("FOO");
 			}

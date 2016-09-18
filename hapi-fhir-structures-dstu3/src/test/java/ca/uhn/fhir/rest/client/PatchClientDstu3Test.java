@@ -62,7 +62,7 @@ public class PatchClientDstu3Test {
 	}
 
 	@Test
-	public void testJsonPatch() throws Exception {
+	public void testJsonPatchAnnotation() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = prepareResponse();
 
 		IClientType client = ourCtx.newRestfulClient(IClientType.class, "http://example.com/fhir");
@@ -71,6 +71,26 @@ public class PatchClientDstu3Test {
 		pt.getText().setDivAsString("A PATIENT");
 
 		MethodOutcome outcome = client.patch(new IdType("Patient/123"), "{}", PatchTypeEnum.JSON_PATCH);
+
+		assertEquals("PATCH", capt.getAllValues().get(0).getMethod());
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals("{}", extractBodyAsString(capt));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+	}
+
+	@Test
+	public void testJsonPatchFluent() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = prepareResponse();
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Patient pt = new Patient();
+		pt.getText().setDivAsString("A PATIENT");
+
+		MethodOutcome outcome = client.patch().resource("").
+				
+				patch(new IdType("Patient/123"), "{}", PatchTypeEnum.JSON_PATCH);
 
 		assertEquals("PATCH", capt.getAllValues().get(0).getMethod());
 		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
