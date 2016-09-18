@@ -180,7 +180,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		final ResourceTable entity = readEntityLatestVersion(theId);
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
-			throw new InvalidRequestException("Trying to delete " + theId + " but this is not the current version");
+			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
 		}
 
 		validateOkToDelete(deleteConflicts, entity);
@@ -1038,7 +1038,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) != entity.getVersion()) {
-			throw new InvalidRequestException("Trying to update " + resourceId + " but this is not the current version");
+			throw new ResourceVersionConflictException("Trying to update " + resourceId + " but this is not the current version");
 		}
 
 		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
@@ -1080,7 +1080,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entityToUpdate = readEntityLatestVersion(theId);
 		if (theId.hasVersionIdPart()) {
 			if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
-				throw new PreconditionFailedException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
+				throw new ResourceVersionConflictException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
 			}
 		}
 		

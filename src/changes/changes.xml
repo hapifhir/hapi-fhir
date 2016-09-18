@@ -7,6 +7,18 @@
 	</properties>
 	<body>
 		<release version="2.1" date="TBD">
+			<action type="add">
+				Client, Server, and JPA server now support experimental support
+				for 
+				<![CDATA[HTTP PATCH]]>
+				using the XML Patch and JSON Patch syntax as explored during the
+				September 2016 Baltimore Connectathon. See 
+				<![CDATA[<a href="http://wiki.hl7.org/index.php?title=201609_PATCH_Connectathon_Track_Proposal">this wiki page</a>]]>
+				for a description of the syntax. 
+				<![CDATA[<br/>]]>
+				Thanks to Pater Girard for all of his help during the connectathon
+				in implementing this feature!
+			</action>
 			<action type="fix">
 				In server, when returning a list of resources, the server sometimes failed to add
 				<![CDATA[<code>_include</code>]]> resources to the response bundle if they were
@@ -61,6 +73,13 @@
 				(e.g. <![CDATA[<code>application/xml+fhir</code>]]>)
 				and the new MimeTypes
 				(e.g. <![CDATA[<code>application/fhir+xml</code>]]>)
+			</action>
+			<action type="fix">
+				JPA server now sends correct 
+				<![CDATA[<code>HTTP 409 Version Conflict</code>]]> 
+				when a 
+				DELETE fails because of constraint issues, instead of
+				<![CDATA[<code>HTTP 400 Invalid Request</code>]]> 				
 			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">

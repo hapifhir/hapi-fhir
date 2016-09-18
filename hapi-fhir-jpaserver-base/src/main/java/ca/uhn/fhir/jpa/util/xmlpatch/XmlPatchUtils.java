@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.util.xmlpatch;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.github.dnault.xmlpatch.Patcher;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class XmlPatchUtils {
@@ -23,12 +23,12 @@ public class XmlPatchUtils {
 		
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
 		try {
-			Patcher.patch(new ByteArrayInputStream(inputResource.getBytes(StandardCharsets.UTF_8)), new ByteArrayInputStream(thePatchBody.getBytes(StandardCharsets.UTF_8)), result);
+			Patcher.patch(new ByteArrayInputStream(inputResource.getBytes(Constants.CHARSET_UTF8)), new ByteArrayInputStream(thePatchBody.getBytes(Constants.CHARSET_UTF8)), result);
 		} catch (IOException e) {
 			throw new InternalErrorException(e);
 		}
 		
-		String resultString = new String(result.toByteArray(), StandardCharsets.UTF_8);
+		String resultString = new String(result.toByteArray(), Constants.CHARSET_UTF8);
 		T retVal = theCtx.newXmlParser().parseResource(clazz, resultString);
 		
 		return retVal;
