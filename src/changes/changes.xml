@@ -93,6 +93,15 @@
 				method which means that log lines will be created when processing is finished,
 				instead of when it started.
 			</action>
+			<action type="fix">
+				STU3 clients were not sending the new mimetype values in the
+				<![CDATA[<code>Content-Type</code>]]> header. Thanks to
+				Claude Nanjo for pointing this out!
+			</action>
+			<action type="fix">
+				JAX-RS server was not able to handle the new mime types defined
+				in STU3
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

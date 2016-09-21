@@ -132,8 +132,8 @@ public class LoggingInterceptor extends InterceptorAdapter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
-	private String myErrorMessageFormat = "ERROR - ${idOrResourceName}";
-	private boolean myLogExceptions;
+	private String myErrorMessageFormat = "ERROR - ${operationType} - ${idOrResourceName}";
+	private boolean myLogExceptions = true;
 	private Logger myLogger = ourLog;
 	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
 

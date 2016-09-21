@@ -653,7 +653,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 */
 			resourceMethod.invokeServer(this, requestDetails);
 
-			for (IServerInterceptor next : myInterceptors) {
+			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = getInterceptors().get(i);
 				next.processingCompletedNormally(requestDetails);
 			}
 

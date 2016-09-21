@@ -66,7 +66,7 @@ public class ClientMimetypeDstu3Test {
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div></text></Patient>", extractBodyAsString(capt));
 	}
@@ -86,7 +86,7 @@ public class ClientMimetypeDstu3Test {
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div></text></Patient>", extractBodyAsString(capt));
 	}
@@ -106,7 +106,7 @@ public class ClientMimetypeDstu3Test {
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
 		assertEquals("{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">A PATIENT</div>\"}}", extractBodyAsString(capt));
 	}
@@ -126,7 +126,7 @@ public class ClientMimetypeDstu3Test {
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
 		assertEquals("{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">A PATIENT</div>\"}}", extractBodyAsString(capt));
 	}

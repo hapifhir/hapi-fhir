@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -112,6 +113,8 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
 		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
+		order.verify(myInterceptor2, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
+		order.verify(myInterceptor1, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
 		verifyNoMoreInteractions(myInterceptor1);
 		verifyNoMoreInteractions(myInterceptor2);
 		

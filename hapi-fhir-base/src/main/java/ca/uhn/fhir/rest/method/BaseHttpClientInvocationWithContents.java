@@ -211,8 +211,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private String getContentType(EncodingEnum encoding) {
 		if (myBundle != null || (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1 && ((myContents != null && myContentsIsBundle) || myResources != null))) {
 			return encoding.getBundleContentType();
-		} else {
+		} else if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+			// application/xml+fhir
 			return encoding.getResourceContentType();
+		} else {
+			// application/fhir+xml
+			return encoding.getResourceContentTypeNonLegacy();
 		}
 	}
 

@@ -371,7 +371,10 @@ public interface IServerInterceptor {
 	/**
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
-	 * 
+	 * <p>
+	 * Note that this individual interceptors will have this method called in the reverse order from the order in 
+	 * which the interceptors were registered with the server. 
+	 * </p>
 	 * @param theRequestDetails
 	 *           The request itself
 	 */

@@ -98,9 +98,8 @@ public class LoggingInterceptorDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(2)).info(captor.capture());
-		assertThat(captor.getAllValues().get(0), StringContains.containsString("read - Patient/EX"));
-		assertThat(captor.getAllValues().get(1), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
+		verify(logger, times(1)).info(captor.capture());
+		assertThat(captor.getAllValues().get(0), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
 	}
 
 	@Test
@@ -134,6 +133,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -175,6 +178,10 @@ public class LoggingInterceptorDstu2Test {
 
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -222,6 +229,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
+		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
@@ -232,6 +243,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		interceptor.setErrorMessageFormat("ERROR - ${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
 		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
 
 		Logger logger = mock(Logger.class);
@@ -249,9 +261,13 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
-		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+		assertEquals("ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
 	}
 
 	@Test
@@ -286,7 +302,11 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-
+		
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
+		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertEquals("extended-operation-type - $everything - Patient", captor.getValue());
@@ -304,6 +324,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -324,6 +348,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
+		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
