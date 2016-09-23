@@ -45,6 +45,7 @@ import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.model.api.BaseBundle;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -309,12 +310,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 		writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
 
-		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
-			eventWriter.writeStartElement("author");
-			writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
-			writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
-			eventWriter.writeEndElement();
-		}
+		writeAuthor(eventWriter, theBundle);
 
 		writeCategories(eventWriter, theBundle.getCategories());
 
@@ -365,6 +361,8 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
+
+			writeAuthor(eventWriter, nextEntry);
 
 			writeCategories(eventWriter, nextEntry.getCategories());
 
@@ -1068,6 +1066,15 @@ public class XmlParser extends BaseParser implements IParser {
 		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
 		retVal.addAll(theList);
 		return retVal;
+	}
+
+	private void writeAuthor(XMLStreamWriter theEventWriter, BaseBundle theBundle) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
+			theEventWriter.writeStartElement("author");
+			writeTagWithTextNode(theEventWriter, "name", theBundle.getAuthorName());
+			writeOptionalTagWithTextNode(theEventWriter, "uri", theBundle.getAuthorUri());
+			theEventWriter.writeEndElement();
+		}
 	}
 
 	private void writeAtomLink(XMLStreamWriter theEventWriter, String theRel, StringDt theStringDt) throws XMLStreamException {

@@ -429,6 +429,25 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testEncodeBundleEntryAuthor() {
+
+		Bundle b = new Bundle();
+		BundleEntry e = b.addEntry();
+		e.getAuthorName().setValue("The Author");
+		e.setResource(new Patient());
+
+		String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(val);
+
+		assertThat(val, StringContains.containsString("<name>The Author</name>"));
+
+		b = ourCtx.newXmlParser().parseBundle(val);
+		assertEquals(1, b.getEntries().size());
+		assertEquals("The Author", b.getEntries().get(0).getAuthorName().getValue());
+
+	}
+
+	@Test
 	public void testEncodeBundleCategory() {
 
 		Bundle b = new Bundle();
