@@ -342,7 +342,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
-							ourLog.info("Found bound operation: {}", opName);
+							ourLog.debug("Found bound operation: {}", opName);
 							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
 						}
 					}
@@ -500,7 +500,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					}
 
 					String name = createOperationName(methodBinding);
-					ourLog.info("Detected operation: {}", name);
+					ourLog.debug("Detected operation: {}", name);
 
 					myOperationBindingToName.put(methodBinding, name);
 					if (myOperationNameToBindings.containsKey(name) == false) {
