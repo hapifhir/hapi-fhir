@@ -1,4 +1,5 @@
 ca.uhn.fhir.jpa.entity.ResourceTable/
+ca.*/
 target/
 /bin
 nohup.out

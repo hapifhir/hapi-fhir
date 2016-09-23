@@ -1046,7 +1046,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		try {
 			myPatientDao.delete(id2, mySrd);
 			fail();
-		} catch (InvalidRequestException e) {
+		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 

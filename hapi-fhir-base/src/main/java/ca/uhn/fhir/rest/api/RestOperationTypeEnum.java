@@ -130,7 +130,12 @@ public enum RestOperationTypeEnum {
 	/**
 	 * $meta-delete extended operation
 	 */
-	META_DELETE("$meta-delete"),
+	META_DELETE("$meta-delete"), 
+	
+	/**
+	 * Patch operation
+	 */
+	PATCH("patch"),
 
 	;
 

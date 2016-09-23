@@ -425,6 +425,38 @@ public class XmlParserDstu2Test {
 		ourCtx = null;
 	}
 
+	/**
+	 * See #448
+	 */
+	@Test
+	public void testParseWithMultipleProfiles() {
+		ourCtx = FhirContext.forDstu2();
+		ourCtx.setDefaultTypeForProfile(CustomObservationDstu2.PROFILE, CustomObservationDstu2.class);
+		ourCtx.setDefaultTypeForProfile(CustomDiagnosticReportDstu2.PROFILE, CustomDiagnosticReportDstu2.class);
+
+		//@formatter:off
+		String input = 
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">" +
+				"<meta>" +
+				"<profile value=\"" + CustomDiagnosticReportDstu2.PROFILE + "\"/>" +
+				"<profile value=\"http://custom_DiagnosticReport2\"/>" +
+				"<profile value=\"http://custom_DiagnosticReport3\"/>" +
+				"</meta>" +
+				"<status value=\"final\"/>" +
+			"</DiagnosticReport>";
+		//@formatter:on
+		
+		IParser parser = ourCtx.newXmlParser();
+		CustomDiagnosticReportDstu2 dr = (CustomDiagnosticReportDstu2) parser.parseResource(input);
+		assertEquals(DiagnosticReportStatusEnum.FINAL, dr.getStatusElement().getValueAsEnum());
+
+		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(dr);
+		assertEquals(3, profiles.size());
+		
+		ourCtx = null;
+	}
+
+	
 	@Test
 	public void testEncodeAndParseContainedNonCustomTypes() {
 		ourCtx = FhirContext.forDstu2();

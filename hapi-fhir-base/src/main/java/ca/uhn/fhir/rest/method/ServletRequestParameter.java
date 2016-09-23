@@ -35,6 +35,10 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 class ServletRequestParameter implements IParameter {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletRequestParameter.class);
 
+	ServletRequestParameter() {
+		super();
+	}
+	
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		/*

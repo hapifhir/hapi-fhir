@@ -1,11 +1,13 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -25,10 +27,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -52,6 +51,32 @@ public class ServerMimetypeDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerMimetypeDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
+
+	@Test
+	public void testConformanceMetadataUsesNewMimetypes() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String content = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class, content);
+			List<String> strings = toStrings(conf.getFormat());
+			assertThat(strings, contains(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW));
+		} finally {
+			status.close();
+		}
+	}
+	
+	
+	
+	private List<String> toStrings(List<CodeType> theFormat) {
+		ArrayList<String> retVal = new ArrayList<>();
+		for (CodeType next : theFormat) {
+			retVal.add(next.asStringValue());
+		}
+		return retVal;
+	}
+
+
 
 	@Test
 	public void testCreateWithXmlLegacyNoAcceptHeader() throws Exception {

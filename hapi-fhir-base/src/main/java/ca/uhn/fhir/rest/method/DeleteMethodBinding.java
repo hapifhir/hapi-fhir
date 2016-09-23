@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.method;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,59 +28,19 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
-
-	private String myResourceName;
-	private Integer myIdParameterIndex;
+public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
 
 	public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, Delete.class, theProvider);
-
-		Delete deleteAnnotation = theMethod.getAnnotation(Delete.class);
-		Class<? extends IResource> resourceType = deleteAnnotation.type();
-		if (resourceType != IResource.class) {
-			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
-			myResourceName = def.getName();
-		} else {
-			if (theProvider != null && theProvider instanceof IResourceProvider) {
-				RuntimeResourceDefinition def = theContext.getResourceDefinition(((IResourceProvider) theProvider).getResourceType());
-				myResourceName = def.getName();
-			} else {
-				throw new ConfigurationException(
-						"Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
-			}
-		}
-
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
-		if (myIdParameterIndex == null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
-		}
-
-		Integer versionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
-		if (versionIdParameterIndex != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName() + " annotation but delete methods may not have this annotation");
-		}
-
-	}
-
-	@Override
-	protected boolean allowVoidReturnType() {
-		return true;
+		super(theMethod, theContext, theProvider, Delete.class, theMethod.getAnnotation(Delete.class).type());
 	}
 
 	@Override
@@ -102,13 +62,13 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	public String getResourceName() {
-		return myResourceName;
+	protected boolean allowVoidReturnType() {
+		return true;
 	}
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IdDt idDt = (IdDt) theArgs[myIdParameterIndex];
+		IIdType idDt = (IIdType) theArgs[getIdParameterIndex()];
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
 		}
@@ -136,7 +96,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-		theParams[myIdParameterIndex] = theRequest.getId();
+		theParams[getIdParameterIndex()] = theRequest.getId();
 	}
 
 	@Override

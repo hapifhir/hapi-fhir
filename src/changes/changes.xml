@@ -7,6 +7,18 @@
 	</properties>
 	<body>
 		<release version="2.1" date="TBD">
+			<action type="add">
+				Client, Server, and JPA server now support experimental support
+				for 
+				<![CDATA[HTTP PATCH]]>
+				using the XML Patch and JSON Patch syntax as explored during the
+				September 2016 Baltimore Connectathon. See 
+				<![CDATA[<a href="http://wiki.hl7.org/index.php?title=201609_PATCH_Connectathon_Track_Proposal">this wiki page</a>]]>
+				for a description of the syntax. 
+				<![CDATA[<br/>]]>
+				Thanks to Pater Girard for all of his help during the connectathon
+				in implementing this feature!
+			</action>
 			<action type="fix">
 				In server, when returning a list of resources, the server sometimes failed to add
 				<![CDATA[<code>_include</code>]]> resources to the response bundle if they were
@@ -35,6 +47,60 @@
 			<action type="fix" issue="444">
 				Times before 1970 with fractional milliseconds were parsed incorrectly. Thanks
 				to GitHub user @CarthageKing for reporting!
+			</action>
+			<action type="fix" issue="448">
+				Prevent crash in parser when parsing resource
+				with multiple profile declarations when
+				default type for profile is used. Thanks to
+				Filip Domazet for the pull request!
+			</action>
+			<action type="fix" issue="445">
+				STU3 servers were adding the old MimeType
+				strings to the 
+				<![CDATA[<code>Conformance.format</code>]]>
+				part of the generated server conformance
+				statement
+			</action>
+			<action type="fix" issue="446">
+				When performing an update using the client on a resource that
+				contains other resources (e.g. Bundle update), all child resources in the
+				parent bundle were incorrectly given the ID of the parent. Thanks
+				to Filip Domazet for reporting!
+			</action>
+			<action type="add">
+				STU clients now use an Accept header which 
+				indicates support for both the old MimeTypes
+				(e.g. <![CDATA[<code>application/xml+fhir</code>]]>)
+				and the new MimeTypes
+				(e.g. <![CDATA[<code>application/fhir+xml</code>]]>)
+			</action>
+			<action type="fix">
+				JPA server now sends correct 
+				<![CDATA[<code>HTTP 409 Version Conflict</code>]]> 
+				when a 
+				DELETE fails because of constraint issues, instead of
+				<![CDATA[<code>HTTP 400 Invalid Request</code>]]> 				
+			</action>
+			<action type="fix">
+				Server history operation did not populate the Bundle.entry.request.url
+				field, which is required in order for the bundle to pass validation.
+				Thanks to Richard Ettema for spotting this!  
+			</action>
+			<action type="add">
+				Add a new method to the server interceptor framework which will be
+				called after all other processing is complete (useful for performance
+				tracking). The server LoggingInterceptor has been switched to using this
+				method which means that log lines will be created when processing is finished,
+				instead of when it started.
+			</action>
+			<action type="fix">
+				STU3 clients were not sending the new mimetype values in the
+				<![CDATA[<code>Content-Type</code>]]> header. Thanks to
+				Claude Nanjo for pointing this out!
+			</action>
+			<action type="fix">
+				JAX-RS server was not able to handle the new mime types defined
+				in STU3
 			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">

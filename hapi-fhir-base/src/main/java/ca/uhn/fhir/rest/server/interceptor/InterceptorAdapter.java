@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,13 +38,13 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 /**
  * Base class for {@link IServerInterceptor} implementations. Provides a No-op implementation
- * of all methods, always returning <code>true</code> 
+ * of all methods, always returning <code>true</code>
  */
 public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
-			IOException {
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws ServletException, IOException {
 		return true;
 	}
 
@@ -64,52 +64,60 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(RequestDetails theRequestDetails) {
+		ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+		return outgoingResponse(theRequestDetails, details.getServletRequest(), details.getServletResponse());
+	}
+
+	@Override
+	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle bundle) {
+		ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+		return outgoingResponse(details, bundle, details.getServletRequest(), details.getServletResponse());
+	}
+
+	@Override
+	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		return true;
 	}
-	
-    @Override
-    public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle bundle) {
-        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
-        return outgoingResponse(details, bundle, details.getServletRequest(), details.getServletResponse());
-    }	
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		return true;
 	}
-	
-    @Override
-    public boolean outgoingResponse(RequestDetails theRequestDetails) {
-        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
-        return outgoingResponse(theRequestDetails, details.getServletRequest(), details.getServletResponse());
-    }	
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
-		return true;
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
+		ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+		return outgoingResponse(details, theResponseObject, details.getServletRequest(), details.getServletResponse());
 	}
-	
-    @Override
-    public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
-        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
-        return outgoingResponse(details, theResponseObject, details.getServletRequest(), details.getServletResponse());
-    }	
-	
+
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		return true;
 	}
-	
-    @Override
-    public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject) {
-        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
-        return outgoingResponse(details, theResponseObject, details.getServletRequest(), details.getServletResponse());
-    }	
+
+	@Override
+	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject) {
+		ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+		return outgoingResponse(details, theResponseObject, details.getServletRequest(), details.getServletResponse());
+	}
+
+	@Override
+	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws AuthenticationException {
+		return true;
+	}
 
 	@Override
 	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
 		return null;
+	}
+
+	@Override
+	public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
+		// nothing
 	}
 
 }

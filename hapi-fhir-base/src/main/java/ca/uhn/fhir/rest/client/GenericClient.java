@@ -69,6 +69,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -107,6 +108,11 @@ import ca.uhn.fhir.rest.gclient.IOperationUntyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.gclient.IParam;
+import ca.uhn.fhir.rest.gclient.IPatch;
+import ca.uhn.fhir.rest.gclient.IPatchExecutable;
+import ca.uhn.fhir.rest.gclient.IPatchTyped;
+import ca.uhn.fhir.rest.gclient.IPatchWithQuery;
+import ca.uhn.fhir.rest.gclient.IPatchWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
@@ -518,6 +524,32 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		Bundle resp = invokeClient(myContext, new BundleResponseHandler(null), invocation, myLogRequestAndResponse);
 
 		return new ArrayList<IBaseResource>(resp.toListOfResources());
+	}
+	
+
+	@Override
+	public IPatch patch() {
+		return new PatchInternal();
+	}
+
+	@Override
+	public MethodOutcome patch(IdDt theIdDt, IBaseResource theResource) {
+		BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(theResource, null, theIdDt, myContext);
+		if (isKeepResponses()) {
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
+		}
+
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		final String resourceName = def.getName();
+
+		OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName);
+		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+		return resp;
+	}
+
+	@Override
+	public MethodOutcome patch(String theId, IBaseResource theResource) {
+		return update(new IdDt(theId), theResource);
 	}
 
 	@Override
@@ -2284,6 +2316,139 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources) {
 			Validate.notNull(theResources, "theResources must not be null");
 			return new TransactionExecutable<List<IBaseResource>>(theResources);
+		}
+
+	}
+	
+	private class PatchInternal extends BaseClientExecutable<IPatchExecutable, MethodOutcome> implements IPatch, IPatchTyped, IPatchExecutable, IPatchWithQuery, IPatchWithQueryTyped {
+
+		private CriterionList myCriterionList;
+		private IIdType myId;
+		private PreferReturnEnum myPrefer;
+		private IBaseResource myResource;
+		private String myResourceBody;
+		private String mySearchUrl;
+		private PatchTypeEnum myPatchType;
+		private String myPatchBody;
+
+		@Override
+		public IPatchWithQueryTyped and(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public IPatchWithQuery conditional() {
+			myCriterionList = new CriterionList();
+			return this;
+		}
+
+		@Override
+		public IPatchTyped conditionalByUrl(String theSearchUrl) {
+			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
+			return this;
+		}
+
+		@Override
+		public MethodOutcome execute() {
+			if (myResource == null) {
+				myResource = parseResourceBody(myResourceBody);
+			}
+
+			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
+			if (getParamEncoding() != null) {
+				myResourceBody = null;
+			}
+			
+			if (myPatchType == null) {
+				throw new InvalidRequestException("No patch type supplied, cannot invoke server");
+			}
+			if (myPatchBody == null) {
+				throw new InvalidRequestException("No patch body supplied, cannot invoke server");
+			}
+
+			
+			if (myId == null) {
+				myId = myResource.getIdElement();
+			}
+
+			if (myId == null || myId.hasIdPart() == false) {
+				throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
+			}
+			BaseHttpClientInvocation invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
+
+			addPreferHeader(myPrefer, invocation);
+
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
+			final String resourceName = def.getName();
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(resourceName, myPrefer);
+
+			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			return invoke(params, binding, invocation);
+
+		}
+
+		@Override
+		public IPatchExecutable prefer(PreferReturnEnum theReturn) {
+			myPrefer = theReturn;
+			return this;
+		}
+
+		@Override
+		public IPatchTyped resource(IBaseResource theResource) {
+			Validate.notNull(theResource, "Resource can not be null");
+			myResource = theResource;
+			return this;
+		}
+
+		@Override
+		public IPatchTyped resource(String theResourceBody) {
+			Validate.notBlank(theResourceBody, "Body can not be null or blank");
+			myResourceBody = theResourceBody;
+			return this;
+		}
+
+		@Override
+		public IPatchWithQueryTyped where(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public IPatchExecutable withId(IIdType theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (theId.hasIdPart() == false) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
+			}
+			myId = theId;
+			return this;
+		}
+
+		@Override
+		public IPatchExecutable withId(String theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (isBlank(theId)) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
+			}
+			myId = new IdDt(theId);
+			return this;
+		}
+
+		@Override
+		public IPatchTyped patchType(PatchTypeEnum patchType) {
+			myPatchType = patchType;
+			return this;
+		}
+
+		@Override
+		public IPatchTyped patchBody(String patchBody) {
+			myPatchBody = patchBody;
+			return this;
 		}
 
 	}
