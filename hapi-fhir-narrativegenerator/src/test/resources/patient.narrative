@@ -1,0 +1,8 @@
+<div>
+
+	{% if name.empty() == false %}
+		{{ name[0].family }}
+		{{ name[0].given }}
+	{% endif %}
+
+</div>
