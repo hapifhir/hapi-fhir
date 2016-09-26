@@ -107,7 +107,7 @@ public class InterceptorUserDataMapDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
+		assertThat(myMapCheckMethods.toString(), myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
 	}
 
 	protected void updateMapUsing(Map<Object, Object> theUserData, Method theMethod) {
