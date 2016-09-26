@@ -97,6 +97,8 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		avoidRaceCondition();
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertThat(captor.getAllValues().get(0), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
@@ -114,6 +116,8 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
+		
+		avoidRaceCondition();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -134,13 +138,17 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		// The server finishes the response and closes the connection, then runs the final interceptor so technically
-		// we could get here before the interceptor has fired
-		Thread.sleep(100);
+		avoidRaceCondition();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertEquals("extended-operation-instance - $everything - Patient/123", captor.getValue());
+	}
+
+	private void avoidRaceCondition() throws InterruptedException {
+		// The server finishes the response and closes the connection, then runs the final interceptor so technically
+		// we could get here before the interceptor has fired
+		Thread.sleep(100);
 	}
 
 	@Test
@@ -179,9 +187,7 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		// The server finishes the response and closes the connection, then runs the final interceptor so technically
-		// we could get here before the interceptor has fired
-		Thread.sleep(100);
+		avoidRaceCondition();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -229,9 +235,7 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		// The server finishes the response and closes the connection, then runs the final interceptor so technically
-		// we could get here before the interceptor has fired
-		Thread.sleep(100);
+		avoidRaceCondition();
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -261,9 +265,7 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		// The server finishes the response and closes the connection, then runs the final interceptor so technically
-		// we could get here before the interceptor has fired
-		Thread.sleep(100);
+		avoidRaceCondition();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -284,6 +286,8 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		avoidRaceCondition();
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertEquals("extended-operation-server - $everything - ", captor.getValue());
@@ -303,9 +307,7 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		
-		// The server finishes the response and closes the connection, then runs the final interceptor so technically
-		// we could get here before the interceptor has fired
-		Thread.sleep(100);
+		avoidRaceCondition();
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -325,9 +327,7 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		// The server finishes the response and closes the connection, then runs the final interceptor so technically
-		// we could get here before the interceptor has fired
-		Thread.sleep(100);
+		avoidRaceCondition();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
@@ -348,9 +348,7 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		// The server finishes the response and closes the connection, then runs the final interceptor so technically
-		// we could get here before the interceptor has fired
-		Thread.sleep(100);
+		avoidRaceCondition();
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
