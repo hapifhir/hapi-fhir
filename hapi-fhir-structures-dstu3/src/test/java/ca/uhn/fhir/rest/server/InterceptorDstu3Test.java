@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -113,6 +114,10 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
 		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
+		
+		// Avoid concurrency issues
+		Thread.sleep(500);
+		
 		order.verify(myInterceptor2, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
 		order.verify(myInterceptor1, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
 		verifyNoMoreInteractions(myInterceptor1);
