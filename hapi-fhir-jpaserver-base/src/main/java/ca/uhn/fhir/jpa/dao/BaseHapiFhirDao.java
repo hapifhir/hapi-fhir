@@ -733,6 +733,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			extractTagsRi((IAnyResource) theResource, theEntity, allDefs);
 		}
 
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		if (def.isStandardType() == false) {
+			String profile = def.getResourceProfile("");
+			if (isNotBlank(profile)) {
+				TagDefinition tag = getTag(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+				allDefs.add(tag);
+				theEntity.addTag(tag);
+				theEntity.setHasTags(true);
+			}
+		}
+		
 		ArrayList<ResourceTag> existingTags = new ArrayList<ResourceTag>();
 		if (theEntity.isHasTags()) {
 			existingTags.addAll(theEntity.getTags());
@@ -1003,9 +1014,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@Override
 	public IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
-		return toResource(type.getImplementingClass(), theEntity, theForHistoryOperation);
+		Class<? extends IBaseResource> resourceType = type.getImplementingClass();
+		return toResource(resourceType, theEntity, theForHistoryOperation);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
 		String resourceText = null;
@@ -1022,14 +1035,34 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			break;
 		}
 
+		/*
+		 * Use the appropriate custom type if one is specified in the context
+		 */
+		Class<R> resourceType = theResourceType;
+		if (myContext.hasDefaultTypeForProfile()) {
+			for (BaseTag nextTag : theEntity.getTags()) {
+				if (nextTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
+					String profile = nextTag.getTag().getCode();
+					if (isNotBlank(profile)) {
+						Class<? extends IBaseResource> newType = myContext.getDefaultTypeForProfile(profile);
+						if (newType != null && theResourceType.isAssignableFrom(newType)) {
+							ourLog.debug("Using custom type {} for profile: {}", newType.getName(), profile);
+							resourceType = (Class<R>) newType;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 		IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
 		R retVal;
 		try {
-			retVal = parser.parseResource(theResourceType, resourceText);
+			retVal = parser.parseResource(resourceType, resourceText);
 		} catch (Exception e) {
 			StringBuilder b = new StringBuilder();
 			b.append("Failed to parse database resource[");
-			b.append(theResourceType);
+			b.append(resourceType);
 			b.append("/");
 			b.append(theEntity.getIdDt().getIdPart());
 			b.append(" (pid ");
@@ -1045,10 +1078,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		if (retVal instanceof IResource) {
 			IResource res = (IResource) retVal;
-			retVal = populateResourceMetadataHapi(theResourceType, theEntity, theForHistoryOperation, res);
+			retVal = populateResourceMetadataHapi(resourceType, theEntity, theForHistoryOperation, res);
 		} else {
 			IAnyResource res = (IAnyResource) retVal;
-			retVal = populateResourceMetadataRi(theResourceType, theEntity, theForHistoryOperation, res);
+			retVal = populateResourceMetadataRi(resourceType, theEntity, theForHistoryOperation, res);
 		}
 		return retVal;
 	}

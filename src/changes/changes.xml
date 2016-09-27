@@ -102,6 +102,11 @@
 				JAX-RS server was not able to handle the new mime types defined
 				in STU3
 			</action>
+			<action type="fix">
+				JPA server did not handle custom types when being called
+				programatically (I.e. not through HTTP interface). Thanks to
+				Anthony Mei for pointing this out!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

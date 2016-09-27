@@ -13,11 +13,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
@@ -81,6 +84,18 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertEquals(Patient.class, foundResources.get(0).getClass());
 		assertEquals(Condition.class, foundResources.get(1).getClass());
 	}
+
+	/**
+	 * #454
+	 */
+	@Test
+	public void testIndexWithUtf8Chars() throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/bug454_utf8.json"), StandardCharsets.UTF_8);
+		
+		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
+		myCodeSystemDao.create(cs);
+	}
+	
 	
 	@Test
 	public void testCodeSearch() {

@@ -1,3 +1,5 @@
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SA', 'HFJ_SEARCH_RESULT', 1);
 CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE( 'SA', 'HFJ_SEARCH_RESULT', 0, 0, 1 );
 
+
+dd if=/dev/urandom of=/opt/glassfish/tmp.tmp bs=1M count=500
