@@ -110,6 +110,10 @@
 			<action type="fix">
 				CLI was not correctly able to upload DSTU2 examples to any server
 			</action>
+			<action type="fix">
+				STU3 validator has been upgrated to include fixes made since the
+				1.6.0 ballot
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
