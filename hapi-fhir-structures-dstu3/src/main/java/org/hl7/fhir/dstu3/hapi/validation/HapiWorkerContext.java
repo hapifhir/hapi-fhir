@@ -1,32 +1,18 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.*;
 
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.context.IWorkerContext.ILoggingService;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.dstu3.model.BaseConformance;
-import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.ConceptMap;
-import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
@@ -35,7 +21,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.validation.IResourceValidator;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 
@@ -208,9 +194,27 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
+		if (theVs != null && isNotBlank(theCode)) {
+			for (ConceptSetComponent next : theVs.getCompose().getInclude()) {
+				if (isBlank(theSystem) || theSystem.equals(next.getSystem())) {
+					for (ConceptReferenceComponent nextCode : next.getConcept()) {
+						if (theCode.equals(nextCode.getCode())) {
+							CodeType code = new CodeType(theCode);
+							return new ValidationResult(new ConceptDefinitionComponent(code));
+						}
+					}
+				}
+			}
+		}
+		
+		
 		boolean caseSensitive = true;
-		CodeSystem system = fetchCodeSystem(theSystem);
-		if (system != null) {
+		if (isNotBlank(theSystem)) {
+			CodeSystem system = fetchCodeSystem(theSystem);
+			if (system == null) {
+				return new ValidationResult(IssueSeverity.INFORMATION, "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present");
+			}
+
 			if (system.hasCaseSensitive()) {
 				caseSensitive = system.getCaseSensitive();
 			}
@@ -233,29 +237,13 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 					expansion.getExpansion().addContains().setCode(nextConcept.getCode()).setDisplay(nextConcept.getDisplay());
 				}
 			}
-			expandedValueSet= new ValueSetExpansionOutcome(expansion);
+			expandedValueSet = new ValueSetExpansionOutcome(expansion);
 		}
-
-		// if (theVs.getCompose().hasExclude() == false) {
-		// if (theVs.getCompose().hasImport() == false) {
-		// if (theVs.getCompose().hasInclude()) {
-		// for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
-		// if (nextInclude.hasFilter() == false) {
-		// if (nextInclude.hasConcept() == false) {
-		// if (nextInclude.hasSystem()) {
-		//
-		// }
-		// }
-		// }
-		// }
-		// }
-		// }
-		// }
 
 		if (expandedValueSet == null) {
 			expandedValueSet = expand(theVs, null);
 		}
-		
+
 		for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
 			String nextCode = next.getCode();
 			if (!caseSensitive) {
@@ -273,31 +261,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			}
 		}
 
-		// for (UriType nextComposeImport : theVs.getCompose().getImport()) {
-		// if (isNotBlank(nextComposeImport.getValue())) {
-		// aaa
-		// }
-		// }
-		// for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
-		// if (theSystem == null || StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
-		// if (nextComposeConceptSet.getConcept().isEmpty()) {
-		// ValidationResult retVal = validateCode(nextComposeConceptSet.getSystem(), theCode, theDisplay);
-		// if (retVal != null && retVal.isOk()) {
-		// return retVal;
-		// }
-		// } else {
-		// for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
-		// ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
-		// conceptDef.setCode(nextComposeCode.getCode());
-		// conceptDef.setDisplay(nextComposeCode.getDisplay());
-		// ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
-		// if (retVal != null && retVal.isOk()) {
-		// return retVal;
-		// }
-		// }
-		// }
-		// }
-		// }
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
 	}
 
@@ -353,6 +316,16 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public void setLogger(ILoggingService theLogger) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getVersion() {
+		return myCtx.getVersion().getVersion().getFhirVersionString();
+	}
+
+	@Override
+	public boolean isNoTerminologyServer() {
+		return false;
 	}
 
 }

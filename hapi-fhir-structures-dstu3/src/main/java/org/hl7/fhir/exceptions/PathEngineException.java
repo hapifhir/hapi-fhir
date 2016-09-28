@@ -1,4 +1,4 @@
-package org.hl7.fhir.dstu3.exceptions;
+package org.hl7.fhir.exceptions;
 
 public class PathEngineException extends FHIRException {
 

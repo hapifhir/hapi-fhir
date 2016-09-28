@@ -30,7 +30,7 @@ import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
@@ -38,7 +38,7 @@ import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
 import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.utils.FluentPathEngine;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;

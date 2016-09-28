@@ -107,6 +107,9 @@
 				programatically (I.e. not through HTTP interface). Thanks to
 				Anthony Mei for pointing this out!
 			</action>
+			<action type="fix">
+				CLI was not correctly able to upload DSTU2 examples to any server
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

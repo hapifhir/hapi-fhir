@@ -28,16 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerProfileProvider;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
