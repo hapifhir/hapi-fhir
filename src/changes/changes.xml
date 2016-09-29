@@ -114,6 +114,13 @@
 				STU3 validator has been upgrated to include fixes made since the
 				1.6.0 ballot
 			</action>
+			<action type="fix" issue="443">
+				XhtmlNode.equalsDeep() contained a bug which caused resources
+				containing a narrative to always return
+				<![CDATA[<code>false</code>]]> for STU3 
+				<![CDATA[<code>Resource#equalsDeep()</code>]]>. Thanks to 
+				GitHub user @XcrigX for reporting!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
