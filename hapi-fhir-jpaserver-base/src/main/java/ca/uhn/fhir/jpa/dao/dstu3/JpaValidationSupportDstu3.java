@@ -63,7 +63,6 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	private FhirContext myDstu3Ctx;
 
 	public JpaValidationSupportDstu3() {

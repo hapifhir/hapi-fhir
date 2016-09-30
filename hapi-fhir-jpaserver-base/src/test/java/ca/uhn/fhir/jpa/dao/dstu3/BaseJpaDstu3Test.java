@@ -102,7 +102,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	protected FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu3")

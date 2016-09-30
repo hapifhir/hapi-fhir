@@ -81,7 +81,6 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	@Autowired
 	private EntityManager myEntityManager;
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	private FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu3")
