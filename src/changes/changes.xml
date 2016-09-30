@@ -121,6 +121,13 @@
 				<![CDATA[<code>Resource#equalsDeep()</code>]]>. Thanks to 
 				GitHub user @XcrigX for reporting!
 			</action>
+			<action type="fix" issue="441">
+				JPA server did not correctly process searches for chained parameters
+				where the chain passed across a field that was a choice between a
+				reference and a non-reference type (e.g. 
+				<![CDATA[<code>MedicationAdministration.medication[x]</code>]]>. 
+				Thanks to GitHub user @Crudelus for reporting!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

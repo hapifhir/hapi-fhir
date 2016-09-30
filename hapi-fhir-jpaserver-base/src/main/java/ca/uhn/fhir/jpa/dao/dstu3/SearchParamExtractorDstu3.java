@@ -682,7 +682,10 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		try {
 			String[] nextPathsSplit = SPLIT.split(thePaths);
 			for (String nextPath : nextPathsSplit) {
-				values.addAll(fp.evaluate((Base) theResource, nextPath));
+				List<Base> allValues = fp.evaluate((Base) theResource, nextPath);
+				if (allValues.isEmpty() == false) {
+					values.addAll(allValues);
+				}
 			}
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
