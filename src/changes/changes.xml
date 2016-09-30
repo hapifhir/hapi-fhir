@@ -114,6 +114,11 @@
 				STU3 validator has been upgrated to include fixes made since the
 				1.6.0 ballot
 			</action>
+			<action type="fix">
+				Prevent JPA server from creating a bunch of
+				FhirContext objects for versions of FHIR that
+				aren't actually being used
+			</action>
 			<action type="fix" issue="443">
 				XhtmlNode.equalsDeep() contained a bug which caused resources
 				containing a narrative to always return
