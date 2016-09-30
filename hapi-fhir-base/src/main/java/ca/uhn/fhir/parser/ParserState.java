@@ -830,7 +830,8 @@ class ParserState<T> {
 		@SuppressWarnings("unused")
 		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
-				ExtensionDt newExtension = new ExtensionDt(theIsModifier, theUrlAttr);
+				ExtensionDt newExtension = new ExtensionDt(theIsModifier);
+				newExtension.setUrl(theUrlAttr);
 				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
 				elem.addUndeclaredExtension(newExtension);
 				ExtensionState newState = new ExtensionState(myPreResourceState, newExtension);

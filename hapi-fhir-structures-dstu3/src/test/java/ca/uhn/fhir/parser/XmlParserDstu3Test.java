@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -76,6 +74,69 @@ public class XmlParserDstu3Test {
 			ourCtx = FhirContext.forDstu3();
 		}
 		ourCtx.setNarrativeGenerator(null);
+	}
+
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseXmlExtensionWithoutUrl() {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"        <extension>\n" + 
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
+			"        </extension>\n" + 
+			"</Patient>";
+		//@formatter:on
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getExtension().size());
+		assertEquals(null, parsed.getExtension().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getExtension().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
+		}
+		
+	}
+
+	
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseXmlModifierExtensionWithoutUrl() {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"        <modifierExtension>\n" + 
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
+			"        </modifierExtension>\n" + 
+			"</Patient>";
+		//@formatter:on
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getModifierExtension().size());
+		assertEquals(null, parsed.getModifierExtension().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getModifierExtension().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
+		}
+		
 	}
 
 	@Test
@@ -1868,53 +1929,7 @@ public class XmlParserDstu3Test {
 		assertThat(output, containsString("<text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">John <b>SMITH </b>"));
 	}
 
-	@Test
-	public void testExceptionWithoutUrl() {
-		//@formatter:off
-		String input =
-			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" + 
-			"<Patient xmlns=\"http://hl7.org/fhir\">" +
-				"<extension>" + 
-					"<valueString value=\"FOO\">" + 
-				"</extension>" +
-				"<address>" + 
-					"<line value=\"FOO\"/>" + 
-				"</address>" +
-			"</Patient>";
-		//@formatter:on
-
-		try {
-			ourCtx.newXmlParser().parseResource(Patient.class, input);
-			fail();
-		} catch (DataFormatException e) {
-			assertThat(e.toString(), containsString("Extension element has no 'url' attribute"));
-		}
-
-	}
-
-	@Test
-	public void testModifierExceptionWithoutUrl() {
-		//@formatter:off
-		String input =
-			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" + 
-			"<Patient xmlns=\"http://hl7.org/fhir\">" +
-				"<modifierExtension>" + 
-					"<valueString value=\"FOO\">" + 
-				"</modifierExtension>" +
-				"<address>" + 
-					"<line value=\"FOO\"/>" + 
-				"</address>" +
-			"</Patient>";
-		//@formatter:on
-
-		try {
-			ourCtx.newXmlParser().parseResource(Patient.class, input);
-			fail();
-		} catch (DataFormatException e) {
-			assertThat(e.toString(), containsString("Extension element has no 'url' attribute"));
-		}
-
-	}
+	
 
 	@Test
 	public void testMoreExtensions() throws Exception {

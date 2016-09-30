@@ -128,6 +128,11 @@
 				<![CDATA[<code>MedicationAdministration.medication[x]</code>]]>. 
 				Thanks to GitHub user @Crudelus for reporting!
 			</action>
+			<action type="fix" issue="414">
+				Handle parsing an extension without a URL more gracefully. In HAPI FHIR 2.0 this caused
+				a NullPointerException to be thrown. Now it will trigger a warning, or throw a 
+				DataFormatException if the StrictErrorHandler is configured on the parser.
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
