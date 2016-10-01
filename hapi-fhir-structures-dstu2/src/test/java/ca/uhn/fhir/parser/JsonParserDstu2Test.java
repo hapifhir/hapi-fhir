@@ -1688,7 +1688,7 @@ public class JsonParserDstu2Test {
 			ourCtx.newJsonParser().parseResource(Conformance.class, input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'JsonObject'", e.getMessage());
+			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
 		}
 	}
 
