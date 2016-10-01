@@ -63,7 +63,6 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	private FhirContext myDstu3Ctx;
 
 	public JpaValidationSupportDstu3() {
@@ -98,6 +97,9 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 				search = myValueSetDao.search(ValueSet.SP_URL, new UriParam(theUri));
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
+			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+				return null;
+			}
 			search = myStructureDefinitionDao.search(StructureDefinition.SP_URL, new UriParam(theUri));
 		} else if ("Questionnaire".equals(resourceName)) {
 			search = myQuestionnaireDao.search(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));

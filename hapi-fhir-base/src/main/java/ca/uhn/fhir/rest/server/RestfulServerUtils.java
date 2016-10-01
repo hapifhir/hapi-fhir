@@ -787,9 +787,17 @@ public class RestfulServerUtils {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 			}
 		} else if (theEncoding == EncodingEnum.JSON) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+			}
 		} else if (theEncoding == EncodingEnum.XML) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
+			}
 		}
 
 	}

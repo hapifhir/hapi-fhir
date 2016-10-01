@@ -63,6 +63,8 @@ public class Constants {
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
+	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
+	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY = CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
 	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
@@ -115,6 +117,7 @@ public class Constants {
 	public static final String PARAM_DELETE = "_delete";
 	public static final String PARAM_ELEMENTS = "_elements";
 	public static final String PARAM_FORMAT = "_format";
+	public static final String PARAM_HAS = "_has";
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
@@ -157,14 +160,16 @@ public class Constants {
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
 	public static final int STATUS_HTTP_410_GONE = 410;
 	public static final int STATUS_HTTP_412_PRECONDITION_FAILED = 412;
-	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	
+	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
 	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
+	public static final String CT_JSON_PATCH = "application/json-patch+json";
+	public static final String CT_XML_PATCH = "application/xml-patch+xml";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

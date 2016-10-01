@@ -5,31 +5,25 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
@@ -40,6 +34,47 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Test
+	public void testValidateStructureDefinition() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/sd-david-dhtest7.json"), StandardCharsets.UTF_8);
+		StructureDefinition sd = myFhirCtx.newJsonParser().parseResource(StructureDefinition.class, input);
+		
+		
+		ourLog.info("Starting validation");
+		try {
+			myStructureDefinitionDao.validate(sd, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+		ourLog.info("Done validation");
+		
+		StopWatch sw = new StopWatch();
+		ourLog.info("Starting validation");
+		try {
+			myStructureDefinitionDao.validate(sd, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
+		} catch (PreconditionFailedException e) {
+			// ok
+		}
+		ourLog.info("Done validation in {}ms", sw.getMillis());
+
+	}
+	
+	@Test
+	public void testValidateDocument() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/document-bundle-dstu3.json"), StandardCharsets.UTF_8);
+		Bundle document = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		
+		
+		ourLog.info("Starting validation");
+		try {
+			MethodOutcome outcome = myBundleDao.validate(document, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+		ourLog.info("Done validation");
+		
+//		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome()));
+	}
 
 	@Test
 	@Ignore

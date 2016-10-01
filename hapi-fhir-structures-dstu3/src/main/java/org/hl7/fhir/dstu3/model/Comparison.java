@@ -3,7 +3,7 @@ package org.hl7.fhir.dstu3.model;
 import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 
 /**

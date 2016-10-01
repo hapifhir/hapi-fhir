@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -829,7 +830,8 @@ class ParserState<T> {
 		@SuppressWarnings("unused")
 		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
-				ExtensionDt newExtension = new ExtensionDt(theIsModifier, theUrlAttr);
+				ExtensionDt newExtension = new ExtensionDt(theIsModifier);
+				newExtension.setUrl(theUrlAttr);
 				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
 				elem.addUndeclaredExtension(newExtension);
 				ExtensionState newState = new ExtensionState(myPreResourceState, newExtension);
@@ -1870,13 +1872,17 @@ class ParserState<T> {
 			} else if (theLocalPart.equals("profile")) {
 				@SuppressWarnings("unchecked")
 				List<IdDt> profiles = (List<IdDt>) myMap.get(ResourceMetadataKeyEnum.PROFILES);
-				if (profiles == null) {
-					profiles = new ArrayList<IdDt>();
-					myMap.put(ResourceMetadataKeyEnum.PROFILES, profiles);
+				List<IdDt> newProfiles;
+				if (profiles != null) {
+					newProfiles = new ArrayList<IdDt>(profiles.size() + 1);
+					newProfiles.addAll(profiles);
+				} else {
+					newProfiles = new ArrayList<IdDt>(1);
 				}
 				IdDt profile = new IdDt();
 				push(new PrimitiveState(getPreResourceState(), profile));
-				profiles.add(profile);
+				newProfiles.add(profile);
+				myMap.put(ResourceMetadataKeyEnum.PROFILES, Collections.unmodifiableList(newProfiles));
 			} else if (theLocalPart.equals("tag")) {
 				TagList tagList = (TagList) myMap.get(ResourceMetadataKeyEnum.TAG_LIST);
 				if (tagList == null) {

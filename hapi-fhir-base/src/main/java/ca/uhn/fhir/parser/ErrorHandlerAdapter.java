@@ -50,4 +50,9 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 		// NOP
 	}
 
+	@Override
+	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
+
 }

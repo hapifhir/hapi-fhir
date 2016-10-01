@@ -22,10 +22,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.OperationParameter.IOperationParamConverter;
 import ca.uhn.fhir.rest.param.*;
@@ -62,22 +59,22 @@ import ca.uhn.fhir.util.UrlUtil;
 @SuppressWarnings("deprecation")
 public class MethodUtil {
 	
-	/** Non instantiable */
-	private MethodUtil() {
-		// nothing
-	}
-	
 	private static final String LABEL = "label=\"";
+	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
-	private static final String SCHEME = "scheme=\"";
 	private static final Set<String> ourServletRequestTypes = new HashSet<String>();
 	private static final Set<String> ourServletResponseTypes = new HashSet<String>();
-	
+	private static final String SCHEME = "scheme=\"";
 	static {
 		ourServletRequestTypes.add("javax.servlet.ServletRequest");
 		ourServletResponseTypes.add("javax.servlet.ServletResponse");
 		ourServletRequestTypes.add("javax.servlet.http.HttpServletRequest");
 		ourServletResponseTypes.add("javax.servlet.http.HttpServletResponse");
+	}
+	
+	/** Non instantiable */
+	private MethodUtil() {
+		// nothing
 	}
 	
 
@@ -158,6 +155,12 @@ public class MethodUtil {
 		retVal.setIfNoneExistString(theIfNoneExistUrl);
 		return retVal;
 	}
+	
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, IIdType theId, PatchTypeEnum thePatchType, String theBody) {
+		return PatchMethodBinding.createPatchInvocation(theContext, theId, thePatchType, theBody);
+	}
+	
+	/** End Patch **/
 
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
 		StringBuilder b = new StringBuilder();
@@ -188,6 +191,7 @@ public class MethodUtil {
 		return retVal;
 	}
 
+	
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, String theMatchUrl) {
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
@@ -364,6 +368,8 @@ public class MethodUtil {
 				param = new RequestOperationCallbackParameter();
 			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
+			} else if (parameterType.equals(PatchTypeEnum.class)) {
+				param = new PatchTypeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];
@@ -603,8 +609,17 @@ public class MethodUtil {
 	 * This is a utility method intended provided to help the JPA module.
 	 */
 	public static IQueryParameterAnd<?> parseQueryParams(RuntimeSearchParam theParamDef, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
+		return parseQueryParams(paramType, theUnqualifiedParamName, theParameters);
+	}
+
+
+	/**
+	 * This is a utility method intended provided to help the JPA module.
+	 */
+	public static IQueryParameterAnd<?> parseQueryParams(RestSearchParameterTypeEnum paramType, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		QueryParameterAndBinder binder = null;
-		switch (theParamDef.getParamType()) {
+		switch (paramType) {
 		case COMPOSITE:
 			throw new UnsupportedOperationException();
 		case DATE:
@@ -627,6 +642,9 @@ public class MethodUtil {
 			break;
 		case URI:
 			binder = new QueryParameterAndBinder(UriAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case HAS:
+			binder = new QueryParameterAndBinder(HasAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
 			break;
 		}
 

@@ -40,6 +40,17 @@
 		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
 	</scm>
 
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>bintray-dnault-maven</id>
+			<name>bintray</name>
+			<url>http://dl.bintray.com/dnault/maven</url>
+		</repository>
+	</repositories>
+
 	<description>
 	</description>
 
@@ -241,6 +252,10 @@
 			<name>Matt Clarke</name>
 			<organization>Orion Health</organization>
 		</developer>
+		<developer>
+			<id>FilipDomazet</id>
+			<name>Filip Domazet</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -299,6 +314,11 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>1.1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.dnault</groupId>
+				<artifactId>xml-patch</artifactId>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -386,6 +406,11 @@
 				<groupId>lt.velykis.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
 				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.riotopsys</groupId>
+				<artifactId>json_patch</artifactId>
+				<version>0.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -733,6 +758,13 @@
 					<configuration>
 						<source>1.6</source>
 						<target>1.6</target>
+						<!-- 
+						We compile the unit tests at Java 8. Might as well since they
+						need Java 8 in order to run (Jetty needs 8) so this way we can
+						use nice java 8 features in tests at least
+						-->
+						<testSource>1.8</testSource>
+						<testTarget>1.8</testTarget>
 						<compilerId>javac-with-errorprone</compilerId>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>

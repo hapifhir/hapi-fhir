@@ -174,7 +174,7 @@ public class XmlParser extends BaseParser implements IParser {
 		try {
 			eventWriter = createXmlWriter(theWriter);
 
-			encodeResourceToXmlStreamWriter(theResource, eventWriter, false);
+			encodeResourceToXmlStreamWriter(theResource, eventWriter, false, false);
 			eventWriter.flush();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
@@ -205,16 +205,24 @@ public class XmlParser extends BaseParser implements IParser {
 
 						if ("extension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								throw new DataFormatException("Extension element has no 'url' attribute");
+								getErrorHandler().missingRequiredElement(new ParseLocation("extension"), "url");
+								url = null;
+							} else {
+								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, urlAttr.getValue(), false);
+							parserState.enteringNewElementExtension(elem, url, false);
 						} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								throw new DataFormatException("Extension element has no 'url' attribute");
+								getErrorHandler().missingRequiredElement(new ParseLocation("modifierExtension"), "url");
+								url = null;
+							} else {
+								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, urlAttr.getValue(), true);
+							parserState.enteringNewElementExtension(elem, url, true);
 						} else {
 							String elementName = elem.getName().getLocalPart();
 							parserState.enteringNewElement(namespaceURI, elementName);
@@ -384,7 +392,7 @@ public class XmlParser extends BaseParser implements IParser {
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				eventWriter.writeStartElement("content");
 				eventWriter.writeAttribute("type", "text/xml");
-				encodeResourceToXmlStreamWriter(resource, eventWriter, false);
+				encodeResourceToXmlStreamWriter(resource, eventWriter, false, true);
 				eventWriter.writeEndElement(); // content
 			} else {
 				ourLog.debug("Bundle entry contains null resource");
@@ -447,7 +455,7 @@ public class XmlParser extends BaseParser implements IParser {
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				theEventWriter.writeStartElement("resource");
-				encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
+				encodeResourceToXmlStreamWriter(resource, theEventWriter, false, true);
 				theEventWriter.writeEndElement(); // content
 			} else {
 				ourLog.debug("Bundle entry contains null resource");
@@ -557,7 +565,7 @@ public class XmlParser extends BaseParser implements IParser {
 		case RESOURCE: {
 			theEventWriter.writeStartElement(childName);
 			IBaseResource resource = (IBaseResource) theElement;
-			encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
+			encodeResourceToXmlStreamWriter(resource, theEventWriter, false, true);
 			theEventWriter.writeEndElement();
 			break;
 		}
@@ -711,7 +719,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, boolean theSubResource) throws XMLStreamException, DataFormatException {
 		IIdType resourceId = null;
 
 		if (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
@@ -727,7 +735,7 @@ public class XmlParser extends BaseParser implements IParser {
 		if (!theIncludedResource) {
 			if (super.shouldEncodeResourceId(theResource) == false) {
 				resourceId = null;
-			} else if (getEncodeForceResourceId() != null) {
+			} else if (theSubResource == false && getEncodeForceResourceId() != null) {
 				resourceId = getEncodeForceResourceId();
 			}
 		}

@@ -19,26 +19,12 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLResolver;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.*;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
@@ -47,6 +33,7 @@ import org.codehaus.stax2.io.EscapingWriterFactory;
 import com.ctc.wstx.api.WstxInputProperties;
 import com.ctc.wstx.stax.WstxOutputFactory;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.util.jar.DependencyLogFactory;
 import ca.uhn.fhir.util.jar.IDependencyLog;
 
@@ -62,6 +49,7 @@ public class XmlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlUtil.class);
 	private static Throwable ourNextException;
 	private static volatile XMLOutputFactory ourOutputFactory;
+	private static Boolean ourStaxPresent;
 	private static final Map<String, Integer> VALID_ENTITY_NAMES;
 	private static final ExtendedEntityReplacingXmlResolver XML_RESOLVER = new ExtendedEntityReplacingXmlResolver();
 
@@ -1528,8 +1516,8 @@ public class XmlUtil {
 			// ok
 		}
 
-		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-
+		XMLOutputFactory outputFactory = newOutputFactory();
+		
 		if (!ourHaveLoggedStaxImplementation) {
 			logStaxImplementation(outputFactory.getClass());
 		}
@@ -1601,8 +1589,7 @@ public class XmlUtil {
 				// ok
 			}
 			
-			XMLInputFactory inputFactory;
-			inputFactory = XMLInputFactory.newInstance();
+			XMLInputFactory inputFactory = newInputFactory();
 
 			if (!ourHaveLoggedStaxImplementation) {
 				logStaxImplementation(inputFactory.getClass());
@@ -1645,7 +1632,6 @@ public class XmlUtil {
 		return ourInputFactory;
 	}
 
-	
 	private static XMLOutputFactory getOrCreateOutputFactory() throws FactoryConfigurationError {
 		if (ourOutputFactory == null) {
 			ourOutputFactory = createOutputFactory();
@@ -1659,6 +1645,29 @@ public class XmlUtil {
 			logger.logStaxImplementation(theClass);
 		}
 		ourHaveLoggedStaxImplementation = true;
+	}
+
+	
+	static XMLInputFactory newInputFactory() throws FactoryConfigurationError {
+		XMLInputFactory inputFactory;
+		try {
+			inputFactory = XMLInputFactory.newInstance();
+			throwUnitTestExceptionIfConfiguredToDoSo();
+		} catch (Throwable e) {
+			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);
+		}
+		return inputFactory;
+	}
+
+	static XMLOutputFactory newOutputFactory() throws FactoryConfigurationError {
+		XMLOutputFactory outputFactory;
+		try {
+			outputFactory = XMLOutputFactory.newInstance();
+			throwUnitTestExceptionIfConfiguredToDoSo();
+		} catch (Throwable e) {
+			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);
+		}
+		return outputFactory;
 	}
 
 	/**
@@ -1691,6 +1700,26 @@ public class XmlUtil {
 		}
 	}
 
+	/**
+	 * This method will return <code>true</code> if a StAX XML parsing library is present
+	 * on the classpath 
+	 */
+	public static boolean isStaxPresent() {
+		Boolean retVal = ourStaxPresent;
+		if (retVal == null) {
+			try {
+				newInputFactory();
+				ourStaxPresent = Boolean.TRUE;
+				retVal = Boolean.TRUE;
+			} catch (ConfigurationException e) {
+				ourLog.info("StAX not detected on classpath, XML processing will be disabled");
+				ourStaxPresent = Boolean.FALSE;
+				retVal = Boolean.FALSE;
+			}
+		}
+		return retVal;
+	}
+	
 	public static class MyEscaper implements EscapingWriterFactory {
 
 		@Override

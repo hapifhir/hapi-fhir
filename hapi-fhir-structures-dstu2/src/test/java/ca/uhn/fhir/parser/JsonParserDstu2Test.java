@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
@@ -106,8 +107,6 @@ public class JsonParserDstu2Test {
 		assertEquals("ORG", o.getName());
 	}
 	
-
-	
 	/**
 	 * See #308
 	 */
@@ -125,6 +124,7 @@ public class JsonParserDstu2Test {
 		obs = p.parseResource(ReportObservation.class, encoded);
 		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
+
 	
 	/**
 	 * See #390
@@ -245,7 +245,7 @@ public class JsonParserDstu2Test {
 		p = (Patient) ourCtx.newJsonParser().parseResource("{\"resourceType\":\"Patient\",\"language\":[\"en_CA\"]}");
 		assertEquals("en_CA", p.getLanguage().getValue());
 	}
-
+	
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
 		Patient p = new Patient();
@@ -302,7 +302,6 @@ public class JsonParserDstu2Test {
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
 
-	
 	/**
 	 * See #336
 	 */
@@ -360,7 +359,7 @@ public class JsonParserDstu2Test {
 
 	}
 
-
+	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -425,7 +424,7 @@ public class JsonParserDstu2Test {
 		assertEquals("VERSION2", label.getVersion());
 	}
 
-	
+
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -446,6 +445,7 @@ public class JsonParserDstu2Test {
 		assertThat(val, not(containsString("text")));
 
 	}
+
 	
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
@@ -484,7 +484,7 @@ public class JsonParserDstu2Test {
 				"}"));
 		//@formatter:on
 	}
-
+	
 	@Test
 	public void testEncodeDoesntIncludeUuidId() {
 		Patient p = new Patient();
@@ -535,7 +535,6 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, not(containsString("Label")));
 	}
 
-	
 	@Test
 	public void testEncodeExtensionInPrimitiveElement() {
 
@@ -565,7 +564,7 @@ public class JsonParserDstu2Test {
 
 	}
 
-
+	
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifier() {
 		Observation obs = new Observation();
@@ -602,6 +601,7 @@ public class JsonParserDstu2Test {
 		assertEquals("http://exturl", obs.getUndeclaredExtensions().get(0).getUrl());
 		assertEquals("ext_url_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getValue()).getValue());
 	}
+
 
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifierWithChildExtension() {
@@ -1360,6 +1360,66 @@ public class JsonParserDstu2Test {
 		assertNotNull(o.getSubject().getResource());
 		p = (Patient) o.getSubject().getResource();
 		assertEquals("patient family", p.getNameFirstRep().getFamilyAsSingleString());
+	}
+
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseJsonExtensionWithoutUrl() {
+		//@formatter:off
+		String input = 
+			"{\"resourceType\":\"Patient\"," +
+			"\"extension\":[ {\"valueDateTime\":\"2011-01-02T11:13:15\"} ]" +
+			"}";
+		//@formatter:on
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getAllUndeclaredExtensions().size());
+		assertEquals(null, parsed.getAllUndeclaredExtensions().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newJsonParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
+		}
+		
+	}
+
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseJsonModifierExtensionWithoutUrl() {
+		//@formatter:off
+		String input = 
+			"{\"resourceType\":\"Patient\"," +
+			"\"modifierExtension\":[ {\"valueDateTime\":\"2011-01-02T11:13:15\"} ]" +
+			"}";
+		//@formatter:on
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getAllUndeclaredExtensions().size());
+		assertEquals(null, parsed.getAllUndeclaredExtensions().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newJsonParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
+		}
+		
 	}
 
 	@Test

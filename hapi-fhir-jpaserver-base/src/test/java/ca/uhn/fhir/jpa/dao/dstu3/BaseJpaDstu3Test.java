@@ -11,41 +11,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
-import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu3.model.AllergyIntolerance;
-import org.hl7.fhir.dstu3.model.Appointment;
-import org.hl7.fhir.dstu3.model.AuditEvent;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.CompartmentDefinition;
-import org.hl7.fhir.dstu3.model.ConceptMap;
-import org.hl7.fhir.dstu3.model.Condition;
-import org.hl7.fhir.dstu3.model.Device;
-import org.hl7.fhir.dstu3.model.DiagnosticRequest;
-import org.hl7.fhir.dstu3.model.DiagnosticReport;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.Immunization;
-import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.dstu3.model.Media;
-import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationOrder;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.NamingSystem;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.OperationDefinition;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.hl7.fhir.dstu3.model.Substance;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -63,14 +30,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
@@ -142,7 +102,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	protected FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu3")
@@ -159,6 +118,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myMedicationDaoDstu3")
 	protected IFhirResourceDao<Medication> myMedicationDao;
+	@Autowired
+	@Qualifier("myMedicationAdministrationDaoDstu3")
+	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 	@Autowired
 	@Qualifier("myMedicationOrderDaoDstu3")
 	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
@@ -220,6 +182,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	@Autowired
+	protected PlatformTransactionManager myTransactionMgr;
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;

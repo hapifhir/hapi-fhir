@@ -48,7 +48,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
  */
 @Path(TestJaxRsMockPatientRestProviderDstu3.PATH)
 @Stateless
-@Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
+@Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW })
 @Interceptors(JaxRsExceptionInterceptor.class)
 public class TestJaxRsMockPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider<Patient> {
 

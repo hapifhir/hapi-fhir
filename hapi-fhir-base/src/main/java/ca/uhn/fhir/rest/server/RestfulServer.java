@@ -29,15 +29,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
@@ -78,13 +71,15 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.UrlPathTokenizer;
-import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.util.VersionUtil;
+import ca.uhn.fhir.util.*;
 
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
+
+	/**
+	 * All incoming requests will have an attribute added to {@link HttpServletRequest#getAttribute(String)}
+	 * with this key. The value will be a Java {@link Date} with the time that request processing began.
+	 */
+	public static final String REQUEST_START_TIME = RestfulServer.class.getName() + "REQUEST_START_TIME";
 
 	/**
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
@@ -658,6 +653,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 */
 			resourceMethod.invokeServer(this, requestDetails);
 
+			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = getInterceptors().get(i);
+				next.processingCompletedNormally(requestDetails);
+			}
+
 		} catch (NotModifiedException e) {
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -1163,6 +1163,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	@Override
 	protected void service(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		theReq.setAttribute(REQUEST_START_TIME, new Date());
+		
 		RequestTypeEnum method;
 		try {
 			method = RequestTypeEnum.valueOf(theReq.getMethod());

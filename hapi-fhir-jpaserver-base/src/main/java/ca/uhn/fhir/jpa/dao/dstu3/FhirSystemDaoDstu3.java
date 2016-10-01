@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,39 +23,19 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.persistence.TypedQuery;
 
 import org.apache.http.NameValuePair;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -182,7 +162,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	}
 
 	/**
-	 * This method is called for nested bundles (e.g. if we received a transaction with an entry that 
+	 * This method is called for nested bundles (e.g. if we received a transaction with an entry that
 	 * was a GET search, this method is called on the bundle for the search result, that will be placed in the
 	 * outer bundle). This method applies the _summary and _content parameters to the output of
 	 * that bundle.
@@ -217,7 +197,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 		return retVal;
 	}
-	
+
 	protected Meta toMeta(Collection<TagDefinition> tagDefinitions) {
 		Meta retVal = new Meta();
 		for (TagDefinition next : tagDefinitions) {
@@ -235,7 +215,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 		return retVal;
 	}
-
 
 	private ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> toDao(UrlParts theParts, String theVerb, String theUrl) {
 		RuntimeResourceDefinition resType;
@@ -269,7 +248,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
 			notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 		}
-		
+
 		String actionName = "Transaction";
 		return transaction((ServletRequestDetails) theRequestDetails, theRequest, actionName);
 	}
@@ -307,13 +286,13 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod(), i));
 			}
 		}
-		
+
 		/*
 		 * We want to execute the transaction request bundle elements in the order
-		 * specified by the FHIR specification (see TransactionSorter) so we save the 
+		 * specified by the FHIR specification (see TransactionSorter) so we save the
 		 * original order in the request, then sort it.
 		 * 
-		 * Entries with a type of GET are removed from the bundle so that they 
+		 * Entries with a type of GET are removed from the bundle so that they
 		 * can be processed at the very end. We do this because the incoming resources
 		 * are saved in a two-phase way in order to deal with interdependencies, and
 		 * we want the GET processing to use the final indexing state
@@ -329,12 +308,12 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 		}
 		Collections.sort(theRequest.getEntry(), new TransactionSorter());
-		
+
 		Set<String> deletedResources = new HashSet<String>();
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 		Map<BundleEntryComponent, ResourceTable> entriesToProcess = new IdentityHashMap<BundleEntryComponent, ResourceTable>();
 		Set<ResourceTable> nonUpdatedEntities = new HashSet<ResourceTable>();
-		
+
 		/*
 		 * Loop through the request and process any entries of type
 		 * PUT, POST or DELETE
@@ -436,7 +415,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 				@SuppressWarnings("rawtypes")
 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
-
 				String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
 
 				DaoMethodOutcome outcome;
@@ -459,11 +437,11 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		/*
 		 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
 		 * if something else has a reference to it.. Unless the thing that has a reference to it
-		 * was also deleted as a part of this transaction, which is why we check this now at the 
+		 * was also deleted as a part of this transaction, which is why we check this now at the
 		 * end.
 		 */
-		
-		for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext(); ) {
+
+		for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext();) {
 			DeleteConflict next = iter.next();
 			if (deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue())) {
 				iter.remove();
@@ -547,9 +525,9 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 			requestDetails.setRequestType(RequestTypeEnum.GET);
 			requestDetails.setServer(theRequestDetails.getServer());
-			
+
 			String url = extractTransactionUrlOrThrowException(nextReqEntry, HTTPVerb.GET);
-			
+
 			int qIndex = url.indexOf('?');
 			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
 			requestDetails.setParameters(new HashMap<String, String[]>());
@@ -574,7 +552,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			if (method == null) {
 				throw new IllegalArgumentException("Unable to handle GET " + url);
 			}
-			
+
 			if (isNotBlank(nextReqEntry.getRequest().getIfMatch())) {
 				requestDetails.addHeader(Constants.HEADER_IF_MATCH, nextReqEntry.getRequest().getIfMatch());
 			}
@@ -584,7 +562,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			if (isNotBlank(nextReqEntry.getRequest().getIfNoneMatch())) {
 				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, nextReqEntry.getRequest().getIfNoneMatch());
 			}
-			
+
 			if (method instanceof BaseResourceReturningMethodBinding) {
 				try {
 					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
@@ -602,12 +580,12 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 
 		}
-		
+
 		for (Entry<BundleEntryComponent, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
 			nextEntry.getKey().getResponse().setLocation(nextEntry.getValue().getIdDt().toUnqualified().getValue());
 			nextEntry.getKey().getResponse().setEtag(nextEntry.getValue().getIdDt().getVersionIdPart());
 		}
-		
+
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
 
@@ -634,7 +612,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		} else {
 			newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
-		newEntry.getResponse().setLastModified(((Resource)theRes).getMeta().getLastUpdated());
+		newEntry.getResponse().setLastModified(((Resource) theRes).getMeta().getLastUpdated());
 	}
 
 	private static boolean isPlaceholder(IdType theId) {

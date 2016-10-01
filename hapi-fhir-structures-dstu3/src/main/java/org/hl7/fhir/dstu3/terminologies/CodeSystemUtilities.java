@@ -2,14 +2,11 @@ package org.hl7.fhir.dstu3.terminologies;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeSystem.PropertyComponent;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptPropertyComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem.PropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.PropertyType;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
 
 public class CodeSystemUtilities {
 
@@ -80,4 +77,35 @@ public class CodeSystemUtilities {
   }
 
 
+  public static CodeSystem makeShareable(CodeSystem cs) {
+    if (!cs.hasMeta())
+      cs.setMeta(new Meta());
+    for (UriType t : cs.getMeta().getProfile()) 
+      if (t.getValue().equals("http://hl7.org/fhir/StructureDefinition/codesystem-shareable-definition"))
+        return cs;
+    cs.getMeta().getProfile().add(new UriType("http://hl7.org/fhir/StructureDefinition/codesystem-shareable-definition"));
+    return cs;
+  }
+
+  public static void setOID(CodeSystem cs, String oid) {
+    if (!oid.startsWith("urn:oid:"))
+       oid = "urn:oid:" + oid;
+    if (!cs.hasIdentifier())
+      cs.setIdentifier(new Identifier().setSystem("urn:ietf:rfc:3986").setValue(oid));
+    else if ("urn:ietf:rfc:3986".equals(cs.getIdentifier().getSystem()) && cs.getIdentifier().hasValue() && cs.getIdentifier().getValue().startsWith("urn:oid:"))
+      cs.getIdentifier().setValue(oid);
+    else
+      throw new Error("unable to set OID on code system");
+    
+  }
+
+  public static boolean hasOID(CodeSystem cs) {
+    return getOID(cs) != null;
+  }
+
+  public static String getOID(CodeSystem cs) {
+    if (cs.hasIdentifier() && "urn:ietf:rfc:3986".equals(cs.getIdentifier().getSystem()) && cs.getIdentifier().hasValue() && cs.getIdentifier().getValue().startsWith("urn:oid:"))
+        return cs.getIdentifier().getValue().substring(8);
+    return null;
+  }
 }

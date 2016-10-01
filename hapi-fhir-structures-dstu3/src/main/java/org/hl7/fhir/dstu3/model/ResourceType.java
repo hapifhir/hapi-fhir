@@ -1,6 +1,6 @@
 package org.hl7.fhir.dstu3.model;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 // Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
 

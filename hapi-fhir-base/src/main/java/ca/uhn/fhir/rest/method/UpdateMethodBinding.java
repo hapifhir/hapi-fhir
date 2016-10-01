@@ -69,13 +69,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			}
 		}
 
-		String ifMatchValue = theRequest.getHeader(Constants.HEADER_IF_MATCH);
-		if (isNotBlank(ifMatchValue)) {
-			ifMatchValue = MethodUtil.parseETagValue(ifMatchValue);
-			if (id != null && id.hasVersionIdPart() == false) {
-				id = id.withVersion(ifMatchValue);
-			}
-		}
+		id = applyETagAsVersion(theRequest, id);
 
 		if (theRequest.getId() != null && theRequest.getId().hasVersionIdPart() == false) {
 			if (id != null && id.hasVersionIdPart()) {
@@ -92,6 +86,17 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		}
 
 		super.addParametersForServerRequest(theRequest, theParams);
+	}
+
+	public static IIdType applyETagAsVersion(RequestDetails theRequest, IIdType id) {
+		String ifMatchValue = theRequest.getHeader(Constants.HEADER_IF_MATCH);
+		if (isNotBlank(ifMatchValue)) {
+			ifMatchValue = MethodUtil.parseETagValue(ifMatchValue);
+			if (id != null && id.hasVersionIdPart() == false) {
+				id = id.withVersion(ifMatchValue);
+			}
+		}
+		return id;
 	}
 
 	@Override

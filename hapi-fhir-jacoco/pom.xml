@@ -232,6 +232,7 @@
 										<include>hapi-fhir-structures-dstu3/target/jacoco.exec</include>
 										<include>hapi-fhir-jpaserver-base/target/jacoco.exec</include>
 										<include>hapi-fhir-client-okhttp/target/jacoco.exec</include>
+										<include>hapi-fhir-android/target/jacoco.exec</include>
 									</includes>
 								</fileSet>
 							</fileSets>

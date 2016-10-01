@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.MessageHeader;
 

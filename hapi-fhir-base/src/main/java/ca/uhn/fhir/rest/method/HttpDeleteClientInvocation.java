@@ -67,4 +67,10 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.DELETE);
 	}
 
+	@Override
+	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
+		// TODO Auto-generated method stub
+		return super.createHttpRequest(theUrl, theEncoding, theRequestType);
+	}
+
 }

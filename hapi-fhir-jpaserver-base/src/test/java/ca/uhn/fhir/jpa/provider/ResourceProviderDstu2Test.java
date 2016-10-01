@@ -54,28 +54,8 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.BaseResource;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Condition;
-import ca.uhn.fhir.model.dstu2.resource.Device;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu2.resource.DocumentManifest;
-import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
-import ca.uhn.fhir.model.dstu2.resource.Encounter;
-import ca.uhn.fhir.model.dstu2.resource.ImagingStudy;
-import ca.uhn.fhir.model.dstu2.resource.Location;
-import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Practitioner;
-import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.AnswerFormatEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
@@ -131,6 +111,33 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
+	/**
+	 * See #441
+	 */
+	@Test
+	public void testSearchMedicationChain() throws Exception {
+		Medication medication = new Medication();
+		medication.getCode().addCoding().setSystem("SYSTEM").setCode("04823543");
+		IIdType medId = myMedicationDao.create(medication).getId().toUnqualifiedVersionless();
+		
+		MedicationAdministration ma = new MedicationAdministration();
+		ma.setMedication(new ResourceReferenceDt(medId));
+		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/MedicationAdministration?medication.code=04823543");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(responseString, containsString(moId.getIdPart()));
+		} finally {
+			response.close();
+		}
+
+	}
+
+	
+	
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
 		Patient pt1 = new Patient();

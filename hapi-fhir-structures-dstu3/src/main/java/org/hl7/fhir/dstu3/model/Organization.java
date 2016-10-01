@@ -30,18 +30,14 @@ package org.hl7.fhir.dstu3.model;
 */
 
 // Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
-
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.utilities.Utilities;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ChildOrder;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
  */

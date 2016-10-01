@@ -37,7 +37,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;

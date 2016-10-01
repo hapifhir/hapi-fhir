@@ -28,6 +28,8 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.utilities.xhtml;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,10 +41,34 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 @ca.uhn.fhir.model.api.annotation.DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {
+  private static final long serialVersionUID = -4362547161441436492L;
+
+
+  public static class Location {
+    private int line;
+    private int column;
+    public Location(int line, int column) {
+      super();
+      this.line = line;
+      this.column = column;
+    }
+    public int getLine() {
+      return line;
+    }
+    public int getColumn() {
+      return column;
+    }
+    @Override
+    public String toString() {
+      return "Line "+Integer.toString(line)+", column "+Integer.toString(column);
+    }
+  }
 
   public static final String NBSP = Character.toString((char)0xa0);
 	private static final String DECL_XMLNS = " xmlns=\"http://www.w3.org/1999/xhtml\"";
 
+  
+  private Location location;
   private NodeType nodeType;
   private String name;
   private Map<String, String> attributes = new HashMap<String, String>();
@@ -252,25 +278,27 @@ public class XhtmlNode implements IBaseXhtml {
     return dst;
   }
 
+	@Override
 	public boolean isEmpty() {
 	  return (childNodes == null || childNodes.isEmpty()) && content == null;
   }
 
 	public boolean equalsDeep(XhtmlNode other) {
-    if (other instanceof XhtmlNode)
+    if (other == null) {
       return false;
-    XhtmlNode o = (XhtmlNode) other;
-    if (!(nodeType == o.nodeType) || !compare(name, o.name) || !compare(content, o.content))
+    }
+
+    if (!(nodeType == other.nodeType) || !compare(name, other.name) || !compare(content, other.content))
     	return false;
-    if (attributes.size() != o.attributes.size())
+    if (attributes.size() != other.attributes.size())
     	return false;
     for (String an : attributes.keySet())
-    	if (!attributes.get(an).equals(o.attributes.get(an)))
+    	if (!attributes.get(an).equals(other.attributes.get(an)))
     		return false;
-    if (childNodes.size() != o.childNodes.size())
+    if (childNodes.size() != other.childNodes.size())
     	return false;
 		for (int i = 0; i < childNodes.size(); i++) {
-			if (!compareDeep(childNodes.get(i), o.childNodes.get(i)))
+			if (!compareDeep(childNodes.get(i), other.childNodes.get(i)))
 				return false;
 		}
 		return true;
@@ -302,6 +330,7 @@ public class XhtmlNode implements IBaseXhtml {
   }
 	
 	
+	@Override
 	public String getValueAsString() {
 		if (isEmpty()) {
 			return null;
@@ -316,20 +345,18 @@ public class XhtmlNode implements IBaseXhtml {
 		}
 	}
 
+	@Override
 	public void setValueAsString(String theValue) throws IllegalArgumentException {
 		this.attributes = null;
 		this.childNodes = null;
 		this.content = null;
 		this.name = null;
 		this.nodeType= null;
-		if (theValue == null) {
+		if (isBlank(theValue)) {
 			return;
 		}
 		
 		String val = theValue.trim();
-		if (theValue == null || theValue.isEmpty()) {
-			return;
-		}
 		
 		if (!val.startsWith("<")) {
 			val = "<div" + DECL_XMLNS +">" + val + "</div>";
@@ -397,6 +424,16 @@ public List<String> getFormatCommentsPre() {
  */
 public List<String> getFormatCommentsPost() {
 	throw new UnsupportedOperationException();
+}
+
+
+public Location getLocation() {
+  return location;
+}
+
+
+public void setLocation(Location location) {
+  this.location = location;
 }
 
 }

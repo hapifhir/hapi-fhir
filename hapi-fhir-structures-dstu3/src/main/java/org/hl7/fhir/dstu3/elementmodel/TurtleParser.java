@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.hl7.fhir.dstu3.formats.IParser.OutputStyle;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 
 public class TurtleParser extends ParserBase {
 

@@ -95,12 +95,13 @@ public class ResourceReferenceInfo {
 		int colonIndex = theInclude.getValue().indexOf(':');
 		if (colonIndex != -1) {
 			// DSTU2+ style
+			String resourceName = theInclude.getValue().substring(0, colonIndex);
 			String paramName = theInclude.getValue().substring(colonIndex + 1);
-			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myOwningResource);
+			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceName);
 			if (resourceDef != null) {
 				RuntimeSearchParam searchParamDef = resourceDef.getSearchParam(paramName);
 				if (searchParamDef!=null) {
-					if (searchParamDef.getPathsSplit().contains(resourceDef.getName() + "." + myName)) {
+					if (searchParamDef.getPathsSplit().contains(myOwningResource + "." + myName)) {
 						return true;
 					}
 				}
