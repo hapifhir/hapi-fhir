@@ -62,7 +62,7 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		String qualifier = defaultString(theQualifier);
 		if (!qualifier.startsWith(":")) {
 			throwInvalidSyntaxException(Constants.PARAM_HAS + qualifier);

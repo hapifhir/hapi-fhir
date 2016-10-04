@@ -41,12 +41,12 @@ final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> imp
 	@Override
 	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterType theValue) throws InternalErrorException {
 		IQueryParameterType param = theValue;
-		List<?> retVal = Collections.singletonList(MethodUtil.singleton(param));
+		List<?> retVal = Collections.singletonList(MethodUtil.singleton(param, null));
 		return (List<IQueryParameterOr<?>>) retVal;
 	}
 
 	@Override
-	public IQueryParameterType parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public IQueryParameterType parse(FhirContext theContext, String theParamName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
 		String value = theParams.get(0).get(0);
 		if (StringUtils.isBlank(value)) {
 			return null;
@@ -58,10 +58,10 @@ final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> imp
 			return dt;
 		}
 		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
+			throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theParamName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
 		}
 
-		dt.setValueAsQueryToken(theParams.get(0).getQualifier(), value);
+		dt.setValueAsQueryToken(theContext, theParamName, theParams.get(0).getQualifier(), value);
 		return dt;
 	}
 

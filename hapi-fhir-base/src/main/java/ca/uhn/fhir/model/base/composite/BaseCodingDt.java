@@ -94,7 +94,7 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theParameter) {
+	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
 		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
 		if (barIndex != -1) {
 			setSystem(theParameter.substring(0, barIndex));

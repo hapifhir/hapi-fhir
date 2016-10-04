@@ -234,7 +234,7 @@ public class SearchParameter extends BaseQueryParameter {
 	 */
 	@Override
 	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		return myParamBinder.parse(getName(), theString);
+		return myParamBinder.parse(theContext, getName(), theString);
 	}
 
 	public void setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {
