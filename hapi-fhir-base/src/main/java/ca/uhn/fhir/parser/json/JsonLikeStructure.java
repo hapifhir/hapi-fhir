@@ -27,6 +27,15 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public interface JsonLikeStructure {
 	public JsonLikeStructure getInstance();
+	
+	/**
+	 * Parse the JSON document into the Json-like structure
+	 * so that it can be navigated.
+	 * 
+	 * @param theReader a <code>Reader</code> that will
+	 * 			process the JSON input stream
+	 * @throws DataFormatException when invalid JSON is received
+	 */
 	public void load (Reader theReader) throws DataFormatException;
 	public void load (Reader theReader, boolean allowArray) throws DataFormatException;
 	public JsonLikeObject getRootObject () throws DataFormatException;
