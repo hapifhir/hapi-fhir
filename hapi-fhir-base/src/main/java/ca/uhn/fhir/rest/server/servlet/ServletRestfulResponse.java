@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.servlet;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -57,7 +55,6 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 			theHttpResponse.setContentLength(bin.getContent().length);
 			ServletOutputStream oos = theHttpResponse.getOutputStream();
 			oos.write(bin.getContent());
-			oos.close();
 			return null;
 		}
 	}
@@ -87,7 +84,6 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 
 	@Override
 	public final Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException {
-		writer.close();
 		return null;
 	}
 
