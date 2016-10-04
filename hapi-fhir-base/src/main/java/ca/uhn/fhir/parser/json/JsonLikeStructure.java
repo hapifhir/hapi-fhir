@@ -1,10 +1,3 @@
-package ca.uhn.fhir.parser.json;
-
-import java.io.Reader;
-import java.io.Writer;
-
-import ca.uhn.fhir.parser.DataFormatException;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,7 +17,21 @@ import ca.uhn.fhir.parser.DataFormatException;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json;
 
+import java.io.Reader;
+import java.io.Writer;
+
+import ca.uhn.fhir.parser.DataFormatException;
+
+/**
+ * This interface is the generic representation of any sort of data 
+ * structure that looks and smells like JSON. These data structures
+ * can be abstractly viewed as a <code.Map</code> or <code>List</code>
+ * whose members are other Maps, Lists, or scalars (Strings, Numbers, Boolean)
+ * 
+ * @author Bill.Denton
+ */
 public interface JsonLikeStructure {
 	public JsonLikeStructure getInstance();
 	
