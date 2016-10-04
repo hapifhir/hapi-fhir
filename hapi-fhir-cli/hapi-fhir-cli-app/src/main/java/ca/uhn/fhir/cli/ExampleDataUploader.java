@@ -13,15 +13,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -241,8 +233,8 @@ public class ExampleDataUploader extends BaseCommand {
 
 	private void sendBundleToTarget(String targetServer, FhirContext ctx, IBaseBundle bundle) throws Exception, IOException {
 		List<IBaseResource> resources = BundleUtil.toListOfResources(ctx, bundle);
-		
-		for (Iterator<IBaseResource> iter = resources.iterator(); iter.hasNext(); ) {
+
+		for (Iterator<IBaseResource> iter = resources.iterator(); iter.hasNext();) {
 			IBaseResource next = iter.next();
 			String nextType = ctx.getResourceDefinition(next).getName();
 			if (nextType.endsWith("Definition")) {
@@ -254,53 +246,55 @@ public class ExampleDataUploader extends BaseCommand {
 			}
 		}
 		
-		
 		List<IBaseResource> subResourceList = new ArrayList<IBaseResource>();
 		while (resources.size() > 0) {
 
-			subResourceList.add(resources.remove(0));
+			IBaseResource nextAddedResource = resources.remove(0);
+			subResourceList.add(nextAddedResource);
 
-			boolean found = false;
-			do {
+			Set<String> checkedTargets = new HashSet<String>();
+			
+			for (int i = 0; i < subResourceList.size(); i++) {
+				IBaseResource nextCandidateSource = subResourceList.get(i);
+				for (ResourceReferenceInfo nextRef : ctx.newTerser().getAllResourceReferences(nextCandidateSource)) {
+					String nextRefResourceType = nextRef.getResourceReference().getReferenceElement().getResourceType();
+					if (isBlank(nextRefResourceType)) {
+						nextRef.getResourceReference().setResource(null);
+						nextRef.getResourceReference().setReference(null);
+						continue;
+					}
+					String nextRefIdPart = nextRef.getResourceReference().getReferenceElement().getIdPart();
+					if (nextRefIdPart.startsWith("EX")) {
+						nextRefIdPart = nextRefIdPart.substring(2);
+					}
+					String nextTarget = nextRefResourceType + "/EX" + nextRefIdPart;
+					nextRef.getResourceReference().setResource(null);
+					nextRef.getResourceReference().setReference(nextTarget);
+					if (checkedTargets.add(nextTarget) == false) {
+						continue;
+					}
 
-				for (IBaseResource nextTarget : subResourceList) {
-					for (int i = 0; i < resources.size(); i++) {
-						IBaseResource nextCandidateSource = resources.get(i);
-						for (ResourceReferenceInfo nextRef : ctx.newTerser().getAllResourceReferences(nextCandidateSource)) {
-							
-							/*
-							 * If we have a reference URL but not a resource, it's a reference
-							 * to another server and we can't upload it
-							 */
-							if (isNotBlank(nextRef.getResourceReference().getReferenceElement().getValue())) {
-								if (nextRef.getResourceReference().getReferenceElement().getValue().contains("gsk.com")) {
-									nextRef.getResourceReference().setReference("");
-								}
-							}
-							
-							String nextRes = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
-							if (isNotBlank(nextRes) && nextRes.equals(nextTarget.getIdElement().toUnqualifiedVersionless().getValue())) {
-								subResourceList.add(resources.remove(i));
-								i--;
-								found = true;
-							}
+					boolean found = false;
+					for (int j = 0; j < resources.size(); j++) {
+						String candidateTarget = resources.get(j).getIdElement().getValue(); 
+						if (isNotBlank(nextTarget) && nextTarget.equals(candidateTarget)) {
+							ourLog.info("Reflexively adding resource {} to bundle as it is a reference target", nextTarget);
+							subResourceList.add(resources.remove(j));
+							found = true;
+							break;
 						}
 					}
 				}
+			}
 
-			} while (found == true);
 
 			if (subResourceList.size() < 10 && resources.size() > 0) {
 				subResourceList.add(resources.remove(0));
 				continue;
 			}
-			
+
 			ourLog.info("About to upload {} examples in a transaction, {} remaining", subResourceList.size(), resources.size());
-			if (true) {
-				subResourceList.clear();
-				continue;
-			}
-			
+
 			IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
 			bundleFactory.initializeBundleFromResourceList(null, subResourceList, null, null, 0, BundleTypeEnum.TRANSACTION);
 			IBaseResource subBundle = bundleFactory.getResourceBundle();
@@ -328,7 +322,7 @@ public class ExampleDataUploader extends BaseCommand {
 				try {
 					fhirClient.transaction().withBundle(encoded).execute();
 				} catch (BaseServerResponseException e) {
-					ourLog.error("Failed to upload", e);
+					ourLog.error("Failed to upload bundle:HTTP " + e.getStatusCode() + ": " + e.getMessage());
 					ourLog.error("Failing bundle: {}", encoded);
 				}
 				long delay = System.currentTimeMillis() - start;
@@ -363,12 +357,12 @@ public class ExampleDataUploader extends BaseCommand {
 			Entry next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("DataElement".equals(next.getResource().getResourceName()) || "OperationOutcome".equals(next.getResource().getResourceName())
+			if ("Subscription".equals(next.getResource().getResourceName()) || "DataElement".equals(next.getResource().getResourceName()) || "OperationOutcome".equals(next.getResource().getResourceName())
 					|| "OperationDefinition".equals(next.getResource().getResourceName())) {
 				ourLog.info("Skipping " + next.getResource().getResourceName() + " example");
 				iterator.remove();
 			} else {
-				IdDt resourceId = next.getResource().getId();
+				IdDt resourceId = new IdDt(next.getResource().getResourceName() + "/EX" + next.getResource().getId().getIdPart());
 				if (!fullIds.add(resourceId.toUnqualifiedVersionless().getValue())) {
 					ourLog.info("Discarding duplicate resource: " + resourceId.getValue());
 					iterator.remove();
@@ -377,36 +371,20 @@ public class ExampleDataUploader extends BaseCommand {
 
 				String idPart = resourceId.getIdPart();
 				if (idPart != null) {
-					if (!ids.containsKey(idPart)) {
-						ids.put(idPart, 1);
-					} else {
-						ids.put(idPart, ids.get(idPart) + 1);
-					}
+					next.getResource().setId(resourceId);
 				} else {
 					ourLog.info("Discarding resource with not explicit ID");
 					iterator.remove();
 				}
 			}
 		}
-		Set<String> qualIds = new HashSet<String>();
-		Map<String, String> renames = new HashMap<String, String>();
+		Set<String> qualIds = new TreeSet<String>();
 		for (Iterator<Entry> iterator = bundle.getEntry().iterator(); iterator.hasNext();) {
 			Entry next = iterator.next();
 			if (next.getResource().getId().getIdPart() != null) {
-				String idPart = next.getResource().getId().getIdPart();
-				String originalId = next.getResource().getResourceName() + '/' + idPart;
-				if (ids.get(idPart) > 1 || next.getResource().getId().isIdPartValidLong()) {
-					idPart = next.getResource().getResourceName() + idPart;
-				}
-				String nextId = next.getResource().getResourceName() + '/' + idPart;
-				if (!qualIds.add(nextId)) {
-					ourLog.info("Discarding duplicate resource with ID: " + nextId);
-					iterator.remove();
-				}
+				String nextId = next.getResource().getId().getValue();
 				next.getRequest().setMethod(HTTPVerbEnum.PUT);
 				next.getRequest().setUrl(nextId);
-				next.getResource().setId("");
-				renames.put(originalId, nextId);
 			}
 		}
 
@@ -421,17 +399,16 @@ public class ExampleDataUploader extends BaseCommand {
 				// }
 				nextRef.getResourceReference().setResource(null);
 				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
-				if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
-					if (renames.containsKey(value)) {
-						nextRef.getResourceReference().setReference(renames.get(value));
-						goodRefs++;
-					} else {
+				
+				if (isNotBlank(value)) {
+					if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
 						ourLog.info("Discarding unknown reference: {}", value);
 						nextRef.getResourceReference().getReferenceElement().setValue(null);
+					} else {
+						goodRefs++;
 					}
-				} else {
-					goodRefs++;
 				}
+				ourLog.info("Found ref: {}", value);
 			}
 		}
 
@@ -460,12 +437,12 @@ public class ExampleDataUploader extends BaseCommand {
 			BundleEntryComponent next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("DataElement".equals(next.getResource().getResourceType().name()) || "OperationOutcome".equals(next.getResource().getResourceType().name())
-					|| "OperationDefinition".equals(next.getResource().getResourceType().name())) {
-				ourLog.info("Skipping " + next.getResource().getResourceType().name() + " example");
+			if ("Subscription".equals(next.getResource().getResourceType()) || "DataElement".equals(next.getResource().getResourceType()) || "OperationOutcome".equals(next.getResource().getResourceType())
+					|| "OperationDefinition".equals(next.getResource().getResourceType())) {
+				ourLog.info("Skipping " + next.getResource().getResourceType() + " example");
 				iterator.remove();
 			} else {
-				IdType resourceId = next.getResource().getIdElement();
+				IdDt resourceId = new IdDt(next.getResource().getResourceType() + "/EX" + next.getResource().getIdElement().getIdPart());
 				if (!fullIds.add(resourceId.toUnqualifiedVersionless().getValue())) {
 					ourLog.info("Discarding duplicate resource: " + resourceId.getValue());
 					iterator.remove();
@@ -474,36 +451,20 @@ public class ExampleDataUploader extends BaseCommand {
 
 				String idPart = resourceId.getIdPart();
 				if (idPart != null) {
-					if (!ids.containsKey(idPart)) {
-						ids.put(idPart, 1);
-					} else {
-						ids.put(idPart, ids.get(idPart) + 1);
-					}
+					next.getResource().setId(resourceId);
 				} else {
 					ourLog.info("Discarding resource with not explicit ID");
 					iterator.remove();
 				}
 			}
 		}
-		Set<String> qualIds = new HashSet<String>();
-		Map<String, String> renames = new HashMap<String, String>();
+		Set<String> qualIds = new TreeSet<String>();
 		for (Iterator<BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext();) {
 			BundleEntryComponent next = iterator.next();
 			if (next.getResource().getIdElement().getIdPart() != null) {
-				String idPart = next.getResource().getIdElement().getIdPart();
-				String originalId = next.getResource().getResourceType().name() + '/' + idPart;
-				if (ids.get(idPart) > 1 || next.getResource().getIdElement().isIdPartValidLong()) {
-					idPart = next.getResource().getResourceType().name() + idPart;
-				}
-				String nextId = next.getResource().getResourceType().name() + '/' + idPart;
-				if (!qualIds.add(nextId)) {
-					ourLog.info("Discarding duplicate resource with ID: " + nextId);
-					iterator.remove();
-				}
+				String nextId = next.getResource().getIdElement().getValue();
 				next.getRequest().setMethod(HTTPVerb.PUT);
 				next.getRequest().setUrl(nextId);
-				next.getResource().setId("");
-				renames.put(originalId, nextId);
 			}
 		}
 
@@ -518,17 +479,16 @@ public class ExampleDataUploader extends BaseCommand {
 				// }
 				nextRef.getResourceReference().setResource(null);
 				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
-				if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
-					if (renames.containsKey(value)) {
-						nextRef.getResourceReference().setReference(renames.get(value));
-						goodRefs++;
-					} else {
+				
+				if (isNotBlank(value)) {
+					if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
 						ourLog.info("Discarding unknown reference: {}", value);
 						nextRef.getResourceReference().getReferenceElement().setValue(null);
+					} else {
+						goodRefs++;
 					}
-				} else {
-					goodRefs++;
 				}
+				ourLog.info("Found ref: {}", value);
 			}
 		}
 
@@ -613,6 +573,7 @@ public class ExampleDataUploader extends BaseCommand {
 		return bundle;
 	}
 
+	@SuppressWarnings("unchecked")
 	private org.hl7.fhir.dstu3.model.Bundle getBundleFromFileDstu3(Integer limit, File inputFile, FhirContext ctx) throws IOException, UnsupportedEncodingException {
 
 		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
@@ -659,7 +620,7 @@ public class ExampleDataUploader extends BaseCommand {
 
 			ValidationResult result = val.validateWithResult(parsed);
 			if (result.isSuccessful() == false) {
-				ourLog.info("FAILED to validate example {}", nextEntry.getName());
+				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result.toString());
 				continue;
 			}
 
@@ -729,42 +690,6 @@ public class ExampleDataUploader extends BaseCommand {
 
 		System.err.println();
 		System.err.flush();
-	}
-
-	private byte[] readStreamFromInternet(CloseableHttpResponse result) throws IOException {
-		byte[] inputBytes;
-		{
-			long maxLength = result.getEntity().getContentLength();
-			int nextLog = -1;
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			int nRead;
-			byte[] data = new byte[16384];
-			while ((nRead = result.getEntity().getContent().read(data, 0, data.length)) != -1) {
-				buffer.write(data, 0, nRead);
-				if (buffer.size() > nextLog) {
-					System.err.print("\r" + Ansi.ansi().eraseLine());
-					System.err.print(FileUtils.byteCountToDisplaySize(buffer.size()));
-					if (maxLength > 0) {
-						System.err.print(" [");
-						int stars = (int) (50.0f * ((float) buffer.size() / (float) maxLength));
-						for (int i = 0; i < stars; i++) {
-							System.err.print("*");
-						}
-						for (int i = stars; i < 50; i++) {
-							System.err.print(" ");
-						}
-						System.err.print("]");
-					}
-					System.err.flush();
-					nextLog += 100000;
-				}
-			}
-			buffer.flush();
-			inputBytes = buffer.toByteArray();
-		}
-		System.err.println();
-		System.err.flush();
-		return inputBytes;
 	}
 
 }

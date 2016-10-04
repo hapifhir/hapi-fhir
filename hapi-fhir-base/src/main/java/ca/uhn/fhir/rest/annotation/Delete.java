@@ -25,6 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 
 /**
@@ -47,5 +49,5 @@ public @interface Delete {
 	 * for client implementations. 
 	 */
 	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
-	Class<? extends IResource> type() default IResource.class;	
+	Class<? extends IBaseResource> type() default IBaseResource.class;	
 }

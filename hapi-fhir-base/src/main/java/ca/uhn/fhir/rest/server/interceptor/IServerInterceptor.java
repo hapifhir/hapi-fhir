@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,8 +41,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 /**
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use
@@ -88,7 +90,8 @@ public interface IServerInterceptor {
 	 * @throws IOException
 	 *            If this exception is thrown, it will be re-thrown up to the container for handling.
 	 */
-	boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException;
+	boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws ServletException, IOException;
 
 	/**
 	 * This method is called just before the actual implementing server method is invoked.
@@ -118,10 +121,10 @@ public interface IServerInterceptor {
 
 	/**
 	 * Invoked before an incoming request is processed. Note that this method is called
-	 * after the server has begin preparing the response to the incoming client request. 
+	 * after the server has begin preparing the response to the incoming client request.
 	 * As such, it is not able to supply a response to the incoming request in the way that
 	 * {@link #incomingRequestPreHandled(RestOperationTypeEnum, ActionRequestDetails)} and
-	 * {@link #incomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse)} 
+	 * {@link #incomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse)}
 	 * are.
 	 * <p>
 	 * This method may however throw a subclass of {@link BaseServerResponseException}, and processing
@@ -292,7 +295,8 @@ public interface IServerInterceptor {
 	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws AuthenticationException;
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the
@@ -364,6 +368,18 @@ public interface IServerInterceptor {
 	 */
 	BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException;
 
+	/**
+	 * This method is called after all processing is completed for a request, but only if the
+	 * request completes normally (i.e. no exception is thrown).
+	 * <p>
+	 * Note that this individual interceptors will have this method called in the reverse order from the order in 
+	 * which the interceptors were registered with the server. 
+	 * </p>
+	 * @param theRequestDetails
+	 *           The request itself
+	 */
+	void processingCompletedNormally(ServletRequestDetails theRequestDetails);
+
 	public static class ActionRequestDetails {
 		private final FhirContext myContext;
 		private final IIdType myId;
@@ -400,18 +416,20 @@ public interface IServerInterceptor {
 			myResource = theResource;
 		}
 
-		public ActionRequestDetails(RequestDetails theRequestDetails, String theResourceType, IIdType theId) {
-			this(theRequestDetails, theRequestDetails.getServer().getFhirContext(), theResourceType, theId);
-		}
-
 		/**
 		 * Constructor
 		 * 
-		 * @param theRequestDetails The request details to wrap
-		 * @param theId The ID of the resource being created (note that the ID should have the resource type populated)
+		 * @param theRequestDetails
+		 *           The request details to wrap
+		 * @param theId
+		 *           The ID of the resource being created (note that the ID should have the resource type populated)
 		 */
 		public ActionRequestDetails(RequestDetails theRequestDetails, IIdType theId) {
 			this(theRequestDetails, theId.getResourceType(), theId);
+		}
+
+		public ActionRequestDetails(RequestDetails theRequestDetails, String theResourceType, IIdType theId) {
+			this(theRequestDetails, theRequestDetails.getServer().getFhirContext(), theResourceType, theId);
 		}
 
 		public FhirContext getContext() {
@@ -454,14 +472,14 @@ public interface IServerInterceptor {
 		}
 
 		/**
-		 * Returns the same map which was 
+		 * Returns the same map which was
 		 */
 		public Map<Object, Object> getUserData() {
 			return myRequestDetails.getUserData();
 		}
 
 		/**
-		 * This method may be invoked by user code to notify interceptors that a nested 
+		 * This method may be invoked by user code to notify interceptors that a nested
 		 * operation is being invoked which is denoted by this request details.
 		 */
 		public void notifyIncomingRequestPreHandled(RestOperationTypeEnum theOperationType) {

@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hl7.fhir.dstu3.model.IdType;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -108,6 +110,23 @@ public List<Organization> getAllOrganizations() {
 }
 //END SNIPPET: searchAll
 
+//START SNIPPET: updateEtag
+@Update
+public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient) {
+   String resourceId = theId.getIdPart();
+   String versionId = theId.getVersionIdPart(); // this will contain the ETag
+   
+   String currentVersion = "1"; // populate this with the current version
+   
+   if (!versionId.equals(currentVersion)) {
+      throw new ResourceVersionConflictException("Expected version " + currentVersion);
+   }
+   
+   // ... perform the update ...
+   return new MethodOutcome();
+   
+}
+//END SNIPPET: updateEtag
 
 //START SNIPPET: summaryAndElements
 @Search

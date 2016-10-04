@@ -30,6 +30,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.Include;
 
 /**
@@ -39,9 +41,10 @@ public class ResourceReferenceInfo {
 	private String myOwningResource;
 	private String myName;
 	private IBaseReference myResource;
+	private FhirContext myContext;
 
 	public ResourceReferenceInfo(FhirContext theContext, IBaseResource theOwningResource, List<String> thePathToElement, IBaseReference theElement) {
-
+		myContext = theContext;
 		myOwningResource = theContext.getResourceDefinition(theOwningResource).getName();
 
 		myResource = theElement;
@@ -89,9 +92,21 @@ public class ResourceReferenceInfo {
 		if (theInclude.getValue().equals("*")) {
 			return true;
 		}
-		if (theInclude.getValue().indexOf(':') != -1) {
-			// DSTU2 style
-			return (theInclude.getValue().equals(myOwningResource + ':' + myName));
+		int colonIndex = theInclude.getValue().indexOf(':');
+		if (colonIndex != -1) {
+			// DSTU2+ style
+			String resourceName = theInclude.getValue().substring(0, colonIndex);
+			String paramName = theInclude.getValue().substring(colonIndex + 1);
+			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceName);
+			if (resourceDef != null) {
+				RuntimeSearchParam searchParamDef = resourceDef.getSearchParam(paramName);
+				if (searchParamDef!=null) {
+					if (searchParamDef.getPathsSplit().contains(myOwningResource + "." + myName)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		} else {
 			// DSTU1 style
 			return (theInclude.getValue().equals(myOwningResource + '.' + myName));

@@ -37,15 +37,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.exceptions.FHIRFormatError;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.formats.IParser.OutputStyle;
 import org.hl7.fhir.dstu3.model.ExpansionProfile;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.TerminologyServiceErrorClass;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 
@@ -113,10 +114,10 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
         if (r instanceof OperationOutcome) {
           OperationOutcome oo = (OperationOutcome) r;
           expansions.put(ToolingExtensions.getExtension(oo,VS_ID_EXT).getValue().toString(),
-            new ValueSetExpansionOutcome(new XhtmlComposer().setXmlOnly(true).composePlainText(oo.getText().getDiv())));
+            new ValueSetExpansionOutcome(new XhtmlComposer().setXmlOnly(true).composePlainText(oo.getText().getDiv()), TerminologyServiceErrorClass.UNKNOWN));
         } else {
           ValueSet vs = (ValueSet) r; 
-          expansions.put(vs.getUrl(), new ValueSetExpansionOutcome(vs, null));
+          expansions.put(vs.getUrl(), new ValueSetExpansionOutcome(vs));
         }
         } finally {
           IOUtils.closeQuietly(is);

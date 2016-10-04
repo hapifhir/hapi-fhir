@@ -580,8 +580,7 @@ patient.setGender(AdministrativeGenderEnum.MALE);]]></source>
 					Both XML and JSON encoding are suported natively using a simple API
 					to pick between them. XML support is built on top of the lightning-fast 
 					<a href="http://docs.oracle.com/javase/tutorial/jaxp/stax/why.html">STaX/JSR 173</a> 
-					API, and JSON support is provided using the new
-					<a href="https://jcp.org/en/jsr/detail?id=353">javax.json/JSR-353</a> API. 
+					API, and JSON support is provided using <a href="https://github.com/google/gson">Google Gson</a>. 
 				</p>
 	
 				<source><![CDATA[FhirContext ctx = FhirContext.forDstu2();

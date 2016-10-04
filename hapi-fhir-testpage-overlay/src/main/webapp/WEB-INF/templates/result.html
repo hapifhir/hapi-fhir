@@ -253,8 +253,8 @@
 																<span class="glyphicon glyphicon-step-backward"></span>
 																Prev Page
 															</button>
-															<script type="text/javascript">
-																if (<th:block th:text="${riBundle.getLink('prev') == null}"/>) {
+															<script type="text/javascript" th:inline="javascript">
+																if ([[${riBundle.getLink('prev') == null}]]) {
 																	$('#page-prev-btn').prop('disabled', true);
 																}
 																$('#page-prev-btn').click(function() {
@@ -270,8 +270,8 @@
 																<span class="glyphicon glyphicon-step-forward"></span>
 																Next Page
 															</button>
-															<script type="text/javascript">
-																if (<th:block th:text="${riBundle.getLink('next') == null}"/>) {
+															<script type="text/javascript" th:inline="javascript">
+																if ([[${riBundle.getLink('next') == null}]]) {
 																	$('#page-next-btn').prop('disabled', true);
 																}
 																$('#page-next-btn').click(function() {

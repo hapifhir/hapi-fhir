@@ -34,17 +34,24 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HapiLocalizer {
 
+	public static final String UNKNOWN_I18N_KEY_MESSAGE = "!MESSAGE!";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
 	private List<ResourceBundle> myBundle = new ArrayList<ResourceBundle>();
 
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<String, MessageFormat>();
+	private String[] myBundleNames;
 
 	public HapiLocalizer() {
 		this(HapiLocalizer.class.getPackage().getName() + ".hapi-messages");
 	}
 
 	public HapiLocalizer(String... theBundleNames) {
-		for (String nextName : theBundleNames) {
+		myBundleNames = theBundleNames;
+		init();
+	}
+
+	protected void init() {
+		for (String nextName : myBundleNames) {
 			myBundle.add(ResourceBundle.getBundle(nextName));
 		}
 	}
@@ -62,7 +69,7 @@ public class HapiLocalizer {
 
 		if (formatString == null) {
 			ourLog.warn("Unknown localization key: {}", theQualifiedKey);
-			formatString = "!MESSAGE!";
+			formatString = UNKNOWN_I18N_KEY_MESSAGE;
 		}
 		return formatString;
 	}

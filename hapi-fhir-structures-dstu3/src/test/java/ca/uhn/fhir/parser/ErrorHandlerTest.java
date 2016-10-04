@@ -31,6 +31,7 @@ public class ErrorHandlerTest {
 		new ErrorHandlerAdapter().unknownElement(null, null);
 		new ErrorHandlerAdapter().containedResourceWithNoId(null);
 		new ErrorHandlerAdapter().unknownReference(null, null);
+		new ErrorHandlerAdapter().missingRequiredElement(null, null);
 	}
 
 	@Test

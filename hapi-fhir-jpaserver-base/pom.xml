@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>2.0</version>
+		<version>2.1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>2.0</version>
+			<version>2.1-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -34,32 +34,32 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>2.0</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>2.0</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>2.0</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>2.0</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>2.0</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>2.0</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -99,7 +99,18 @@
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
 		</dependency>
-		
+
+		<!-- Patch Dependencies -->
+		<dependency>
+			<groupId>net.riotopsys</groupId>
+			<artifactId>json_patch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.dnault</groupId>
+			<artifactId>xml-patch</artifactId>
+			<version>0.3.0</version>
+		</dependency>
+
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
 		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> 
 			</exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> 
@@ -356,7 +367,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>2.0</version>
+				<version>2.1-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>build_dstu1</id>
@@ -408,22 +419,22 @@
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu</artifactId>
-						<version>2.0</version>
+						<version>2.1-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu2</artifactId>
-						<version>2.0</version>
+						<version>2.1-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu3</artifactId>
-						<version>2.0</version>
+						<version>2.1-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-						<version>2.0</version>
+						<version>2.1-SNAPSHOT</version>
 					</dependency>
 				</dependencies>
 			</plugin>

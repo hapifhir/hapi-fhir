@@ -1,0 +1,16 @@
+{
+	"resourceType": "CodeSystem",
+	"url": "http://nestvision.com/fhir/myexample-yh",
+	"name": "NestVision Restful Interactions",
+	"status": "active",
+	"publisher": "杨浩",
+	"description": "this is a codesystem example.",
+	"caseSensitive": true,
+	"concept": [
+		{
+			"code": "mygod",
+			"display": "wodetian",
+			"definition": "this is a translate."
+		}
+	]
+}

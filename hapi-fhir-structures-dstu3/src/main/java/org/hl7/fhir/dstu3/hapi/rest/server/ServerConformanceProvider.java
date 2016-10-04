@@ -22,44 +22,20 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Conformance;
-import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceStatementKind;
-import org.hl7.fhir.dstu3.model.Conformance.ResourceInteractionComponent;
-import org.hl7.fhir.dstu3.model.Conformance.RestfulConformanceMode;
-import org.hl7.fhir.dstu3.model.Conformance.SystemRestfulInteraction;
-import org.hl7.fhir.dstu3.model.Conformance.TypeRestfulInteraction;
-import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Conformance.*;
 import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -70,14 +46,8 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
-import ca.uhn.fhir.rest.method.IParameter;
-import ca.uhn.fhir.rest.method.OperationMethodBinding;
+import ca.uhn.fhir.rest.method.*;
 import ca.uhn.fhir.rest.method.OperationMethodBinding.ReturnType;
-import ca.uhn.fhir.rest.method.OperationParameter;
-import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
@@ -223,8 +193,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setKind(ConformanceStatementKind.INSTANCE);
 		retVal.getSoftware().setName(myServerConfiguration.getServerName());
 		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
-		retVal.addFormat(Constants.CT_FHIR_XML);
-		retVal.addFormat(Constants.CT_FHIR_JSON);
+		retVal.addFormat(Constants.CT_FHIR_XML_NEW);
+		retVal.addFormat(Constants.CT_FHIR_JSON_NEW);
 		retVal.setStatus(ConformanceResourceStatus.ACTIVE);
 
 		ConformanceRestComponent rest = retVal.addRest();
@@ -342,7 +312,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
-							ourLog.info("Found bound operation: {}", opName);
+							ourLog.debug("Found bound operation: {}", opName);
 							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
 						}
 					}
@@ -500,7 +470,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					}
 
 					String name = createOperationName(methodBinding);
-					ourLog.info("Detected operation: {}", name);
+					ourLog.debug("Detected operation: {}", name);
 
 					myOperationBindingToName.put(methodBinding, name);
 					if (myOperationNameToBindings.containsKey(name) == false) {

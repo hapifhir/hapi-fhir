@@ -69,6 +69,69 @@ public class XmlParserDstu2Test {
 	}
 	
 	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseXmlExtensionWithoutUrl() {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"        <extension>\n" + 
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
+			"        </extension>\n" + 
+			"</Patient>";
+		//@formatter:on
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getAllUndeclaredExtensions().size());
+		assertEquals(null, parsed.getAllUndeclaredExtensions().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
+		}
+		
+	}
+
+	
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseXmlModifierExtensionWithoutUrl() {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"        <modifierExtension>\n" + 
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
+			"        </modifierExtension>\n" + 
+			"</Patient>";
+		//@formatter:on
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getAllUndeclaredExtensions().size());
+		assertEquals(null, parsed.getAllUndeclaredExtensions().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
+		}
+		
+	}
+	
+	/**
 	 * If a contained resource refers to a contained resource that comes after it, it should still be successfully
 	 * woven together.
 	 */
@@ -425,6 +488,38 @@ public class XmlParserDstu2Test {
 		ourCtx = null;
 	}
 
+	/**
+	 * See #448
+	 */
+	@Test
+	public void testParseWithMultipleProfiles() {
+		ourCtx = FhirContext.forDstu2();
+		ourCtx.setDefaultTypeForProfile(CustomObservationDstu2.PROFILE, CustomObservationDstu2.class);
+		ourCtx.setDefaultTypeForProfile(CustomDiagnosticReportDstu2.PROFILE, CustomDiagnosticReportDstu2.class);
+
+		//@formatter:off
+		String input = 
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">" +
+				"<meta>" +
+				"<profile value=\"" + CustomDiagnosticReportDstu2.PROFILE + "\"/>" +
+				"<profile value=\"http://custom_DiagnosticReport2\"/>" +
+				"<profile value=\"http://custom_DiagnosticReport3\"/>" +
+				"</meta>" +
+				"<status value=\"final\"/>" +
+			"</DiagnosticReport>";
+		//@formatter:on
+		
+		IParser parser = ourCtx.newXmlParser();
+		CustomDiagnosticReportDstu2 dr = (CustomDiagnosticReportDstu2) parser.parseResource(input);
+		assertEquals(DiagnosticReportStatusEnum.FINAL, dr.getStatusElement().getValueAsEnum());
+
+		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(dr);
+		assertEquals(3, profiles.size());
+		
+		ourCtx = null;
+	}
+
+	
 	@Test
 	public void testEncodeAndParseContainedNonCustomTypes() {
 		ourCtx = FhirContext.forDstu2();

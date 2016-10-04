@@ -21,13 +21,7 @@ package org.hl7.fhir.dstu3.hapi.rest.server;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -38,25 +32,14 @@ import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.BundleInclusionRule;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
@@ -91,11 +74,11 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 				}
 			}
 			
-			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
+			List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
 			do {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
-				for (BaseResourceReferenceDt nextRef : references) {
+				for (IBaseReference nextRef : references) {
 					IAnyResource nextRes = (IAnyResource) nextRef.getResource();
 					if (nextRes != null) {
 						if (nextRes.getIdElement().hasIdPart()) {
@@ -120,9 +103,9 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 				}
 
 				// Linked resources may themselves have linked resources
-				references = new ArrayList<BaseResourceReferenceDt>();
+				references = new ArrayList<IBaseReference>();
 				for (IAnyResource iResource : addedResourcesThisPass) {
-					List<BaseResourceReferenceDt> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
+					List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
 					references.addAll(newReferences);
 				}
 
@@ -138,6 +121,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 			String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
 			if (httpVerb != null) {
 				entry.getRequest().getMethodElement().setValueAsString(httpVerb);
+				entry.getRequest().getUrlElement().setValue(next.getId());
 			}
 		}
 
@@ -164,7 +148,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 
 		for (IBaseResource next : theResult) {
 			if (next.getIdElement().isEmpty() == false) {
-				addedResourceIds.add((IdType) next.getIdElement());
+				addedResourceIds.add(next.getIdElement());
 			}
 		}
 
@@ -185,8 +169,9 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes))
-						continue;
+					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
+						continue; 
+					}
 
 					IAnyResource nextRes = (IAnyResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
@@ -223,11 +208,14 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 
 			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
 			Resource nextAsResource = (Resource)next;
+			IIdType id = populateBundleEntryFullUrl(next, entry);
 			String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
 			if (httpVerb != null) {
 				entry.getRequest().getMethodElement().setValueAsString(httpVerb);
+				if (id != null) {
+					entry.getRequest().setUrl(id.getValue());
+				}
 			}
-			populateBundleEntryFullUrl(next, entry);
 			
 			String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
 			if (searchMode != null) {
@@ -246,16 +234,19 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 
 	}
 
-	private void populateBundleEntryFullUrl(IBaseResource next, BundleEntryComponent entry) {
+	private IIdType populateBundleEntryFullUrl(IBaseResource next, BundleEntryComponent entry) {
+		IIdType idElement = null;
 		if (next.getIdElement().hasBaseUrl()) {
-			entry.setFullUrl(next.getIdElement().toVersionless().getValue());
+			idElement = next.getIdElement();
+			entry.setFullUrl(idElement.toVersionless().getValue());
 		} else {
 			if (isNotBlank(myBase) && next.getIdElement().hasIdPart()) {
-				IIdType id = next.getIdElement().toVersionless();
-				id = id.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
-				entry.setFullUrl(id.getValue());
+				idElement = next.getIdElement();
+				idElement = idElement.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
+				entry.setFullUrl(idElement.toVersionless().getValue());
 			}
 		}
+		return idElement;
 	}
 
 	@Override
@@ -394,7 +385,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 				Resource next = (Resource) nextBaseRes;
 				BundleEntryComponent nextEntry = myBundle.addEntry();
 
-				nextEntry.setResource((Resource) next);
+				nextEntry.setResource(next);
 				if (next.getIdElement().isEmpty()) {
 					nextEntry.getRequest().setMethod(HTTPVerb.POST);
 				} else {
