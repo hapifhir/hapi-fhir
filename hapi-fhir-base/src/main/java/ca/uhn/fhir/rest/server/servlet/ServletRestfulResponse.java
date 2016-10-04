@@ -50,12 +50,12 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		theHttpResponse.setStatus(stausCode);
 		theHttpResponse.setContentType(contentType);
 		if (bin.getContent() == null || bin.getContent().length == 0) {
-			return null;
+			return theHttpResponse.getOutputStream();
 		} else {
 			theHttpResponse.setContentLength(bin.getContent().length);
 			ServletOutputStream oos = theHttpResponse.getOutputStream();
 			oos.write(bin.getContent());
-			return null;
+			return oos;
 		}
 	}
 
@@ -83,8 +83,8 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 	}
 
 	@Override
-	public final Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException {
-		return null;
+	public final Object sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) throws IOException {
+		return theWriter;
 	}
 
 	@Override
