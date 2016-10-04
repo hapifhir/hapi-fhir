@@ -37,6 +37,9 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.*;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.model.api.*;
@@ -1688,6 +1691,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		// }
 	}
 
+	public static Gson newGson() {
+		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+		return gson;
+	}
+	
 	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {
 		theWriter.write(theName, theValue);
 	}
