@@ -42,8 +42,10 @@ import com.google.gson.JsonSyntaxException;
 
 public class GsonStructure implements JsonLikeStructure {
 
-	private JsonObject nativeObject;
-	private JsonLikeObject jsonLikeObject = null;
+	private enum ROOT_TYPE {OBJECT, ARRAY};
+	private ROOT_TYPE rootType = null;
+	private JsonElement nativeRoot = null;
+	private JsonLikeValue jsonLikeRoot = null;
 	private GsonWriter jsonLikeWriter = null;
 	
 	public GsonStructure() {
@@ -54,9 +56,18 @@ public class GsonStructure implements JsonLikeStructure {
 		super();
 		setNativeObject(json);
 	}
+	public GsonStructure (JsonArray json) {
+		super();
+		setNativeArray(json);
+	}
 	
 	public void setNativeObject (JsonObject json) {
-		this.nativeObject = json;
+		this.rootType = ROOT_TYPE.OBJECT;
+		this.nativeRoot = json;
+	}
+	public void setNativeArray (JsonArray json) {
+		this.rootType = ROOT_TYPE.ARRAY;
+		this.nativeRoot = json;
 	}
 
 	@Override
@@ -67,26 +78,32 @@ public class GsonStructure implements JsonLikeStructure {
 	@Override
 	public void load(Reader theReader) throws DataFormatException {
 		PushbackReader pbr = new PushbackReader(theReader);
+		int nextInt;
 		try {
 			while(true) {
-				int nextInt;
 					nextInt = pbr.read();
 				if (nextInt == -1) {
 					throw new DataFormatException("Did not find any content to parse");
 				}
-				if (nextInt == '{') {
-					pbr.unread('{');
+				if (nextInt == '{' || nextInt == '[') {
+					pbr.unread(nextInt);
 					break;
 				}
 				if (Character.isWhitespace(nextInt)) {
 					continue;
 				}
-				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
+				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{' or '[')");
 			}
 		
 			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-		
-			nativeObject = gson.fromJson(pbr, JsonObject.class);
+			if (nextInt == '{') {
+				JsonObject root = gson.fromJson(pbr, JsonObject.class);
+				setNativeObject(root);
+			} else
+			if (nextInt == '[') {
+				JsonArray root = gson.fromJson(pbr, JsonArray.class);
+				setNativeArray(root);
+			}
 		} catch (JsonSyntaxException e) {
 			if (e.getMessage().startsWith("Unexpected char 39")) {
 				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
@@ -114,11 +131,25 @@ public class GsonStructure implements JsonLikeStructure {
 	}
 
 	@Override
-	public JsonLikeObject getRootObject() {
-		if (null == jsonLikeObject) {
-			jsonLikeObject = new GsonJsonObject(nativeObject);
+	public JsonLikeObject getRootObject() throws DataFormatException {
+		if (rootType == ROOT_TYPE.OBJECT) {
+			if (null == jsonLikeRoot) {
+				jsonLikeRoot = new GsonJsonObject((JsonObject)nativeRoot);
+			}
+			return jsonLikeRoot.getAsObject();
 		}
-		return jsonLikeObject;
+		throw new DataFormatException("Content must be a valid JSON Object. It must start with '{'.");
+	}
+
+	@Override
+	public JsonLikeArray getRootArray() throws DataFormatException {
+		if (rootType == ROOT_TYPE.ARRAY) {
+			if (null == jsonLikeRoot) {
+				jsonLikeRoot = new GsonJsonArray((JsonArray)nativeRoot);
+			}
+			return jsonLikeRoot.getAsArray();
+		}
+		throw new DataFormatException("Content must be a valid JSON Array. It must start with '['.");
 	}
 
 	private static class GsonJsonObject extends JsonLikeObject {
