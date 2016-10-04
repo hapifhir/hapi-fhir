@@ -77,6 +77,11 @@ public class GsonStructure implements JsonLikeStructure {
 
 	@Override
 	public void load(Reader theReader) throws DataFormatException {
+		this.load(theReader, false);		
+	}
+
+	@Override
+	public void load(Reader theReader, boolean allowArray) throws DataFormatException {
 		PushbackReader pbr = new PushbackReader(theReader);
 		int nextInt;
 		try {
@@ -85,14 +90,21 @@ public class GsonStructure implements JsonLikeStructure {
 				if (nextInt == -1) {
 					throw new DataFormatException("Did not find any content to parse");
 				}
-				if (nextInt == '{' || nextInt == '[') {
+				if (nextInt == '{') {
 					pbr.unread(nextInt);
 					break;
 				}
 				if (Character.isWhitespace(nextInt)) {
 					continue;
 				}
-				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{' or '[')");
+				if (allowArray) {
+					if (nextInt == '[') {
+						pbr.unread(nextInt);
+						break;
+					}
+					throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{' or '[')");
+				}
+				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
 			}
 		
 			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
