@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,7 @@ public class StringParameterTest {
 		assertEquals(":contains", sp.getQueryParameterQualifier());
 		
 		sp = new StringParam("VAL");
-		sp.setValueAsQueryToken(":contains", "VAL");
+		sp.setValueAsQueryToken(ourCtx, null, ":contains", "VAL");
 		assertEquals(true, sp.isContains());
 		assertEquals("VAL", sp.getValue());
 	}
@@ -54,7 +55,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?plain=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -63,7 +64,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?plain=BBB");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -76,7 +77,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str:exact=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -85,7 +86,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str:exact=AAA");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -94,7 +95,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str:exact=BBB");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -107,7 +108,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?ccc:exact=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -120,7 +121,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -130,7 +131,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=AAA");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -140,7 +141,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=BBB");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -153,7 +154,7 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa&_format=xml&_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());

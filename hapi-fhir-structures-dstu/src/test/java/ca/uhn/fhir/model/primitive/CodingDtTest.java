@@ -16,7 +16,7 @@ public class CodingDtTest {
 	@Test
 	public void testTokenNoSystem() {
 		CodingDt dt = new CodingDt();
-		dt.setValueAsQueryToken(null, "c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "c");
 		
 		assertEquals(null, dt.getSystem().getValueAsString());
 		assertEquals("c", dt.getCode().getValue());
@@ -26,7 +26,7 @@ public class CodingDtTest {
 	@Test
 	public void testTokenWithPipeInValue() {
 		CodingDt dt = new CodingDt();
-		dt.setValueAsQueryToken(null, "a|b|c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "a|b|c");
 		
 		assertEquals("a", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getCode().getValue());
@@ -36,7 +36,7 @@ public class CodingDtTest {
 	@Test
 	public void testTokenWithPipeInValueAndNoSystem() {
 		CodingDt dt = new CodingDt();
-		dt.setValueAsQueryToken(null, "|b\\|c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "|b\\|c");
 		
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getCode().getValue());
@@ -50,7 +50,7 @@ public class CodingDtTest {
 	@Test
 	public void testTokenWithPipeInValueAndNoSystemAndBeLenient() {
 		CodingDt dt = new CodingDt();
-		dt.setValueAsQueryToken(null, "|b|c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "|b|c");
 		
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getCode().getValue());

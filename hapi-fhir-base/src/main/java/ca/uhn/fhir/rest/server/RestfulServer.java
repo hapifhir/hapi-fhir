@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -651,13 +652,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * This is basically the end of processing for a successful request, since the
 			 * method binding replies to the client and closes the response.
 			 */
-			resourceMethod.invokeServer(this, requestDetails);
+			Closeable outputStreamOrWriter = (Closeable) resourceMethod.invokeServer(this, requestDetails);
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
 				next.processingCompletedNormally(requestDetails);
 			}
 
+			outputStreamOrWriter.close();
+			
 		} catch (NotModifiedException e) {
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -1141,24 +1144,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		if (allowPrefer) {
 			addContentLocationHeaders(theRequest, servletResponse, response, resourceName);
 		}
+		Writer writer;
 		if (outcome != null) {
 			ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest);
 			servletResponse.setContentType(encoding.getResourceContentType());
-			Writer writer = servletResponse.getWriter();
+			writer = servletResponse.getWriter();
 			IParser parser = encoding.getEncoding().newParser(getFhirContext());
 			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(this, theRequest));
-			try {
-				outcome.execute(parser, writer);
-			} finally {
-				writer.close();
-			}
+			outcome.execute(parser, writer);
 		} else {
 			servletResponse.setContentType(Constants.CT_TEXT_WITH_UTF8);
-			Writer writer = servletResponse.getWriter();
-			writer.close();
+			writer = servletResponse.getWriter();
 		}
-		// getMethod().in
-		return null;
+		return writer;
 	}
 
 	@Override

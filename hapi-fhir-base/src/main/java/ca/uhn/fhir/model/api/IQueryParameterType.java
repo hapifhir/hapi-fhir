@@ -31,7 +31,8 @@ public interface IQueryParameterType {
 	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
 	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
-	 * 
+	 * @param theContext TODO
+	 * @param theParamName TODO
 	 * @param theQualifier
 	 *            The parameter name qualifier that accompanied this value. For example, if the complete query was
 	 *            <code>http://foo?name:exact=John</code>, qualifier would be ":exact"
@@ -39,7 +40,7 @@ public interface IQueryParameterType {
 	 *            The actual parameter value. For example, if the complete query was
 	 *            <code>http://foo?name:exact=John</code>, the value would be "John"
 	 */
-	public void setValueAsQueryToken(String theQualifier, String theValue);
+	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue);
 
 	/**
 	 * Returns a representation of this parameter's value as it will be represented "over the wire". In other

@@ -15,7 +15,7 @@ public class IdentifierDtTest {
 	@Test
 	public void testTokenNoSystem() {
 		IdentifierDt dt = new IdentifierDt();
-		dt.setValueAsQueryToken(null, "c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "c");
 		
 		assertEquals(null, dt.getSystem().getValueAsString());
 		assertEquals("c", dt.getValue().getValue());
@@ -25,7 +25,7 @@ public class IdentifierDtTest {
 	@Test
 	public void testTokenWithPipeInValue() {
 		IdentifierDt dt = new IdentifierDt();
-		dt.setValueAsQueryToken(null, "a|b|c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "a|b|c");
 		
 		assertEquals("a", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getValue().getValue());
@@ -35,7 +35,7 @@ public class IdentifierDtTest {
 	@Test
 	public void testTokenWithPipeInValueAndNoSystem() {
 		IdentifierDt dt = new IdentifierDt();
-		dt.setValueAsQueryToken(null, "|b\\|c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "|b\\|c");
 		
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getValue().getValue());
@@ -49,7 +49,7 @@ public class IdentifierDtTest {
 	@Test
 	public void testTokenWithPipeInValueAndNoSystemAndBeLenient() {
 		IdentifierDt dt = new IdentifierDt();
-		dt.setValueAsQueryToken(null, "|b|c");
+		dt.setValueAsQueryToken(ourCtx, null, null, "|b|c");
 		
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getValue().getValue());

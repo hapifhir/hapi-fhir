@@ -617,11 +617,11 @@ public class SearchBuilder {
 							}
 
 							chainValue = new ReferenceParam();
-							chainValue.setValueAsQueryToken(qualifier, resourceId);
+							chainValue.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
 							((ReferenceParam) chainValue).setChain(remainingChain);
 						} else if (isMeta) {
 							IQueryParameterType type = BaseHapiFhirDao.newInstanceType(chain);
-							type.setValueAsQueryToken(qualifier, resourceId);
+							type.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
 							chainValue = type;
 						} else {
 							chainValue = toParameterType(param, qualifier, resourceId);
@@ -1998,7 +1998,7 @@ public class SearchBuilder {
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
 		IQueryParameterType qp = toParameterType(theParam);
 
-		qp.setValueAsQueryToken(theQualifier, theValueAsQueryToken); // aaaa
+		qp.setValueAsQueryToken(myContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
 	}
 

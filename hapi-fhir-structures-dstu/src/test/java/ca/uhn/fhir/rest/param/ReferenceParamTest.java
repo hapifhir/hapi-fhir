@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ReferenceParamTest {
@@ -13,7 +14,7 @@ public class ReferenceParamTest {
 	public void testWithResourceTypeAsQualifier() {
 		
 		ReferenceParam rp = new ReferenceParam();
-		rp.setValueAsQueryToken(":Location", "123");
+		rp.setValueAsQueryToken(ourCtx, null, ":Location", "123");
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
 		
@@ -23,12 +24,13 @@ public class ReferenceParamTest {
 	public void testWithResourceType() {
 		
 		ReferenceParam rp = new ReferenceParam();
-		rp.setValueAsQueryToken(null, "Location/123");
+		rp.setValueAsQueryToken(ourCtx, null, null, "Location/123");
 		assertEquals("Location", rp.getResourceType());
 		assertEquals("123", rp.getIdPart());
 		
 	}
 	
+	private FhirContext ourCtx = FhirContext.forDstu1();
 
 	@AfterClass
 	public static void afterClassClearContext() {
