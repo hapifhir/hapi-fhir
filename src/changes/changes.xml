@@ -8,6 +8,15 @@
 	<body>
 		<release version="2.1" date="TBD">
 			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>spring-data-orm (JPA): 1.10.2 -&gt; 1.10.4</li>
+					</ul>
+				]]>
+			</action>
+			<action type="add">
 				Client, Server, and JPA server now support experimental support
 				for 
 				<![CDATA[HTTP PATCH]]>
