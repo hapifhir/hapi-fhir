@@ -1,5 +1,3 @@
-package ca.uhn.fhir.parser.json;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,7 +17,15 @@ package ca.uhn.fhir.parser.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json;
 
+/**
+ * This is the generalization of anything that is a "value"
+ * element in a JSON structure. This could be a JSON object,
+ * a JSON array, a scalar value (number, string, boolean),
+ * or a null.
+ * 
+ */
 public abstract class JsonLikeValue {
 	
 	public enum ValueType {
