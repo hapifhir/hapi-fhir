@@ -153,6 +153,11 @@
 				corrected to return an error to the client. Thanks to
 				Kevin Tallevi for finding this!
 			</action>
+			<action type="fix" issue="411">
+				Fix #411 - Searching by <![CDATA[<code>POST [base]/_search</code>]]> with urlencoded parameters doesn't work correctly if
+				interceptors are accessing the parameters and there is are also
+				parameters on the URL. Thanks to Jim Steel for reporting!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
