@@ -211,7 +211,7 @@ public class RestfulServerUtils {
 							nextPart = nextPart.trim();
 							EncodingEnum encoding = EncodingEnum.forContentType(nextPart);
 							if (encoding != null) {
-								retVal = new ResponseEncoding(encoding, nextPart);
+								retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), encoding, nextPart);
 								break;
 							}
 						}
@@ -232,7 +232,7 @@ public class RestfulServerUtils {
 			for (String nextFormat : format) {
 				EncodingEnum retVal = EncodingEnum.forContentType(nextFormat);
 				if (retVal != null) {
-					return new ResponseEncoding(retVal, nextFormat);
+					return new ResponseEncoding(theReq.getServer().getFhirContext(), retVal, nextFormat);
 				}
 			}
 		}
@@ -288,12 +288,12 @@ public class RestfulServerUtils {
 					ResponseEncoding encoding;
 					if (endSpaceIndex == -1) {
 						if (startSpaceIndex == 0) {
-							encoding = getEncodingForContentType(strict, nextToken);
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken);
 						} else {
-							encoding = getEncodingForContentType(strict, nextToken.substring(startSpaceIndex));
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex));
 						}
 					} else {
-						encoding = getEncodingForContentType(strict, nextToken.substring(startSpaceIndex, endSpaceIndex));
+						encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex, endSpaceIndex));
 						String remaining = nextToken.substring(endSpaceIndex + 1);
 						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
 						while (qualifierTok.hasMoreTokens()) {
@@ -347,7 +347,7 @@ public class RestfulServerUtils {
 	public static ResponseEncoding determineResponseEncodingWithDefault(RequestDetails theReq) {
 		ResponseEncoding retVal = determineResponseEncodingNoDefault(theReq, theReq.getServer().getDefaultResponseEncoding());
 		if (retVal == null) {
-			retVal = new ResponseEncoding(theReq.getServer().getDefaultResponseEncoding(), null);
+			retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), theReq.getServer().getDefaultResponseEncoding(), null);
 		}
 		return retVal;
 	}
@@ -417,7 +417,7 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	private static ResponseEncoding getEncodingForContentType(boolean theStrict, String theContentType) {
+	private static ResponseEncoding getEncodingForContentType(FhirContext theFhirContext, boolean theStrict, String theContentType) {
 		EncodingEnum encoding;
 		if (theStrict) {
 			encoding = EncodingEnum.forContentTypeStrict(theContentType);
@@ -427,7 +427,7 @@ public class RestfulServerUtils {
 		if (encoding == null) {
 			return null;
 		} else {
-			return new ResponseEncoding(encoding, theContentType);
+			return new ResponseEncoding(theFhirContext, encoding, theContentType);
 		}
 	}
 
@@ -635,7 +635,7 @@ public class RestfulServerUtils {
 
 		// Ok, we're not serving a binary resource, so apply default encoding
 		if (responseEncoding == null) {
-			responseEncoding = new ResponseEncoding(theServer.getDefaultResponseEncoding(), null);
+			responseEncoding = new ResponseEncoding(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), null);
 		}
 
 		boolean encodingDomainResourceAsText = theSummaryMode.contains(SummaryEnum.TEXT);
@@ -752,13 +752,21 @@ public class RestfulServerUtils {
 		private final EncodingEnum myEncoding;
 		private final Boolean myNonLegacy;
 
-		public ResponseEncoding(EncodingEnum theEncoding, String theContentType) {
+		public ResponseEncoding(FhirContext theCtx, EncodingEnum theEncoding, String theContentType) {
 			super();
 			myEncoding = theEncoding;
 			if (theContentType != null) {
-				myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
+				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
+					myNonLegacy = !theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3);
+				} else {
+					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
+				}
 			} else {
-				myNonLegacy = null;
+				if (theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+					myNonLegacy = null;
+				} else {
+					myNonLegacy = Boolean.TRUE;
+				}
 			}
 		}
 

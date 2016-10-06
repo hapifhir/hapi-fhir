@@ -17,6 +17,7 @@ tmp.txt
 tmp.txt
 ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/
 ca.uhn.fhir.jpa.entity.ResourceTable/
+ca.uhn.fhir.jpa.entity.TermConcept/
 
 # Vagrant stuff.
 .vagrant

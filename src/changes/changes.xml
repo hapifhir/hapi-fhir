@@ -19,6 +19,11 @@
 				Thanks to Pater Girard for all of his help during the connectathon
 				in implementing this feature!
 			</action>
+			<action type="add">
+				Both client and server now use the new STU3 mime types by default
+				if running in STU3 mode (in other words, using an STU3 
+				FhirContext).
+			</action>
 			<action type="fix">
 				In server, when returning a list of resources, the server sometimes failed to add
 				<![CDATA[<code>_include</code>]]> resources to the response bundle if they were

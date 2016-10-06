@@ -35,10 +35,13 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
@@ -110,6 +113,39 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 	}
+
+	
+	/**
+	 * See #411
+	 * 
+	 * Let's see if we can reproduce this issue in JPA
+	 */
+	@Test
+	public void testSearchWithMixedParams() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("0");
+		patient.addName().addFamily("testSearchWithMixedParams").addGiven("Joe");
+		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		
+		HttpPost httpPost = new HttpPost(ourServerBase +  "/Patient/_search?_format=application/xml");
+		httpPost.addHeader("Cache-Control","no-cache");
+		List<NameValuePair> parameters = Lists.newArrayList();
+		parameters.add(new BasicNameValuePair("name", "Smith"));
+		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+
+		ourLog.info("Outgoing post: {}", httpPost);
+		
+		CloseableHttpResponse status = ourHttpClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
 	
 	@Test
 	public void testSearchPagingKeepsOldSearches() throws Exception {
