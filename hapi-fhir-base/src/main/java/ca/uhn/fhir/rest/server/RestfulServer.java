@@ -528,14 +528,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		try {
 
-			for (IServerInterceptor next : myInterceptors) {
-				boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
-				if (!continueProcessing) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return;
-				}
-			}
-
+			/* ***********************************
+			 * Parse out the request parameters
+			 * ***********************************/
+			
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
@@ -551,14 +547,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				ourLog.trace("Context Path: {}", servletContextPath);
 			}
 
-			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
-
-			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
-				requestPath = requestPath.substring(1);
-			}
-
-			fhirServerBase = getServerBaseForRequest(theRequest);
-
 			String completeUrl;
 			Map<String, String[]> params = null;
 			if (StringUtils.isNotBlank(theRequest.getQueryString())) {
@@ -572,7 +560,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				if (isIgnoreServerParsedRequestParameters()) {
 					String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 					if (theRequestType == RequestTypeEnum.POST && isNotBlank(contentType) && contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
-						String requestBody = new String(requestDetails.loadRequestContents(), Charsets.UTF_8);
+						String requestBody = new String(requestDetails.loadRequestContents(), Constants.CHARSET_UTF8);
 						params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
 					} else if (theRequestType == RequestTypeEnum.GET) {
 						params = UrlUtil.parseQueryString(theRequest.getQueryString());
@@ -588,6 +576,28 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			requestDetails.setParameters(params);
 
+			/* *************************
+			 * Notify interceptors about the incoming request
+			 * *************************/
+			
+			for (IServerInterceptor next : myInterceptors) {
+				boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
+				if (!continueProcessing) {
+					ourLog.debug("Interceptor {} returned false, not continuing processing");
+					return;
+				}
+			}
+			
+			
+			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
+
+			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
+				requestPath = requestPath.substring(1);
+			}
+
+			fhirServerBase = getServerBaseForRequest(theRequest);
+
+			
 			IIdType id;
 			populateRequestDetailsFromRequestPath(requestDetails, requestPath);
 
