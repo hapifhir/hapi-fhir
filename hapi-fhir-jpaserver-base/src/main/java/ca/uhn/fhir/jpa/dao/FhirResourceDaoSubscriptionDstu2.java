@@ -65,7 +65,6 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subscription>implements IFhirResourceDaoSubscription<Subscription> {
 
@@ -148,7 +147,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
-		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
+		SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
 
 		criteriaUrl = new SearchParameterMap();
 		long start = theSubscriptionTable.getMostRecentMatch().getTime();

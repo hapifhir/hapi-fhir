@@ -389,7 +389,7 @@ public class IdentifierDt
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
+	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		int barIndex = theValue.indexOf('|');
 		if (barIndex != -1) {
 			setSystem(new UriDt(theValue.substring(0, barIndex)));

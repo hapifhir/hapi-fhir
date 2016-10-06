@@ -15,7 +15,7 @@ public class QuantityParamTest {
 	@Test
 	public void testFull() {
 		QuantityParam p = new QuantityParam();
-		p.setValueAsQueryToken(null, "<5.4|http://unitsofmeasure.org|mg");
+		p.setValueAsQueryToken(ourCtx, null, null, "<5.4|http://unitsofmeasure.org|mg");
 		assertEquals(QuantityCompararatorEnum.LESSTHAN,p.getComparator());
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals("http://unitsofmeasure.org", p.getSystem());
@@ -26,7 +26,7 @@ public class QuantityParamTest {
 	@Test
 	public void testApproximate() {
 		QuantityParam p = new QuantityParam();
-		p.setValueAsQueryToken(null, "~5.4|http://unitsofmeasure.org|mg");
+		p.setValueAsQueryToken(ourCtx, null, null, "~5.4|http://unitsofmeasure.org|mg");
 		assertEquals(null,p.getComparator());
 		assertEquals(true, p.isApproximate());
 		assertEquals("5.4", p.getValue().toPlainString());
@@ -39,7 +39,7 @@ public class QuantityParamTest {
 	@Test
 	public void testNoQualifier() {
 		QuantityParam p = new QuantityParam();
-		p.setValueAsQueryToken(null, "5.4|http://unitsofmeasure.org|mg");
+		p.setValueAsQueryToken(ourCtx, null, null, "5.4|http://unitsofmeasure.org|mg");
 		assertEquals(null, p.getComparator());
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals("http://unitsofmeasure.org", p.getSystem());
@@ -51,7 +51,7 @@ public class QuantityParamTest {
 	@Test
 	public void testNoUnits() {
 		QuantityParam p = new QuantityParam();
-		p.setValueAsQueryToken(null, "5.4");
+		p.setValueAsQueryToken(ourCtx, null, null, "5.4");
 		assertEquals(null, p.getComparator());
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals(null, p.getSystem());

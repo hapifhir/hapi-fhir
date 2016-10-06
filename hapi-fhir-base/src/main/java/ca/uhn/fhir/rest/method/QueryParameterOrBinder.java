@@ -44,7 +44,7 @@ final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> impl
 	}
 
 	@Override
-	public IQueryParameterOr<?> parse(String theName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public IQueryParameterOr<?> parse(FhirContext theContext, String theParamName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		IQueryParameterOr<?> dt;
 		try {
 			dt = newInstance();
@@ -52,10 +52,10 @@ final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> impl
 				return dt;
 			}
 			if (theString.size() > 1) {
-				throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
+				throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theParamName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
 			}
 			
-			dt.setValuesAsQueryTokens(theString.get(0));
+			dt.setValuesAsQueryTokens(theContext, theParamName, theString.get(0));
 		} catch (SecurityException e) {
 			throw new InternalErrorException(e);
 		}

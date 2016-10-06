@@ -147,6 +147,16 @@
 				a NullPointerException to be thrown. Now it will trigger a warning, or throw a 
 				DataFormatException if the StrictErrorHandler is configured on the parser.
 			</action>
+			<action type="fix">
+				Calling a HAPI server URL with a chain on a parameter that shouldn't accept
+				chains (e.g.
+				<![CDATA[<code>GET [base]/Patient?name.foo=smith</code>]]>)
+				did not return an error and instead just ignored the chained part
+				and treated the parameter as though it did not have the chain. This
+				led to confusing and potentially unsafe behaviour. This has been
+				corrected to return an error to the client. Thanks to
+				Kevin Tallevi for finding this!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

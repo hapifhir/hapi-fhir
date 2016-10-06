@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,8 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
 	@Override
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-		handleException(theRequestDetails, theException);
+		Closeable writer = (Closeable) handleException(theRequestDetails, theException);
+		writer.close();
 		return false;
 	}
 

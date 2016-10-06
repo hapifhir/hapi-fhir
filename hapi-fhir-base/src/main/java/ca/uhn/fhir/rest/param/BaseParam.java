@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 
 /*
@@ -24,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
  * Base class for RESTful operation parameter types
@@ -32,6 +35,12 @@ abstract class BaseParam implements IQueryParameterType {
 
 	private Boolean myMissing;
 
+	abstract String doGetQueryParameterQualifier();
+
+	abstract String doGetValueAsQueryToken(FhirContext theContext);
+
+	abstract void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue);
+
 	/**
 	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale instead of a normal value
 	 */
@@ -39,7 +48,7 @@ abstract class BaseParam implements IQueryParameterType {
 	public Boolean getMissing() {
 		return myMissing;
 	}
-
+	
 	@Override
 	public final String getQueryParameterQualifier() {
 		if (myMissing != null && myMissing.booleanValue()) {
@@ -48,16 +57,19 @@ abstract class BaseParam implements IQueryParameterType {
 		return doGetQueryParameterQualifier();
 	}
 
-	abstract String doGetQueryParameterQualifier();
-
-	abstract String doGetValueAsQueryToken(FhirContext theContext);
-	
 	@Override
 	public final String getValueAsQueryToken(FhirContext theContext) {
 		if (myMissing != null) {
 			return myMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE;
 		}
 		return doGetValueAsQueryToken(theContext);
+	}
+
+	/**
+	 * Does this parameter type support chained parameters (only reference should return <code>true</code> for this)
+	 */
+	protected boolean isSupportsChain() {
+		return false;
 	}
 
 	/**
@@ -74,17 +86,21 @@ abstract class BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public final void setValueAsQueryToken(String theQualifier, String theValue) {
+	public final void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		if (Constants.PARAMQUALIFIER_MISSING.equals(theQualifier)) {
 			myMissing = "true".equals(theValue);
-			doSetValueAsQueryToken(null, null);
+			doSetValueAsQueryToken(theContext, theParamName, null, null);
 		} else {
+			if (isNotBlank(theQualifier) && theQualifier.charAt(0) == '.') {
+				if (!isSupportsChain()) {
+					String msg = theContext.getLocalizer().getMessage(BaseParam.class, "chainNotSupported", theParamName + theQualifier, theQualifier);
+					throw new InvalidRequestException(msg);
+				}
+			}
+			
 			myMissing = null;
-			doSetValueAsQueryToken(theQualifier, theValue);
+			doSetValueAsQueryToken(theContext, theParamName, theQualifier, theValue);
 		}
 	}
-
-	abstract void doSetValueAsQueryToken(String theQualifier, String theValue);
-
 	
 }

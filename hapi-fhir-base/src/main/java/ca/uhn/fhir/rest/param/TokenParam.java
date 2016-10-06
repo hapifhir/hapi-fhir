@@ -107,7 +107,7 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theParameter) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
 		setModifier(null);
 		if (theQualifier != null) {
 			TokenParamModifier modifier = TokenParamModifier.forValue(theQualifier);
