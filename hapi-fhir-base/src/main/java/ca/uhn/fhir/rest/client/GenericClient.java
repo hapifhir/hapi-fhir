@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.client;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -243,7 +243,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return delete(theType, new IdDt(theId));
 	}
 
-	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint, SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
+			SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -394,8 +395,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	/**
 	 * @deprecated Use {@link LoggingInterceptor} as a client interceptor registered to your
-	 * client instead, as this provides much more fine-grained control over what is logged. This
-	 * method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16) 
+	 *             client instead, as this provides much more fine-grained control over what is logged. This
+	 *             method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16)
 	 */
 	@Deprecated
 	public boolean isLogRequestAndResponse() {
@@ -525,7 +526,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		return new ArrayList<IBaseResource>(resp.toListOfResources());
 	}
-	
 
 	@Override
 	public IPatch patch() {
@@ -1483,6 +1483,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private RuntimeResourceDefinition myParametersDef;
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
+		private Class myReturnResourceType;
 
 		@SuppressWarnings("unchecked")
 		private void addParam(String theName, IBase theValue) {
@@ -1552,25 +1553,33 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
 
-			ResourceResponseHandler handler = new ResourceResponseHandler();
-			handler.setPreferResponseTypes(getPreferResponseTypes(myType));
-
-			Object retVal = invoke(null, handler, invocation);
-			if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
+			if (myReturnResourceType != null) {
+				ResourceResponseHandler handler;
+				handler = new ResourceResponseHandler(myReturnResourceType);
+				Object retVal = invoke(null, handler, invocation);
 				return retVal;
 			} else {
-				RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
-				IBaseResource parameters = def.newInstance();
+				ResourceResponseHandler handler;
+				handler = new ResourceResponseHandler();
+				handler.setPreferResponseTypes(getPreferResponseTypes(myType));
 
-				BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-				BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
-				IBase parameter = paramChildElem.newInstance();
-				paramChild.getMutator().addValue(parameters, parameter);
+				Object retVal = invoke(null, handler, invocation);
+				if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
+					return retVal;
+				} else {
+					RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
+					IBaseResource parameters = def.newInstance();
 
-				BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
-				resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+					BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+					BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+					IBase parameter = paramChildElem.newInstance();
+					paramChild.getMutator().addValue(parameters, parameter);
 
-				return parameters;
+					BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
+					resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+
+					return parameters;
+				}
 			}
 		}
 
@@ -1613,7 +1622,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type: " + theOutputParameterType.getName());
 			}
 			if (!"Parameters".equals(def.getName())) {
-				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName() + " is a resource named: " + def.getName());
+				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName()
+						+ " is a resource named: " + def.getName());
 			}
 			myParameters = (IBaseParameters) def.newInstance();
 			return this;
@@ -1657,12 +1667,21 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IOperationUntypedWithInput returnResourceType(Class theReturnType) {
+			Validate.notNull(theReturnType, "theReturnType must not be null");
+			Validate.isTrue(IBaseResource.class.isAssignableFrom(theReturnType), "theReturnType must be a class which extends from IBaseResource");
+			myReturnResourceType = theReturnType;
+			return this;
+		}
+
 	}
 
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<IBaseOperationOutcome> {
 
 		@Override
-		public IBaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public IBaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
@@ -1858,7 +1877,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				Class<? extends IBaseResource> bundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
 				ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType);
@@ -2011,7 +2031,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			if (myReturnBundleType == null && myContext.getVersion().getVersion().isRi()) {
-				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify " + "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
+				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify "
+						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
 			}
 
 			IClientResponseHandler<? extends IBase> binding;
@@ -2212,7 +2233,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class StringResponseHandler implements IClientResponseHandler<String> {
 
 		@Override
-		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws IOException, BaseServerResponseException {
 			return IOUtils.toString(theResponseReader);
 		}
 	}
@@ -2319,7 +2341,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 	}
-	
+
 	private class PatchInternal extends BaseClientExecutable<IPatchExecutable, MethodOutcome> implements IPatch, IPatchTyped, IPatchExecutable, IPatchWithQuery, IPatchWithQueryTyped {
 
 		private CriterionList myCriterionList;
@@ -2359,7 +2381,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (getParamEncoding() != null) {
 				myResourceBody = null;
 			}
-			
+
 			if (myPatchType == null) {
 				throw new InvalidRequestException("No patch type supplied, cannot invoke server");
 			}
@@ -2367,7 +2389,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new InvalidRequestException("No patch body supplied, cannot invoke server");
 			}
 
-			
 			if (myId == null) {
 				myId = myResource.getIdElement();
 			}

@@ -158,6 +158,10 @@
 				interceptors are accessing the parameters and there is are also
 				parameters on the URL. Thanks to Jim Steel for reporting!
 			</action>
+			<action type="add">
+				Fluent client can now return types other than Parameters
+				when invoking operations.
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

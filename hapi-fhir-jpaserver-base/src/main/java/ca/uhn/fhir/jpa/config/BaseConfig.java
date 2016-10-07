@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -38,12 +37,8 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 
 @Configuration
 @EnableScheduling
@@ -64,10 +59,9 @@ public class BaseConfig implements SchedulingConfigurer {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		return new DatabaseBackedPagingProvider(10);
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider(10);
+		return retVal;
 	}
-
-
 
 	@Bean(autowire=Autowire.BY_TYPE)
 	public StaleSearchDeletingSvc staleSearchDeletingSvc() {
