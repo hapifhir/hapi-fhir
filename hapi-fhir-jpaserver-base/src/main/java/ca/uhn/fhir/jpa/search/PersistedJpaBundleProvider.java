@@ -253,7 +253,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 	@Override
 	public int size() {
 		ensureSearchEntityLoaded();
-		return mySearchEntity.getTotalCount();
+		return Math.max(0, mySearchEntity.getTotalCount());
 	}
 
 	public static Pageable toPage(final int theFromIndex, int theToIndex) {

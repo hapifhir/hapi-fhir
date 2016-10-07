@@ -176,6 +176,10 @@
 				Fluent client can now return types other than Parameters
 				when invoking operations.
 			</action>
+			<action type="fix">
+				JPA server shouldn't report a totalCount in Bundle of "-1" when
+				there are no results
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
