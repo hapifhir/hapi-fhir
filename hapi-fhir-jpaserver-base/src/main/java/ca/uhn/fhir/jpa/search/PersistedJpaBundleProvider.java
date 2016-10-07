@@ -256,7 +256,7 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 		return mySearchEntity.getTotalCount();
 	}
 
-	private Pageable toPage(int theFromIndex, int theToIndex) {
+	public static Pageable toPage(final int theFromIndex, int theToIndex) {
 		int pageSize = theToIndex - theFromIndex;
 		if (pageSize < 1) {
 			return null;
@@ -264,7 +264,14 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 
 		int pageIndex = theFromIndex / pageSize;
 
-		Pageable page = new PageRequest(pageIndex, pageSize);
+		Pageable page = new PageRequest(pageIndex, pageSize) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public int getOffset() {
+				return theFromIndex;
+			}};
+		
 		return page;
 	}
 }

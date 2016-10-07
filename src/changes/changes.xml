@@ -16,6 +16,11 @@
 					</ul>
 				]]>
 			</action>
+			<action type="fix">
+				Fix a fairly significant issue in JPA Server when using the <![CDATA[<code>DatabaseBackedPagingProvider</code>]]>: When paging over the results
+				of a search / $everything operation, under certain circumstances resources may be missing from the last page of results
+				that is returned. Thanks to David Hay for reporting!
+			</action>
 			<action type="add">
 				Client, Server, and JPA server now support experimental support
 				for 

@@ -669,7 +669,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				next.processingCompletedNormally(requestDetails);
 			}
 
-			outputStreamOrWriter.close();
+			if (outputStreamOrWriter != null) {
+				outputStreamOrWriter.close();
+			}
 			
 		} catch (NotModifiedException e) {
 
