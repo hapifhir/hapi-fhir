@@ -180,6 +180,11 @@
 				JPA server shouldn't report a totalCount in Bundle of "-1" when
 				there are no results
 			</action>
+			<action type="fix" issue="454">
+				JPA server was not correctly normalizing strings with non-latin characters
+				(e.g. Chinese chars). Thanks to GitHub user @YinAqu for reporting and providing
+				some great analysis of the issue! 
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

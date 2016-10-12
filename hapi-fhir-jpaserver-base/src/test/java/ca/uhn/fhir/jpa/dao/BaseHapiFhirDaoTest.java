@@ -10,12 +10,10 @@ import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.util.TestUtil;
 
-public class BaseFhirDaoTest  extends BaseJpaTest {
+public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
@@ -39,6 +37,13 @@ public class BaseFhirDaoTest  extends BaseJpaTest {
 		period.setEnd(new DateTimeDt("2011-01-02T11:33:33Z"));
 		observation.setEffective(period);
 		
+	}
+	
+	@Test
+	public void testNormalizeString() {
+		assertEquals("TEST TEST", BaseHapiFhirDao.normalizeString("TEST teSt"));
+		assertEquals("AEIØU", BaseHapiFhirDao.normalizeString("åéîøü"));
+		assertEquals("杨浩", BaseHapiFhirDao.normalizeString("杨浩"));
 	}
 
 

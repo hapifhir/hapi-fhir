@@ -564,6 +564,32 @@ public class ServerConformanceProviderDstu3Test {
 	}
 
 	@Test
+	public void testSearchReferenceParameterWithList() throws Exception {
+
+		RestfulServer rsNoType = new RestfulServer(ourCtx);
+		rsNoType.registerProvider(new SearchProviderWithListNoType());
+		ServerConformanceProvider sc = new ServerConformanceProvider(rsNoType);
+		rsNoType.setServerConformanceProvider(sc);
+		rsNoType.init(createServletConfig());
+
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		String confNoType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(confNoType);
+
+		RestfulServer rsWithType = new RestfulServer(ourCtx);
+		rsWithType.registerProvider(new SearchProviderWithListWithType());
+		ServerConformanceProvider scWithType = new ServerConformanceProvider(rsWithType);
+		rsWithType.setServerConformanceProvider(scWithType);
+		rsWithType.init(createServletConfig());
+
+		Conformance conformanceWithType = scWithType.getServerConformance(createHttpServletRequest());
+		String confWithType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformanceWithType);
+		ourLog.info(confWithType);
+
+		assertEquals(confNoType, confWithType);
+	}
+
+	@Test
 	public void testSystemHistorySupported() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -849,6 +875,39 @@ public class ServerConformanceProviderDstu3Test {
 
 	}
 
+	public static class SearchProviderWithListNoType  implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+
+
+		@Search()
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+			return null;
+		}
+
+	}
+
+	public static class SearchProviderWithListWithType  implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+
+
+		@Search(type=Patient.class)
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+			return null;
+		}
+
+	}
+
+	
 	public static class SystemHistoryProvider {
 
 		@History

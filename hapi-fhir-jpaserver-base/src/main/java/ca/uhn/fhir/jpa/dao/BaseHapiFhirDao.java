@@ -1584,11 +1584,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	public static String normalizeString(String theString) {
 		char[] out = new char[theString.length()];
-		theString = Normalizer.normalize(theString, Normalizer.Form.NFD);
+
+		/*
+		 * The following block of code is used to strip out diacritical marks from latin script
+		 * and also convert to upper case. E.g. "jåmes" becomes "JAMES".
+		 * 
+		 * See http://www.unicode.org/charts/PDF/U0300.pdf for the logic
+		 * behind stripping 0300-036F
+		 * 
+		 * See #454 for an issue where we were completely stripping non latin characters
+		 */
+		String string = Normalizer.normalize(theString, Normalizer.Form.NFD);
 		int j = 0;
-		for (int i = 0, n = theString.length(); i < n; ++i) {
-			char c = theString.charAt(i);
-			if (c <= '\u007F') {
+		for (int i = 0, n = string.length(); i < n; ++i) {
+			char c = string.charAt(i);
+			if (c >= '\u0300' && c <= '\u036F') {
+				continue;
+			} else {
 				out[j++] = c;
 			}
 		}
