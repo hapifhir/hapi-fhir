@@ -185,6 +185,11 @@
 				(e.g. Chinese chars). Thanks to GitHub user @YinAqu for reporting and providing
 				some great analysis of the issue! 
 			</action>
+			<action type="add">
+				Add a new method to ReferenceClientParam which allows you to
+				pass in a number of IDs by a collection of Strings. Thanks to
+				Thomas Andersen for the pul request!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
