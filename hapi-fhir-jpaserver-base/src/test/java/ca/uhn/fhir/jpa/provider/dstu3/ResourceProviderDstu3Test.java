@@ -61,8 +61,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -2253,6 +2251,43 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, actual.getEntry().size());
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
+	}
+	
+	@Test
+	public void testSearchByReferenceIds() {
+		Organization o1 = new Organization();
+		o1.setName("testSearchByResourceChainName01");
+		IIdType o1id = ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();	
+		Organization o2 = new Organization();
+		o2.setName("testSearchByResourceChainName02");
+		IIdType o2id = ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
+		
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds01");
+		p1.addName().addFamily("testSearchByReferenceIdsFamily01").addGiven("testSearchByReferenceIdsGiven01");
+		p1.setManagingOrganization(new Reference(o1id.toUnqualifiedVersionless()));
+		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
+		
+		Patient p2 = new Patient();
+		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds02");
+		p2.addName().addFamily("testSearchByReferenceIdsFamily02").addGiven("testSearchByReferenceIdsGiven02");
+		p2.setManagingOrganization(new Reference(o2id.toUnqualifiedVersionless()));
+		IIdType p2Id = ourClient.create().resource(p2).execute().getId();
+		
+		//@formatter:off
+		Bundle actual = ourClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ORGANIZATION.hasAnyOf(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
+				.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
+		//@formatter:on
+		Set<String> expectedIds = new HashSet<String>();
+		expectedIds.add(p1Id.getIdPart());
+		expectedIds.add(p2Id.getIdPart());
+		Set<String> actualIds = new HashSet<String>();
+		for (BundleEntryComponent ele : actual.getEntry()) {
+			actualIds.add(ele.getResource().getIdElement().getIdPart());
+		}
+		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
 	}
 
 	@Test
