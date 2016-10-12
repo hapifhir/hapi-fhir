@@ -568,11 +568,12 @@ public class ServerConformanceProviderDstu3Test {
 
 		RestfulServer rsNoType = new RestfulServer(ourCtx);
 		rsNoType.registerProvider(new SearchProviderWithListNoType());
-		ServerConformanceProvider sc = new ServerConformanceProvider(rsNoType);
-		rsNoType.setServerConformanceProvider(sc);
+		ServerConformanceProvider scNoType = new ServerConformanceProvider(rsNoType);
+		rsNoType.setServerConformanceProvider(scNoType);
 		rsNoType.init(createServletConfig());
-
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		scNoType.getServerConfiguration().setConformanceDate("2011-02-22T11:22:33Z");
+		
+		Conformance conformance = scNoType.getServerConformance(createHttpServletRequest());
 		String confNoType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(confNoType);
 
@@ -581,6 +582,7 @@ public class ServerConformanceProviderDstu3Test {
 		ServerConformanceProvider scWithType = new ServerConformanceProvider(rsWithType);
 		rsWithType.setServerConformanceProvider(scWithType);
 		rsWithType.init(createServletConfig());
+		scWithType.getServerConfiguration().setConformanceDate("2011-02-22T11:22:33Z");
 
 		Conformance conformanceWithType = scWithType.getServerConformance(createHttpServletRequest());
 		String confWithType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformanceWithType);

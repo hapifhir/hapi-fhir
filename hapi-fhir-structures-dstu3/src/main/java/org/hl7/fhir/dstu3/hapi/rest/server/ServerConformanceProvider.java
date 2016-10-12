@@ -72,7 +72,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-
 	private RestulfulServerConfiguration myServerConfiguration;
 
 	/*
@@ -595,8 +594,13 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		myPublisher = thePublisher;
 	}
 
+	@Override
 	public void setRestfulServer(RestfulServer theRestfulServer) {
 		myServerConfiguration = theRestfulServer.createConfiguration();
+	}
+
+	RestulfulServerConfiguration getServerConfiguration() {
+		return myServerConfiguration;
 	}
 
 	private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {
