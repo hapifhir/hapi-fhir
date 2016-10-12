@@ -66,7 +66,7 @@ public class ReferenceClientParam extends BaseClientParam  implements IParam {
 	 * simply add a subsequent {@link IQuery#where(ICriterion) where} criteria
 	 * with the same parameter.
 	 */
-	public ICriterion<ReferenceClientParam> hasAnyOf(Collection<String> theIds) {
+	public ICriterion<ReferenceClientParam> hasAnyOfIds(Collection<String> theIds) {
 		return new StringCriterion<ReferenceClientParam>(getParamName(), theIds);
 	}
 	

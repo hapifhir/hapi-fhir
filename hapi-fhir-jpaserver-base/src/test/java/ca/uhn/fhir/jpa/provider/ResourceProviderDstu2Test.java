@@ -1592,7 +1592,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		//@formatter:off
 		Bundle actual = ourClient.search()
 				.forResource(Patient.class)
-				.where(Patient.ORGANIZATION.hasAnyOf(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
+				.where(Patient.ORGANIZATION.hasAnyOfIds(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		Set<String> expectedIds = new HashSet<String>();
