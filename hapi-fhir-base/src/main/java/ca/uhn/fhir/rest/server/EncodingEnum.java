@@ -46,6 +46,11 @@ public enum EncodingEnum {
 
 	;
 
+	/** "xml" */
+	public static final String XML_PLAIN_STRING = "xml";
+	/** "json" */
+	public  static final String JSON_PLAIN_STRING = "json";
+	
 	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingNonLegacy;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
@@ -53,17 +58,24 @@ public enum EncodingEnum {
 	static {
 		ourContentTypeToEncoding = new HashMap<String, EncodingEnum>();
 		ourContentTypeToEncodingNonLegacy = new HashMap<String, EncodingEnum>();
+		
 		for (EncodingEnum next : values()) {
 			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
 			ourContentTypeToEncoding.put(next.myResourceContentTypeNonLegacy, next);
 			ourContentTypeToEncoding.put(next.myResourceContentTypeLegacy, next);
-
 			ourContentTypeToEncodingNonLegacy.put(next.myResourceContentTypeNonLegacy, next);
+
+			/*
+			 * See #346
+			 */
+			ourContentTypeToEncoding.put(next.myResourceContentTypeNonLegacy.replace('+', ' '), next);
+			ourContentTypeToEncoding.put(next.myResourceContentTypeLegacy.replace('+', ' '), next);
+			ourContentTypeToEncodingNonLegacy.put(next.myResourceContentTypeNonLegacy.replace('+', ' '), next);
+
 		}
-		
+
 		// Add before we add the lenient ones
 		ourContentTypeToEncodingStrict = Collections.unmodifiableMap(new HashMap<String, EncodingEnum>(ourContentTypeToEncoding));
-		ourContentTypeToEncodingNonLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingNonLegacy);
 
 		/*
 		 * These are wrong, but we add them just to be tolerant of other
@@ -77,17 +89,11 @@ public enum EncodingEnum {
 		/*
 		 * Plain values, used for parameter values
 		 */
-		ourContentTypeToEncoding.put("json", JSON);
-		ourContentTypeToEncoding.put("xml", XML);
+		ourContentTypeToEncoding.put(JSON_PLAIN_STRING, JSON);
+		ourContentTypeToEncoding.put(XML_PLAIN_STRING, XML);
 
-		/*
-		 * See #346
-		 */
-		for (EncodingEnum next : values()) {
-			ourContentTypeToEncoding.put(next.myResourceContentTypeNonLegacy.replace('+', ' '), next);
-			ourContentTypeToEncoding.put(next.myResourceContentTypeLegacy.replace('+', ' '), next);
-		}
-		
+		ourContentTypeToEncodingNonLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingNonLegacy);
+
 	}
 
 	private String myBundleContentType;

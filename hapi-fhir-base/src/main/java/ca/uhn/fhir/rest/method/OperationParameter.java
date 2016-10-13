@@ -304,7 +304,8 @@ public class OperationParameter implements IParameter {
 							parameters.add(QualifiedParamList.singleton(paramValues[1]));
 						}
 						DateRangeParam dateRangeParam = new DateRangeParam();
-						dateRangeParam.setValuesAsQueryTokens(parameters);
+						FhirContext ctx = theRequest.getServer().getFhirContext();
+						dateRangeParam.setValuesAsQueryTokens(ctx, myName, parameters);
 						matchingParamValues.add(dateRangeParam);
 					} else if (String.class.isAssignableFrom(myParameterType)) {
 

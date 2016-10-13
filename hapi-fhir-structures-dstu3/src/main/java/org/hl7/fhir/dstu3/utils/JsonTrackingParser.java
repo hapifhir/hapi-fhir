@@ -4,14 +4,10 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Stack;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 
 
 /**

@@ -33,41 +33,17 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 */
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionDesignationComponent;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.ExpansionProfile;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Factory;
-import org.hl7.fhir.dstu3.model.PrimitiveType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceDesignationComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionParameterComponent;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.dstu3.model.ValueSet.*;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
+import org.hl7.fhir.exceptions.NoTerminologyServiceException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.Utilities;
 
@@ -239,15 +215,19 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 				focus.getExpansion().setTotal(total);
 			}
 			
-			return new ValueSetExpansionOutcome(focus, null);
+      return new ValueSetExpansionOutcome(focus);
 		} catch (RuntimeException e) {
 			// TODO: we should put something more specific instead of just Exception below, since
 			// it swallows bugs.. what would be expected to be caught there?
 			throw e;
+    } catch (NoTerminologyServiceException e) {
+      // well, we couldn't expand, so we'll return an interface to a checker that can check membership of the set
+      // that might fail too, but it might not, later.
+      return new ValueSetExpansionOutcome(new ValueSetCheckerSimple(source, factory, context), e.getMessage(), TerminologyServiceErrorClass.NOSERVICE);
 		} catch (Exception e) {
 			// well, we couldn't expand, so we'll return an interface to a checker that can check membership of the set
 			// that might fail too, but it might not, later.
-			return new ValueSetExpansionOutcome(new ValueSetCheckerSimple(source, factory, context), e.getMessage());
+    return new ValueSetExpansionOutcome(new ValueSetCheckerSimple(source, factory, context), e.getMessage(), TerminologyServiceErrorClass.UNKNOWN);
 		}
 	}
 
@@ -283,7 +263,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 		return null;
 	}
 
-	private void handleCompose(ValueSetComposeComponent compose, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws TerminologyServiceException, ETooCostly, FileNotFoundException, IOException {
+  private void handleCompose(ValueSetComposeComponent compose, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws TerminologyServiceException, ETooCostly, FileNotFoundException, IOException, NoTerminologyServiceException {
 		// Exclude comes first because we build up a map of things to exclude
 		for (ConceptSetComponent inc : compose.getExclude())
 			excludeCodes(inc, params);
@@ -311,10 +291,10 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
     if (vso.getError() != null)
       throw new TerminologyServiceException("Unable to expand imported value set: "+vso.getError());
 		if (vso.getService() != null)
-			throw new TerminologyServiceException("Unable to expand imported value set " + value);
+      throw new TerminologyServiceException("Unable to expand imported value set "+value);
 		if (vs.hasVersion())
-			if (!existsInParams(params, "version", new UriType(vs.getUrl() + "?version=" + vs.getVersion())))
-				params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(vs.getUrl() + "?version=" + vs.getVersion())));
+      if (!existsInParams(params, "version", new UriType(vs.getUrl()+"?version="+vs.getVersion())))
+        params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(vs.getUrl()+"?version="+vs.getVersion())));
 		for (ValueSetExpansionParameterComponent p : vso.getValueset().getExpansion().getParameter()) {
 			if (!existsInParams(params, p.getName(), p.getValue()))
 				params.add(p);
@@ -330,20 +310,24 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 		}
 	}
 
-  private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws ETooCostly, org.hl7.fhir.exceptions.TerminologyServiceException {
+  private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws ETooCostly, org.hl7.fhir.exceptions.TerminologyServiceException, NoTerminologyServiceException {
 		CodeSystem cs = context.fetchCodeSystem(inc.getSystem());
 		if ((cs == null || cs.getContent() != CodeSystemContentMode.COMPLETE) && context.supportsSystem(inc.getSystem())) {
       addCodes(context.expandVS(inc, canBeHeirarchy), params, profile);
 			return;
 		}
 
-		if (cs == null)
-			throw new TerminologyServiceException("unable to find code system " + inc.getSystem().toString());
+    if (cs == null) {
+      if (context.isNoTerminologyServer())
+        throw new NoTerminologyServiceException("unable to find code system "+inc.getSystem().toString());
+      else
+        throw new TerminologyServiceException("unable to find code system "+inc.getSystem().toString());
+    }
 		if (cs.getContent() != CodeSystemContentMode.COMPLETE)
-			throw new TerminologyServiceException("Code system " + inc.getSystem().toString() + " is incomplete");
+      throw new TerminologyServiceException("Code system "+inc.getSystem().toString()+" is incomplete");
 		if (cs.hasVersion())
-			if (!existsInParams(params, "version", new UriType(cs.getUrl() + "?version=" + cs.getVersion())))
-				params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(cs.getUrl() + "?version=" + cs.getVersion())));
+      if (!existsInParams(params, "version", new UriType(cs.getUrl()+"?version="+cs.getVersion())))
+        params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(cs.getUrl()+"?version="+cs.getVersion())));
 	  
 		if (inc.getConcept().size() == 0 && inc.getFilter().size() == 0) {
 			// special case - add all the code system
@@ -368,7 +352,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 				// special: all non-abstract codes in the target code system under the value
 				ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), fc.getValue());
 				if (def == null)
-					throw new TerminologyServiceException("Code '" + fc.getValue() + "' not found in system '" + inc.getSystem() + "'");
+          throw new TerminologyServiceException("Code '"+fc.getValue()+"' not found in system '"+inc.getSystem()+"'");
         addCodeAndDescendents(cs, inc.getSystem(), def, null, profile);
 			} else if ("display".equals(fc.getProperty()) && fc.getOp() == FilterOperator.EQUAL) {
 			  // gg; note: wtf is this: if the filter is display=v, look up the code 'v', and see if it's diplsay is 'v'?

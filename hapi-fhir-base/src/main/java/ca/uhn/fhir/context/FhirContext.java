@@ -694,12 +694,15 @@ public class FhirContext {
 	 *           The profile string, e.g. <code>"http://example.com/some_patient_profile"</code>. Must not be
 	 *           <code>null</code> or empty.
 	 * @param theClass
-	 *           The resource type. Must not be <code>null</code> or empty.
+	 *           The resource type, or <code>null</code> to clear any existing type
 	 */
 	public void setDefaultTypeForProfile(String theProfile, Class<? extends IBaseResource> theClass) {
 		Validate.notBlank(theProfile, "theProfile must not be null or empty");
-		Validate.notNull(theClass, "theProfile must not be null");
-		myDefaultTypeForProfile.put(theProfile, theClass);
+		if (theClass == null) {
+			myDefaultTypeForProfile.remove(theProfile);
+		} else {
+			myDefaultTypeForProfile.put(theProfile, theClass);
+		}
 	}
 
 	/**

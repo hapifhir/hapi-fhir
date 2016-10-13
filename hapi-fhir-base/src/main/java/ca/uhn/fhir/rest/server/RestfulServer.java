@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -527,14 +528,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		try {
 
-			for (IServerInterceptor next : myInterceptors) {
-				boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
-				if (!continueProcessing) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return;
-				}
-			}
-
+			/* ***********************************
+			 * Parse out the request parameters
+			 * ***********************************/
+			
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
@@ -550,14 +547,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				ourLog.trace("Context Path: {}", servletContextPath);
 			}
 
-			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
-
-			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
-				requestPath = requestPath.substring(1);
-			}
-
-			fhirServerBase = getServerBaseForRequest(theRequest);
-
 			String completeUrl;
 			Map<String, String[]> params = null;
 			if (StringUtils.isNotBlank(theRequest.getQueryString())) {
@@ -571,7 +560,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				if (isIgnoreServerParsedRequestParameters()) {
 					String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 					if (theRequestType == RequestTypeEnum.POST && isNotBlank(contentType) && contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
-						String requestBody = new String(requestDetails.loadRequestContents(), Charsets.UTF_8);
+						String requestBody = new String(requestDetails.loadRequestContents(), Constants.CHARSET_UTF8);
 						params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
 					} else if (theRequestType == RequestTypeEnum.GET) {
 						params = UrlUtil.parseQueryString(theRequest.getQueryString());
@@ -587,6 +576,28 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			requestDetails.setParameters(params);
 
+			/* *************************
+			 * Notify interceptors about the incoming request
+			 * *************************/
+			
+			for (IServerInterceptor next : myInterceptors) {
+				boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
+				if (!continueProcessing) {
+					ourLog.debug("Interceptor {} returned false, not continuing processing");
+					return;
+				}
+			}
+			
+			
+			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
+
+			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
+				requestPath = requestPath.substring(1);
+			}
+
+			fhirServerBase = getServerBaseForRequest(theRequest);
+
+			
 			IIdType id;
 			populateRequestDetailsFromRequestPath(requestDetails, requestPath);
 
@@ -651,13 +662,17 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * This is basically the end of processing for a successful request, since the
 			 * method binding replies to the client and closes the response.
 			 */
-			resourceMethod.invokeServer(this, requestDetails);
+			Closeable outputStreamOrWriter = (Closeable) resourceMethod.invokeServer(this, requestDetails);
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
 				next.processingCompletedNormally(requestDetails);
 			}
 
+			if (outputStreamOrWriter != null) {
+				outputStreamOrWriter.close();
+			}
+			
 		} catch (NotModifiedException e) {
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -1141,24 +1156,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		if (allowPrefer) {
 			addContentLocationHeaders(theRequest, servletResponse, response, resourceName);
 		}
+		Writer writer;
 		if (outcome != null) {
 			ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest);
 			servletResponse.setContentType(encoding.getResourceContentType());
-			Writer writer = servletResponse.getWriter();
+			writer = servletResponse.getWriter();
 			IParser parser = encoding.getEncoding().newParser(getFhirContext());
 			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(this, theRequest));
-			try {
-				outcome.execute(parser, writer);
-			} finally {
-				writer.close();
-			}
+			outcome.execute(parser, writer);
 		} else {
 			servletResponse.setContentType(Constants.CT_TEXT_WITH_UTF8);
-			Writer writer = servletResponse.getWriter();
-			writer.close();
+			writer = servletResponse.getWriter();
 		}
-		// getMethod().in
-		return null;
+		return writer;
 	}
 
 	@Override

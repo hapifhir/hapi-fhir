@@ -1299,7 +1299,20 @@ public class JsonParser extends BaseParser implements IParser {
 	private void parseExtension(ParserState<?> theState, JsonArray theValues, boolean theIsModifier) {
 		for (int i = 0; i < theValues.size(); i++) {
 			JsonObject nextExtObj = (JsonObject) theValues.get(i);
-			String url = nextExtObj.get("url").getAsString();
+			JsonElement jsonElement = nextExtObj.get("url");
+			String url;
+			if (!(jsonElement instanceof JsonPrimitive)) {
+				String parentElementName;
+				if (theIsModifier) {
+					parentElementName = "modifierExtension";
+				} else {
+					parentElementName = "extension";
+				}
+				getErrorHandler().missingRequiredElement(new ParseLocation(parentElementName), "url");
+				url = null;
+			} else {
+				url = jsonElement.getAsString();
+			}
 			theState.enteringNewElementExtension(null, url, theIsModifier);
 			for (Iterator<Entry<String, JsonElement>> iter = nextExtObj.entrySet().iterator(); iter.hasNext();) {
 				String next = iter.next().getKey();

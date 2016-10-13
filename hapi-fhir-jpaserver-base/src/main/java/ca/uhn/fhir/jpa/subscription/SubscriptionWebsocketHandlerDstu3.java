@@ -54,7 +54,6 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandlerDstu3.class);
 
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	private FhirContext myCtx;
 
 	private ScheduledFuture<?> myScheduleFuture;

@@ -59,6 +59,22 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	}
 	
+	@Test
+	public void testValidateDocument() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/document-bundle-dstu3.json"), StandardCharsets.UTF_8);
+		Bundle document = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		
+		
+		ourLog.info("Starting validation");
+		try {
+			MethodOutcome outcome = myBundleDao.validate(document, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+		ourLog.info("Done validation");
+		
+//		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome()));
+	}
 
 	@Test
 	@Ignore

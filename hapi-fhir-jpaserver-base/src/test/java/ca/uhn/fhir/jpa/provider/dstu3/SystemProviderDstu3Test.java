@@ -251,7 +251,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		HttpGet get = new HttpGet(ourServerBase);
 //		get.addHeader("Accept", "application/xml, text/html");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
-		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/json+fhir"));
+		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/fhir+json"));
 	}
 	
 

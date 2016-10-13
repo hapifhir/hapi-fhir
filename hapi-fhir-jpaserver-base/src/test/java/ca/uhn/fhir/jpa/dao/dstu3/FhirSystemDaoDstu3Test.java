@@ -49,6 +49,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
@@ -69,6 +71,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@After
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -102,6 +105,26 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		IdType id = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		MedicationOrder mo = myMedicationOrderDao.read(id);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
+	}
+
+	@Test
+	public void testTransactionOruBundle() throws IOException {
+		myDaoConfig.setAllowMultipleDelete(true);
+		
+		String input = IOUtils.toString(getClass().getResourceAsStream("/oruBundle.json"), StandardCharsets.UTF_8);
+
+		Bundle inputBundle;
+		Bundle outputBundle;
+		inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+
+		inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+
+		IBundleProvider allPatients = myPatientDao.search(new SearchParameterMap());
+		assertEquals(1, allPatients.size());
 	}
 
 	@Test

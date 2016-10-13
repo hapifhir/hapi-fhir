@@ -27,34 +27,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import javax.persistence.criteria.*;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,45 +49,16 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.entity.ResourceLink;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchInclude;
-import ca.uhn.fhir.jpa.entity.SearchResult;
-import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.jpa.entity.TagDefinition;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.StopWatch;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
@@ -120,19 +70,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.CompositeParam;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.HasParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -605,22 +543,32 @@ public class SearchBuilder {
 						codePredicates.add(eq);
 					}
 				} else {
-
-					String paramPath = myContext.getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
-					BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
-					if (!(def instanceof RuntimeChildResourceDefinition)) {
-						throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
-					}
+					
 					List<Class<? extends IBaseResource>> resourceTypes;
-
 					String resourceId;
 					if (!ref.getValue().matches("[a-zA-Z]+\\/.*")) {
-						RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
-						resourceTypes = resDef.getResourceTypes();
+						
+						String paramPath = myContext.getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
+						if (paramPath.endsWith(".as(Reference)")) {
+							paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
+						}
+						
+						BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
+						if (def instanceof RuntimeChildChoiceDefinition) {
+							RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition)def;
+							resourceTypes = choiceDef.getResourceTypes();
+						} else if (def instanceof RuntimeChildResourceDefinition) {
+							RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
+							resourceTypes = resDef.getResourceTypes();
+						} else {
+							throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
+						}
+						
 						resourceId = ref.getValue();
+						
 					} else {
-						resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 						RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
+						resourceTypes = new ArrayList<Class<? extends IBaseResource>>(1);
 						resourceTypes.add(resDef.getImplementingClass());
 						resourceId = ref.getIdPart();
 					}
@@ -669,11 +617,11 @@ public class SearchBuilder {
 							}
 
 							chainValue = new ReferenceParam();
-							chainValue.setValueAsQueryToken(qualifier, resourceId);
+							chainValue.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
 							((ReferenceParam) chainValue).setChain(remainingChain);
 						} else if (isMeta) {
 							IQueryParameterType type = BaseHapiFhirDao.newInstanceType(chain);
-							type.setValueAsQueryToken(qualifier, resourceId);
+							type.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
 							chainValue = type;
 						} else {
 							chainValue = toParameterType(param, qualifier, resourceId);
@@ -1996,7 +1944,7 @@ public class SearchBuilder {
 						break;
 					}
 				}
-			}
+			} 
 
 			if (doHaveNoResults()) {
 				return;
@@ -2009,16 +1957,6 @@ public class SearchBuilder {
 	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
 		myResourceType = theResourceType;
 		myResourceName = theResourceName;
-	}
-
-	private List<Long> toList(Collection<Long> theLoadPids) {
-		final List<Long> pids;
-		if (theLoadPids instanceof List) {
-			pids = (List<Long>) theLoadPids;
-		} else {
-			pids = new ArrayList<Long>(theLoadPids);
-		}
-		return pids;
 	}
 
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
@@ -2060,7 +1998,7 @@ public class SearchBuilder {
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
 		IQueryParameterType qp = toParameterType(theParam);
 
-		qp.setValueAsQueryToken(theQualifier, theValueAsQueryToken); // aaaa
+		qp.setValueAsQueryToken(myContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
 	}
 

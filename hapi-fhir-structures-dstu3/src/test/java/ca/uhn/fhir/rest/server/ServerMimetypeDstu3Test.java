@@ -88,7 +88,7 @@ public class ServerMimetypeDstu3Test {
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -138,7 +138,7 @@ public class ServerMimetypeDstu3Test {
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML_NEW + "; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -159,7 +159,7 @@ public class ServerMimetypeDstu3Test {
 		httpPost.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW);
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -179,7 +179,7 @@ public class ServerMimetypeDstu3Test {
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON + "; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -199,7 +199,7 @@ public class ServerMimetypeDstu3Test {
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -220,7 +220,7 @@ public class ServerMimetypeDstu3Test {
 		httpPost.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -236,7 +236,7 @@ public class ServerMimetypeDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -244,7 +244,7 @@ public class ServerMimetypeDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
-		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -253,7 +253,7 @@ public class ServerMimetypeDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=" + Constants.CT_FHIR_XML);
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -270,7 +270,7 @@ public class ServerMimetypeDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=" + Constants.CT_FHIR_XML_NEW);
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -278,7 +278,7 @@ public class ServerMimetypeDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
-		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 
@@ -289,14 +289,14 @@ public class ServerMimetypeDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("\"resourceType\""));
-		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -305,7 +305,7 @@ public class ServerMimetypeDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=" + Constants.CT_FHIR_JSON);
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -321,14 +321,14 @@ public class ServerMimetypeDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=" + Constants.CT_FHIR_JSON_NEW);
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("\"resourceType\""));
-		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@AfterClass

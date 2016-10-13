@@ -205,16 +205,24 @@ public class XmlParser extends BaseParser implements IParser {
 
 						if ("extension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								throw new DataFormatException("Extension element has no 'url' attribute");
+								getErrorHandler().missingRequiredElement(new ParseLocation("extension"), "url");
+								url = null;
+							} else {
+								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, urlAttr.getValue(), false);
+							parserState.enteringNewElementExtension(elem, url, false);
 						} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								throw new DataFormatException("Extension element has no 'url' attribute");
+								getErrorHandler().missingRequiredElement(new ParseLocation("modifierExtension"), "url");
+								url = null;
+							} else {
+								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, urlAttr.getValue(), true);
+							parserState.enteringNewElementExtension(elem, url, true);
 						} else {
 							String elementName = elem.getName().getLocalPart();
 							parserState.enteringNewElement(namespaceURI, elementName);

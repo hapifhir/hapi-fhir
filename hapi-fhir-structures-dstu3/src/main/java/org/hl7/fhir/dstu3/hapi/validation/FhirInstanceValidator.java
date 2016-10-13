@@ -161,7 +161,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
 			if (profile != null) {
 				try {
-					v.validate(messages, document, profile);
+					v.validate(null, messages, document, profile);
 				} catch (Exception e) {
 					throw new InternalErrorException("Unexpected failure while validating resource", e);
 				}
@@ -174,7 +174,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
 			if (profile != null) {
 				try {
-					v.validate(messages, json, profile);
+					v.validate(null, messages, json, profile);
 				} catch (Exception e) {
 					throw new InternalErrorException("Unexpected failure while validating resource", e);
 				}

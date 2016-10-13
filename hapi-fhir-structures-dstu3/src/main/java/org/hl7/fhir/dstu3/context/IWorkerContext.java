@@ -1,9 +1,10 @@
-package org.hl7.fhir.dstu3.utils;
+package org.hl7.fhir.dstu3.context;
 
 import java.util.List;
 import java.util.Set;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.context.IWorkerContext.ILoggingService;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -19,8 +20,9 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.TerminologyServiceErrorClass;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.dstu3.utils.IWorkerContext.ILoggingService;
+import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu3.validation.IResourceValidator;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 
@@ -46,7 +48,14 @@ import org.hl7.fhir.exceptions.TerminologyServiceException;
  */
 public interface IWorkerContext {
 
+  /**
+   * Get the versions of the definitions loaded in context
+   * @return
+   */
+  public String getVersion();
+  
   // -- Parsers (read and write instances) ----------------------------------------
+
 
   /**
    * Get a parser to read/write instances. Use the defined type (will be extended 
@@ -207,6 +216,7 @@ public interface IWorkerContext {
     private ConceptDefinitionComponent definition;
     private IssueSeverity severity;
     private String message;
+    private TerminologyServiceErrorClass errorClass;
     
     public ValidationResult(IssueSeverity severity, String message) {
       this.severity = severity;
@@ -223,12 +233,20 @@ public interface IWorkerContext {
       this.definition = definition;
     }
     
+    public ValidationResult(IssueSeverity severity, String message, TerminologyServiceErrorClass errorClass) {
+      this.severity = severity;
+      this.message = message;
+      this.errorClass = errorClass;
+    }
+
     public boolean isOk() {
       return definition != null;
     }
 
     public String getDisplay() {
-      return definition == null ? "??" : definition.getDisplay();
+// We don't want to return question-marks because that prevents something more useful from being displayed (e.g. the code) if there's no display value
+//      return definition == null ? "??" : definition.getDisplay();
+      return definition == null ? null : definition.getDisplay();
     }
 
     public ConceptDefinitionComponent asConceptDefinition() {
@@ -242,6 +260,16 @@ public interface IWorkerContext {
     public String getMessage() {
       return message;
     }
+
+    public boolean IsNoService() {
+      return errorClass == TerminologyServiceErrorClass.NOSERVICE;
+    }
+
+    public TerminologyServiceErrorClass getErrorClass() {
+      return errorClass;
+    }
+    
+    
   }
 
   /**
@@ -314,4 +342,6 @@ public interface IWorkerContext {
   }
 
   public void setLogger(ILoggingService logger);
+
+  public boolean isNoTerminologyServer();
 }

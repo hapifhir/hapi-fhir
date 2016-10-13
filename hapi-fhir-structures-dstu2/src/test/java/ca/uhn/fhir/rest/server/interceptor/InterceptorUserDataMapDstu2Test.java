@@ -92,7 +92,7 @@ public class InterceptorUserDataMapDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods, containsInAnyOrder("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException"));
+		assertThat(myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException"));
 	}
 
 	@Test
@@ -106,8 +106,14 @@ public class InterceptorUserDataMapDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		for (int i = 0; i < 10; i++) {
+			if (!myMapCheckMethods.contains("processingCompletedNormally")) {
+				Thread.sleep(100);
+			}
+		}
+		
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
+		assertThat(myMapCheckMethods.toString(), myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
 	}
 
 	protected void updateMapUsing(Map<Object, Object> theUserData, Method theMethod) {

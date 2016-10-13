@@ -13,6 +13,7 @@ import java.util.TimeZone;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -183,10 +184,12 @@ public class DateRangeParamTest {
 		if (theUpper != null) {
 			tokens.add(QualifiedParamList.singleton(null, theUpper));
 		}
-		p.setValuesAsQueryTokens(tokens);
+		p.setValuesAsQueryTokens(ourCtx, null, tokens);
 		return p;
 	}
 
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	
 	public static Date parse(String theString) throws ParseException {
 		return ourFmt.parse(theString);
 	}

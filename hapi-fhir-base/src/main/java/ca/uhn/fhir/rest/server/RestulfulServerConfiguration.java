@@ -39,6 +39,13 @@ public class RestulfulServerConfiguration {
     private String conformanceDate;
     
     /**
+     * Constructor
+     */
+    public RestulfulServerConfiguration() {
+       super();
+    }
+    
+    /**
      * Get the resourceBindings
      * @return the resourceBindings
      */

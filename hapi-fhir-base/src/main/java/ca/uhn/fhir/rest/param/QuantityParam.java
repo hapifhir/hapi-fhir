@@ -183,7 +183,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 	 *            A quantity value (with no system or units), such as "100.0" or "gt4"
 	 */
 	public QuantityParam(String theQuantity) {
-		setValueAsQueryToken(null, theQuantity);
+		setValueAsQueryToken(null, null, null, theQuantity);
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 	 *            A quantity value (with no system or units), such as <code>100</code>
 	 */
 	public QuantityParam(long theQuantity) {
-		setValueAsQueryToken(null, Long.toString(theQuantity));
+		setValueAsQueryToken(null, null, null, Long.toString(theQuantity));
 	}
 
 	/**
@@ -207,7 +207,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 	 *            The unit code
 	 */
 	public QuantityParam(String theQuantity, String theSystem, String theUnits) {
-		setValueAsQueryToken(null, theQuantity);
+		setValueAsQueryToken(null, null, null, theQuantity);
 		setSystem(theSystem);
 		setUnits(theUnits);
 	}
@@ -248,7 +248,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 	}
 
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		clear();
 
 		if (theValue == null) {

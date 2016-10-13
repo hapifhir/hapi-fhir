@@ -43,11 +43,11 @@ final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd<?>> im
 	}
 
 	@Override
-	public IQueryParameterAnd<?> parse(String theName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public IQueryParameterAnd<?> parse(FhirContext theContext, String theParamName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		IQueryParameterAnd<?> dt;
 		try {
 			dt = newInstance();
-			dt.setValuesAsQueryTokens(theString);
+			dt.setValuesAsQueryTokens(theContext, theParamName, theString);
 		} catch (SecurityException e) {
 			throw new InternalErrorException(e);
 		}

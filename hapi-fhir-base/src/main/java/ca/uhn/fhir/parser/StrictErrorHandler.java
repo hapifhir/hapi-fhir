@@ -56,5 +56,19 @@ public class StrictErrorHandler implements IParserErrorHandler {
 		throw new DataFormatException("Resource has invalid reference: " + theReference);
 	}
 
+	@Override
+	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
+		StringBuilder b = new StringBuilder();
+		b.append("Resource is missing required element '");
+		b.append(theElementName);
+		b.append("'");
+		if (theLocation != null) {
+			b.append(" in parent element '");
+			b.append(theLocation.getParentElementName());
+			b.append("'");
+		}
+		throw new DataFormatException(b.toString());
+	}
+
 
 }

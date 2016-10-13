@@ -48,12 +48,12 @@ abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
 		if (isBlank(retVal)) {
 			return Collections.emptyList();
 		}
-		List<?> retValList = Collections.singletonList(MethodUtil.singleton(new StringParam(retVal)));
+		List<?> retValList = Collections.singletonList(MethodUtil.singleton(new StringParam(retVal), null));
 		return (List<IQueryParameterOr<?>>) retValList;
 	}
 
 	@Override
-	public T parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public T parse(FhirContext theContext, String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
 		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
 			return null;
 		}

@@ -8,6 +8,20 @@
 	<body>
 		<release version="2.1" date="TBD">
 			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>spring-data-orm (JPA): 1.10.2 -&gt; 1.10.4</li>
+					</ul>
+				]]>
+			</action>
+			<action type="fix">
+				Fix a fairly significant issue in JPA Server when using the <![CDATA[<code>DatabaseBackedPagingProvider</code>]]>: When paging over the results
+				of a search / $everything operation, under certain circumstances resources may be missing from the last page of results
+				that is returned. Thanks to David Hay for reporting!
+			</action>
+			<action type="add">
 				Client, Server, and JPA server now support experimental support
 				for 
 				<![CDATA[HTTP PATCH]]>
@@ -18,6 +32,11 @@
 				<![CDATA[<br/>]]>
 				Thanks to Pater Girard for all of his help during the connectathon
 				in implementing this feature!
+			</action>
+			<action type="add">
+				Both client and server now use the new STU3 mime types by default
+				if running in STU3 mode (in other words, using an STU3 
+				FhirContext).
 			</action>
 			<action type="fix">
 				In server, when returning a list of resources, the server sometimes failed to add
@@ -101,6 +120,75 @@
 			<action type="fix">
 				JAX-RS server was not able to handle the new mime types defined
 				in STU3
+			</action>
+			<action type="fix">
+				JPA server did not handle custom types when being called
+				programatically (I.e. not through HTTP interface). Thanks to
+				Anthony Mei for pointing this out!
+			</action>
+			<action type="fix">
+				CLI was not correctly able to upload DSTU2 examples to any server
+			</action>
+			<action type="fix">
+				STU3 validator has been upgrated to include fixes made since the
+				1.6.0 ballot
+			</action>
+			<action type="fix">
+				Prevent JPA server from creating a bunch of
+				FhirContext objects for versions of FHIR that
+				aren't actually being used
+			</action>
+			<action type="fix" issue="443">
+				XhtmlNode.equalsDeep() contained a bug which caused resources
+				containing a narrative to always return
+				<![CDATA[<code>false</code>]]> for STU3 
+				<![CDATA[<code>Resource#equalsDeep()</code>]]>. Thanks to 
+				GitHub user @XcrigX for reporting!
+			</action>
+			<action type="fix" issue="441">
+				JPA server did not correctly process searches for chained parameters
+				where the chain passed across a field that was a choice between a
+				reference and a non-reference type (e.g. 
+				<![CDATA[<code>MedicationAdministration.medication[x]</code>]]>. 
+				Thanks to GitHub user @Crudelus for reporting!
+			</action>
+			<action type="fix" issue="414">
+				Handle parsing an extension without a URL more gracefully. In HAPI FHIR 2.0 this caused
+				a NullPointerException to be thrown. Now it will trigger a warning, or throw a 
+				DataFormatException if the StrictErrorHandler is configured on the parser.
+			</action>
+			<action type="fix">
+				Calling a HAPI server URL with a chain on a parameter that shouldn't accept
+				chains (e.g.
+				<![CDATA[<code>GET [base]/Patient?name.foo=smith</code>]]>)
+				did not return an error and instead just ignored the chained part
+				and treated the parameter as though it did not have the chain. This
+				led to confusing and potentially unsafe behaviour. This has been
+				corrected to return an error to the client. Thanks to
+				Kevin Tallevi for finding this!
+			</action>
+			<action type="fix" issue="411">
+				Fix #411 - Searching by <![CDATA[<code>POST [base]/_search</code>]]> with urlencoded parameters doesn't work correctly if
+				interceptors are accessing the parameters and there is are also
+				parameters on the URL. Thanks to Jim Steel for reporting!
+			</action>
+			<action type="add">
+				Fluent client can now return types other than Parameters
+				when invoking operations.
+			</action>
+			<action type="fix">
+				JPA server shouldn't report a totalCount in Bundle of "-1" when
+				there are no results
+			</action>
+			<action type="fix" issue="454">
+				JPA server was not correctly normalizing strings with non-latin characters
+				(e.g. Chinese chars). Thanks to GitHub user @YinAqu for reporting and providing
+				some great analysis of the issue! 
+			</action>
+			<action type="add">
+				Add a new method to ReferenceClientParam which allows you to
+				pass in a number of IDs by a collection of Strings. Thanks to
+				Thomas Andersen for the pul request!
 			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -36,12 +38,21 @@ public interface IParserErrorHandler {
 	void containedResourceWithNoId(IParseLocation theLocation);
 
 	/**
+	 * Resource was missing a required element
+	 * 
+	 * @param theLocation
+	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
+	 * @param theReference The actual invalid reference (e.g. "#3")
+	 * @since 2.1
+	 */
+	void missingRequiredElement(IParseLocation theLocation, String theElementName);
+
+	/**
 	 * Invoked when an element repetition (e.g. a second repetition of something) is found for a field
 	 * which is non-repeating.
 	 * 
 	 * @param theLocation
-	 *           The location in the document. WILL ALWAYS BE NULL currently, as this is not yet implemented, but this parameter is included so that locations can be added in the future without
-	 *           changing the API.
+	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
 	 * @param theElementName
 	 *           The name of the element that was found.
 	 * @since 1.2
@@ -52,8 +63,7 @@ public interface IParserErrorHandler {
 	 * Invoked when an unknown element is found in the document.
 	 * 
 	 * @param theLocation
-	 *           The location in the document. WILL ALWAYS BE NULL currently, as this is not yet implemented, but this parameter is included so that locations can be added in the future without
-	 *           changing the API.
+	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
 	 * @param theAttributeName
 	 *           The name of the attribute that was found.
 	 */
@@ -63,8 +73,7 @@ public interface IParserErrorHandler {
 	 * Invoked when an unknown element is found in the document.
 	 * 
 	 * @param theLocation
-	 *           The location in the document. WILL ALWAYS BE NULL currently, as this is not yet implemented, but this parameter is included so that locations can be added in the future without
-	 *           changing the API.
+	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
 	 * @param theElementName
 	 *           The name of the element that was found.
 	 */
@@ -75,8 +84,7 @@ public interface IParserErrorHandler {
 	 * it is a local reference to an unknown contained resource)
 	 * 
 	 * @param theLocation
-	 *           The location in the document. WILL ALWAYS BE NULL currently, as this is not yet implemented, but this parameter is included so that locations can be added in the future without
-	 *           changing the API.
+	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
 	 * @param theReference The actual invalid reference (e.g. "#3")
 	 * @since 2.0
 	 */
@@ -88,7 +96,13 @@ public interface IParserErrorHandler {
 	 * locations can be added to the API in a future release without changing the API.
 	 */
 	public interface IParseLocation {
-		// nothing for now
+
+		/**
+		 * Returns the name of the parent element (the element containing the element currently being parsed)
+		 * @since 2.1
+		 */
+		String getParentElementName();
+		
 	}
 
 }

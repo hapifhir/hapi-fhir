@@ -25,6 +25,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -36,10 +37,20 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
 public class BaseDstu1Config extends BaseConfig {
+	private static FhirContext ourFhirContextDstu1;
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologySvc terminologyService() {
 		return new HapiTerminologySvcDstu1();
+	}
+
+	@Bean(name = "myFhirContextDstu1")
+	@Lazy
+	public FhirContext fhirContextDstu1() {
+		if (ourFhirContextDstu1 == null) {
+			ourFhirContextDstu1 = FhirContext.forDstu1();
+		}
+		return ourFhirContextDstu1;
 	}
 
 

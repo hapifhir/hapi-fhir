@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -61,8 +62,14 @@ public class BaseDstu3Config extends BaseConfig {
 
 	@Bean
 	@Primary
-	public FhirContext defaultFhirContext() {
-		return fhirContextDstu3();
+	public FhirContext fhirContextDstu3() {
+		FhirContext retVal = FhirContext.forDstu3();
+		
+		// Don't strip versions in some places
+		ParserOptions parserOptions = retVal.getParserOptions();
+		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		
+		return retVal;
 	}
 
 	@Bean(name = "myInstanceValidatorDstu3")
@@ -95,7 +102,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(name = "mySystemProviderDstu3")
 	public ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 systemProviderDstu3() {
 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 retVal = new ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3();
-		retVal.setContext(defaultFhirContext());
+		retVal.setContext(fhirContextDstu3());
 		retVal.setDao(systemDaoDstu3());
 		return retVal;
 	}
@@ -114,7 +121,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(autowire=Autowire.BY_TYPE)
 	public TerminologyUploaderProviderDstu3 terminologyUploaderProvider() {
 		TerminologyUploaderProviderDstu3 retVal = new TerminologyUploaderProviderDstu3();
-		retVal.setContext(defaultFhirContext());
+		retVal.setContext(fhirContextDstu3());
 		return retVal;
 	}
 	

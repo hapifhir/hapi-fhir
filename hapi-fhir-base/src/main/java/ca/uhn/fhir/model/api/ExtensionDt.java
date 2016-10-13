@@ -130,6 +130,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		myModifier = theModifier;
 	}
 
+	@Override
 	public ExtensionDt setUrl(String theUrl) {
 		myUrl = theUrl != null ? new StringDt(theUrl) : myUrl;
 		return this;
@@ -140,6 +141,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		return this;
 	}
 
+	@Override
 	public ExtensionDt setValue(IBaseDatatype theValue) {
 		myValue = theValue;
 		return this;

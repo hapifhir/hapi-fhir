@@ -56,6 +56,38 @@ public class JsonParserDstu3Test {
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
 	}
+	
+	
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseJsonModifierExtensionWithoutUrl() {
+		//@formatter:off
+		String input = 
+			"{\"resourceType\":\"Patient\"," +
+			"\"modifierExtension\":[ {\"valueDateTime\":\"2011-01-02T11:13:15\"} ]" +
+			"}";
+		//@formatter:on
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getModifierExtension().size());
+		assertEquals(null, parsed.getModifierExtension().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getModifierExtension().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newJsonParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
+		}
+		
+	}
+
 
 	@Test
 	public void testParseMissingArray() throws IOException {
@@ -82,6 +114,8 @@ public class JsonParserDstu3Test {
 		assertThat(output, containsString("\"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">VALUE</div>\""));
 	}
 
+
+	
 	@Test
 	public void testEncodeNarrativeShouldIncludeNamespaceWithProcessingInstruction() {
 
@@ -137,6 +171,37 @@ public class JsonParserDstu3Test {
 		assertThat(encode, containsString("\"value\": \"APPID\""));
 	}
 
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseJsonExtensionWithoutUrl() {
+		//@formatter:off
+		String input = 
+			"{\"resourceType\":\"Patient\"," +
+			"\"extension\":[ {\"valueDateTime\":\"2011-01-02T11:13:15\"} ]" +
+			"}";
+		//@formatter:on
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getExtension().size());
+		assertEquals(null, parsed.getExtension().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getExtension().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newJsonParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
+		}
+		
+	}
+	
+	
 	/**
 	 * See #344
 	 */

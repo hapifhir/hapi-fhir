@@ -210,4 +210,17 @@ public class Utilities {
 		return s.substring(0, 1).toLowerCase() + s.substring(1);
 	}
 
+	 public static int charCount(String s, char c) {
+       int res = 0;
+       for (char ch : s.toCharArray())
+             if (ch == c)
+               res++;
+       return res;
+	 }
+
+	 public static boolean isURL(String s) {
+	    boolean ok = s.matches("^http(s{0,1})://[a-zA-Z0-9_/\\-\\.]+\\.([A-Za-z/]{2,5})[a-zA-Z0-9_/\\&\\?\\=\\-\\.\\~\\%]*");
+	    return ok;
+	 }
+	 
 }

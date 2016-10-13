@@ -78,7 +78,7 @@ public class ResourceValidatorDstu3Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(ooencoded, containsString("No issues"));
+		assertThat(ooencoded, containsString("Unknown extension http://foo"));
 	}
 
 	/**

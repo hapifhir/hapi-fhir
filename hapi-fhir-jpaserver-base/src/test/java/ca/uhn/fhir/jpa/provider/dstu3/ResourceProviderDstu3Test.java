@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
@@ -28,32 +29,32 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -68,8 +69,10 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -84,6 +87,203 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@Test
+	public void testFullTextSearch() throws RuntimeException, Exception {
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Systolic Blood Pressure");
+		obs1.setStatus(ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.setComment("obs1");
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Diastolic Blood Pressure");
+		obs2.setStatus(ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Observation?_content=systolic&_pretty=true");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(responseString, containsString(id1.getIdPart()));
+		} finally {
+			response.close();
+		}
+	}
+
+	/**
+	 * See #441
+	 */
+	@Test
+	public void testSearchMedicationChain() throws Exception {
+		Medication medication = new Medication();
+		medication.getCode().addCoding().setSystem("SYSTEM").setCode("04823543");
+		IIdType medId = myMedicationDao.create(medication).getId().toUnqualifiedVersionless();
+
+		MedicationAdministration ma = new MedicationAdministration();
+		ma.setMedication(new Reference(medId));
+		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/MedicationAdministration?medication.code=04823543");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(responseString, containsString(moId.getIdPart()));
+		} finally {
+			response.close();
+		}
+
+	}
+
+	/**
+	 * Per message from David Hay on Skype
+	 */
+	@Test
+	public void testEverythingWithLargeSet() throws Exception {
+		String inputString = IOUtils.toString(getClass().getResourceAsStream("/david_big_bundle.json"), StandardCharsets.UTF_8);
+		Bundle inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
+		inputBundle.setType(BundleType.TRANSACTION);
+
+		Set<String> allIds = new TreeSet<String>();
+		for (BundleEntryComponent nextEntry : inputBundle.getEntry()) {
+			nextEntry.getRequest().setMethod(HTTPVerb.PUT);
+			nextEntry.getRequest().setUrl(nextEntry.getResource().getId());
+			allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		mySystemDao.transaction(mySrd, inputBundle);
+
+		Bundle responseBundle = ourClient.operation().onInstance(new IdType("Patient/A161443")).named("everything").withParameter(Parameters.class, "_count", new IntegerType(50)).useHttpGet()
+				.returnResourceType(Bundle.class).execute();
+
+		TreeSet<String> ids = new TreeSet<String>();
+		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
+			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			}
+		}
+
+		String nextUrl = responseBundle.getLink("next").getUrl();
+		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
+			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+				ids.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			}
+		}
+
+		assertThat(ids, hasItem("List/A161444"));
+		assertThat(ids, hasItem("List/A161468"));
+		assertThat(ids, hasItem("List/A161500"));
+
+		assertEquals(null, responseBundle.getLink("next"));
+
+		ourLog.info("Expected {} - {}", allIds.size(), allIds);
+		ourLog.info("Actual   {} - {}", ids.size(), ids);
+		assertEquals(allIds, ids);
+
+	}
+
+	/**
+	 * Per message from David Hay on Skype
+	 */
+	@Test
+	public void testEverythingWithLargeSet2() throws Exception {
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		for (int i = 1; i < 77; i++) {
+			Observation obs = new Observation();
+			obs.setId("A" + StringUtils.leftPad(Integer.toString(i), 2, '0'));
+			obs.setSubject(new Reference(id));
+			ourClient.update().resource(obs).execute();
+		}
+
+		Bundle responseBundle = ourClient.operation().onInstance(id).named("everything").withParameter(Parameters.class, "_count", new IntegerType(50)).useHttpGet().returnResourceType(Bundle.class)
+				.execute();
+
+		TreeSet<String> ids = new TreeSet<String>();
+		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
+			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+				ids.add(nextEntry.getResource().getIdElement().getIdPart());
+			}
+		}
+
+		ourLog.info("Have {} IDs: {}", ids.size(), ids);
+
+		BundleLinkComponent nextLink = responseBundle.getLink("next");
+		while (nextLink != null) {
+			String nextUrl = nextLink.getUrl();
+			responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+			for (int i = 0; i < responseBundle.getEntry().size(); i++) {
+				for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
+					ids.add(nextEntry.getResource().getIdElement().getIdPart());
+				}
+			}
+
+			ourLog.info("Have {} IDs: {}", ids.size(), ids);
+			nextLink = responseBundle.getLink("next");
+		}
+
+		assertThat(ids, hasItem(id.getIdPart()));
+		for (int i = 1; i < 77; i++) {
+			assertThat(ids, hasItem("A" + StringUtils.leftPad(Integer.toString(i), 2, '0')));
+		}
+		assertEquals(77, ids.size());
+	}
+
+	@Test
+	public void testEmptySearch() throws Exception {
+		Bundle responseBundle;
+		
+		responseBundle = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		assertEquals(0, responseBundle.getTotal());
+		
+		responseBundle = ourClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("AAA")).returnBundle(Bundle.class).execute();
+		assertEquals(0, responseBundle.getTotal());
+		
+		responseBundle = ourClient.search().forResource(Patient.class).where(new StringClientParam("_content").matches().value("AAA")).returnBundle(Bundle.class).execute();
+		assertEquals(0, responseBundle.getTotal());
+		
+		
+	}
+
+	/**
+	 * See #411
+	 * 
+	 * Let's see if we can reproduce this issue in JPA
+	 */
+	@Test
+	public void testSearchWithMixedParams() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("0");
+		patient.addName().addFamily("testSearchWithMixedParams").addGiven("Joe");
+		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		HttpPost httpPost = new HttpPost(ourServerBase + "/Patient/_search?_format=application/xml");
+		httpPost.addHeader("Cache-Control", "no-cache");
+		List<NameValuePair> parameters = Lists.newArrayList();
+		parameters.add(new BasicNameValuePair("name", "Smith"));
+		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+
+		ourLog.info("Outgoing post: {}", httpPost);
+
+		CloseableHttpResponse status = ourHttpClient.execute(httpPost);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
 	}
 
 	@Test
@@ -1726,7 +1926,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());
-		
+
 		try {
 			myBundleDao.validate(history, null, null, null, null, null, mySrd);
 		} catch (PreconditionFailedException e) {
@@ -2051,6 +2251,43 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, actual.getEntry().size());
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
+	}
+	
+	@Test
+	public void testSearchByReferenceIds() {
+		Organization o1 = new Organization();
+		o1.setName("testSearchByResourceChainName01");
+		IIdType o1id = ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();	
+		Organization o2 = new Organization();
+		o2.setName("testSearchByResourceChainName02");
+		IIdType o2id = ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
+		
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds01");
+		p1.addName().addFamily("testSearchByReferenceIdsFamily01").addGiven("testSearchByReferenceIdsGiven01");
+		p1.setManagingOrganization(new Reference(o1id.toUnqualifiedVersionless()));
+		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
+		
+		Patient p2 = new Patient();
+		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds02");
+		p2.addName().addFamily("testSearchByReferenceIdsFamily02").addGiven("testSearchByReferenceIdsGiven02");
+		p2.setManagingOrganization(new Reference(o2id.toUnqualifiedVersionless()));
+		IIdType p2Id = ourClient.create().resource(p2).execute().getId();
+		
+		//@formatter:off
+		Bundle actual = ourClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ORGANIZATION.hasAnyOfIds(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
+				.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
+		//@formatter:on
+		Set<String> expectedIds = new HashSet<String>();
+		expectedIds.add(p1Id.getIdPart());
+		expectedIds.add(p2Id.getIdPart());
+		Set<String> actualIds = new HashSet<String>();
+		for (BundleEntryComponent ele : actual.getEntry()) {
+			actualIds.add(ele.getResource().getIdElement().getIdPart());
+		}
+		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
 	}
 
 	@Test

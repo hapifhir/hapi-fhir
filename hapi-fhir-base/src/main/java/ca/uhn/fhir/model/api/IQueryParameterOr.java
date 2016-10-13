@@ -22,11 +22,12 @@ package ca.uhn.fhir.model.api;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 
 public interface IQueryParameterOr<T extends IQueryParameterType> {
 
-	public void setValuesAsQueryTokens(QualifiedParamList theParameters);
+	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters);
 
 	public List<T> getValuesAsQueryTokens();
 
