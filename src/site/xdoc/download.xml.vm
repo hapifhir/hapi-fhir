@@ -123,12 +123,12 @@
 				<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-base</artifactId>
-   <version>${hapi_stable_version}</version>
+   <version>${project.version}</version>
 </dependency>
 <dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-structures-dstu</artifactId>
-   <version>${hapi_stable_version}</version>
+   <version>${project.version}</version>
 </dependency>]]></source>
 			</subsection>
 
@@ -151,7 +151,7 @@
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-structures-dstu2</artifactId>
-   <version>${hapi_stable_version}</version>
+   <version>${project.version}</version>
 </dependency>]]></source>
 				
 			</subsection>
@@ -166,7 +166,7 @@
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-   <version>${hapi_stable_version}</version>
+   <version>${project.version}</version>
 </dependency>]]></source>
 				
 				<p>
@@ -177,7 +177,7 @@
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-   <version>${hapi_stable_version}</version>
+   <version>${project.version}</version>
 </dependency>]]></source>
 				
 			</subsection>
@@ -193,19 +193,19 @@
 			<p> 
 				DSTU1: 
 			</p>
-			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${hapi_stable_version}'
-compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu:${hapi_stable_version}']]></source>
+			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${project.version}'
+compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu:${project.version}']]></source>
 			<p>
 				DSTU2 (HAPI):
 			</p>
-			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${hapi_stable_version}'
-compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${hapi_stable_version}']]></source>
+			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${project.version}'
+compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${project.version}']]></source>
 			<p>
 				DSTU2 (RI):
 			</p>
-			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${hapi_stable_version}'
-compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2:${hapi_stable_version}'
-compile 'ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2:${hapi_stable_version}']]></source>
+			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${project.version}'
+compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2:${project.version}'
+compile 'ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2:${project.version}']]></source>
 		</section>
 
 		<section name="Using Snapshot Builds">
