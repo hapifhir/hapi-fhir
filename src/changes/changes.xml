@@ -34,6 +34,11 @@
 				in implementing this feature!
 			</action>
 			<action type="add">
+				Android library now uses OkHttp client by default instead
+				of Apache HttpClient. This should lead to much simpler
+				support for Android in the future.
+			</action>
+			<action type="add">
 				Both client and server now use the new STU3 mime types by default
 				if running in STU3 mode (in other words, using an STU3 
 				FhirContext).

@@ -1416,6 +1416,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				myEntityManager.persist(next);
 			}
 
+			theEntity.toString();
+			
 		} // if thePerformIndexing
 
 		theEntity = myEntityManager.merge(theEntity);

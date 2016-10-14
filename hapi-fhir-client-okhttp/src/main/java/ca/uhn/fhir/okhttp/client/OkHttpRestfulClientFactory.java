@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
 import java.net.InetSocketAddress;
@@ -39,7 +40,7 @@ import java.util.Map;
  */
 public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
-    private OkHttpClient myNativeClient;
+    private Call.Factory myNativeClient;
 
     public OkHttpRestfulClientFactory() {
         super();
@@ -59,7 +60,7 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
         myNativeClient = null;
     }
 
-    public synchronized OkHttpClient getNativeClient() {
+    public synchronized Call.Factory getNativeClient() {
         if (myNativeClient == null) {
             myNativeClient = new OkHttpClient();
         }
@@ -83,13 +84,13 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
      */
     @Override
     public void setHttpClient(Object okHttpClient) {
-        myNativeClient = (OkHttpClient) okHttpClient;
+        myNativeClient = (Call.Factory) okHttpClient;
     }
 
     @Override
     public void setProxy(String theHost, Integer thePort) {
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(theHost, thePort));
-        OkHttpClient.Builder builder = getNativeClient().newBuilder().proxy(proxy);
+        OkHttpClient.Builder builder = ((OkHttpClient)getNativeClient()).newBuilder().proxy(proxy);
         setHttpClient(builder.build());
     }
 

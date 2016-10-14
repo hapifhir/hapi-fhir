@@ -275,25 +275,6 @@
 							</sources>
 						</configuration>
 					</execution>
-					<!-- 
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>../hapi-fhir-structures-dstu/src/test/java</source>
-								<source>../hapi-fhir-structures-dstu2/src/test/java</source>
-								<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source>
-								<source>../hapi-fhir-structures-dstu3/src/test/java</source>
-								<source>../hapi-fhir-jpaserver-base/src/test/java</source>
-								<source>../hapi-fhir-base/src/test/java</source>
-							</sources>
-						</configuration>
-					</execution>
-					-->
 				</executions>
 			</plugin>
 			<plugin>
@@ -331,6 +312,9 @@
 			</testResource>
 			<testResource>
 				<directory>../hapi-fhir-structures-dstu3/src/test/resources</directory>
+			</testResource>
+			<testResource>
+				<directory>../hapi-fhir-client-okhttp/src/test/resources</directory>
 			</testResource>
 		</testResources>
 	</build>

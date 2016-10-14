@@ -626,6 +626,33 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(new IdType(patientId).toUnqualifiedVersionless().getValue(), o.getSubject().getReference());
 	}
 
+	/**
+	 * See #467
+	 */
+	@Test
+	public void testTransactionWithLink() {
+		String methodName = "testTransactionWithLink";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
+		assertEquals(2, resp.getEntry().size());
+
+//		o = (Observation) myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
+//		assertEquals(new IdType(patientId).toUnqualifiedVersionless().getValue(), o.getSubject().getReference());
+	}
+
 	@Test
 	public void testTransactionCreateNoMatchUrl() {
 		String methodName = "testTransactionCreateNoMatchUrl";

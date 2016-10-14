@@ -1,5 +1,16 @@
 package ca.uhn.fhir.okhttp.client;
 
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.deleteLastCharacter;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
+
+import java.util.List;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+
 /*
  * #%L
  * HAPI FHIR OkHttp Client
@@ -31,12 +42,6 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import okhttp3.*;
 import okhttp3.internal.Version;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-
-import java.util.List;
-import java.util.Map;
-
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.*;
 
 /**
  * A Http Request based on OkHttp. This is an adapter around the class
@@ -46,7 +51,7 @@ import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.*;
  */
 public class OkHttpRestfulClient implements IHttpClient {
 
-    private OkHttpClient myClient;
+    private Call.Factory myClient;
     private StringBuilder myUrl;
     private Map<String, List<String>> myIfNoneExistParams;
     private String myIfNoneExistString;
@@ -54,7 +59,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     private List<Header> myHeaders;
     private OkHttpRestfulRequest myRequest;
 
-    public OkHttpRestfulClient(OkHttpClient theClient,
+    public OkHttpRestfulClient(Call.Factory theClient,
                                StringBuilder theUrl,
                                Map<String, List<String>> theIfNoneExistParams,
                                String theIfNoneExistString,

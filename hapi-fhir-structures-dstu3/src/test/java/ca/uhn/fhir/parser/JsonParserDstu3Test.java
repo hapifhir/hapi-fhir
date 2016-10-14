@@ -40,6 +40,7 @@ import com.google.common.collect.Sets;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
+import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -86,6 +87,47 @@ public class JsonParserDstu3Test {
 			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
 		}
 		
+	}
+
+	
+	/**
+	 * See #327
+	 */
+	@Test
+	public void testEncodeExtensionWithContainedResource() {
+
+		TestPatientFor327 patient = new TestPatientFor327();
+		patient.setBirthDateElement(new DateType("2016-04-14"));
+
+		List<Reference> conditions = new ArrayList<Reference>();
+		Condition condition = new Condition();
+		condition.addBodySite().setText("BODY SITE");
+		conditions.add(new Reference(condition));
+		patient.setCondition(conditions);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		//@formatter:off
+		assertThat(encoded, stringContainsInOrder(
+			"<Patient xmlns=\"http://hl7.org/fhir\">", 
+				"<contained>", 
+					"<Condition xmlns=\"http://hl7.org/fhir\">", 
+						"<id value=\"1\"/>", 
+						"<bodySite>", 
+							"<text value=\"BODY SITE\"/>", 
+						"</bodySite>", 
+					"</Condition>", 
+				"</contained>", 
+				"<extension url=\"testCondition\">",
+					"<valueReference>", 
+						"<reference value=\"#1\"/>", 
+					"</valueReference>", 
+				"</extension>", 
+				"<birthDate value=\"2016-04-14\"/>", 
+			"</Patient>"
+		));
+		//@formatter:on
 	}
 
 

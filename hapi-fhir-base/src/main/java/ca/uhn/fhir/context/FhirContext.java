@@ -1,5 +1,7 @@
 package ca.uhn.fhir.context;
 
+import java.lang.reflect.Method;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -197,6 +199,24 @@ public class FhirContext {
 		}
 		
 		myResourceTypesToScan = theResourceTypes;
+		
+		/*
+		 * Check if we're running in Android mode and configure the context appropriately if so
+		 */
+		try {
+			Class<?> clazz = Class.forName("ca.uhn.fhir.android.AndroidMarker");
+			ourLog.info("Android mode detected, configuring FhirContext for Android operation");
+			try {
+				Method method = clazz.getMethod("configureContext", FhirContext.class);
+				method.invoke(null, this);
+			} catch (Throwable e) {
+				ourLog.warn("Failed to configure context for Android operation", e);
+			}
+		} catch (ClassNotFoundException e) {
+			ourLog.trace("Android mode not detected");
+		}
+		
+		
 	}
 
 	private String createUnknownResourceNameError(String theResourceName, FhirVersionEnum theVersion) {
@@ -302,7 +322,6 @@ public class FhirContext {
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 */
-	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IBaseResource> theResourceType) {
 		validateInitialized();
 		if (theResourceType == null) {
@@ -364,7 +383,6 @@ public class FhirContext {
 	 * Note that this method is case insensitive!
 	 * </p>
 	 */
-	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		validateInitialized();
 		Validate.notBlank(theResourceName, "theResourceName must not be blank");
@@ -378,7 +396,7 @@ public class FhirContext {
 				throw new DataFormatException(createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
 			}
 			if (IBaseResource.class.isAssignableFrom(clazz)) {
-				retVal = scanResourceType((Class<? extends IResource>) clazz);
+				retVal = scanResourceType(clazz);
 			}
 		}
 

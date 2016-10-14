@@ -56,13 +56,15 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client-okhttp</artifactId>
+			<version>2.1-SNAPSHOT</version>		
+		</dependency>
+		
+		<dependency>
 			<groupId>org.codehaus.woodstox</groupId>
 			<artifactId>woodstox-core-asl</artifactId>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient-android</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -161,6 +163,7 @@
 					<artifactSet>
 						<includes combine.children="append">
 							<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
+							<include>ca.uhn.hapi.fhir:hapi-fhir-client-okhttp</include>
 							<include>org.codehaus.woodstox:woodstox-core-asl</include>
 							<include>javax.xml.stream:stax-api</include>
 							<include>org.codehaus.woodstox:stax2-api</include>

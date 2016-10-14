@@ -1,5 +1,9 @@
 package ca.uhn.fhir.okhttp.client;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 /*
  * #%L
  * HAPI FHIR OkHttp Client
@@ -24,13 +28,9 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import okhttp3.Call;
-import okhttp3.OkHttpClient;
+import okhttp3.Call.Factory;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Adapter for building an OkHttp-specific request.
@@ -40,12 +40,12 @@ import java.util.Map;
 public class OkHttpRestfulRequest implements IHttpRequest {
 
     private final Request.Builder myRequestBuilder;
-    private OkHttpClient myClient;
+    private Factory myClient;
     private String myUrl;
     private RequestTypeEnum myRequestTypeEnum;
     private RequestBody myRequestBody;
 
-    public OkHttpRestfulRequest(OkHttpClient theClient, String theUrl, RequestTypeEnum theRequestTypeEnum, RequestBody theRequestBody) {
+    public OkHttpRestfulRequest(Call.Factory theClient, String theUrl, RequestTypeEnum theRequestTypeEnum, RequestBody theRequestBody) {
         myClient = theClient;
         myUrl = theUrl;
         myRequestTypeEnum = theRequestTypeEnum;
