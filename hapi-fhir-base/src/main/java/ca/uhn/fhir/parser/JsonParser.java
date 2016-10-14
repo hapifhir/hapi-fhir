@@ -1605,6 +1605,15 @@ public class JsonParser extends BaseParser implements IParser {
 
 				JsonParser.write(theEventWriter, "url", myDef.getExtensionUrl());
 
+				/*
+				 * This makes sure that even if the extension contains a reference to a contained
+				 * resource which has a HAPI-assigned ID we'll still encode that ID.
+				 * 
+				 * See #327 
+				 */
+				List<? extends IBase> preProcessedValue = preProcessValues(myDef, theResource, Collections.singletonList(myValue), myChildElem);
+				myValue = preProcessedValue.get(0);
+				
 				BaseRuntimeElementDefinition<?> def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
 				if (def.getChildType() == ChildTypeEnum.RESOURCE_BLOCK) {
 					extractAndWriteExtensionsAsDirectChild(myValue, theEventWriter, def, theResDef, theResource, myChildElem);
