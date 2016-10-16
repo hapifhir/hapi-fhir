@@ -808,8 +808,20 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_sort=address&_count=123&_format=json", capt.getAllValues().get(idx++).getURI().toString());
 
-	}
+		
+		//@formatter:off
+		response = client.search()
+				.forResource(Patient.class)
+				.encodedJson()
+				.where(Patient.BIRTHDATE.beforeOrEquals().day("2012-01-22").orAfter().day("2020-01-01"))
+				.and(Patient.BIRTHDATE.after().day("2011-01-01"))
+				.execute();
+		//@formatter:on
 
+		String comma = "%2C";
+		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22" + comma + "%3E2020-01-01&birthdate=%3E2011-01-01&_format=json", capt.getAllValues().get(idx++).getURI().toString());
+	}
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByNumberExact() throws Exception {
