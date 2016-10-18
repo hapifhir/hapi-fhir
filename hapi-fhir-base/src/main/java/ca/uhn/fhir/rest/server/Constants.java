@@ -170,6 +170,7 @@ public class Constants {
 	public static final String URL_TOKEN_METADATA = "metadata";
 	public static final String CT_JSON_PATCH = "application/json-patch+json";
 	public static final String CT_XML_PATCH = "application/xml-patch+xml";
+	public static final String PARAM_PRETTY_VALUE_FALSE = "false";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

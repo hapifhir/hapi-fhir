@@ -88,6 +88,59 @@ public class ResponseHighlightingInterceptorTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	/**
+	 * See #464
+	 */
+	@Test
+	public void testPrettyPrintDefaultsToTrue() throws Exception {
+		ourServlet.setDefaultPrettyPrint(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "text/html");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+	}
+
+	/**
+	 * See #464
+	 */
+	@Test
+	public void testPrettyPrintDefaultsToTrueWithExplicitTrue() throws Exception {
+		ourServlet.setDefaultPrettyPrint(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
+		httpGet.addHeader("Accept", "text/html");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+	}
+
+	/**
+	 * See #464
+	 */
+	@Test
+	public void testPrettyPrintDefaultsToTrueWithExplicitFalse() throws Exception {
+		ourServlet.setDefaultPrettyPrint(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
+		httpGet.addHeader("Accept", "text/html");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+	}
 
 	@Test
 	public void testForceResponseTime() throws Exception {
@@ -122,7 +175,7 @@ public class ResponseHighlightingInterceptorTest {
 	public void testGetInvalidResourceNoAcceptHeader() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
@@ -391,7 +444,7 @@ public class ResponseHighlightingInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
-		assertThat(output, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(output, stringContainsInOrder("<body>", "<pre>", "\n", "</pre>"));
 		assertThat(output, containsString("<a href=\"?_format=json\">"));
 	}
 

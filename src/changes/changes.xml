@@ -201,6 +201,13 @@
 				contained resource, the reference value (e.g. "#1") did not
 				get serialized. Thanks to GitHub user @fw060 for reporting!
 			</action>
+			<action type="fix" issue="464">
+				ResponseHighlighterInterceptor now pretty-prints responses
+				by default unless the user has explicitly requested
+				a non-pretty-printed response (ie.
+				using <![CDATA[<code>?_pretty=false</code>]]>. Thanks to 
+				Allan Brohansen and Jens Villadsen for the suggestion!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

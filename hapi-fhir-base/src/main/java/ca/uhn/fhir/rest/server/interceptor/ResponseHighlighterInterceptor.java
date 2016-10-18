@@ -295,6 +295,20 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			RestfulServerUtils.configureResponseParser(theRequestDetails, p);
 		}
 
+		// This interceptor defaults to pretty printing unless the user
+		// has specifically requested us not to
+		boolean prettyPrintResponse = true;
+		String[] prettyParams = parameters.get(Constants.PARAM_PRETTY);
+		if (prettyParams != null && prettyParams.length > 0) {
+			if (Constants.PARAM_PRETTY_VALUE_FALSE.equals(prettyParams[0])) {
+				prettyPrintResponse = false;
+			}
+		}
+		if (prettyPrintResponse) {
+			p.setPrettyPrint(prettyPrintResponse);
+		}
+		
+		
 		EncodingEnum encoding = p.getEncoding();
 		String encoded = p.encodeResourceToString(resource);
 
