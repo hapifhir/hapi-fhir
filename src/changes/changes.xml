@@ -208,6 +208,14 @@
 				using <![CDATA[<code>?_pretty=false</code>]]>. Thanks to 
 				Allan Brohansen and Jens Villadsen for the suggestion!
 			</action>
+			<action type="add" issue="469">
+				Add a new JSON library abstraction layer to the JSON parser.
+				This contribution shouldn't have any end-user impact but does
+				make it easier to use the JSON parser to generate custom structures
+				for other purposes, and should allow us to support RDF more
+				easily at some point. Thanks to Bill Denton for the pull
+				request and the contribution!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

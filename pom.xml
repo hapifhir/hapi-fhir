@@ -256,6 +256,12 @@
 			<id>FilipDomazet</id>
 			<name>Filip Domazet</name>
 		</developer>
+		<developer>
+			<id>bdenton</id>
+			<name>Bill Denton</name>
+			<organization>Akana, Inc</organization>
+		</developer>
+	</developers>
 	</developers>
 
 	<licenses>
