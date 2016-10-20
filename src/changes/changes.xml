@@ -216,6 +216,11 @@
 				easily at some point. Thanks to Bill Denton for the pull
 				request and the contribution!
 			</action>
+			<action type="add" issue="455">
+				DSTU1 Bundle encoder did not include the Bundle entry author in
+				the generated bundle. Thanks to Hannes Venter for the pull
+				request and contribution!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

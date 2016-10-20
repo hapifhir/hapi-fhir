@@ -261,6 +261,11 @@
 			<name>Bill Denton</name>
 			<organization>Akana, Inc</organization>
 		</developer>
+		<developer>
+			<id>hnnesv</id>
+			<name>Hannes Venter</name>
+			<organization>Jembi Health Systems</organization>
+		</developer>
 	</developers>
 
 	<licenses>
