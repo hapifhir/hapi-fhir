@@ -63,7 +63,16 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 		switch (myOp) {
 		case READ:
 			if (theOutputResource == null) {
-				return null;
+				switch (theOperation) {
+				case READ:
+					appliesToResourceId = theInputResourceId;
+					break;
+				case SEARCH_SYSTEM:
+				case SEARCH_TYPE:
+					return new Verdict(PolicyEnum.ALLOW, this);
+				default:
+					return null;
+				}
 			}
 			appliesToResource = theOutputResource;
 			break;

@@ -221,20 +221,16 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		IIdType inputResourceId = null;
 		
 		switch (determineOperationDirection(theOperation, theProcessedRequest.getResource())) {
-		case IN_UNCATEGORIZED:
-			inputResourceId = theProcessedRequest.getId();
-			if (inputResourceId == null || inputResourceId.hasIdPart() == false) {
-				return;
-			} else {
-				break;
-			}
 		case IN:
 		case BOTH:
 			inputResource = theProcessedRequest.getResource();
 			inputResourceId = theProcessedRequest.getId();
 			break;
-		case NONE:
 		case OUT:
+			inputResource = null;
+			inputResourceId = theProcessedRequest.getId();
+			break;
+		case NONE:
 			return;
 		}
 
@@ -257,8 +253,6 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
 		switch (determineOperationDirection(theRequestDetails.getRestOperationType(), null)) {
-		case IN_UNCATEGORIZED:
-			return true;
 		case IN:
 		case NONE:
 			return true;
@@ -354,7 +348,6 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 
 	private enum OperationExamineDirection {
 		IN,
-		IN_UNCATEGORIZED,
 		NONE,
 		OUT, 
 		BOTH, 
