@@ -225,6 +225,12 @@
 				Remove unused field (myIsContained) from ResourceTable
 				in JPA server.
 			</action>
+			<action type="add">
+				AuthorizationInterceptor is now a bit more aggressive
+				at blocking read operations, stopping them on the
+				way in if there is no way they will be accepted
+				to the resource check on the way out
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

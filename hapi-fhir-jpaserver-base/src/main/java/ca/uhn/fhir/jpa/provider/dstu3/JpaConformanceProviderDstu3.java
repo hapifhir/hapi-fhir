@@ -118,9 +118,18 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 			}
 		}
 
+		massage(retVal);
+		
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected void massage(Conformance theStatement) {
+		// nothing
 	}
 
 	public void setDaoConfig(DaoConfig myDaoConfig) {

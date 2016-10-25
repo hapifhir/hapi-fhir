@@ -167,7 +167,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Rule 1"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 		
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
@@ -321,7 +321,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Default Rule"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
@@ -625,7 +625,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -679,8 +679,8 @@ public class AuthorizationInterceptorDstu2Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
@@ -719,7 +719,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -729,7 +729,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
