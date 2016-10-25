@@ -221,6 +221,10 @@
 				the generated bundle. Thanks to Hannes Venter for the pull
 				request and contribution!
 			</action>
+			<action type="fix">
+				Remove unused field (myIsContained) from ResourceTable
+				in JPA server.
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
