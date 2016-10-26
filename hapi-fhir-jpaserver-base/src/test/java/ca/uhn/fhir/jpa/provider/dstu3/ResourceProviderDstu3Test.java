@@ -864,7 +864,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -877,7 +877,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourHttpClient.execute(post);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertEquals(id.getValue(), newIdString); // version should match for conditional create
 		} finally {
 			response.close();
@@ -904,7 +904,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", respString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -946,7 +946,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", respString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -963,7 +963,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", respString);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -1000,7 +1000,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -1011,7 +1011,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourHttpClient.execute(post);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id2 = new IdType(newIdString);
 		} finally {
@@ -1249,7 +1249,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -1293,7 +1293,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -3075,7 +3075,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -3087,7 +3087,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourHttpClient.execute(put);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			IdType newId = new IdType(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue());
+			IdType newId = new IdType(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue());
 			assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
 			assertNotEquals(id, newId);
 		} finally {
@@ -3110,7 +3110,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
@@ -3126,7 +3126,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourHttpClient.execute(put);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id2 = new IdType(newIdString);
 		} finally {
@@ -3153,7 +3153,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {

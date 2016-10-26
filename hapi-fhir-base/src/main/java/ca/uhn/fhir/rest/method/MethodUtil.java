@@ -546,6 +546,14 @@ public class MethodUtil {
 			}
 		}
 
+		List<String> locationHeaders = theHeaders.get(Constants.HEADER_LOCATION_LC);
+		if (locationHeaders != null && locationHeaders.size() > 0 && StringUtils.isNotBlank(locationHeaders.get(0))) {
+			String headerValue = locationHeaders.get(0);
+			if (isNotBlank(headerValue)) {
+				new IdDt(headerValue).applyTo(resource);
+			}
+		}
+
 		IdDt existing = IdDt.of(resource);
 
 		List<String> eTagHeaders = theHeaders.get(Constants.HEADER_ETAG_LC);
