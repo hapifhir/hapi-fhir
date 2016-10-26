@@ -231,6 +231,16 @@
 				way in if there is no way they will be accepted
 				to the resource check on the way out
 			</action>
+			<action type="fix" issue="472">
+				STU3 servers were incorrectly returning the 
+				<![CDATA[<code>Content-Location</code>]]>
+				header instead of the
+				<![CDATA[<code>Content</code>]]>
+				header. The former has been removed from the 
+				FHIR specification in STU3, but the 
+				latter got removed in HAPI's code base.
+				Thanks to Jim Steel for reporting!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

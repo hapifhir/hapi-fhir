@@ -47,6 +47,29 @@ public class CreateDstu3Test {
 	private static Server ourServer;
 
 	/**
+	 * #472
+	 */
+	@Test
+	public void testCreateReturnsLocationHeader() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+
+		assertEquals(1, status.getHeaders("Location").length);
+		assertEquals(0, status.getHeaders("Content-Location").length);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
+
+	}
+
+	/**
 	 * #342
 	 */
 	@Test
