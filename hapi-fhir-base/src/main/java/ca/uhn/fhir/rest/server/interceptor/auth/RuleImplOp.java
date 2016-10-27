@@ -69,6 +69,8 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 					break;
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
+				case HISTORY_INSTANCE:
+				case HISTORY_SYSTEM:
 					return new Verdict(PolicyEnum.ALLOW, this);
 				default:
 					return null;
