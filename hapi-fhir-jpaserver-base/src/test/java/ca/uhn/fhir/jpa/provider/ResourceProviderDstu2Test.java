@@ -26,6 +26,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -1621,7 +1622,56 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 		assertEquals("Expects to retrieve the 2 patients which reference the two different organizations", expectedIds, actualIds);
 	}
-
+	
+	@Test
+	public void testForResourcesWithProfile() {
+		Organization o1 = new Organization();
+		o1.setName("testSearchByResourceChainName01");
+		o1.getMeta().addProfile("http://profile1").addProfile("http://profile2");
+		IdDt o1id = (IdDt) ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();	
+		Organization o2 = new Organization();
+		o2.setName("testSearchByResourceChainName02");
+		o2.getMeta().addProfile("http://profile1").addProfile("http://profile3");
+		IdDt o2id = (IdDt) ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
+		//@formatter:off
+		Bundle actual = ourClient.search()
+				.forResource(Organization.class)
+				.withProfile("http://profile1")
+				.withProfile("http://profileX")
+				.encodedJson().prettyPrint().execute();
+		//@formatter:on
+		assertEquals("nothing matches profile x", Collections.emptyList(), actual.getEntries());
+		//@formatter:off
+		actual = ourClient.search()
+				.forResource(Organization.class)
+				.withProfile("http://profile1")
+				.withProfile("http://profile2")
+				.encodedJson().prettyPrint().execute();
+		//@formatter:on
+		Set<String> expectedIds = new HashSet<String>();
+		expectedIds.add(o1id.getIdPart());
+		Set<String> actualIds = new HashSet<String>();
+		for (BundleEntry ele : actual.getEntries()) {
+			actualIds.add(ele.getResource().getId().getIdPart());
+		}
+		assertEquals("Expects to retrieve the 1 orgination matching on Org1's profiles", expectedIds, actualIds);
+		//@formatter:off
+		actual = ourClient.search()
+				.forResource(Organization.class)
+				.withProfile("http://profile1")
+				.withAnyProfile(Arrays.asList("http://profile3", "http://profile2"))
+				.encodedJson().prettyPrint().execute();
+		//@formatter:on
+		expectedIds = new HashSet<String>();
+		expectedIds.add(o1id.getIdPart());
+		expectedIds.add(o2id.getIdPart());
+		actualIds = new HashSet<String>();
+		for (BundleEntry ele : actual.getEntries()) {
+			actualIds.add(ele.getResource().getId().getIdPart());
+		}
+		assertEquals("Expects to retrieve the 2 orginations, since we match on (the common profile AND (Org1's second profile OR org2's second profile))", expectedIds, actualIds);
+	}
+	
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParamRp";

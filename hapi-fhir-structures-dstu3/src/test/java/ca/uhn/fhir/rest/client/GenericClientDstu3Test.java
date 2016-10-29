@@ -991,6 +991,16 @@ public class GenericClientDstu3Test {
 		//@formatter:off
 		client.search()
 			.forResource("Patient")
+			.where(Patient.BIRTHDATE.after().second(now.getValueAsString()).orBefore().second(now.getValueAsString()))
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + now.getValueAsString() + ",lt" + now.getValueAsString(), UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		idx++;
+		
+		//@formatter:off
+		client.search()
+			.forResource("Patient")
 			.where(Patient.BIRTHDATE.after().now())
 			.returnBundle(Bundle.class)
 			.execute();
