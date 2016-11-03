@@ -65,10 +65,13 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 			if (theOutputResource == null) {
 				switch (theOperation) {
 				case READ:
+				case VREAD:
 					appliesToResourceId = theInputResourceId;
 					break;
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
+				case HISTORY_INSTANCE:
+				case HISTORY_SYSTEM:
 					return new Verdict(PolicyEnum.ALLOW, this);
 				default:
 					return null;
@@ -80,8 +83,20 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 			if (theInputResource == null && theInputResourceId == null) {
 				return null;
 			}
-			appliesToResource = theInputResource;
-			appliesToResourceId = theInputResourceId;
+			switch (theOperation) {
+			case CREATE:
+			case UPDATE:
+			case ADD_TAGS:
+			case DELETE_TAGS:
+			case META_ADD:
+			case META_DELETE:
+			case PATCH:
+				appliesToResource = theInputResource;
+				appliesToResourceId = theInputResourceId;
+				break;
+			default:
+				return null;
+			}
 			break;
 		case DELETE:
 			if (theOperation == RestOperationTypeEnum.DELETE) {

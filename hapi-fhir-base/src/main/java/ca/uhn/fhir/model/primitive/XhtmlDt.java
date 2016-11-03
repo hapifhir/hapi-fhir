@@ -162,10 +162,13 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		int firstTagIndex = value.indexOf("<", hasProcessingInstruction ? 1 : 0);
 		if (firstTagIndex != -1) {
 			int firstTagEnd = value.indexOf(">", firstTagIndex);
+			int firstSlash = value.indexOf("/", firstTagIndex);
 			if (firstTagEnd != -1) {
-				String firstTag = value.substring(firstTagIndex, firstTagEnd);
-				if (!firstTag.contains(" xmlns")) {
-					value = value.substring(0, firstTagEnd) + DECL_XMLNS + value.substring(firstTagEnd);
+				if (firstSlash > firstTagEnd) {
+					String firstTag = value.substring(firstTagIndex, firstTagEnd);
+					if (!firstTag.contains(" xmlns")) {
+						value = value.substring(0, firstTagEnd) + DECL_XMLNS + value.substring(firstTagEnd);
+					}
 				}
 			}
 		}

@@ -51,6 +51,11 @@ import org.junit.Test;
 
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
@@ -110,6 +115,23 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		IOUtils.closeQuietly(resp.getEntity().getContent());
 		assertEquals(200, resp.getStatusLine().getStatusCode());
+	}
+
+	/**
+	 * See #484
+	 */
+	@Test
+	public void saveAndRetrieveBasicResource() throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
+		
+		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
+		ourLog.info(respString);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, respString);
+		IdDt id = new IdDt(bundle.getEntry().get(0).getResponse().getLocation());
+		
+		Basic basic = ourClient.read().resource(Basic.class).withId(id).execute();
+		List<ExtensionDt> exts = basic.getUndeclaredExtensionsByUrl("http://localhost:1080/hapi-fhir-jpaserver-example/baseDstu2/StructureDefinition/DateID");
+		assertEquals(1, exts.size());
 	}
 
 	/**
