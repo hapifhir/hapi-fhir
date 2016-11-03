@@ -65,6 +65,7 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 			if (theOutputResource == null) {
 				switch (theOperation) {
 				case READ:
+				case VREAD:
 					appliesToResourceId = theInputResourceId;
 					break;
 				case SEARCH_SYSTEM:

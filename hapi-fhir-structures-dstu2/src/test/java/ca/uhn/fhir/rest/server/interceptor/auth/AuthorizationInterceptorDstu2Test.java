@@ -70,7 +70,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -86,7 +85,6 @@ public class AuthorizationInterceptorDstu2Test {
 	private static List<IResource> ourReturn;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
-
 
 	@Before
 	public void before() {
@@ -168,7 +166,7 @@ public class AuthorizationInterceptorDstu2Test {
 		assertThat(response, containsString("Access denied by rule: Rule 1"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
-		
+
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
 		status = ourClient.execute(httpGet);
@@ -196,16 +194,16 @@ public class AuthorizationInterceptorDstu2Test {
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.BATCH);
 		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.POST);
-		
+
 		Bundle output = new Bundle();
 		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		output.addEntry().getResponse().setLocation("/Patient/1");
-		
+
 		HttpPost httpPost;
 		HttpResponse status;
 		String response;
 
-		ourReturn = Arrays.asList((IResource)output);
+		ourReturn = Arrays.asList((IResource) output);
 		ourHitMethod = false;
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(createFhirResourceEntity(input));
@@ -232,16 +230,16 @@ public class AuthorizationInterceptorDstu2Test {
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.BATCH);
 		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.POST);
-		
+
 		Bundle output = new Bundle();
 		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		output.addEntry().setResource(createPatient(2));
-		
+
 		HttpPost httpPost;
 		HttpResponse status;
 		String response;
 
-		ourReturn = Arrays.asList((IResource)output);
+		ourReturn = Arrays.asList((IResource) output);
 		ourHitMethod = false;
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(createFhirResourceEntity(input));
@@ -268,16 +266,16 @@ public class AuthorizationInterceptorDstu2Test {
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.COLLECTION);
 		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.POST);
-		
+
 		Bundle output = new Bundle();
 		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		output.addEntry().setResource(createPatient(1));
-		
+
 		HttpPost httpPost;
 		HttpResponse status;
 		String response;
 
-		ourReturn = Arrays.asList((IResource)output);
+		ourReturn = Arrays.asList((IResource) output);
 		ourHitMethod = false;
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(createFhirResourceEntity(input));
@@ -298,7 +296,7 @@ public class AuthorizationInterceptorDstu2Test {
 					.denyAll("Default Rule")
 					.build();
 				//@formatter:on
-		}
+			}
 		});
 
 		HttpGet httpGet;
@@ -331,8 +329,17 @@ public class AuthorizationInterceptorDstu2Test {
 		assertThat(response, containsString("Access denied by rule: Default Rule"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Default Rule"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
 	}
-	
+
 	@Test
 	public void testMetadataAllow() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -408,7 +415,7 @@ public class AuthorizationInterceptorDstu2Test {
 		response = extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
-		
+
 	}
 
 	@Test
@@ -458,7 +465,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
-		
+
 		// Wrong instance
 		ourHitMethod = false;
 		ourReturn = Arrays.asList(createPatient(2));
@@ -520,7 +527,7 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
-	
+
 	@Test
 	public void testOperationTypeLevel() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -617,6 +624,14 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
+		ourReturn = Arrays.asList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/_history/222");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
 		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
@@ -692,7 +707,6 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testReadByCompartmentWrong() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -771,16 +785,16 @@ public class AuthorizationInterceptorDstu2Test {
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.TRANSACTION);
 		input.addEntry().setResource(createPatient(1)).getRequest().setUrl("/Patient").setMethod(HTTPVerbEnum.PUT);
-		
+
 		Bundle output = new Bundle();
 		output.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		output.addEntry().getResponse().setLocation("/Patient/1");
-		
+
 		HttpPost httpPost;
 		HttpResponse status;
 		String response;
 
-		ourReturn = Arrays.asList((IResource)output);
+		ourReturn = Arrays.asList((IResource) output);
 		ourHitMethod = false;
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(createFhirResourceEntity(input));
@@ -951,8 +965,6 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
-	
-	
 
 	@Test
 	public void testWriteByCompartmentUpdateConditionalResolvesToInvalid() throws Exception {
@@ -986,7 +998,6 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testWriteByCompartmentUpdateConditionalResolvesToValid() throws Exception {
 		ourConditionalCreateId = "1";
@@ -1128,7 +1139,7 @@ public class AuthorizationInterceptorDstu2Test {
 		assertTrue(ourHitMethod);
 
 	}
-	
+
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -1186,13 +1197,13 @@ public class AuthorizationInterceptorDstu2Test {
 			return Observation.class;
 		}
 
-		@Operation(name="opName", idempotent=true)
+		@Operation(name = "opName", idempotent = true)
 		public Parameters operation() {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
 
-		@Operation(name="opName", idempotent=true)
+		@Operation(name = "opName", idempotent = true)
 		public Parameters operation(@IdParam IdDt theId) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
@@ -1203,15 +1214,17 @@ public class AuthorizationInterceptorDstu2Test {
 			ourHitMethod = true;
 			return (Observation) ourReturn.get(0);
 		}
+
 		@Search()
 		public List<IResource> search() {
 			ourHitMethod = true;
 			return ourReturn;
 		}
+
 		@Update()
 		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Observation theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
-			
+
 			if (isNotBlank(theConditionalUrl)) {
 				IdDt actual = new IdDt("Observation", ourConditionalCreateId);
 				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
@@ -1222,22 +1235,20 @@ public class AuthorizationInterceptorDstu2Test {
 				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
 				theResource.setId(theId.withVersion("2"));
 			}
-			
+
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setCreated(true);
 			retVal.setResource(theResource);
 			return retVal;
 		}
 
-
 	}
-	
-	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
-			
+
 			if (isNotBlank(theConditionalUrl)) {
 				IdDt actual = new IdDt("Patient", ourConditionalCreateId);
 				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
@@ -1246,7 +1257,7 @@ public class AuthorizationInterceptorDstu2Test {
 				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, theResource);
 				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.CREATE);
 			}
-			
+
 			ourHitMethod = true;
 			theResource.setId("Patient/1/_history/1");
 			MethodOutcome retVal = new MethodOutcome();
@@ -1254,7 +1265,6 @@ public class AuthorizationInterceptorDstu2Test {
 			retVal.setResource(theResource);
 			return retVal;
 		}
-
 
 		@Delete()
 		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
@@ -1270,20 +1280,20 @@ public class AuthorizationInterceptorDstu2Test {
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-			
-		@Operation(name="opName", idempotent=true)
+
+		@Operation(name = "opName", idempotent = true)
 		public Parameters operation() {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
-		
-		@Operation(name="opName", idempotent=true)
+
+		@Operation(name = "opName", idempotent = true)
 		public Parameters operation(@IdParam IdDt theId) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
 
-		@Operation(name="opName2", idempotent=true)
+		@Operation(name = "opName2", idempotent = true)
 		public Parameters operation2(@IdParam IdDt theId) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
@@ -1300,7 +1310,7 @@ public class AuthorizationInterceptorDstu2Test {
 			ourHitMethod = true;
 			return ourReturn;
 		}
-		
+
 		@Update()
 		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
@@ -1320,9 +1330,10 @@ public class AuthorizationInterceptorDstu2Test {
 			retVal.setResource(theResource);
 			return retVal;
 		}
-		
+
 		@Validate
-		public MethodOutcome validate(@ResourceParam Patient theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+		public MethodOutcome validate(@ResourceParam Patient theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding,
+				@Validate.Mode ValidationModeEnum theMode,
 				@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 			OperationOutcome oo = new OperationOutcome();
@@ -1340,17 +1351,15 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 	}
-	
-	public static class PlainProvider
-	{
-		
-		@Operation(name="opName", idempotent=true)
+
+	public static class PlainProvider {
+
+		@Operation(name = "opName", idempotent = true)
 		public Parameters operation() {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
-		
-		
+
 		@Transaction()
 		public Bundle search(@TransactionParam Bundle theInput) {
 			ourHitMethod = true;
