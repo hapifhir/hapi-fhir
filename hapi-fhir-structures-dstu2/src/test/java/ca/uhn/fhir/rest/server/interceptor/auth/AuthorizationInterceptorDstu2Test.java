@@ -528,6 +528,66 @@ public class AuthorizationInterceptorDstu2Test {
 		assertFalse(ourHitMethod);
 	}
 
+	
+	@Test
+	public void testOperationNotAllowedWithWritePermissiom() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("RULE 1").write().allResources().withAnyId().andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// System
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Type
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		// Instance
+		ourHitMethod = false;
+		ourReturn = Arrays.asList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+}
+	
+	
 	@Test
 	public void testOperationTypeLevel() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {

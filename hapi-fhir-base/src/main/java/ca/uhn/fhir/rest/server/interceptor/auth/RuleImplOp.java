@@ -83,8 +83,20 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 			if (theInputResource == null && theInputResourceId == null) {
 				return null;
 			}
-			appliesToResource = theInputResource;
-			appliesToResourceId = theInputResourceId;
+			switch (theOperation) {
+			case CREATE:
+			case UPDATE:
+			case ADD_TAGS:
+			case DELETE_TAGS:
+			case META_ADD:
+			case META_DELETE:
+			case PATCH:
+				appliesToResource = theInputResource;
+				appliesToResourceId = theInputResourceId;
+				break;
+			default:
+				return null;
+			}
 			break;
 		case DELETE:
 			if (theOperation == RestOperationTypeEnum.DELETE) {
