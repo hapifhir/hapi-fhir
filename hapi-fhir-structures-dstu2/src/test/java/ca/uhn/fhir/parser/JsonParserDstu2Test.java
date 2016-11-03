@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.Basic;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
@@ -125,7 +126,6 @@ public class JsonParserDstu2Test {
 		assertEquals(true, obs.getReadOnly().getValue().booleanValue());
 	}
 
-	
 	/**
 	 * See #390
 	 */
@@ -143,6 +143,7 @@ public class JsonParserDstu2Test {
 		assertEquals("123", b.getId().getIdPart());
 		assertEquals(0, b.getEntry().size());
 	}
+	
 	
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -301,7 +302,7 @@ public class JsonParserDstu2Test {
 		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
-
+	
 	/**
 	 * See #336
 	 */
@@ -359,7 +360,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -424,7 +424,7 @@ public class JsonParserDstu2Test {
 		assertEquals("VERSION2", label.getVersion());
 	}
 
-
+	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -446,7 +446,7 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
+
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
 
@@ -465,6 +465,7 @@ public class JsonParserDstu2Test {
 		assertEquals(1, b.getEntries().size());
 
 	}
+
 	
 	/**
 	 * Fixing #89
@@ -494,7 +495,7 @@ public class JsonParserDstu2Test {
 		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		assertThat(actual, not(containsString("78ef6f64c2f2")));
 	}
-
+	
 	@Test
 	public void testEncodeEmptyBinary() {
 		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
@@ -564,7 +565,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifier() {
 		Observation obs = new Observation();
@@ -602,7 +602,7 @@ public class JsonParserDstu2Test {
 		assertEquals("ext_url_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getValue()).getValue());
 	}
 
-
+	
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifierWithChildExtension() {
 		Observation obs = new Observation();
@@ -646,6 +646,7 @@ public class JsonParserDstu2Test {
 		assertEquals("http://subext", obs.getUndeclaredExtensions().get(0).getExtension().get(0).getUrl());
 		assertEquals("sub_ext_value", ((StringDt)obs.getUndeclaredExtensions().get(0).getExtension().get(0).getValue()).getValue());
 	}
+
 
 	/**
 	 * See #428
@@ -1488,6 +1489,16 @@ public class JsonParserDstu2Test {
 
 		assertEquals(exp, act);
 
+	}
+
+	/**
+	 * See #484
+	 */
+	@Test
+	public void testParseNarrativeWithEmptyDiv() {
+		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div/>\"}}";
+		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
+		assertEquals("<div/>", basic.getText().getDivAsString());
 	}
 
 	/**
