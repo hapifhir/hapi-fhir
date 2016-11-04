@@ -40,6 +40,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -234,7 +235,95 @@ public class AuthorizationInterceptorDstu2Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$everything");
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Bundle"));
 		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(true, ourHitMethod);
+
+		ourReturn = Arrays.asList();
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Encounter/1/$everything");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("OperationOutcome"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(false, ourHitMethod);
+		
+	}
+
+	@Test
+	public void testOperationByInstanceOfTypeWithInvalidReturnValue() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andThen()
+					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+		
+		// With a return value we don't allow
+		ourReturn = Arrays.asList(createPatient(222));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$everything");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("OperationOutcome"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(true, ourHitMethod);
+
+		// With a return value we do
+		ourReturn = Arrays.asList(createPatient(1));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$everything");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Bundle"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(true, ourHitMethod);
+		
+	}
+
+	@Test
+	public void testOperationByInstanceOfTypeWithReturnValue() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList();
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$everything");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("Bundle"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(true, ourHitMethod);
+
+		ourReturn = Arrays.asList();
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Encounter/1/$everything");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertThat(response, containsString("OperationOutcome"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(false, ourHitMethod);
 	}
 
 	@Test
@@ -1297,12 +1386,13 @@ public class AuthorizationInterceptorDstu2Test {
 
 		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
 		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
+		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
 		PlainProvider plainProvider = new PlainProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv);
+		ourServlet.setResourceProviders(patProvider, obsProv, encProv);
 		ourServlet.setPlainProviders(plainProvider);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -1387,6 +1477,23 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
+	public static class DummyEncounterResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Encounter.class;
+		}
+		@Operation(name = "everything", idempotent = true)
+		public Bundle everything(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			Bundle retVal = new Bundle();
+			for (IResource next : ourReturn) {
+				retVal.addEntry().setResource(next);
+			}
+			return retVal;
+		}
+	}
+	
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Create()

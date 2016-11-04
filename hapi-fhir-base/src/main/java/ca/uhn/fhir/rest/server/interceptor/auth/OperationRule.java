@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,6 +41,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
 	private List<IIdType> myAppliesToIds;
+	private HashSet<Class<? extends IBaseResource>> myAppliesToInstancesOfType;
 
 	/**
 	 * Must include the leading $
@@ -66,6 +67,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 			break;
 		case EXTENDED_OPERATION_TYPE:
 			if (myAppliesToTypes != null) {
+				// TODO: Convert to a map of strings and keep the result
 				for (Class<? extends IBaseResource> next : myAppliesToTypes) {
 					String resName = ctx.getResourceDefinition(next).getName();
 					if (resName.equals(theRequestDetails.getResourceName())) {
@@ -76,12 +78,24 @@ class OperationRule extends BaseRule implements IAuthRule {
 			}
 			break;
 		case EXTENDED_OPERATION_INSTANCE:
-			if (myAppliesToIds != null) {
-				String instanceId = theRequestDetails.getId().toUnqualifiedVersionless().getValue();
-				for (IIdType next : myAppliesToIds) {
-					if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
-						applies = true;
-						break;
+			if (theInputResourceId != null) {
+				if (myAppliesToIds != null) {
+					String instanceId = theInputResourceId.toUnqualifiedVersionless().getValue();
+					for (IIdType next : myAppliesToIds) {
+						if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
+							applies = true;
+							break;
+						}
+					}
+				}
+				if (myAppliesToInstancesOfType != null) {
+					// TODO: Convert to a map of strings and keep the result
+					for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+						String resName = ctx.getResourceDefinition(next).getName();
+						if (resName.equals(theInputResourceId.getResourceType())) {
+							applies = true;
+							break;
+						}
 					}
 				}
 			}
@@ -97,7 +111,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		if (myOperationName != null && !myOperationName.equals(theRequestDetails.getOperation())) {
 			return null;
 		}
-		
+
 		return newVerdict();
 	}
 
@@ -111,6 +125,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	public void appliesToInstances(List<IIdType> theAppliesToIds) {
 		myAppliesToIds = theAppliesToIds;
+	}
+
+	public void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
+		myAppliesToInstancesOfType = theAppliesToTypes;
 	}
 
 }

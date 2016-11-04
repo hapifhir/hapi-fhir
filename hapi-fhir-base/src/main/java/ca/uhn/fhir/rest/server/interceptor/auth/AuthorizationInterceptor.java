@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -138,6 +139,8 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		case EXTENDED_OPERATION_INSTANCE:
 		case EXTENDED_OPERATION_SERVER:
 		case EXTENDED_OPERATION_TYPE:
+			return OperationExamineDirection.BOTH;
+
 		case METADATA:
 			// Security does not apply to these operations 
 			return OperationExamineDirection.IN;
@@ -270,10 +273,18 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		case HISTORY_INSTANCE:
 		case HISTORY_SYSTEM:
 		case HISTORY_TYPE:
-		case TRANSACTION:{
+		case TRANSACTION:
+		case EXTENDED_OPERATION_SERVER:
+		case EXTENDED_OPERATION_TYPE:
+		case EXTENDED_OPERATION_INSTANCE: {
 			if (theResponseObject != null) {
-				IBaseBundle responseBundle = (IBaseBundle) theResponseObject;
-				resources = toListOfResources(fhirContext, responseBundle);
+				if (theResponseObject instanceof IBaseBundle) {
+//					IBaseBundle responseBundle = (IBaseBundle) theResponseObject;
+//					resources = toListOfResources(fhirContext, responseBundle);
+					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+				} else if (theResponseObject instanceof IBaseParameters) {
+					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+				}
 			}
 			break;
 		}
@@ -290,6 +301,18 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 
 		return true;
+	}
+
+	private List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+		List<IBaseResource> resources;
+		resources = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
+		
+		// Exclude the container
+		if (resources.size() > 0 && resources.get(0) == theResponseObject) {
+			resources = resources.subList(1, resources.size());
+		}
+		
+		return resources;
 	}
 
 	@CoverageIgnore
@@ -329,18 +352,18 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		myDefaultPolicy = theDefaultPolicy;
 	}
 
-	private List<IBaseResource> toListOfResources(FhirContext fhirContext, IBaseBundle responseBundle) {
-		List<IBaseResource> retVal = BundleUtil.toListOfResources(fhirContext, responseBundle);
-		for (int i = 0; i < retVal.size(); i++) {
-			IBaseResource nextResource = retVal.get(i);
-			if (nextResource instanceof IBaseBundle) {
-				retVal.addAll(BundleUtil.toListOfResources(fhirContext, (IBaseBundle) nextResource));
-				retVal.remove(i);
-				i--;
-			}
-		}
-		return retVal;
-	}
+//	private List<IBaseResource> toListOfResources(FhirContext fhirContext, IBaseBundle responseBundle) {
+//		List<IBaseResource> retVal = BundleUtil.toListOfResources(fhirContext, responseBundle);
+//		for (int i = 0; i < retVal.size(); i++) {
+//			IBaseResource nextResource = retVal.get(i);
+//			if (nextResource instanceof IBaseBundle) {
+//				retVal.addAll(BundleUtil.toListOfResources(fhirContext, (IBaseBundle) nextResource));
+//				retVal.remove(i);
+//				i--;
+//			}
+//		}
+//		return retVal;
+//	}
 
 	private static UnsupportedOperationException failForDstu1() {
 		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");

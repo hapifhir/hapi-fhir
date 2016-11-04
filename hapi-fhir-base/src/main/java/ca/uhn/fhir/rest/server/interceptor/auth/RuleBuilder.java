@@ -343,14 +343,32 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished onType(Class<? extends IBaseResource> theType) {
-					Validate.notNull(theType, "theType must not be null");
+					validateType(theType);
 
 					OperationRule rule = createRule();
-					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
-					appliesToTypes.add(theType);
-					rule.appliesToTypes(appliesToTypes);
+					rule.appliesToTypes(toTypeSet(theType));
 					myRules.add(rule);
 					return new RuleBuilderFinished();
+				}
+
+				private void validateType(Class<? extends IBaseResource> theType) {
+					Validate.notNull(theType, "theType must not be null");
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onInstancesOfType(Class<? extends IBaseResource> theType) {
+					validateType(theType);
+
+					OperationRule rule = createRule();
+					rule.appliesToInstancesOfType(toTypeSet(theType));
+					myRules.add(rule);
+					return new RuleBuilderFinished();
+				}
+
+				private HashSet<Class<? extends IBaseResource>> toTypeSet(Class<? extends IBaseResource> theType) {
+					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
+					appliesToTypes.add(theType);
+					return appliesToTypes;
 				}
 
 			}

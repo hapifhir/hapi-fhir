@@ -229,7 +229,10 @@
 				AuthorizationInterceptor is now a bit more aggressive
 				at blocking read operations, stopping them on the
 				way in if there is no way they will be accepted
-				to the resource check on the way out
+				to the resource check on the way out. In addition
+				it can now be configured to allow/deny operation
+				invocations at the instance level on any
+				instance of a given type
 			</action>
 			<action type="fix" issue="472">
 				STU3 servers were incorrectly returning the 
