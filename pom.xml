@@ -266,6 +266,10 @@
 			<name>Hannes Venter</name>
 			<organization>Jembi Health Systems</organization>
 		</developer>
+		<developer>
+			<id>vadi2</id>
+			<name>Vadim Peretokin</name>
+		</developer>
 	</developers>
 
 	<licenses>
