@@ -213,6 +213,31 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testOperationByInstanceOfTypeAllowed() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Arrays.asList();
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$everything");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
 	public void testBatchWhenTransactionReadDenied() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -1351,6 +1376,16 @@ public class AuthorizationInterceptorDstu2Test {
 		public Parameters operation(@IdParam IdDt theId) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
+		}
+
+		@Operation(name = "everything", idempotent = true)
+		public Bundle everything(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			Bundle retVal = new Bundle();
+			for (IResource next : ourReturn) {
+				retVal.addEntry().setResource(next);
+			}
+			return retVal;
 		}
 
 		@Operation(name = "opName2", idempotent = true)
