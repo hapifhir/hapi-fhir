@@ -27,7 +27,7 @@
 				textual resources being found in
 				<code>hapi-fhir-validation-resources-dstu3-[version].jar</code>.
 				For information on where to find these libraries, see the
-				<a href="./downloads.html">Downloads</a> page.
+				<a href="./download.html">Download</a> page.
 			</p>
 			<p>
 				Migrating to DSTU3 does require some effort, as the resource
