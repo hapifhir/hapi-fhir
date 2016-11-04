@@ -7,7 +7,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire.GroupQuestion;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -17,7 +20,21 @@ public class ExtensionsDstu2 {
 @SuppressWarnings("unused")
 public static void main(String[] args) throws DataFormatException, IOException {
 
-	
+   {   
+   Questionnaire q= new Questionnaire();
+   GroupQuestion item = q.getGroup().addQuestion();
+   item.setText("Hello");
+   
+   ExtensionDt extension = new ExtensionDt(false, "http://hl7.org/fhir/StructureDefinition/translation");
+   item.getTextElement().addUndeclaredExtension(extension);
+   
+   extension.addUndeclaredExtension(new ExtensionDt(false, "lang", new CodeDt("es")));
+   extension.addUndeclaredExtension(new ExtensionDt(false, "cont", new StringDt("hola")));
+   
+   System.out.println(FhirContext.forDstu2().newJsonParser().setPrettyPrint(true).encodeResourceToString(q));
+   }
+
+   
 // START SNIPPET: resourceExtension
 // Create an example patient
 Patient patient = new Patient();

@@ -617,7 +617,7 @@ public List<DiagnosticReport> getDiagnosticReport(
                @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
                TokenParam theIdentifier,
                
-               @IncludeParam(allow= {"DiagnosticReport.subject"}) 
+               @IncludeParam(allow= {"DiagnosticReport:subject"}) 
                Set<Include> theIncludes ) {
 	
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
@@ -626,7 +626,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   DiagnosticReport report = loadSomeDiagnosticReportFromDatabase(theIdentifier);
 
   // If the client has asked for the subject to be included:
-  if (theIncludes.contains(new Include("DiagnosticReport.subject"))) {
+  if (theIncludes.contains(new Include("DiagnosticReport:subject"))) {
 	 
     // The resource reference should contain the ID of the patient
     IdDt subjectId = report.getSubject().getReference();
@@ -665,7 +665,7 @@ public List<DiagnosticReport> getDiagnosticReport(
              @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
              TokenParam theIdentifier,
              
-             @IncludeParam(allow= {"DiagnosticReport.subject"}) 
+             @IncludeParam(allow= {"DiagnosticReport:subject"}) 
              String theInclude ) {
 	
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
@@ -674,7 +674,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   DiagnosticReport report = loadSomeDiagnosticReportFromDatabase(theIdentifier);
 
   // If the client has asked for the subject to be included:
-  if ("DiagnosticReport.subject".equals(theInclude)) {
+  if ("DiagnosticReport:subject".equals(theInclude)) {
 	 
     // The resource reference should contain the ID of the patient
     IdDt subjectId = report.getSubject().getReference();

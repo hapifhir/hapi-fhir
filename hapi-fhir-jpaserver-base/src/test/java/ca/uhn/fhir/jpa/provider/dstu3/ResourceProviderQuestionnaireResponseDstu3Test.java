@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -58,6 +59,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			}
 			ourRestServer.registerInterceptor(ourValidatingInterceptor);
 		}
+		
 	}
 
 	
