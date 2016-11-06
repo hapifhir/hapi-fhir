@@ -20,51 +20,55 @@
 				<tbody>
 					<tr>
 						<td rowspan="1">hapi-fhir-structures-dstu</td>
-						<td>1.1 - 1.6.1</td>
+						<td>HAPI FHIR 1.1 - 2.1</td>
 						<td><a href="http://www.hl7.org/fhir/DSTU1/index.html">DSTU1 0.0.82</a></td>
 					</tr>
 					<tr>
 						<td rowspan="3">hapi-fhir-structures-dstu2</td>
-						<td>1.1</td>
+						<td>HAPI FHIR 1.1</td>
 						<td><a href="http://www.hl7.org/fhir/2015May/index.html">DSTU2 0.5.0</a></td>
 					</tr>
 					<tr>
-						<td>1.2</td>
+						<td>HAPI FHIR 1.2</td>
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
 					</tr>
 					<tr>
-						<td>1.3 - 1.6.1</td>
+						<td>HAPI FHIR 1.3 - 2.1</td>
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
 					</tr>
 					<tr>
 						<td rowspan="3">hapi-fhir-structures-hl7org-dstu2</td>
-						<td>1.1</td>
-						<td><a href="http://hl7-fhir.github.io/">DSTU2 0.5.0 Snapshot</a> (SVN 5843)</td>
+						<td>HAPI FHIR 1.1</td>
+						<td><a href="http://build.fhir.org/">DSTU2 0.5.0 Snapshot</a> (SVN 5843)</td>
 					</tr>
 					<tr>
-						<td>1.2</td>
+						<td>HAPI FHIR 1.2</td>
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
 					</tr>
 					<tr>
-						<td>1.3 - 1.6</td>
+						<td>HAPI FHIR 1.3 - 2.1</td>
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
 					</tr>
 					<tr>
-						<td rowspan="4">hapi-fhir-structures-dstu3</td>
-						<td>1.4</td>
-						<td><a href="http://hl7-fhir.github.io/">STU3 1.3.0 Snapshot</a> (SVN 7602)</td>
+						<td rowspan="5">hapi-fhir-structures-dstu3</td>
+						<td>HAPI FHIR 1.4</td>
+						<td><a href="http://build.fhir.org/">STU3 1.3.0 Snapshot</a> (SVN 7602)</td>
 					</tr>
 					<tr>
-						<td>1.5</td>
-						<td><a href="http://hl7-fhir.github.io/">STU3 1.4.0 Snapshot</a> (SVN 8138)</td>
+						<td>HAPI FHIR 1.5</td>
+						<td><a href="http://build.fhir.org/">STU3 1.4.0 Snapshot</a> (SVN 8138)</td>
 					</tr>
 					<tr>
-						<td>1.6</td>
-						<td><a href="http://hl7-fhir.github.io/">STU3 1.4.0 Snapshot</a> (SVN 8636)</td>
+						<td>HAPI FHIR 1.6</td>
+						<td><a href="http://build.fhir.org/">STU3 1.4.0 Snapshot</a> (SVN 8636)</td>
 					</tr>
 					<tr>
-						<td>2.0</td>
-						<td><a href="http://hl7-fhir.github.io/">STU3 1.6.0</a> (SVN 9663)</td>
+						<td>HAPI FHIR 2.0</td>
+						<td><a href="http://build.fhir.org/">STU3 1.6.0</a> (SVN 9663)</td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 2.1</td>
+						<td><a href="http://build.fhir.org/">STU3 1.7.0</a> (SVN 10129)</td>
 					</tr>
 				</tbody>
 			</table>

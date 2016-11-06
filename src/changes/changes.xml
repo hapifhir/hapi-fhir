@@ -8,6 +8,14 @@
 	<body>
 		<release version="2.1" date="TBD">
 			<action type="add">
+				STU3 structure definitions have been updated to the 
+				STU3 latest definitions (1.7.0 - SVN 10129). In 
+				particular, this version supports the new CapabilityStatement
+				resource which replaces the previous Conformance
+				resource (in order to reduce upgrade pain, both resource
+				types are included in this version of HAPI)
+			</action>
+			<action type="add">
 				Bump the version of a few dependencies to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
