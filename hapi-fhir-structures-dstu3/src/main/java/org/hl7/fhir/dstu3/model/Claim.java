@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,16 +29,21 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.
  */
@@ -296,9 +299,14 @@ public class Claim extends DomainResource {
         /**
          * Other claims which are related to this claim such as prior claim versions or for related services.
          */
-        @Child(name = "claim", type = {Identifier.class, Claim.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "claim", type = {Claim.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference to the related claim", formalDefinition="Other claims which are related to this claim such as prior claim versions or for related services." )
-        protected Type claim;
+        protected Reference claim;
+
+        /**
+         * The actual object that is the target of the reference (Other claims which are related to this claim such as prior claim versions or for related services.)
+         */
+        protected Claim claimTarget;
 
         /**
          * For example prior or umbrella.
@@ -315,7 +323,7 @@ public class Claim extends DomainResource {
         @Description(shortDefinition="Related file or case reference", formalDefinition="An alternate organizational reference to the case or file to which this particular claim pertains - eg Property/Casualy insurer claim # or Workers Compensation case # ." )
         protected Identifier reference;
 
-        private static final long serialVersionUID = -2033217402L;
+        private static final long serialVersionUID = -515151214L;
 
     /**
      * Constructor
@@ -327,34 +335,13 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #claim} (Other claims which are related to this claim such as prior claim versions or for related services.)
          */
-        public Type getClaim() { 
+        public Reference getClaim() { 
+          if (this.claim == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create RelatedClaimComponent.claim");
+            else if (Configuration.doAutoCreate())
+              this.claim = new Reference(); // cc
           return this.claim;
-        }
-
-        /**
-         * @return {@link #claim} (Other claims which are related to this claim such as prior claim versions or for related services.)
-         */
-        public Identifier getClaimIdentifier() throws FHIRException { 
-          if (!(this.claim instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.claim.getClass().getName()+" was encountered");
-          return (Identifier) this.claim;
-        }
-
-        public boolean hasClaimIdentifier() { 
-          return this.claim instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #claim} (Other claims which are related to this claim such as prior claim versions or for related services.)
-         */
-        public Reference getClaimReference() throws FHIRException { 
-          if (!(this.claim instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.claim.getClass().getName()+" was encountered");
-          return (Reference) this.claim;
-        }
-
-        public boolean hasClaimReference() { 
-          return this.claim instanceof Reference;
         }
 
         public boolean hasClaim() { 
@@ -364,8 +351,28 @@ public class Claim extends DomainResource {
         /**
          * @param value {@link #claim} (Other claims which are related to this claim such as prior claim versions or for related services.)
          */
-        public RelatedClaimComponent setClaim(Type value) { 
+        public RelatedClaimComponent setClaim(Reference value) { 
           this.claim = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #claim} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Other claims which are related to this claim such as prior claim versions or for related services.)
+         */
+        public Claim getClaimTarget() { 
+          if (this.claimTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create RelatedClaimComponent.claim");
+            else if (Configuration.doAutoCreate())
+              this.claimTarget = new Claim(); // aa
+          return this.claimTarget;
+        }
+
+        /**
+         * @param value {@link #claim} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Other claims which are related to this claim such as prior claim versions or for related services.)
+         */
+        public RelatedClaimComponent setClaimTarget(Claim value) { 
+          this.claimTarget = value;
           return this;
         }
 
@@ -419,7 +426,7 @@ public class Claim extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("claim[x]", "Identifier|Reference(Claim)", "Other claims which are related to this claim such as prior claim versions or for related services.", 0, java.lang.Integer.MAX_VALUE, claim));
+          childrenList.add(new Property("claim", "Reference(Claim)", "Other claims which are related to this claim such as prior claim versions or for related services.", 0, java.lang.Integer.MAX_VALUE, claim));
           childrenList.add(new Property("relationship", "Coding", "For example prior or umbrella.", 0, java.lang.Integer.MAX_VALUE, relationship));
           childrenList.add(new Property("reference", "Identifier", "An alternate organizational reference to the case or file to which this particular claim pertains - eg Property/Casualy insurer claim # or Workers Compensation case # .", 0, java.lang.Integer.MAX_VALUE, reference));
         }
@@ -427,7 +434,7 @@ public class Claim extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 94742588: /*claim*/ return this.claim == null ? new Base[0] : new Base[] {this.claim}; // Type
+        case 94742588: /*claim*/ return this.claim == null ? new Base[0] : new Base[] {this.claim}; // Reference
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // Coding
         case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // Identifier
         default: return super.getProperty(hash, name, checkValid);
@@ -439,7 +446,7 @@ public class Claim extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 94742588: // claim
-          this.claim = (Type) value; // Type
+          this.claim = castToReference(value); // Reference
           break;
         case -261851592: // relationship
           this.relationship = castToCoding(value); // Coding
@@ -454,8 +461,8 @@ public class Claim extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("claim[x]"))
-          this.claim = (Type) value; // Type
+        if (name.equals("claim"))
+          this.claim = castToReference(value); // Reference
         else if (name.equals("relationship"))
           this.relationship = castToCoding(value); // Coding
         else if (name.equals("reference"))
@@ -467,7 +474,7 @@ public class Claim extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 683016900:  return getClaim(); // Type
+        case 94742588:  return getClaim(); // Reference
         case -261851592:  return getRelationship(); // Coding
         case -925155509:  return getReference(); // Identifier
         default: return super.makeProperty(hash, name);
@@ -477,11 +484,7 @@ public class Claim extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("claimIdentifier")) {
-          this.claim = new Identifier();
-          return this.claim;
-        }
-        else if (name.equals("claimReference")) {
+        if (name.equals("claim")) {
           this.claim = new Reference();
           return this.claim;
         }
@@ -560,11 +563,16 @@ public class Claim extends DomainResource {
         /**
          * Party to be reimbursed: Subscriber, provider, other.
          */
-        @Child(name = "party", type = {Identifier.class, Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "party", type = {Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Party to receive the payable", formalDefinition="Party to be reimbursed: Subscriber, provider, other." )
-        protected Type party;
+        protected Reference party;
 
-        private static final long serialVersionUID = -385798848L;
+        /**
+         * The actual object that is the target of the reference (Party to be reimbursed: Subscriber, provider, other.)
+         */
+        protected Resource partyTarget;
+
+        private static final long serialVersionUID = 140598850L;
 
     /**
      * Constructor
@@ -632,34 +640,13 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #party} (Party to be reimbursed: Subscriber, provider, other.)
          */
-        public Type getParty() { 
+        public Reference getParty() { 
+          if (this.party == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PayeeComponent.party");
+            else if (Configuration.doAutoCreate())
+              this.party = new Reference(); // cc
           return this.party;
-        }
-
-        /**
-         * @return {@link #party} (Party to be reimbursed: Subscriber, provider, other.)
-         */
-        public Identifier getPartyIdentifier() throws FHIRException { 
-          if (!(this.party instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.party.getClass().getName()+" was encountered");
-          return (Identifier) this.party;
-        }
-
-        public boolean hasPartyIdentifier() { 
-          return this.party instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #party} (Party to be reimbursed: Subscriber, provider, other.)
-         */
-        public Reference getPartyReference() throws FHIRException { 
-          if (!(this.party instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.party.getClass().getName()+" was encountered");
-          return (Reference) this.party;
-        }
-
-        public boolean hasPartyReference() { 
-          return this.party instanceof Reference;
         }
 
         public boolean hasParty() { 
@@ -669,8 +656,23 @@ public class Claim extends DomainResource {
         /**
          * @param value {@link #party} (Party to be reimbursed: Subscriber, provider, other.)
          */
-        public PayeeComponent setParty(Type value) { 
+        public PayeeComponent setParty(Reference value) { 
           this.party = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #party} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Party to be reimbursed: Subscriber, provider, other.)
+         */
+        public Resource getPartyTarget() { 
+          return this.partyTarget;
+        }
+
+        /**
+         * @param value {@link #party} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Party to be reimbursed: Subscriber, provider, other.)
+         */
+        public PayeeComponent setPartyTarget(Resource value) { 
+          this.partyTarget = value;
           return this;
         }
 
@@ -678,7 +680,7 @@ public class Claim extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "Coding", "Type of Party to be reimbursed: Subscriber, provider, other.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("resourceType", "Coding", "organization | patient | practitioner | relatedperson.", 0, java.lang.Integer.MAX_VALUE, resourceType));
-          childrenList.add(new Property("party[x]", "Identifier|Reference(Practitioner|Organization|Patient|RelatedPerson)", "Party to be reimbursed: Subscriber, provider, other.", 0, java.lang.Integer.MAX_VALUE, party));
+          childrenList.add(new Property("party", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Party to be reimbursed: Subscriber, provider, other.", 0, java.lang.Integer.MAX_VALUE, party));
         }
 
       @Override
@@ -686,7 +688,7 @@ public class Claim extends DomainResource {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
         case -384364440: /*resourceType*/ return this.resourceType == null ? new Base[0] : new Base[] {this.resourceType}; // Coding
-        case 106437350: /*party*/ return this.party == null ? new Base[0] : new Base[] {this.party}; // Type
+        case 106437350: /*party*/ return this.party == null ? new Base[0] : new Base[] {this.party}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -702,7 +704,7 @@ public class Claim extends DomainResource {
           this.resourceType = castToCoding(value); // Coding
           break;
         case 106437350: // party
-          this.party = (Type) value; // Type
+          this.party = castToReference(value); // Reference
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -715,8 +717,8 @@ public class Claim extends DomainResource {
           this.type = castToCoding(value); // Coding
         else if (name.equals("resourceType"))
           this.resourceType = castToCoding(value); // Coding
-        else if (name.equals("party[x]"))
-          this.party = (Type) value; // Type
+        else if (name.equals("party"))
+          this.party = castToReference(value); // Reference
         else
           super.setProperty(name, value);
       }
@@ -726,7 +728,7 @@ public class Claim extends DomainResource {
         switch (hash) {
         case 3575610:  return getType(); // Coding
         case -384364440:  return getResourceType(); // Coding
-        case 1189320666:  return getParty(); // Type
+        case 106437350:  return getParty(); // Reference
         default: return super.makeProperty(hash, name);
         }
 
@@ -742,11 +744,7 @@ public class Claim extends DomainResource {
           this.resourceType = new Coding();
           return this.resourceType;
         }
-        else if (name.equals("partyIdentifier")) {
-          this.party = new Identifier();
-          return this.party;
-        }
-        else if (name.equals("partyReference")) {
+        else if (name.equals("party")) {
           this.party = new Reference();
           return this.party;
         }
@@ -1013,10 +1011,10 @@ public class Claim extends DomainResource {
           this.code = castToCoding(value); // Coding
           break;
         case -873664438: // timing
-          this.timing = (Type) value; // Type
+          this.timing = castToType(value); // Type
           break;
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1030,9 +1028,9 @@ public class Claim extends DomainResource {
         else if (name.equals("code"))
           this.code = castToCoding(value); // Coding
         else if (name.equals("timing[x]"))
-          this.timing = (Type) value; // Type
+          this.timing = castToType(value); // Type
         else if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -1661,7 +1659,7 @@ public class Claim extends DomainResource {
           this.date = castToDateTime(value); // DateTimeType
           break;
         case -1095204141: // procedure
-          this.procedure = (Type) value; // Type
+          this.procedure = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1675,7 +1673,7 @@ public class Claim extends DomainResource {
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("procedure[x]"))
-          this.procedure = (Type) value; // Type
+          this.procedure = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -1772,9 +1770,14 @@ public class Claim extends DomainResource {
         /**
          * Reference to the program or plan identification, underwriter or payor.
          */
-        @Child(name = "coverage", type = {Identifier.class, Coverage.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "coverage", type = {Coverage.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Insurance information", formalDefinition="Reference to the program or plan identification, underwriter or payor." )
-        protected Type coverage;
+        protected Reference coverage;
+
+        /**
+         * The actual object that is the target of the reference (Reference to the program or plan identification, underwriter or payor.)
+         */
+        protected Coverage coverageTarget;
 
         /**
          * The contract number of a business agreement which describes the terms and conditions.
@@ -1810,7 +1813,7 @@ public class Claim extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ruleset")
         protected Coding originalRuleset;
 
-        private static final long serialVersionUID = 2031704818L;
+        private static final long serialVersionUID = -1003564312L;
 
     /**
      * Constructor
@@ -1822,7 +1825,7 @@ public class Claim extends DomainResource {
     /**
      * Constructor
      */
-      public CoverageComponent(PositiveIntType sequence, BooleanType focal, Type coverage) {
+      public CoverageComponent(PositiveIntType sequence, BooleanType focal, Reference coverage) {
         super();
         this.sequence = sequence;
         this.focal = focal;
@@ -1922,34 +1925,13 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
          */
-        public Type getCoverage() { 
+        public Reference getCoverage() { 
+          if (this.coverage == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoverageComponent.coverage");
+            else if (Configuration.doAutoCreate())
+              this.coverage = new Reference(); // cc
           return this.coverage;
-        }
-
-        /**
-         * @return {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
-         */
-        public Identifier getCoverageIdentifier() throws FHIRException { 
-          if (!(this.coverage instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.coverage.getClass().getName()+" was encountered");
-          return (Identifier) this.coverage;
-        }
-
-        public boolean hasCoverageIdentifier() { 
-          return this.coverage instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
-         */
-        public Reference getCoverageReference() throws FHIRException { 
-          if (!(this.coverage instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.coverage.getClass().getName()+" was encountered");
-          return (Reference) this.coverage;
-        }
-
-        public boolean hasCoverageReference() { 
-          return this.coverage instanceof Reference;
         }
 
         public boolean hasCoverage() { 
@@ -1959,8 +1941,28 @@ public class Claim extends DomainResource {
         /**
          * @param value {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
          */
-        public CoverageComponent setCoverage(Type value) { 
+        public CoverageComponent setCoverage(Reference value) { 
           this.coverage = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #coverage} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the program or plan identification, underwriter or payor.)
+         */
+        public Coverage getCoverageTarget() { 
+          if (this.coverageTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoverageComponent.coverage");
+            else if (Configuration.doAutoCreate())
+              this.coverageTarget = new Coverage(); // aa
+          return this.coverageTarget;
+        }
+
+        /**
+         * @param value {@link #coverage} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the program or plan identification, underwriter or payor.)
+         */
+        public CoverageComponent setCoverageTarget(Coverage value) { 
+          this.coverageTarget = value;
           return this;
         }
 
@@ -2146,7 +2148,7 @@ public class Claim extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("sequence", "positiveInt", "A service line item.", 0, java.lang.Integer.MAX_VALUE, sequence));
           childrenList.add(new Property("focal", "boolean", "The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, java.lang.Integer.MAX_VALUE, focal));
-          childrenList.add(new Property("coverage[x]", "Identifier|Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, java.lang.Integer.MAX_VALUE, coverage));
+          childrenList.add(new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, java.lang.Integer.MAX_VALUE, coverage));
           childrenList.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, java.lang.Integer.MAX_VALUE, businessArrangement));
           childrenList.add(new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef));
           childrenList.add(new Property("claimResponse", "Reference(ClaimResponse)", "The Coverages adjudication details.", 0, java.lang.Integer.MAX_VALUE, claimResponse));
@@ -2158,7 +2160,7 @@ public class Claim extends DomainResource {
         switch (hash) {
         case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
         case 97604197: /*focal*/ return this.focal == null ? new Base[0] : new Base[] {this.focal}; // BooleanType
-        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Type
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Reference
         case 259920682: /*businessArrangement*/ return this.businessArrangement == null ? new Base[0] : new Base[] {this.businessArrangement}; // StringType
         case 522246568: /*preAuthRef*/ return this.preAuthRef == null ? new Base[0] : this.preAuthRef.toArray(new Base[this.preAuthRef.size()]); // StringType
         case 689513629: /*claimResponse*/ return this.claimResponse == null ? new Base[0] : new Base[] {this.claimResponse}; // Reference
@@ -2178,7 +2180,7 @@ public class Claim extends DomainResource {
           this.focal = castToBoolean(value); // BooleanType
           break;
         case -351767064: // coverage
-          this.coverage = (Type) value; // Type
+          this.coverage = castToReference(value); // Reference
           break;
         case 259920682: // businessArrangement
           this.businessArrangement = castToString(value); // StringType
@@ -2203,8 +2205,8 @@ public class Claim extends DomainResource {
           this.sequence = castToPositiveInt(value); // PositiveIntType
         else if (name.equals("focal"))
           this.focal = castToBoolean(value); // BooleanType
-        else if (name.equals("coverage[x]"))
-          this.coverage = (Type) value; // Type
+        else if (name.equals("coverage"))
+          this.coverage = castToReference(value); // Reference
         else if (name.equals("businessArrangement"))
           this.businessArrangement = castToString(value); // StringType
         else if (name.equals("preAuthRef"))
@@ -2222,7 +2224,7 @@ public class Claim extends DomainResource {
         switch (hash) {
         case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
         case 97604197: throw new FHIRException("Cannot make property focal as it is not a complex type"); // BooleanType
-        case 227689880:  return getCoverage(); // Type
+        case -351767064:  return getCoverage(); // Reference
         case 259920682: throw new FHIRException("Cannot make property businessArrangement as it is not a complex type"); // StringType
         case 522246568: throw new FHIRException("Cannot make property preAuthRef as it is not a complex type"); // StringType
         case 689513629:  return getClaimResponse(); // Reference
@@ -2240,11 +2242,7 @@ public class Claim extends DomainResource {
         else if (name.equals("focal")) {
           throw new FHIRException("Cannot call addChild on a primitive type Claim.focal");
         }
-        else if (name.equals("coverageIdentifier")) {
-          this.coverage = new Identifier();
-          return this.coverage;
-        }
-        else if (name.equals("coverageReference")) {
+        else if (name.equals("coverage")) {
           this.coverage = new Reference();
           return this.coverage;
         }
@@ -2502,7 +2500,7 @@ public class Claim extends DomainResource {
           this.type = castToCoding(value); // Coding
           break;
         case 1901043637: // location
-          this.location = (Type) value; // Type
+          this.location = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2516,7 +2514,7 @@ public class Claim extends DomainResource {
         else if (name.equals("type"))
           this.type = castToCoding(value); // Coding
         else if (name.equals("location[x]"))
-          this.location = (Type) value; // Type
+          this.location = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -2607,7 +2605,7 @@ public class Claim extends DomainResource {
          * The members of the team who provided the overall service as well as their role and whether responsible and qualifications.
          */
         @Child(name = "careTeam", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="The members of the team who provided the overall service as well as their role and whether responsible and qualifications." )
+        @Description(shortDefinition="Members of the care team", formalDefinition="The members of the team who provided the overall service as well as their role and whether responsible and qualifications." )
         protected List<CareTeamComponent> careTeam;
 
         /**
@@ -3721,10 +3719,10 @@ public class Claim extends DomainResource {
           this.getProgramCode().add(castToCoding(value)); // Coding
           break;
         case 1379209295: // serviced
-          this.serviced = (Type) value; // Type
+          this.serviced = castToType(value); // Type
           break;
         case 1901043637: // location
-          this.location = (Type) value; // Type
+          this.location = castToType(value); // Type
           break;
         case -1285004149: // quantity
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
@@ -3780,9 +3778,9 @@ public class Claim extends DomainResource {
         else if (name.equals("programCode"))
           this.getProgramCode().add(castToCoding(value));
         else if (name.equals("serviced[x]"))
-          this.serviced = (Type) value; // Type
+          this.serviced = castToType(value); // Type
         else if (name.equals("location[x]"))
-          this.location = (Type) value; // Type
+          this.location = castToType(value); // Type
         else if (name.equals("quantity"))
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
         else if (name.equals("unitPrice"))
@@ -4023,9 +4021,14 @@ public class Claim extends DomainResource {
         /**
          * Member of the team who provided the overall service.
          */
-        @Child(name = "provider", type = {Identifier.class, Practitioner.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "provider", type = {Practitioner.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Provider individual or organization", formalDefinition="Member of the team who provided the overall service." )
-        protected Type provider;
+        protected Reference provider;
+
+        /**
+         * The actual object that is the target of the reference (Member of the team who provided the overall service.)
+         */
+        protected Resource providerTarget;
 
         /**
          * The party who is billing and responsible for the claimed good or service rendered to the patient.
@@ -4050,7 +4053,7 @@ public class Claim extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/provider-qualification")
         protected Coding qualification;
 
-        private static final long serialVersionUID = 31082634L;
+        private static final long serialVersionUID = 2022321671L;
 
     /**
      * Constructor
@@ -4062,7 +4065,7 @@ public class Claim extends DomainResource {
     /**
      * Constructor
      */
-      public CareTeamComponent(Type provider) {
+      public CareTeamComponent(Reference provider) {
         super();
         this.provider = provider;
       }
@@ -4070,34 +4073,13 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #provider} (Member of the team who provided the overall service.)
          */
-        public Type getProvider() { 
+        public Reference getProvider() { 
+          if (this.provider == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CareTeamComponent.provider");
+            else if (Configuration.doAutoCreate())
+              this.provider = new Reference(); // cc
           return this.provider;
-        }
-
-        /**
-         * @return {@link #provider} (Member of the team who provided the overall service.)
-         */
-        public Identifier getProviderIdentifier() throws FHIRException { 
-          if (!(this.provider instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.provider.getClass().getName()+" was encountered");
-          return (Identifier) this.provider;
-        }
-
-        public boolean hasProviderIdentifier() { 
-          return this.provider instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #provider} (Member of the team who provided the overall service.)
-         */
-        public Reference getProviderReference() throws FHIRException { 
-          if (!(this.provider instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.provider.getClass().getName()+" was encountered");
-          return (Reference) this.provider;
-        }
-
-        public boolean hasProviderReference() { 
-          return this.provider instanceof Reference;
         }
 
         public boolean hasProvider() { 
@@ -4107,8 +4089,23 @@ public class Claim extends DomainResource {
         /**
          * @param value {@link #provider} (Member of the team who provided the overall service.)
          */
-        public CareTeamComponent setProvider(Type value) { 
+        public CareTeamComponent setProvider(Reference value) { 
           this.provider = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #provider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Member of the team who provided the overall service.)
+         */
+        public Resource getProviderTarget() { 
+          return this.providerTarget;
+        }
+
+        /**
+         * @param value {@link #provider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Member of the team who provided the overall service.)
+         */
+        public CareTeamComponent setProviderTarget(Resource value) { 
+          this.providerTarget = value;
           return this;
         }
 
@@ -4207,7 +4204,7 @@ public class Claim extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("provider[x]", "Identifier|Reference(Practitioner|Organization)", "Member of the team who provided the overall service.", 0, java.lang.Integer.MAX_VALUE, provider));
+          childrenList.add(new Property("provider", "Reference(Practitioner|Organization)", "Member of the team who provided the overall service.", 0, java.lang.Integer.MAX_VALUE, provider));
           childrenList.add(new Property("responsible", "boolean", "The party who is billing and responsible for the claimed good or service rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, responsible));
           childrenList.add(new Property("role", "Coding", "The lead, assisting or supervising practitioner and their discipline if a multidisiplinary team.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("qualification", "Coding", "The qualification which is applicable for this service.", 0, java.lang.Integer.MAX_VALUE, qualification));
@@ -4216,7 +4213,7 @@ public class Claim extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Type
+        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Reference
         case 1847674614: /*responsible*/ return this.responsible == null ? new Base[0] : new Base[] {this.responsible}; // BooleanType
         case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // Coding
         case -631333393: /*qualification*/ return this.qualification == null ? new Base[0] : new Base[] {this.qualification}; // Coding
@@ -4229,7 +4226,7 @@ public class Claim extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -987494927: // provider
-          this.provider = (Type) value; // Type
+          this.provider = castToReference(value); // Reference
           break;
         case 1847674614: // responsible
           this.responsible = castToBoolean(value); // BooleanType
@@ -4247,8 +4244,8 @@ public class Claim extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("provider[x]"))
-          this.provider = (Type) value; // Type
+        if (name.equals("provider"))
+          this.provider = castToReference(value); // Reference
         else if (name.equals("responsible"))
           this.responsible = castToBoolean(value); // BooleanType
         else if (name.equals("role"))
@@ -4262,7 +4259,7 @@ public class Claim extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 2064698607:  return getProvider(); // Type
+        case -987494927:  return getProvider(); // Reference
         case 1847674614: throw new FHIRException("Cannot make property responsible as it is not a complex type"); // BooleanType
         case 3506294:  return getRole(); // Coding
         case -631333393:  return getQualification(); // Coding
@@ -4273,11 +4270,7 @@ public class Claim extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("providerIdentifier")) {
-          this.provider = new Identifier();
-          return this.provider;
-        }
-        else if (name.equals("providerReference")) {
+        if (name.equals("provider")) {
           this.provider = new Reference();
           return this.provider;
         }
@@ -6728,23 +6721,38 @@ public class Claim extends DomainResource {
     /**
      * The Insurer who is target  of the request.
      */
-    @Child(name = "insurer", type = {Identifier.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "insurer", type = {Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Target", formalDefinition="The Insurer who is target  of the request." )
-    protected Type insurer;
+    protected Reference insurer;
+
+    /**
+     * The actual object that is the target of the reference (The Insurer who is target  of the request.)
+     */
+    protected Organization insurerTarget;
 
     /**
      * The provider which is responsible for the bill, claim pre-determination, pre-authorization.
      */
-    @Child(name = "provider", type = {Identifier.class, Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "provider", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible provider", formalDefinition="The provider which is responsible for the bill, claim pre-determination, pre-authorization." )
-    protected Type provider;
+    protected Reference provider;
+
+    /**
+     * The actual object that is the target of the reference (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
+     */
+    protected Practitioner providerTarget;
 
     /**
      * The organization which is responsible for the bill, claim pre-determination, pre-authorization.
      */
-    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "organization", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the bill, claim pre-determination, pre-authorization." )
-    protected Type organization;
+    protected Reference organization;
+
+    /**
+     * The actual object that is the target of the reference (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
+     */
+    protected Organization organizationTarget;
 
     /**
      * Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
@@ -6773,16 +6781,26 @@ public class Claim extends DomainResource {
     /**
      * Person who created the invoice/claim/pre-determination or pre-authorization.
      */
-    @Child(name = "enterer", type = {Identifier.class, Practitioner.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "enterer", type = {Practitioner.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Author", formalDefinition="Person who created the invoice/claim/pre-determination or pre-authorization." )
-    protected Type enterer;
+    protected Reference enterer;
+
+    /**
+     * The actual object that is the target of the reference (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    protected Practitioner entererTarget;
 
     /**
      * Facility where the services were provided.
      */
-    @Child(name = "facility", type = {Identifier.class, Location.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "facility", type = {Location.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Servicing Facility", formalDefinition="Facility where the services were provided." )
-    protected Type facility;
+    protected Reference facility;
+
+    /**
+     * The actual object that is the target of the reference (Facility where the services were provided.)
+     */
+    protected Location facilityTarget;
 
     /**
      * Other claims which are related to this claim such as prior claim versions or for related services.
@@ -6794,16 +6812,26 @@ public class Claim extends DomainResource {
     /**
      * Prescription to support the dispensing of Pharmacy or Vision products.
      */
-    @Child(name = "prescription", type = {Identifier.class, MedicationOrder.class, VisionPrescription.class}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "prescription", type = {MedicationRequest.class, VisionPrescription.class}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Prescription", formalDefinition="Prescription to support the dispensing of Pharmacy or Vision products." )
-    protected Type prescription;
+    protected Reference prescription;
+
+    /**
+     * The actual object that is the target of the reference (Prescription to support the dispensing of Pharmacy or Vision products.)
+     */
+    protected Resource prescriptionTarget;
 
     /**
      * Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.
      */
-    @Child(name = "originalPrescription", type = {Identifier.class, MedicationOrder.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "originalPrescription", type = {MedicationRequest.class}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Original Prescription", formalDefinition="Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products." )
-    protected Type originalPrescription;
+    protected Reference originalPrescription;
+
+    /**
+     * The actual object that is the target of the reference (Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.)
+     */
+    protected MedicationRequest originalPrescriptionTarget;
 
     /**
      * The party to be reimbursed for the services.
@@ -6815,15 +6843,20 @@ public class Claim extends DomainResource {
     /**
      * The referral resource which lists the date, practitioner, reason and other supporting information.
      */
-    @Child(name = "referral", type = {Identifier.class, ReferralRequest.class}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "referral", type = {ReferralRequest.class}, order=20, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Treatment Referral", formalDefinition="The referral resource which lists the date, practitioner, reason and other supporting information." )
-    protected Type referral;
+    protected Reference referral;
+
+    /**
+     * The actual object that is the target of the reference (The referral resource which lists the date, practitioner, reason and other supporting information.)
+     */
+    protected ReferralRequest referralTarget;
 
     /**
      * Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required.
      */
     @Child(name = "information", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="", formalDefinition="Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required." )
+    @Description(shortDefinition="Exceptions, special considerations, the condition, situation, prior or concurrent issues", formalDefinition="Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required." )
     protected List<SpecialConditionComponent> information;
 
     /**
@@ -6843,9 +6876,14 @@ public class Claim extends DomainResource {
     /**
      * Patient Resource.
      */
-    @Child(name = "patient", type = {Identifier.class, Patient.class}, order=24, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "patient", type = {Patient.class}, order=24, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The subject of the Products and Services", formalDefinition="Patient Resource." )
-    protected Type patient;
+    protected Reference patient;
+
+    /**
+     * The actual object that is the target of the reference (Patient Resource.)
+     */
+    protected Patient patientTarget;
 
     /**
      * Financial instrument by which payment information for health care.
@@ -6858,7 +6896,7 @@ public class Claim extends DomainResource {
      * An accident which resulted in the need for healthcare services.
      */
     @Child(name = "accident", type = {}, order=26, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="", formalDefinition="An accident which resulted in the need for healthcare services." )
+    @Description(shortDefinition="Details about an accident", formalDefinition="An accident which resulted in the need for healthcare services." )
     protected AccidentComponent accident;
 
     /**
@@ -6896,7 +6934,7 @@ public class Claim extends DomainResource {
     @Description(shortDefinition="Only if type = oral", formalDefinition="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons." )
     protected List<MissingTeethComponent> missingTeeth;
 
-    private static final long serialVersionUID = -658306834L;
+    private static final long serialVersionUID = -587280853L;
 
   /**
    * Constructor
@@ -6908,7 +6946,7 @@ public class Claim extends DomainResource {
   /**
    * Constructor
    */
-    public Claim(Enumeration<ClaimStatus> status, Coding type, Type patient) {
+    public Claim(Enumeration<ClaimStatus> status, Coding type, Reference patient) {
       super();
       this.status = status;
       this.type = type;
@@ -7214,34 +7252,13 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #insurer} (The Insurer who is target  of the request.)
      */
-    public Type getInsurer() { 
+    public Reference getInsurer() { 
+      if (this.insurer == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.insurer");
+        else if (Configuration.doAutoCreate())
+          this.insurer = new Reference(); // cc
       return this.insurer;
-    }
-
-    /**
-     * @return {@link #insurer} (The Insurer who is target  of the request.)
-     */
-    public Identifier getInsurerIdentifier() throws FHIRException { 
-      if (!(this.insurer instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.insurer.getClass().getName()+" was encountered");
-      return (Identifier) this.insurer;
-    }
-
-    public boolean hasInsurerIdentifier() { 
-      return this.insurer instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #insurer} (The Insurer who is target  of the request.)
-     */
-    public Reference getInsurerReference() throws FHIRException { 
-      if (!(this.insurer instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.insurer.getClass().getName()+" was encountered");
-      return (Reference) this.insurer;
-    }
-
-    public boolean hasInsurerReference() { 
-      return this.insurer instanceof Reference;
     }
 
     public boolean hasInsurer() { 
@@ -7251,42 +7268,41 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #insurer} (The Insurer who is target  of the request.)
      */
-    public Claim setInsurer(Type value) { 
+    public Claim setInsurer(Reference value) { 
       this.insurer = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #insurer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Insurer who is target  of the request.)
+     */
+    public Organization getInsurerTarget() { 
+      if (this.insurerTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.insurer");
+        else if (Configuration.doAutoCreate())
+          this.insurerTarget = new Organization(); // aa
+      return this.insurerTarget;
+    }
+
+    /**
+     * @param value {@link #insurer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Insurer who is target  of the request.)
+     */
+    public Claim setInsurerTarget(Organization value) { 
+      this.insurerTarget = value;
       return this;
     }
 
     /**
      * @return {@link #provider} (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
      */
-    public Type getProvider() { 
+    public Reference getProvider() { 
+      if (this.provider == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.provider");
+        else if (Configuration.doAutoCreate())
+          this.provider = new Reference(); // cc
       return this.provider;
-    }
-
-    /**
-     * @return {@link #provider} (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Identifier getProviderIdentifier() throws FHIRException { 
-      if (!(this.provider instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.provider.getClass().getName()+" was encountered");
-      return (Identifier) this.provider;
-    }
-
-    public boolean hasProviderIdentifier() { 
-      return this.provider instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #provider} (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Reference getProviderReference() throws FHIRException { 
-      if (!(this.provider instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.provider.getClass().getName()+" was encountered");
-      return (Reference) this.provider;
-    }
-
-    public boolean hasProviderReference() { 
-      return this.provider instanceof Reference;
     }
 
     public boolean hasProvider() { 
@@ -7296,42 +7312,41 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #provider} (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
      */
-    public Claim setProvider(Type value) { 
+    public Claim setProvider(Reference value) { 
       this.provider = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #provider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
+     */
+    public Practitioner getProviderTarget() { 
+      if (this.providerTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.provider");
+        else if (Configuration.doAutoCreate())
+          this.providerTarget = new Practitioner(); // aa
+      return this.providerTarget;
+    }
+
+    /**
+     * @param value {@link #provider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
+     */
+    public Claim setProviderTarget(Practitioner value) { 
+      this.providerTarget = value;
       return this;
     }
 
     /**
      * @return {@link #organization} (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
      */
-    public Type getOrganization() { 
+    public Reference getOrganization() { 
+      if (this.organization == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.organization");
+        else if (Configuration.doAutoCreate())
+          this.organization = new Reference(); // cc
       return this.organization;
-    }
-
-    /**
-     * @return {@link #organization} (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Identifier getOrganizationIdentifier() throws FHIRException { 
-      if (!(this.organization instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Identifier) this.organization;
-    }
-
-    public boolean hasOrganizationIdentifier() { 
-      return this.organization instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #organization} (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Reference getOrganizationReference() throws FHIRException { 
-      if (!(this.organization instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Reference) this.organization;
-    }
-
-    public boolean hasOrganizationReference() { 
-      return this.organization instanceof Reference;
     }
 
     public boolean hasOrganization() { 
@@ -7341,8 +7356,28 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #organization} (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
      */
-    public Claim setOrganization(Type value) { 
+    public Claim setOrganization(Reference value) { 
       this.organization = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
+     */
+    public Organization getOrganizationTarget() { 
+      if (this.organizationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.organization");
+        else if (Configuration.doAutoCreate())
+          this.organizationTarget = new Organization(); // aa
+      return this.organizationTarget;
+    }
+
+    /**
+     * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
+     */
+    public Claim setOrganizationTarget(Organization value) { 
+      this.organizationTarget = value;
       return this;
     }
 
@@ -7446,34 +7481,13 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #enterer} (Person who created the invoice/claim/pre-determination or pre-authorization.)
      */
-    public Type getEnterer() { 
+    public Reference getEnterer() { 
+      if (this.enterer == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.enterer");
+        else if (Configuration.doAutoCreate())
+          this.enterer = new Reference(); // cc
       return this.enterer;
-    }
-
-    /**
-     * @return {@link #enterer} (Person who created the invoice/claim/pre-determination or pre-authorization.)
-     */
-    public Identifier getEntererIdentifier() throws FHIRException { 
-      if (!(this.enterer instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.enterer.getClass().getName()+" was encountered");
-      return (Identifier) this.enterer;
-    }
-
-    public boolean hasEntererIdentifier() { 
-      return this.enterer instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #enterer} (Person who created the invoice/claim/pre-determination or pre-authorization.)
-     */
-    public Reference getEntererReference() throws FHIRException { 
-      if (!(this.enterer instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.enterer.getClass().getName()+" was encountered");
-      return (Reference) this.enterer;
-    }
-
-    public boolean hasEntererReference() { 
-      return this.enterer instanceof Reference;
     }
 
     public boolean hasEnterer() { 
@@ -7483,42 +7497,41 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #enterer} (Person who created the invoice/claim/pre-determination or pre-authorization.)
      */
-    public Claim setEnterer(Type value) { 
+    public Claim setEnterer(Reference value) { 
       this.enterer = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #enterer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    public Practitioner getEntererTarget() { 
+      if (this.entererTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.enterer");
+        else if (Configuration.doAutoCreate())
+          this.entererTarget = new Practitioner(); // aa
+      return this.entererTarget;
+    }
+
+    /**
+     * @param value {@link #enterer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    public Claim setEntererTarget(Practitioner value) { 
+      this.entererTarget = value;
       return this;
     }
 
     /**
      * @return {@link #facility} (Facility where the services were provided.)
      */
-    public Type getFacility() { 
+    public Reference getFacility() { 
+      if (this.facility == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.facility");
+        else if (Configuration.doAutoCreate())
+          this.facility = new Reference(); // cc
       return this.facility;
-    }
-
-    /**
-     * @return {@link #facility} (Facility where the services were provided.)
-     */
-    public Identifier getFacilityIdentifier() throws FHIRException { 
-      if (!(this.facility instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.facility.getClass().getName()+" was encountered");
-      return (Identifier) this.facility;
-    }
-
-    public boolean hasFacilityIdentifier() { 
-      return this.facility instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #facility} (Facility where the services were provided.)
-     */
-    public Reference getFacilityReference() throws FHIRException { 
-      if (!(this.facility instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.facility.getClass().getName()+" was encountered");
-      return (Reference) this.facility;
-    }
-
-    public boolean hasFacilityReference() { 
-      return this.facility instanceof Reference;
     }
 
     public boolean hasFacility() { 
@@ -7528,8 +7541,28 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #facility} (Facility where the services were provided.)
      */
-    public Claim setFacility(Type value) { 
+    public Claim setFacility(Reference value) { 
       this.facility = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #facility} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Facility where the services were provided.)
+     */
+    public Location getFacilityTarget() { 
+      if (this.facilityTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.facility");
+        else if (Configuration.doAutoCreate())
+          this.facilityTarget = new Location(); // aa
+      return this.facilityTarget;
+    }
+
+    /**
+     * @param value {@link #facility} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Facility where the services were provided.)
+     */
+    public Claim setFacilityTarget(Location value) { 
+      this.facilityTarget = value;
       return this;
     }
 
@@ -7589,34 +7622,13 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #prescription} (Prescription to support the dispensing of Pharmacy or Vision products.)
      */
-    public Type getPrescription() { 
+    public Reference getPrescription() { 
+      if (this.prescription == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.prescription");
+        else if (Configuration.doAutoCreate())
+          this.prescription = new Reference(); // cc
       return this.prescription;
-    }
-
-    /**
-     * @return {@link #prescription} (Prescription to support the dispensing of Pharmacy or Vision products.)
-     */
-    public Identifier getPrescriptionIdentifier() throws FHIRException { 
-      if (!(this.prescription instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.prescription.getClass().getName()+" was encountered");
-      return (Identifier) this.prescription;
-    }
-
-    public boolean hasPrescriptionIdentifier() { 
-      return this.prescription instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #prescription} (Prescription to support the dispensing of Pharmacy or Vision products.)
-     */
-    public Reference getPrescriptionReference() throws FHIRException { 
-      if (!(this.prescription instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.prescription.getClass().getName()+" was encountered");
-      return (Reference) this.prescription;
-    }
-
-    public boolean hasPrescriptionReference() { 
-      return this.prescription instanceof Reference;
     }
 
     public boolean hasPrescription() { 
@@ -7626,42 +7638,36 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #prescription} (Prescription to support the dispensing of Pharmacy or Vision products.)
      */
-    public Claim setPrescription(Type value) { 
+    public Claim setPrescription(Reference value) { 
       this.prescription = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #prescription} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Prescription to support the dispensing of Pharmacy or Vision products.)
+     */
+    public Resource getPrescriptionTarget() { 
+      return this.prescriptionTarget;
+    }
+
+    /**
+     * @param value {@link #prescription} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Prescription to support the dispensing of Pharmacy or Vision products.)
+     */
+    public Claim setPrescriptionTarget(Resource value) { 
+      this.prescriptionTarget = value;
       return this;
     }
 
     /**
      * @return {@link #originalPrescription} (Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.)
      */
-    public Type getOriginalPrescription() { 
+    public Reference getOriginalPrescription() { 
+      if (this.originalPrescription == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.originalPrescription");
+        else if (Configuration.doAutoCreate())
+          this.originalPrescription = new Reference(); // cc
       return this.originalPrescription;
-    }
-
-    /**
-     * @return {@link #originalPrescription} (Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.)
-     */
-    public Identifier getOriginalPrescriptionIdentifier() throws FHIRException { 
-      if (!(this.originalPrescription instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.originalPrescription.getClass().getName()+" was encountered");
-      return (Identifier) this.originalPrescription;
-    }
-
-    public boolean hasOriginalPrescriptionIdentifier() { 
-      return this.originalPrescription instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #originalPrescription} (Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.)
-     */
-    public Reference getOriginalPrescriptionReference() throws FHIRException { 
-      if (!(this.originalPrescription instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.originalPrescription.getClass().getName()+" was encountered");
-      return (Reference) this.originalPrescription;
-    }
-
-    public boolean hasOriginalPrescriptionReference() { 
-      return this.originalPrescription instanceof Reference;
     }
 
     public boolean hasOriginalPrescription() { 
@@ -7671,8 +7677,28 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #originalPrescription} (Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.)
      */
-    public Claim setOriginalPrescription(Type value) { 
+    public Claim setOriginalPrescription(Reference value) { 
       this.originalPrescription = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #originalPrescription} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.)
+     */
+    public MedicationRequest getOriginalPrescriptionTarget() { 
+      if (this.originalPrescriptionTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.originalPrescription");
+        else if (Configuration.doAutoCreate())
+          this.originalPrescriptionTarget = new MedicationRequest(); // aa
+      return this.originalPrescriptionTarget;
+    }
+
+    /**
+     * @param value {@link #originalPrescription} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.)
+     */
+    public Claim setOriginalPrescriptionTarget(MedicationRequest value) { 
+      this.originalPrescriptionTarget = value;
       return this;
     }
 
@@ -7703,34 +7729,13 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #referral} (The referral resource which lists the date, practitioner, reason and other supporting information.)
      */
-    public Type getReferral() { 
+    public Reference getReferral() { 
+      if (this.referral == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.referral");
+        else if (Configuration.doAutoCreate())
+          this.referral = new Reference(); // cc
       return this.referral;
-    }
-
-    /**
-     * @return {@link #referral} (The referral resource which lists the date, practitioner, reason and other supporting information.)
-     */
-    public Identifier getReferralIdentifier() throws FHIRException { 
-      if (!(this.referral instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.referral.getClass().getName()+" was encountered");
-      return (Identifier) this.referral;
-    }
-
-    public boolean hasReferralIdentifier() { 
-      return this.referral instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #referral} (The referral resource which lists the date, practitioner, reason and other supporting information.)
-     */
-    public Reference getReferralReference() throws FHIRException { 
-      if (!(this.referral instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.referral.getClass().getName()+" was encountered");
-      return (Reference) this.referral;
-    }
-
-    public boolean hasReferralReference() { 
-      return this.referral instanceof Reference;
     }
 
     public boolean hasReferral() { 
@@ -7740,8 +7745,28 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #referral} (The referral resource which lists the date, practitioner, reason and other supporting information.)
      */
-    public Claim setReferral(Type value) { 
+    public Claim setReferral(Reference value) { 
       this.referral = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #referral} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The referral resource which lists the date, practitioner, reason and other supporting information.)
+     */
+    public ReferralRequest getReferralTarget() { 
+      if (this.referralTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.referral");
+        else if (Configuration.doAutoCreate())
+          this.referralTarget = new ReferralRequest(); // aa
+      return this.referralTarget;
+    }
+
+    /**
+     * @param value {@link #referral} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The referral resource which lists the date, practitioner, reason and other supporting information.)
+     */
+    public Claim setReferralTarget(ReferralRequest value) { 
+      this.referralTarget = value;
       return this;
     }
 
@@ -7907,34 +7932,13 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #patient} (Patient Resource.)
      */
-    public Type getPatient() { 
+    public Reference getPatient() { 
+      if (this.patient == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.patient");
+        else if (Configuration.doAutoCreate())
+          this.patient = new Reference(); // cc
       return this.patient;
-    }
-
-    /**
-     * @return {@link #patient} (Patient Resource.)
-     */
-    public Identifier getPatientIdentifier() throws FHIRException { 
-      if (!(this.patient instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.patient.getClass().getName()+" was encountered");
-      return (Identifier) this.patient;
-    }
-
-    public boolean hasPatientIdentifier() { 
-      return this.patient instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #patient} (Patient Resource.)
-     */
-    public Reference getPatientReference() throws FHIRException { 
-      if (!(this.patient instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.patient.getClass().getName()+" was encountered");
-      return (Reference) this.patient;
-    }
-
-    public boolean hasPatientReference() { 
-      return this.patient instanceof Reference;
     }
 
     public boolean hasPatient() { 
@@ -7944,8 +7948,28 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #patient} (Patient Resource.)
      */
-    public Claim setPatient(Type value) { 
+    public Claim setPatient(Reference value) { 
       this.patient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Patient Resource.)
+     */
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Claim.patient");
+        else if (Configuration.doAutoCreate())
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
+    }
+
+    /**
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Patient Resource.)
+     */
+    public Claim setPatientTarget(Patient value) { 
+      this.patientTarget = value;
       return this;
     }
 
@@ -8214,23 +8238,23 @@ public class Claim extends DomainResource {
         childrenList.add(new Property("originalRuleset", "Coding", "The version of the specification from which the original instance was created.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
         childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("billablePeriod", "Period", "The billable period for which charges are being submitted.", 0, java.lang.Integer.MAX_VALUE, billablePeriod));
-        childrenList.add(new Property("insurer[x]", "Identifier|Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, insurer));
-        childrenList.add(new Property("provider[x]", "Identifier|Reference(Practitioner)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, provider));
-        childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, organization));
+        childrenList.add(new Property("insurer", "Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, insurer));
+        childrenList.add(new Property("provider", "Reference(Practitioner)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, provider));
+        childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("use", "code", "Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).", 0, java.lang.Integer.MAX_VALUE, use));
         childrenList.add(new Property("priority", "Coding", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("fundsReserve", "Coding", "In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.", 0, java.lang.Integer.MAX_VALUE, fundsReserve));
-        childrenList.add(new Property("enterer[x]", "Identifier|Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, java.lang.Integer.MAX_VALUE, enterer));
-        childrenList.add(new Property("facility[x]", "Identifier|Reference(Location)", "Facility where the services were provided.", 0, java.lang.Integer.MAX_VALUE, facility));
+        childrenList.add(new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, java.lang.Integer.MAX_VALUE, enterer));
+        childrenList.add(new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, java.lang.Integer.MAX_VALUE, facility));
         childrenList.add(new Property("related", "", "Other claims which are related to this claim such as prior claim versions or for related services.", 0, java.lang.Integer.MAX_VALUE, related));
-        childrenList.add(new Property("prescription[x]", "Identifier|Reference(MedicationOrder|VisionPrescription)", "Prescription to support the dispensing of Pharmacy or Vision products.", 0, java.lang.Integer.MAX_VALUE, prescription));
-        childrenList.add(new Property("originalPrescription[x]", "Identifier|Reference(MedicationOrder)", "Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.", 0, java.lang.Integer.MAX_VALUE, originalPrescription));
+        childrenList.add(new Property("prescription", "Reference(MedicationRequest|VisionPrescription)", "Prescription to support the dispensing of Pharmacy or Vision products.", 0, java.lang.Integer.MAX_VALUE, prescription));
+        childrenList.add(new Property("originalPrescription", "Reference(MedicationRequest)", "Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products.", 0, java.lang.Integer.MAX_VALUE, originalPrescription));
         childrenList.add(new Property("payee", "", "The party to be reimbursed for the services.", 0, java.lang.Integer.MAX_VALUE, payee));
-        childrenList.add(new Property("referral[x]", "Identifier|Reference(ReferralRequest)", "The referral resource which lists the date, practitioner, reason and other supporting information.", 0, java.lang.Integer.MAX_VALUE, referral));
+        childrenList.add(new Property("referral", "Reference(ReferralRequest)", "The referral resource which lists the date, practitioner, reason and other supporting information.", 0, java.lang.Integer.MAX_VALUE, referral));
         childrenList.add(new Property("information", "", "Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required.", 0, java.lang.Integer.MAX_VALUE, information));
         childrenList.add(new Property("diagnosis", "", "Ordered list of patient diagnosis for which care is sought.", 0, java.lang.Integer.MAX_VALUE, diagnosis));
         childrenList.add(new Property("procedure", "", "Ordered list of patient procedures performed to support the adjudication.", 0, java.lang.Integer.MAX_VALUE, procedure));
-        childrenList.add(new Property("patient[x]", "Identifier|Reference(Patient)", "Patient Resource.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("coverage", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, coverage));
         childrenList.add(new Property("accident", "", "An accident which resulted in the need for healthcare services.", 0, java.lang.Integer.MAX_VALUE, accident));
         childrenList.add(new Property("employmentImpacted", "Period", "The start and optional end dates of when the patient was precluded from working due to the treatable condition(s).", 0, java.lang.Integer.MAX_VALUE, employmentImpacted));
@@ -8251,23 +8275,23 @@ public class Claim extends DomainResource {
         case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case -332066046: /*billablePeriod*/ return this.billablePeriod == null ? new Base[0] : new Base[] {this.billablePeriod}; // Period
-        case 1957615864: /*insurer*/ return this.insurer == null ? new Base[0] : new Base[] {this.insurer}; // Type
-        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Type
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
+        case 1957615864: /*insurer*/ return this.insurer == null ? new Base[0] : new Base[] {this.insurer}; // Reference
+        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Reference
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // Enumeration<Use>
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Coding
         case 1314609806: /*fundsReserve*/ return this.fundsReserve == null ? new Base[0] : new Base[] {this.fundsReserve}; // Coding
-        case -1591951995: /*enterer*/ return this.enterer == null ? new Base[0] : new Base[] {this.enterer}; // Type
-        case 501116579: /*facility*/ return this.facility == null ? new Base[0] : new Base[] {this.facility}; // Type
+        case -1591951995: /*enterer*/ return this.enterer == null ? new Base[0] : new Base[] {this.enterer}; // Reference
+        case 501116579: /*facility*/ return this.facility == null ? new Base[0] : new Base[] {this.facility}; // Reference
         case 1090493483: /*related*/ return this.related == null ? new Base[0] : this.related.toArray(new Base[this.related.size()]); // RelatedClaimComponent
-        case 460301338: /*prescription*/ return this.prescription == null ? new Base[0] : new Base[] {this.prescription}; // Type
-        case -1814015861: /*originalPrescription*/ return this.originalPrescription == null ? new Base[0] : new Base[] {this.originalPrescription}; // Type
+        case 460301338: /*prescription*/ return this.prescription == null ? new Base[0] : new Base[] {this.prescription}; // Reference
+        case -1814015861: /*originalPrescription*/ return this.originalPrescription == null ? new Base[0] : new Base[] {this.originalPrescription}; // Reference
         case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // PayeeComponent
-        case -722568291: /*referral*/ return this.referral == null ? new Base[0] : new Base[] {this.referral}; // Type
+        case -722568291: /*referral*/ return this.referral == null ? new Base[0] : new Base[] {this.referral}; // Reference
         case 1968600364: /*information*/ return this.information == null ? new Base[0] : this.information.toArray(new Base[this.information.size()]); // SpecialConditionComponent
         case 1196993265: /*diagnosis*/ return this.diagnosis == null ? new Base[0] : this.diagnosis.toArray(new Base[this.diagnosis.size()]); // DiagnosisComponent
         case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : this.procedure.toArray(new Base[this.procedure.size()]); // ProcedureComponent
-        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Type
+        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // CoverageComponent
         case -2143202801: /*accident*/ return this.accident == null ? new Base[0] : new Base[] {this.accident}; // AccidentComponent
         case 1051487345: /*employmentImpacted*/ return this.employmentImpacted == null ? new Base[0] : new Base[] {this.employmentImpacted}; // Period
@@ -8308,13 +8332,13 @@ public class Claim extends DomainResource {
           this.billablePeriod = castToPeriod(value); // Period
           break;
         case 1957615864: // insurer
-          this.insurer = (Type) value; // Type
+          this.insurer = castToReference(value); // Reference
           break;
         case -987494927: // provider
-          this.provider = (Type) value; // Type
+          this.provider = castToReference(value); // Reference
           break;
         case 1178922291: // organization
-          this.organization = (Type) value; // Type
+          this.organization = castToReference(value); // Reference
           break;
         case 116103: // use
           this.use = new UseEnumFactory().fromType(value); // Enumeration<Use>
@@ -8326,25 +8350,25 @@ public class Claim extends DomainResource {
           this.fundsReserve = castToCoding(value); // Coding
           break;
         case -1591951995: // enterer
-          this.enterer = (Type) value; // Type
+          this.enterer = castToReference(value); // Reference
           break;
         case 501116579: // facility
-          this.facility = (Type) value; // Type
+          this.facility = castToReference(value); // Reference
           break;
         case 1090493483: // related
           this.getRelated().add((RelatedClaimComponent) value); // RelatedClaimComponent
           break;
         case 460301338: // prescription
-          this.prescription = (Type) value; // Type
+          this.prescription = castToReference(value); // Reference
           break;
         case -1814015861: // originalPrescription
-          this.originalPrescription = (Type) value; // Type
+          this.originalPrescription = castToReference(value); // Reference
           break;
         case 106443592: // payee
           this.payee = (PayeeComponent) value; // PayeeComponent
           break;
         case -722568291: // referral
-          this.referral = (Type) value; // Type
+          this.referral = castToReference(value); // Reference
           break;
         case 1968600364: // information
           this.getInformation().add((SpecialConditionComponent) value); // SpecialConditionComponent
@@ -8356,7 +8380,7 @@ public class Claim extends DomainResource {
           this.getProcedure().add((ProcedureComponent) value); // ProcedureComponent
           break;
         case -791418107: // patient
-          this.patient = (Type) value; // Type
+          this.patient = castToReference(value); // Reference
           break;
         case -351767064: // coverage
           this.getCoverage().add((CoverageComponent) value); // CoverageComponent
@@ -8402,40 +8426,40 @@ public class Claim extends DomainResource {
           this.created = castToDateTime(value); // DateTimeType
         else if (name.equals("billablePeriod"))
           this.billablePeriod = castToPeriod(value); // Period
-        else if (name.equals("insurer[x]"))
-          this.insurer = (Type) value; // Type
-        else if (name.equals("provider[x]"))
-          this.provider = (Type) value; // Type
-        else if (name.equals("organization[x]"))
-          this.organization = (Type) value; // Type
+        else if (name.equals("insurer"))
+          this.insurer = castToReference(value); // Reference
+        else if (name.equals("provider"))
+          this.provider = castToReference(value); // Reference
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
         else if (name.equals("use"))
           this.use = new UseEnumFactory().fromType(value); // Enumeration<Use>
         else if (name.equals("priority"))
           this.priority = castToCoding(value); // Coding
         else if (name.equals("fundsReserve"))
           this.fundsReserve = castToCoding(value); // Coding
-        else if (name.equals("enterer[x]"))
-          this.enterer = (Type) value; // Type
-        else if (name.equals("facility[x]"))
-          this.facility = (Type) value; // Type
+        else if (name.equals("enterer"))
+          this.enterer = castToReference(value); // Reference
+        else if (name.equals("facility"))
+          this.facility = castToReference(value); // Reference
         else if (name.equals("related"))
           this.getRelated().add((RelatedClaimComponent) value);
-        else if (name.equals("prescription[x]"))
-          this.prescription = (Type) value; // Type
-        else if (name.equals("originalPrescription[x]"))
-          this.originalPrescription = (Type) value; // Type
+        else if (name.equals("prescription"))
+          this.prescription = castToReference(value); // Reference
+        else if (name.equals("originalPrescription"))
+          this.originalPrescription = castToReference(value); // Reference
         else if (name.equals("payee"))
           this.payee = (PayeeComponent) value; // PayeeComponent
-        else if (name.equals("referral[x]"))
-          this.referral = (Type) value; // Type
+        else if (name.equals("referral"))
+          this.referral = castToReference(value); // Reference
         else if (name.equals("information"))
           this.getInformation().add((SpecialConditionComponent) value);
         else if (name.equals("diagnosis"))
           this.getDiagnosis().add((DiagnosisComponent) value);
         else if (name.equals("procedure"))
           this.getProcedure().add((ProcedureComponent) value);
-        else if (name.equals("patient[x]"))
-          this.patient = (Type) value; // Type
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
         else if (name.equals("coverage"))
           this.getCoverage().add((CoverageComponent) value);
         else if (name.equals("accident"))
@@ -8465,23 +8489,23 @@ public class Claim extends DomainResource {
         case 1089373397:  return getOriginalRuleset(); // Coding
         case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
         case -332066046:  return getBillablePeriod(); // Period
-        case -2026616696:  return getInsurer(); // Type
-        case 2064698607:  return getProvider(); // Type
-        case 1326483053:  return getOrganization(); // Type
+        case 1957615864:  return getInsurer(); // Reference
+        case -987494927:  return getProvider(); // Reference
+        case 1178922291:  return getOrganization(); // Reference
         case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<Use>
         case -1165461084:  return getPriority(); // Coding
         case 1314609806:  return getFundsReserve(); // Coding
-        case -812909349:  return getEnterer(); // Type
-        case -542224643:  return getFacility(); // Type
+        case -1591951995:  return getEnterer(); // Reference
+        case 501116579:  return getFacility(); // Reference
         case 1090493483:  return addRelated(); // RelatedClaimComponent
-        case -993324506:  return getPrescription(); // Type
-        case -2067905515:  return getOriginalPrescription(); // Type
+        case 460301338:  return getPrescription(); // Reference
+        case -1814015861:  return getOriginalPrescription(); // Reference
         case 106443592:  return getPayee(); // PayeeComponent
-        case 344221635:  return getReferral(); // Type
+        case -722568291:  return getReferral(); // Reference
         case 1968600364:  return addInformation(); // SpecialConditionComponent
         case 1196993265:  return addDiagnosis(); // DiagnosisComponent
         case -1095204141:  return addProcedure(); // ProcedureComponent
-        case -2061246629:  return getPatient(); // Type
+        case -791418107:  return getPatient(); // Reference
         case -351767064:  return addCoverage(); // CoverageComponent
         case -2143202801:  return getAccident(); // AccidentComponent
         case 1051487345:  return getEmploymentImpacted(); // Period
@@ -8524,27 +8548,15 @@ public class Claim extends DomainResource {
           this.billablePeriod = new Period();
           return this.billablePeriod;
         }
-        else if (name.equals("insurerIdentifier")) {
-          this.insurer = new Identifier();
-          return this.insurer;
-        }
-        else if (name.equals("insurerReference")) {
+        else if (name.equals("insurer")) {
           this.insurer = new Reference();
           return this.insurer;
         }
-        else if (name.equals("providerIdentifier")) {
-          this.provider = new Identifier();
-          return this.provider;
-        }
-        else if (name.equals("providerReference")) {
+        else if (name.equals("provider")) {
           this.provider = new Reference();
           return this.provider;
         }
-        else if (name.equals("organizationIdentifier")) {
-          this.organization = new Identifier();
-          return this.organization;
-        }
-        else if (name.equals("organizationReference")) {
+        else if (name.equals("organization")) {
           this.organization = new Reference();
           return this.organization;
         }
@@ -8559,38 +8571,22 @@ public class Claim extends DomainResource {
           this.fundsReserve = new Coding();
           return this.fundsReserve;
         }
-        else if (name.equals("entererIdentifier")) {
-          this.enterer = new Identifier();
-          return this.enterer;
-        }
-        else if (name.equals("entererReference")) {
+        else if (name.equals("enterer")) {
           this.enterer = new Reference();
           return this.enterer;
         }
-        else if (name.equals("facilityIdentifier")) {
-          this.facility = new Identifier();
-          return this.facility;
-        }
-        else if (name.equals("facilityReference")) {
+        else if (name.equals("facility")) {
           this.facility = new Reference();
           return this.facility;
         }
         else if (name.equals("related")) {
           return addRelated();
         }
-        else if (name.equals("prescriptionIdentifier")) {
-          this.prescription = new Identifier();
-          return this.prescription;
-        }
-        else if (name.equals("prescriptionReference")) {
+        else if (name.equals("prescription")) {
           this.prescription = new Reference();
           return this.prescription;
         }
-        else if (name.equals("originalPrescriptionIdentifier")) {
-          this.originalPrescription = new Identifier();
-          return this.originalPrescription;
-        }
-        else if (name.equals("originalPrescriptionReference")) {
+        else if (name.equals("originalPrescription")) {
           this.originalPrescription = new Reference();
           return this.originalPrescription;
         }
@@ -8598,11 +8594,7 @@ public class Claim extends DomainResource {
           this.payee = new PayeeComponent();
           return this.payee;
         }
-        else if (name.equals("referralIdentifier")) {
-          this.referral = new Identifier();
-          return this.referral;
-        }
-        else if (name.equals("referralReference")) {
+        else if (name.equals("referral")) {
           this.referral = new Reference();
           return this.referral;
         }
@@ -8615,11 +8607,7 @@ public class Claim extends DomainResource {
         else if (name.equals("procedure")) {
           return addProcedure();
         }
-        else if (name.equals("patientIdentifier")) {
-          this.patient = new Identifier();
-          return this.patient;
-        }
-        else if (name.equals("patientReference")) {
+        else if (name.equals("patient")) {
           this.patient = new Reference();
           return this.patient;
         }
@@ -8802,56 +8790,30 @@ public class Claim extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>insurer-reference</b>
+   * Search parameter: <b>provider</b>
    * <p>
-   * Description: <b>The target payor/insurer for the Claim</b><br>
+   * Description: <b>Provider responsible for the Claim</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Claim.insurerReference</b><br>
+   * Path: <b>Claim.provider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="insurer-reference", path="Claim.insurer.as(Reference)", description="The target payor/insurer for the Claim", type="reference", target={Organization.class } )
-  public static final String SP_INSURER_REFERENCE = "insurer-reference";
+  @SearchParamDefinition(name="provider", path="Claim.provider", description="Provider responsible for the Claim", type="reference", target={Practitioner.class } )
+  public static final String SP_PROVIDER = "provider";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>insurer-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>provider</b>
    * <p>
-   * Description: <b>The target payor/insurer for the Claim</b><br>
+   * Description: <b>Provider responsible for the Claim</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Claim.insurerReference</b><br>
+   * Path: <b>Claim.provider</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INSURER_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INSURER_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROVIDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROVIDER);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Claim:insurer-reference</b>".
+   * the path value of "<b>Claim:provider</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_INSURER_REFERENCE = new ca.uhn.fhir.model.api.Include("Claim:insurer-reference").toLocked();
-
- /**
-   * Search parameter: <b>organization-reference</b>
-   * <p>
-   * Description: <b>The reference to the providing organization</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Claim.organizationReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organization-reference", path="Claim.organization.as(Reference)", description="The reference to the providing organization", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATION_REFERENCE = "organization-reference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization-reference</b>
-   * <p>
-   * Description: <b>The reference to the providing organization</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Claim.organizationReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION_REFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Claim:organization-reference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION_REFERENCE = new ca.uhn.fhir.model.api.Include("Claim:organization-reference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDER = new ca.uhn.fhir.model.api.Include("Claim:provider").toLocked();
 
  /**
    * Search parameter: <b>use</b>
@@ -8874,30 +8836,30 @@ public class Claim extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam USE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_USE);
 
  /**
-   * Search parameter: <b>patient-reference</b>
+   * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>Patient receiving the services</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Claim.patientReference</b><br>
+   * Path: <b>Claim.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient-reference", path="Claim.patient.as(Reference)", description="Patient receiving the services", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
-  public static final String SP_PATIENT_REFERENCE = "patient-reference";
+  @SearchParamDefinition(name="patient", path="Claim.patient", description="Patient receiving the services", type="reference", target={Patient.class } )
+  public static final String SP_PATIENT = "patient";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>patient-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
    * Description: <b>Patient receiving the services</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Claim.patientReference</b><br>
+   * Path: <b>Claim.patient</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Claim:patient-reference</b>".
+   * the path value of "<b>Claim:patient</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT_REFERENCE = new ca.uhn.fhir.model.api.Include("Claim:patient-reference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Claim:patient").toLocked();
 
  /**
    * Search parameter: <b>created</b>
@@ -8920,24 +8882,56 @@ public class Claim extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
-   * Search parameter: <b>provider-identifier</b>
+   * Search parameter: <b>insurer</b>
    * <p>
-   * Description: <b>Provider responsible for the Claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.providerIdentifier</b><br>
+   * Description: <b>The target payor/insurer for the Claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Claim.insurer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provider-identifier", path="Claim.provider.as(Identifier)", description="Provider responsible for the Claim", type="token", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") } )
-  public static final String SP_PROVIDER_IDENTIFIER = "provider-identifier";
+  @SearchParamDefinition(name="insurer", path="Claim.insurer", description="The target payor/insurer for the Claim", type="reference", target={Organization.class } )
+  public static final String SP_INSURER = "insurer";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>provider-identifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>insurer</b>
    * <p>
-   * Description: <b>Provider responsible for the Claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.providerIdentifier</b><br>
+   * Description: <b>The target payor/insurer for the Claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Claim.insurer</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PROVIDER_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PROVIDER_IDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INSURER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INSURER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Claim:insurer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INSURER = new ca.uhn.fhir.model.api.Include("Claim:insurer").toLocked();
+
+ /**
+   * Search parameter: <b>organization</b>
+   * <p>
+   * Description: <b>The reference to the providing organization</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Claim.organization</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="organization", path="Claim.organization", description="The reference to the providing organization", type="reference", target={Organization.class } )
+  public static final String SP_ORGANIZATION = "organization";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
+   * <p>
+   * Description: <b>The reference to the providing organization</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Claim.organization</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Claim:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("Claim:organization").toLocked();
 
  /**
    * Search parameter: <b>priority</b>
@@ -8960,136 +8954,30 @@ public class Claim extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PRIORITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PRIORITY);
 
  /**
-   * Search parameter: <b>facility-reference</b>
+   * Search parameter: <b>facility</b>
    * <p>
    * Description: <b>Facility responsible for the goods and services</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Claim.facilityReference</b><br>
+   * Path: <b>Claim.facility</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="facility-reference", path="Claim.facility.as(Reference)", description="Facility responsible for the goods and services", type="reference", target={Location.class } )
-  public static final String SP_FACILITY_REFERENCE = "facility-reference";
+  @SearchParamDefinition(name="facility", path="Claim.facility", description="Facility responsible for the goods and services", type="reference", target={Location.class } )
+  public static final String SP_FACILITY = "facility";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>facility-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>facility</b>
    * <p>
    * Description: <b>Facility responsible for the goods and services</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Claim.facilityReference</b><br>
+   * Path: <b>Claim.facility</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam FACILITY_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_FACILITY_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam FACILITY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_FACILITY);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Claim:facility-reference</b>".
+   * the path value of "<b>Claim:facility</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_FACILITY_REFERENCE = new ca.uhn.fhir.model.api.Include("Claim:facility-reference").toLocked();
-
- /**
-   * Search parameter: <b>insurer-identifier</b>
-   * <p>
-   * Description: <b>The target payor/insurer for the Claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.insurerIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="insurer-identifier", path="Claim.insurer.as(Identifier)", description="The target payor/insurer for the Claim", type="token" )
-  public static final String SP_INSURER_IDENTIFIER = "insurer-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>insurer-identifier</b>
-   * <p>
-   * Description: <b>The target payor/insurer for the Claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.insurerIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam INSURER_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_INSURER_IDENTIFIER);
-
- /**
-   * Search parameter: <b>organization-identifier</b>
-   * <p>
-   * Description: <b>The reference to the providing organization</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.organizationIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organization-identifier", path="Claim.organization.as(Identifier)", description="The reference to the providing organization", type="token" )
-  public static final String SP_ORGANIZATION_IDENTIFIER = "organization-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization-identifier</b>
-   * <p>
-   * Description: <b>The reference to the providing organization</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.organizationIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATION_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATION_IDENTIFIER);
-
- /**
-   * Search parameter: <b>facility-identifier</b>
-   * <p>
-   * Description: <b>Facility responsible for the goods and services</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.facilityIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="facility-identifier", path="Claim.facility.as(Identifier)", description="Facility responsible for the goods and services", type="token" )
-  public static final String SP_FACILITY_IDENTIFIER = "facility-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>facility-identifier</b>
-   * <p>
-   * Description: <b>Facility responsible for the goods and services</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.facilityIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FACILITY_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FACILITY_IDENTIFIER);
-
- /**
-   * Search parameter: <b>provider-reference</b>
-   * <p>
-   * Description: <b>Provider responsible for the Claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Claim.providerReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="provider-reference", path="Claim.provider.as(Reference)", description="Provider responsible for the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
-  public static final String SP_PROVIDER_REFERENCE = "provider-reference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>provider-reference</b>
-   * <p>
-   * Description: <b>Provider responsible for the Claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Claim.providerReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROVIDER_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROVIDER_REFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Claim:provider-reference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDER_REFERENCE = new ca.uhn.fhir.model.api.Include("Claim:provider-reference").toLocked();
-
- /**
-   * Search parameter: <b>patient-identifier</b>
-   * <p>
-   * Description: <b>Patient receiving the services</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.patientIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="patient-identifier", path="Claim.patient.as(Identifier)", description="Patient receiving the services", type="token", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
-  public static final String SP_PATIENT_IDENTIFIER = "patient-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>patient-identifier</b>
-   * <p>
-   * Description: <b>Patient receiving the services</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Claim.patientIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PATIENT_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PATIENT_IDENTIFIER);
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_FACILITY = new ca.uhn.fhir.model.api.Include("Claim:facility").toLocked();
 
 
 }

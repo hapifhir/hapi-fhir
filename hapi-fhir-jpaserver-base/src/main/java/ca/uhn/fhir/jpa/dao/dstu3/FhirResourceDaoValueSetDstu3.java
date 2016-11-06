@@ -23,10 +23,8 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
@@ -34,10 +32,9 @@ import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
@@ -53,7 +50,6 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
 
@@ -82,7 +78,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		ValueSetExpansionOutcome outcome = workerContext.expand(theSource, null);
 
 		ValueSet retVal = outcome.getValueset();
-		retVal.setStatus(ConformanceResourceStatus.ACTIVE);
+		retVal.setStatus(PublicationStatus.ACTIVE);
 
 		return retVal;
 
@@ -110,7 +106,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 
 		ValueSet source = new ValueSet();
 
-		source.getCompose().addImport(theUri);
+		source.getCompose().addInclude().addValueSet(theUri);
 
 		if (isNotBlank(theFilter)) {
 			ConceptSetComponent include = source.getCompose().addInclude();
@@ -140,11 +136,12 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	@Override
 	public ValueSet expand(ValueSet source, String theFilter) {
 		ValueSet toExpand = new ValueSet();
-		for (UriType next : source.getCompose().getImport()) {
-			ConceptSetComponent include = toExpand.getCompose().addInclude();
-			include.setSystem(next.getValue());
-			addFilterIfPresent(theFilter, include);
-		}
+
+//		for (UriType next : source.getCompose().getInclude()) {
+//			ConceptSetComponent include = toExpand.getCompose().addInclude();
+//			include.setSystem(next.getValue());
+//			addFilterIfPresent(theFilter, include);
+//		}
 
 		for (ConceptSetComponent next : source.getCompose().getInclude()) {
 			toExpand.getCompose().addInclude(next);

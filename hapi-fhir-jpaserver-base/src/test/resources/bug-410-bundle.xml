@@ -82,7 +82,7 @@
 	<entry>
 		<fullUrl value="urn:uuid:902d418781be4fc185d9f45e523598f1" />
 		<resource>
-			<MedicationOrder>
+			<MedicationRequest>
 				<text>
 					<status value="generated" />
 					<xhtml:div>TEST</xhtml:div>
@@ -285,12 +285,12 @@
 						</coding>
 					</type>
 				</substitution>
-			</MedicationOrder>
+			</MedicationRequest>
 		</resource>
 		<request>
 			<method value="POST" />
-			<url value="MedicationOrder" />
-			<ifNoneExist value="MedicationOrder?identifier=1MN89XMN3B26M4B7P0-4" />
+			<url value="MedicationRequest" />
+			<ifNoneExist value="MedicationRequest?identifier=1MN89XMN3B26M4B7P0-4" />
 		</request>
 	</entry>
 	<entry>

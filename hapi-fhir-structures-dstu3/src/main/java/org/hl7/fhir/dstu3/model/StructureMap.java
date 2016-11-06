@@ -29,24 +29,30 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
+// added from java-adornments.txt:
+import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 
-import ca.uhn.fhir.model.api.annotation.*;
+// end addition
 /**
  * A Map of relationships between 2 structures that can be used to transform data.
  */
 @ResourceDef(name="StructureMap", profile="http://hl7.org/fhir/Profile/StructureMap")
-@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "requirements", "copyright", "structure", "import", "group"})
-public class StructureMap extends BaseConformance {
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "jurisdiction", "purpose", "copyright", "structure", "import", "group"})
+public class StructureMap extends MetadataResource {
 
     public enum StructureMapModelMode {
         /**
@@ -785,238 +791,6 @@ public class StructureMap extends BaseConformance {
       return code.getSystem();
       }
     }
-
-    @Block()
-    public static class StructureMapContactComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The name of an individual to contact regarding the structure map.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the structure map." )
-        protected StringType name;
-
-        /**
-         * Contact details for individual (if a name was provided) or the publisher.
-         */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
-    /**
-     * Constructor
-     */
-      public StructureMapContactComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (The name of an individual to contact regarding the structure map.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create StructureMapContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the structure map.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StructureMapContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the structure map.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the structure map.
-         */
-        public StructureMapContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public StructureMapContactComponent setTelecom(List<ContactPoint> theTelecom) { 
-          this.telecom = theTelecom;
-          return this;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-        public StructureMapContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the structure map.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type StructureMap.name");
-        }
-        else if (name.equals("telecom")) {
-          return addTelecom();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public StructureMapContactComponent copy() {
-        StructureMapContactComponent dst = new StructureMapContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof StructureMapContactComponent))
-          return false;
-        StructureMapContactComponent o = (StructureMapContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof StructureMapContactComponent))
-          return false;
-        StructureMapContactComponent o = (StructureMapContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
-      }
-
-  public String fhirType() {
-    return "StructureMap.contact";
-
-  }
-
-  }
 
     @Block()
     public static class StructureMapStructureComponent extends BackboneElement implements IBaseBackboneElement {
@@ -1764,6 +1538,14 @@ public class StructureMap extends BaseConformance {
 
   }
 
+// added from java-adornments.txt:
+
+  public String toString() {
+    return StructureMapUtilities.groupToString(this);
+  }
+
+
+// end addition
   }
 
     @Block()
@@ -2664,6 +2446,14 @@ public class StructureMap extends BaseConformance {
 
   }
 
+// added from java-adornments.txt:
+
+  public String toString() {
+    return StructureMapUtilities.ruleToString(this);
+  }
+
+
+// end addition
   }
 
     @Block()
@@ -3301,6 +3091,14 @@ public class StructureMap extends BaseConformance {
 
   }
 
+// added from java-adornments.txt:
+
+  public String toString() {
+    return StructureMapUtilities.sourceToString(this);
+  }
+
+
+// end addition
   }
 
     @Block()
@@ -3308,14 +3106,14 @@ public class StructureMap extends BaseConformance {
         /**
          * Type or variable this rule applies to.
          */
-        @Child(name = "context", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "context", type = {IdType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Type or variable this rule applies to", formalDefinition="Type or variable this rule applies to." )
         protected IdType context;
 
         /**
          * How to interpret the context.
          */
-        @Child(name = "contextType", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "contextType", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="type | variable", formalDefinition="How to interpret the context." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/map-context-type")
         protected Enumeration<StructureMapContextType> contextType;
@@ -3373,15 +3171,6 @@ public class StructureMap extends BaseConformance {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public StructureMapGroupRuleTargetComponent(IdType context, Enumeration<StructureMapContextType> contextType) {
-        super();
-        this.context = context;
-        this.contextType = contextType;
-      }
-
         /**
          * @return {@link #context} (Type or variable this rule applies to.). This is the underlying object with id, value and extensions. The accessor "getContext" gives direct access to the value
          */
@@ -3421,9 +3210,13 @@ public class StructureMap extends BaseConformance {
          * @param value Type or variable this rule applies to.
          */
         public StructureMapGroupRuleTargetComponent setContext(String value) { 
+          if (Utilities.noString(value))
+            this.context = null;
+          else {
             if (this.context == null)
               this.context = new IdType();
             this.context.setValue(value);
+          }
           return this;
         }
 
@@ -3466,9 +3259,13 @@ public class StructureMap extends BaseConformance {
          * @param value How to interpret the context.
          */
         public StructureMapGroupRuleTargetComponent setContextType(StructureMapContextType value) { 
+          if (value == null)
+            this.contextType = null;
+          else {
             if (this.contextType == null)
               this.contextType = new Enumeration<StructureMapContextType>(new StructureMapContextTypeEnumFactory());
             this.contextType.setValue(value);
+          }
           return this;
         }
 
@@ -3966,6 +3763,14 @@ public class StructureMap extends BaseConformance {
 
   }
 
+// added from java-adornments.txt:
+
+  public String toString() {
+    return StructureMapUtilities.targetToString(this);
+  }
+
+
+// end addition
   }
 
     @Block()
@@ -4096,7 +3901,7 @@ public class StructureMap extends BaseConformance {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -4106,7 +3911,7 @@ public class StructureMap extends BaseConformance {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -4182,6 +3987,15 @@ public class StructureMap extends BaseConformance {
 
   }
 
+// added from java-adornments.txt:
+
+      public String toString() {
+        return value == null ? "null!" : value.toString();
+      }
+
+
+
+// end addition
   }
 
     @Block()
@@ -4429,76 +4243,48 @@ public class StructureMap extends BaseConformance {
   }
 
     /**
-     * Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).
+     * A formal identifier that is used to identify this structure map when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Other identifiers for the StructureMap", formalDefinition="Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)." )
+    @Description(shortDefinition="Additional identifier for the structure map", formalDefinition="A formal identifier that is used to identify this structure map when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected List<Identifier> identifier;
 
     /**
-     * This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * Explains why this structure map is needed and why it has been designed as it has.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
-    protected BooleanType experimental;
+    @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this structure map is defined", formalDefinition="Explains why this structure map is needed and why it has been designed as it has." )
+    protected MarkdownType purpose;
 
     /**
-     * The name of the individual or organization that published the structure map.
+     * A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the structure map." )
-    protected StringType publisher;
-
-    /**
-     * Contacts to assist a user in finding and communicating with the publisher.
-     */
-    @Child(name = "contact", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
-    protected List<StructureMapContactComponent> contact;
-
-    /**
-     * A free text natural language description of the StructureMap and its use.
-     */
-    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Natural language description of the StructureMap", formalDefinition="A free text natural language description of the StructureMap and its use." )
-    protected MarkdownType description;
-
-    /**
-     * Explains why this structure map is needed and why it's been designed as it has.
-     */
-    @Child(name = "requirements", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Scope and Usage this structure map is for", formalDefinition="Explains why this structure map is needed and why it's been designed as it has." )
-    protected MarkdownType requirements;
-
-    /**
-     * A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
-     */
-    @Child(name = "copyright", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
-    protected StringType copyright;
+    @Child(name = "copyright", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map." )
+    protected MarkdownType copyright;
 
     /**
      * A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced.
      */
-    @Child(name = "structure", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "structure", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Structure Definition used by this map", formalDefinition="A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced." )
     protected List<StructureMapStructureComponent> structure;
 
     /**
      * Other maps used by this map (canonical URLs).
      */
-    @Child(name = "import", type = {UriType.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "import", type = {UriType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Other maps used by this map (canonical URLs)", formalDefinition="Other maps used by this map (canonical URLs)." )
     protected List<UriType> import_;
 
     /**
      * Named sections for reader convenience.
      */
-    @Child(name = "group", type = {}, order=9, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "group", type = {}, order=5, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Named sections for reader convenience", formalDefinition="Named sections for reader convenience." )
     protected List<StructureMapGroupComponent> group;
 
-    private static final long serialVersionUID = 629253107L;
+    private static final long serialVersionUID = 952506557L;
 
   /**
    * Constructor
@@ -4510,7 +4296,7 @@ public class StructureMap extends BaseConformance {
   /**
    * Constructor
    */
-    public StructureMap(UriType url, StringType name, Enumeration<ConformanceResourceStatus> status) {
+    public StructureMap(UriType url, StringType name, Enumeration<PublicationStatus> status) {
       super();
       this.url = url;
       this.name = name;
@@ -4518,7 +4304,42 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published.
+     * @return {@link #url} (An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public UriType getUrlElement() { 
+      if (this.url == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureMap.url");
+        else if (Configuration.doAutoCreate())
+          this.url = new UriType(); // bb
+      return this.url;
+    }
+
+    public boolean hasUrlElement() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    public boolean hasUrl() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    /**
+     * @param value {@link #url} (An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public StructureMap setUrlElement(UriType value) { 
+      this.url = value;
+      return this;
+    }
+
+    /**
+     * @return An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).
+     */
+    public String getUrl() { 
+      return this.url == null ? null : this.url.getValue();
+    }
+
+    /**
+     * @param value An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public StructureMap setUrl(String value) { 
         if (this.url == null)
@@ -4528,7 +4349,7 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @return {@link #identifier} (Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).)
+     * @return {@link #identifier} (A formal identifier that is used to identify this structure map when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -4581,7 +4402,42 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the StructureMap when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureMap author manually.
+     * @return {@link #version} (The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public StringType getVersionElement() { 
+      if (this.version == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureMap.version");
+        else if (Configuration.doAutoCreate())
+          this.version = new StringType(); // bb
+      return this.version;
+    }
+
+    public boolean hasVersionElement() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    public boolean hasVersion() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    /**
+     * @param value {@link #version} (The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public StructureMap setVersionElement(StringType value) { 
+      this.version = value;
+      return this;
+    }
+
+    /**
+     * @return The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     */
+    public String getVersion() { 
+      return this.version == null ? null : this.version.getValue();
+    }
+
+    /**
+     * @param value The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
      */
     public StructureMap setVersion(String value) { 
       if (Utilities.noString(value))
@@ -4595,7 +4451,42 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value A free text natural language name identifying the StructureMap.
+     * @return {@link #name} (A natural language name identifying the structure map. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public StringType getNameElement() { 
+      if (this.name == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureMap.name");
+        else if (Configuration.doAutoCreate())
+          this.name = new StringType(); // bb
+      return this.name;
+    }
+
+    public boolean hasNameElement() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    public boolean hasName() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    /**
+     * @param value {@link #name} (A natural language name identifying the structure map. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public StructureMap setNameElement(StringType value) { 
+      this.name = value;
+      return this;
+    }
+
+    /**
+     * @return A natural language name identifying the structure map. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     */
+    public String getName() { 
+      return this.name == null ? null : this.name.getValue();
+    }
+
+    /**
+     * @param value A natural language name identifying the structure map. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public StructureMap setName(String value) { 
         if (this.name == null)
@@ -4605,17 +4496,101 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value The status of the StructureMap.
+     * @return {@link #title} (A short, descriptive, user-friendly title for the structure map.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
      */
-    public StructureMap setStatus(ConformanceResourceStatus value) { 
+    public StringType getTitleElement() { 
+      if (this.title == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureMap.title");
+        else if (Configuration.doAutoCreate())
+          this.title = new StringType(); // bb
+      return this.title;
+    }
+
+    public boolean hasTitleElement() { 
+      return this.title != null && !this.title.isEmpty();
+    }
+
+    public boolean hasTitle() { 
+      return this.title != null && !this.title.isEmpty();
+    }
+
+    /**
+     * @param value {@link #title} (A short, descriptive, user-friendly title for the structure map.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
+     */
+    public StructureMap setTitleElement(StringType value) { 
+      this.title = value;
+      return this;
+    }
+
+    /**
+     * @return A short, descriptive, user-friendly title for the structure map.
+     */
+    public String getTitle() { 
+      return this.title == null ? null : this.title.getValue();
+    }
+
+    /**
+     * @param value A short, descriptive, user-friendly title for the structure map.
+     */
+    public StructureMap setTitle(String value) { 
+      if (Utilities.noString(value))
+        this.title = null;
+      else {
+        if (this.title == null)
+          this.title = new StringType();
+        this.title.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The status of this structure map. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<PublicationStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureMap.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of this structure map. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public StructureMap setStatusElement(Enumeration<PublicationStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of this structure map. Enables tracking the life-cycle of the content.
+     */
+    public PublicationStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of this structure map. Enables tracking the life-cycle of the content.
+     */
+    public StructureMap setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #experimental} (This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -4635,7 +4610,7 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value {@link #experimental} (This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public StructureMap setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -4643,14 +4618,14 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @return This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public StructureMap setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -4709,18 +4684,18 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
      */
-    public List<StructureMapContactComponent> getContact() { 
+    public List<ContactDetail> getContact() { 
       if (this.contact == null)
-        this.contact = new ArrayList<StructureMapContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       return this.contact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public StructureMap setContact(List<StructureMapContactComponent> theContact) { 
+    public StructureMap setContact(List<ContactDetail> theContact) { 
       this.contact = theContact;
       return this;
     }
@@ -4728,25 +4703,25 @@ public class StructureMap extends BaseConformance {
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
-      for (StructureMapContactComponent item : this.contact)
+      for (ContactDetail item : this.contact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public StructureMapContactComponent addContact() { //3
-      StructureMapContactComponent t = new StructureMapContactComponent();
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
       if (this.contact == null)
-        this.contact = new ArrayList<StructureMapContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return t;
     }
 
-    public StructureMap addContact(StructureMapContactComponent t) { //3
+    public StructureMap addContact(ContactDetail t) { //3
       if (t == null)
         return this;
       if (this.contact == null)
-        this.contact = new ArrayList<StructureMapContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return this;
     }
@@ -4754,7 +4729,7 @@ public class StructureMap extends BaseConformance {
     /**
      * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public StructureMapContactComponent getContactFirstRep() { 
+    public ContactDetail getContactFirstRep() { 
       if (getContact().isEmpty()) {
         addContact();
       }
@@ -4762,7 +4737,42 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value The date this version of the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
+     * @return {@link #date} (The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureMap.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public StructureMap setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.
      */
     public StructureMap setDate(Date value) { 
       if (value == null)
@@ -4776,7 +4786,7 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the StructureMap and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the structure map from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -4796,7 +4806,7 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the StructureMap and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the structure map from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StructureMap setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -4804,14 +4814,14 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @return A free text natural language description of the StructureMap and its use.
+     * @return A free text natural language description of the structure map from the consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the StructureMap and its use.
+     * @param value A free text natural language description of the structure map from the consumer's perspective.
      */
     public StructureMap setDescription(String value) { 
       if (value == null)
@@ -4825,63 +4835,169 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @return {@link #requirements} (Explains why this structure map is needed and why it's been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
      */
-    public MarkdownType getRequirementsElement() { 
-      if (this.requirements == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureMap.requirements");
-        else if (Configuration.doAutoCreate())
-          this.requirements = new MarkdownType(); // bb
-      return this.requirements;
-    }
-
-    public boolean hasRequirementsElement() { 
-      return this.requirements != null && !this.requirements.isEmpty();
-    }
-
-    public boolean hasRequirements() { 
-      return this.requirements != null && !this.requirements.isEmpty();
+    public List<UsageContext> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      return this.useContext;
     }
 
     /**
-     * @param value {@link #requirements} (Explains why this structure map is needed and why it's been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public StructureMap setRequirementsElement(MarkdownType value) { 
-      this.requirements = value;
+    public StructureMap setUseContext(List<UsageContext> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (UsageContext item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public UsageContext addUseContext() { //3
+      UsageContext t = new UsageContext();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    public StructureMap addUseContext(UsageContext t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
       return this;
     }
 
     /**
-     * @return Explains why this structure map is needed and why it's been designed as it has.
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
      */
-    public String getRequirements() { 
-      return this.requirements == null ? null : this.requirements.getValue();
+    public UsageContext getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
     }
 
     /**
-     * @param value Explains why this structure map is needed and why it's been designed as it has.
+     * @return {@link #jurisdiction} (A jurisdiction in which the structure map is intended to be used.)
      */
-    public StructureMap setRequirements(String value) { 
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public StructureMap setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public StructureMap addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
+    }
+
+    /**
+     * @return {@link #purpose} (Explains why this structure map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public MarkdownType getPurposeElement() { 
+      if (this.purpose == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureMap.purpose");
+        else if (Configuration.doAutoCreate())
+          this.purpose = new MarkdownType(); // bb
+      return this.purpose;
+    }
+
+    public boolean hasPurposeElement() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    public boolean hasPurpose() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    /**
+     * @param value {@link #purpose} (Explains why this structure map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public StructureMap setPurposeElement(MarkdownType value) { 
+      this.purpose = value;
+      return this;
+    }
+
+    /**
+     * @return Explains why this structure map is needed and why it has been designed as it has.
+     */
+    public String getPurpose() { 
+      return this.purpose == null ? null : this.purpose.getValue();
+    }
+
+    /**
+     * @param value Explains why this structure map is needed and why it has been designed as it has.
+     */
+    public StructureMap setPurpose(String value) { 
       if (value == null)
-        this.requirements = null;
+        this.purpose = null;
       else {
-        if (this.requirements == null)
-          this.requirements = new MarkdownType();
-        this.requirements.setValue(value);
+        if (this.purpose == null)
+          this.purpose = new MarkdownType();
+        this.purpose.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #copyright} (A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     * @return {@link #copyright} (A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
-    public StringType getCopyrightElement() { 
+    public MarkdownType getCopyrightElement() { 
       if (this.copyright == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create StructureMap.copyright");
         else if (Configuration.doAutoCreate())
-          this.copyright = new StringType(); // bb
+          this.copyright = new MarkdownType(); // bb
       return this.copyright;
     }
 
@@ -4894,29 +5010,29 @@ public class StructureMap extends BaseConformance {
     }
 
     /**
-     * @param value {@link #copyright} (A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     * @param value {@link #copyright} (A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
-    public StructureMap setCopyrightElement(StringType value) { 
+    public StructureMap setCopyrightElement(MarkdownType value) { 
       this.copyright = value;
       return this;
     }
 
     /**
-     * @return A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     * @return A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.
      */
     public String getCopyright() { 
       return this.copyright == null ? null : this.copyright.getValue();
     }
 
     /**
-     * @param value A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     * @param value A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.
      */
     public StructureMap setCopyright(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.copyright = null;
       else {
         if (this.copyright == null)
-          this.copyright = new StringType();
+          this.copyright = new MarkdownType();
         this.copyright.setValue(value);
       }
       return this;
@@ -5091,13 +5207,21 @@ public class StructureMap extends BaseConformance {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this StructureMap when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("experimental", "boolean", "This StructureMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this structure map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure map is (or will be) published. The URL SHOULD include the major version of the structure map. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this structure map when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the structure map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A natural language name identifying the structure map. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the structure map.", 0, java.lang.Integer.MAX_VALUE, title));
+        childrenList.add(new Property("status", "code", "The status of this structure map. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this structure map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the structure map.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the StructureMap and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("requirements", "markdown", "Explains why this structure map is needed and why it's been designed as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
-        childrenList.add(new Property("copyright", "string", "A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
+        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the structure map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the structure map changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the structure map from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the structure map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explains why this structure map is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("structure", "", "A structure definition used by this map. The structure definition may describe instances that are converted, or the instances that are produced.", 0, java.lang.Integer.MAX_VALUE, structure));
         childrenList.add(new Property("import", "uri", "Other maps used by this map (canonical URLs).", 0, java.lang.Integer.MAX_VALUE, import_));
         childrenList.add(new Property("group", "", "Named sections for reader convenience.", 0, java.lang.Integer.MAX_VALUE, group));
@@ -5110,15 +5234,17 @@ public class StructureMap extends BaseConformance {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // StructureMapContactComponent
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
-        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
-        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 144518515: /*structure*/ return this.structure == null ? new Base[0] : this.structure.toArray(new Base[this.structure.size()]); // StructureMapStructureComponent
         case -1184795739: /*import*/ return this.import_ == null ? new Base[0] : this.import_.toArray(new Base[this.import_.size()]); // UriType
         case 98629247: /*group*/ return this.group == null ? new Base[0] : this.group.toArray(new Base[this.group.size()]); // StructureMapGroupComponent
@@ -5142,8 +5268,11 @@ public class StructureMap extends BaseConformance {
         case 3373707: // name
           this.name = castToString(value); // StringType
           break;
+        case 110371416: // title
+          this.title = castToString(value); // StringType
+          break;
         case -892481550: // status
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
@@ -5152,7 +5281,7 @@ public class StructureMap extends BaseConformance {
           this.publisher = castToString(value); // StringType
           break;
         case 951526432: // contact
-          this.getContact().add((StructureMapContactComponent) value); // StructureMapContactComponent
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
@@ -5161,13 +5290,16 @@ public class StructureMap extends BaseConformance {
           this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
-          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
           break;
-        case -1619874672: // requirements
-          this.requirements = castToMarkdown(value); // MarkdownType
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -220463842: // purpose
+          this.purpose = castToMarkdown(value); // MarkdownType
           break;
         case 1522889671: // copyright
-          this.copyright = castToString(value); // StringType
+          this.copyright = castToMarkdown(value); // MarkdownType
           break;
         case 144518515: // structure
           this.getStructure().add((StructureMapStructureComponent) value); // StructureMapStructureComponent
@@ -5193,24 +5325,28 @@ public class StructureMap extends BaseConformance {
           this.version = castToString(value); // StringType
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
+        else if (name.equals("title"))
+          this.title = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("experimental"))
           this.experimental = castToBoolean(value); // BooleanType
         else if (name.equals("publisher"))
           this.publisher = castToString(value); // StringType
         else if (name.equals("contact"))
-          this.getContact().add((StructureMapContactComponent) value);
+          this.getContact().add(castToContactDetail(value));
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
           this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
-          this.getUseContext().add(castToCodeableConcept(value));
-        else if (name.equals("requirements"))
-          this.requirements = castToMarkdown(value); // MarkdownType
+          this.getUseContext().add(castToUsageContext(value));
+        else if (name.equals("jurisdiction"))
+          this.getJurisdiction().add(castToCodeableConcept(value));
+        else if (name.equals("purpose"))
+          this.purpose = castToMarkdown(value); // MarkdownType
         else if (name.equals("copyright"))
-          this.copyright = castToString(value); // StringType
+          this.copyright = castToMarkdown(value); // MarkdownType
         else if (name.equals("structure"))
           this.getStructure().add((StructureMapStructureComponent) value);
         else if (name.equals("import"))
@@ -5228,15 +5364,17 @@ public class StructureMap extends BaseConformance {
         case -1618432855:  return addIdentifier(); // Identifier
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // StructureMapContactComponent
+        case 951526432:  return addContact(); // ContactDetail
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // CodeableConcept
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
+        case -669707736:  return addUseContext(); // UsageContext
+        case -507075711:  return addJurisdiction(); // CodeableConcept
+        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
         case 144518515:  return addStructure(); // StructureMapStructureComponent
         case -1184795739: throw new FHIRException("Cannot make property import as it is not a complex type"); // UriType
         case 98629247:  return addGroup(); // StructureMapGroupComponent
@@ -5259,6 +5397,9 @@ public class StructureMap extends BaseConformance {
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type StructureMap.name");
         }
+        else if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type StructureMap.title");
+        }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type StructureMap.status");
         }
@@ -5280,8 +5421,11 @@ public class StructureMap extends BaseConformance {
         else if (name.equals("useContext")) {
           return addUseContext();
         }
-        else if (name.equals("requirements")) {
-          throw new FHIRException("Cannot call addChild on a primitive type StructureMap.requirements");
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
+        }
+        else if (name.equals("purpose")) {
+          throw new FHIRException("Cannot call addChild on a primitive type StructureMap.purpose");
         }
         else if (name.equals("copyright")) {
           throw new FHIRException("Cannot call addChild on a primitive type StructureMap.copyright");
@@ -5315,22 +5459,28 @@ public class StructureMap extends BaseConformance {
         };
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
+        dst.title = title == null ? null : title.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
-          dst.contact = new ArrayList<StructureMapContactComponent>();
-          for (StructureMapContactComponent i : contact)
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
         dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
-          dst.useContext = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : useContext)
+          dst.useContext = new ArrayList<UsageContext>();
+          for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
         };
-        dst.requirements = requirements == null ? null : requirements.copy();
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
+        };
+        dst.purpose = purpose == null ? null : purpose.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         if (structure != null) {
           dst.structure = new ArrayList<StructureMapStructureComponent>();
@@ -5361,9 +5511,7 @@ public class StructureMap extends BaseConformance {
         if (!(other instanceof StructureMap))
           return false;
         StructureMap o = (StructureMap) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(experimental, o.experimental, true)
-           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true)
-           && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(structure, o.structure, true) && compareDeep(import_, o.import_, true) && compareDeep(group, o.group, true)
           ;
       }
@@ -5375,14 +5523,13 @@ public class StructureMap extends BaseConformance {
         if (!(other instanceof StructureMap))
           return false;
         StructureMap o = (StructureMap) other;
-        return compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
-           && compareValues(copyright, o.copyright, true) && compareValues(import_, o.import_, true);
+        return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true) && compareValues(import_, o.import_, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, experimental, publisher
-          , contact, description, requirements, copyright, structure, import_, group);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, copyright
+          , structure, import_, group);
       }
 
   @Override
@@ -5393,17 +5540,17 @@ public class StructureMap extends BaseConformance {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>The profile publication date</b><br>
+   * Description: <b>The structure map publication date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>StructureMap.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="StructureMap.date", description="The profile publication date", type="date" )
+  @SearchParamDefinition(name="date", path="StructureMap.date", description="The structure map publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>The profile publication date</b><br>
+   * Description: <b>The structure map publication date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>StructureMap.date</b><br>
    * </p>
@@ -5413,17 +5560,17 @@ public class StructureMap extends BaseConformance {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>The identifier of the profile</b><br>
+   * Description: <b>External identifiers for the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="The identifier of the profile", type="token" )
+  @SearchParamDefinition(name="identifier", path="StructureMap.identifier", description="External identifiers for the structure map", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>The identifier of the profile</b><br>
+   * Description: <b>External identifiers for the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.identifier</b><br>
    * </p>
@@ -5431,19 +5578,39 @@ public class StructureMap extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for structure map</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>StructureMap.jurisdiction</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="jurisdiction", path="StructureMap.jurisdiction", description="Intended jurisdiction for structure map", type="token" )
+  public static final String SP_JURISDICTION = "jurisdiction";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for structure map</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>StructureMap.jurisdiction</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
+
+ /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the profile</b><br>
+   * Description: <b>Name of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the profile", type="string" )
+  @SearchParamDefinition(name="name", path="StructureMap.name", description="Name of the structure map", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the profile</b><br>
+   * Description: <b>Name of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.name</b><br>
    * </p>
@@ -5451,59 +5618,19 @@ public class StructureMap extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>A use context assigned to the structure</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>StructureMap.useContext</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="StructureMap.useContext", description="A use context assigned to the structure", type="token" )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>A use context assigned to the structure</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>StructureMap.useContext</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
-
- /**
-   * Search parameter: <b>publisher</b>
-   * <p>
-   * Description: <b>Name of the publisher of the profile</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>StructureMap.publisher</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="publisher", path="StructureMap.publisher", description="Name of the publisher of the profile", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
-   * <p>
-   * Description: <b>Name of the publisher of the profile</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>StructureMap.publisher</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
-
- /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search in the description of the profile</b><br>
+   * Description: <b>Text search against the description of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search in the description of the profile", type="string" )
+  @SearchParamDefinition(name="description", path="StructureMap.description", description="Text search against the description of the structure map", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search in the description of the profile</b><br>
+   * Description: <b>Text search against the description of the structure map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>StructureMap.description</b><br>
    * </p>
@@ -5511,39 +5638,59 @@ public class StructureMap extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
-   * Search parameter: <b>experimental</b>
+   * Search parameter: <b>publisher</b>
    * <p>
-   * Description: <b>Whether the map is defined purely for experimental reasons</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>StructureMap.experimental</b><br>
+   * Description: <b>Name of the publisher of the structure map</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>StructureMap.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="experimental", path="StructureMap.experimental", description="Whether the map is defined purely for experimental reasons", type="token" )
-  public static final String SP_EXPERIMENTAL = "experimental";
+  @SearchParamDefinition(name="publisher", path="StructureMap.publisher", description="Name of the publisher of the structure map", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>experimental</b>
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
    * <p>
-   * Description: <b>Whether the map is defined purely for experimental reasons</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>StructureMap.experimental</b><br>
+   * Description: <b>Name of the publisher of the structure map</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>StructureMap.publisher</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EXPERIMENTAL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EXPERIMENTAL);
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>title</b>
+   * <p>
+   * Description: <b>Text search against the title of the structure map</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>StructureMap.title</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="title", path="StructureMap.title", description="Text search against the title of the structure map", type="string" )
+  public static final String SP_TITLE = "title";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>title</b>
+   * <p>
+   * Description: <b>Text search against the title of the structure map</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>StructureMap.title</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
 
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the profile</b><br>
+   * Description: <b>The version identifier of the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="StructureMap.version", description="The version identifier of the profile", type="token" )
+  @SearchParamDefinition(name="version", path="StructureMap.version", description="The version identifier of the structure map", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the profile</b><br>
+   * Description: <b>The version identifier of the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.version</b><br>
    * </p>
@@ -5553,17 +5700,17 @@ public class StructureMap extends BaseConformance {
  /**
    * Search parameter: <b>url</b>
    * <p>
-   * Description: <b>The url that identifies the structure map</b><br>
+   * Description: <b>The uri that identifies the structure map</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>StructureMap.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="StructureMap.url", description="The url that identifies the structure map", type="uri" )
+  @SearchParamDefinition(name="url", path="StructureMap.url", description="The uri that identifies the structure map", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
    * <p>
-   * Description: <b>The url that identifies the structure map</b><br>
+   * Description: <b>The uri that identifies the structure map</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>StructureMap.url</b><br>
    * </p>
@@ -5573,23 +5720,31 @@ public class StructureMap extends BaseConformance {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>The current status of the profile</b><br>
+   * Description: <b>The current status of the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="StructureMap.status", description="The current status of the profile", type="token" )
+  @SearchParamDefinition(name="status", path="StructureMap.status", description="The current status of the structure map", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>The current status of the profile</b><br>
+   * Description: <b>The current status of the structure map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>StructureMap.status</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
+// added from java-adornments.txt:
+
+  public String toString() {
+    return StructureMapUtilities.render(this);
+  }
+
+
+// end addition
 
 }
 

@@ -29,16 +29,20 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
@@ -1517,7 +1521,7 @@ public class Questionnaire extends DomainResource {
           this.getOption().add((QuestionnaireItemOptionComponent) value); // QuestionnaireItemOptionComponent
           break;
         case 1948342084: // initial
-          this.initial = (Type) value; // Type
+          this.initial = castToType(value); // Type
           break;
         case 3242771: // item
           this.getItem().add((QuestionnaireItemComponent) value); // QuestionnaireItemComponent
@@ -1554,7 +1558,7 @@ public class Questionnaire extends DomainResource {
         else if (name.equals("option"))
           this.getOption().add((QuestionnaireItemOptionComponent) value);
         else if (name.equals("initial[x]"))
-          this.initial = (Type) value; // Type
+          this.initial = castToType(value); // Type
         else if (name.equals("item"))
           this.getItem().add((QuestionnaireItemComponent) value);
         else
@@ -2102,7 +2106,7 @@ public class Questionnaire extends DomainResource {
           this.hasAnswer = castToBoolean(value); // BooleanType
           break;
         case -1412808770: // answer
-          this.answer = (Type) value; // Type
+          this.answer = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2116,7 +2120,7 @@ public class Questionnaire extends DomainResource {
         else if (name.equals("hasAnswer"))
           this.hasAnswer = castToBoolean(value); // BooleanType
         else if (name.equals("answer[x]"))
-          this.answer = (Type) value; // Type
+          this.answer = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -2367,7 +2371,7 @@ public class Questionnaire extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2377,7 +2381,7 @@ public class Questionnaire extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else
           super.setProperty(name, value);
       }

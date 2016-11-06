@@ -29,15 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-
-import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A record of a request for a medication, substance or device used in the healthcare setting.
  */
@@ -913,13 +917,13 @@ public class SupplyRequest extends DomainResource {
           this.kind = castToCodeableConcept(value); // CodeableConcept
           break;
         case 2129914144: // orderedItem
-          this.orderedItem = (Type) value; // Type
+          this.orderedItem = castToType(value); // Type
           break;
         case -1663305268: // supplier
           this.getSupplier().add(castToReference(value)); // Reference
           break;
         case -934964668: // reason
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
           break;
         case 3648314: // when
           this.when = (SupplyRequestWhenComponent) value; // SupplyRequestWhenComponent
@@ -944,11 +948,11 @@ public class SupplyRequest extends DomainResource {
         else if (name.equals("kind"))
           this.kind = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("orderedItem[x]"))
-          this.orderedItem = (Type) value; // Type
+          this.orderedItem = castToType(value); // Type
         else if (name.equals("supplier"))
           this.getSupplier().add(castToReference(value));
         else if (name.equals("reason[x]"))
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
         else if (name.equals("when"))
           this.when = (SupplyRequestWhenComponent) value; // SupplyRequestWhenComponent
         else

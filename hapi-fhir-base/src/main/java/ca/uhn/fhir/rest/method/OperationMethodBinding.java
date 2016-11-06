@@ -63,6 +63,7 @@ import ca.uhn.fhir.util.FhirTerser;
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationMethodBinding.class);
+	private BundleTypeEnum myBundleType;
 	private boolean myCanOperateAtInstanceLevel;
 	private boolean myCanOperateAtServerLevel;
 	private boolean myCanOperateAtTypeLevel;
@@ -73,7 +74,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final RestOperationTypeEnum myOtherOperatiopnType;
 	private List<ReturnType> myReturnParams;
 	private final ReturnTypeEnum myReturnType;
-	private BundleTypeEnum myBundleType;
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
 			OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
@@ -260,6 +260,15 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
+			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, this, null);
+			theRequest.getUserData().put(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY, requestContents);
+		}
+		return super.invokeServer(theServer, theRequest);
+	}
+
+	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
 			// all good
@@ -287,21 +296,16 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
-			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, this, null);
-			theRequest.getUserData().put(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY, requestContents);
-		}
-		return super.invokeServer(theServer, theRequest);
-	}
-
 	public boolean isCanOperateAtInstanceLevel() {
 		return this.myCanOperateAtInstanceLevel;
 	}
 
 	public boolean isCanOperateAtServerLevel() {
 		return this.myCanOperateAtServerLevel;
+	}
+
+	public boolean isCanOperateAtTypeLevel() {
+		return myCanOperateAtTypeLevel;
 	}
 
 	public boolean isIdempotent() {

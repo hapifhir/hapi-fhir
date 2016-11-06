@@ -13,7 +13,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationOrder;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -307,7 +307,7 @@ public class CustomTypeDstu3Test {
 	@Test
 	public void testParseResourceWithContainedResourcesWithProfile() {
 		//@formatter:off
-		String input = "<MedicationOrder xmlns=\"http://hl7.org/fhir\">"
+		String input = "<MedicationRequest xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"44cfa24c-52e1-a8ff-8428-4e7ce1165460-local\"/> "
 				+ "<meta> "
 				+ "<profile value=\"http://fhir.something.com/StructureDefinition/our-medication-order\"/> "
@@ -326,13 +326,13 @@ public class CustomTypeDstu3Test {
 				+ "<medication> "
 				+ "<reference value=\"#1\"/> "
 				+ "</medication> "
-				+ "</MedicationOrder>";
+				+ "</MedicationRequest>";
 		//@formatter:on
 		
 		FhirContext ctx = FhirContext.forDstu3();
 		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
 		
-		MedicationOrder mo = ctx.newXmlParser().parseResource(MedicationOrder.class, input);
+		MedicationRequest mo = ctx.newXmlParser().parseResource(MedicationRequest.class, input);
 		assertEquals(MyMedication.class, mo.getContained().get(0).getClass());
 	}
 

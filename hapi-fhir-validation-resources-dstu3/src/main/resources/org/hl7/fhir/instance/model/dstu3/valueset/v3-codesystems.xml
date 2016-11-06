@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="v3-valuesets"/>
  <meta>
-  <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+  <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -80,7 +80,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-InformationSensitivityPolicy"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-InformationSensitivityPolicy"/>
@@ -154,7 +154,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ConfidentialityClassification"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ConfidentialityClassification"/>
@@ -206,7 +206,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ServiceDeliveryLocationRoleType"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ServiceDeliveryLocationRoleType"/>
@@ -286,7 +286,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityPolicy"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SecurityPolicy"/>
@@ -360,7 +360,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassOrganization"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityClassOrganization"/>
@@ -399,7 +399,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetDirect"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationTargetDirect"/>
@@ -438,7 +438,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipHasComponent"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipHasComponent"/>
@@ -679,7 +679,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassSupply"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClassSupply"/>
@@ -718,7 +718,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityIntegrityObservationValue"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SecurityIntegrityObservationValue"/>
@@ -891,7 +891,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassDocument"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClassDocument"/>
@@ -1066,7 +1066,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RefrainPolicy"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RefrainPolicy"/>
@@ -1105,7 +1105,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetSubject"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationTargetSubject"/>
@@ -1144,7 +1144,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipPertains"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipPertains"/>
@@ -1385,7 +1385,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassManufacturedProduct"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassManufacturedProduct"/>
@@ -1424,7 +1424,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassROI"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClassROI"/>
@@ -1469,7 +1469,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRelationshipFormal"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassRelationshipFormal"/>
@@ -1545,7 +1545,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActSubstanceAdminSubstitutionCode"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActSubstanceAdminSubstitutionCode"/>
@@ -1590,7 +1590,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-AS"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState-AS"/>
@@ -1677,7 +1677,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPartitive"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassPartitive"/>
@@ -1722,7 +1722,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassDevice"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityClassDevice"/>
@@ -1889,7 +1889,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-DC"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState-DC"/>
@@ -2004,7 +2004,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SubstanceAdminSubstitutionReason"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SubstanceAdminSubstitutionReason"/>
@@ -2084,7 +2084,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassPassive"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassPassive"/>
@@ -2164,7 +2164,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassClinicalDocument"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClassClinicalDocument"/>
@@ -2238,7 +2238,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassObservation"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClassObservation"/>
@@ -2448,7 +2448,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationPhysicalPerformer"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationPhysicalPerformer"/>
@@ -2487,7 +2487,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HumanLanguage"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-HumanLanguage"/>
@@ -2521,7 +2521,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassRoot"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassRoot"/>
@@ -2828,7 +2828,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassSpecimen"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassSpecimen"/>
@@ -2902,7 +2902,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodIntent"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActMoodIntent"/>
@@ -2941,7 +2941,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityDeterminerDetermined"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityDeterminerDetermined"/>
@@ -3011,7 +3011,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationType"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ObservationType"/>
@@ -3119,7 +3119,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassPlace"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityClassPlace"/>
@@ -3158,7 +3158,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentSectionType"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-DocumentSectionType"/>
@@ -3223,7 +3223,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassRoot"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityClassRoot"/>
@@ -3297,7 +3297,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationTranscriber"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationInformationTranscriber"/>
@@ -3371,7 +3371,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState"/>
@@ -3392,8 +3392,12 @@
     </contact>
     <description value=" Specifies the state change of a target  Act, such as a document or an entry, from its previous state as a predecessor Act. For example, if the target Act is the result of a predecessor Act being &quot;obsoleted&quot; and replaced with the target Act, the source ProvenanceEventCurrentState Act code would be  &quot;obsoleted&quot;."/>
     <compose>
-     <import value="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState-AS"/>
-     <import value="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState-DC"/>
+     <include>
+      <valueSet value="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState-AS"/>
+     </include>
+     <include>
+      <valueSet value="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState-DC"/>
+     </include>
     </compose>
    </ValueSet>
   </resource>
@@ -3404,7 +3408,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActCoverageTypeCode"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActCoverageTypeCode"/>
@@ -3610,7 +3614,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationInformationGenerator"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationInformationGenerator"/>
@@ -3721,7 +3725,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-xBasicConfidentialityKind"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-xBasicConfidentialityKind"/>
@@ -3826,7 +3830,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MilitaryRoleType"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-MilitaryRoleType"/>
@@ -3865,7 +3869,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActConsentType"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActConsentType"/>
@@ -3974,7 +3978,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAssociative"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassAssociative"/>
@@ -4019,7 +4023,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Compartment"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-Compartment"/>
@@ -4299,7 +4303,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityControlObservationValue"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SecurityControlObservationValue"/>
@@ -4320,11 +4324,21 @@
     </contact>
     <description value=" Security observation values used to indicate security control metadata.  V:SecurityControl is the union of V:SecurityPolicy,V:ObligationPolicy, V:RefrainPolicy, V:PurposeOfUse, and V:GeneralPurpose of Use used to populate the SecurityControlObservationValue attribute in order to convey one or more nonhierarchical security control metadata dictating handling caveats, purpose of use, dissemination controls and other refrain policies, and obligations to which a custodian or receiver is required to comply."/>
     <compose>
-     <import value="http://hl7.org/fhir/ValueSet/v3-SecurityPolicy"/>
-     <import value="http://hl7.org/fhir/ValueSet/v3-ObligationPolicy"/>
-     <import value="http://hl7.org/fhir/ValueSet/v3-RefrainPolicy"/>
-     <import value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
-     <import value="http://hl7.org/fhir/ValueSet/v3-GeneralPurposeOfUse"/>
+     <include>
+      <valueSet value="http://hl7.org/fhir/ValueSet/v3-SecurityPolicy"/>
+     </include>
+     <include>
+      <valueSet value="http://hl7.org/fhir/ValueSet/v3-ObligationPolicy"/>
+     </include>
+     <include>
+      <valueSet value="http://hl7.org/fhir/ValueSet/v3-RefrainPolicy"/>
+     </include>
+     <include>
+      <valueSet value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
+     </include>
+     <include>
+      <valueSet value="http://hl7.org/fhir/ValueSet/v3-GeneralPurposeOfUse"/>
+     </include>
     </compose>
    </ValueSet>
   </resource>
@@ -4335,7 +4349,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PersonalRelationshipRoleType"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-PersonalRelationshipRoleType"/>
@@ -4520,7 +4534,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationVerifier"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationVerifier"/>
@@ -4559,7 +4573,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMoodPredicate"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActMoodPredicate"/>
@@ -4666,7 +4680,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassLivingSubject"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityClassLivingSubject"/>
@@ -4806,7 +4820,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationIndirectTarget"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationIndirectTarget"/>
@@ -4880,7 +4894,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SeverityObservation"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SeverityObservation"/>
@@ -4991,7 +5005,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassAgent"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassAgent"/>
@@ -5275,7 +5289,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActEncounterCode"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActEncounterCode"/>
@@ -5557,7 +5571,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipConditional"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipConditional"/>
@@ -5637,7 +5651,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PurposeOfUse"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
@@ -5707,7 +5721,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClassManufacturedMaterial"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityClassManufacturedMaterial"/>
@@ -5781,7 +5795,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipFulfills"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActRelationshipFulfills"/>
@@ -5820,7 +5834,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActIncidentCode"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActIncidentCode"/>
@@ -5935,7 +5949,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActInvoiceGroupCode"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode"/>
@@ -5980,7 +5994,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassProcedure"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClassProcedure"/>
@@ -6019,7 +6033,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GeneralPurposeOfUse"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-GeneralPurposeOfUse"/>
@@ -6080,7 +6094,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassInvestigation"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActClassInvestigation"/>
@@ -6119,7 +6133,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-VerificationMethod"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-VerificationMethod"/>
@@ -6193,7 +6207,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-FamilyMember"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-FamilyMember"/>
@@ -6337,7 +6351,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassMutualRelationship"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassMutualRelationship"/>
@@ -6619,7 +6633,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObligationPolicy"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ObligationPolicy"/>
@@ -6658,7 +6672,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationTargetLocation"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationTargetLocation"/>
@@ -6942,7 +6956,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClassServiceDeliveryLocation"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleClassServiceDeliveryLocation"/>
@@ -6981,7 +6995,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActPharmacySupplyType"/>
     <meta>
-     <lastUpdated value="2016-08-25T23:04:39.263-04:00"/>
+     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActPharmacySupplyType"/>
@@ -10281,12 +10295,22 @@
     <description value="  Description: Code that specifies whether an address part names the street, city, country, postal code, post box, etc. Discussion: The hierarchical nature of these concepts shows composition.  E.g. &quot;Street Name&quot; is part of &quot;Street Address Line&quot;"/>
     <caseSensitive value="true"/>
     <valueSet value="http://hl7.org/fhir/ValueSet/v3-AddressPartType"/>
-    <hierarchyMeaning value="part-of"/>
+    <hierarchyMeaning value="subsumes"/>
     <content value="complete"/>
+    <property>
+     <code value="partOf"/>
+     <uri value="http://hl7.org/fhir/codesystem-hierarchy-meaning#part-of"/>
+     <description value="This relationship indicates that the source concept is a component of the target concept"/>
+     <type value="code"/>
+    </property>
     <concept>
      <code value="ADL"/>
      <display value="additional locator"/>
      <definition value="This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., &quot;3rd floor, Appt. 342&quot;). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch &quot;t.o.&quot; means &quot;opposite to&quot; for house boats located across the street facing houses)."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="AL"/>
+     </property>
     </concept>
     <concept>
      <code value="AL"/>
@@ -10307,16 +10331,28 @@
      <code value="BNN"/>
      <display value="building number numeric"/>
      <definition value="The numeric portion of a building number"/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="BNR"/>
+     </property>
     </concept>
     <concept>
      <code value="BNR"/>
      <display value="building number"/>
      <definition value="The number of a building, house or lot alongside the street.  Also known as &quot;primary street number&quot;.  This does not number the street but rather the building."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="SAL"/>
+     </property>
     </concept>
     <concept>
      <code value="BNS"/>
      <display value="building number suffix"/>
      <definition value="Any alphabetic character, fraction or other text that may appear after the numeric portion of a building number"/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="BNR"/>
+     </property>
     </concept>
     <concept>
      <code value="CAR"/>
@@ -10352,31 +10388,55 @@
      <code value="DINST"/>
      <display value="delivery installation type"/>
      <definition value="Indicates the type of delivery installation (the facility to which the mail will be delivered prior to final shipping via the delivery mode.) Example: post office, letter carrier depot, community mail center, station, etc."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="DAL"/>
+     </property>
     </concept>
     <concept>
      <code value="DINSTA"/>
      <display value="delivery installation area"/>
      <definition value="The location of the delivery installation, usually a town or city, and is only required if the area is different from the municipality. Area to which mail delivery service is provided from any postal facility or service such as an individual letter carrier, rural route, or postal route."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="DAL"/>
+     </property>
     </concept>
     <concept>
      <code value="DINSTQ"/>
      <display value="delivery installation qualifier"/>
      <definition value="A number, letter or name identifying a delivery installation.  E.g., for Station A, the delivery installation qualifier would be 'A'."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="DAL"/>
+     </property>
     </concept>
     <concept>
      <code value="DIR"/>
      <display value="direction"/>
      <definition value="Direction (e.g., N, S, W, E)"/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="SAL"/>
+     </property>
     </concept>
     <concept>
      <code value="DMOD"/>
      <display value="delivery mode"/>
      <definition value="Indicates the type of service offered, method of delivery.  For example: post office box, rural route, general delivery, etc."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="DAL"/>
+     </property>
     </concept>
     <concept>
      <code value="DMODID"/>
      <display value="delivery mode identifier"/>
      <definition value="Represents the routing information such as a letter carrier route number.  It is the identifying number of the designator (the box number or rural route number)."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="DAL"/>
+     </property>
     </concept>
     <concept>
      <code value="DPID"/>
@@ -10387,11 +10447,19 @@
      <code value="INT"/>
      <display value="intersection"/>
      <definition value="Description:An intersection denotes that the actual address is located AT or CLOSE TO the intersection OF two or more streets."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="AL"/>
+     </property>
     </concept>
     <concept>
      <code value="POB"/>
      <display value="post box"/>
      <definition value="A numbered box located in a post station."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="DMODID"/>
+     </property>
     </concept>
     <concept>
      <code value="PRE"/>
@@ -10407,26 +10475,46 @@
      <code value="STB"/>
      <display value="street name base"/>
      <definition value="The base name of a roadway or artery recognized by a municipality (excluding street type and direction)"/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="STR"/>
+     </property>
     </concept>
     <concept>
      <code value="STR"/>
      <display value="street name"/>
      <definition value="street name"/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="SAL"/>
+     </property>
     </concept>
     <concept>
      <code value="STTYP"/>
      <display value="street type"/>
      <definition value="The designation given to the street.  (e.g. Street, Avenue, Crescent, etc.)"/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="STR"/>
+     </property>
     </concept>
     <concept>
      <code value="UNID"/>
      <display value="unit identifier"/>
      <definition value="The number or name of a specific unit contained within a building or complex, as assigned by that building or complex."/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="ADL"/>
+     </property>
     </concept>
     <concept>
      <code value="UNIT"/>
      <display value="unit designator"/>
      <definition value="Indicates the type of specific unit contained within a building or complex.  E.g. Appartment, Floor"/>
+     <property>
+      <code value="partOf"/>
+      <valueCode value="ADL"/>
+     </property>
     </concept>
     <concept>
      <code value="ZIP"/>

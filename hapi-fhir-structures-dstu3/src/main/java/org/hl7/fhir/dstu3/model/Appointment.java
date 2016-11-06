@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).
  */
@@ -955,7 +958,14 @@ public class Appointment extends DomainResource {
     @Description(shortDefinition="Participants involved in appointment", formalDefinition="List of participants involved in the appointment." )
     protected List<AppointmentParticipantComponent> participant;
 
-    private static final long serialVersionUID = 552749730L;
+    /**
+     * A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.
+     */
+    @Child(name = "requestedPeriod", type = {Period.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Potential date/time interval(s) requested to allocate the appointment during", formalDefinition="A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time." )
+    protected List<Period> requestedPeriod;
+
+    private static final long serialVersionUID = -1430302122L;
 
   /**
    * Constructor
@@ -1711,6 +1721,59 @@ public class Appointment extends DomainResource {
       return getParticipant().get(0);
     }
 
+    /**
+     * @return {@link #requestedPeriod} (A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.)
+     */
+    public List<Period> getRequestedPeriod() { 
+      if (this.requestedPeriod == null)
+        this.requestedPeriod = new ArrayList<Period>();
+      return this.requestedPeriod;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Appointment setRequestedPeriod(List<Period> theRequestedPeriod) { 
+      this.requestedPeriod = theRequestedPeriod;
+      return this;
+    }
+
+    public boolean hasRequestedPeriod() { 
+      if (this.requestedPeriod == null)
+        return false;
+      for (Period item : this.requestedPeriod)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Period addRequestedPeriod() { //3
+      Period t = new Period();
+      if (this.requestedPeriod == null)
+        this.requestedPeriod = new ArrayList<Period>();
+      this.requestedPeriod.add(t);
+      return t;
+    }
+
+    public Appointment addRequestedPeriod(Period t) { //3
+      if (t == null)
+        return this;
+      if (this.requestedPeriod == null)
+        this.requestedPeriod = new ArrayList<Period>();
+      this.requestedPeriod.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #requestedPeriod}, creating it if it does not already exist
+     */
+    public Period getRequestedPeriodFirstRep() { 
+      if (getRequestedPeriod().isEmpty()) {
+        addRequestedPeriod();
+      }
+      return getRequestedPeriod().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -1729,6 +1792,7 @@ public class Appointment extends DomainResource {
         childrenList.add(new Property("created", "dateTime", "The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("comment", "string", "Additional comments about the appointment.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("participant", "", "List of participants involved in the appointment.", 0, java.lang.Integer.MAX_VALUE, participant));
+        childrenList.add(new Property("requestedPeriod", "Period", "A set of date ranges (potentially including times) that the appointment is preferred to be scheduled. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.", 0, java.lang.Integer.MAX_VALUE, requestedPeriod));
       }
 
       @Override
@@ -1750,6 +1814,7 @@ public class Appointment extends DomainResource {
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
         case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // AppointmentParticipantComponent
+        case -897241393: /*requestedPeriod*/ return this.requestedPeriod == null ? new Base[0] : this.requestedPeriod.toArray(new Base[this.requestedPeriod.size()]); // Period
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1806,6 +1871,9 @@ public class Appointment extends DomainResource {
         case 767422259: // participant
           this.getParticipant().add((AppointmentParticipantComponent) value); // AppointmentParticipantComponent
           break;
+        case -897241393: // requestedPeriod
+          this.getRequestedPeriod().add(castToPeriod(value)); // Period
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -1845,6 +1913,8 @@ public class Appointment extends DomainResource {
           this.comment = castToString(value); // StringType
         else if (name.equals("participant"))
           this.getParticipant().add((AppointmentParticipantComponent) value);
+        else if (name.equals("requestedPeriod"))
+          this.getRequestedPeriod().add(castToPeriod(value));
         else
           super.setProperty(name, value);
       }
@@ -1868,6 +1938,7 @@ public class Appointment extends DomainResource {
         case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
         case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
         case 767422259:  return addParticipant(); // AppointmentParticipantComponent
+        case -897241393:  return addRequestedPeriod(); // Period
         default: return super.makeProperty(hash, name);
         }
 
@@ -1926,6 +1997,9 @@ public class Appointment extends DomainResource {
         else if (name.equals("participant")) {
           return addParticipant();
         }
+        else if (name.equals("requestedPeriod")) {
+          return addRequestedPeriod();
+        }
         else
           return super.addChild(name);
       }
@@ -1974,6 +2048,11 @@ public class Appointment extends DomainResource {
           for (AppointmentParticipantComponent i : participant)
             dst.participant.add(i.copy());
         };
+        if (requestedPeriod != null) {
+          dst.requestedPeriod = new ArrayList<Period>();
+          for (Period i : requestedPeriod)
+            dst.requestedPeriod.add(i.copy());
+        };
         return dst;
       }
 
@@ -1993,7 +2072,8 @@ public class Appointment extends DomainResource {
            && compareDeep(reason, o.reason, true) && compareDeep(priority, o.priority, true) && compareDeep(description, o.description, true)
            && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(minutesDuration, o.minutesDuration, true)
            && compareDeep(slot, o.slot, true) && compareDeep(created, o.created, true) && compareDeep(comment, o.comment, true)
-           && compareDeep(participant, o.participant, true);
+           && compareDeep(participant, o.participant, true) && compareDeep(requestedPeriod, o.requestedPeriod, true)
+          ;
       }
 
       @Override
@@ -2011,7 +2091,7 @@ public class Appointment extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, serviceCategory
           , serviceType, specialty, appointmentType, reason, priority, description, start
-          , end, minutesDuration, slot, created, comment, participant);
+          , end, minutesDuration, slot, created, comment, participant, requestedPeriod);
       }
 
   @Override

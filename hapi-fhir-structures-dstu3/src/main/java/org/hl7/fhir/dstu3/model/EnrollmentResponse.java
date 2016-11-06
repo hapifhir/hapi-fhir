@@ -29,20 +29,20 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.RemittanceOutcome;
-import org.hl7.fhir.dstu3.model.Enumerations.RemittanceOutcomeEnumFactory;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides enrollment and plan details from the processing of an Enrollment resource.
  */
@@ -786,7 +786,7 @@ public class EnrollmentResponse extends DomainResource {
           this.status = new EnrollmentResponseStatusEnumFactory().fromType(value); // Enumeration<EnrollmentResponseStatus>
           break;
         case 1095692943: // request
-          this.request = (Type) value; // Type
+          this.request = castToType(value); // Type
           break;
         case -1106507950: // outcome
           this.outcome = new RemittanceOutcomeEnumFactory().fromType(value); // Enumeration<RemittanceOutcome>
@@ -804,13 +804,13 @@ public class EnrollmentResponse extends DomainResource {
           this.created = castToDateTime(value); // DateTimeType
           break;
         case 1178922291: // organization
-          this.organization = (Type) value; // Type
+          this.organization = castToType(value); // Type
           break;
         case 1601527200: // requestProvider
-          this.requestProvider = (Type) value; // Type
+          this.requestProvider = castToType(value); // Type
           break;
         case 599053666: // requestOrganization
-          this.requestOrganization = (Type) value; // Type
+          this.requestOrganization = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -824,7 +824,7 @@ public class EnrollmentResponse extends DomainResource {
         else if (name.equals("status"))
           this.status = new EnrollmentResponseStatusEnumFactory().fromType(value); // Enumeration<EnrollmentResponseStatus>
         else if (name.equals("request[x]"))
-          this.request = (Type) value; // Type
+          this.request = castToType(value); // Type
         else if (name.equals("outcome"))
           this.outcome = new RemittanceOutcomeEnumFactory().fromType(value); // Enumeration<RemittanceOutcome>
         else if (name.equals("disposition"))
@@ -836,11 +836,11 @@ public class EnrollmentResponse extends DomainResource {
         else if (name.equals("created"))
           this.created = castToDateTime(value); // DateTimeType
         else if (name.equals("organization[x]"))
-          this.organization = (Type) value; // Type
+          this.organization = castToType(value); // Type
         else if (name.equals("requestProvider[x]"))
-          this.requestProvider = (Type) value; // Type
+          this.requestProvider = castToType(value); // Type
         else if (name.equals("requestOrganization[x]"))
-          this.requestOrganization = (Type) value; // Type
+          this.requestOrganization = castToType(value); // Type
         else
           super.setProperty(name, value);
       }

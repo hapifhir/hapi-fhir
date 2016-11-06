@@ -683,14 +683,14 @@ public class XmlParserDstu3Test {
 	 * See #347
 	 */
 	@Test
-	public void testEncodeAndParseMedicationOrder() {
-		MedicationOrder mo = new MedicationOrder();
+	public void testEncodeAndParseMedicationRequest() {
+		MedicationRequest mo = new MedicationRequest();
 		mo.getDateWrittenElement().setValueAsString("2015-10-05");
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
 		ourLog.info(encoded);
 
-		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, encoded);
+		mo = ourCtx.newXmlParser().parseResource(MedicationRequest.class, encoded);
 		assertEquals("2015-10-05", mo.getDateWrittenElement().getValueAsString());
 	}
 
@@ -868,13 +868,13 @@ public class XmlParserDstu3Test {
 
 	@Test
 	public void testEncodeAndParseProfiledDatatype() {
-		MedicationOrder mo = new MedicationOrder();
+		MedicationRequest mo = new MedicationRequest();
 		mo.addDosageInstruction().getTiming().getRepeat().setBounds(new Duration().setCode("code"));
 		String out = ourCtx.newXmlParser().encodeResourceToString(mo);
 		ourLog.info(out);
 		assertThat(out, containsString("</boundsDuration>"));
 
-		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, out);
+		mo = ourCtx.newXmlParser().parseResource(MedicationRequest.class, out);
 		Duration duration = (Duration) mo.getDosageInstruction().get(0).getTiming().getRepeat().getBounds();
 		assertEquals("code", duration.getCode());
 	}
@@ -1060,7 +1060,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeContainedResources() {
 
-		MedicationOrder medicationPrescript = new MedicationOrder();
+		MedicationRequest medicationPrescript = new MedicationRequest();
 
 		String medId = "123";
 		CodeableConcept codeDt = new CodeableConcept().addCoding(new Coding().setSystem("urn:sys").setCode("code1"));
@@ -1082,9 +1082,9 @@ public class XmlParserDstu3Test {
 
 		// @formatter:on
 		assertThat(encoded,
-				stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
+				stringContainsInOrder("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>"));
 		//@formatter:off
 
 	}
@@ -1095,7 +1095,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeContainedResourcesAutomatic() {
 		
-		MedicationOrder medicationPrescript = new MedicationOrder();
+		MedicationRequest medicationPrescript = new MedicationRequest();
 		String nameDisp = "MedRef";
 		CodeableConcept codeDt = new CodeableConcept().addCoding(new Coding("urn:sys", "code1", null));
 		
@@ -1117,9 +1117,9 @@ public class XmlParserDstu3Test {
 		
 		//@formatter:on
 		assertThat(encoded,
-				stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
+				stringContainsInOrder("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
 						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>"));
 		//@formatter:off
 	}
 
@@ -1129,7 +1129,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeContainedResourcesManualContainUsingNonLocalId() {
 		
-		MedicationOrder medicationPrescript = new MedicationOrder();
+		MedicationRequest medicationPrescript = new MedicationRequest();
 		
 		String medId = "123";
 		CodeableConcept codeDt = new CodeableConcept().addCoding(new Coding("urn:sys", "code1", null));
@@ -1151,9 +1151,9 @@ public class XmlParserDstu3Test {
 		
 		//@formatter:on
 		assertThat(encoded,
-				stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
+				stringContainsInOrder("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
-						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
+						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>"));
 		//@formatter:off
 
 	}
@@ -1214,7 +1214,7 @@ public class XmlParserDstu3Test {
 				.setStatus(status);
 		//@formatter:on
 
-		gr.addAction(new GuidanceResponse.GuidanceResponseActionComponent().setTitle("Action").setResource(new Reference(pr)));
+		gr.setReason(new Reference(pr));
 		gr.getContained().add(p);
 		gr.getContained().add(pr);
 
@@ -2008,17 +2008,17 @@ public class XmlParserDstu3Test {
 		assertEquals(("2014-08-18T01:43:30Z"), parsed.getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("searchset", parsed.getType().toCode());
 		assertEquals(3, parsed.getTotal());
-		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink("next").getUrl());
-		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLink("self").getUrl());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink("next").getUrl());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&_include=MedicationRequest.medication", parsed.getLink("self").getUrl());
 
 		assertEquals(2, parsed.getEntry().size());
 		assertEquals("http://foo?search", parsed.getEntry().get(0).getLink("search").getUrl());
 
-		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", parsed.getEntry().get(0).getLink("alternate").getUrl());
-		MedicationOrder p = (MedicationOrder) parsed.getEntry().get(0).getResource();
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", parsed.getEntry().get(0).getLink("alternate").getUrl());
+		MedicationRequest p = (MedicationRequest) parsed.getEntry().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference());
 		assertEquals("2014-08-16T05:31:17Z", p.getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId());
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", p.getId());
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId());
@@ -2044,18 +2044,18 @@ public class XmlParserDstu3Test {
 		assertEquals("2014-08-18T01:43:30Z", parsed.getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("searchset", parsed.getType());
 		assertEquals(3, parsed.getTotal());
-		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
-		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&_include=MedicationRequest.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
 
 		assertEquals(2, parsed.getEntry().size());
 		assertEquals("alternate", parsed.getEntry().get(0).getLink().get(0).getRelation());
-		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", parsed.getEntry().get(0).getLink().get(0).getUrl());
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", parsed.getEntry().get(0).getLink().get(0).getUrl());
 		assertEquals("http://foo?search", parsed.getEntry().get(0).getRequest().getUrlElement().getValueAsString());
 
-		MedicationOrder p = (MedicationOrder) parsed.getEntry().get(0).getResource();
+		MedicationRequest p = (MedicationRequest) parsed.getEntry().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference());
 		assertEquals("2014-08-16T05:31:17Z", p.getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId());
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", p.getId());
 		// assertEquals("3123", p.getId());
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();

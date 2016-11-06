@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A homogeneous material with a definite composition.
  */
@@ -417,7 +420,7 @@ public class Substance extends DomainResource {
           this.quantity = castToRatio(value); // Ratio
           break;
         case 530040176: // substance
-          this.substance = (Type) value; // Type
+          this.substance = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -429,7 +432,7 @@ public class Substance extends DomainResource {
         if (name.equals("quantity"))
           this.quantity = castToRatio(value); // Ratio
         else if (name.equals("substance[x]"))
-          this.substance = (Type) value; // Type
+          this.substance = castToType(value); // Type
         else
           super.setProperty(name, value);
       }

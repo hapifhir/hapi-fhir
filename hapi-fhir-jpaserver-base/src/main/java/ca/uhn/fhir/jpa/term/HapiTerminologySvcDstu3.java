@@ -266,7 +266,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		ValueSet source = new ValueSet();
-		source.getCompose().addImport(theValueSet);
+		source.getCompose().addInclude().addValueSet(theValueSet);
 		try {
 			ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
 

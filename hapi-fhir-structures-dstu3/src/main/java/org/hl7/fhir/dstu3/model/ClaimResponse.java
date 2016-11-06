@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,16 +29,21 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the adjudication details from the processing of a Claim resource.
  */
@@ -3834,9 +3837,14 @@ public class ClaimResponse extends DomainResource {
         /**
          * Reference to the program or plan identification, underwriter or payor.
          */
-        @Child(name = "coverage", type = {Identifier.class, Coverage.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "coverage", type = {Coverage.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Insurance information", formalDefinition="Reference to the program or plan identification, underwriter or payor." )
-        protected Type coverage;
+        protected Reference coverage;
+
+        /**
+         * The actual object that is the target of the reference (Reference to the program or plan identification, underwriter or payor.)
+         */
+        protected Coverage coverageTarget;
 
         /**
          * The contract number of a business agreement which describes the terms and conditions.
@@ -3864,7 +3872,7 @@ public class ClaimResponse extends DomainResource {
          */
         protected ClaimResponse claimResponseTarget;
 
-        private static final long serialVersionUID = -1151494539L;
+        private static final long serialVersionUID = -1216535489L;
 
     /**
      * Constructor
@@ -3876,7 +3884,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * Constructor
      */
-      public CoverageComponent(PositiveIntType sequence, BooleanType focal, Type coverage) {
+      public CoverageComponent(PositiveIntType sequence, BooleanType focal, Reference coverage) {
         super();
         this.sequence = sequence;
         this.focal = focal;
@@ -3976,34 +3984,13 @@ public class ClaimResponse extends DomainResource {
         /**
          * @return {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
          */
-        public Type getCoverage() { 
+        public Reference getCoverage() { 
+          if (this.coverage == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoverageComponent.coverage");
+            else if (Configuration.doAutoCreate())
+              this.coverage = new Reference(); // cc
           return this.coverage;
-        }
-
-        /**
-         * @return {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
-         */
-        public Identifier getCoverageIdentifier() throws FHIRException { 
-          if (!(this.coverage instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.coverage.getClass().getName()+" was encountered");
-          return (Identifier) this.coverage;
-        }
-
-        public boolean hasCoverageIdentifier() { 
-          return this.coverage instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
-         */
-        public Reference getCoverageReference() throws FHIRException { 
-          if (!(this.coverage instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.coverage.getClass().getName()+" was encountered");
-          return (Reference) this.coverage;
-        }
-
-        public boolean hasCoverageReference() { 
-          return this.coverage instanceof Reference;
         }
 
         public boolean hasCoverage() { 
@@ -4013,8 +4000,28 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
          */
-        public CoverageComponent setCoverage(Type value) { 
+        public CoverageComponent setCoverage(Reference value) { 
           this.coverage = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #coverage} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the program or plan identification, underwriter or payor.)
+         */
+        public Coverage getCoverageTarget() { 
+          if (this.coverageTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create CoverageComponent.coverage");
+            else if (Configuration.doAutoCreate())
+              this.coverageTarget = new Coverage(); // aa
+          return this.coverageTarget;
+        }
+
+        /**
+         * @param value {@link #coverage} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the program or plan identification, underwriter or payor.)
+         */
+        public CoverageComponent setCoverageTarget(Coverage value) { 
+          this.coverageTarget = value;
           return this;
         }
 
@@ -4176,7 +4183,7 @@ public class ClaimResponse extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("sequence", "positiveInt", "A service line item.", 0, java.lang.Integer.MAX_VALUE, sequence));
           childrenList.add(new Property("focal", "boolean", "The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, java.lang.Integer.MAX_VALUE, focal));
-          childrenList.add(new Property("coverage[x]", "Identifier|Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, java.lang.Integer.MAX_VALUE, coverage));
+          childrenList.add(new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, java.lang.Integer.MAX_VALUE, coverage));
           childrenList.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, java.lang.Integer.MAX_VALUE, businessArrangement));
           childrenList.add(new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef));
           childrenList.add(new Property("claimResponse", "Reference(ClaimResponse)", "The Coverages adjudication details.", 0, java.lang.Integer.MAX_VALUE, claimResponse));
@@ -4187,7 +4194,7 @@ public class ClaimResponse extends DomainResource {
         switch (hash) {
         case 1349547969: /*sequence*/ return this.sequence == null ? new Base[0] : new Base[] {this.sequence}; // PositiveIntType
         case 97604197: /*focal*/ return this.focal == null ? new Base[0] : new Base[] {this.focal}; // BooleanType
-        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Type
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Reference
         case 259920682: /*businessArrangement*/ return this.businessArrangement == null ? new Base[0] : new Base[] {this.businessArrangement}; // StringType
         case 522246568: /*preAuthRef*/ return this.preAuthRef == null ? new Base[0] : this.preAuthRef.toArray(new Base[this.preAuthRef.size()]); // StringType
         case 689513629: /*claimResponse*/ return this.claimResponse == null ? new Base[0] : new Base[] {this.claimResponse}; // Reference
@@ -4206,7 +4213,7 @@ public class ClaimResponse extends DomainResource {
           this.focal = castToBoolean(value); // BooleanType
           break;
         case -351767064: // coverage
-          this.coverage = (Type) value; // Type
+          this.coverage = castToReference(value); // Reference
           break;
         case 259920682: // businessArrangement
           this.businessArrangement = castToString(value); // StringType
@@ -4228,8 +4235,8 @@ public class ClaimResponse extends DomainResource {
           this.sequence = castToPositiveInt(value); // PositiveIntType
         else if (name.equals("focal"))
           this.focal = castToBoolean(value); // BooleanType
-        else if (name.equals("coverage[x]"))
-          this.coverage = (Type) value; // Type
+        else if (name.equals("coverage"))
+          this.coverage = castToReference(value); // Reference
         else if (name.equals("businessArrangement"))
           this.businessArrangement = castToString(value); // StringType
         else if (name.equals("preAuthRef"))
@@ -4245,7 +4252,7 @@ public class ClaimResponse extends DomainResource {
         switch (hash) {
         case 1349547969: throw new FHIRException("Cannot make property sequence as it is not a complex type"); // PositiveIntType
         case 97604197: throw new FHIRException("Cannot make property focal as it is not a complex type"); // BooleanType
-        case 227689880:  return getCoverage(); // Type
+        case -351767064:  return getCoverage(); // Reference
         case 259920682: throw new FHIRException("Cannot make property businessArrangement as it is not a complex type"); // StringType
         case 522246568: throw new FHIRException("Cannot make property preAuthRef as it is not a complex type"); // StringType
         case 689513629:  return getClaimResponse(); // Reference
@@ -4262,11 +4269,7 @@ public class ClaimResponse extends DomainResource {
         else if (name.equals("focal")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.focal");
         }
-        else if (name.equals("coverageIdentifier")) {
-          this.coverage = new Identifier();
-          return this.coverage;
-        }
-        else if (name.equals("coverageReference")) {
+        else if (name.equals("coverage")) {
           this.coverage = new Reference();
           return this.coverage;
         }
@@ -4353,9 +4356,14 @@ public class ClaimResponse extends DomainResource {
     /**
      * Original request resource referrence.
      */
-    @Child(name = "request", type = {Identifier.class, Claim.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "request", type = {Claim.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Id of resource triggering adjudication", formalDefinition="Original request resource referrence." )
-    protected Type request;
+    protected Reference request;
+
+    /**
+     * The actual object that is the target of the reference (Original request resource referrence.)
+     */
+    protected Claim requestTarget;
 
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
@@ -4383,23 +4391,38 @@ public class ClaimResponse extends DomainResource {
     /**
      * The Insurer who produced this adjudicated response.
      */
-    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "organization", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
-    protected Type organization;
+    protected Reference organization;
+
+    /**
+     * The actual object that is the target of the reference (The Insurer who produced this adjudicated response.)
+     */
+    protected Organization organizationTarget;
 
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Identifier.class, Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
-    protected Type requestProvider;
+    protected Reference requestProvider;
+
+    /**
+     * The actual object that is the target of the reference (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    protected Practitioner requestProviderTarget;
 
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestOrganization", type = {Identifier.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestOrganization", type = {Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
-    protected Type requestOrganization;
+    protected Reference requestOrganization;
+
+    /**
+     * The actual object that is the target of the reference (The organization which is responsible for the services rendered to the patient.)
+     */
+    protected Organization requestOrganizationTarget;
 
     /**
      * Processing outcome errror, partial or complete processing.
@@ -4470,7 +4493,7 @@ public class ClaimResponse extends DomainResource {
      * Payment details for the claim if the claim has been paid.
      */
     @Child(name = "payment", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="", formalDefinition="Payment details for the claim if the claim has been paid." )
+    @Description(shortDefinition="Payment details, if paid", formalDefinition="Payment details for the claim if the claim has been paid." )
     protected PaymentComponent payment;
 
     /**
@@ -4503,7 +4526,7 @@ public class ClaimResponse extends DomainResource {
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<CoverageComponent> coverage;
 
-    private static final long serialVersionUID = -467293002L;
+    private static final long serialVersionUID = -1923433424L;
 
   /**
    * Constructor
@@ -4621,34 +4644,13 @@ public class ClaimResponse extends DomainResource {
     /**
      * @return {@link #request} (Original request resource referrence.)
      */
-    public Type getRequest() { 
+    public Reference getRequest() { 
+      if (this.request == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.request");
+        else if (Configuration.doAutoCreate())
+          this.request = new Reference(); // cc
       return this.request;
-    }
-
-    /**
-     * @return {@link #request} (Original request resource referrence.)
-     */
-    public Identifier getRequestIdentifier() throws FHIRException { 
-      if (!(this.request instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.request.getClass().getName()+" was encountered");
-      return (Identifier) this.request;
-    }
-
-    public boolean hasRequestIdentifier() { 
-      return this.request instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #request} (Original request resource referrence.)
-     */
-    public Reference getRequestReference() throws FHIRException { 
-      if (!(this.request instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.request.getClass().getName()+" was encountered");
-      return (Reference) this.request;
-    }
-
-    public boolean hasRequestReference() { 
-      return this.request instanceof Reference;
     }
 
     public boolean hasRequest() { 
@@ -4658,8 +4660,28 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #request} (Original request resource referrence.)
      */
-    public ClaimResponse setRequest(Type value) { 
+    public ClaimResponse setRequest(Reference value) { 
       this.request = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original request resource referrence.)
+     */
+    public Claim getRequestTarget() { 
+      if (this.requestTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.request");
+        else if (Configuration.doAutoCreate())
+          this.requestTarget = new Claim(); // aa
+      return this.requestTarget;
+    }
+
+    /**
+     * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original request resource referrence.)
+     */
+    public ClaimResponse setRequestTarget(Claim value) { 
+      this.requestTarget = value;
       return this;
     }
 
@@ -4763,34 +4785,13 @@ public class ClaimResponse extends DomainResource {
     /**
      * @return {@link #organization} (The Insurer who produced this adjudicated response.)
      */
-    public Type getOrganization() { 
+    public Reference getOrganization() { 
+      if (this.organization == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.organization");
+        else if (Configuration.doAutoCreate())
+          this.organization = new Reference(); // cc
       return this.organization;
-    }
-
-    /**
-     * @return {@link #organization} (The Insurer who produced this adjudicated response.)
-     */
-    public Identifier getOrganizationIdentifier() throws FHIRException { 
-      if (!(this.organization instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Identifier) this.organization;
-    }
-
-    public boolean hasOrganizationIdentifier() { 
-      return this.organization instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #organization} (The Insurer who produced this adjudicated response.)
-     */
-    public Reference getOrganizationReference() throws FHIRException { 
-      if (!(this.organization instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Reference) this.organization;
-    }
-
-    public boolean hasOrganizationReference() { 
-      return this.organization instanceof Reference;
     }
 
     public boolean hasOrganization() { 
@@ -4800,42 +4801,41 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #organization} (The Insurer who produced this adjudicated response.)
      */
-    public ClaimResponse setOrganization(Type value) { 
+    public ClaimResponse setOrganization(Reference value) { 
       this.organization = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Insurer who produced this adjudicated response.)
+     */
+    public Organization getOrganizationTarget() { 
+      if (this.organizationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.organization");
+        else if (Configuration.doAutoCreate())
+          this.organizationTarget = new Organization(); // aa
+      return this.organizationTarget;
+    }
+
+    /**
+     * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Insurer who produced this adjudicated response.)
+     */
+    public ClaimResponse setOrganizationTarget(Organization value) { 
+      this.organizationTarget = value;
       return this;
     }
 
     /**
      * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public Type getRequestProvider() { 
+    public Reference getRequestProvider() { 
+      if (this.requestProvider == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.requestProvider");
+        else if (Configuration.doAutoCreate())
+          this.requestProvider = new Reference(); // cc
       return this.requestProvider;
-    }
-
-    /**
-     * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
-     */
-    public Identifier getRequestProviderIdentifier() throws FHIRException { 
-      if (!(this.requestProvider instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.requestProvider.getClass().getName()+" was encountered");
-      return (Identifier) this.requestProvider;
-    }
-
-    public boolean hasRequestProviderIdentifier() { 
-      return this.requestProvider instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
-     */
-    public Reference getRequestProviderReference() throws FHIRException { 
-      if (!(this.requestProvider instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.requestProvider.getClass().getName()+" was encountered");
-      return (Reference) this.requestProvider;
-    }
-
-    public boolean hasRequestProviderReference() { 
-      return this.requestProvider instanceof Reference;
     }
 
     public boolean hasRequestProvider() { 
@@ -4845,42 +4845,41 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public ClaimResponse setRequestProvider(Type value) { 
+    public ClaimResponse setRequestProvider(Reference value) { 
       this.requestProvider = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public Practitioner getRequestProviderTarget() { 
+      if (this.requestProviderTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.requestProvider");
+        else if (Configuration.doAutoCreate())
+          this.requestProviderTarget = new Practitioner(); // aa
+      return this.requestProviderTarget;
+    }
+
+    /**
+     * @param value {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public ClaimResponse setRequestProviderTarget(Practitioner value) { 
+      this.requestProviderTarget = value;
       return this;
     }
 
     /**
      * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public Type getRequestOrganization() { 
+    public Reference getRequestOrganization() { 
+      if (this.requestOrganization == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.requestOrganization");
+        else if (Configuration.doAutoCreate())
+          this.requestOrganization = new Reference(); // cc
       return this.requestOrganization;
-    }
-
-    /**
-     * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Identifier getRequestOrganizationIdentifier() throws FHIRException { 
-      if (!(this.requestOrganization instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.requestOrganization.getClass().getName()+" was encountered");
-      return (Identifier) this.requestOrganization;
-    }
-
-    public boolean hasRequestOrganizationIdentifier() { 
-      return this.requestOrganization instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Reference getRequestOrganizationReference() throws FHIRException { 
-      if (!(this.requestOrganization instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.requestOrganization.getClass().getName()+" was encountered");
-      return (Reference) this.requestOrganization;
-    }
-
-    public boolean hasRequestOrganizationReference() { 
-      return this.requestOrganization instanceof Reference;
     }
 
     public boolean hasRequestOrganization() { 
@@ -4890,8 +4889,28 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public ClaimResponse setRequestOrganization(Type value) { 
+    public ClaimResponse setRequestOrganization(Reference value) { 
       this.requestOrganization = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
+     */
+    public Organization getRequestOrganizationTarget() { 
+      if (this.requestOrganizationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.requestOrganization");
+        else if (Configuration.doAutoCreate())
+          this.requestOrganizationTarget = new Organization(); // aa
+      return this.requestOrganizationTarget;
+    }
+
+    /**
+     * @param value {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
+     */
+    public ClaimResponse setRequestOrganizationTarget(Organization value) { 
+      this.requestOrganizationTarget = value;
       return this;
     }
 
@@ -5405,13 +5424,13 @@ public class ClaimResponse extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("request[x]", "Identifier|Reference(Claim)", "Original request resource referrence.", 0, java.lang.Integer.MAX_VALUE, request));
+        childrenList.add(new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
         childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("requestProvider[x]", "Identifier|Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
-        childrenList.add(new Property("requestOrganization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
+        childrenList.add(new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
+        childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
+        childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
         childrenList.add(new Property("outcome", "Coding", "Processing outcome errror, partial or complete processing.", 0, java.lang.Integer.MAX_VALUE, outcome));
         childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));
         childrenList.add(new Property("payeeType", "Coding", "Party to be reimbursed: Subscriber, provider, other.", 0, java.lang.Integer.MAX_VALUE, payeeType));
@@ -5433,13 +5452,13 @@ public class ClaimResponse extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ClaimResponseStatus>
-        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Type
+        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
         case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
         case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
-        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Type
-        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Type
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
+        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
+        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
         case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Coding
         case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
         case -316321118: /*payeeType*/ return this.payeeType == null ? new Base[0] : new Base[] {this.payeeType}; // Coding
@@ -5469,7 +5488,7 @@ public class ClaimResponse extends DomainResource {
           this.status = new ClaimResponseStatusEnumFactory().fromType(value); // Enumeration<ClaimResponseStatus>
           break;
         case 1095692943: // request
-          this.request = (Type) value; // Type
+          this.request = castToReference(value); // Reference
           break;
         case 1548678118: // ruleset
           this.ruleset = castToCoding(value); // Coding
@@ -5481,13 +5500,13 @@ public class ClaimResponse extends DomainResource {
           this.created = castToDateTime(value); // DateTimeType
           break;
         case 1178922291: // organization
-          this.organization = (Type) value; // Type
+          this.organization = castToReference(value); // Reference
           break;
         case 1601527200: // requestProvider
-          this.requestProvider = (Type) value; // Type
+          this.requestProvider = castToReference(value); // Reference
           break;
         case 599053666: // requestOrganization
-          this.requestOrganization = (Type) value; // Type
+          this.requestOrganization = castToReference(value); // Reference
           break;
         case -1106507950: // outcome
           this.outcome = castToCoding(value); // Coding
@@ -5542,20 +5561,20 @@ public class ClaimResponse extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("status"))
           this.status = new ClaimResponseStatusEnumFactory().fromType(value); // Enumeration<ClaimResponseStatus>
-        else if (name.equals("request[x]"))
-          this.request = (Type) value; // Type
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
         else if (name.equals("ruleset"))
           this.ruleset = castToCoding(value); // Coding
         else if (name.equals("originalRuleset"))
           this.originalRuleset = castToCoding(value); // Coding
         else if (name.equals("created"))
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("organization[x]"))
-          this.organization = (Type) value; // Type
-        else if (name.equals("requestProvider[x]"))
-          this.requestProvider = (Type) value; // Type
-        else if (name.equals("requestOrganization[x]"))
-          this.requestOrganization = (Type) value; // Type
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("requestProvider"))
+          this.requestProvider = castToReference(value); // Reference
+        else if (name.equals("requestOrganization"))
+          this.requestOrganization = castToReference(value); // Reference
         else if (name.equals("outcome"))
           this.outcome = castToCoding(value); // Coding
         else if (name.equals("disposition"))
@@ -5593,13 +5612,13 @@ public class ClaimResponse extends DomainResource {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ClaimResponseStatus>
-        case 37106577:  return getRequest(); // Type
+        case 1095692943:  return getRequest(); // Reference
         case 1548678118:  return getRuleset(); // Coding
         case 1089373397:  return getOriginalRuleset(); // Coding
         case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case 1326483053:  return getOrganization(); // Type
-        case -1694784800:  return getRequestProvider(); // Type
-        case 818740190:  return getRequestOrganization(); // Type
+        case 1178922291:  return getOrganization(); // Reference
+        case 1601527200:  return getRequestProvider(); // Reference
+        case 599053666:  return getRequestOrganization(); // Reference
         case -1106507950:  return getOutcome(); // Coding
         case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
         case -316321118:  return getPayeeType(); // Coding
@@ -5627,11 +5646,7 @@ public class ClaimResponse extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.status");
         }
-        else if (name.equals("requestIdentifier")) {
-          this.request = new Identifier();
-          return this.request;
-        }
-        else if (name.equals("requestReference")) {
+        else if (name.equals("request")) {
           this.request = new Reference();
           return this.request;
         }
@@ -5646,27 +5661,15 @@ public class ClaimResponse extends DomainResource {
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.created");
         }
-        else if (name.equals("organizationIdentifier")) {
-          this.organization = new Identifier();
-          return this.organization;
-        }
-        else if (name.equals("organizationReference")) {
+        else if (name.equals("organization")) {
           this.organization = new Reference();
           return this.organization;
         }
-        else if (name.equals("requestProviderIdentifier")) {
-          this.requestProvider = new Identifier();
-          return this.requestProvider;
-        }
-        else if (name.equals("requestProviderReference")) {
+        else if (name.equals("requestProvider")) {
           this.requestProvider = new Reference();
           return this.requestProvider;
         }
-        else if (name.equals("requestOrganizationIdentifier")) {
-          this.requestOrganization = new Identifier();
-          return this.requestOrganization;
-        }
-        else if (name.equals("requestOrganizationReference")) {
+        else if (name.equals("requestOrganization")) {
           this.requestOrganization = new Reference();
           return this.requestOrganization;
         }
@@ -5848,30 +5851,30 @@ public class ClaimResponse extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>request-reference</b>
+   * Search parameter: <b>request</b>
    * <p>
    * Description: <b>The claim reference</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClaimResponse.requestReference</b><br>
+   * Path: <b>ClaimResponse.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request-reference", path="ClaimResponse.request.as(Reference)", description="The claim reference", type="reference", target={Claim.class } )
-  public static final String SP_REQUEST_REFERENCE = "request-reference";
+  @SearchParamDefinition(name="request", path="ClaimResponse.request", description="The claim reference", type="reference", target={Claim.class } )
+  public static final String SP_REQUEST = "request";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request</b>
    * <p>
    * Description: <b>The claim reference</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClaimResponse.requestReference</b><br>
+   * Path: <b>ClaimResponse.request</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ClaimResponse:request-reference</b>".
+   * the path value of "<b>ClaimResponse:request</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_REFERENCE = new ca.uhn.fhir.model.api.Include("ClaimResponse:request-reference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("ClaimResponse:request").toLocked();
 
  /**
    * Search parameter: <b>disposition</b>
@@ -5914,32 +5917,6 @@ public class ClaimResponse extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam PAYMENTDATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_PAYMENTDATE);
 
  /**
-   * Search parameter: <b>organization-reference</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ClaimResponse.organizationReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organization-reference", path="ClaimResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATION_REFERENCE = "organization-reference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization-reference</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ClaimResponse.organizationReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION_REFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ClaimResponse:organization-reference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION_REFERENCE = new ca.uhn.fhir.model.api.Include("ClaimResponse:organization-reference").toLocked();
-
- /**
    * Search parameter: <b>created</b>
    * <p>
    * Description: <b>The creation date</b><br>
@@ -5960,44 +5937,30 @@ public class ClaimResponse extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
-   * Search parameter: <b>organization-identifier</b>
+   * Search parameter: <b>organization</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClaimResponse.organizationIdentifier</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClaimResponse.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization-identifier", path="ClaimResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
-  public static final String SP_ORGANIZATION_IDENTIFIER = "organization-identifier";
+  @SearchParamDefinition(name="organization", path="ClaimResponse.organization", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_ORGANIZATION = "organization";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization-identifier</b>
+   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClaimResponse.organizationIdentifier</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClaimResponse.organization</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATION_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATION_IDENTIFIER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
 
- /**
-   * Search parameter: <b>request-identifier</b>
-   * <p>
-   * Description: <b>The claim reference</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClaimResponse.requestIdentifier</b><br>
-   * </p>
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClaimResponse:organization</b>".
    */
-  @SearchParamDefinition(name="request-identifier", path="ClaimResponse.request.as(Identifier)", description="The claim reference", type="token" )
-  public static final String SP_REQUEST_IDENTIFIER = "request-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-identifier</b>
-   * <p>
-   * Description: <b>The claim reference</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClaimResponse.requestIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_IDENTIFIER);
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("ClaimResponse:organization").toLocked();
 
  /**
    * Search parameter: <b>outcome</b>

@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:o="urn:schemas-microsoft-com:office:office"
  xmlns:x="urn:schemas-microsoft-com:office:excel"
@@ -10,17 +9,17 @@
   <LastAuthor>Grahame Grieve</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2016-02-04T01:34:39Z</LastSaved>
-  <Version>16.00</Version>
+  <Version>15.0</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>9084</WindowHeight>
-  <WindowWidth>23040</WindowWidth>
+  <WindowHeight>16680</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
-  <WindowTopY>0</WindowTopY>
-  <ActiveSheet>3</ActiveSheet>
+  <WindowTopY>460</WindowTopY>
+  <ActiveSheet>5</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -35,7 +34,7 @@
    <Protection/>
   </Style>
   <Style ss:ID="s62" ss:Name="Hyperlink">
-   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000FF"
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000D4"
     ss:Underline="Single"/>
   </Style>
   <Style ss:ID="s63" ss:Name="Normal 2">
@@ -75,7 +74,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s71">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -87,7 +86,7 @@
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"/>
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s72">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -100,7 +99,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s73">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -113,7 +112,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s74">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -125,7 +124,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s75">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -137,7 +136,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s76">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -149,7 +148,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s77">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -175,7 +174,7 @@
    <Borders>
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
    </Borders>
-   <Interior ss:Color="#A5A5A5" ss:Pattern="Solid"/>
+   <Interior ss:Color="#969696" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s80">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -220,7 +219,7 @@
    <Borders>
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
    </Borders>
-   <Interior ss:Color="#A5A5A5" ss:Pattern="Solid"/>
+   <Interior ss:Color="#969696" ss:Pattern="Solid"/>
    <NumberFormat/>
    <Protection/>
   </Style>
@@ -367,7 +366,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s102">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -380,7 +379,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s103">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
@@ -393,7 +392,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s104">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
@@ -564,7 +563,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s124">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
@@ -576,7 +575,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
-   <Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s125">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
@@ -588,7 +587,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"
     ss:Bold="1"/>
-   <Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s126">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
@@ -600,7 +599,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"
     ss:Bold="1"/>
-   <Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s127">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
@@ -654,14 +653,14 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s135">
+  <Style ss:ID="s134">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s136">
+  <Style ss:ID="s135">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -669,7 +668,7 @@
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"/>
    <Interior/>
   </Style>
-  <Style ss:ID="s137">
+  <Style ss:ID="s136">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -692,7 +691,7 @@
    </Borders>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#333399"
     ss:Bold="1"/>
-   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="s140">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
@@ -800,7 +799,7 @@
  </Names>
  <Worksheet ss:Name="Instructions">
   <Table ss:ExpandedColumnCount="1" ss:ExpandedRowCount="3" x:FullColumns="1"
-   x:FullRows="1" ss:DefaultRowHeight="15">
+   x:FullRows="1" ss:DefaultColumnWidth="54" ss:DefaultRowHeight="15">
    <Column ss:AutoFitWidth="0" ss:Width="411"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s64"><Data ss:Type="String">FHIR Resource-authoring Spreadsheet</Data></Cell>
@@ -820,6 +819,7 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <Panes>
     <Pane>
      <Number>3</Number>
@@ -836,121 +836,138 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="24" ss:ExpandedRowCount="95" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s68" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s69" ss:Width="227.39999999999998"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.399999999999991"/>
-   <Column ss:StyleID="s68" ss:Width="29.4"/>
-   <Column ss:StyleID="s68" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.4"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="28.8"/>
+   x:FullRows="1" ss:StyleID="s68" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s69" ss:Width="227"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77"/>
+   <Column ss:StyleID="s68" ss:Width="29"/>
+   <Column ss:StyleID="s68" ss:Width="35"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="29"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="27"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="106.80000000000001"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="107"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="81"/>
-   <Column ss:StyleID="s68" ss:Width="51.6" ss:Span="1"/>
-   <Column ss:Index="12" ss:StyleID="s68" ss:AutoFitWidth="0"
-    ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120.60000000000001"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="161.4"/>
+   <Column ss:StyleID="s68" ss:Width="52" ss:Span="1"/>
+   <Column ss:Index="12" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="80"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="121"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="161"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="135"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="135"/>
-   <Column ss:Index="20" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="103.8"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50.4"/>
+   <Column ss:Index="20" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="104"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="66"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.4"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119"/>
    <Row ss:AutoFitHeight="0" ss:Height="45" ss:StyleID="s70">
     <Cell ss:StyleID="s71"><Data ss:Type="String">Element</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Format is ResourceName.componentName.componentName</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Format is ResourceName.componentName.componentName</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Aliases</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Other names - semi-colon separated</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Other names - semi-colon separated</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s72"><Data ss:Type="String">Card.</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Min and max repetitions n..m</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Card.</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Min and max repetitions n..m</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s72"><Data ss:Type="String">Inv.</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-delimited list of Ids from Invariant tab that controls appearance of this element</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Inv.</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Comma-delimited list of Ids from Invariant tab that controls appearance of this element</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s72"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type, resource reference, profiles, aggregations, class names, type references, etc. - see the wiki</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Data type, resource reference, profiles, aggregations, class names, type references, etc. - see the wiki</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Is Modifier</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, indicates this element modifies the meaning of sibling or descendant elements.  Defaults to N</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">If Y, indicates this element modifies the meaning of sibling or descendant elements.  Defaults to N</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Summary</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, element is included in the summary view (query with _summary=true).  Default is N</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">If Y, element is included in the summary view (query with _summary=true).  Default is N</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Binding</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Binding for coded data - either from local Bindings tab or declared elsewhere</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Binding for coded data - either from local Bindings tab or declared elsewhere</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Example</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">An example of the expected sort of value for this element.</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">An example of the expected sort of value for this element.</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Default Value</Data><Comment
-      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The value to be assumed if the element is omitted from the instance.  Only permitted for simple data types</Font>       </ss:Data></Comment><NamedCell
+      ss:Author="Lloyd"><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">The value to be assumed if the element is omitted from the instance.  Only permitted for simple data types</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Missing Meaning</Data><Comment
-      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Semantic inferred if element is omitted from instance</Font>       </ss:Data></Comment><NamedCell
+      ss:Author="Lloyd"><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Semantic inferred if element is omitted from instance</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s72"><Data ss:Type="String">Regex</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates a regular expression that the value of this element must meet.  Only allowed for simple data types.</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Regex</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Indicates a regular expression that the value of this element must meet.  Only allowed for simple data types.</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s72"><Data ss:Type="String">Short Label</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Short Name</Data><Comment
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Short description or code1 | code2 | code3 +</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Full definition - required</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Full definition - required</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">Requirements</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Why element/resource is needed or why selected constraints chosen</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Why element/resource is needed or why selected constraints chosen</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">Comments</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes for implementers</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Additional notes for implementers</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s74"><Data ss:Type="String">To Do</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Things to bug you about if they're not done :&gt;</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s74"><Data ss:Type="String">To Do</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Things to bug you about if they're not done :&gt;</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">RIM Mapping</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. RIMClass[classCode=foo,moodCode=bar].someAssociation[typeCode=code].attribute</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">E.g. RIMClass[classCode=foo,moodCode=bar].someAssociation[typeCode=code].attribute</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">v2 Mapping</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. SEG.1.2.3</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">E.g. SEG.1.2.3</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">??? Mapping</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s75"><Data ss:Type="String">UML</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Guidance for class location in UML diagram.  Only specify on root. See wiki for guidance</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s75"><Data ss:Type="String">UML</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Guidance for class location in UML diagram.  Only specify on root. See wiki for guidance</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">Display Hint</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Not published</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Not published</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Extensible</Data></Cell>
    </Row>
@@ -1084,7 +1101,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">n</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="409.5">
+   <Row ss:AutoFitHeight="0" ss:Height="409">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Resource.language</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3317,7 +3334,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3355,6 +3372,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -3391,42 +3409,46 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s100" ss:DefaultRowHeight="15">
-   <Column ss:Index="2" ss:StyleID="s100" ss:AutoFitWidth="0"
-    ss:Width="115.80000000000001"/>
-   <Column ss:StyleID="s100" ss:Width="55.800000000000004"/>
+   x:FullRows="1" ss:StyleID="s100" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="116"/>
+   <Column ss:StyleID="s100" ss:Width="56"/>
    <Column ss:StyleID="s100" ss:Width="165"/>
-   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="204.60000000000002"/>
-   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="198.6"/>
-   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="188.4"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">
-    <Cell ss:StyleID="s101"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique Number</Font>       </ss:Data></Comment><NamedCell
+   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="205"/>
+   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="199"/>
+   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="188"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s70">
+    <Cell ss:StyleID="s101"><Data ss:Type="String">Id</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Unique Number</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique short label</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Unique short label</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Severity</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates impact of violating the invariant.  (Defaults to 'error')</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Indicates impact of violating the invariant.  (Defaults to 'error')</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Context</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">English</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">English description of constraint</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">English description of constraint</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">OCL</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Optional - OCL expression of the rule</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">OCL</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Optional - OCL expression of the rule</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">XPath</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">XPath 2 expression.  See wiki or make Lloyd do it :&gt;</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">XPath 2 expression.  See wiki or make Lloyd do it :&gt;</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -3862,7 +3884,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s107"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s109"/>
@@ -3871,7 +3893,7 @@
     <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s110"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -3885,6 +3907,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -3919,31 +3942,33 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="29" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="70.8"/>
+   x:FullRows="1" ss:StyleID="s111" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="71"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="57"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="109.8"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="110"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="210"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="382.79999999999995"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s112">
-    <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">Unique name for search parameter - required, lower-case, dash-delimited string    </ss:Data></Comment><NamedCell
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="383"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s112">
+    <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>Unique name for search parameter - required, lower-case, dash-delimited string    </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type for parameter</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Data type for parameter</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Target Types</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma delimited list of target resources</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Comma delimited list of target resources</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Path</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of param.  Will default if omitted and Path is specified, otherwise it is required</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Explanation of param.  Will default if omitted and Path is specified, otherwise it is required</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4128,14 +4153,14 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s118"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -4150,7 +4175,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4186,60 +4211,62 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="12" ss:ExpandedRowCount="47" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
+   x:FullRows="1" ss:StyleID="s111" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="192"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="124.80000000000001"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="125"/>
    <Column ss:StyleID="s111" ss:Width="24"/>
-   <Column ss:StyleID="s111" ss:Width="25.8"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="106.80000000000001"
-    ss:Span="2"/>
-   <Column ss:Index="8" ss:StyleID="s111" ss:AutoFitWidth="0"
-    ss:Width="222.60000000000002"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="253.79999999999998"
-    ss:Span="1"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s123"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The name of the operation or parameter (parameters prefixed by operation name + &quot;.&quot;) </Font>       </ss:Data></Comment><NamedCell
+   <Column ss:StyleID="s111" ss:Width="26"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="107" ss:Span="2"/>
+   <Column ss:Index="8" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="223"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="254" ss:Span="1"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">The name of the operation or parameter (parameters prefixed by operation name + &quot;.&quot;) </Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s124"><Data ss:Type="String">Use</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">&quot;System | Resource | Instance&quot; (operation) &quot;In&quot; or &quot;Out&quot; (parameter)</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Use</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">&quot;System | Resource | Instance&quot; (operation) &quot;In&quot; or &quot;Out&quot; (parameter)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s124"><Data ss:Type="String">Min</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Minimum cardinality for a parameter (must be a non-negative integer)</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Min</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Minimum cardinality for a parameter (must be a non-negative integer)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s124"><Data ss:Type="String">Max</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">maximum cardinality for a parameter - must be &quot;*&quot; or a positive integer</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Max</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">maximum cardinality for a parameter - must be &quot;*&quot; or a positive integer</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s124"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">query/operation for operation; data type for a parameter</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">query/operation for operation; data type for a parameter</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">Binding</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">Profile</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Profile that must apply to parameter's type</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Profile that must apply to parameter's type</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">Title</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The descriptive label for the operation</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">The descriptive label for the operation</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s125"><Data ss:Type="String">Documentation</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of the operation or parameter</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Explanation of the operation or parameter</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s126"><Data ss:Type="String">Footer</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional usage notes for an operation</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Additional usage notes for an operation</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Example.Request</Data></Cell>
     <Cell><Data ss:Type="String">Example.Response</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="348.75">
+   <Row ss:AutoFitHeight="0" ss:Height="348">
     <Cell ss:StyleID="s113"><Data ss:Type="String">validate</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">Resource | Instance</Data><NamedCell
@@ -4307,7 +4334,7 @@
     <Cell ss:StyleID="s131"><Data ss:Type="String">If the operation outcome does not list any errors, and a mode was specified, then this is an indication that the operation would be expected to succeed (excepting for transactional integrity issues, see below)</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="120.75">
+   <Row ss:AutoFitHeight="0" ss:Height="120">
     <Cell ss:StyleID="s116"><Data ss:Type="String">meta</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">System | Resource | Instance</Data></Cell>
     <Cell ss:StyleID="s130"/>
@@ -4347,7 +4374,7 @@
     <Cell><Data ss:Type="String">$meta-add-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$meta-add-response.txt</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="97.5">
+   <Row ss:AutoFitHeight="0" ss:Height="97">
     <Cell ss:StyleID="s116"><Data ss:Type="String">meta-add.meta</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
@@ -4385,7 +4412,7 @@
     <Cell><Data ss:Type="String">$meta-delete-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$meta-delete-response.txt</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="97.5">
+   <Row ss:AutoFitHeight="0" ss:Height="97">
     <Cell ss:StyleID="s116"><Data ss:Type="String">meta-delete.meta</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
@@ -4409,391 +4436,19 @@
     <Cell ss:StyleID="s117"><Data ss:Type="String">Resulting meta for the resource</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">System</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">operation</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">The CDS Hook operation is the core API request for CDS Hooks</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">It represents an outbound call from the EHR, in the context of a user session, and in the context of a specific activity within that user sesssion (e.g. opening a patient record; prescribing a new med; or reviewing orders before signing them).</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.activity</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Coding</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="Default"><Data ss:Type="String">Activity that the user is performing</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">Name of the Activity (expressed as a coding, preferably drawn from SMART's activity catalog) that the user is performing in the EHR, and for which this hook was triggered (e.g. patient-view, or medication-prescribe)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.activityInstance</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">links multiple cds-hook calls together</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">While working in the EHR, a user can perform multiple activities in series or in parallel. For example, a clinician might prescribe two drugs in a row; each prescription activity would be assigned a unique activityInstance. The activity catalog provides a description of what events should initiate and terminate a given activity. This allows an external service to associate requests with activity state, which is necessary to support the following app-centric decision sequence, where the steps are tied together by a common activityInstance:&#10;&#10;EHR invokes CDS hook&#10;CDS service returns app link card&#10;User clicks app link and interacts with app&#10;Flow returns to EHR, which re-invokes CDS hook&#10;CDS service returns decision with user's choice&#10;Note: the activityInstance is globally unique and should contain enough entropy to be un-guessable.</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.fhirServer</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Base URL for the calling EHR's FHIR server</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">Base URL for the calling EHR's FHIR server. The scheme should be https</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Allow the CDS service to connect to the EHR's FHIR server</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">Security details allowing the CDS service to connect to the EHR's FHIR server. These fields allow the CDS service to access EHR data in a context limited by the current user's privileges</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.token</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">a bearer token to be presented by the CDS service to the EHR</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">is a bearer token to be presented with any API calls the CDS service makes to the EHR, by including it in an Authorization header like:&#10;&#10;Authorization: Bearer {{token}}</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.scope</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Represents the set of scopes assigned to this token (see SMART on FHIR scopes)</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Represents the set of scopes assigned to this token (see SMART on FHIR scopes)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.expires</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">integer</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Expresses the token lifetime as an integer number of seconds</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Expresses the token lifetime as an integer number of seconds</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.redirect</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">Used by services that will return an app link card</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String"> This field is only used by services that will return an app link card: when a user clicks the card's link to launch an app, it becomes the app's job to send the user to this redirect URL upon completion of user interaction. (Design note: this field is supplied up-front, as part of the initial request, to avoid requiring the EHR to append any content to app launch links. This helps support an important &quot;degenerate&quot; use case for app link cards: pointing to static content. See below for details.)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.user</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource type + id representing the current user</Data></Cell>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.patient</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource id of the current patient</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">The FHIR resource id of the current patient. For example, 123.</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.encounter</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource id of the current encounter</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">The FHIR resource id of the current encounter. For example, 123</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.context</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Any</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">activity-specific contextual data that an external service needs</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">activity-specific contextual data (see Activity) that an external service needs. (For exampe, with the order-review activity this will include MedicationOrder and Diagnostic resources, among others)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.preFetchData</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Bundle</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">prefetch data per config</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">as a performance tweak, the EHR may pass along data according to the service's Prefetch-Template. This helps provide the service with all the data it needs to efficiently compute a set of recommendations. (Note that in the absence of preFetchData, an external service can always execute FHIR REST API calls against the EHR server to obtain additional data ad-hoc.)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">one CDS result for the EHR to present to the user</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">one CDS result for the EHR to present to the user. Cards can provide a combination of information (for reading), suggested actions (to be applied if a user selects them), and links (to launch an app if the user selects them). The EHR decides how to display cards, but we recommend displaying suggestions using buttons, and links using underlined text.</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.summary</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">one-sentence, &lt;140-character summary message for display to the user inside of this card.</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">one-sentence, &lt;140-character summary message for display to the user inside of this card.</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.detail</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">optional detailed information to display, represented in Markdown</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">optional detailed information to display, represented in Markdown. (For non-urgent cards, the EHR may hide these details until the user clicks a link like &quot;view more details...&quot;.)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.indicator</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">code</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Urgency/importance of what this card conveys. </Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">Urgency/importance of what this card conveys. Allowed values, in order of increasing urgency, are: success, info, warning, hard-stop. The EHR can use this field to help make UI display decisions such as sort order or coloring. The value hard-stop indicates that the workflow should not be allowed to proceed.R[-12]C</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a short, human-readable description</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">grouping structure for a short, human-readable description (in source.label) of the source of the information displayed on this card, with an optional link (in source.url) where the user can learn more about the organization or data set that provided the information on this card. Note that source.url should not be used to supply a context-specific &quot;drill-down&quot; view of the information on this card. For that, use link.url instead.</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source.label</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String"> human-readable description (in source.label) of the source of the information displayed on this card</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String"> human-readable description (in source.label) of the source of the information displayed on this card</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source.url</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Link (in source.url) where the user can learn more about the organization or data set that provided the information on this card</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Link (in source.url) where the user can learn more about the organization or data set that provided the information on this card</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for suggestion cards, which allow a service to suggest a set of changes in the context of the current activity (e.g. changing the dose of the medication currently being prescribed, for the medication-prescribe activity)</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for suggestion cards, which allow a service to suggest a set of changes in the context of the current activity (e.g. changing the dose of the medication currently being prescribed, for the medication-prescribe activity)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.label</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this suggestion (e.g. the EHR might render this as the text on a button tied to this suggestion).</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this suggestion (e.g. the EHR might render this as the text on a button tied to this suggestion).</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.create</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Resource</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that this suggestion applies within the current activity (e.g. for medication-prescribe, this holds the updated prescription as proposed by the suggestion).</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that this suggestion applies within the current activity (e.g. for medication-prescribe, this holds the updated prescription as proposed by the suggestion).</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.delete</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a link to an app that the user might want to run for additional information or to help guide a decision</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a link to an app that the user might want to run for additional information or to help guide a decision</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link.label</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this link (e.g. the EHR might render this as the underlined text of a clickable link)</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this link (e.g. the EHR might render this as the underlined text of a clickable link)</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link.url</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">URL to load when a user clicks on this link</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">URL to load when a user clicks on this link. Note that this may be a &quot;deep link&quot; with context embedded in path segments, query parameters, or a hash. In general this URL should embed enough context for the app to determine the activityInstance, and redirect url upon downstream launch, because the EHR will simply use this url as-is, without appending any parameters at launch time.</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">out</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Grouping structure representing a decision to be applied directly to the user session</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">grouping structure representing a decision to be applied directly to the user session. Note that a CDS service may only return a decision after interacting with the user through an app link. Decisions are designed to convey any choices the user made in an app session</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision.create</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Resource</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that the EHR should create within the current activity (e.g. for medication-prescribe, this would be the updated prescription that a user had authored in an app session).</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">new resource(s) that the EHR should create within the current activity (e.g. for medication-prescribe, this would be the updated prescription that a user had authored in an app session).</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision.delete</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String"> id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list)</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:Index="46" ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s136"/>
-    <Cell ss:StyleID="s137"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -4808,10 +4463,11 @@
     <HorizontalResolution>-1</HorizontalResolution>
     <VerticalResolution>-1</VerticalResolution>
    </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>4</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4824,11 +4480,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
-     <ActiveCol>9</ActiveCol>
+     <ActiveRow>12</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4838,45 +4495,456 @@
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
  </Worksheet>
+ <Worksheet ss:Name="non-op">
+  <Table ss:ExpandedColumnCount="10" ss:ExpandedRowCount="31" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="54" ss:DefaultRowHeight="15">
+   <Column ss:Index="9" ss:Width="1535"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">System</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">operation</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The CDS Hook operation is the core API request for CDS Hooks</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">It represents an outbound call from the EHR, in the context of a user session, and in the context of a specific activity within that user sesssion (e.g. opening a patient record; prescribing a new med; or reviewing orders before signing them).</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.activity</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">Activity that the user is performing</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Name of the Activity (expressed as a coding, preferably drawn from SMART's activity catalog) that the user is performing in the EHR, and for which this hook was triggered (e.g. patient-view, or medication-prescribe)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.activityInstance</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">links multiple cds-hook calls together</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">While working in the EHR, a user can perform multiple activities in series or in parallel. For example, a clinician might prescribe two drugs in a row; each prescription activity would be assigned a unique activityInstance. The activity catalog provides a description of what events should initiate and terminate a given activity. This allows an external service to associate requests with activity state, which is necessary to support the following app-centric decision sequence, where the steps are tied together by a common activityInstance:&#10;&#10;EHR invokes CDS hook&#10;CDS service returns app link card&#10;User clicks app link and interacts with app&#10;Flow returns to EHR, which re-invokes CDS hook&#10;CDS service returns decision with user's choice&#10;Note: the activityInstance is globally unique and should contain enough entropy to be un-guessable.</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.fhirServer</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Base URL for the calling EHR's FHIR server</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Base URL for the calling EHR's FHIR server. The scheme should be https</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Allow the CDS service to connect to the EHR's FHIR server</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Security details allowing the CDS service to connect to the EHR's FHIR server. These fields allow the CDS service to access EHR data in a context limited by the current user's privileges</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.token</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">a bearer token to be presented by the CDS service to the EHR</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">is a bearer token to be presented with any API calls the CDS service makes to the EHR, by including it in an Authorization header like:&#10;&#10;Authorization: Bearer {{token}}</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.scope</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Represents the set of scopes assigned to this token (see SMART on FHIR scopes)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Represents the set of scopes assigned to this token (see SMART on FHIR scopes)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.oauth.expires</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Expresses the token lifetime as an integer number of seconds</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Expresses the token lifetime as an integer number of seconds</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.redirect</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Used by services that will return an app link card</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String"> This field is only used by services that will return an app link card: when a user clicks the card's link to launch an app, it becomes the app's job to send the user to this redirect URL upon completion of user interaction. (Design note: this field is supplied up-front, as part of the initial request, to avoid requiring the EHR to append any content to app launch links. This helps support an important &quot;degenerate&quot; use case for app link cards: pointing to static content. See below for details.)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.user</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource type + id representing the current user</Data></Cell>
+    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.patient</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource id of the current patient</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">The FHIR resource id of the current patient. For example, 123.</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.encounter</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">The FHIR resource id of the current encounter</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">The FHIR resource id of the current encounter. For example, 123</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.context</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Any</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">activity-specific contextual data that an external service needs</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">activity-specific contextual data (see Activity) that an external service needs. (For exampe, with the order-review activity this will include MedicationRequest and Diagnostic resources, among others)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.preFetchData</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Bundle</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">prefetch data per config</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">as a performance tweak, the EHR may pass along data according to the service's Prefetch-Template. This helps provide the service with all the data it needs to efficiently compute a set of recommendations. (Note that in the absence of preFetchData, an external service can always execute FHIR REST API calls against the EHR server to obtain additional data ad-hoc.)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">one CDS result for the EHR to present to the user</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">one CDS result for the EHR to present to the user. Cards can provide a combination of information (for reading), suggested actions (to be applied if a user selects them), and links (to launch an app if the user selects them). The EHR decides how to display cards, but we recommend displaying suggestions using buttons, and links using underlined text.</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.summary</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">one-sentence, &lt;140-character summary message for display to the user inside of this card.</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">one-sentence, &lt;140-character summary message for display to the user inside of this card.</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.detail</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">optional detailed information to display, represented in Markdown</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">optional detailed information to display, represented in Markdown. (For non-urgent cards, the EHR may hide these details until the user clicks a link like &quot;view more details...&quot;.)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.indicator</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Urgency/importance of what this card conveys. </Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Urgency/importance of what this card conveys. Allowed values, in order of increasing urgency, are: success, info, warning, hard-stop. The EHR can use this field to help make UI display decisions such as sort order or coloring. The value hard-stop indicates that the workflow should not be allowed to proceed.R[-12]C</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a short, human-readable description</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">grouping structure for a short, human-readable description (in source.label) of the source of the information displayed on this card, with an optional link (in source.url) where the user can learn more about the organization or data set that provided the information on this card. Note that source.url should not be used to supply a context-specific &quot;drill-down&quot; view of the information on this card. For that, use link.url instead.</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source.label</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String"> human-readable description (in source.label) of the source of the information displayed on this card</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String"> human-readable description (in source.label) of the source of the information displayed on this card</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.source.url</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Link (in source.url) where the user can learn more about the organization or data set that provided the information on this card</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Link (in source.url) where the user can learn more about the organization or data set that provided the information on this card</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for suggestion cards, which allow a service to suggest a set of changes in the context of the current activity (e.g. changing the dose of the medication currently being prescribed, for the medication-prescribe activity)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for suggestion cards, which allow a service to suggest a set of changes in the context of the current activity (e.g. changing the dose of the medication currently being prescribed, for the medication-prescribe activity)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.label</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this suggestion (e.g. the EHR might render this as the text on a button tied to this suggestion).</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this suggestion (e.g. the EHR might render this as the text on a button tied to this suggestion).</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.create</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that this suggestion applies within the current activity (e.g. for medication-prescribe, this holds the updated prescription as proposed by the suggestion).</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that this suggestion applies within the current activity (e.g. for medication-prescribe, this holds the updated prescription as proposed by the suggestion).</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.suggestion.delete</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a link to an app that the user might want to run for additional information or to help guide a decision</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">grouping structure for a link to an app that the user might want to run for additional information or to help guide a decision</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link.label</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this link (e.g. the EHR might render this as the underlined text of a clickable link)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">human-readable label to display for this link (e.g. the EHR might render this as the underlined text of a clickable link)</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.card.link.url</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">URL to load when a user clicks on this link</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">URL to load when a user clicks on this link. Note that this may be a &quot;deep link&quot; with context embedded in path segments, query parameters, or a hash. In general this URL should embed enough context for the app to determine the activityInstance, and redirect url upon downstream launch, because the EHR will simply use this url as-is, without appending any parameters at launch time.</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Grouping structure representing a decision to be applied directly to the user session</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">grouping structure representing a decision to be applied directly to the user session. Note that a CDS service may only return a decision after interacting with the user through an app link. Decisions are designed to convey any choices the user made in an app session</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision.create</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">new resource(s) that the EHR should create within the current activity (e.g. for medication-prescribe, this would be the updated prescription that a user had authored in an app session).</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">new resource(s) that the EHR should create within the current activity (e.g. for medication-prescribe, this would be the updated prescription that a user had authored in an app session).</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s111">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">cds-hook.decision.delete</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String"> id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list)</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">id(s) of any resources to remove from the current activity (e.g. for the order-review activity, this would provide a way to remove orders from the pending list). In activities like medication-prescribe where only one &quot;content&quot; resource is ever relevant, this field may be omitted</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-1</HorizontalResolution>
+    <VerticalResolution>-1</VerticalResolution>
+   </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
+   <Selected/>
+   <LeftColumnVisible>8</LeftColumnVisible>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>17</ActiveRow>
+     <ActiveCol>8</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
  <Worksheet ss:Name="Events">
   <Names>
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Events!R1C1:R1C9"
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="21" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="82.8" ss:Span="1"/>
-   <Column ss:Index="3" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="198.6"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="157.80000000000001"/>
-   <Column ss:StyleID="s111" ss:Width="106.80000000000001"/>
-   <Column ss:StyleID="s111" ss:Width="113.39999999999999"/>
+   x:FullRows="1" ss:StyleID="s111" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="83" ss:Span="1"/>
+   <Column ss:Index="3" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="199"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="158"/>
+   <Column ss:StyleID="s111" ss:Width="107"/>
+   <Column ss:StyleID="s111" ss:Width="113"/>
    <Column ss:StyleID="s111" ss:Width="120"/>
-   <Column ss:StyleID="s111" ss:Width="127.8"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="74.400000000000006"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Column ss:StyleID="s111" ss:Width="128"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="74"/>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Event Code</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Unique code for the event; e.g. patient-link  </Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Category</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Impact of message and time-sensitiveness for processing (see wiki/spec)</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Impact of message and time-sensitiveness for processing (see wiki/spec)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">What triggers the event and what behavior it drives</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">What triggers the event and what behavior it drives</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional implementer guidance</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Additional implementer guidance</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Request Resources</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for request</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Comma-separated list of focal resources for request</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Response Resources</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for response</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Comma-separated list of focal resources for response</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Request Aggregations</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -5083,7 +5151,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s118"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s109"/>
     <Cell ss:StyleID="s121"/>
@@ -5094,7 +5162,7 @@
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -5108,6 +5176,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5140,47 +5209,44 @@
   <Names>
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
-  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="41" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s111" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="281.39999999999998"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="281"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="252"/>
    <Column ss:StyleID="s111" ss:Width="63"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Label for profile Comment the row by starting with '!'</Font>       </ss:Data></Comment><NamedCell
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Label for profile Comment the row by starting with '!'</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Filename</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the resulting profile resource-something-profile.xml or …profile.spreadsheet.xml</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Name of the resulting profile resource-something-profile.xml or …profile.spreadsheet.xml</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Source</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of profile spreadsheet or XML file.  Defaults to same as Filename </Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Name of profile spreadsheet or XML file.  Defaults to same as Filename </Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">IG Name</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s113"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s115"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s113"><Data ss:Type="String">Resource Extensions</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s114"><Data ss:Type="String">resource-extensions.xml</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s114"><Data ss:Type="String">resource-extensions-spreadsheet.xml</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s115"><Data ss:Type="String">spreadsheet</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">core</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s116"/>
@@ -5392,13 +5458,25 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s118"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -5407,6 +5485,12 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5426,7 +5510,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>2</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5441,42 +5526,47 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="41" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="260.39999999999998"
+   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="260"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s138" ss:Width="88.800000000000011"/>
-   <Column ss:StyleID="s138" ss:Width="27.6"/>
-   <Column ss:StyleID="s138" ss:Width="327.59999999999997"/>
+   <Column ss:StyleID="s138" ss:Width="89"/>
+   <Column ss:StyleID="s138" ss:Width="28"/>
+   <Column ss:StyleID="s138" ss:Width="328"/>
    <Column ss:StyleID="s138" ss:Width="57"/>
-   <Column ss:StyleID="s138" ss:Width="205.8" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s138" ss:Width="39.6"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Descriptive Name</Font>       </ss:Data></Comment><NamedCell
+   <Column ss:StyleID="s138" ss:Width="206" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s138" ss:Width="40"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Descriptive Name</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Default = XML.  Leave at default unless told otherwise</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Default = XML.  Leave at default unless told otherwise</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s139"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Description of content/purposes of example</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Description of content/purposes of example</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Identity</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">resource id</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">resource id</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Filename</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Profile</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the profile  example is associated with (and should be published with)</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Name of the profile  example is associated with (and should be published with)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">In Book</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Include this example in the book form?</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Include this example in the book form?</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5821,16 +5911,16 @@
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s143"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s145"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s146"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -5839,6 +5929,9 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Print>
+   </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5873,72 +5966,81 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s111" ss:Width="114.6"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="274.8"/>
+   x:FullRows="1" ss:StyleID="s111" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s111" ss:Width="115"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="275"/>
    <Column ss:StyleID="s111" ss:Width="51"/>
    <Column ss:StyleID="s111" ss:Width="45"/>
-   <Column ss:StyleID="s111" ss:Width="146.39999999999998"/>
-   <Column ss:StyleID="s111" ss:Width="172.79999999999998"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="97.800000000000011"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="88.800000000000011"/>
+   <Column ss:StyleID="s111" ss:Width="146"/>
+   <Column ss:StyleID="s111" ss:Width="173"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="98"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="89"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="172.79999999999998"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="165.6" ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s111" ss:AutoFitWidth="0"
-    ss:Width="106.80000000000001"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="173"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="166" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="107"/>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Binding Name</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique name across all resources</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Unique name across all resources</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Formal description of the types of codes allowed for elements with this binding</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Formal description of the types of codes allowed for elements with this binding</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Binding</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">How is the set of codes defined?</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">How is the set of codes defined?</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Conformance</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Y = example, blank = incomplete.  Only relevant if binding is &quot;value set&quot;</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Y = example, blank = incomplete.  Only relevant if binding is &quot;value set&quot;</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Reference</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">#tab-name or value set filename(without extension) or URL for reference </Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">#tab-name or value set filename(without extension) or URL for reference </Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Text to display for reference bindings (not used otherwise)</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Text to display for reference bindings (not used otherwise)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">OID</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The OID for the code list if one already exists.  (If omitted, one will be assigned)</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">OID</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">The OID for the code list if one already exists.  (If omitted, one will be assigned)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">URI</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Full URI for the code list.  (If not specified, defaults to http://hl7.org/fhir/ValueSet</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">URI</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Full URI for the code list.  (If not specified, defaults to http://hl7.org/fhir/ValueSet</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Website/Email</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Contact information for the code list (if different from standard HL7 FHIR contact info)</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Contact information for the code list (if different from standard HL7 FHIR contact info)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Copyright</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Copyright information associated with the code list.  If not specified, Public Domain assumed</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Copyright information associated with the code list.  If not specified, Public Domain assumed</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v2 value set mapped to</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">v2</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">uri of v2 value set mapped to</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v3 value set mapped to</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">v3</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">uri of v3 value set mapped to</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unpublished notes</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Unpublished notes</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6361,7 +6463,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s118"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s148"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s121"/>
@@ -6376,7 +6478,7 @@
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -6390,6 +6492,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6425,52 +6528,56 @@
     ss:RefersTo="='resource-validation-mode'!R1C1:R1C9" ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s138" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s138" ss:Width="80.400000000000006"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="34.799999999999997"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="155.39999999999998"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="80.400000000000006"
-    ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s138" ss:AutoFitWidth="0"
-    ss:Width="244.79999999999998"/>
+   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="54"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s138" ss:Width="80"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="35"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="155"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="80" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="245"/>
    <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="242.4"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s101"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell
+   <Column ss:Index="9" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="242"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s101"><Data ss:Type="String">Code</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">The code to be sent over the wire</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Id</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">System</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Parent</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Display</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">v2</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Mappings to v2 codes - See wiki for syntax</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">v3</Data><Comment ss:Author=""><Data>        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Mappings to v3 codes - See wiki for syntax</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell
+      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
+        html:Size="8" html:Color="#000000"
+        xmlns="http://www.w3.org/TR/REC-html40">Additional notes about the code.  Not published</Font>       </Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -7002,18 +7109,18 @@
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s143"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"/>
-    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s146"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -7022,6 +7129,9 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Print>
+   </Print>
+   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

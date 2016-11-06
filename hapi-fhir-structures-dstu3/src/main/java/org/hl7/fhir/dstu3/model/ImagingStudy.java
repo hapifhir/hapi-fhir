@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
  */
@@ -1824,14 +1827,14 @@ public class ImagingStudy extends DomainResource {
     /**
      * Who read the study and interpreted the images or other content.
      */
-    @Child(name = "interpreter", type = {Practitioner.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "interpreter", type = {Practitioner.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who interpreted images", formalDefinition="Who read the study and interpreted the images or other content." )
-    protected Reference interpreter;
-
+    protected List<Reference> interpreter;
     /**
-     * The actual object that is the target of the reference (Who read the study and interpreted the images or other content.)
+     * The actual objects that are the target of the reference (Who read the study and interpreted the images or other content.)
      */
-    protected Practitioner interpreterTarget;
+    protected List<Practitioner> interpreterTarget;
+
 
     /**
      * Methods of accessing  (e.g., retrieving, viewing) the study.
@@ -1887,7 +1890,7 @@ public class ImagingStudy extends DomainResource {
     @Description(shortDefinition="Each study has one or more series of instances", formalDefinition="Each study has one or more series of images or other content." )
     protected List<ImagingStudySeriesComponent> series;
 
-    private static final long serialVersionUID = -1406371081L;
+    private static final long serialVersionUID = -1223643343L;
 
   /**
    * Constructor
@@ -2373,45 +2376,76 @@ public class ImagingStudy extends DomainResource {
     /**
      * @return {@link #interpreter} (Who read the study and interpreted the images or other content.)
      */
-    public Reference getInterpreter() { 
+    public List<Reference> getInterpreter() { 
       if (this.interpreter == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingStudy.interpreter");
-        else if (Configuration.doAutoCreate())
-          this.interpreter = new Reference(); // cc
+        this.interpreter = new ArrayList<Reference>();
       return this.interpreter;
     }
 
-    public boolean hasInterpreter() { 
-      return this.interpreter != null && !this.interpreter.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setInterpreter(List<Reference> theInterpreter) { 
+      this.interpreter = theInterpreter;
+      return this;
     }
 
-    /**
-     * @param value {@link #interpreter} (Who read the study and interpreted the images or other content.)
-     */
-    public ImagingStudy setInterpreter(Reference value) { 
-      this.interpreter = value;
+    public boolean hasInterpreter() { 
+      if (this.interpreter == null)
+        return false;
+      for (Reference item : this.interpreter)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addInterpreter() { //3
+      Reference t = new Reference();
+      if (this.interpreter == null)
+        this.interpreter = new ArrayList<Reference>();
+      this.interpreter.add(t);
+      return t;
+    }
+
+    public ImagingStudy addInterpreter(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.interpreter == null)
+        this.interpreter = new ArrayList<Reference>();
+      this.interpreter.add(t);
       return this;
     }
 
     /**
-     * @return {@link #interpreter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Who read the study and interpreted the images or other content.)
+     * @return The first repetition of repeating field {@link #interpreter}, creating it if it does not already exist
      */
-    public Practitioner getInterpreterTarget() { 
+    public Reference getInterpreterFirstRep() { 
+      if (getInterpreter().isEmpty()) {
+        addInterpreter();
+      }
+      return getInterpreter().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Practitioner> getInterpreterTarget() { 
       if (this.interpreterTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingStudy.interpreter");
-        else if (Configuration.doAutoCreate())
-          this.interpreterTarget = new Practitioner(); // aa
+        this.interpreterTarget = new ArrayList<Practitioner>();
       return this.interpreterTarget;
     }
 
     /**
-     * @param value {@link #interpreter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Who read the study and interpreted the images or other content.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
-    public ImagingStudy setInterpreterTarget(Practitioner value) { 
-      this.interpreterTarget = value;
-      return this;
+    @Deprecated
+    public Practitioner addInterpreterTarget() { 
+      Practitioner r = new Practitioner();
+      if (this.interpreterTarget == null)
+        this.interpreterTarget = new ArrayList<Practitioner>();
+      this.interpreterTarget.add(r);
+      return r;
     }
 
     /**
@@ -2793,7 +2827,7 @@ public class ImagingStudy extends DomainResource {
         case -1897185151: /*started*/ return this.started == null ? new Base[0] : new Base[] {this.started}; // DateTimeType
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -722568161: /*referrer*/ return this.referrer == null ? new Base[0] : new Base[] {this.referrer}; // Reference
-        case -2008009094: /*interpreter*/ return this.interpreter == null ? new Base[0] : new Base[] {this.interpreter}; // Reference
+        case -2008009094: /*interpreter*/ return this.interpreter == null ? new Base[0] : this.interpreter.toArray(new Base[this.interpreter.size()]); // Reference
         case 231778726: /*baseLocation*/ return this.baseLocation == null ? new Base[0] : this.baseLocation.toArray(new Base[this.baseLocation.size()]); // StudyBaseLocationComponent
         case 1920000407: /*numberOfSeries*/ return this.numberOfSeries == null ? new Base[0] : new Base[] {this.numberOfSeries}; // UnsignedIntType
         case -1043544226: /*numberOfInstances*/ return this.numberOfInstances == null ? new Base[0] : new Base[] {this.numberOfInstances}; // UnsignedIntType
@@ -2840,7 +2874,7 @@ public class ImagingStudy extends DomainResource {
           this.referrer = castToReference(value); // Reference
           break;
         case -2008009094: // interpreter
-          this.interpreter = castToReference(value); // Reference
+          this.getInterpreter().add(castToReference(value)); // Reference
           break;
         case 231778726: // baseLocation
           this.getBaseLocation().add((StudyBaseLocationComponent) value); // StudyBaseLocationComponent
@@ -2891,7 +2925,7 @@ public class ImagingStudy extends DomainResource {
         else if (name.equals("referrer"))
           this.referrer = castToReference(value); // Reference
         else if (name.equals("interpreter"))
-          this.interpreter = castToReference(value); // Reference
+          this.getInterpreter().add(castToReference(value));
         else if (name.equals("baseLocation"))
           this.getBaseLocation().add((StudyBaseLocationComponent) value);
         else if (name.equals("numberOfSeries"))
@@ -2923,7 +2957,7 @@ public class ImagingStudy extends DomainResource {
         case -1897185151: throw new FHIRException("Cannot make property started as it is not a complex type"); // DateTimeType
         case -332612366:  return addBasedOn(); // Reference
         case -722568161:  return getReferrer(); // Reference
-        case -2008009094:  return getInterpreter(); // Reference
+        case -2008009094:  return addInterpreter(); // Reference
         case 231778726:  return addBaseLocation(); // StudyBaseLocationComponent
         case 1920000407: throw new FHIRException("Cannot make property numberOfSeries as it is not a complex type"); // UnsignedIntType
         case -1043544226: throw new FHIRException("Cannot make property numberOfInstances as it is not a complex type"); // UnsignedIntType
@@ -2973,8 +3007,7 @@ public class ImagingStudy extends DomainResource {
           return this.referrer;
         }
         else if (name.equals("interpreter")) {
-          this.interpreter = new Reference();
-          return this.interpreter;
+          return addInterpreter();
         }
         else if (name.equals("baseLocation")) {
           return addBaseLocation();
@@ -3032,7 +3065,11 @@ public class ImagingStudy extends DomainResource {
             dst.basedOn.add(i.copy());
         };
         dst.referrer = referrer == null ? null : referrer.copy();
-        dst.interpreter = interpreter == null ? null : interpreter.copy();
+        if (interpreter != null) {
+          dst.interpreter = new ArrayList<Reference>();
+          for (Reference i : interpreter)
+            dst.interpreter.add(i.copy());
+        };
         if (baseLocation != null) {
           dst.baseLocation = new ArrayList<StudyBaseLocationComponent>();
           for (StudyBaseLocationComponent i : baseLocation)

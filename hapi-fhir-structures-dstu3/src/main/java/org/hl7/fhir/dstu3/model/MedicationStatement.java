@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
  */
@@ -199,6 +202,112 @@ public class MedicationStatement extends DomainResource {
       }
     }
 
+    public enum MedicationStatementNotTaken {
+        /**
+         * Positive assertion that patient has taken medication
+         */
+        Y, 
+        /**
+         * Negative assertion that patient has not taken medication
+         */
+        N, 
+        /**
+         * Unknown assertion if patient has taken medication
+         */
+        UNK, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static MedicationStatementNotTaken fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("y".equals(codeString))
+          return Y;
+        if ("n".equals(codeString))
+          return N;
+        if ("unk".equals(codeString))
+          return UNK;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown MedicationStatementNotTaken code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case Y: return "y";
+            case N: return "n";
+            case UNK: return "unk";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case Y: return "http://hl7.org/fhir/medication-statement-nottaken";
+            case N: return "http://hl7.org/fhir/medication-statement-nottaken";
+            case UNK: return "http://hl7.org/fhir/medication-statement-nottaken";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case Y: return "Positive assertion that patient has taken medication";
+            case N: return "Negative assertion that patient has not taken medication";
+            case UNK: return "Unknown assertion if patient has taken medication";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case Y: return "Yes";
+            case N: return "No";
+            case UNK: return "Unknown";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class MedicationStatementNotTakenEnumFactory implements EnumFactory<MedicationStatementNotTaken> {
+    public MedicationStatementNotTaken fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("y".equals(codeString))
+          return MedicationStatementNotTaken.Y;
+        if ("n".equals(codeString))
+          return MedicationStatementNotTaken.N;
+        if ("unk".equals(codeString))
+          return MedicationStatementNotTaken.UNK;
+        throw new IllegalArgumentException("Unknown MedicationStatementNotTaken code '"+codeString+"'");
+        }
+        public Enumeration<MedicationStatementNotTaken> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("y".equals(codeString))
+          return new Enumeration<MedicationStatementNotTaken>(this, MedicationStatementNotTaken.Y);
+        if ("n".equals(codeString))
+          return new Enumeration<MedicationStatementNotTaken>(this, MedicationStatementNotTaken.N);
+        if ("unk".equals(codeString))
+          return new Enumeration<MedicationStatementNotTaken>(this, MedicationStatementNotTaken.UNK);
+        throw new FHIRException("Unknown MedicationStatementNotTaken code '"+codeString+"'");
+        }
+    public String toCode(MedicationStatementNotTaken code) {
+      if (code == MedicationStatementNotTaken.Y)
+        return "y";
+      if (code == MedicationStatementNotTaken.N)
+        return "n";
+      if (code == MedicationStatementNotTaken.UNK)
+        return "unk";
+      return "?";
+      }
+    public String toSystem(MedicationStatementNotTaken code) {
+      return code.getSystem();
+      }
+    }
+
     public enum MedicationStatementCategory {
         /**
          * Includes orders for medications to be administered or consumed in an inpatient or acute care setting
@@ -321,716 +430,6 @@ public class MedicationStatement extends DomainResource {
       }
     }
 
-    @Block()
-    public static class MedicationStatementDosageComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Free text dosage information as reported about a patient's medication use. When coded dosage information is present, the free text may still be present for display to humans.
-         */
-        @Child(name = "text", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Free text dosage instructions as reported by the information source", formalDefinition="Free text dosage information as reported about a patient's medication use. When coded dosage information is present, the free text may still be present for display to humans." )
-        protected StringType text;
-
-        /**
-         * Additional instructions such as "Swallow with plenty of water" which may or may not be coded.
-         */
-        @Child(name = "additionalInstructions", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Supplemental instructions - e.g. \"with meals\"", formalDefinition="Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/additional-instructions-codes")
-        protected List<CodeableConcept> additionalInstructions;
-
-        /**
-         * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.
-         */
-        @Child(name = "timing", type = {Timing.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="When/how often was medication taken", formalDefinition="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period." )
-        protected Timing timing;
-
-        /**
-         * Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  Specifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.
-         */
-        @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Take \"as needed\" (for x)", formalDefinition="Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  \r\rSpecifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-as-needed-reason")
-        protected Type asNeeded;
-
-        /**
-         * A coded specification of or a reference to the anatomic site where the medication first enters the body.
-         */
-        @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Where (on body) medication is/was administered", formalDefinition="A coded specification of or a reference to the anatomic site where the medication first enters the body." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/approach-site-codes")
-        protected Type site;
-
-        /**
-         * A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.
-         */
-        @Child(name = "route", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="How the medication entered the body", formalDefinition="A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/route-codes")
-        protected CodeableConcept route;
-
-        /**
-         * A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  For example, Slow Push, Deep IV.
-         */
-        @Child(name = "method", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Technique used to administer medication", formalDefinition="A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  For example, Slow Push, Deep IV." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/administration-method-codes")
-        protected CodeableConcept method;
-
-        /**
-         * The amount of therapeutic or other substance given at one administration event.
-         */
-        @Child(name = "dose", type = {SimpleQuantity.class, Range.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Amount of medication per dose", formalDefinition="The amount of therapeutic or other substance given at one administration event." )
-        protected Type dose;
-
-        /**
-         * Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.
-         */
-        @Child(name = "rate", type = {Ratio.class, Range.class, SimpleQuantity.class}, order=9, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Dose quantity per unit of time", formalDefinition="Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period." )
-        protected Type rate;
-
-        /**
-         * The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time.  For example, 1000mg in 24 hours.
-         */
-        @Child(name = "maxDosePerPeriod", type = {Ratio.class}, order=10, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Maximum dose that was consumed per unit of time", formalDefinition="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time.  For example, 1000mg in 24 hours." )
-        protected Ratio maxDosePerPeriod;
-
-        private static final long serialVersionUID = -1640641324L;
-
-    /**
-     * Constructor
-     */
-      public MedicationStatementDosageComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #text} (Free text dosage information as reported about a patient's medication use. When coded dosage information is present, the free text may still be present for display to humans.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
-         */
-        public StringType getTextElement() { 
-          if (this.text == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.text");
-            else if (Configuration.doAutoCreate())
-              this.text = new StringType(); // bb
-          return this.text;
-        }
-
-        public boolean hasTextElement() { 
-          return this.text != null && !this.text.isEmpty();
-        }
-
-        public boolean hasText() { 
-          return this.text != null && !this.text.isEmpty();
-        }
-
-        /**
-         * @param value {@link #text} (Free text dosage information as reported about a patient's medication use. When coded dosage information is present, the free text may still be present for display to humans.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
-         */
-        public MedicationStatementDosageComponent setTextElement(StringType value) { 
-          this.text = value;
-          return this;
-        }
-
-        /**
-         * @return Free text dosage information as reported about a patient's medication use. When coded dosage information is present, the free text may still be present for display to humans.
-         */
-        public String getText() { 
-          return this.text == null ? null : this.text.getValue();
-        }
-
-        /**
-         * @param value Free text dosage information as reported about a patient's medication use. When coded dosage information is present, the free text may still be present for display to humans.
-         */
-        public MedicationStatementDosageComponent setText(String value) { 
-          if (Utilities.noString(value))
-            this.text = null;
-          else {
-            if (this.text == null)
-              this.text = new StringType();
-            this.text.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #additionalInstructions} (Additional instructions such as "Swallow with plenty of water" which may or may not be coded.)
-         */
-        public List<CodeableConcept> getAdditionalInstructions() { 
-          if (this.additionalInstructions == null)
-            this.additionalInstructions = new ArrayList<CodeableConcept>();
-          return this.additionalInstructions;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public MedicationStatementDosageComponent setAdditionalInstructions(List<CodeableConcept> theAdditionalInstructions) { 
-          this.additionalInstructions = theAdditionalInstructions;
-          return this;
-        }
-
-        public boolean hasAdditionalInstructions() { 
-          if (this.additionalInstructions == null)
-            return false;
-          for (CodeableConcept item : this.additionalInstructions)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public CodeableConcept addAdditionalInstructions() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.additionalInstructions == null)
-            this.additionalInstructions = new ArrayList<CodeableConcept>();
-          this.additionalInstructions.add(t);
-          return t;
-        }
-
-        public MedicationStatementDosageComponent addAdditionalInstructions(CodeableConcept t) { //3
-          if (t == null)
-            return this;
-          if (this.additionalInstructions == null)
-            this.additionalInstructions = new ArrayList<CodeableConcept>();
-          this.additionalInstructions.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #additionalInstructions}, creating it if it does not already exist
-         */
-        public CodeableConcept getAdditionalInstructionsFirstRep() { 
-          if (getAdditionalInstructions().isEmpty()) {
-            addAdditionalInstructions();
-          }
-          return getAdditionalInstructions().get(0);
-        }
-
-        /**
-         * @return {@link #timing} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.)
-         */
-        public Timing getTiming() { 
-          if (this.timing == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.timing");
-            else if (Configuration.doAutoCreate())
-              this.timing = new Timing(); // cc
-          return this.timing;
-        }
-
-        public boolean hasTiming() { 
-          return this.timing != null && !this.timing.isEmpty();
-        }
-
-        /**
-         * @param value {@link #timing} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.)
-         */
-        public MedicationStatementDosageComponent setTiming(Timing value) { 
-          this.timing = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  Specifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.)
-         */
-        public Type getAsNeeded() { 
-          return this.asNeeded;
-        }
-
-        /**
-         * @return {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  Specifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.)
-         */
-        public BooleanType getAsNeededBooleanType() throws FHIRException { 
-          if (!(this.asNeeded instanceof BooleanType))
-            throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
-          return (BooleanType) this.asNeeded;
-        }
-
-        public boolean hasAsNeededBooleanType() { 
-          return this.asNeeded instanceof BooleanType;
-        }
-
-        /**
-         * @return {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  Specifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.)
-         */
-        public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
-          if (!(this.asNeeded instanceof CodeableConcept))
-            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.asNeeded;
-        }
-
-        public boolean hasAsNeededCodeableConcept() { 
-          return this.asNeeded instanceof CodeableConcept;
-        }
-
-        public boolean hasAsNeeded() { 
-          return this.asNeeded != null && !this.asNeeded.isEmpty();
-        }
-
-        /**
-         * @param value {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  Specifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.)
-         */
-        public MedicationStatementDosageComponent setAsNeeded(Type value) { 
-          this.asNeeded = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #site} (A coded specification of or a reference to the anatomic site where the medication first enters the body.)
-         */
-        public Type getSite() { 
-          return this.site;
-        }
-
-        /**
-         * @return {@link #site} (A coded specification of or a reference to the anatomic site where the medication first enters the body.)
-         */
-        public CodeableConcept getSiteCodeableConcept() throws FHIRException { 
-          if (!(this.site instanceof CodeableConcept))
-            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.site;
-        }
-
-        public boolean hasSiteCodeableConcept() { 
-          return this.site instanceof CodeableConcept;
-        }
-
-        /**
-         * @return {@link #site} (A coded specification of or a reference to the anatomic site where the medication first enters the body.)
-         */
-        public Reference getSiteReference() throws FHIRException { 
-          if (!(this.site instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
-          return (Reference) this.site;
-        }
-
-        public boolean hasSiteReference() { 
-          return this.site instanceof Reference;
-        }
-
-        public boolean hasSite() { 
-          return this.site != null && !this.site.isEmpty();
-        }
-
-        /**
-         * @param value {@link #site} (A coded specification of or a reference to the anatomic site where the medication first enters the body.)
-         */
-        public MedicationStatementDosageComponent setSite(Type value) { 
-          this.site = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #route} (A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.)
-         */
-        public CodeableConcept getRoute() { 
-          if (this.route == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.route");
-            else if (Configuration.doAutoCreate())
-              this.route = new CodeableConcept(); // cc
-          return this.route;
-        }
-
-        public boolean hasRoute() { 
-          return this.route != null && !this.route.isEmpty();
-        }
-
-        /**
-         * @param value {@link #route} (A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.)
-         */
-        public MedicationStatementDosageComponent setRoute(CodeableConcept value) { 
-          this.route = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #method} (A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  For example, Slow Push, Deep IV.)
-         */
-        public CodeableConcept getMethod() { 
-          if (this.method == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.method");
-            else if (Configuration.doAutoCreate())
-              this.method = new CodeableConcept(); // cc
-          return this.method;
-        }
-
-        public boolean hasMethod() { 
-          return this.method != null && !this.method.isEmpty();
-        }
-
-        /**
-         * @param value {@link #method} (A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  For example, Slow Push, Deep IV.)
-         */
-        public MedicationStatementDosageComponent setMethod(CodeableConcept value) { 
-          this.method = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
-         */
-        public Type getDose() { 
-          return this.dose;
-        }
-
-        /**
-         * @return {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
-         */
-        public SimpleQuantity getDoseSimpleQuantity() throws FHIRException { 
-          if (!(this.dose instanceof SimpleQuantity))
-            throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.dose.getClass().getName()+" was encountered");
-          return (SimpleQuantity) this.dose;
-        }
-
-        public boolean hasDoseSimpleQuantity() { 
-          return this.dose instanceof SimpleQuantity;
-        }
-
-        /**
-         * @return {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
-         */
-        public Range getDoseRange() throws FHIRException { 
-          if (!(this.dose instanceof Range))
-            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.dose.getClass().getName()+" was encountered");
-          return (Range) this.dose;
-        }
-
-        public boolean hasDoseRange() { 
-          return this.dose instanceof Range;
-        }
-
-        public boolean hasDose() { 
-          return this.dose != null && !this.dose.isEmpty();
-        }
-
-        /**
-         * @param value {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
-         */
-        public MedicationStatementDosageComponent setDose(Type value) { 
-          this.dose = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.)
-         */
-        public Type getRate() { 
-          return this.rate;
-        }
-
-        /**
-         * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.)
-         */
-        public Ratio getRateRatio() throws FHIRException { 
-          if (!(this.rate instanceof Ratio))
-            throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
-          return (Ratio) this.rate;
-        }
-
-        public boolean hasRateRatio() { 
-          return this.rate instanceof Ratio;
-        }
-
-        /**
-         * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.)
-         */
-        public Range getRateRange() throws FHIRException { 
-          if (!(this.rate instanceof Range))
-            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
-          return (Range) this.rate;
-        }
-
-        public boolean hasRateRange() { 
-          return this.rate instanceof Range;
-        }
-
-        /**
-         * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.)
-         */
-        public SimpleQuantity getRateSimpleQuantity() throws FHIRException { 
-          if (!(this.rate instanceof SimpleQuantity))
-            throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
-          return (SimpleQuantity) this.rate;
-        }
-
-        public boolean hasRateSimpleQuantity() { 
-          return this.rate instanceof SimpleQuantity;
-        }
-
-        public boolean hasRate() { 
-          return this.rate != null && !this.rate.isEmpty();
-        }
-
-        /**
-         * @param value {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.)
-         */
-        public MedicationStatementDosageComponent setRate(Type value) { 
-          this.rate = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #maxDosePerPeriod} (The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time.  For example, 1000mg in 24 hours.)
-         */
-        public Ratio getMaxDosePerPeriod() { 
-          if (this.maxDosePerPeriod == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.maxDosePerPeriod");
-            else if (Configuration.doAutoCreate())
-              this.maxDosePerPeriod = new Ratio(); // cc
-          return this.maxDosePerPeriod;
-        }
-
-        public boolean hasMaxDosePerPeriod() { 
-          return this.maxDosePerPeriod != null && !this.maxDosePerPeriod.isEmpty();
-        }
-
-        /**
-         * @param value {@link #maxDosePerPeriod} (The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time.  For example, 1000mg in 24 hours.)
-         */
-        public MedicationStatementDosageComponent setMaxDosePerPeriod(Ratio value) { 
-          this.maxDosePerPeriod = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("text", "string", "Free text dosage information as reported about a patient's medication use. When coded dosage information is present, the free text may still be present for display to humans.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("additionalInstructions", "CodeableConcept", "Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.", 0, java.lang.Integer.MAX_VALUE, additionalInstructions));
-          childrenList.add(new Property("timing", "Timing", "The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.", 0, java.lang.Integer.MAX_VALUE, timing));
-          childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).  \r\rSpecifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
-          childrenList.add(new Property("site[x]", "CodeableConcept|Reference(BodySite)", "A coded specification of or a reference to the anatomic site where the medication first enters the body.", 0, java.lang.Integer.MAX_VALUE, site));
-          childrenList.add(new Property("route", "CodeableConcept", "A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.", 0, java.lang.Integer.MAX_VALUE, route));
-          childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  For example, Slow Push, Deep IV.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("dose[x]", "SimpleQuantity|Range", "The amount of therapeutic or other substance given at one administration event.", 0, java.lang.Integer.MAX_VALUE, dose));
-          childrenList.add(new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.  Sometimes, a rate can imply duration when expressed as total volume / duration (e.g.  500mL/2 hours implies a duration of 2 hours).  However, when rate doesn't imply duration (e.g. 250mL/hour), then the timing.repeat.duration is needed to convey the infuse over time period.", 0, java.lang.Integer.MAX_VALUE, rate));
-          childrenList.add(new Property("maxDosePerPeriod", "Ratio", "The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time.  For example, 1000mg in 24 hours.", 0, java.lang.Integer.MAX_VALUE, maxDosePerPeriod));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
-        case -1206718612: /*additionalInstructions*/ return this.additionalInstructions == null ? new Base[0] : this.additionalInstructions.toArray(new Base[this.additionalInstructions.size()]); // CodeableConcept
-        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Timing
-        case -1432923513: /*asNeeded*/ return this.asNeeded == null ? new Base[0] : new Base[] {this.asNeeded}; // Type
-        case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // Type
-        case 108704329: /*route*/ return this.route == null ? new Base[0] : new Base[] {this.route}; // CodeableConcept
-        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
-        case 3089437: /*dose*/ return this.dose == null ? new Base[0] : new Base[] {this.dose}; // Type
-        case 3493088: /*rate*/ return this.rate == null ? new Base[0] : new Base[] {this.rate}; // Type
-        case 1506263709: /*maxDosePerPeriod*/ return this.maxDosePerPeriod == null ? new Base[0] : new Base[] {this.maxDosePerPeriod}; // Ratio
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3556653: // text
-          this.text = castToString(value); // StringType
-          break;
-        case -1206718612: // additionalInstructions
-          this.getAdditionalInstructions().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case -873664438: // timing
-          this.timing = castToTiming(value); // Timing
-          break;
-        case -1432923513: // asNeeded
-          this.asNeeded = (Type) value; // Type
-          break;
-        case 3530567: // site
-          this.site = (Type) value; // Type
-          break;
-        case 108704329: // route
-          this.route = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case -1077554975: // method
-          this.method = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case 3089437: // dose
-          this.dose = (Type) value; // Type
-          break;
-        case 3493088: // rate
-          this.rate = (Type) value; // Type
-          break;
-        case 1506263709: // maxDosePerPeriod
-          this.maxDosePerPeriod = castToRatio(value); // Ratio
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("text"))
-          this.text = castToString(value); // StringType
-        else if (name.equals("additionalInstructions"))
-          this.getAdditionalInstructions().add(castToCodeableConcept(value));
-        else if (name.equals("timing"))
-          this.timing = castToTiming(value); // Timing
-        else if (name.equals("asNeeded[x]"))
-          this.asNeeded = (Type) value; // Type
-        else if (name.equals("site[x]"))
-          this.site = (Type) value; // Type
-        else if (name.equals("route"))
-          this.route = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("method"))
-          this.method = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("dose[x]"))
-          this.dose = (Type) value; // Type
-        else if (name.equals("rate[x]"))
-          this.rate = (Type) value; // Type
-        else if (name.equals("maxDosePerPeriod"))
-          this.maxDosePerPeriod = castToRatio(value); // Ratio
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
-        case -1206718612:  return addAdditionalInstructions(); // CodeableConcept
-        case -873664438:  return getTiming(); // Timing
-        case -544329575:  return getAsNeeded(); // Type
-        case 2099997657:  return getSite(); // Type
-        case 108704329:  return getRoute(); // CodeableConcept
-        case -1077554975:  return getMethod(); // CodeableConcept
-        case 1843195715:  return getDose(); // Type
-        case 983460768:  return getRate(); // Type
-        case 1506263709:  return getMaxDosePerPeriod(); // Ratio
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("text")) {
-          throw new FHIRException("Cannot call addChild on a primitive type MedicationStatement.text");
-        }
-        else if (name.equals("additionalInstructions")) {
-          return addAdditionalInstructions();
-        }
-        else if (name.equals("timing")) {
-          this.timing = new Timing();
-          return this.timing;
-        }
-        else if (name.equals("asNeededBoolean")) {
-          this.asNeeded = new BooleanType();
-          return this.asNeeded;
-        }
-        else if (name.equals("asNeededCodeableConcept")) {
-          this.asNeeded = new CodeableConcept();
-          return this.asNeeded;
-        }
-        else if (name.equals("siteCodeableConcept")) {
-          this.site = new CodeableConcept();
-          return this.site;
-        }
-        else if (name.equals("siteReference")) {
-          this.site = new Reference();
-          return this.site;
-        }
-        else if (name.equals("route")) {
-          this.route = new CodeableConcept();
-          return this.route;
-        }
-        else if (name.equals("method")) {
-          this.method = new CodeableConcept();
-          return this.method;
-        }
-        else if (name.equals("doseSimpleQuantity")) {
-          this.dose = new SimpleQuantity();
-          return this.dose;
-        }
-        else if (name.equals("doseRange")) {
-          this.dose = new Range();
-          return this.dose;
-        }
-        else if (name.equals("rateRatio")) {
-          this.rate = new Ratio();
-          return this.rate;
-        }
-        else if (name.equals("rateRange")) {
-          this.rate = new Range();
-          return this.rate;
-        }
-        else if (name.equals("rateSimpleQuantity")) {
-          this.rate = new SimpleQuantity();
-          return this.rate;
-        }
-        else if (name.equals("maxDosePerPeriod")) {
-          this.maxDosePerPeriod = new Ratio();
-          return this.maxDosePerPeriod;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public MedicationStatementDosageComponent copy() {
-        MedicationStatementDosageComponent dst = new MedicationStatementDosageComponent();
-        copyValues(dst);
-        dst.text = text == null ? null : text.copy();
-        if (additionalInstructions != null) {
-          dst.additionalInstructions = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : additionalInstructions)
-            dst.additionalInstructions.add(i.copy());
-        };
-        dst.timing = timing == null ? null : timing.copy();
-        dst.asNeeded = asNeeded == null ? null : asNeeded.copy();
-        dst.site = site == null ? null : site.copy();
-        dst.route = route == null ? null : route.copy();
-        dst.method = method == null ? null : method.copy();
-        dst.dose = dose == null ? null : dose.copy();
-        dst.rate = rate == null ? null : rate.copy();
-        dst.maxDosePerPeriod = maxDosePerPeriod == null ? null : maxDosePerPeriod.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof MedicationStatementDosageComponent))
-          return false;
-        MedicationStatementDosageComponent o = (MedicationStatementDosageComponent) other;
-        return compareDeep(text, o.text, true) && compareDeep(additionalInstructions, o.additionalInstructions, true)
-           && compareDeep(timing, o.timing, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(site, o.site, true)
-           && compareDeep(route, o.route, true) && compareDeep(method, o.method, true) && compareDeep(dose, o.dose, true)
-           && compareDeep(rate, o.rate, true) && compareDeep(maxDosePerPeriod, o.maxDosePerPeriod, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof MedicationStatementDosageComponent))
-          return false;
-        MedicationStatementDosageComponent o = (MedicationStatementDosageComponent) other;
-        return compareValues(text, o.text, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(text, additionalInstructions
-          , timing, asNeeded, site, route, method, dose, rate, maxDosePerPeriod);
-      }
-
-  public String fhirType() {
-    return "MedicationStatement.dosage";
-
-  }
-
-  }
-
     /**
      * External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.
      */
@@ -1074,27 +473,27 @@ public class MedicationStatement extends DomainResource {
     protected Type effective;
 
     /**
-     * The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder.
+     * The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest.
      */
-    @Child(name = "informationSource", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Person who provided the information about the taking of this medication", formalDefinition="The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder." )
+    @Child(name = "informationSource", type = {Patient.class, Practitioner.class, RelatedPerson.class, Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Person or organization that provided the information about the taking of this medication", formalDefinition="The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest." )
     protected Reference informationSource;
 
     /**
-     * The actual object that is the target of the reference (The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder.)
+     * The actual object that is the target of the reference (The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest.)
      */
     protected Resource informationSourceTarget;
 
     /**
-     * Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports or is used to derive the MedicationStatement.
+     * Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement.
      */
-    @Child(name = "supportingInformation", type = {Reference.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Additional supporting information", formalDefinition="Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports or is used to derive the MedicationStatement." )
-    protected List<Reference> supportingInformation;
+    @Child(name = "derivedFrom", type = {Reference.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Additional supporting information", formalDefinition="Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement." )
+    protected List<Reference> derivedFrom;
     /**
-     * The actual objects that are the target of the reference (Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports or is used to derive the MedicationStatement.)
+     * The actual objects that are the target of the reference (Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement.)
      */
-    protected List<Resource> supportingInformationTarget;
+    protected List<Resource> derivedFromTarget;
 
 
     /**
@@ -1105,11 +504,12 @@ public class MedicationStatement extends DomainResource {
     protected DateTimeType dateAsserted;
 
     /**
-     * Set this to true if the record is saying that the medication was NOT taken.
+     * Indicator of the certainty of whether the medication was taken by the patient.
      */
-    @Child(name = "notTaken", type = {BooleanType.class}, order=8, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="True if medication is/was not being taken", formalDefinition="Set this to true if the record is saying that the medication was NOT taken." )
-    protected BooleanType notTaken;
+    @Child(name = "notTaken", type = {CodeType.class}, order=8, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="y | n | unk", formalDefinition="Indicator of the certainty of whether the medication was taken by the patient." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-statement-nottaken")
+    protected Enumeration<MedicationStatementNotTaken> notTaken;
 
     /**
      * A code indicating why the medication was not taken.
@@ -1156,11 +556,11 @@ public class MedicationStatement extends DomainResource {
     /**
      * Indicates how the medication is/was used by the patient.
      */
-    @Child(name = "dosage", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dosage", type = {DosageInstruction.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Details of how medication was taken", formalDefinition="Indicates how the medication is/was used by the patient." )
-    protected List<MedicationStatementDosageComponent> dosage;
+    protected List<DosageInstruction> dosage;
 
-    private static final long serialVersionUID = 410293359L;
+    private static final long serialVersionUID = -2066984119L;
 
   /**
    * Constructor
@@ -1412,7 +812,7 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #informationSource} (The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder.)
+     * @return {@link #informationSource} (The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest.)
      */
     public Reference getInformationSource() { 
       if (this.informationSource == null)
@@ -1428,7 +828,7 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @param value {@link #informationSource} (The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder.)
+     * @param value {@link #informationSource} (The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest.)
      */
     public MedicationStatement setInformationSource(Reference value) { 
       this.informationSource = value;
@@ -1436,14 +836,14 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #informationSource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder.)
+     * @return {@link #informationSource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest.)
      */
     public Resource getInformationSourceTarget() { 
       return this.informationSourceTarget;
     }
 
     /**
-     * @param value {@link #informationSource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder.)
+     * @param value {@link #informationSource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest.)
      */
     public MedicationStatement setInformationSourceTarget(Resource value) { 
       this.informationSourceTarget = value;
@@ -1451,66 +851,66 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #supportingInformation} (Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports or is used to derive the MedicationStatement.)
+     * @return {@link #derivedFrom} (Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement.)
      */
-    public List<Reference> getSupportingInformation() { 
-      if (this.supportingInformation == null)
-        this.supportingInformation = new ArrayList<Reference>();
-      return this.supportingInformation;
+    public List<Reference> getDerivedFrom() { 
+      if (this.derivedFrom == null)
+        this.derivedFrom = new ArrayList<Reference>();
+      return this.derivedFrom;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public MedicationStatement setSupportingInformation(List<Reference> theSupportingInformation) { 
-      this.supportingInformation = theSupportingInformation;
+    public MedicationStatement setDerivedFrom(List<Reference> theDerivedFrom) { 
+      this.derivedFrom = theDerivedFrom;
       return this;
     }
 
-    public boolean hasSupportingInformation() { 
-      if (this.supportingInformation == null)
+    public boolean hasDerivedFrom() { 
+      if (this.derivedFrom == null)
         return false;
-      for (Reference item : this.supportingInformation)
+      for (Reference item : this.derivedFrom)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addSupportingInformation() { //3
+    public Reference addDerivedFrom() { //3
       Reference t = new Reference();
-      if (this.supportingInformation == null)
-        this.supportingInformation = new ArrayList<Reference>();
-      this.supportingInformation.add(t);
+      if (this.derivedFrom == null)
+        this.derivedFrom = new ArrayList<Reference>();
+      this.derivedFrom.add(t);
       return t;
     }
 
-    public MedicationStatement addSupportingInformation(Reference t) { //3
+    public MedicationStatement addDerivedFrom(Reference t) { //3
       if (t == null)
         return this;
-      if (this.supportingInformation == null)
-        this.supportingInformation = new ArrayList<Reference>();
-      this.supportingInformation.add(t);
+      if (this.derivedFrom == null)
+        this.derivedFrom = new ArrayList<Reference>();
+      this.derivedFrom.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #supportingInformation}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #derivedFrom}, creating it if it does not already exist
      */
-    public Reference getSupportingInformationFirstRep() { 
-      if (getSupportingInformation().isEmpty()) {
-        addSupportingInformation();
+    public Reference getDerivedFromFirstRep() { 
+      if (getDerivedFrom().isEmpty()) {
+        addDerivedFrom();
       }
-      return getSupportingInformation().get(0);
+      return getDerivedFrom().get(0);
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<Resource> getSupportingInformationTarget() { 
-      if (this.supportingInformationTarget == null)
-        this.supportingInformationTarget = new ArrayList<Resource>();
-      return this.supportingInformationTarget;
+    public List<Resource> getDerivedFromTarget() { 
+      if (this.derivedFromTarget == null)
+        this.derivedFromTarget = new ArrayList<Resource>();
+      return this.derivedFromTarget;
     }
 
     /**
@@ -1563,14 +963,14 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #notTaken} (Set this to true if the record is saying that the medication was NOT taken.). This is the underlying object with id, value and extensions. The accessor "getNotTaken" gives direct access to the value
+     * @return {@link #notTaken} (Indicator of the certainty of whether the medication was taken by the patient.). This is the underlying object with id, value and extensions. The accessor "getNotTaken" gives direct access to the value
      */
-    public BooleanType getNotTakenElement() { 
+    public Enumeration<MedicationStatementNotTaken> getNotTakenElement() { 
       if (this.notTaken == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create MedicationStatement.notTaken");
         else if (Configuration.doAutoCreate())
-          this.notTaken = new BooleanType(); // bb
+          this.notTaken = new Enumeration<MedicationStatementNotTaken>(new MedicationStatementNotTakenEnumFactory()); // bb
       return this.notTaken;
     }
 
@@ -1583,27 +983,31 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @param value {@link #notTaken} (Set this to true if the record is saying that the medication was NOT taken.). This is the underlying object with id, value and extensions. The accessor "getNotTaken" gives direct access to the value
+     * @param value {@link #notTaken} (Indicator of the certainty of whether the medication was taken by the patient.). This is the underlying object with id, value and extensions. The accessor "getNotTaken" gives direct access to the value
      */
-    public MedicationStatement setNotTakenElement(BooleanType value) { 
+    public MedicationStatement setNotTakenElement(Enumeration<MedicationStatementNotTaken> value) { 
       this.notTaken = value;
       return this;
     }
 
     /**
-     * @return Set this to true if the record is saying that the medication was NOT taken.
+     * @return Indicator of the certainty of whether the medication was taken by the patient.
      */
-    public boolean getNotTaken() { 
-      return this.notTaken == null || this.notTaken.isEmpty() ? false : this.notTaken.getValue();
+    public MedicationStatementNotTaken getNotTaken() { 
+      return this.notTaken == null ? null : this.notTaken.getValue();
     }
 
     /**
-     * @param value Set this to true if the record is saying that the medication was NOT taken.
+     * @param value Indicator of the certainty of whether the medication was taken by the patient.
      */
-    public MedicationStatement setNotTaken(boolean value) { 
+    public MedicationStatement setNotTaken(MedicationStatementNotTaken value) { 
+      if (value == null)
+        this.notTaken = null;
+      else {
         if (this.notTaken == null)
-          this.notTaken = new BooleanType();
+          this.notTaken = new Enumeration<MedicationStatementNotTaken>(new MedicationStatementNotTakenEnumFactory());
         this.notTaken.setValue(value);
+      }
       return this;
     }
 
@@ -1893,16 +1297,16 @@ public class MedicationStatement extends DomainResource {
     /**
      * @return {@link #dosage} (Indicates how the medication is/was used by the patient.)
      */
-    public List<MedicationStatementDosageComponent> getDosage() { 
+    public List<DosageInstruction> getDosage() { 
       if (this.dosage == null)
-        this.dosage = new ArrayList<MedicationStatementDosageComponent>();
+        this.dosage = new ArrayList<DosageInstruction>();
       return this.dosage;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public MedicationStatement setDosage(List<MedicationStatementDosageComponent> theDosage) { 
+    public MedicationStatement setDosage(List<DosageInstruction> theDosage) { 
       this.dosage = theDosage;
       return this;
     }
@@ -1910,25 +1314,25 @@ public class MedicationStatement extends DomainResource {
     public boolean hasDosage() { 
       if (this.dosage == null)
         return false;
-      for (MedicationStatementDosageComponent item : this.dosage)
+      for (DosageInstruction item : this.dosage)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public MedicationStatementDosageComponent addDosage() { //3
-      MedicationStatementDosageComponent t = new MedicationStatementDosageComponent();
+    public DosageInstruction addDosage() { //3
+      DosageInstruction t = new DosageInstruction();
       if (this.dosage == null)
-        this.dosage = new ArrayList<MedicationStatementDosageComponent>();
+        this.dosage = new ArrayList<DosageInstruction>();
       this.dosage.add(t);
       return t;
     }
 
-    public MedicationStatement addDosage(MedicationStatementDosageComponent t) { //3
+    public MedicationStatement addDosage(DosageInstruction t) { //3
       if (t == null)
         return this;
       if (this.dosage == null)
-        this.dosage = new ArrayList<MedicationStatementDosageComponent>();
+        this.dosage = new ArrayList<DosageInstruction>();
       this.dosage.add(t);
       return this;
     }
@@ -1936,7 +1340,7 @@ public class MedicationStatement extends DomainResource {
     /**
      * @return The first repetition of repeating field {@link #dosage}, creating it if it does not already exist
      */
-    public MedicationStatementDosageComponent getDosageFirstRep() { 
+    public DosageInstruction getDosageFirstRep() { 
       if (getDosage().isEmpty()) {
         addDosage();
       }
@@ -1950,16 +1354,16 @@ public class MedicationStatement extends DomainResource {
         childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
         childrenList.add(new Property("patient", "Reference(Patient)", "The person or animal who is/was taking the medication.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("effective[x]", "dateTime|Period", "The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the wasNotGiven element is true).", 0, java.lang.Integer.MAX_VALUE, effective));
-        childrenList.add(new Property("informationSource", "Reference(Patient|Practitioner|RelatedPerson)", "The person who provided the information about the taking of this medication.  Note:  A MedicationStatement may be derived from supportingInformation e.g claims or medicationOrder.", 0, java.lang.Integer.MAX_VALUE, informationSource));
-        childrenList.add(new Property("supportingInformation", "Reference(Any)", "Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports or is used to derive the MedicationStatement.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
+        childrenList.add(new Property("informationSource", "Reference(Patient|Practitioner|RelatedPerson|Organization)", "The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g Claim or MedicationRequest.", 0, java.lang.Integer.MAX_VALUE, informationSource));
+        childrenList.add(new Property("derivedFrom", "Reference(Any)", "Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement.", 0, java.lang.Integer.MAX_VALUE, derivedFrom));
         childrenList.add(new Property("dateAsserted", "dateTime", "The date when the medication statement was asserted by the information source.", 0, java.lang.Integer.MAX_VALUE, dateAsserted));
-        childrenList.add(new Property("notTaken", "boolean", "Set this to true if the record is saying that the medication was NOT taken.", 0, java.lang.Integer.MAX_VALUE, notTaken));
+        childrenList.add(new Property("notTaken", "code", "Indicator of the certainty of whether the medication was taken by the patient.", 0, java.lang.Integer.MAX_VALUE, notTaken));
         childrenList.add(new Property("reasonNotTaken", "CodeableConcept", "A code indicating why the medication was not taken.", 0, java.lang.Integer.MAX_VALUE, reasonNotTaken));
         childrenList.add(new Property("reasonForUseCode", "CodeableConcept", "A reason for why the medication is being/was taken.", 0, java.lang.Integer.MAX_VALUE, reasonForUseCode));
         childrenList.add(new Property("reasonForUseReference", "Reference(Condition)", "Condition that supports why the medication is being/was taken.", 0, java.lang.Integer.MAX_VALUE, reasonForUseReference));
         childrenList.add(new Property("note", "Annotation", "Provides extra information about the medication statement that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("category", "code", "Indicates where type of medication statement and where the medication is expected to be consumed or administered.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("dosage", "", "Indicates how the medication is/was used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosage));
+        childrenList.add(new Property("dosage", "DosageInstruction", "Indicates how the medication is/was used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosage));
       }
 
       @Override
@@ -1971,15 +1375,15 @@ public class MedicationStatement extends DomainResource {
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case -1468651097: /*effective*/ return this.effective == null ? new Base[0] : new Base[] {this.effective}; // Type
         case -2123220889: /*informationSource*/ return this.informationSource == null ? new Base[0] : new Base[] {this.informationSource}; // Reference
-        case -1248768647: /*supportingInformation*/ return this.supportingInformation == null ? new Base[0] : this.supportingInformation.toArray(new Base[this.supportingInformation.size()]); // Reference
+        case 1077922663: /*derivedFrom*/ return this.derivedFrom == null ? new Base[0] : this.derivedFrom.toArray(new Base[this.derivedFrom.size()]); // Reference
         case -1980855245: /*dateAsserted*/ return this.dateAsserted == null ? new Base[0] : new Base[] {this.dateAsserted}; // DateTimeType
-        case 1565822388: /*notTaken*/ return this.notTaken == null ? new Base[0] : new Base[] {this.notTaken}; // BooleanType
+        case 1565822388: /*notTaken*/ return this.notTaken == null ? new Base[0] : new Base[] {this.notTaken}; // Enumeration<MedicationStatementNotTaken>
         case 2112880664: /*reasonNotTaken*/ return this.reasonNotTaken == null ? new Base[0] : this.reasonNotTaken.toArray(new Base[this.reasonNotTaken.size()]); // CodeableConcept
         case -1558446993: /*reasonForUseCode*/ return this.reasonForUseCode == null ? new Base[0] : this.reasonForUseCode.toArray(new Base[this.reasonForUseCode.size()]); // CodeableConcept
         case -370888183: /*reasonForUseReference*/ return this.reasonForUseReference == null ? new Base[0] : this.reasonForUseReference.toArray(new Base[this.reasonForUseReference.size()]); // Reference
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<MedicationStatementCategory>
-        case -1326018889: /*dosage*/ return this.dosage == null ? new Base[0] : this.dosage.toArray(new Base[this.dosage.size()]); // MedicationStatementDosageComponent
+        case -1326018889: /*dosage*/ return this.dosage == null ? new Base[0] : this.dosage.toArray(new Base[this.dosage.size()]); // DosageInstruction
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1995,25 +1399,25 @@ public class MedicationStatement extends DomainResource {
           this.status = new MedicationStatementStatusEnumFactory().fromType(value); // Enumeration<MedicationStatementStatus>
           break;
         case 1998965455: // medication
-          this.medication = (Type) value; // Type
+          this.medication = castToType(value); // Type
           break;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
           break;
         case -1468651097: // effective
-          this.effective = (Type) value; // Type
+          this.effective = castToType(value); // Type
           break;
         case -2123220889: // informationSource
           this.informationSource = castToReference(value); // Reference
           break;
-        case -1248768647: // supportingInformation
-          this.getSupportingInformation().add(castToReference(value)); // Reference
+        case 1077922663: // derivedFrom
+          this.getDerivedFrom().add(castToReference(value)); // Reference
           break;
         case -1980855245: // dateAsserted
           this.dateAsserted = castToDateTime(value); // DateTimeType
           break;
         case 1565822388: // notTaken
-          this.notTaken = castToBoolean(value); // BooleanType
+          this.notTaken = new MedicationStatementNotTakenEnumFactory().fromType(value); // Enumeration<MedicationStatementNotTaken>
           break;
         case 2112880664: // reasonNotTaken
           this.getReasonNotTaken().add(castToCodeableConcept(value)); // CodeableConcept
@@ -2031,7 +1435,7 @@ public class MedicationStatement extends DomainResource {
           this.category = new MedicationStatementCategoryEnumFactory().fromType(value); // Enumeration<MedicationStatementCategory>
           break;
         case -1326018889: // dosage
-          this.getDosage().add((MedicationStatementDosageComponent) value); // MedicationStatementDosageComponent
+          this.getDosage().add(castToDosageInstruction(value)); // DosageInstruction
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2045,19 +1449,19 @@ public class MedicationStatement extends DomainResource {
         else if (name.equals("status"))
           this.status = new MedicationStatementStatusEnumFactory().fromType(value); // Enumeration<MedicationStatementStatus>
         else if (name.equals("medication[x]"))
-          this.medication = (Type) value; // Type
+          this.medication = castToType(value); // Type
         else if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
         else if (name.equals("effective[x]"))
-          this.effective = (Type) value; // Type
+          this.effective = castToType(value); // Type
         else if (name.equals("informationSource"))
           this.informationSource = castToReference(value); // Reference
-        else if (name.equals("supportingInformation"))
-          this.getSupportingInformation().add(castToReference(value));
+        else if (name.equals("derivedFrom"))
+          this.getDerivedFrom().add(castToReference(value));
         else if (name.equals("dateAsserted"))
           this.dateAsserted = castToDateTime(value); // DateTimeType
         else if (name.equals("notTaken"))
-          this.notTaken = castToBoolean(value); // BooleanType
+          this.notTaken = new MedicationStatementNotTakenEnumFactory().fromType(value); // Enumeration<MedicationStatementNotTaken>
         else if (name.equals("reasonNotTaken"))
           this.getReasonNotTaken().add(castToCodeableConcept(value));
         else if (name.equals("reasonForUseCode"))
@@ -2069,7 +1473,7 @@ public class MedicationStatement extends DomainResource {
         else if (name.equals("category"))
           this.category = new MedicationStatementCategoryEnumFactory().fromType(value); // Enumeration<MedicationStatementCategory>
         else if (name.equals("dosage"))
-          this.getDosage().add((MedicationStatementDosageComponent) value);
+          this.getDosage().add(castToDosageInstruction(value));
         else
           super.setProperty(name, value);
       }
@@ -2083,15 +1487,15 @@ public class MedicationStatement extends DomainResource {
         case -791418107:  return getPatient(); // Reference
         case 247104889:  return getEffective(); // Type
         case -2123220889:  return getInformationSource(); // Reference
-        case -1248768647:  return addSupportingInformation(); // Reference
+        case 1077922663:  return addDerivedFrom(); // Reference
         case -1980855245: throw new FHIRException("Cannot make property dateAsserted as it is not a complex type"); // DateTimeType
-        case 1565822388: throw new FHIRException("Cannot make property notTaken as it is not a complex type"); // BooleanType
+        case 1565822388: throw new FHIRException("Cannot make property notTaken as it is not a complex type"); // Enumeration<MedicationStatementNotTaken>
         case 2112880664:  return addReasonNotTaken(); // CodeableConcept
         case -1558446993:  return addReasonForUseCode(); // CodeableConcept
         case -370888183:  return addReasonForUseReference(); // Reference
         case 3387378:  return addNote(); // Annotation
         case 50511102: throw new FHIRException("Cannot make property category as it is not a complex type"); // Enumeration<MedicationStatementCategory>
-        case -1326018889:  return addDosage(); // MedicationStatementDosageComponent
+        case -1326018889:  return addDosage(); // DosageInstruction
         default: return super.makeProperty(hash, name);
         }
 
@@ -2129,8 +1533,8 @@ public class MedicationStatement extends DomainResource {
           this.informationSource = new Reference();
           return this.informationSource;
         }
-        else if (name.equals("supportingInformation")) {
-          return addSupportingInformation();
+        else if (name.equals("derivedFrom")) {
+          return addDerivedFrom();
         }
         else if (name.equals("dateAsserted")) {
           throw new FHIRException("Cannot call addChild on a primitive type MedicationStatement.dateAsserted");
@@ -2178,10 +1582,10 @@ public class MedicationStatement extends DomainResource {
         dst.patient = patient == null ? null : patient.copy();
         dst.effective = effective == null ? null : effective.copy();
         dst.informationSource = informationSource == null ? null : informationSource.copy();
-        if (supportingInformation != null) {
-          dst.supportingInformation = new ArrayList<Reference>();
-          for (Reference i : supportingInformation)
-            dst.supportingInformation.add(i.copy());
+        if (derivedFrom != null) {
+          dst.derivedFrom = new ArrayList<Reference>();
+          for (Reference i : derivedFrom)
+            dst.derivedFrom.add(i.copy());
         };
         dst.dateAsserted = dateAsserted == null ? null : dateAsserted.copy();
         dst.notTaken = notTaken == null ? null : notTaken.copy();
@@ -2207,8 +1611,8 @@ public class MedicationStatement extends DomainResource {
         };
         dst.category = category == null ? null : category.copy();
         if (dosage != null) {
-          dst.dosage = new ArrayList<MedicationStatementDosageComponent>();
-          for (MedicationStatementDosageComponent i : dosage)
+          dst.dosage = new ArrayList<DosageInstruction>();
+          for (DosageInstruction i : dosage)
             dst.dosage.add(i.copy());
         };
         return dst;
@@ -2227,7 +1631,7 @@ public class MedicationStatement extends DomainResource {
         MedicationStatement o = (MedicationStatement) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(medication, o.medication, true)
            && compareDeep(patient, o.patient, true) && compareDeep(effective, o.effective, true) && compareDeep(informationSource, o.informationSource, true)
-           && compareDeep(supportingInformation, o.supportingInformation, true) && compareDeep(dateAsserted, o.dateAsserted, true)
+           && compareDeep(derivedFrom, o.derivedFrom, true) && compareDeep(dateAsserted, o.dateAsserted, true)
            && compareDeep(notTaken, o.notTaken, true) && compareDeep(reasonNotTaken, o.reasonNotTaken, true)
            && compareDeep(reasonForUseCode, o.reasonForUseCode, true) && compareDeep(reasonForUseReference, o.reasonForUseReference, true)
            && compareDeep(note, o.note, true) && compareDeep(category, o.category, true) && compareDeep(dosage, o.dosage, true)
@@ -2247,9 +1651,8 @@ public class MedicationStatement extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, medication
-          , patient, effective, informationSource, supportingInformation, dateAsserted, notTaken
-          , reasonNotTaken, reasonForUseCode, reasonForUseReference, note, category, dosage
-          );
+          , patient, effective, informationSource, derivedFrom, dateAsserted, notTaken, reasonNotTaken
+          , reasonForUseCode, reasonForUseReference, note, category, dosage);
       }
 
   @Override
@@ -2372,17 +1775,17 @@ public class MedicationStatement extends DomainResource {
  /**
    * Search parameter: <b>source</b>
    * <p>
-   * Description: <b>Who the information in the statement came from</b><br>
+   * Description: <b>Who or where the information in the statement came from</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationStatement.informationSource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who or where the information in the statement came from", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
    * <p>
-   * Description: <b>Who the information in the statement came from</b><br>
+   * Description: <b>Who or where the information in the statement came from</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationStatement.informationSource</b><br>
    * </p>

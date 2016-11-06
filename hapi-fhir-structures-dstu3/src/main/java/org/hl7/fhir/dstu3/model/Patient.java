@@ -29,17 +29,20 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGenderEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-
-import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
@@ -2350,7 +2353,7 @@ public class Patient extends DomainResource {
           this.birthDate = castToDate(value); // DateType
           break;
         case 561497972: // deceased
-          this.deceased = (Type) value; // Type
+          this.deceased = castToType(value); // Type
           break;
         case -1147692044: // address
           this.getAddress().add(castToAddress(value)); // Address
@@ -2359,7 +2362,7 @@ public class Patient extends DomainResource {
           this.maritalStatus = castToCodeableConcept(value); // CodeableConcept
           break;
         case -677369713: // multipleBirth
-          this.multipleBirth = (Type) value; // Type
+          this.multipleBirth = castToType(value); // Type
           break;
         case 106642994: // photo
           this.getPhoto().add(castToAttachment(value)); // Attachment
@@ -2402,13 +2405,13 @@ public class Patient extends DomainResource {
         else if (name.equals("birthDate"))
           this.birthDate = castToDate(value); // DateType
         else if (name.equals("deceased[x]"))
-          this.deceased = (Type) value; // Type
+          this.deceased = castToType(value); // Type
         else if (name.equals("address"))
           this.getAddress().add(castToAddress(value));
         else if (name.equals("maritalStatus"))
           this.maritalStatus = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("multipleBirth[x]"))
-          this.multipleBirth = (Type) value; // Type
+          this.multipleBirth = castToType(value); // Type
         else if (name.equals("photo"))
           this.getPhoto().add(castToAttachment(value));
         else if (name.equals("contact"))

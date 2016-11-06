@@ -33,15 +33,37 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 */
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionDesignationComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.*;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.ExpansionProfile;
+import org.hl7.fhir.dstu3.model.Factory;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
+import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceDesignationComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetFilterComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionParameterComponent;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
 import org.hl7.fhir.exceptions.NoTerminologyServiceException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
@@ -73,8 +95,10 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 	}
 
 
-  private ValueSetExpansionContainsComponent addCode(String system, String code, String display, ValueSetExpansionContainsComponent parent, List<ConceptDefinitionDesignationComponent> designations, ExpansionProfile profile, boolean isAbstract) {
-		ValueSetExpansionContainsComponent n = new ValueSet.ValueSetExpansionContainsComponent();
+  private ValueSetExpansionContainsComponent addCode(String system, String code, String display, ValueSetExpansionContainsComponent parent, List<ConceptDefinitionDesignationComponent> designations, ExpansionProfile profile, boolean isAbstract, List<ValueSet> filters) {
+    if (filters != null && !filters.isEmpty() && !filterContainsCode(filters, system, code))
+      return null;
+    ValueSetExpansionContainsComponent n = new ValueSet.ValueSetExpansionContainsComponent();
 		n.setSystem(system);
 		n.setCode(code);
     if (isAbstract) 
@@ -98,14 +122,30 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 			codes.add(n);
 			map.put(s, n);
 		}
-		if (canBeHeirarchy) {
-		  if (parent != null)
+		if (canBeHeirarchy && parent != null) {
 		    parent.getContains().add(n);
-		  else
+		} else {
 		    roots.add(n);
 		}
 		return n;
 	}
+
+  private boolean filterContainsCode(List<ValueSet> filters, String system, String code) {
+    for (ValueSet vse : filters)
+      if (expansionContainsCode(vse.getExpansion().getContains(), system, code))
+        return true;
+    return false;
+  }
+
+  private boolean expansionContainsCode(List<ValueSetExpansionContainsComponent> contains, String system, String code) {
+    for (ValueSetExpansionContainsComponent cc : contains) {
+      if (system.equals(cc.getSystem()) && code.equals(cc.getCode()))
+        return true;
+      if (expansionContainsCode(cc.getContains(), system, code))
+        return true;
+    }
+    return false;
+  }
 
   private ConceptDefinitionDesignationComponent getMatchingLang(List<ConceptDefinitionDesignationComponent> list, String lang) {
     for (ConceptDefinitionDesignationComponent t : list)
@@ -117,18 +157,18 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
     return null;
   }
 
-  private void addCodeAndDescendents(CodeSystem cs, String system, ConceptDefinitionComponent def, ValueSetExpansionContainsComponent parent, ExpansionProfile profile) {
+  private void addCodeAndDescendents(CodeSystem cs, String system, ConceptDefinitionComponent def, ValueSetExpansionContainsComponent parent, ExpansionProfile profile, List<ValueSet> filters) {
 		if (!CodeSystemUtilities.isDeprecated(cs, def)) {
 		  ValueSetExpansionContainsComponent np = null;
       boolean abs = CodeSystemUtilities.isAbstract(cs, def);
       if (canBeHeirarchy || !abs)
-        np = addCode(system, def.getCode(), def.getDisplay(), parent, def.getDesignation(), profile, abs);
+        np = addCode(system, def.getCode(), def.getDisplay(), parent, def.getDesignation(), profile, abs, filters);
 			for (ConceptDefinitionComponent c : def.getConcept())
-        addCodeAndDescendents(cs, system, c, np, profile);
+        addCodeAndDescendents(cs, system, c, np, profile, filters);
 		}
 	}
 
-  private void addCodes(ValueSetExpansionComponent expand, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws ETooCostly {
+  private void addCodes(ValueSetExpansionComponent expand, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile, List<ValueSet> filters) throws ETooCostly {
 		if (expand.getContains().size() > maxExpansionSize)
 			throw new ETooCostly("Too many codes to display (>" + Integer.toString(expand.getContains().size()) + ")");
 		for (ValueSetExpansionParameterComponent p : expand.getParameter()) {
@@ -136,7 +176,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 				params.add(p);
 		}
 
-    copyImportContains(expand.getContains(), null, profile);
+    copyImportContains(expand.getContains(), null, profile, filters);
 		
 		total = expand.getTotal();
 	}
@@ -150,9 +190,13 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 	}
 
 	private void excludeCodes(ConceptSetComponent exc, List<ValueSetExpansionParameterComponent> params) throws TerminologyServiceException {
-		if (exc.getConcept().size() == 0 && exc.getFilter().size() == 0) {
+		if (exc.hasSystem() && exc.getConcept().size() == 0 && exc.getFilter().size() == 0) {
 			excludeSystems.add(exc.getSystem());
 		}
+
+    if (exc.hasValueSet())
+      throw new Error("Processing Value set references in exclude is not yet done");
+//      importValueSet(imp.getValue(), params, profile);
 
 		CodeSystem cs = context.fetchCodeSystem(exc.getSystem());
 		if ((cs == null || cs.getContent() != CodeSystemContentMode.COMPLETE) && context.supportsSystem(exc.getSystem())) {
@@ -268,8 +312,6 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 		for (ConceptSetComponent inc : compose.getExclude())
 			excludeCodes(inc, params);
     canBeHeirarchy = !profile.getExcludeNested() && excludeKeys.isEmpty() && excludeSystems.isEmpty();
-		for (UriType imp : compose.getImport())
-  		importValueSet(imp.getValue(), params, profile);
   	boolean first = true;
   	for (ConceptSetComponent inc : compose.getInclude()) {
   	  if (first == true)
@@ -281,7 +323,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 
 	}
 
-	private void importValueSet(String value, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws ETooCostly, TerminologyServiceException, FileNotFoundException, IOException {
+	private ValueSet importValueSet(String value, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws ETooCostly, TerminologyServiceException, FileNotFoundException, IOException {
 		if (value == null)
 			throw new TerminologyServiceException("unable to find value set with no identity");
 		ValueSet vs = context.fetchResource(ValueSet.class, value);
@@ -300,75 +342,87 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
 				params.add(p);
 		}
     canBeHeirarchy = false; // if we're importing a value set, we have to be combining, so we won't try for a heirarchy
-    copyImportContains(vso.getValueset().getExpansion().getContains(), null, profile);
+   return vso.getValueset();
   }
 
-  private void copyImportContains(List<ValueSetExpansionContainsComponent> list, ValueSetExpansionContainsComponent parent, ExpansionProfile profile) {
+  private void copyImportContains(List<ValueSetExpansionContainsComponent> list, ValueSetExpansionContainsComponent parent, ExpansionProfile profile, List<ValueSet> filter) {
     for (ValueSetExpansionContainsComponent c : list) {
-      ValueSetExpansionContainsComponent np = addCode(c.getSystem(), c.getCode(), c.getDisplay(), parent, null, profile, c.getAbstract());
-      copyImportContains(c.getContains(), np, profile);
+      ValueSetExpansionContainsComponent np = addCode(c.getSystem(), c.getCode(), c.getDisplay(), parent, null, profile, c.getAbstract(), filter);
+      copyImportContains(c.getContains(), np, profile, filter);
 		}
 	}
 
-  private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws ETooCostly, org.hl7.fhir.exceptions.TerminologyServiceException, NoTerminologyServiceException {
-		CodeSystem cs = context.fetchCodeSystem(inc.getSystem());
-		if ((cs == null || cs.getContent() != CodeSystemContentMode.COMPLETE) && context.supportsSystem(inc.getSystem())) {
-      addCodes(context.expandVS(inc, canBeHeirarchy), params, profile);
-			return;
-		}
+  private void includeCodes(ConceptSetComponent inc, List<ValueSetExpansionParameterComponent> params, ExpansionProfile profile) throws ETooCostly, org.hl7.fhir.exceptions.TerminologyServiceException, NoTerminologyServiceException, FileNotFoundException, IOException {
+    List<ValueSet> imports = new ArrayList<ValueSet>();
+    for (UriType imp : inc.getValueSet())
+      imports.add(importValueSet(imp.getValue(), params, profile));
 
-    if (cs == null) {
-      if (context.isNoTerminologyServer())
-        throw new NoTerminologyServiceException("unable to find code system "+inc.getSystem().toString());
-      else
-        throw new TerminologyServiceException("unable to find code system "+inc.getSystem().toString());
+    if (!inc.hasSystem()) {
+      if (imports.isEmpty()) // though this is not supposed to be the case
+        return;
+      ValueSet base = imports.get(0); 
+      imports.remove(0);
+      copyImportContains(base.getExpansion().getContains(), null, profile, imports);      
+    } else {
+      CodeSystem cs = context.fetchCodeSystem(inc.getSystem());
+      if ((cs == null || cs.getContent() != CodeSystemContentMode.COMPLETE) && context.supportsSystem(inc.getSystem())) {
+        addCodes(context.expandVS(inc, canBeHeirarchy), params, profile, imports);
+        return;
+      }
+
+      if (cs == null) {
+        if (context.isNoTerminologyServer())
+          throw new NoTerminologyServiceException("unable to find code system "+inc.getSystem().toString());
+        else
+          throw new TerminologyServiceException("unable to find code system "+inc.getSystem().toString());
+      }
+      if (cs.getContent() != CodeSystemContentMode.COMPLETE)
+        throw new TerminologyServiceException("Code system "+inc.getSystem().toString()+" is incomplete");
+      if (cs.hasVersion())
+        if (!existsInParams(params, "version", new UriType(cs.getUrl()+"?version="+cs.getVersion())))
+          params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(cs.getUrl()+"?version="+cs.getVersion())));
+
+      if (inc.getConcept().size() == 0 && inc.getFilter().size() == 0) {
+        // special case - add all the code system
+        for (ConceptDefinitionComponent def : cs.getConcept()) {
+          addCodeAndDescendents(cs, inc.getSystem(), def, null, profile, imports);
+        }
+      }
+
+      if (!inc.getConcept().isEmpty()) {
+        canBeHeirarchy = false;
+        for (ConceptReferenceComponent c : inc.getConcept()) {
+          addCode(inc.getSystem(), c.getCode(), Utilities.noString(c.getDisplay()) ? getCodeDisplay(cs, c.getCode()) : c.getDisplay(), null, convertDesignations(c.getDesignation()), profile, false, imports);
+        }
+      }
+      if (inc.getFilter().size() > 1) {
+        canBeHeirarchy = false; // which will bt the case if we get around to supporting this
+        throw new TerminologyServiceException("Multiple filters not handled yet"); // need to and them, and this isn't done yet. But this shouldn't arise in non loinc and snomed value sets
+      }
+      if (inc.getFilter().size() == 1) {
+        ConceptSetFilterComponent fc = inc.getFilter().get(0);
+        if ("concept".equals(fc.getProperty()) && fc.getOp() == FilterOperator.ISA) {
+          // special: all non-abstract codes in the target code system under the value
+          ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), fc.getValue());
+          if (def == null)
+            throw new TerminologyServiceException("Code '"+fc.getValue()+"' not found in system '"+inc.getSystem()+"'");
+          addCodeAndDescendents(cs, inc.getSystem(), def, null, profile, imports);
+        } else if ("display".equals(fc.getProperty()) && fc.getOp() == FilterOperator.EQUAL) {
+          // gg; note: wtf is this: if the filter is display=v, look up the code 'v', and see if it's diplsay is 'v'?
+          canBeHeirarchy = false;
+          ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), fc.getValue());
+          if (def != null) {
+            if (isNotBlank(def.getDisplay()) && isNotBlank(fc.getValue())) {
+              if (def.getDisplay().contains(fc.getValue())) {
+                addCode(inc.getSystem(), def.getCode(), def.getDisplay(), null, def.getDesignation(), profile, CodeSystemUtilities.isAbstract(cs,  def), imports);
+              }
+            }
+          }
+        } else
+          throw new NotImplementedException("Search by property[" + fc.getProperty() + "] and op[" + fc.getOp() + "] is not supported yet");
+      }
     }
-		if (cs.getContent() != CodeSystemContentMode.COMPLETE)
-      throw new TerminologyServiceException("Code system "+inc.getSystem().toString()+" is incomplete");
-		if (cs.hasVersion())
-      if (!existsInParams(params, "version", new UriType(cs.getUrl()+"?version="+cs.getVersion())))
-        params.add(new ValueSetExpansionParameterComponent().setName("version").setValue(new UriType(cs.getUrl()+"?version="+cs.getVersion())));
-	  
-		if (inc.getConcept().size() == 0 && inc.getFilter().size() == 0) {
-			// special case - add all the code system
-			for (ConceptDefinitionComponent def : cs.getConcept()) {
-        addCodeAndDescendents(cs, inc.getSystem(), def, null, profile);
-			}
-		}
-
-	  if (!inc.getConcept().isEmpty()) {
-	    canBeHeirarchy = false;
-		for (ConceptReferenceComponent c : inc.getConcept()) {
-        addCode(inc.getSystem(), c.getCode(), Utilities.noString(c.getDisplay()) ? getCodeDisplay(cs, c.getCode()) : c.getDisplay(), null, convertDesignations(c.getDesignation()), profile, false);
-		}
-	  }
-	  if (inc.getFilter().size() > 1) {
-	    canBeHeirarchy = false; // which will bt the case if we get around to supporting this
-			throw new TerminologyServiceException("Multiple filters not handled yet"); // need to and them, and this isn't done yet. But this shouldn't arise in non loinc and snomed value sets
-	  }
-		if (inc.getFilter().size() == 1) {
-			ConceptSetFilterComponent fc = inc.getFilter().get(0);
-			if ("concept".equals(fc.getProperty()) && fc.getOp() == FilterOperator.ISA) {
-				// special: all non-abstract codes in the target code system under the value
-				ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), fc.getValue());
-				if (def == null)
-          throw new TerminologyServiceException("Code '"+fc.getValue()+"' not found in system '"+inc.getSystem()+"'");
-        addCodeAndDescendents(cs, inc.getSystem(), def, null, profile);
-			} else if ("display".equals(fc.getProperty()) && fc.getOp() == FilterOperator.EQUAL) {
-			  // gg; note: wtf is this: if the filter is display=v, look up the code 'v', and see if it's diplsay is 'v'?
-			  canBeHeirarchy = false;
-				ConceptDefinitionComponent def = getConceptForCode(cs.getConcept(), fc.getValue());
-				if (def != null) {
-					if (isNotBlank(def.getDisplay()) && isNotBlank(fc.getValue())) {
-						if (def.getDisplay().contains(fc.getValue())) {
-              addCode(inc.getSystem(), def.getCode(), def.getDisplay(), null, def.getDesignation(), profile, CodeSystemUtilities.isAbstract(cs,  def));
-						}
-					}
-				}
-			} else
-				throw new NotImplementedException("Search by property[" + fc.getProperty() + "] and op[" + fc.getOp() + "] is not supported yet");
-		}
-	}
+  }
 
   private List<ConceptDefinitionDesignationComponent> convertDesignations(List<ConceptReferenceDesignationComponent> list) {
     List<ConceptDefinitionDesignationComponent> res = new ArrayList<CodeSystem.ConceptDefinitionDesignationComponent>();

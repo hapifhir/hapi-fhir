@@ -29,15 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-
-import ca.uhn.fhir.model.api.annotation.*;
 /**
  * An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
  */
@@ -284,7 +288,7 @@ public class Communication extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 951530617: // content
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -294,7 +298,7 @@ public class Communication extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
         else
           super.setProperty(name, value);
       }

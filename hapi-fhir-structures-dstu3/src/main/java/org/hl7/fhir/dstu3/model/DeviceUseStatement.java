@@ -29,17 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.
  */
@@ -57,14 +59,14 @@ public class DeviceUseStatement extends DomainResource {
      * The time period over which the device was used.
      */
     @Child(name = "whenUsed", type = {Period.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="The time period over which the device was used." )
+    @Description(shortDefinition="Period device was used", formalDefinition="The time period over which the device was used." )
     protected Period whenUsed;
 
     /**
      * The details of the device used.
      */
     @Child(name = "device", type = {Device.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="The details of the device used." )
+    @Description(shortDefinition="Reference to device used", formalDefinition="The details of the device used." )
     protected Reference device;
 
     /**
@@ -76,35 +78,35 @@ public class DeviceUseStatement extends DomainResource {
      * An external identifier for this statement such as an IRI.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="An external identifier for this statement such as an IRI." )
+    @Description(shortDefinition="External identifier for this record", formalDefinition="An external identifier for this statement such as an IRI." )
     protected List<Identifier> identifier;
 
     /**
      * Reason or justification for the use of the device.
      */
     @Child(name = "indication", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="Reason or justification for the use of the device." )
+    @Description(shortDefinition="Why device was used", formalDefinition="Reason or justification for the use of the device." )
     protected List<CodeableConcept> indication;
 
     /**
      * Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.
      */
     @Child(name = "notes", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement." )
+    @Description(shortDefinition="Addition details (comments, instructions)", formalDefinition="Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement." )
     protected List<StringType> notes;
 
     /**
      * The time at which the statement was made/recorded.
      */
     @Child(name = "recordedOn", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="The time at which the statement was made/recorded." )
+    @Description(shortDefinition="When statement was recorded", formalDefinition="The time at which the statement was made/recorded." )
     protected DateTimeType recordedOn;
 
     /**
      * The patient who used the device.
      */
     @Child(name = "subject", type = {Patient.class}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="The patient who used the device." )
+    @Description(shortDefinition="Patient using device", formalDefinition="The patient who used the device." )
     protected Reference subject;
 
     /**
@@ -116,7 +118,7 @@ public class DeviceUseStatement extends DomainResource {
      * How often the device was used.
      */
     @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="How often the device was used." )
+    @Description(shortDefinition="How often  the device was used", formalDefinition="How often the device was used." )
     protected Type timing;
 
     private static final long serialVersionUID = -1668571635L;
@@ -602,7 +604,7 @@ public class DeviceUseStatement extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1702620169: // bodySite
-          this.bodySite = (Type) value; // Type
+          this.bodySite = castToType(value); // Type
           break;
         case 2042879511: // whenUsed
           this.whenUsed = castToPeriod(value); // Period
@@ -626,7 +628,7 @@ public class DeviceUseStatement extends DomainResource {
           this.subject = castToReference(value); // Reference
           break;
         case -873664438: // timing
-          this.timing = (Type) value; // Type
+          this.timing = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -636,7 +638,7 @@ public class DeviceUseStatement extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("bodySite[x]"))
-          this.bodySite = (Type) value; // Type
+          this.bodySite = castToType(value); // Type
         else if (name.equals("whenUsed"))
           this.whenUsed = castToPeriod(value); // Period
         else if (name.equals("device"))
@@ -652,7 +654,7 @@ public class DeviceUseStatement extends DomainResource {
         else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
         else if (name.equals("timing[x]"))
-          this.timing = (Type) value; // Type
+          this.timing = castToType(value); // Type
         else
           super.setProperty(name, value);
       }

@@ -58,7 +58,7 @@ public class ServerMimetypeDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String content = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class, content);
+			CapabilityStatement conf = ourCtx.newXmlParser().parseResource(CapabilityStatement.class, content);
 			List<String> strings = toStrings(conf.getFormat());
 			assertThat(strings, contains(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW));
 		} finally {

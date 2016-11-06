@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu3.model;
 
 import org.hl7.fhir.exceptions.FHIRException;
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 public enum ResourceType {
     Account,
@@ -15,6 +15,7 @@ public enum ResourceType {
     Binary,
     BodySite,
     Bundle,
+    CapabilityStatement,
     CarePlan,
     CareTeam,
     Claim,
@@ -27,12 +28,10 @@ public enum ResourceType {
     Composition,
     ConceptMap,
     Condition,
-    Conformance,
     Consent,
     Contract,
     Coverage,
     DataElement,
-    DecisionSupportServiceModule,
     DetectedIssue,
     Device,
     DeviceComponent,
@@ -73,7 +72,7 @@ public enum ResourceType {
     Medication,
     MedicationAdministration,
     MedicationDispense,
-    MedicationOrder,
+    MedicationRequest,
     MedicationStatement,
     MessageHeader,
     NamingSystem,
@@ -99,10 +98,12 @@ public enum ResourceType {
     QuestionnaireResponse,
     ReferralRequest,
     RelatedPerson,
+    RequestGroup,
     RiskAssessment,
     Schedule,
     SearchParameter,
     Sequence,
+    ServiceDefinition,
     Slot,
     Specimen,
     StructureDefinition,
@@ -112,6 +113,7 @@ public enum ResourceType {
     SupplyDelivery,
     SupplyRequest,
     Task,
+    TestReport,
     TestScript,
     ValueSet,
     VisionPrescription;
@@ -139,6 +141,8 @@ public enum ResourceType {
       return "bodysite";
     case Bundle:
       return "bundle";
+    case CapabilityStatement:
+      return "capabilitystatement";
     case CarePlan:
       return "careplan";
     case CareTeam:
@@ -163,8 +167,6 @@ public enum ResourceType {
       return "conceptmap";
     case Condition:
       return "condition";
-    case Conformance:
-      return "conformance";
     case Consent:
       return "consent";
     case Contract:
@@ -173,8 +175,6 @@ public enum ResourceType {
       return "coverage";
     case DataElement:
       return "dataelement";
-    case DecisionSupportServiceModule:
-      return "decisionsupportservicemodule";
     case DetectedIssue:
       return "detectedissue";
     case Device:
@@ -255,8 +255,8 @@ public enum ResourceType {
       return "medicationadministration";
     case MedicationDispense:
       return "medicationdispense";
-    case MedicationOrder:
-      return "medicationorder";
+    case MedicationRequest:
+      return "medicationrequest";
     case MedicationStatement:
       return "medicationstatement";
     case MessageHeader:
@@ -307,6 +307,8 @@ public enum ResourceType {
       return "referralrequest";
     case RelatedPerson:
       return "relatedperson";
+    case RequestGroup:
+      return "requestgroup";
     case RiskAssessment:
       return "riskassessment";
     case Schedule:
@@ -315,6 +317,8 @@ public enum ResourceType {
       return "searchparameter";
     case Sequence:
       return "sequence";
+    case ServiceDefinition:
+      return "servicedefinition";
     case Slot:
       return "slot";
     case Specimen:
@@ -333,6 +337,8 @@ public enum ResourceType {
       return "supplyrequest";
     case Task:
       return "task";
+    case TestReport:
+      return "testreport";
     case TestScript:
       return "testscript";
     case ValueSet:
@@ -365,6 +371,8 @@ public enum ResourceType {
       return BodySite;
     if ("Bundle".equals(code))
       return Bundle;
+    if ("CapabilityStatement".equals(code))
+      return CapabilityStatement;
     if ("CarePlan".equals(code))
       return CarePlan;
     if ("CareTeam".equals(code))
@@ -389,8 +397,6 @@ public enum ResourceType {
       return ConceptMap;
     if ("Condition".equals(code))
       return Condition;
-    if ("Conformance".equals(code))
-      return Conformance;
     if ("Consent".equals(code))
       return Consent;
     if ("Contract".equals(code))
@@ -399,8 +405,6 @@ public enum ResourceType {
       return Coverage;
     if ("DataElement".equals(code))
       return DataElement;
-    if ("DecisionSupportServiceModule".equals(code))
-      return DecisionSupportServiceModule;
     if ("DetectedIssue".equals(code))
       return DetectedIssue;
     if ("Device".equals(code))
@@ -481,8 +485,8 @@ public enum ResourceType {
       return MedicationAdministration;
     if ("MedicationDispense".equals(code))
       return MedicationDispense;
-    if ("MedicationOrder".equals(code))
-      return MedicationOrder;
+    if ("MedicationRequest".equals(code))
+      return MedicationRequest;
     if ("MedicationStatement".equals(code))
       return MedicationStatement;
     if ("MessageHeader".equals(code))
@@ -533,6 +537,8 @@ public enum ResourceType {
       return ReferralRequest;
     if ("RelatedPerson".equals(code))
       return RelatedPerson;
+    if ("RequestGroup".equals(code))
+      return RequestGroup;
     if ("RiskAssessment".equals(code))
       return RiskAssessment;
     if ("Schedule".equals(code))
@@ -541,6 +547,8 @@ public enum ResourceType {
       return SearchParameter;
     if ("Sequence".equals(code))
       return Sequence;
+    if ("ServiceDefinition".equals(code))
+      return ServiceDefinition;
     if ("Slot".equals(code))
       return Slot;
     if ("Specimen".equals(code))
@@ -559,6 +567,8 @@ public enum ResourceType {
       return SupplyRequest;
     if ("Task".equals(code))
       return Task;
+    if ("TestReport".equals(code))
+      return TestReport;
     if ("TestScript".equals(code))
       return TestScript;
     if ("ValueSet".equals(code))

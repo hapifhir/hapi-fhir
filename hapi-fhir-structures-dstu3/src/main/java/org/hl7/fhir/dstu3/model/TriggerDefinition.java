@@ -29,16 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A description of a triggering event.
  */
@@ -480,7 +482,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
           this.eventName = castToString(value); // StringType
           break;
         case 125465476: // eventTiming
-          this.eventTiming = (Type) value; // Type
+          this.eventTiming = castToType(value); // Type
           break;
         case 30931300: // eventData
           this.eventData = castToDataRequirement(value); // DataRequirement
@@ -497,7 +499,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         else if (name.equals("eventName"))
           this.eventName = castToString(value); // StringType
         else if (name.equals("eventTiming[x]"))
-          this.eventTiming = (Type) value; // Type
+          this.eventTiming = castToType(value); // Type
         else if (name.equals("eventData"))
           this.eventData = castToDataRequirement(value); // DataRequirement
         else

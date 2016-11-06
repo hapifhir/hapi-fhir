@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,15 +29,20 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.
  */
@@ -543,13 +546,13 @@ public class RiskAssessment extends DomainResource {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
           break;
         case -1290561483: // probability
-          this.probability = (Type) value; // Type
+          this.probability = castToType(value); // Type
           break;
         case -70741061: // relativeRisk
           this.relativeRisk = castToDecimal(value); // DecimalType
           break;
         case 3648314: // when
-          this.when = (Type) value; // Type
+          this.when = castToType(value); // Type
           break;
         case 345689335: // rationale
           this.rationale = castToString(value); // StringType
@@ -564,11 +567,11 @@ public class RiskAssessment extends DomainResource {
         if (name.equals("outcome"))
           this.outcome = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("probability[x]"))
-          this.probability = (Type) value; // Type
+          this.probability = castToType(value); // Type
         else if (name.equals("relativeRisk"))
           this.relativeRisk = castToDecimal(value); // DecimalType
         else if (name.equals("when[x]"))
-          this.when = (Type) value; // Type
+          this.when = castToType(value); // Type
         else if (name.equals("rationale"))
           this.rationale = castToString(value); // StringType
         else
@@ -1538,7 +1541,7 @@ public class RiskAssessment extends DomainResource {
           this.context = castToReference(value); // Reference
           break;
         case 1687874001: // occurrence
-          this.occurrence = (Type) value; // Type
+          this.occurrence = castToType(value); // Type
           break;
         case -861311717: // condition
           this.condition = castToReference(value); // Reference
@@ -1547,7 +1550,7 @@ public class RiskAssessment extends DomainResource {
           this.performer = castToReference(value); // Reference
           break;
         case -934964668: // reason
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
           break;
         case -1077554975: // method
           this.method = castToCodeableConcept(value); // CodeableConcept
@@ -1586,13 +1589,13 @@ public class RiskAssessment extends DomainResource {
         else if (name.equals("context"))
           this.context = castToReference(value); // Reference
         else if (name.equals("occurrence[x]"))
-          this.occurrence = (Type) value; // Type
+          this.occurrence = castToType(value); // Type
         else if (name.equals("condition"))
           this.condition = castToReference(value); // Reference
         else if (name.equals("performer"))
           this.performer = castToReference(value); // Reference
         else if (name.equals("reason[x]"))
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
         else if (name.equals("method"))
           this.method = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("basis"))

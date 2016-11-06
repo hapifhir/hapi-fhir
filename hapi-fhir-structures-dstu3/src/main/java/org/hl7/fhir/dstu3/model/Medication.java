@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
  */
@@ -48,10 +51,10 @@ public class Medication extends DomainResource {
     @Block()
     public static class MedicationProductComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Describes the form of the item.  Powder; tablets; carton.
+         * Describes the form of the item.  Powder; tablets; capsule.
          */
         @Child(name = "form", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="powder | tablets | carton +", formalDefinition="Describes the form of the item.  Powder; tablets; carton." )
+        @Description(shortDefinition="powder | tablets | capsule +", formalDefinition="Describes the form of the item.  Powder; tablets; capsule." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-form-codes")
         protected CodeableConcept form;
 
@@ -66,7 +69,7 @@ public class Medication extends DomainResource {
          * Information about a group of medication produced or packaged from one production run.
          */
         @Child(name = "batch", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="Information about a group of medication produced or packaged from one production run." )
+        @Description(shortDefinition="Identifies a single production run", formalDefinition="Information about a group of medication produced or packaged from one production run." )
         protected List<MedicationProductBatchComponent> batch;
 
         private static final long serialVersionUID = 1132853671L;
@@ -79,7 +82,7 @@ public class Medication extends DomainResource {
       }
 
         /**
-         * @return {@link #form} (Describes the form of the item.  Powder; tablets; carton.)
+         * @return {@link #form} (Describes the form of the item.  Powder; tablets; capsule.)
          */
         public CodeableConcept getForm() { 
           if (this.form == null)
@@ -95,7 +98,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @param value {@link #form} (Describes the form of the item.  Powder; tablets; carton.)
+         * @param value {@link #form} (Describes the form of the item.  Powder; tablets; capsule.)
          */
         public MedicationProductComponent setForm(CodeableConcept value) { 
           this.form = value;
@@ -210,7 +213,7 @@ public class Medication extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("form", "CodeableConcept", "Describes the form of the item.  Powder; tablets; carton.", 0, java.lang.Integer.MAX_VALUE, form));
+          childrenList.add(new Property("form", "CodeableConcept", "Describes the form of the item.  Powder; tablets; capsule.", 0, java.lang.Integer.MAX_VALUE, form));
           childrenList.add(new Property("ingredient", "", "Identifies a particular constituent of interest in the product.", 0, java.lang.Integer.MAX_VALUE, ingredient));
           childrenList.add(new Property("batch", "", "Information about a group of medication produced or packaged from one production run.", 0, java.lang.Integer.MAX_VALUE, batch));
         }
@@ -454,7 +457,7 @@ public class Medication extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3242771: // item
-          this.item = (Type) value; // Type
+          this.item = castToType(value); // Type
           break;
         case -1413853096: // amount
           this.amount = castToRatio(value); // Ratio
@@ -467,7 +470,7 @@ public class Medication extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("item[x]"))
-          this.item = (Type) value; // Type
+          this.item = castToType(value); // Type
         else if (name.equals("amount"))
           this.amount = castToRatio(value); // Ratio
         else
@@ -547,14 +550,14 @@ public class Medication extends DomainResource {
          * The assigned lot number of a batch of the specified product.
          */
         @Child(name = "lotNumber", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="The assigned lot number of a batch of the specified product." )
+        @Description(shortDefinition="Identifier assigned to batch", formalDefinition="The assigned lot number of a batch of the specified product." )
         protected StringType lotNumber;
 
         /**
          * When this specific batch of product will expire.
          */
         @Child(name = "expirationDate", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="When this specific batch of product will expire." )
+        @Description(shortDefinition="When batch will expire", formalDefinition="When this specific batch of product will expire." )
         protected DateTimeType expirationDate;
 
         private static final long serialVersionUID = 1982738755L;
@@ -1099,7 +1102,7 @@ public class Medication extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3242771: // item
-          this.item = (Type) value; // Type
+          this.item = castToType(value); // Type
           break;
         case -1413853096: // amount
           this.amount = castToSimpleQuantity(value); // SimpleQuantity
@@ -1112,7 +1115,7 @@ public class Medication extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("item[x]"))
-          this.item = (Type) value; // Type
+          this.item = castToType(value); // Type
         else if (name.equals("amount"))
           this.amount = castToSimpleQuantity(value); // SimpleQuantity
         else
@@ -1662,17 +1665,17 @@ public class Medication extends DomainResource {
  /**
    * Search parameter: <b>form</b>
    * <p>
-   * Description: <b>powder | tablets | carton +</b><br>
+   * Description: <b>powder | tablets | capsule +</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Medication.product.form</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token" )
+  @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | capsule +", type="token" )
   public static final String SP_FORM = "form";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>form</b>
    * <p>
-   * Description: <b>powder | tablets | carton +</b><br>
+   * Description: <b>powder | tablets | capsule +</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Medication.product.form</b><br>
    * </p>

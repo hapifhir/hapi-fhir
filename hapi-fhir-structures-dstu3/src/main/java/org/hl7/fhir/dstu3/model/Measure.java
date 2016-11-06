@@ -29,127 +29,26 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The Measure resource provides the definition of a quality measure.
  */
 @ResourceDef(name="Measure", profile="http://hl7.org/fhir/Profile/Measure")
-public class Measure extends DomainResource {
-
-    public enum MeasureStatus {
-        /**
-         * The module is in draft state
-         */
-        DRAFT, 
-        /**
-         * The module is active
-         */
-        ACTIVE, 
-        /**
-         * The module is inactive, either rejected before publication, or retired after publication
-         */
-        INACTIVE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static MeasureStatus fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("draft".equals(codeString))
-          return DRAFT;
-        if ("active".equals(codeString))
-          return ACTIVE;
-        if ("inactive".equals(codeString))
-          return INACTIVE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown MeasureStatus code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case DRAFT: return "draft";
-            case ACTIVE: return "active";
-            case INACTIVE: return "inactive";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case DRAFT: return "http://hl7.org/fhir/module-metadata-status";
-            case ACTIVE: return "http://hl7.org/fhir/module-metadata-status";
-            case INACTIVE: return "http://hl7.org/fhir/module-metadata-status";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case DRAFT: return "The module is in draft state";
-            case ACTIVE: return "The module is active";
-            case INACTIVE: return "The module is inactive, either rejected before publication, or retired after publication";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case DRAFT: return "Draft";
-            case ACTIVE: return "Active";
-            case INACTIVE: return "Inactive";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MeasureStatusEnumFactory implements EnumFactory<MeasureStatus> {
-    public MeasureStatus fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("draft".equals(codeString))
-          return MeasureStatus.DRAFT;
-        if ("active".equals(codeString))
-          return MeasureStatus.ACTIVE;
-        if ("inactive".equals(codeString))
-          return MeasureStatus.INACTIVE;
-        throw new IllegalArgumentException("Unknown MeasureStatus code '"+codeString+"'");
-        }
-        public Enumeration<MeasureStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("draft".equals(codeString))
-          return new Enumeration<MeasureStatus>(this, MeasureStatus.DRAFT);
-        if ("active".equals(codeString))
-          return new Enumeration<MeasureStatus>(this, MeasureStatus.ACTIVE);
-        if ("inactive".equals(codeString))
-          return new Enumeration<MeasureStatus>(this, MeasureStatus.INACTIVE);
-        throw new FHIRException("Unknown MeasureStatus code '"+codeString+"'");
-        }
-    public String toCode(MeasureStatus code) {
-      if (code == MeasureStatus.DRAFT)
-        return "draft";
-      if (code == MeasureStatus.ACTIVE)
-        return "active";
-      if (code == MeasureStatus.INACTIVE)
-        return "inactive";
-      return "?";
-      }
-    public String toSystem(MeasureStatus code) {
-      return code.getSystem();
-      }
-    }
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
+public class Measure extends MetadataResource {
 
     public enum MeasureScoring {
         /**
@@ -397,9 +296,9 @@ public class Measure extends DomainResource {
          */
         MEASUREPOPULATIONEXCLUSION, 
         /**
-         * The measure score for the measure
+         * The measure observation for the measure
          */
-        MEASURESCORE, 
+        MEASUREOBSERVATION, 
         /**
          * added to help the parsers with the generic types
          */
@@ -423,8 +322,8 @@ public class Measure extends DomainResource {
           return MEASUREPOPULATION;
         if ("measure-population-exclusion".equals(codeString))
           return MEASUREPOPULATIONEXCLUSION;
-        if ("measure-score".equals(codeString))
-          return MEASURESCORE;
+        if ("measure-observation".equals(codeString))
+          return MEASUREOBSERVATION;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -440,7 +339,7 @@ public class Measure extends DomainResource {
             case DENOMINATOREXCEPTION: return "denominator-exception";
             case MEASUREPOPULATION: return "measure-population";
             case MEASUREPOPULATIONEXCLUSION: return "measure-population-exclusion";
-            case MEASURESCORE: return "measure-score";
+            case MEASUREOBSERVATION: return "measure-observation";
             default: return "?";
           }
         }
@@ -454,7 +353,7 @@ public class Measure extends DomainResource {
             case DENOMINATOREXCEPTION: return "http://hl7.org/fhir/measure-population";
             case MEASUREPOPULATION: return "http://hl7.org/fhir/measure-population";
             case MEASUREPOPULATIONEXCLUSION: return "http://hl7.org/fhir/measure-population";
-            case MEASURESCORE: return "http://hl7.org/fhir/measure-population";
+            case MEASUREOBSERVATION: return "http://hl7.org/fhir/measure-population";
             default: return "?";
           }
         }
@@ -468,7 +367,7 @@ public class Measure extends DomainResource {
             case DENOMINATOREXCEPTION: return "The denominator exception for the measure";
             case MEASUREPOPULATION: return "The measure population for the measure";
             case MEASUREPOPULATIONEXCLUSION: return "The measure population exclusion for the measure";
-            case MEASURESCORE: return "The measure score for the measure";
+            case MEASUREOBSERVATION: return "The measure observation for the measure";
             default: return "?";
           }
         }
@@ -482,7 +381,7 @@ public class Measure extends DomainResource {
             case DENOMINATOREXCEPTION: return "Denominator Exception";
             case MEASUREPOPULATION: return "Measure Population";
             case MEASUREPOPULATIONEXCLUSION: return "Measure Population Exclusion";
-            case MEASURESCORE: return "Measure Score";
+            case MEASUREOBSERVATION: return "Measure Observation";
             default: return "?";
           }
         }
@@ -509,8 +408,8 @@ public class Measure extends DomainResource {
           return MeasurePopulationType.MEASUREPOPULATION;
         if ("measure-population-exclusion".equals(codeString))
           return MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
-        if ("measure-score".equals(codeString))
-          return MeasurePopulationType.MEASURESCORE;
+        if ("measure-observation".equals(codeString))
+          return MeasurePopulationType.MEASUREOBSERVATION;
         throw new IllegalArgumentException("Unknown MeasurePopulationType code '"+codeString+"'");
         }
         public Enumeration<MeasurePopulationType> fromType(Base code) throws FHIRException {
@@ -535,8 +434,8 @@ public class Measure extends DomainResource {
           return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.MEASUREPOPULATION);
         if ("measure-population-exclusion".equals(codeString))
           return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.MEASUREPOPULATIONEXCLUSION);
-        if ("measure-score".equals(codeString))
-          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.MEASURESCORE);
+        if ("measure-observation".equals(codeString))
+          return new Enumeration<MeasurePopulationType>(this, MeasurePopulationType.MEASUREOBSERVATION);
         throw new FHIRException("Unknown MeasurePopulationType code '"+codeString+"'");
         }
     public String toCode(MeasurePopulationType code) {
@@ -556,8 +455,8 @@ public class Measure extends DomainResource {
         return "measure-population";
       if (code == MeasurePopulationType.MEASUREPOPULATIONEXCLUSION)
         return "measure-population-exclusion";
-      if (code == MeasurePopulationType.MEASURESCORE)
-        return "measure-score";
+      if (code == MeasurePopulationType.MEASUREOBSERVATION)
+        return "measure-observation";
       return "?";
       }
     public String toSystem(MeasurePopulationType code) {
@@ -1091,7 +990,7 @@ public class Measure extends DomainResource {
          * The type of population criteria.
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-score", formalDefinition="The type of population criteria." )
+        @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-observation", formalDefinition="The type of population criteria." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-population")
         protected Enumeration<MeasurePopulationType> type;
 
@@ -2138,150 +2037,79 @@ public class Measure extends DomainResource {
   }
 
     /**
-     * An absolute URL that is used to identify this measure when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published.
+     * A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical URL to reference this measure", formalDefinition="An absolute URL that is used to identify this measure when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published." )
-    protected UriType url;
-
-    /**
-     * A logical identifier for the measure such as the CMS or NQF identifier. Note that at least one identifier is required for non-experimental active artifacts.
-     */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Logical identifier(s) for the measure", formalDefinition="A logical identifier for the measure such as the CMS or NQF identifier. Note that at least one identifier is required for non-experimental active artifacts." )
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Additional identifier for the measure", formalDefinition="A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected List<Identifier> identifier;
 
     /**
-     * The version of the measure, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
+     * Explains why this measure is needed and why it has been designed as it has.
      */
-    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The version of the measure, if any", formalDefinition="The version of the measure, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts." )
-    protected StringType version;
-
-    /**
-     * A machine-friendly name for the measure. This name should be usable as an identifier for the measure by machine processing applications such as code generation.
-     */
-    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A machine-friendly name for the measure", formalDefinition="A machine-friendly name for the measure. This name should be usable as an identifier for the measure by machine processing applications such as code generation." )
-    protected StringType name;
-
-    /**
-     * A short, descriptive, user-friendly title for the measure.
-     */
-    @Child(name = "title", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A user-friendly title for the measure", formalDefinition="A short, descriptive, user-friendly title for the measure." )
-    protected StringType title;
-
-    /**
-     * The status of the measure.
-     */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | active | inactive", formalDefinition="The status of the measure." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/module-metadata-status")
-    protected Enumeration<MeasureStatus> status;
-
-    /**
-     * Determines whether the measure was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.
-     */
-    @Child(name = "experimental", type = {BooleanType.class}, order=6, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="Determines whether the measure was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments." )
-    protected BooleanType experimental;
-
-    /**
-     * A free text natural language description of the measure from the consumer's perspective.
-     */
-    @Child(name = "description", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Natural language description of the measure", formalDefinition="A free text natural language description of the measure from the consumer's perspective." )
-    protected StringType description;
-
-    /**
-     * A brief description of the purpose of the measure.
-     */
-    @Child(name = "purpose", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the purpose of the measure", formalDefinition="A brief description of the purpose of the measure." )
-    protected StringType purpose;
+    @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this measure is defined", formalDefinition="Explains why this measure is needed and why it has been designed as it has." )
+    protected MarkdownType purpose;
 
     /**
      * A detailed description of how the measure is used from a clinical perspective.
      */
-    @Child(name = "usage", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "usage", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Describes the clinical usage of the measure", formalDefinition="A detailed description of how the measure is used from a clinical perspective." )
     protected StringType usage;
 
     /**
-     * The date on which the measure was published.
+     * The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    @Child(name = "publicationDate", type = {DateType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Publication date for this version of the measure", formalDefinition="The date on which the measure was published." )
-    protected DateType publicationDate;
+    @Child(name = "approvalDate", type = {DateType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="When measure approved by publisher", formalDefinition="The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
+    protected DateType approvalDate;
 
     /**
-     * The date on which the measure content was last reviewed.
+     * The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
      */
-    @Child(name = "lastReviewDate", type = {DateType.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Last review date for the measure", formalDefinition="The date on which the measure content was last reviewed." )
+    @Child(name = "lastReviewDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Last review date for the measure", formalDefinition="The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
-     * The period during which the measure content is effective.
+     * The period during which the measure content was or is planned to be effective.
      */
-    @Child(name = "effectivePeriod", type = {Period.class}, order=12, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The effective date range for the measure", formalDefinition="The period during which the measure content is effective." )
+    @Child(name = "effectivePeriod", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The effective date range for the measure", formalDefinition="The period during which the measure content was or is planned to be effective." )
     protected Period effectivePeriod;
-
-    /**
-     * Specifies various attributes of the patient population for whom and/or environment of care in which, the measure is applicable.
-     */
-    @Child(name = "coverage", type = {UsageContext.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the context of use for this measure", formalDefinition="Specifies various attributes of the patient population for whom and/or environment of care in which, the measure is applicable." )
-    protected List<UsageContext> coverage;
 
     /**
      * Clinical topics related to the content of the measure.
      */
-    @Child(name = "topic", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "topic", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Descriptional topics for the measure", formalDefinition="Clinical topics related to the content of the measure." )
     protected List<CodeableConcept> topic;
 
     /**
      * A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.
      */
-    @Child(name = "contributor", type = {Contributor.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contributor", type = {Contributor.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the measure, including authors, editors, reviewers, and endorsers." )
     protected List<Contributor> contributor;
 
     /**
-     * The name of the individual or organization that published the measure (also known as the steward for the measure). This information is required for non-experimental active artifacts.
-     */
-    @Child(name = "publisher", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the measure (also known as the steward for the measure). This information is required for non-experimental active artifacts." )
-    protected StringType publisher;
-
-    /**
-     * Contact details to assist a user in finding and communicating with the publisher.
-     */
-    @Child(name = "contact", type = {ContactDetail.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
-    protected List<ContactDetail> contact;
-
-    /**
      * A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {MarkdownType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure." )
-    protected StringType copyright;
+    protected MarkdownType copyright;
 
     /**
-     * Related resources such as additional documentation, justification, or bibliographic references.
+     * Related artifacts such as additional documentation, justification, or bibliographic references.
      */
-    @Child(name = "relatedResource", type = {RelatedResource.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Related resources for the measure", formalDefinition="Related resources such as additional documentation, justification, or bibliographic references." )
-    protected List<RelatedResource> relatedResource;
+    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Related artifacts for the measure", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    protected List<RelatedArtifact> relatedArtifact;
 
     /**
      * A reference to a Library resource containing the formal logic used by the measure.
      */
-    @Child(name = "library", type = {Library.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "library", type = {Library.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Logic used by the measure", formalDefinition="A reference to a Library resource containing the formal logic used by the measure." )
     protected List<Reference> library;
     /**
@@ -2293,14 +2121,14 @@ public class Measure extends DomainResource {
     /**
      * A disclaimer for the use of the measure.
      */
-    @Child(name = "disclaimer", type = {MarkdownType.class}, order=21, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "disclaimer", type = {MarkdownType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Disclaimer for the measure", formalDefinition="A disclaimer for the use of the measure." )
     protected MarkdownType disclaimer;
 
     /**
      * The measure scoring type, e.g. proportion, CV.
      */
-    @Child(name = "scoring", type = {CodeType.class}, order=22, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "scoring", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="The measure scoring type, e.g. proportion, CV." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-scoring")
     protected Enumeration<MeasureScoring> scoring;
@@ -2308,7 +2136,7 @@ public class Measure extends DomainResource {
     /**
      * The measure type, e.g. process, outcome.
      */
-    @Child(name = "type", type = {CodeType.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "type", type = {CodeType.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="process | outcome", formalDefinition="The measure type, e.g. process, outcome." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-type")
     protected List<Enumeration<MeasureType>> type;
@@ -2316,74 +2144,74 @@ public class Measure extends DomainResource {
     /**
      * A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.
      */
-    @Child(name = "riskAdjustment", type = {StringType.class}, order=24, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "riskAdjustment", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How is risk adjustment applied for this measure", formalDefinition="A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results." )
     protected StringType riskAdjustment;
 
     /**
      * A description of the rate aggregation for the measure.
      */
-    @Child(name = "rateAggregation", type = {StringType.class}, order=25, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "rateAggregation", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How is rate aggregation performed for this measure", formalDefinition="A description of the rate aggregation for the measure." )
     protected StringType rateAggregation;
 
     /**
      * The rationale for the measure.
      */
-    @Child(name = "rationale", type = {MarkdownType.class}, order=26, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "rationale", type = {MarkdownType.class}, order=16, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why does this measure exist", formalDefinition="The rationale for the measure." )
     protected MarkdownType rationale;
 
     /**
      * The clinical recommendation statement for the measure.
      */
-    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=27, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Clinical recommendation", formalDefinition="The clinical recommendation statement for the measure." )
     protected MarkdownType clinicalRecommendationStatement;
 
     /**
      * Improvement notation for the measure, e.g. higher score indicates better quality.
      */
-    @Child(name = "improvementNotation", type = {StringType.class}, order=28, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "improvementNotation", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Improvement notation for the measure, e.g. higher score indicates better quality", formalDefinition="Improvement notation for the measure, e.g. higher score indicates better quality." )
     protected StringType improvementNotation;
 
     /**
      * A narrative description of the complete measure calculation.
      */
-    @Child(name = "definition", type = {MarkdownType.class}, order=29, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "definition", type = {MarkdownType.class}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A natural language definition of the measure", formalDefinition="A narrative description of the complete measure calculation." )
     protected MarkdownType definition;
 
     /**
      * Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.
      */
-    @Child(name = "guidance", type = {MarkdownType.class}, order=30, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "guidance", type = {MarkdownType.class}, order=20, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The guidance for the measure", formalDefinition="Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure." )
     protected MarkdownType guidance;
 
     /**
      * The measure set, e.g. Preventive Care and Screening.
      */
-    @Child(name = "set", type = {StringType.class}, order=31, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "set", type = {StringType.class}, order=21, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The measure set, e.g. Preventive Care and Screening", formalDefinition="The measure set, e.g. Preventive Care and Screening." )
     protected StringType set;
 
     /**
      * A group of population criteria for the measure.
      */
-    @Child(name = "group", type = {}, order=32, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "group", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Population criteria group", formalDefinition="A group of population criteria for the measure." )
     protected List<MeasureGroupComponent> group;
 
     /**
      * The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.
      */
-    @Child(name = "supplementalData", type = {}, order=33, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supplementalData", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Supplemental data", formalDefinition="The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path." )
     protected List<MeasureSupplementalDataComponent> supplementalData;
 
-    private static final long serialVersionUID = 100136119L;
+    private static final long serialVersionUID = -590779721L;
 
   /**
    * Constructor
@@ -2395,13 +2223,13 @@ public class Measure extends DomainResource {
   /**
    * Constructor
    */
-    public Measure(Enumeration<MeasureStatus> status) {
+    public Measure(Enumeration<PublicationStatus> status) {
       super();
       this.status = status;
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this measure when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2421,7 +2249,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this measure when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public Measure setUrlElement(UriType value) { 
       this.url = value;
@@ -2429,14 +2257,14 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this measure when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published.
+     * @return An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this measure when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published.
+     * @param value An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public Measure setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2450,7 +2278,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (A logical identifier for the measure such as the CMS or NQF identifier. Note that at least one identifier is required for non-experimental active artifacts.)
+     * @return {@link #identifier} (A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -2503,7 +2331,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #version} (The version of the measure, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -2523,7 +2351,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #version} (The version of the measure, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public Measure setVersionElement(StringType value) { 
       this.version = value;
@@ -2531,14 +2359,14 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return The version of the measure, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
+     * @return The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The version of the measure, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
+     * @param value The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public Measure setVersion(String value) { 
       if (Utilities.noString(value))
@@ -2552,7 +2380,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (A machine-friendly name for the measure. This name should be usable as an identifier for the measure by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -2572,7 +2400,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #name} (A machine-friendly name for the measure. This name should be usable as an identifier for the measure by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public Measure setNameElement(StringType value) { 
       this.name = value;
@@ -2580,14 +2408,14 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return A machine-friendly name for the measure. This name should be usable as an identifier for the measure by machine processing applications such as code generation.
+     * @return A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value A machine-friendly name for the measure. This name should be usable as an identifier for the measure by machine processing applications such as code generation.
+     * @param value A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public Measure setName(String value) { 
       if (Utilities.noString(value))
@@ -2650,14 +2478,14 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The status of the measure.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (The status of this measure. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<MeasureStatus> getStatusElement() { 
+    public Enumeration<PublicationStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Measure.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<MeasureStatus>(new MeasureStatusEnumFactory()); // bb
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -2670,32 +2498,32 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (The status of the measure.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The status of this measure. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Measure setStatusElement(Enumeration<MeasureStatus> value) { 
+    public Measure setStatusElement(Enumeration<PublicationStatus> value) { 
       this.status = value;
       return this;
     }
 
     /**
-     * @return The status of the measure.
+     * @return The status of this measure. Enables tracking the life-cycle of the content.
      */
-    public MeasureStatus getStatus() { 
+    public PublicationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value The status of the measure.
+     * @param value The status of this measure. Enables tracking the life-cycle of the content.
      */
-    public Measure setStatus(MeasureStatus value) { 
+    public Measure setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<MeasureStatus>(new MeasureStatusEnumFactory());
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #experimental} (Determines whether the measure was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -2715,7 +2543,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #experimental} (Determines whether the measure was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public Measure setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -2723,14 +2551,14 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return Determines whether the measure was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.
+     * @return A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value Determines whether the measure was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.
+     * @param value A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public Measure setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -2740,14 +2568,63 @@ public class Measure extends DomainResource {
     }
 
     /**
+     * @return {@link #date} (The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public Measure setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
+     */
+    public Measure setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #description} (A free text natural language description of the measure from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Measure.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -2762,7 +2639,7 @@ public class Measure extends DomainResource {
     /**
      * @param value {@link #description} (A free text natural language description of the measure from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public Measure setDescriptionElement(StringType value) { 
+    public Measure setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
@@ -2778,25 +2655,25 @@ public class Measure extends DomainResource {
      * @param value A free text natural language description of the measure from the consumer's perspective.
      */
     public Measure setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #purpose} (A brief description of the purpose of the measure.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explains why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
-    public StringType getPurposeElement() { 
+    public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Measure.purpose");
         else if (Configuration.doAutoCreate())
-          this.purpose = new StringType(); // bb
+          this.purpose = new MarkdownType(); // bb
       return this.purpose;
     }
 
@@ -2809,29 +2686,29 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #purpose} (A brief description of the purpose of the measure.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explains why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
-    public Measure setPurposeElement(StringType value) { 
+    public Measure setPurposeElement(MarkdownType value) { 
       this.purpose = value;
       return this;
     }
 
     /**
-     * @return A brief description of the purpose of the measure.
+     * @return Explains why this measure is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value A brief description of the purpose of the measure.
+     * @param value Explains why this measure is needed and why it has been designed as it has.
      */
     public Measure setPurpose(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.purpose = null;
       else {
         if (this.purpose == null)
-          this.purpose = new StringType();
+          this.purpose = new MarkdownType();
         this.purpose.setValue(value);
       }
       return this;
@@ -2887,56 +2764,56 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #publicationDate} (The date on which the measure was published.). This is the underlying object with id, value and extensions. The accessor "getPublicationDate" gives direct access to the value
+     * @return {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
-    public DateType getPublicationDateElement() { 
-      if (this.publicationDate == null)
+    public DateType getApprovalDateElement() { 
+      if (this.approvalDate == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.publicationDate");
+          throw new Error("Attempt to auto-create Measure.approvalDate");
         else if (Configuration.doAutoCreate())
-          this.publicationDate = new DateType(); // bb
-      return this.publicationDate;
+          this.approvalDate = new DateType(); // bb
+      return this.approvalDate;
     }
 
-    public boolean hasPublicationDateElement() { 
-      return this.publicationDate != null && !this.publicationDate.isEmpty();
+    public boolean hasApprovalDateElement() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
     }
 
-    public boolean hasPublicationDate() { 
-      return this.publicationDate != null && !this.publicationDate.isEmpty();
+    public boolean hasApprovalDate() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
     }
 
     /**
-     * @param value {@link #publicationDate} (The date on which the measure was published.). This is the underlying object with id, value and extensions. The accessor "getPublicationDate" gives direct access to the value
+     * @param value {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
-    public Measure setPublicationDateElement(DateType value) { 
-      this.publicationDate = value;
+    public Measure setApprovalDateElement(DateType value) { 
+      this.approvalDate = value;
       return this;
     }
 
     /**
-     * @return The date on which the measure was published.
+     * @return The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    public Date getPublicationDate() { 
-      return this.publicationDate == null ? null : this.publicationDate.getValue();
+    public Date getApprovalDate() { 
+      return this.approvalDate == null ? null : this.approvalDate.getValue();
     }
 
     /**
-     * @param value The date on which the measure was published.
+     * @param value The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    public Measure setPublicationDate(Date value) { 
+    public Measure setApprovalDate(Date value) { 
       if (value == null)
-        this.publicationDate = null;
+        this.approvalDate = null;
       else {
-        if (this.publicationDate == null)
-          this.publicationDate = new DateType();
-        this.publicationDate.setValue(value);
+        if (this.approvalDate == null)
+          this.approvalDate = new DateType();
+        this.approvalDate.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #lastReviewDate} (The date on which the measure content was last reviewed.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @return {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public DateType getLastReviewDateElement() { 
       if (this.lastReviewDate == null)
@@ -2956,7 +2833,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #lastReviewDate} (The date on which the measure content was last reviewed.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @param value {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public Measure setLastReviewDateElement(DateType value) { 
       this.lastReviewDate = value;
@@ -2964,14 +2841,14 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return The date on which the measure content was last reviewed.
+     * @return The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
      */
     public Date getLastReviewDate() { 
       return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
     }
 
     /**
-     * @param value The date on which the measure content was last reviewed.
+     * @param value The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
      */
     public Measure setLastReviewDate(Date value) { 
       if (value == null)
@@ -2985,7 +2862,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #effectivePeriod} (The period during which the measure content is effective.)
+     * @return {@link #effectivePeriod} (The period during which the measure content was or is planned to be effective.)
      */
     public Period getEffectivePeriod() { 
       if (this.effectivePeriod == null)
@@ -3001,7 +2878,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #effectivePeriod} (The period during which the measure content is effective.)
+     * @param value {@link #effectivePeriod} (The period during which the measure content was or is planned to be effective.)
      */
     public Measure setEffectivePeriod(Period value) { 
       this.effectivePeriod = value;
@@ -3009,56 +2886,109 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #coverage} (Specifies various attributes of the patient population for whom and/or environment of care in which, the measure is applicable.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
      */
-    public List<UsageContext> getCoverage() { 
-      if (this.coverage == null)
-        this.coverage = new ArrayList<UsageContext>();
-      return this.coverage;
+    public List<UsageContext> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      return this.useContext;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Measure setCoverage(List<UsageContext> theCoverage) { 
-      this.coverage = theCoverage;
+    public Measure setUseContext(List<UsageContext> theUseContext) { 
+      this.useContext = theUseContext;
       return this;
     }
 
-    public boolean hasCoverage() { 
-      if (this.coverage == null)
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
         return false;
-      for (UsageContext item : this.coverage)
+      for (UsageContext item : this.useContext)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public UsageContext addCoverage() { //3
+    public UsageContext addUseContext() { //3
       UsageContext t = new UsageContext();
-      if (this.coverage == null)
-        this.coverage = new ArrayList<UsageContext>();
-      this.coverage.add(t);
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
       return t;
     }
 
-    public Measure addCoverage(UsageContext t) { //3
+    public Measure addUseContext(UsageContext t) { //3
       if (t == null)
         return this;
-      if (this.coverage == null)
-        this.coverage = new ArrayList<UsageContext>();
-      this.coverage.add(t);
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
      */
-    public UsageContext getCoverageFirstRep() { 
-      if (getCoverage().isEmpty()) {
-        addCoverage();
+    public UsageContext getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
       }
-      return getCoverage().get(0);
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return {@link #jurisdiction} (A jurisdiction in which the measure is intended to be used.)
+     */
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Measure setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public Measure addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
     }
 
     /**
@@ -3168,7 +3098,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the measure (also known as the steward for the measure). This information is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -3188,7 +3118,7 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the measure (also known as the steward for the measure). This information is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public Measure setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -3196,14 +3126,14 @@ public class Measure extends DomainResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the measure (also known as the steward for the measure). This information is required for non-experimental active artifacts.
+     * @return The name of the individual or organization that published the measure.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the measure (also known as the steward for the measure). This information is required for non-experimental active artifacts.
+     * @param value The name of the individual or organization that published the measure.
      */
     public Measure setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -3272,12 +3202,12 @@ public class Measure extends DomainResource {
     /**
      * @return {@link #copyright} (A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
-    public StringType getCopyrightElement() { 
+    public MarkdownType getCopyrightElement() { 
       if (this.copyright == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Measure.copyright");
         else if (Configuration.doAutoCreate())
-          this.copyright = new StringType(); // bb
+          this.copyright = new MarkdownType(); // bb
       return this.copyright;
     }
 
@@ -3292,7 +3222,7 @@ public class Measure extends DomainResource {
     /**
      * @param value {@link #copyright} (A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
-    public Measure setCopyrightElement(StringType value) { 
+    public Measure setCopyrightElement(MarkdownType value) { 
       this.copyright = value;
       return this;
     }
@@ -3308,67 +3238,67 @@ public class Measure extends DomainResource {
      * @param value A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
      */
     public Measure setCopyright(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.copyright = null;
       else {
         if (this.copyright == null)
-          this.copyright = new StringType();
+          this.copyright = new MarkdownType();
         this.copyright.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #relatedResource} (Related resources such as additional documentation, justification, or bibliographic references.)
+     * @return {@link #relatedArtifact} (Related artifacts such as additional documentation, justification, or bibliographic references.)
      */
-    public List<RelatedResource> getRelatedResource() { 
-      if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<RelatedResource>();
-      return this.relatedResource;
+    public List<RelatedArtifact> getRelatedArtifact() { 
+      if (this.relatedArtifact == null)
+        this.relatedArtifact = new ArrayList<RelatedArtifact>();
+      return this.relatedArtifact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Measure setRelatedResource(List<RelatedResource> theRelatedResource) { 
-      this.relatedResource = theRelatedResource;
+    public Measure setRelatedArtifact(List<RelatedArtifact> theRelatedArtifact) { 
+      this.relatedArtifact = theRelatedArtifact;
       return this;
     }
 
-    public boolean hasRelatedResource() { 
-      if (this.relatedResource == null)
+    public boolean hasRelatedArtifact() { 
+      if (this.relatedArtifact == null)
         return false;
-      for (RelatedResource item : this.relatedResource)
+      for (RelatedArtifact item : this.relatedArtifact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public RelatedResource addRelatedResource() { //3
-      RelatedResource t = new RelatedResource();
-      if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<RelatedResource>();
-      this.relatedResource.add(t);
+    public RelatedArtifact addRelatedArtifact() { //3
+      RelatedArtifact t = new RelatedArtifact();
+      if (this.relatedArtifact == null)
+        this.relatedArtifact = new ArrayList<RelatedArtifact>();
+      this.relatedArtifact.add(t);
       return t;
     }
 
-    public Measure addRelatedResource(RelatedResource t) { //3
+    public Measure addRelatedArtifact(RelatedArtifact t) { //3
       if (t == null)
         return this;
-      if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<RelatedResource>();
-      this.relatedResource.add(t);
+      if (this.relatedArtifact == null)
+        this.relatedArtifact = new ArrayList<RelatedArtifact>();
+      this.relatedArtifact.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #relatedResource}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #relatedArtifact}, creating it if it does not already exist
      */
-    public RelatedResource getRelatedResourceFirstRep() { 
-      if (getRelatedResource().isEmpty()) {
-        addRelatedResource();
+    public RelatedArtifact getRelatedArtifactFirstRep() { 
+      if (getRelatedArtifact().isEmpty()) {
+        addRelatedArtifact();
       }
-      return getRelatedResource().get(0);
+      return getRelatedArtifact().get(0);
     }
 
     /**
@@ -4105,26 +4035,28 @@ public class Measure extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this measure when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published.", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("identifier", "Identifier", "A logical identifier for the measure such as the CMS or NQF identifier. Note that at least one identifier is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The version of the measure, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A machine-friendly name for the measure. This name should be usable as an identifier for the measure by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the measure.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("status", "code", "The status of the measure.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "Determines whether the measure was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the measure from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("purpose", "string", "A brief description of the purpose of the measure.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the measure from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("purpose", "markdown", "Explains why this measure is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, java.lang.Integer.MAX_VALUE, usage));
-        childrenList.add(new Property("publicationDate", "date", "The date on which the measure was published.", 0, java.lang.Integer.MAX_VALUE, publicationDate));
-        childrenList.add(new Property("lastReviewDate", "date", "The date on which the measure content was last reviewed.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
-        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the measure content is effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
-        childrenList.add(new Property("coverage", "UsageContext", "Specifies various attributes of the patient population for whom and/or environment of care in which, the measure is applicable.", 0, java.lang.Integer.MAX_VALUE, coverage));
+        childrenList.add(new Property("approvalDate", "date", "The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
+        childrenList.add(new Property("lastReviewDate", "date", "The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
+        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         childrenList.add(new Property("topic", "CodeableConcept", "Clinical topics related to the content of the measure.", 0, java.lang.Integer.MAX_VALUE, topic));
         childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the measure (also known as the steward for the measure). This information is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, publisher));
+        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("copyright", "string", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("relatedResource", "RelatedResource", "Related resources such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedResource));
+        childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, java.lang.Integer.MAX_VALUE, copyright));
+        childrenList.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
         childrenList.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library));
         childrenList.add(new Property("disclaimer", "markdown", "A disclaimer for the use of the measure.", 0, java.lang.Integer.MAX_VALUE, disclaimer));
         childrenList.add(new Property("scoring", "code", "The measure scoring type, e.g. proportion, CV.", 0, java.lang.Integer.MAX_VALUE, scoring));
@@ -4149,21 +4081,23 @@ public class Measure extends DomainResource {
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<MeasureStatus>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // StringType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
-        case 1470566394: /*publicationDate*/ return this.publicationDate == null ? new Base[0] : new Base[] {this.publicationDate}; // DateType
+        case 223539345: /*approvalDate*/ return this.approvalDate == null ? new Base[0] : new Base[] {this.approvalDate}; // DateType
         case -1687512484: /*lastReviewDate*/ return this.lastReviewDate == null ? new Base[0] : new Base[] {this.lastReviewDate}; // DateType
         case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
-        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // UsageContext
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
         case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
-        case 1554540889: /*relatedResource*/ return this.relatedResource == null ? new Base[0] : this.relatedResource.toArray(new Base[this.relatedResource.size()]); // RelatedResource
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
+        case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
         case 432371099: /*disclaimer*/ return this.disclaimer == null ? new Base[0] : new Base[] {this.disclaimer}; // MarkdownType
         case 1924005583: /*scoring*/ return this.scoring == null ? new Base[0] : new Base[] {this.scoring}; // Enumeration<MeasureScoring>
@@ -4202,22 +4136,25 @@ public class Measure extends DomainResource {
           this.title = castToString(value); // StringType
           break;
         case -892481550: // status
-          this.status = new MeasureStatusEnumFactory().fromType(value); // Enumeration<MeasureStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
           break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -220463842: // purpose
-          this.purpose = castToString(value); // StringType
+          this.purpose = castToMarkdown(value); // MarkdownType
           break;
         case 111574433: // usage
           this.usage = castToString(value); // StringType
           break;
-        case 1470566394: // publicationDate
-          this.publicationDate = castToDate(value); // DateType
+        case 223539345: // approvalDate
+          this.approvalDate = castToDate(value); // DateType
           break;
         case -1687512484: // lastReviewDate
           this.lastReviewDate = castToDate(value); // DateType
@@ -4225,8 +4162,11 @@ public class Measure extends DomainResource {
         case -403934648: // effectivePeriod
           this.effectivePeriod = castToPeriod(value); // Period
           break;
-        case -351767064: // coverage
-          this.getCoverage().add(castToUsageContext(value)); // UsageContext
+        case -669707736: // useContext
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          break;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case 110546223: // topic
           this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
@@ -4241,10 +4181,10 @@ public class Measure extends DomainResource {
           this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case 1522889671: // copyright
-          this.copyright = castToString(value); // StringType
+          this.copyright = castToMarkdown(value); // MarkdownType
           break;
-        case 1554540889: // relatedResource
-          this.getRelatedResource().add(castToRelatedResource(value)); // RelatedResource
+        case 666807069: // relatedArtifact
+          this.getRelatedArtifact().add(castToRelatedArtifact(value)); // RelatedArtifact
           break;
         case 166208699: // library
           this.getLibrary().add(castToReference(value)); // Reference
@@ -4306,23 +4246,27 @@ public class Measure extends DomainResource {
         else if (name.equals("title"))
           this.title = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new MeasureStatusEnumFactory().fromType(value); // Enumeration<MeasureStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("experimental"))
           this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("purpose"))
-          this.purpose = castToString(value); // StringType
+          this.purpose = castToMarkdown(value); // MarkdownType
         else if (name.equals("usage"))
           this.usage = castToString(value); // StringType
-        else if (name.equals("publicationDate"))
-          this.publicationDate = castToDate(value); // DateType
+        else if (name.equals("approvalDate"))
+          this.approvalDate = castToDate(value); // DateType
         else if (name.equals("lastReviewDate"))
           this.lastReviewDate = castToDate(value); // DateType
         else if (name.equals("effectivePeriod"))
           this.effectivePeriod = castToPeriod(value); // Period
-        else if (name.equals("coverage"))
-          this.getCoverage().add(castToUsageContext(value));
+        else if (name.equals("useContext"))
+          this.getUseContext().add(castToUsageContext(value));
+        else if (name.equals("jurisdiction"))
+          this.getJurisdiction().add(castToCodeableConcept(value));
         else if (name.equals("topic"))
           this.getTopic().add(castToCodeableConcept(value));
         else if (name.equals("contributor"))
@@ -4332,9 +4276,9 @@ public class Measure extends DomainResource {
         else if (name.equals("contact"))
           this.getContact().add(castToContactDetail(value));
         else if (name.equals("copyright"))
-          this.copyright = castToString(value); // StringType
-        else if (name.equals("relatedResource"))
-          this.getRelatedResource().add(castToRelatedResource(value));
+          this.copyright = castToMarkdown(value); // MarkdownType
+        else if (name.equals("relatedArtifact"))
+          this.getRelatedArtifact().add(castToRelatedArtifact(value));
         else if (name.equals("library"))
           this.getLibrary().add(castToReference(value));
         else if (name.equals("disclaimer"))
@@ -4375,21 +4319,23 @@ public class Measure extends DomainResource {
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
         case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<MeasureStatus>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // StringType
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
+        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
         case 111574433: throw new FHIRException("Cannot make property usage as it is not a complex type"); // StringType
-        case 1470566394: throw new FHIRException("Cannot make property publicationDate as it is not a complex type"); // DateType
+        case 223539345: throw new FHIRException("Cannot make property approvalDate as it is not a complex type"); // DateType
         case -1687512484: throw new FHIRException("Cannot make property lastReviewDate as it is not a complex type"); // DateType
         case -403934648:  return getEffectivePeriod(); // Period
-        case -351767064:  return addCoverage(); // UsageContext
+        case -669707736:  return addUseContext(); // UsageContext
+        case -507075711:  return addJurisdiction(); // CodeableConcept
         case 110546223:  return addTopic(); // CodeableConcept
         case -1895276325:  return addContributor(); // Contributor
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // ContactDetail
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
-        case 1554540889:  return addRelatedResource(); // RelatedResource
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
+        case 666807069:  return addRelatedArtifact(); // RelatedArtifact
         case 166208699:  return addLibrary(); // Reference
         case 432371099: throw new FHIRException("Cannot make property disclaimer as it is not a complex type"); // MarkdownType
         case 1924005583: throw new FHIRException("Cannot make property scoring as it is not a complex type"); // Enumeration<MeasureScoring>
@@ -4432,6 +4378,9 @@ public class Measure extends DomainResource {
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.experimental");
         }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.date");
+        }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
         }
@@ -4441,8 +4390,8 @@ public class Measure extends DomainResource {
         else if (name.equals("usage")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.usage");
         }
-        else if (name.equals("publicationDate")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.publicationDate");
+        else if (name.equals("approvalDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.approvalDate");
         }
         else if (name.equals("lastReviewDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.lastReviewDate");
@@ -4451,8 +4400,11 @@ public class Measure extends DomainResource {
           this.effectivePeriod = new Period();
           return this.effectivePeriod;
         }
-        else if (name.equals("coverage")) {
-          return addCoverage();
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
         }
         else if (name.equals("topic")) {
           return addTopic();
@@ -4469,8 +4421,8 @@ public class Measure extends DomainResource {
         else if (name.equals("copyright")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.copyright");
         }
-        else if (name.equals("relatedResource")) {
-          return addRelatedResource();
+        else if (name.equals("relatedArtifact")) {
+          return addRelatedArtifact();
         }
         else if (name.equals("library")) {
           return addLibrary();
@@ -4537,16 +4489,22 @@ public class Measure extends DomainResource {
         dst.title = title == null ? null : title.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.usage = usage == null ? null : usage.copy();
-        dst.publicationDate = publicationDate == null ? null : publicationDate.copy();
+        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
         dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
         dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
-        if (coverage != null) {
-          dst.coverage = new ArrayList<UsageContext>();
-          for (UsageContext i : coverage)
-            dst.coverage.add(i.copy());
+        if (useContext != null) {
+          dst.useContext = new ArrayList<UsageContext>();
+          for (UsageContext i : useContext)
+            dst.useContext.add(i.copy());
+        };
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
         };
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
@@ -4565,10 +4523,10 @@ public class Measure extends DomainResource {
             dst.contact.add(i.copy());
         };
         dst.copyright = copyright == null ? null : copyright.copy();
-        if (relatedResource != null) {
-          dst.relatedResource = new ArrayList<RelatedResource>();
-          for (RelatedResource i : relatedResource)
-            dst.relatedResource.add(i.copy());
+        if (relatedArtifact != null) {
+          dst.relatedArtifact = new ArrayList<RelatedArtifact>();
+          for (RelatedArtifact i : relatedArtifact)
+            dst.relatedArtifact.add(i.copy());
         };
         if (library != null) {
           dst.library = new ArrayList<Reference>();
@@ -4614,16 +4572,12 @@ public class Measure extends DomainResource {
         if (!(other instanceof Measure))
           return false;
         Measure o = (Measure) other;
-        return compareDeep(url, o.url, true) && compareDeep(identifier, o.identifier, true) && compareDeep(version, o.version, true)
-           && compareDeep(name, o.name, true) && compareDeep(title, o.title, true) && compareDeep(status, o.status, true)
-           && compareDeep(experimental, o.experimental, true) && compareDeep(description, o.description, true)
-           && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true) && compareDeep(publicationDate, o.publicationDate, true)
-           && compareDeep(lastReviewDate, o.lastReviewDate, true) && compareDeep(effectivePeriod, o.effectivePeriod, true)
-           && compareDeep(coverage, o.coverage, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
-           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(copyright, o.copyright, true)
-           && compareDeep(relatedResource, o.relatedResource, true) && compareDeep(library, o.library, true)
-           && compareDeep(disclaimer, o.disclaimer, true) && compareDeep(scoring, o.scoring, true) && compareDeep(type, o.type, true)
-           && compareDeep(riskAdjustment, o.riskAdjustment, true) && compareDeep(rateAggregation, o.rateAggregation, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true)
+           && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
+           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
+           && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
+           && compareDeep(library, o.library, true) && compareDeep(disclaimer, o.disclaimer, true) && compareDeep(scoring, o.scoring, true)
+           && compareDeep(type, o.type, true) && compareDeep(riskAdjustment, o.riskAdjustment, true) && compareDeep(rateAggregation, o.rateAggregation, true)
            && compareDeep(rationale, o.rationale, true) && compareDeep(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
            && compareDeep(improvementNotation, o.improvementNotation, true) && compareDeep(definition, o.definition, true)
            && compareDeep(guidance, o.guidance, true) && compareDeep(set, o.set, true) && compareDeep(group, o.group, true)
@@ -4637,25 +4591,21 @@ public class Measure extends DomainResource {
         if (!(other instanceof Measure))
           return false;
         Measure o = (Measure) other;
-        return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
-           && compareValues(title, o.title, true) && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true)
-           && compareValues(description, o.description, true) && compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true)
-           && compareValues(publicationDate, o.publicationDate, true) && compareValues(lastReviewDate, o.lastReviewDate, true)
-           && compareValues(publisher, o.publisher, true) && compareValues(copyright, o.copyright, true) && compareValues(disclaimer, o.disclaimer, true)
-           && compareValues(scoring, o.scoring, true) && compareValues(type, o.type, true) && compareValues(riskAdjustment, o.riskAdjustment, true)
-           && compareValues(rateAggregation, o.rateAggregation, true) && compareValues(rationale, o.rationale, true)
-           && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true) && compareValues(improvementNotation, o.improvementNotation, true)
-           && compareValues(definition, o.definition, true) && compareValues(guidance, o.guidance, true) && compareValues(set, o.set, true)
-          ;
+        return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
+           && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
+           && compareValues(disclaimer, o.disclaimer, true) && compareValues(scoring, o.scoring, true) && compareValues(type, o.type, true)
+           && compareValues(riskAdjustment, o.riskAdjustment, true) && compareValues(rateAggregation, o.rateAggregation, true)
+           && compareValues(rationale, o.rationale, true) && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
+           && compareValues(improvementNotation, o.improvementNotation, true) && compareValues(definition, o.definition, true)
+           && compareValues(guidance, o.guidance, true) && compareValues(set, o.set, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version
-          , name, title, status, experimental, description, purpose, usage, publicationDate
-          , lastReviewDate, effectivePeriod, coverage, topic, contributor, publisher, contact
-          , copyright, relatedResource, library, disclaimer, scoring, type, riskAdjustment
-          , rateAggregation, rationale, clinicalRecommendationStatement, improvementNotation, definition
-          , guidance, set, group, supplementalData);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, usage
+          , approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright, relatedArtifact
+          , library, disclaimer, scoring, type, riskAdjustment, rateAggregation, rationale
+          , clinicalRecommendationStatement, improvementNotation, definition, guidance, set
+          , group, supplementalData);
       }
 
   @Override
@@ -4664,24 +4614,144 @@ public class Measure extends DomainResource {
    }
 
  /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The measure publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Measure.date</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="date", path="Measure.date", description="The measure publication date", type="date" )
+  public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The measure publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Measure.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>Logical identifier for the module (e.g. CMS-143)</b><br>
+   * Description: <b>External identifiers for the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Measure.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
+  @SearchParamDefinition(name="identifier", path="Measure.identifier", description="External identifiers for the measure", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>Logical identifier for the module (e.g. CMS-143)</b><br>
+   * Description: <b>External identifiers for the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.identifier</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>effective</b>
+   * <p>
+   * Description: <b>Effective time associated with the measure</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Measure.effectivePeriod</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="effective", path="Measure.effectivePeriod", description="Effective time associated with the measure", type="date" )
+  public static final String SP_EFFECTIVE = "effective";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>effective</b>
+   * <p>
+   * Description: <b>Effective time associated with the measure</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Measure.effectivePeriod</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam EFFECTIVE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EFFECTIVE);
+
+ /**
+   * Search parameter: <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for measure</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Measure.jurisdiction</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="jurisdiction", path="Measure.jurisdiction", description="Intended jurisdiction for measure", type="token" )
+  public static final String SP_JURISDICTION = "jurisdiction";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for measure</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Measure.jurisdiction</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Name of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.name</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="name", path="Measure.name", description="Name of the measure", type="string" )
+  public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Name of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.description</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="description", path="Measure.description", description="Text search against the description of the measure", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.publisher</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="publisher", path="Measure.publisher", description="Name of the publisher of the measure", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the measure</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Measure.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
 
  /**
    * Search parameter: <b>topic</b>
@@ -4704,39 +4774,19 @@ public class Measure extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
 
  /**
-   * Search parameter: <b>description</b>
-   * <p>
-   * Description: <b>Text search against the description</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Measure.description</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="description", path="Measure.description", description="Text search against the description", type="string" )
-  public static final String SP_DESCRIPTION = "description";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>description</b>
-   * <p>
-   * Description: <b>Text search against the description</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Measure.description</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
-
- /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title</b><br>
+   * Description: <b>Text search against the title of the measure</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Measure.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Measure.title", description="Text search against the title", type="string" )
+  @SearchParamDefinition(name="title", path="Measure.title", description="Text search against the title of the measure", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title</b><br>
+   * Description: <b>Text search against the title of the measure</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Measure.title</b><br>
    * </p>
@@ -4746,37 +4796,57 @@ public class Measure extends DomainResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>Version of the module (e.g. 1.0.0)</b><br>
-   * Type: <b>string</b><br>
+   * Description: <b>The version identifier of the measure</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>Measure.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="Measure.version", description="Version of the module (e.g. 1.0.0)", type="string" )
+  @SearchParamDefinition(name="version", path="Measure.version", description="The version identifier of the measure", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>Version of the module (e.g. 1.0.0)</b><br>
-   * Type: <b>string</b><br>
+   * Description: <b>The version identifier of the measure</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>Measure.version</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam VERSION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VERSION);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the measure</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>Measure.url</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="url", path="Measure.url", description="The uri that identifies the measure", type="uri" )
+  public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the measure</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>Measure.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
 
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>Status of the module</b><br>
+   * Description: <b>The current status of the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Measure.status", description="Status of the module", type="token" )
+  @SearchParamDefinition(name="status", path="Measure.status", description="The current status of the measure", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>Status of the module</b><br>
+   * Description: <b>The current status of the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.status</b><br>
    * </p>

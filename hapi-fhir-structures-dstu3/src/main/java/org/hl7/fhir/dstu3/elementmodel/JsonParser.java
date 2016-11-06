@@ -38,25 +38,8 @@ public class JsonParser extends ParserBase {
 	}
 
 	@Override
-	public Element parse(InputStream stream) throws Exception {
-		// if we're parsing at this point, then we're going to use the custom parser
-		map = new HashMap<JsonElement, LocationData>();
-		String source = TextFile.streamToString(stream);
-		if (policy == ValidationPolicy.EVERYTHING) {
-			JsonObject obj = null; 
-      try {
-			  obj = JsonTrackingParser.parse(source, map);
-      } catch (Exception e) {  
-				logError(-1, -1, "(document)", IssueType.INVALID, "Error parsing JSON: "+e.getMessage(), IssueSeverity.FATAL);
-      	return null;
-      }
-		  assert (map.containsKey(obj));
-			return parse(obj);	
-		} else {
-			JsonObject obj = (JsonObject) new com.google.gson.JsonParser().parse(source);
-			assert (map.containsKey(obj));
-			return parse(obj);	
-		} 
+	public Element parse(InputStream stream)  {
+		throw new UnsupportedOperationException();
 	}
 
 	public Element parse(JsonObject object, Map<JsonElement, LocationData> map) throws Exception {

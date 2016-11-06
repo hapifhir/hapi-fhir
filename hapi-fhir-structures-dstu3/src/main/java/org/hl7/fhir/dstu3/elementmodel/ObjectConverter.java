@@ -2,13 +2,23 @@ package org.hl7.fhir.dstu3.elementmodel;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.ElementDefinition;
+import org.hl7.fhir.dstu3.model.Factory;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
+
 
 public class ObjectConverter  {
 
@@ -18,7 +28,7 @@ public class ObjectConverter  {
     this.context = context;
   }
 
-  public Element convert(Resource ig) throws Exception {
+  public Element convert(Resource ig) throws IOException, FHIRFormatError, DefinitionException {
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
     org.hl7.fhir.dstu3.formats.JsonParser jp = new org.hl7.fhir.dstu3.formats.JsonParser();
     jp.compose(bs, ig);
@@ -60,6 +70,18 @@ public class ObjectConverter  {
       return path.substring(path.lastIndexOf('.')+1);
     else
       return path;
+  }
+
+  public Type convertToType(Element element) throws FHIRException {
+    Type b = new Factory().create(element.fhirType());
+    if (b instanceof PrimitiveType) {
+      ((PrimitiveType) b).setValueAsString(element.primitiveValue());
+    } else {
+      for (Element child : element.getChildren()) {
+        b.setProperty(child.getName(), convertToType(child));
+      }
+    }
+    return b;
   }
 
 

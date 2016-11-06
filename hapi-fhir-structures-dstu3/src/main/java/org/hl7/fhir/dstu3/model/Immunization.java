@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
  */
@@ -47,25 +50,13 @@ public class Immunization extends DomainResource {
 
     public enum ImmunizationStatus {
         /**
-         * The administration has started but has not yet completed.
-         */
-        INPROGRESS, 
-        /**
-         * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended".
-         */
-        ONHOLD, 
-        /**
-         * All actions that are implied by the administration have occurred.
+         * null
          */
         COMPLETED, 
         /**
-         * The administration was entered in error and therefore nullified.
+         * null
          */
         ENTEREDINERROR, 
-        /**
-         * Actions implied by the administration have been permanently halted, before all of them occurred.
-         */
-        STOPPED, 
         /**
          * added to help the parsers with the generic types
          */
@@ -73,16 +64,10 @@ public class Immunization extends DomainResource {
         public static ImmunizationStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("in-progress".equals(codeString))
-          return INPROGRESS;
-        if ("on-hold".equals(codeString))
-          return ONHOLD;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        if ("stopped".equals(codeString))
-          return STOPPED;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -90,41 +75,29 @@ public class Immunization extends DomainResource {
         }
         public String toCode() {
           switch (this) {
-            case INPROGRESS: return "in-progress";
-            case ONHOLD: return "on-hold";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
-            case STOPPED: return "stopped";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "http://hl7.org/fhir/medication-admin-status";
-            case ONHOLD: return "http://hl7.org/fhir/medication-admin-status";
             case COMPLETED: return "http://hl7.org/fhir/medication-admin-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/medication-admin-status";
-            case STOPPED: return "http://hl7.org/fhir/medication-admin-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "The administration has started but has not yet completed.";
-            case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
-            case COMPLETED: return "All actions that are implied by the administration have occurred.";
-            case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";
-            case STOPPED: return "Actions implied by the administration have been permanently halted, before all of them occurred.";
+            case COMPLETED: return "";
+            case ENTEREDINERROR: return "";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case INPROGRESS: return "In Progress";
-            case ONHOLD: return "On Hold";
-            case COMPLETED: return "Completed";
-            case ENTEREDINERROR: return "Entered in Error";
-            case STOPPED: return "Stopped";
+            case COMPLETED: return "completed";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -135,16 +108,10 @@ public class Immunization extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("in-progress".equals(codeString))
-          return ImmunizationStatus.INPROGRESS;
-        if ("on-hold".equals(codeString))
-          return ImmunizationStatus.ONHOLD;
         if ("completed".equals(codeString))
           return ImmunizationStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ImmunizationStatus.ENTEREDINERROR;
-        if ("stopped".equals(codeString))
-          return ImmunizationStatus.STOPPED;
         throw new IllegalArgumentException("Unknown ImmunizationStatus code '"+codeString+"'");
         }
         public Enumeration<ImmunizationStatus> fromType(Base code) throws FHIRException {
@@ -153,29 +120,17 @@ public class Immunization extends DomainResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("in-progress".equals(codeString))
-          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.INPROGRESS);
-        if ("on-hold".equals(codeString))
-          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.ONHOLD);
         if ("completed".equals(codeString))
           return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.ENTEREDINERROR);
-        if ("stopped".equals(codeString))
-          return new Enumeration<ImmunizationStatus>(this, ImmunizationStatus.STOPPED);
         throw new FHIRException("Unknown ImmunizationStatus code '"+codeString+"'");
         }
     public String toCode(ImmunizationStatus code) {
-      if (code == ImmunizationStatus.INPROGRESS)
-        return "in-progress";
-      if (code == ImmunizationStatus.ONHOLD)
-        return "on-hold";
       if (code == ImmunizationStatus.COMPLETED)
         return "completed";
       if (code == ImmunizationStatus.ENTEREDINERROR)
         return "entered-in-error";
-      if (code == ImmunizationStatus.STOPPED)
-        return "stopped";
       return "?";
       }
     public String toSystem(ImmunizationStatus code) {
@@ -1328,8 +1283,8 @@ public class Immunization extends DomainResource {
      * Indicates the current status of the vaccination event.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="in-progress | on-hold | completed | entered-in-error | stopped", formalDefinition="Indicates the current status of the vaccination event." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-admin-status")
+    @Description(shortDefinition="completed | entered-in-error", formalDefinition="Indicates the current status of the vaccination event." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-status")
     protected Enumeration<ImmunizationStatus> status;
 
     /**

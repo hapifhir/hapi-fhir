@@ -35,6 +35,7 @@
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))">Pattern and value are mutually exclusive (inherited)</sch:assert>
       <sch:assert test="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))">Constraints must be unique by key (inherited)</sch:assert>
       <sch:assert test="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))">Types must be unique by the combination of code and profile (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\\-\\_]+$')">sliceName must be a proper token (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">default value and meaningWhenMissing are mutually exclusive (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -50,6 +51,7 @@
   <sch:pattern>
     <sch:title>ElementDefinition.slicing</sch:title>
     <sch:rule context="f:ElementDefinition/f:slicing">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="(f:discriminator) or (f:description)">If there are no discriminators, there must be a definition (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -57,6 +59,12 @@
     <sch:title>ElementDefinition.max</sch:title>
     <sch:rule context="f:ElementDefinition/f:max">
       <sch:assert test="@value='*' or (normalize-space(@value)!='' and normalize-space(translate(@value, '0123456789',''))='')">Max SHALL be a number or &quot;*&quot; (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
+    <sch:title>ElementDefinition.base</sch:title>
+    <sch:rule context="f:ElementDefinition/f:base">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
@@ -69,19 +77,28 @@
   <sch:pattern>
     <sch:title>ElementDefinition.type</sch:title>
     <sch:rule context="f:ElementDefinition/f:type">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])">Aggregation may only be specified if one of the allowed types for the element is a resource (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
+    <sch:title>ElementDefinition.constraint</sch:title>
+    <sch:rule context="f:ElementDefinition/f:constraint">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
     <sch:title>ElementDefinition.binding</sch:title>
     <sch:rule context="f:ElementDefinition/f:binding">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="(exists(f:valueSetUri) or exists(f:valueSetReference)) or exists(f:description)">provide either a reference or a description (or both) (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:valueSetUri)) or (starts-with(string(f:valueSetUri/@value), 'http:') or starts-with(string(f:valueSetUri/@value), 'https:') or starts-with(string(f:valueSetUri/@value), 'urn:'))">ValueSet as a URI SHALL start with http:// or https:// urn: (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
-    <sch:title>ElementDefinition.binding.valueSet[x]</sch:title>
-    <sch:rule context="f:ElementDefinition/f:binding/f:valueSet[x]">
-      <sch:assert test="starts-with(string(@value), 'http:') or starts-with(string(@value), 'https:') or starts-with(string(@value), 'urn:')">URI SHALL start with http:// or https:// urn: (inherited)</sch:assert>
+    <sch:title>ElementDefinition.mapping</sch:title>
+    <sch:rule context="f:ElementDefinition/f:mapping">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>

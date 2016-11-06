@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,19 +29,19 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
+import java.math.*;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
  */
@@ -1347,7 +1345,7 @@ public class Timing extends Type implements ICompositeType {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1383205195: // bounds
-          this.bounds = (Type) value; // Type
+          this.bounds = castToType(value); // Type
           break;
         case 94851343: // count
           this.count = castToInteger(value); // IntegerType
@@ -1393,7 +1391,7 @@ public class Timing extends Type implements ICompositeType {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("bounds[x]"))
-          this.bounds = (Type) value; // Type
+          this.bounds = castToType(value); // Type
         else if (name.equals("count"))
           this.count = castToInteger(value); // IntegerType
         else if (name.equals("countMax"))

@@ -22,20 +22,44 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Conformance.*;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceStatementKind;
+import org.hl7.fhir.dstu3.model.Conformance.ResourceInteractionComponent;
+import org.hl7.fhir.dstu3.model.Conformance.RestfulConformanceMode;
+import org.hl7.fhir.dstu3.model.Conformance.SystemRestfulInteraction;
+import org.hl7.fhir.dstu3.model.Conformance.TypeRestfulInteraction;
+import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -46,8 +70,14 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.method.*;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
+import ca.uhn.fhir.rest.method.IParameter;
+import ca.uhn.fhir.rest.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.method.OperationMethodBinding.ReturnType;
+import ca.uhn.fhir.rest.method.OperationParameter;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
@@ -63,7 +93,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
  * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
  * </p>
+ * 
+ * @deprecated Use {@link ServerCapabilityStatementProvider} instead
  */
+@Deprecated
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProvider.class);
@@ -194,7 +227,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML_NEW);
 		retVal.addFormat(Constants.CT_FHIR_JSON_NEW);
-		retVal.setStatus(ConformanceResourceStatus.ACTIVE);
+		retVal.setStatus(PublicationStatus.ACTIVE);
 
 		ConformanceRestComponent rest = retVal.addRest();
 		rest.setMode(RestfulConformanceMode.SERVER);
@@ -492,9 +525,12 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		}
 
 		OperationDefinition op = new OperationDefinition();
-		op.setStatus(ConformanceResourceStatus.ACTIVE);
+		op.setStatus(PublicationStatus.ACTIVE);
 		op.setKind(OperationKind.OPERATION);
 		op.setIdempotent(true);
+		op.setType(false);
+		op.setInstance(false);
+		op.setSystem(false);
 
 		Set<String> inParams = new HashSet<String>();
 		Set<String> outParams = new HashSet<String>();
@@ -509,6 +545,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			if (sharedDescription.isCanOperateAtServerLevel()) {
 				op.setSystem(true);
 			}
+			if (sharedDescription.isCanOperateAtTypeLevel()) {
+				op.setType(true);
+			}
 			if (!sharedDescription.isIdempotent()) {
 				op.setIdempotent(sharedDescription.isIdempotent());
 			}
@@ -520,7 +559,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				op.setSystem(sharedDescription.isCanOperateAtServerLevel());
 			}
 			if (isNotBlank(sharedDescription.getResourceName())) {
-				op.addTypeElement().setValue(sharedDescription.getResourceName());
+				op.addResourceElement().setValue(sharedDescription.getResourceName());
 			}
 
 			for (IParameter nextParamUntyped : sharedDescription.getParameters()) {

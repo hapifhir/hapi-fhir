@@ -29,18 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.
  */
@@ -387,7 +388,7 @@ public class DataRequirement extends Type implements ICompositeType {
           this.path = castToString(value); // StringType
           break;
         case -1410174671: // valueSet
-          this.valueSet = (Type) value; // Type
+          this.valueSet = castToType(value); // Type
           break;
         case -766209282: // valueCode
           this.getValueCode().add(castToCode(value)); // CodeType
@@ -408,7 +409,7 @@ public class DataRequirement extends Type implements ICompositeType {
         if (name.equals("path"))
           this.path = castToString(value); // StringType
         else if (name.equals("valueSet[x]"))
-          this.valueSet = (Type) value; // Type
+          this.valueSet = castToType(value); // Type
         else if (name.equals("valueCode"))
           this.getValueCode().add(castToCode(value));
         else if (name.equals("valueCoding"))
@@ -674,7 +675,7 @@ public class DataRequirement extends Type implements ICompositeType {
           this.path = castToString(value); // StringType
           break;
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -686,7 +687,7 @@ public class DataRequirement extends Type implements ICompositeType {
         if (name.equals("path"))
           this.path = castToString(value); // StringType
         else if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else
           super.setProperty(name, value);
       }

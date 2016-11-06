@@ -29,637 +29,183 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Resource to define constraints on the Expansion of a FHIR ValueSet.
  */
 @ResourceDef(name="ExpansionProfile", profile="http://hl7.org/fhir/Profile/ExpansionProfile")
-@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "publisher", "contact", "date", "description", "codeSystem", "includeDesignations", "designation", "includeDefinition", "includeInactive", "excludeNested", "excludeNotForUI", "excludePostCoordinated", "displayLanguage", "limitedExpansion"})
-public class ExpansionProfile extends BaseConformance {
+@ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "jurisdiction", "fixedVersion", "excludedSystem", "includeDesignations", "designation", "includeDefinition", "activeOnly", "excludeNested", "excludeNotForUI", "excludePostCoordinated", "displayLanguage", "limitedExpansion"})
+public class ExpansionProfile extends MetadataResource {
 
-    @Block()
-    public static class ExpansionProfileContactComponent extends BackboneElement implements IBaseBackboneElement {
+    public enum SystemVersionProcessingMode {
         /**
-         * The name of an individual to contact regarding the expansion profile.
+         * Use this version of the code system if a value set doesn't specify a version
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the expansion profile." )
-        protected StringType name;
-
+        DEFAULT, 
         /**
-         * Contact details for individual (if a name was provided) or the publisher.
+         * Use this version of the code system. If a value set specifies a different version, the expansion operation should fail
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
-    /**
-     * Constructor
-     */
-      public ExpansionProfileContactComponent() {
-        super();
-      }
-
+        CHECK, 
         /**
-         * @return {@link #name} (The name of an individual to contact regarding the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes
          */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ExpansionProfileContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
+        OVERRIDE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static SystemVersionProcessingMode fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("default".equals(codeString))
+          return DEFAULT;
+        if ("check".equals(codeString))
+          return CHECK;
+        if ("override".equals(codeString))
+          return OVERRIDE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SystemVersionProcessingMode code '"+codeString+"'");
         }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public ExpansionProfileContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the expansion profile.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the expansion profile.
-         */
-        public ExpansionProfileContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
+        public String toCode() {
+          switch (this) {
+            case DEFAULT: return "default";
+            case CHECK: return "check";
+            case OVERRIDE: return "override";
+            default: return "?";
           }
-          return this;
         }
-
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ExpansionProfileContactComponent setTelecom(List<ContactPoint> theTelecom) { 
-          this.telecom = theTelecom;
-          return this;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-        public ExpansionProfileContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
+        public String getSystem() {
+          switch (this) {
+            case DEFAULT: return "http://hl7.org/fhir/system-version-processing-mode";
+            case CHECK: return "http://hl7.org/fhir/system-version-processing-mode";
+            case OVERRIDE: return "http://hl7.org/fhir/system-version-processing-mode";
+            default: return "?";
           }
-          return getTelecom().get(0);
         }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the expansion profile.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.name");
-        }
-        else if (name.equals("telecom")) {
-          return addTelecom();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ExpansionProfileContactComponent copy() {
-        ExpansionProfileContactComponent dst = new ExpansionProfileContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ExpansionProfileContactComponent))
-          return false;
-        ExpansionProfileContactComponent o = (ExpansionProfileContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ExpansionProfileContactComponent))
-          return false;
-        ExpansionProfileContactComponent o = (ExpansionProfileContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
-      }
-
-  public String fhirType() {
-    return "ExpansionProfile.contact";
-
-  }
-
-  }
-
-    @Block()
-    public static class ExpansionProfileCodeSystemComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Code systems to be included in value set expansions.
-         */
-        @Child(name = "include", type = {}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Code systems to be included", formalDefinition="Code systems to be included in value set expansions." )
-        protected CodeSystemIncludeComponent include;
-
-        /**
-         * Code systems to be excluded from value set expansions.
-         */
-        @Child(name = "exclude", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Code systems to be excluded", formalDefinition="Code systems to be excluded from value set expansions." )
-        protected CodeSystemExcludeComponent exclude;
-
-        private static final long serialVersionUID = 340558624L;
-
-    /**
-     * Constructor
-     */
-      public ExpansionProfileCodeSystemComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #include} (Code systems to be included in value set expansions.)
-         */
-        public CodeSystemIncludeComponent getInclude() { 
-          if (this.include == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ExpansionProfileCodeSystemComponent.include");
-            else if (Configuration.doAutoCreate())
-              this.include = new CodeSystemIncludeComponent(); // cc
-          return this.include;
-        }
-
-        public boolean hasInclude() { 
-          return this.include != null && !this.include.isEmpty();
-        }
-
-        /**
-         * @param value {@link #include} (Code systems to be included in value set expansions.)
-         */
-        public ExpansionProfileCodeSystemComponent setInclude(CodeSystemIncludeComponent value) { 
-          this.include = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #exclude} (Code systems to be excluded from value set expansions.)
-         */
-        public CodeSystemExcludeComponent getExclude() { 
-          if (this.exclude == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ExpansionProfileCodeSystemComponent.exclude");
-            else if (Configuration.doAutoCreate())
-              this.exclude = new CodeSystemExcludeComponent(); // cc
-          return this.exclude;
-        }
-
-        public boolean hasExclude() { 
-          return this.exclude != null && !this.exclude.isEmpty();
-        }
-
-        /**
-         * @param value {@link #exclude} (Code systems to be excluded from value set expansions.)
-         */
-        public ExpansionProfileCodeSystemComponent setExclude(CodeSystemExcludeComponent value) { 
-          this.exclude = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("include", "", "Code systems to be included in value set expansions.", 0, java.lang.Integer.MAX_VALUE, include));
-          childrenList.add(new Property("exclude", "", "Code systems to be excluded from value set expansions.", 0, java.lang.Integer.MAX_VALUE, exclude));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 1942574248: /*include*/ return this.include == null ? new Base[0] : new Base[] {this.include}; // CodeSystemIncludeComponent
-        case -1321148966: /*exclude*/ return this.exclude == null ? new Base[0] : new Base[] {this.exclude}; // CodeSystemExcludeComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 1942574248: // include
-          this.include = (CodeSystemIncludeComponent) value; // CodeSystemIncludeComponent
-          break;
-        case -1321148966: // exclude
-          this.exclude = (CodeSystemExcludeComponent) value; // CodeSystemExcludeComponent
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("include"))
-          this.include = (CodeSystemIncludeComponent) value; // CodeSystemIncludeComponent
-        else if (name.equals("exclude"))
-          this.exclude = (CodeSystemExcludeComponent) value; // CodeSystemExcludeComponent
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 1942574248:  return getInclude(); // CodeSystemIncludeComponent
-        case -1321148966:  return getExclude(); // CodeSystemExcludeComponent
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("include")) {
-          this.include = new CodeSystemIncludeComponent();
-          return this.include;
-        }
-        else if (name.equals("exclude")) {
-          this.exclude = new CodeSystemExcludeComponent();
-          return this.exclude;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ExpansionProfileCodeSystemComponent copy() {
-        ExpansionProfileCodeSystemComponent dst = new ExpansionProfileCodeSystemComponent();
-        copyValues(dst);
-        dst.include = include == null ? null : include.copy();
-        dst.exclude = exclude == null ? null : exclude.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ExpansionProfileCodeSystemComponent))
-          return false;
-        ExpansionProfileCodeSystemComponent o = (ExpansionProfileCodeSystemComponent) other;
-        return compareDeep(include, o.include, true) && compareDeep(exclude, o.exclude, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ExpansionProfileCodeSystemComponent))
-          return false;
-        ExpansionProfileCodeSystemComponent o = (ExpansionProfileCodeSystemComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(include, exclude);
-      }
-
-  public String fhirType() {
-    return "ExpansionProfile.codeSystem";
-
-  }
-
-  }
-
-    @Block()
-    public static class CodeSystemIncludeComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * A data group for each code system to be included.
-         */
-        @Child(name = "codeSystem", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="The code systems to be included", formalDefinition="A data group for each code system to be included." )
-        protected List<CodeSystemIncludeCodeSystemComponent> codeSystem;
-
-        private static final long serialVersionUID = 1076909689L;
-
-    /**
-     * Constructor
-     */
-      public CodeSystemIncludeComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #codeSystem} (A data group for each code system to be included.)
-         */
-        public List<CodeSystemIncludeCodeSystemComponent> getCodeSystem() { 
-          if (this.codeSystem == null)
-            this.codeSystem = new ArrayList<CodeSystemIncludeCodeSystemComponent>();
-          return this.codeSystem;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public CodeSystemIncludeComponent setCodeSystem(List<CodeSystemIncludeCodeSystemComponent> theCodeSystem) { 
-          this.codeSystem = theCodeSystem;
-          return this;
-        }
-
-        public boolean hasCodeSystem() { 
-          if (this.codeSystem == null)
-            return false;
-          for (CodeSystemIncludeCodeSystemComponent item : this.codeSystem)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public CodeSystemIncludeCodeSystemComponent addCodeSystem() { //3
-          CodeSystemIncludeCodeSystemComponent t = new CodeSystemIncludeCodeSystemComponent();
-          if (this.codeSystem == null)
-            this.codeSystem = new ArrayList<CodeSystemIncludeCodeSystemComponent>();
-          this.codeSystem.add(t);
-          return t;
-        }
-
-        public CodeSystemIncludeComponent addCodeSystem(CodeSystemIncludeCodeSystemComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.codeSystem == null)
-            this.codeSystem = new ArrayList<CodeSystemIncludeCodeSystemComponent>();
-          this.codeSystem.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
-         */
-        public CodeSystemIncludeCodeSystemComponent getCodeSystemFirstRep() { 
-          if (getCodeSystem().isEmpty()) {
-            addCodeSystem();
+        public String getDefinition() {
+          switch (this) {
+            case DEFAULT: return "Use this version of the code system if a value set doesn't specify a version";
+            case CHECK: return "Use this version of the code system. If a value set specifies a different version, the expansion operation should fail";
+            case OVERRIDE: return "Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes";
+            default: return "?";
           }
-          return getCodeSystem().get(0);
         }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("codeSystem", "", "A data group for each code system to be included.", 0, java.lang.Integer.MAX_VALUE, codeSystem));
+        public String getDisplay() {
+          switch (this) {
+            case DEFAULT: return "Default Version";
+            case CHECK: return "Check ValueSet Version";
+            case OVERRIDE: return "Override ValueSet Version";
+            default: return "?";
+          }
         }
+    }
 
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -916511108: /*codeSystem*/ return this.codeSystem == null ? new Base[0] : this.codeSystem.toArray(new Base[this.codeSystem.size()]); // CodeSystemIncludeCodeSystemComponent
-        default: return super.getProperty(hash, name, checkValid);
+  public static class SystemVersionProcessingModeEnumFactory implements EnumFactory<SystemVersionProcessingMode> {
+    public SystemVersionProcessingMode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("default".equals(codeString))
+          return SystemVersionProcessingMode.DEFAULT;
+        if ("check".equals(codeString))
+          return SystemVersionProcessingMode.CHECK;
+        if ("override".equals(codeString))
+          return SystemVersionProcessingMode.OVERRIDE;
+        throw new IllegalArgumentException("Unknown SystemVersionProcessingMode code '"+codeString+"'");
         }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -916511108: // codeSystem
-          this.getCodeSystem().add((CodeSystemIncludeCodeSystemComponent) value); // CodeSystemIncludeCodeSystemComponent
-          break;
-        default: super.setProperty(hash, name, value);
+        public Enumeration<SystemVersionProcessingMode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("default".equals(codeString))
+          return new Enumeration<SystemVersionProcessingMode>(this, SystemVersionProcessingMode.DEFAULT);
+        if ("check".equals(codeString))
+          return new Enumeration<SystemVersionProcessingMode>(this, SystemVersionProcessingMode.CHECK);
+        if ("override".equals(codeString))
+          return new Enumeration<SystemVersionProcessingMode>(this, SystemVersionProcessingMode.OVERRIDE);
+        throw new FHIRException("Unknown SystemVersionProcessingMode code '"+codeString+"'");
         }
-
+    public String toCode(SystemVersionProcessingMode code) {
+      if (code == SystemVersionProcessingMode.DEFAULT)
+        return "default";
+      if (code == SystemVersionProcessingMode.CHECK)
+        return "check";
+      if (code == SystemVersionProcessingMode.OVERRIDE)
+        return "override";
+      return "?";
       }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("codeSystem"))
-          this.getCodeSystem().add((CodeSystemIncludeCodeSystemComponent) value);
-        else
-          super.setProperty(name, value);
+    public String toSystem(SystemVersionProcessingMode code) {
+      return code.getSystem();
       }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -916511108:  return addCodeSystem(); // CodeSystemIncludeCodeSystemComponent
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("codeSystem")) {
-          return addCodeSystem();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public CodeSystemIncludeComponent copy() {
-        CodeSystemIncludeComponent dst = new CodeSystemIncludeComponent();
-        copyValues(dst);
-        if (codeSystem != null) {
-          dst.codeSystem = new ArrayList<CodeSystemIncludeCodeSystemComponent>();
-          for (CodeSystemIncludeCodeSystemComponent i : codeSystem)
-            dst.codeSystem.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof CodeSystemIncludeComponent))
-          return false;
-        CodeSystemIncludeComponent o = (CodeSystemIncludeComponent) other;
-        return compareDeep(codeSystem, o.codeSystem, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof CodeSystemIncludeComponent))
-          return false;
-        CodeSystemIncludeComponent o = (CodeSystemIncludeComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(codeSystem);
-      }
-
-  public String fhirType() {
-    return "ExpansionProfile.codeSystem.include";
-
-  }
-
-  }
+    }
 
     @Block()
-    public static class CodeSystemIncludeCodeSystemComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ExpansionProfileFixedVersionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * An absolute URI which is the code system to be included.
+         * The specific system for which to fix the version.
          */
         @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The specific code system to be included", formalDefinition="An absolute URI which is the code system to be included." )
+        @Description(shortDefinition="System to have it's version fixed", formalDefinition="The specific system for which to fix the version." )
         protected UriType system;
 
         /**
          * The version of the code system from which codes in the expansion should be included.
          */
-        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "version", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Specific version of the code system referred to", formalDefinition="The version of the code system from which codes in the expansion should be included." )
         protected StringType version;
 
-        private static final long serialVersionUID = 1145288774L;
+        /**
+         * How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.
+         */
+        @Child(name = "mode", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="default | check | override", formalDefinition="How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/system-version-processing-mode")
+        protected Enumeration<SystemVersionProcessingMode> mode;
+
+        private static final long serialVersionUID = 1818466753L;
 
     /**
      * Constructor
      */
-      public CodeSystemIncludeCodeSystemComponent() {
+      public ExpansionProfileFixedVersionComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public CodeSystemIncludeCodeSystemComponent(UriType system) {
+      public ExpansionProfileFixedVersionComponent(UriType system, StringType version, Enumeration<SystemVersionProcessingMode> mode) {
         super();
         this.system = system;
+        this.version = version;
+        this.mode = mode;
       }
 
         /**
-         * @return {@link #system} (An absolute URI which is the code system to be included.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
+         * @return {@link #system} (The specific system for which to fix the version.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
          */
         public UriType getSystemElement() { 
           if (this.system == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemIncludeCodeSystemComponent.system");
+              throw new Error("Attempt to auto-create ExpansionProfileFixedVersionComponent.system");
             else if (Configuration.doAutoCreate())
               this.system = new UriType(); // bb
           return this.system;
@@ -674,24 +220,24 @@ public class ExpansionProfile extends BaseConformance {
         }
 
         /**
-         * @param value {@link #system} (An absolute URI which is the code system to be included.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
+         * @param value {@link #system} (The specific system for which to fix the version.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
          */
-        public CodeSystemIncludeCodeSystemComponent setSystemElement(UriType value) { 
+        public ExpansionProfileFixedVersionComponent setSystemElement(UriType value) { 
           this.system = value;
           return this;
         }
 
         /**
-         * @return An absolute URI which is the code system to be included.
+         * @return The specific system for which to fix the version.
          */
         public String getSystem() { 
           return this.system == null ? null : this.system.getValue();
         }
 
         /**
-         * @param value An absolute URI which is the code system to be included.
+         * @param value The specific system for which to fix the version.
          */
-        public CodeSystemIncludeCodeSystemComponent setSystem(String value) { 
+        public ExpansionProfileFixedVersionComponent setSystem(String value) { 
             if (this.system == null)
               this.system = new UriType();
             this.system.setValue(value);
@@ -704,7 +250,7 @@ public class ExpansionProfile extends BaseConformance {
         public StringType getVersionElement() { 
           if (this.version == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemIncludeCodeSystemComponent.version");
+              throw new Error("Attempt to auto-create ExpansionProfileFixedVersionComponent.version");
             else if (Configuration.doAutoCreate())
               this.version = new StringType(); // bb
           return this.version;
@@ -721,7 +267,7 @@ public class ExpansionProfile extends BaseConformance {
         /**
          * @param value {@link #version} (The version of the code system from which codes in the expansion should be included.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
          */
-        public CodeSystemIncludeCodeSystemComponent setVersionElement(StringType value) { 
+        public ExpansionProfileFixedVersionComponent setVersionElement(StringType value) { 
           this.version = value;
           return this;
         }
@@ -736,21 +282,63 @@ public class ExpansionProfile extends BaseConformance {
         /**
          * @param value The version of the code system from which codes in the expansion should be included.
          */
-        public CodeSystemIncludeCodeSystemComponent setVersion(String value) { 
-          if (Utilities.noString(value))
-            this.version = null;
-          else {
+        public ExpansionProfileFixedVersionComponent setVersion(String value) { 
             if (this.version == null)
               this.version = new StringType();
             this.version.setValue(value);
-          }
+          return this;
+        }
+
+        /**
+         * @return {@link #mode} (How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         */
+        public Enumeration<SystemVersionProcessingMode> getModeElement() { 
+          if (this.mode == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ExpansionProfileFixedVersionComponent.mode");
+            else if (Configuration.doAutoCreate())
+              this.mode = new Enumeration<SystemVersionProcessingMode>(new SystemVersionProcessingModeEnumFactory()); // bb
+          return this.mode;
+        }
+
+        public boolean hasModeElement() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        public boolean hasMode() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        /**
+         * @param value {@link #mode} (How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         */
+        public ExpansionProfileFixedVersionComponent setModeElement(Enumeration<SystemVersionProcessingMode> value) { 
+          this.mode = value;
+          return this;
+        }
+
+        /**
+         * @return How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.
+         */
+        public SystemVersionProcessingMode getMode() { 
+          return this.mode == null ? null : this.mode.getValue();
+        }
+
+        /**
+         * @param value How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.
+         */
+        public ExpansionProfileFixedVersionComponent setMode(SystemVersionProcessingMode value) { 
+            if (this.mode == null)
+              this.mode = new Enumeration<SystemVersionProcessingMode>(new SystemVersionProcessingModeEnumFactory());
+            this.mode.setValue(value);
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("system", "uri", "An absolute URI which is the code system to be included.", 0, java.lang.Integer.MAX_VALUE, system));
+          childrenList.add(new Property("system", "uri", "The specific system for which to fix the version.", 0, java.lang.Integer.MAX_VALUE, system));
           childrenList.add(new Property("version", "string", "The version of the code system from which codes in the expansion should be included.", 0, java.lang.Integer.MAX_VALUE, version));
+          childrenList.add(new Property("mode", "code", "How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.", 0, java.lang.Integer.MAX_VALUE, mode));
         }
 
       @Override
@@ -758,6 +346,7 @@ public class ExpansionProfile extends BaseConformance {
         switch (hash) {
         case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // UriType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
+        case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<SystemVersionProcessingMode>
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -772,6 +361,9 @@ public class ExpansionProfile extends BaseConformance {
         case 351608024: // version
           this.version = castToString(value); // StringType
           break;
+        case 3357091: // mode
+          this.mode = new SystemVersionProcessingModeEnumFactory().fromType(value); // Enumeration<SystemVersionProcessingMode>
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -783,6 +375,8 @@ public class ExpansionProfile extends BaseConformance {
           this.system = castToUri(value); // UriType
         else if (name.equals("version"))
           this.version = castToString(value); // StringType
+        else if (name.equals("mode"))
+          this.mode = new SystemVersionProcessingModeEnumFactory().fromType(value); // Enumeration<SystemVersionProcessingMode>
         else
           super.setProperty(name, value);
       }
@@ -792,6 +386,7 @@ public class ExpansionProfile extends BaseConformance {
         switch (hash) {
         case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
+        case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<SystemVersionProcessingMode>
         default: return super.makeProperty(hash, name);
         }
 
@@ -805,15 +400,19 @@ public class ExpansionProfile extends BaseConformance {
         else if (name.equals("version")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.version");
         }
+        else if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.mode");
+        }
         else
           return super.addChild(name);
       }
 
-      public CodeSystemIncludeCodeSystemComponent copy() {
-        CodeSystemIncludeCodeSystemComponent dst = new CodeSystemIncludeCodeSystemComponent();
+      public ExpansionProfileFixedVersionComponent copy() {
+        ExpansionProfileFixedVersionComponent dst = new ExpansionProfileFixedVersionComponent();
         copyValues(dst);
         dst.system = system == null ? null : system.copy();
         dst.version = version == null ? null : version.copy();
+        dst.mode = mode == null ? null : mode.copy();
         return dst;
       }
 
@@ -821,199 +420,37 @@ public class ExpansionProfile extends BaseConformance {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof CodeSystemIncludeCodeSystemComponent))
+        if (!(other instanceof ExpansionProfileFixedVersionComponent))
           return false;
-        CodeSystemIncludeCodeSystemComponent o = (CodeSystemIncludeCodeSystemComponent) other;
-        return compareDeep(system, o.system, true) && compareDeep(version, o.version, true);
+        ExpansionProfileFixedVersionComponent o = (ExpansionProfileFixedVersionComponent) other;
+        return compareDeep(system, o.system, true) && compareDeep(version, o.version, true) && compareDeep(mode, o.mode, true)
+          ;
       }
 
       @Override
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof CodeSystemIncludeCodeSystemComponent))
+        if (!(other instanceof ExpansionProfileFixedVersionComponent))
           return false;
-        CodeSystemIncludeCodeSystemComponent o = (CodeSystemIncludeCodeSystemComponent) other;
-        return compareValues(system, o.system, true) && compareValues(version, o.version, true);
+        ExpansionProfileFixedVersionComponent o = (ExpansionProfileFixedVersionComponent) other;
+        return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(mode, o.mode, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, version, mode);
       }
 
   public String fhirType() {
-    return "ExpansionProfile.codeSystem.include.codeSystem";
+    return "ExpansionProfile.fixedVersion";
 
   }
 
   }
 
     @Block()
-    public static class CodeSystemExcludeComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * A data group for each code system to be excluded.
-         */
-        @Child(name = "codeSystem", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="The code systems to be excluded", formalDefinition="A data group for each code system to be excluded." )
-        protected List<CodeSystemExcludeCodeSystemComponent> codeSystem;
-
-        private static final long serialVersionUID = 1960514347L;
-
-    /**
-     * Constructor
-     */
-      public CodeSystemExcludeComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #codeSystem} (A data group for each code system to be excluded.)
-         */
-        public List<CodeSystemExcludeCodeSystemComponent> getCodeSystem() { 
-          if (this.codeSystem == null)
-            this.codeSystem = new ArrayList<CodeSystemExcludeCodeSystemComponent>();
-          return this.codeSystem;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public CodeSystemExcludeComponent setCodeSystem(List<CodeSystemExcludeCodeSystemComponent> theCodeSystem) { 
-          this.codeSystem = theCodeSystem;
-          return this;
-        }
-
-        public boolean hasCodeSystem() { 
-          if (this.codeSystem == null)
-            return false;
-          for (CodeSystemExcludeCodeSystemComponent item : this.codeSystem)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public CodeSystemExcludeCodeSystemComponent addCodeSystem() { //3
-          CodeSystemExcludeCodeSystemComponent t = new CodeSystemExcludeCodeSystemComponent();
-          if (this.codeSystem == null)
-            this.codeSystem = new ArrayList<CodeSystemExcludeCodeSystemComponent>();
-          this.codeSystem.add(t);
-          return t;
-        }
-
-        public CodeSystemExcludeComponent addCodeSystem(CodeSystemExcludeCodeSystemComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.codeSystem == null)
-            this.codeSystem = new ArrayList<CodeSystemExcludeCodeSystemComponent>();
-          this.codeSystem.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #codeSystem}, creating it if it does not already exist
-         */
-        public CodeSystemExcludeCodeSystemComponent getCodeSystemFirstRep() { 
-          if (getCodeSystem().isEmpty()) {
-            addCodeSystem();
-          }
-          return getCodeSystem().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("codeSystem", "", "A data group for each code system to be excluded.", 0, java.lang.Integer.MAX_VALUE, codeSystem));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -916511108: /*codeSystem*/ return this.codeSystem == null ? new Base[0] : this.codeSystem.toArray(new Base[this.codeSystem.size()]); // CodeSystemExcludeCodeSystemComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -916511108: // codeSystem
-          this.getCodeSystem().add((CodeSystemExcludeCodeSystemComponent) value); // CodeSystemExcludeCodeSystemComponent
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("codeSystem"))
-          this.getCodeSystem().add((CodeSystemExcludeCodeSystemComponent) value);
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -916511108:  return addCodeSystem(); // CodeSystemExcludeCodeSystemComponent
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("codeSystem")) {
-          return addCodeSystem();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public CodeSystemExcludeComponent copy() {
-        CodeSystemExcludeComponent dst = new CodeSystemExcludeComponent();
-        copyValues(dst);
-        if (codeSystem != null) {
-          dst.codeSystem = new ArrayList<CodeSystemExcludeCodeSystemComponent>();
-          for (CodeSystemExcludeCodeSystemComponent i : codeSystem)
-            dst.codeSystem.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof CodeSystemExcludeComponent))
-          return false;
-        CodeSystemExcludeComponent o = (CodeSystemExcludeComponent) other;
-        return compareDeep(codeSystem, o.codeSystem, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof CodeSystemExcludeComponent))
-          return false;
-        CodeSystemExcludeComponent o = (CodeSystemExcludeComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(codeSystem);
-      }
-
-  public String fhirType() {
-    return "ExpansionProfile.codeSystem.exclude";
-
-  }
-
-  }
-
-    @Block()
-    public static class CodeSystemExcludeCodeSystemComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ExpansionProfileExcludedSystemComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI which is the code system to be excluded.
          */
@@ -1033,14 +470,14 @@ public class ExpansionProfile extends BaseConformance {
     /**
      * Constructor
      */
-      public CodeSystemExcludeCodeSystemComponent() {
+      public ExpansionProfileExcludedSystemComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public CodeSystemExcludeCodeSystemComponent(UriType system) {
+      public ExpansionProfileExcludedSystemComponent(UriType system) {
         super();
         this.system = system;
       }
@@ -1051,7 +488,7 @@ public class ExpansionProfile extends BaseConformance {
         public UriType getSystemElement() { 
           if (this.system == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemExcludeCodeSystemComponent.system");
+              throw new Error("Attempt to auto-create ExpansionProfileExcludedSystemComponent.system");
             else if (Configuration.doAutoCreate())
               this.system = new UriType(); // bb
           return this.system;
@@ -1068,7 +505,7 @@ public class ExpansionProfile extends BaseConformance {
         /**
          * @param value {@link #system} (An absolute URI which is the code system to be excluded.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
          */
-        public CodeSystemExcludeCodeSystemComponent setSystemElement(UriType value) { 
+        public ExpansionProfileExcludedSystemComponent setSystemElement(UriType value) { 
           this.system = value;
           return this;
         }
@@ -1083,7 +520,7 @@ public class ExpansionProfile extends BaseConformance {
         /**
          * @param value An absolute URI which is the code system to be excluded.
          */
-        public CodeSystemExcludeCodeSystemComponent setSystem(String value) { 
+        public ExpansionProfileExcludedSystemComponent setSystem(String value) { 
             if (this.system == null)
               this.system = new UriType();
             this.system.setValue(value);
@@ -1096,7 +533,7 @@ public class ExpansionProfile extends BaseConformance {
         public StringType getVersionElement() { 
           if (this.version == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CodeSystemExcludeCodeSystemComponent.version");
+              throw new Error("Attempt to auto-create ExpansionProfileExcludedSystemComponent.version");
             else if (Configuration.doAutoCreate())
               this.version = new StringType(); // bb
           return this.version;
@@ -1113,7 +550,7 @@ public class ExpansionProfile extends BaseConformance {
         /**
          * @param value {@link #version} (The version of the code system from which codes in the expansion should be excluded.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
          */
-        public CodeSystemExcludeCodeSystemComponent setVersionElement(StringType value) { 
+        public ExpansionProfileExcludedSystemComponent setVersionElement(StringType value) { 
           this.version = value;
           return this;
         }
@@ -1128,7 +565,7 @@ public class ExpansionProfile extends BaseConformance {
         /**
          * @param value The version of the code system from which codes in the expansion should be excluded.
          */
-        public CodeSystemExcludeCodeSystemComponent setVersion(String value) { 
+        public ExpansionProfileExcludedSystemComponent setVersion(String value) { 
           if (Utilities.noString(value))
             this.version = null;
           else {
@@ -1201,8 +638,8 @@ public class ExpansionProfile extends BaseConformance {
           return super.addChild(name);
       }
 
-      public CodeSystemExcludeCodeSystemComponent copy() {
-        CodeSystemExcludeCodeSystemComponent dst = new CodeSystemExcludeCodeSystemComponent();
+      public ExpansionProfileExcludedSystemComponent copy() {
+        ExpansionProfileExcludedSystemComponent dst = new ExpansionProfileExcludedSystemComponent();
         copyValues(dst);
         dst.system = system == null ? null : system.copy();
         dst.version = version == null ? null : version.copy();
@@ -1213,9 +650,9 @@ public class ExpansionProfile extends BaseConformance {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof CodeSystemExcludeCodeSystemComponent))
+        if (!(other instanceof ExpansionProfileExcludedSystemComponent))
           return false;
-        CodeSystemExcludeCodeSystemComponent o = (CodeSystemExcludeCodeSystemComponent) other;
+        ExpansionProfileExcludedSystemComponent o = (ExpansionProfileExcludedSystemComponent) other;
         return compareDeep(system, o.system, true) && compareDeep(version, o.version, true);
       }
 
@@ -1223,9 +660,9 @@ public class ExpansionProfile extends BaseConformance {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof CodeSystemExcludeCodeSystemComponent))
+        if (!(other instanceof ExpansionProfileExcludedSystemComponent))
           return false;
-        CodeSystemExcludeCodeSystemComponent o = (CodeSystemExcludeCodeSystemComponent) other;
+        ExpansionProfileExcludedSystemComponent o = (ExpansionProfileExcludedSystemComponent) other;
         return compareValues(system, o.system, true) && compareValues(version, o.version, true);
       }
 
@@ -1234,7 +671,7 @@ public class ExpansionProfile extends BaseConformance {
       }
 
   public String fhirType() {
-    return "ExpansionProfile.codeSystem.exclude.codeSystem";
+    return "ExpansionProfile.excludedSystem";
 
   }
 
@@ -2149,112 +1586,91 @@ public class ExpansionProfile extends BaseConformance {
   }
 
     /**
-     * Formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.
+     * A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Additional identifier for the expansion profile (e.g. an Object Identifier)", formalDefinition="Formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance." )
+    @Description(shortDefinition="Additional identifier for the expansion profile", formalDefinition="A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected Identifier identifier;
 
     /**
-     * This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage.
+     * Fix use of a particular code system to a particular version.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage." )
-    protected BooleanType experimental;
+    @Child(name = "fixedVersion", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Fix use of a code system to a particular version", formalDefinition="Fix use of a particular code system to a particular version." )
+    protected List<ExpansionProfileFixedVersionComponent> fixedVersion;
 
     /**
-     * The name of the individual or organization that published the expansion profile.
+     * Code system, or a particular version of a code system to be excluded from value set expansions.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the publisher (organization or individual)", formalDefinition="The name of the individual or organization that published the expansion profile." )
-    protected StringType publisher;
-
-    /**
-     * Contacts to assist a user in finding and communicating with the publisher.
-     */
-    @Child(name = "contact", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
-    protected List<ExpansionProfileContactComponent> contact;
-
-    /**
-     * A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.
-     */
-    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Human language description of the expansion profile", formalDefinition="A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile." )
-    protected MarkdownType description;
-
-    /**
-     * A set of criteria that provide the constraints imposed on the value set expansion by including or excluding codes from specific code systems (or versions).
-     */
-    @Child(name = "codeSystem", type = {}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When the expansion profile imposes code system contraints", formalDefinition="A set of criteria that provide the constraints imposed on the value set expansion by including or excluding codes from specific code systems (or versions)." )
-    protected ExpansionProfileCodeSystemComponent codeSystem;
+    @Child(name = "excludedSystem", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Systems/Versions to be exclude", formalDefinition="Code system, or a particular version of a code system to be excluded from value set expansions." )
+    protected ExpansionProfileExcludedSystemComponent excludedSystem;
 
     /**
      * Controls whether concept designations are to be included or excluded in value set expansions.
      */
-    @Child(name = "includeDesignations", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "includeDesignations", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Whether the expansion should include concept designations", formalDefinition="Controls whether concept designations are to be included or excluded in value set expansions." )
     protected BooleanType includeDesignations;
 
     /**
      * A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.
      */
-    @Child(name = "designation", type = {}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "designation", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the expansion profile imposes designation contraints", formalDefinition="A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations." )
     protected ExpansionProfileDesignationComponent designation;
 
     /**
      * Controls whether the value set definition is included or excluded in value set expansions.
      */
-    @Child(name = "includeDefinition", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "includeDefinition", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Include or exclude the value set definition in the expansion", formalDefinition="Controls whether the value set definition is included or excluded in value set expansions." )
     protected BooleanType includeDefinition;
 
     /**
      * Controls whether inactive concepts are included or excluded in value set expansions.
      */
-    @Child(name = "includeInactive", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "activeOnly", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Include or exclude inactive concepts in the expansion", formalDefinition="Controls whether inactive concepts are included or excluded in value set expansions." )
-    protected BooleanType includeInactive;
+    protected BooleanType activeOnly;
 
     /**
      * Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).
      */
-    @Child(name = "excludeNested", type = {BooleanType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "excludeNested", type = {BooleanType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Include or exclude nested codes in the value set expansion", formalDefinition="Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains)." )
     protected BooleanType excludeNested;
 
     /**
      * Controls whether or not the value set expansion includes codes which cannot be displayed in user interfaces.
      */
-    @Child(name = "excludeNotForUI", type = {BooleanType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "excludeNotForUI", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Include or exclude codes which cannot be rendered in user interfaces in the value set expansion", formalDefinition="Controls whether or not the value set expansion includes codes which cannot be displayed in user interfaces." )
     protected BooleanType excludeNotForUI;
 
     /**
      * Controls whether or not the value set expansion includes post coordinated codes.
      */
-    @Child(name = "excludePostCoordinated", type = {BooleanType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "excludePostCoordinated", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Include or exclude codes which are post coordinated expressions in the value set expansion", formalDefinition="Controls whether or not the value set expansion includes post coordinated codes." )
     protected BooleanType excludePostCoordinated;
 
     /**
      * Specifies the language to be used for description in the expansions i.e. the language to be used for ValueSet.expansion.contains.display.
      */
-    @Child(name = "displayLanguage", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "displayLanguage", type = {CodeType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Specify the language for the display element of codes in the value set expansion", formalDefinition="Specifies the language to be used for description in the expansions i.e. the language to be used for ValueSet.expansion.contains.display." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected CodeType displayLanguage;
 
     /**
-     * If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete.
+     * If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).
      */
-    @Child(name = "limitedExpansion", type = {BooleanType.class}, order=14, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Controls behaviour of the value set expand operation when value sets are too large to be completely expanded", formalDefinition="If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete." )
+    @Child(name = "limitedExpansion", type = {BooleanType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Controls behaviour of the value set expand operation when value sets are too large to be completely expanded", formalDefinition="If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html)." )
     protected BooleanType limitedExpansion;
 
-    private static final long serialVersionUID = 184454016L;
+    private static final long serialVersionUID = 1067457001L;
 
   /**
    * Constructor
@@ -2266,13 +1682,48 @@ public class ExpansionProfile extends BaseConformance {
   /**
    * Constructor
    */
-    public ExpansionProfile(Enumeration<ConformanceResourceStatus> status) {
+    public ExpansionProfile(Enumeration<PublicationStatus> status) {
       super();
       this.status = status;
     }
 
     /**
-     * @param value An absolute URL that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published.
+     * @return {@link #url} (An absolute URL that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public UriType getUrlElement() { 
+      if (this.url == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ExpansionProfile.url");
+        else if (Configuration.doAutoCreate())
+          this.url = new UriType(); // bb
+      return this.url;
+    }
+
+    public boolean hasUrlElement() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    public boolean hasUrl() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    /**
+     * @param value {@link #url} (An absolute URL that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public ExpansionProfile setUrlElement(UriType value) { 
+      this.url = value;
+      return this;
+    }
+
+    /**
+     * @return An absolute URL that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).
+     */
+    public String getUrl() { 
+      return this.url == null ? null : this.url.getValue();
+    }
+
+    /**
+     * @param value An absolute URL that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public ExpansionProfile setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2286,7 +1737,7 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return {@link #identifier} (Formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     * @return {@link #identifier} (A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
     public Identifier getIdentifier() { 
       if (this.identifier == null)
@@ -2302,7 +1753,7 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value {@link #identifier} (Formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     * @param value {@link #identifier} (A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
     public ExpansionProfile setIdentifier(Identifier value) { 
       this.identifier = value;
@@ -2310,7 +1761,42 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value Used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance.
+     * @return {@link #version} (The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public StringType getVersionElement() { 
+      if (this.version == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ExpansionProfile.version");
+        else if (Configuration.doAutoCreate())
+          this.version = new StringType(); // bb
+      return this.version;
+    }
+
+    public boolean hasVersionElement() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    public boolean hasVersion() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    /**
+     * @param value {@link #version} (The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public ExpansionProfile setVersionElement(StringType value) { 
+      this.version = value;
+      return this;
+    }
+
+    /**
+     * @return The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     */
+    public String getVersion() { 
+      return this.version == null ? null : this.version.getValue();
+    }
+
+    /**
+     * @param value The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
      */
     public ExpansionProfile setVersion(String value) { 
       if (Utilities.noString(value))
@@ -2324,7 +1810,42 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value A free text natural language name for the expansion profile.
+     * @return {@link #name} (A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public StringType getNameElement() { 
+      if (this.name == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ExpansionProfile.name");
+        else if (Configuration.doAutoCreate())
+          this.name = new StringType(); // bb
+      return this.name;
+    }
+
+    public boolean hasNameElement() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    public boolean hasName() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    /**
+     * @param value {@link #name} (A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public ExpansionProfile setNameElement(StringType value) { 
+      this.name = value;
+      return this;
+    }
+
+    /**
+     * @return A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     */
+    public String getName() { 
+      return this.name == null ? null : this.name.getValue();
+    }
+
+    /**
+     * @param value A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public ExpansionProfile setName(String value) { 
       if (Utilities.noString(value))
@@ -2338,17 +1859,52 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value The status of the expansion profile.
+     * @return {@link #status} (The status of this expansion profile. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public ExpansionProfile setStatus(ConformanceResourceStatus value) { 
+    public Enumeration<PublicationStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ExpansionProfile.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of this expansion profile. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public ExpansionProfile setStatusElement(Enumeration<PublicationStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of this expansion profile. Enables tracking the life-cycle of the content.
+     */
+    public PublicationStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of this expansion profile. Enables tracking the life-cycle of the content.
+     */
+    public ExpansionProfile setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #experimental} (This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A flag to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -2368,7 +1924,7 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value {@link #experimental} (This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A flag to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public ExpansionProfile setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -2376,14 +1932,14 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage.
+     * @return A flag to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage.
+     * @param value A flag to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public ExpansionProfile setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -2442,18 +1998,18 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
      */
-    public List<ExpansionProfileContactComponent> getContact() { 
+    public List<ContactDetail> getContact() { 
       if (this.contact == null)
-        this.contact = new ArrayList<ExpansionProfileContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       return this.contact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ExpansionProfile setContact(List<ExpansionProfileContactComponent> theContact) { 
+    public ExpansionProfile setContact(List<ContactDetail> theContact) { 
       this.contact = theContact;
       return this;
     }
@@ -2461,25 +2017,25 @@ public class ExpansionProfile extends BaseConformance {
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
-      for (ExpansionProfileContactComponent item : this.contact)
+      for (ContactDetail item : this.contact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ExpansionProfileContactComponent addContact() { //3
-      ExpansionProfileContactComponent t = new ExpansionProfileContactComponent();
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
       if (this.contact == null)
-        this.contact = new ArrayList<ExpansionProfileContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return t;
     }
 
-    public ExpansionProfile addContact(ExpansionProfileContactComponent t) { //3
+    public ExpansionProfile addContact(ContactDetail t) { //3
       if (t == null)
         return this;
       if (this.contact == null)
-        this.contact = new ArrayList<ExpansionProfileContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return this;
     }
@@ -2487,7 +2043,7 @@ public class ExpansionProfile extends BaseConformance {
     /**
      * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public ExpansionProfileContactComponent getContactFirstRep() { 
+    public ContactDetail getContactFirstRep() { 
       if (getContact().isEmpty()) {
         addContact();
       }
@@ -2495,7 +2051,42 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value The date that the expansion profile status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes.
+     * @return {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ExpansionProfile.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public ExpansionProfile setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
      */
     public ExpansionProfile setDate(Date value) { 
       if (value == null)
@@ -2509,7 +2100,7 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the expansion profile from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -2529,7 +2120,7 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the expansion profile from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public ExpansionProfile setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -2537,14 +2128,14 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.
+     * @return A free text natural language description of the expansion profile from the consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.
+     * @param value A free text natural language description of the expansion profile from the consumer's perspective.
      */
     public ExpansionProfile setDescription(String value) { 
       if (value == null)
@@ -2558,26 +2149,185 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return {@link #codeSystem} (A set of criteria that provide the constraints imposed on the value set expansion by including or excluding codes from specific code systems (or versions).)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
      */
-    public ExpansionProfileCodeSystemComponent getCodeSystem() { 
-      if (this.codeSystem == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExpansionProfile.codeSystem");
-        else if (Configuration.doAutoCreate())
-          this.codeSystem = new ExpansionProfileCodeSystemComponent(); // cc
-      return this.codeSystem;
-    }
-
-    public boolean hasCodeSystem() { 
-      return this.codeSystem != null && !this.codeSystem.isEmpty();
+    public List<UsageContext> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      return this.useContext;
     }
 
     /**
-     * @param value {@link #codeSystem} (A set of criteria that provide the constraints imposed on the value set expansion by including or excluding codes from specific code systems (or versions).)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ExpansionProfile setCodeSystem(ExpansionProfileCodeSystemComponent value) { 
-      this.codeSystem = value;
+    public ExpansionProfile setUseContext(List<UsageContext> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (UsageContext item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public UsageContext addUseContext() { //3
+      UsageContext t = new UsageContext();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    public ExpansionProfile addUseContext(UsageContext t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public UsageContext getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return {@link #jurisdiction} (A jurisdiction in which the expansion profile is intended to be used.)
+     */
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ExpansionProfile setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public ExpansionProfile addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
+    }
+
+    /**
+     * @return {@link #fixedVersion} (Fix use of a particular code system to a particular version.)
+     */
+    public List<ExpansionProfileFixedVersionComponent> getFixedVersion() { 
+      if (this.fixedVersion == null)
+        this.fixedVersion = new ArrayList<ExpansionProfileFixedVersionComponent>();
+      return this.fixedVersion;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ExpansionProfile setFixedVersion(List<ExpansionProfileFixedVersionComponent> theFixedVersion) { 
+      this.fixedVersion = theFixedVersion;
+      return this;
+    }
+
+    public boolean hasFixedVersion() { 
+      if (this.fixedVersion == null)
+        return false;
+      for (ExpansionProfileFixedVersionComponent item : this.fixedVersion)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ExpansionProfileFixedVersionComponent addFixedVersion() { //3
+      ExpansionProfileFixedVersionComponent t = new ExpansionProfileFixedVersionComponent();
+      if (this.fixedVersion == null)
+        this.fixedVersion = new ArrayList<ExpansionProfileFixedVersionComponent>();
+      this.fixedVersion.add(t);
+      return t;
+    }
+
+    public ExpansionProfile addFixedVersion(ExpansionProfileFixedVersionComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.fixedVersion == null)
+        this.fixedVersion = new ArrayList<ExpansionProfileFixedVersionComponent>();
+      this.fixedVersion.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #fixedVersion}, creating it if it does not already exist
+     */
+    public ExpansionProfileFixedVersionComponent getFixedVersionFirstRep() { 
+      if (getFixedVersion().isEmpty()) {
+        addFixedVersion();
+      }
+      return getFixedVersion().get(0);
+    }
+
+    /**
+     * @return {@link #excludedSystem} (Code system, or a particular version of a code system to be excluded from value set expansions.)
+     */
+    public ExpansionProfileExcludedSystemComponent getExcludedSystem() { 
+      if (this.excludedSystem == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ExpansionProfile.excludedSystem");
+        else if (Configuration.doAutoCreate())
+          this.excludedSystem = new ExpansionProfileExcludedSystemComponent(); // cc
+      return this.excludedSystem;
+    }
+
+    public boolean hasExcludedSystem() { 
+      return this.excludedSystem != null && !this.excludedSystem.isEmpty();
+    }
+
+    /**
+     * @param value {@link #excludedSystem} (Code system, or a particular version of a code system to be excluded from value set expansions.)
+     */
+    public ExpansionProfile setExcludedSystem(ExpansionProfileExcludedSystemComponent value) { 
+      this.excludedSystem = value;
       return this;
     }
 
@@ -2696,47 +2446,47 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return {@link #includeInactive} (Controls whether inactive concepts are included or excluded in value set expansions.). This is the underlying object with id, value and extensions. The accessor "getIncludeInactive" gives direct access to the value
+     * @return {@link #activeOnly} (Controls whether inactive concepts are included or excluded in value set expansions.). This is the underlying object with id, value and extensions. The accessor "getActiveOnly" gives direct access to the value
      */
-    public BooleanType getIncludeInactiveElement() { 
-      if (this.includeInactive == null)
+    public BooleanType getActiveOnlyElement() { 
+      if (this.activeOnly == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ExpansionProfile.includeInactive");
+          throw new Error("Attempt to auto-create ExpansionProfile.activeOnly");
         else if (Configuration.doAutoCreate())
-          this.includeInactive = new BooleanType(); // bb
-      return this.includeInactive;
+          this.activeOnly = new BooleanType(); // bb
+      return this.activeOnly;
     }
 
-    public boolean hasIncludeInactiveElement() { 
-      return this.includeInactive != null && !this.includeInactive.isEmpty();
+    public boolean hasActiveOnlyElement() { 
+      return this.activeOnly != null && !this.activeOnly.isEmpty();
     }
 
-    public boolean hasIncludeInactive() { 
-      return this.includeInactive != null && !this.includeInactive.isEmpty();
+    public boolean hasActiveOnly() { 
+      return this.activeOnly != null && !this.activeOnly.isEmpty();
     }
 
     /**
-     * @param value {@link #includeInactive} (Controls whether inactive concepts are included or excluded in value set expansions.). This is the underlying object with id, value and extensions. The accessor "getIncludeInactive" gives direct access to the value
+     * @param value {@link #activeOnly} (Controls whether inactive concepts are included or excluded in value set expansions.). This is the underlying object with id, value and extensions. The accessor "getActiveOnly" gives direct access to the value
      */
-    public ExpansionProfile setIncludeInactiveElement(BooleanType value) { 
-      this.includeInactive = value;
+    public ExpansionProfile setActiveOnlyElement(BooleanType value) { 
+      this.activeOnly = value;
       return this;
     }
 
     /**
      * @return Controls whether inactive concepts are included or excluded in value set expansions.
      */
-    public boolean getIncludeInactive() { 
-      return this.includeInactive == null || this.includeInactive.isEmpty() ? false : this.includeInactive.getValue();
+    public boolean getActiveOnly() { 
+      return this.activeOnly == null || this.activeOnly.isEmpty() ? false : this.activeOnly.getValue();
     }
 
     /**
      * @param value Controls whether inactive concepts are included or excluded in value set expansions.
      */
-    public ExpansionProfile setIncludeInactive(boolean value) { 
-        if (this.includeInactive == null)
-          this.includeInactive = new BooleanType();
-        this.includeInactive.setValue(value);
+    public ExpansionProfile setActiveOnly(boolean value) { 
+        if (this.activeOnly == null)
+          this.activeOnly = new BooleanType();
+        this.activeOnly.setValue(value);
       return this;
     }
 
@@ -2925,7 +2675,7 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return {@link #limitedExpansion} (If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete.). This is the underlying object with id, value and extensions. The accessor "getLimitedExpansion" gives direct access to the value
+     * @return {@link #limitedExpansion} (If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).). This is the underlying object with id, value and extensions. The accessor "getLimitedExpansion" gives direct access to the value
      */
     public BooleanType getLimitedExpansionElement() { 
       if (this.limitedExpansion == null)
@@ -2945,7 +2695,7 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @param value {@link #limitedExpansion} (If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete.). This is the underlying object with id, value and extensions. The accessor "getLimitedExpansion" gives direct access to the value
+     * @param value {@link #limitedExpansion} (If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).). This is the underlying object with id, value and extensions. The accessor "getLimitedExpansion" gives direct access to the value
      */
     public ExpansionProfile setLimitedExpansionElement(BooleanType value) { 
       this.limitedExpansion = value;
@@ -2953,14 +2703,14 @@ public class ExpansionProfile extends BaseConformance {
     }
 
     /**
-     * @return If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete.
+     * @return If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).
      */
     public boolean getLimitedExpansion() { 
       return this.limitedExpansion == null || this.limitedExpansion.isEmpty() ? false : this.limitedExpansion.getValue();
     }
 
     /**
-     * @param value If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete.
+     * @param value If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).
      */
     public ExpansionProfile setLimitedExpansion(boolean value) { 
         if (this.limitedExpansion == null)
@@ -2971,21 +2721,29 @@ public class ExpansionProfile extends BaseConformance {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("experimental", "boolean", "This expansion profile was authored for testing purposes (or education/evaluation/marketing), and is not intended for genuine production usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("status", "code", "The status of this expansion profile. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the use of the expansion profile - reason for definition,  conditions of use, etc. The description may include a list of expected usages for the expansion profile and can also describe the approach taken to build the expansion profile.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("codeSystem", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding codes from specific code systems (or versions).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
+        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the expansion profile from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the expansion profile is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("fixedVersion", "", "Fix use of a particular code system to a particular version.", 0, java.lang.Integer.MAX_VALUE, fixedVersion));
+        childrenList.add(new Property("excludedSystem", "", "Code system, or a particular version of a code system to be excluded from value set expansions.", 0, java.lang.Integer.MAX_VALUE, excludedSystem));
         childrenList.add(new Property("includeDesignations", "boolean", "Controls whether concept designations are to be included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, includeDesignations));
         childrenList.add(new Property("designation", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.", 0, java.lang.Integer.MAX_VALUE, designation));
         childrenList.add(new Property("includeDefinition", "boolean", "Controls whether the value set definition is included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, includeDefinition));
-        childrenList.add(new Property("includeInactive", "boolean", "Controls whether inactive concepts are included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, includeInactive));
+        childrenList.add(new Property("activeOnly", "boolean", "Controls whether inactive concepts are included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, activeOnly));
         childrenList.add(new Property("excludeNested", "boolean", "Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).", 0, java.lang.Integer.MAX_VALUE, excludeNested));
         childrenList.add(new Property("excludeNotForUI", "boolean", "Controls whether or not the value set expansion includes codes which cannot be displayed in user interfaces.", 0, java.lang.Integer.MAX_VALUE, excludeNotForUI));
         childrenList.add(new Property("excludePostCoordinated", "boolean", "Controls whether or not the value set expansion includes post coordinated codes.", 0, java.lang.Integer.MAX_VALUE, excludePostCoordinated));
         childrenList.add(new Property("displayLanguage", "code", "Specifies the language to be used for description in the expansions i.e. the language to be used for ValueSet.expansion.contains.display.", 0, java.lang.Integer.MAX_VALUE, displayLanguage));
-        childrenList.add(new Property("limitedExpansion", "boolean", "If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete.", 0, java.lang.Integer.MAX_VALUE, limitedExpansion));
+        childrenList.add(new Property("limitedExpansion", "boolean", "If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).", 0, java.lang.Integer.MAX_VALUE, limitedExpansion));
       }
 
       @Override
@@ -2995,17 +2753,20 @@ public class ExpansionProfile extends BaseConformance {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ExpansionProfileContactComponent
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
-        case -916511108: /*codeSystem*/ return this.codeSystem == null ? new Base[0] : new Base[] {this.codeSystem}; // ExpansionProfileCodeSystemComponent
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
+        case 807748292: /*fixedVersion*/ return this.fixedVersion == null ? new Base[0] : this.fixedVersion.toArray(new Base[this.fixedVersion.size()]); // ExpansionProfileFixedVersionComponent
+        case 2125282457: /*excludedSystem*/ return this.excludedSystem == null ? new Base[0] : new Base[] {this.excludedSystem}; // ExpansionProfileExcludedSystemComponent
         case 461507620: /*includeDesignations*/ return this.includeDesignations == null ? new Base[0] : new Base[] {this.includeDesignations}; // BooleanType
         case -900931593: /*designation*/ return this.designation == null ? new Base[0] : new Base[] {this.designation}; // ExpansionProfileDesignationComponent
         case 127972379: /*includeDefinition*/ return this.includeDefinition == null ? new Base[0] : new Base[] {this.includeDefinition}; // BooleanType
-        case 1634790707: /*includeInactive*/ return this.includeInactive == null ? new Base[0] : new Base[] {this.includeInactive}; // BooleanType
+        case 2043813842: /*activeOnly*/ return this.activeOnly == null ? new Base[0] : new Base[] {this.activeOnly}; // BooleanType
         case 424992625: /*excludeNested*/ return this.excludeNested == null ? new Base[0] : new Base[] {this.excludeNested}; // BooleanType
         case 667582980: /*excludeNotForUI*/ return this.excludeNotForUI == null ? new Base[0] : new Base[] {this.excludeNotForUI}; // BooleanType
         case 563335154: /*excludePostCoordinated*/ return this.excludePostCoordinated == null ? new Base[0] : new Base[] {this.excludePostCoordinated}; // BooleanType
@@ -3032,7 +2793,7 @@ public class ExpansionProfile extends BaseConformance {
           this.name = castToString(value); // StringType
           break;
         case -892481550: // status
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
@@ -3041,7 +2802,7 @@ public class ExpansionProfile extends BaseConformance {
           this.publisher = castToString(value); // StringType
           break;
         case 951526432: // contact
-          this.getContact().add((ExpansionProfileContactComponent) value); // ExpansionProfileContactComponent
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
@@ -3049,8 +2810,17 @@ public class ExpansionProfile extends BaseConformance {
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
           break;
-        case -916511108: // codeSystem
-          this.codeSystem = (ExpansionProfileCodeSystemComponent) value; // ExpansionProfileCodeSystemComponent
+        case -669707736: // useContext
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          break;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case 807748292: // fixedVersion
+          this.getFixedVersion().add((ExpansionProfileFixedVersionComponent) value); // ExpansionProfileFixedVersionComponent
+          break;
+        case 2125282457: // excludedSystem
+          this.excludedSystem = (ExpansionProfileExcludedSystemComponent) value; // ExpansionProfileExcludedSystemComponent
           break;
         case 461507620: // includeDesignations
           this.includeDesignations = castToBoolean(value); // BooleanType
@@ -3061,8 +2831,8 @@ public class ExpansionProfile extends BaseConformance {
         case 127972379: // includeDefinition
           this.includeDefinition = castToBoolean(value); // BooleanType
           break;
-        case 1634790707: // includeInactive
-          this.includeInactive = castToBoolean(value); // BooleanType
+        case 2043813842: // activeOnly
+          this.activeOnly = castToBoolean(value); // BooleanType
           break;
         case 424992625: // excludeNested
           this.excludeNested = castToBoolean(value); // BooleanType
@@ -3095,27 +2865,33 @@ public class ExpansionProfile extends BaseConformance {
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("experimental"))
           this.experimental = castToBoolean(value); // BooleanType
         else if (name.equals("publisher"))
           this.publisher = castToString(value); // StringType
         else if (name.equals("contact"))
-          this.getContact().add((ExpansionProfileContactComponent) value);
+          this.getContact().add(castToContactDetail(value));
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("codeSystem"))
-          this.codeSystem = (ExpansionProfileCodeSystemComponent) value; // ExpansionProfileCodeSystemComponent
+        else if (name.equals("useContext"))
+          this.getUseContext().add(castToUsageContext(value));
+        else if (name.equals("jurisdiction"))
+          this.getJurisdiction().add(castToCodeableConcept(value));
+        else if (name.equals("fixedVersion"))
+          this.getFixedVersion().add((ExpansionProfileFixedVersionComponent) value);
+        else if (name.equals("excludedSystem"))
+          this.excludedSystem = (ExpansionProfileExcludedSystemComponent) value; // ExpansionProfileExcludedSystemComponent
         else if (name.equals("includeDesignations"))
           this.includeDesignations = castToBoolean(value); // BooleanType
         else if (name.equals("designation"))
           this.designation = (ExpansionProfileDesignationComponent) value; // ExpansionProfileDesignationComponent
         else if (name.equals("includeDefinition"))
           this.includeDefinition = castToBoolean(value); // BooleanType
-        else if (name.equals("includeInactive"))
-          this.includeInactive = castToBoolean(value); // BooleanType
+        else if (name.equals("activeOnly"))
+          this.activeOnly = castToBoolean(value); // BooleanType
         else if (name.equals("excludeNested"))
           this.excludeNested = castToBoolean(value); // BooleanType
         else if (name.equals("excludeNotForUI"))
@@ -3137,17 +2913,20 @@ public class ExpansionProfile extends BaseConformance {
         case -1618432855:  return getIdentifier(); // Identifier
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ExpansionProfileContactComponent
+        case 951526432:  return addContact(); // ContactDetail
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -916511108:  return getCodeSystem(); // ExpansionProfileCodeSystemComponent
+        case -669707736:  return addUseContext(); // UsageContext
+        case -507075711:  return addJurisdiction(); // CodeableConcept
+        case 807748292:  return addFixedVersion(); // ExpansionProfileFixedVersionComponent
+        case 2125282457:  return getExcludedSystem(); // ExpansionProfileExcludedSystemComponent
         case 461507620: throw new FHIRException("Cannot make property includeDesignations as it is not a complex type"); // BooleanType
         case -900931593:  return getDesignation(); // ExpansionProfileDesignationComponent
         case 127972379: throw new FHIRException("Cannot make property includeDefinition as it is not a complex type"); // BooleanType
-        case 1634790707: throw new FHIRException("Cannot make property includeInactive as it is not a complex type"); // BooleanType
+        case 2043813842: throw new FHIRException("Cannot make property activeOnly as it is not a complex type"); // BooleanType
         case 424992625: throw new FHIRException("Cannot make property excludeNested as it is not a complex type"); // BooleanType
         case 667582980: throw new FHIRException("Cannot make property excludeNotForUI as it is not a complex type"); // BooleanType
         case 563335154: throw new FHIRException("Cannot make property excludePostCoordinated as it is not a complex type"); // BooleanType
@@ -3191,9 +2970,18 @@ public class ExpansionProfile extends BaseConformance {
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.description");
         }
-        else if (name.equals("codeSystem")) {
-          this.codeSystem = new ExpansionProfileCodeSystemComponent();
-          return this.codeSystem;
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
+        }
+        else if (name.equals("fixedVersion")) {
+          return addFixedVersion();
+        }
+        else if (name.equals("excludedSystem")) {
+          this.excludedSystem = new ExpansionProfileExcludedSystemComponent();
+          return this.excludedSystem;
         }
         else if (name.equals("includeDesignations")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.includeDesignations");
@@ -3205,8 +2993,8 @@ public class ExpansionProfile extends BaseConformance {
         else if (name.equals("includeDefinition")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.includeDefinition");
         }
-        else if (name.equals("includeInactive")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.includeInactive");
+        else if (name.equals("activeOnly")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.activeOnly");
         }
         else if (name.equals("excludeNested")) {
           throw new FHIRException("Cannot call addChild on a primitive type ExpansionProfile.excludeNested");
@@ -3243,17 +3031,32 @@ public class ExpansionProfile extends BaseConformance {
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
-          dst.contact = new ArrayList<ExpansionProfileContactComponent>();
-          for (ExpansionProfileContactComponent i : contact)
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
         dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
-        dst.codeSystem = codeSystem == null ? null : codeSystem.copy();
+        if (useContext != null) {
+          dst.useContext = new ArrayList<UsageContext>();
+          for (UsageContext i : useContext)
+            dst.useContext.add(i.copy());
+        };
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
+        };
+        if (fixedVersion != null) {
+          dst.fixedVersion = new ArrayList<ExpansionProfileFixedVersionComponent>();
+          for (ExpansionProfileFixedVersionComponent i : fixedVersion)
+            dst.fixedVersion.add(i.copy());
+        };
+        dst.excludedSystem = excludedSystem == null ? null : excludedSystem.copy();
         dst.includeDesignations = includeDesignations == null ? null : includeDesignations.copy();
         dst.designation = designation == null ? null : designation.copy();
         dst.includeDefinition = includeDefinition == null ? null : includeDefinition.copy();
-        dst.includeInactive = includeInactive == null ? null : includeInactive.copy();
+        dst.activeOnly = activeOnly == null ? null : activeOnly.copy();
         dst.excludeNested = excludeNested == null ? null : excludeNested.copy();
         dst.excludeNotForUI = excludeNotForUI == null ? null : excludeNotForUI.copy();
         dst.excludePostCoordinated = excludePostCoordinated == null ? null : excludePostCoordinated.copy();
@@ -3273,11 +3076,10 @@ public class ExpansionProfile extends BaseConformance {
         if (!(other instanceof ExpansionProfile))
           return false;
         ExpansionProfile o = (ExpansionProfile) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(experimental, o.experimental, true)
-           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true)
-           && compareDeep(codeSystem, o.codeSystem, true) && compareDeep(includeDesignations, o.includeDesignations, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(fixedVersion, o.fixedVersion, true)
+           && compareDeep(excludedSystem, o.excludedSystem, true) && compareDeep(includeDesignations, o.includeDesignations, true)
            && compareDeep(designation, o.designation, true) && compareDeep(includeDefinition, o.includeDefinition, true)
-           && compareDeep(includeInactive, o.includeInactive, true) && compareDeep(excludeNested, o.excludeNested, true)
+           && compareDeep(activeOnly, o.activeOnly, true) && compareDeep(excludeNested, o.excludeNested, true)
            && compareDeep(excludeNotForUI, o.excludeNotForUI, true) && compareDeep(excludePostCoordinated, o.excludePostCoordinated, true)
            && compareDeep(displayLanguage, o.displayLanguage, true) && compareDeep(limitedExpansion, o.limitedExpansion, true)
           ;
@@ -3290,19 +3092,17 @@ public class ExpansionProfile extends BaseConformance {
         if (!(other instanceof ExpansionProfile))
           return false;
         ExpansionProfile o = (ExpansionProfile) other;
-        return compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(description, o.description, true) && compareValues(includeDesignations, o.includeDesignations, true)
-           && compareValues(includeDefinition, o.includeDefinition, true) && compareValues(includeInactive, o.includeInactive, true)
-           && compareValues(excludeNested, o.excludeNested, true) && compareValues(excludeNotForUI, o.excludeNotForUI, true)
-           && compareValues(excludePostCoordinated, o.excludePostCoordinated, true) && compareValues(displayLanguage, o.displayLanguage, true)
-           && compareValues(limitedExpansion, o.limitedExpansion, true);
+        return compareValues(includeDesignations, o.includeDesignations, true) && compareValues(includeDefinition, o.includeDefinition, true)
+           && compareValues(activeOnly, o.activeOnly, true) && compareValues(excludeNested, o.excludeNested, true)
+           && compareValues(excludeNotForUI, o.excludeNotForUI, true) && compareValues(excludePostCoordinated, o.excludePostCoordinated, true)
+           && compareValues(displayLanguage, o.displayLanguage, true) && compareValues(limitedExpansion, o.limitedExpansion, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, experimental, publisher
-          , contact, description, codeSystem, includeDesignations, designation, includeDefinition
-          , includeInactive, excludeNested, excludeNotForUI, excludePostCoordinated, displayLanguage
-          , limitedExpansion);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, fixedVersion, excludedSystem
+          , includeDesignations, designation, includeDefinition, activeOnly, excludeNested, excludeNotForUI
+          , excludePostCoordinated, displayLanguage, limitedExpansion);
       }
 
   @Override
@@ -3333,17 +3133,17 @@ public class ExpansionProfile extends BaseConformance {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>The identifier for the expansion profile</b><br>
+   * Description: <b>External identifiers for the expansion profile</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ExpansionProfile.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ExpansionProfile.identifier", description="The identifier for the expansion profile", type="token" )
+  @SearchParamDefinition(name="identifier", path="ExpansionProfile.identifier", description="External identifiers for the expansion profile", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>The identifier for the expansion profile</b><br>
+   * Description: <b>External identifiers for the expansion profile</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ExpansionProfile.identifier</b><br>
    * </p>
@@ -3351,24 +3151,64 @@ public class ExpansionProfile extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.jurisdiction</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="jurisdiction", path="ExpansionProfile.jurisdiction", description="Intended jurisdiction for expansion profile", type="token" )
+  public static final String SP_JURISDICTION = "jurisdiction";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.jurisdiction</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
+
+ /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>The name of the expansion profile</b><br>
+   * Description: <b>Name of the expansion profile</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ExpansionProfile.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ExpansionProfile.name", description="The name of the expansion profile", type="string" )
+  @SearchParamDefinition(name="name", path="ExpansionProfile.name", description="Name of the expansion profile", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>The name of the expansion profile</b><br>
+   * Description: <b>Name of the expansion profile</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ExpansionProfile.name</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.description</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="description", path="ExpansionProfile.description", description="Text search against the description of the expansion profile", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
    * Search parameter: <b>publisher</b>
@@ -3389,26 +3229,6 @@ public class ExpansionProfile extends BaseConformance {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
-
- /**
-   * Search parameter: <b>description</b>
-   * <p>
-   * Description: <b>Text search in the description of the expansion profile</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ExpansionProfile.description</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="description", path="ExpansionProfile.description", description="Text search in the description of the expansion profile", type="string" )
-  public static final String SP_DESCRIPTION = "description";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>description</b>
-   * <p>
-   * Description: <b>Text search in the description of the expansion profile</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>ExpansionProfile.description</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
    * Search parameter: <b>version</b>
@@ -3433,17 +3253,17 @@ public class ExpansionProfile extends BaseConformance {
  /**
    * Search parameter: <b>url</b>
    * <p>
-   * Description: <b>The logical URL for the expansion profile</b><br>
+   * Description: <b>The uri that identifies the expansion profile</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>ExpansionProfile.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="ExpansionProfile.url", description="The logical URL for the expansion profile", type="uri" )
+  @SearchParamDefinition(name="url", path="ExpansionProfile.url", description="The uri that identifies the expansion profile", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
    * <p>
-   * Description: <b>The logical URL for the expansion profile</b><br>
+   * Description: <b>The uri that identifies the expansion profile</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>ExpansionProfile.url</b><br>
    * </p>
@@ -3453,17 +3273,17 @@ public class ExpansionProfile extends BaseConformance {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>The status of the expansion profile</b><br>
+   * Description: <b>The current status of the expansion profile</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ExpansionProfile.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ExpansionProfile.status", description="The status of the expansion profile", type="token" )
+  @SearchParamDefinition(name="status", path="ExpansionProfile.status", description="The current status of the expansion profile", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>The status of the expansion profile</b><br>
+   * Description: <b>The current status of the expansion profile</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ExpansionProfile.status</b><br>
    * </p>

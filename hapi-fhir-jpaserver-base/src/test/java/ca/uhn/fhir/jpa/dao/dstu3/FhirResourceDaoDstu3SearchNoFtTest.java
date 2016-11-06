@@ -213,10 +213,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		pat2.getManagingOrganization().setReferenceElement(orgId);
 		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
-		MedicationOrder mo = new MedicationOrder();
+		MedicationRequest mo = new MedicationRequest();
 		mo.getPatient().setReferenceElement(patId);
 		mo.setMedication(new Reference(medId));
-		IIdType moId = myMedicationOrderDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
+		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 		
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, mySrd);

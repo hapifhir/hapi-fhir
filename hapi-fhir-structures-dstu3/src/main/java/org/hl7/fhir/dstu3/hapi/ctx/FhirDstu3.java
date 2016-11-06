@@ -26,10 +26,18 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
-import org.hl7.fhir.dstu3.hapi.rest.server.ServerConformanceProvider;
+import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerProfileProvider;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -46,8 +54,8 @@ public class FhirDstu3 implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
-		return new ServerConformanceProvider(theServer);
+	public ServerCapabilityStatementProvider createServerConformanceProvider(RestfulServer theServer) {
+		return new ServerCapabilityStatementProvider(theServer);
 	}
 
 	@Override

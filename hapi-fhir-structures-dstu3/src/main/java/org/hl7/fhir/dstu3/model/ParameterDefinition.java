@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.
  */
@@ -146,7 +149,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      * Whether the parameter is input or output for the module.
      */
     @Child(name = "use", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="Whether the parameter is input or output for the module." )
+    @Description(shortDefinition="input | output", formalDefinition="Whether the parameter is input or output for the module." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-parameter-use")
     protected Enumeration<ParameterUse> use;
 
@@ -175,7 +178,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      * The type of the parameter.
      */
     @Child(name = "type", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="The type of the parameter." )
+    @Description(shortDefinition="Type for the parameter", formalDefinition="The type of the parameter." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/all-types")
     protected CodeType type;
 

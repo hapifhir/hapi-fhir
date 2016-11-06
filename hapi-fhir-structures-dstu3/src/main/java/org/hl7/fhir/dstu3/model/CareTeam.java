@@ -29,15 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.
  */
@@ -47,10 +51,10 @@ public class CareTeam extends DomainResource {
     @Block()
     public static class CareTeamParticipantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Indicates specific responsibility of an individual within the care team, such as "Primary physician", "Team coordinator", "Caregiver", etc.
+         * Indicates specific responsibility of an individual within the care team, such as "Primary care physician", "Trained social worker counselor", "Caregiver", etc.
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Type of involvement", formalDefinition="Indicates specific responsibility of an individual within the care team, such as \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc." )
+        @Description(shortDefinition="Type of involvement", formalDefinition="Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participant-role")
         protected CodeableConcept role;
 
@@ -83,7 +87,7 @@ public class CareTeam extends DomainResource {
       }
 
         /**
-         * @return {@link #role} (Indicates specific responsibility of an individual within the care team, such as "Primary physician", "Team coordinator", "Caregiver", etc.)
+         * @return {@link #role} (Indicates specific responsibility of an individual within the care team, such as "Primary care physician", "Trained social worker counselor", "Caregiver", etc.)
          */
         public CodeableConcept getRole() { 
           if (this.role == null)
@@ -99,7 +103,7 @@ public class CareTeam extends DomainResource {
         }
 
         /**
-         * @param value {@link #role} (Indicates specific responsibility of an individual within the care team, such as "Primary physician", "Team coordinator", "Caregiver", etc.)
+         * @param value {@link #role} (Indicates specific responsibility of an individual within the care team, such as "Primary care physician", "Trained social worker counselor", "Caregiver", etc.)
          */
         public CareTeamParticipantComponent setRole(CodeableConcept value) { 
           this.role = value;
@@ -171,7 +175,7 @@ public class CareTeam extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.", 0, java.lang.Integer.MAX_VALUE, role));
+          childrenList.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization)", "The specific person or organization who is participating/expected to participate in the care team.", 0, java.lang.Integer.MAX_VALUE, member));
           childrenList.add(new Property("period", "Period", "Indicates when the specific member or organization did (or is intended to) come into effect and end.", 0, java.lang.Integer.MAX_VALUE, period));
         }
@@ -303,15 +307,15 @@ public class CareTeam extends DomainResource {
     /**
      * Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type of team", formalDefinition="Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team." )
-    protected List<CodeableConcept> type;
+    protected List<CodeableConcept> category;
 
     /**
-     * Name of the care team.
+     * A label for human use intended to distinguish like teams.  E.g. the "red" vs. "green" trauma teams.
      */
     @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the team, such as crisis assessment team", formalDefinition="Name of the care team." )
+    @Description(shortDefinition="Name of the team, such as crisis assessment team", formalDefinition="A label for human use intended to distinguish like teams.  E.g. the \"red\" vs. \"green\" trauma teams." )
     protected StringType name;
 
     /**
@@ -343,16 +347,16 @@ public class CareTeam extends DomainResource {
     /**
      * The organization responsible for the care team.
      */
-    @Child(name = "managingOrganization", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Organization responsible for the care team", formalDefinition="The organization responsible for the care team." )
-    protected Reference managingOrganization;
-
+    protected List<Reference> managingOrganization;
     /**
-     * The actual object that is the target of the reference (The organization responsible for the care team.)
+     * The actual objects that are the target of the reference (The organization responsible for the care team.)
      */
-    protected Organization managingOrganizationTarget;
+    protected List<Organization> managingOrganizationTarget;
 
-    private static final long serialVersionUID = -917605050L;
+
+    private static final long serialVersionUID = 141870602L;
 
   /**
    * Constructor
@@ -439,60 +443,60 @@ public class CareTeam extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.)
+     * @return {@link #category} (Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.)
      */
-    public List<CodeableConcept> getType() { 
-      if (this.type == null)
-        this.type = new ArrayList<CodeableConcept>();
-      return this.type;
+    public List<CodeableConcept> getCategory() { 
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      return this.category;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CareTeam setType(List<CodeableConcept> theType) { 
-      this.type = theType;
+    public CareTeam setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
       return this;
     }
 
-    public boolean hasType() { 
-      if (this.type == null)
+    public boolean hasCategory() { 
+      if (this.category == null)
         return false;
-      for (CodeableConcept item : this.type)
+      for (CodeableConcept item : this.category)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeableConcept addType() { //3
+    public CodeableConcept addCategory() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.type == null)
-        this.type = new ArrayList<CodeableConcept>();
-      this.type.add(t);
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
       return t;
     }
 
-    public CareTeam addType(CodeableConcept t) { //3
+    public CareTeam addCategory(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.type == null)
-        this.type = new ArrayList<CodeableConcept>();
-      this.type.add(t);
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
      */
-    public CodeableConcept getTypeFirstRep() { 
-      if (getType().isEmpty()) {
-        addType();
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
       }
-      return getType().get(0);
+      return getCategory().get(0);
     }
 
     /**
-     * @return {@link #name} (Name of the care team.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (A label for human use intended to distinguish like teams.  E.g. the "red" vs. "green" trauma teams.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -512,7 +516,7 @@ public class CareTeam extends DomainResource {
     }
 
     /**
-     * @param value {@link #name} (Name of the care team.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (A label for human use intended to distinguish like teams.  E.g. the "red" vs. "green" trauma teams.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public CareTeam setNameElement(StringType value) { 
       this.name = value;
@@ -520,14 +524,14 @@ public class CareTeam extends DomainResource {
     }
 
     /**
-     * @return Name of the care team.
+     * @return A label for human use intended to distinguish like teams.  E.g. the "red" vs. "green" trauma teams.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value Name of the care team.
+     * @param value A label for human use intended to distinguish like teams.  E.g. the "red" vs. "green" trauma teams.
      */
     public CareTeam setName(String value) { 
       if (Utilities.noString(value))
@@ -659,53 +663,84 @@ public class CareTeam extends DomainResource {
     /**
      * @return {@link #managingOrganization} (The organization responsible for the care team.)
      */
-    public Reference getManagingOrganization() { 
+    public List<Reference> getManagingOrganization() { 
       if (this.managingOrganization == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CareTeam.managingOrganization");
-        else if (Configuration.doAutoCreate())
-          this.managingOrganization = new Reference(); // cc
+        this.managingOrganization = new ArrayList<Reference>();
       return this.managingOrganization;
     }
 
-    public boolean hasManagingOrganization() { 
-      return this.managingOrganization != null && !this.managingOrganization.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CareTeam setManagingOrganization(List<Reference> theManagingOrganization) { 
+      this.managingOrganization = theManagingOrganization;
+      return this;
     }
 
-    /**
-     * @param value {@link #managingOrganization} (The organization responsible for the care team.)
-     */
-    public CareTeam setManagingOrganization(Reference value) { 
-      this.managingOrganization = value;
+    public boolean hasManagingOrganization() { 
+      if (this.managingOrganization == null)
+        return false;
+      for (Reference item : this.managingOrganization)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addManagingOrganization() { //3
+      Reference t = new Reference();
+      if (this.managingOrganization == null)
+        this.managingOrganization = new ArrayList<Reference>();
+      this.managingOrganization.add(t);
+      return t;
+    }
+
+    public CareTeam addManagingOrganization(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.managingOrganization == null)
+        this.managingOrganization = new ArrayList<Reference>();
+      this.managingOrganization.add(t);
       return this;
     }
 
     /**
-     * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization responsible for the care team.)
+     * @return The first repetition of repeating field {@link #managingOrganization}, creating it if it does not already exist
      */
-    public Organization getManagingOrganizationTarget() { 
+    public Reference getManagingOrganizationFirstRep() { 
+      if (getManagingOrganization().isEmpty()) {
+        addManagingOrganization();
+      }
+      return getManagingOrganization().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Organization> getManagingOrganizationTarget() { 
       if (this.managingOrganizationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CareTeam.managingOrganization");
-        else if (Configuration.doAutoCreate())
-          this.managingOrganizationTarget = new Organization(); // aa
+        this.managingOrganizationTarget = new ArrayList<Organization>();
       return this.managingOrganizationTarget;
     }
 
     /**
-     * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization responsible for the care team.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
-    public CareTeam setManagingOrganizationTarget(Organization value) { 
-      this.managingOrganizationTarget = value;
-      return this;
+    @Deprecated
+    public Organization addManagingOrganizationTarget() { 
+      Organization r = new Organization();
+      if (this.managingOrganizationTarget == null)
+        this.managingOrganizationTarget = new ArrayList<Organization>();
+      this.managingOrganizationTarget.add(r);
+      return r;
     }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this care team that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "CodeableConcept", "Indicates whether the care team is currently active, suspended, inactive, or entered in error.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("type", "CodeableConcept", "Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("name", "string", "Name of the care team.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("category", "CodeableConcept", "Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("name", "string", "A label for human use intended to distinguish like teams.  E.g. the \"red\" vs. \"green\" trauma teams.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is handled by the team.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("period", "Period", "Indicates when the team did (or is intended to) come into effect and end.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("participant", "", "Identifies all people and organizations who are expected to be involved in the care team.", 0, java.lang.Integer.MAX_VALUE, participant));
@@ -717,12 +752,12 @@ public class CareTeam extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeableConcept
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // CareTeamParticipantComponent
-        case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
+        case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : this.managingOrganization.toArray(new Base[this.managingOrganization.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -737,8 +772,8 @@ public class CareTeam extends DomainResource {
         case -892481550: // status
           this.status = castToCodeableConcept(value); // CodeableConcept
           break;
-        case 3575610: // type
-          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
+        case 50511102: // category
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case 3373707: // name
           this.name = castToString(value); // StringType
@@ -753,7 +788,7 @@ public class CareTeam extends DomainResource {
           this.getParticipant().add((CareTeamParticipantComponent) value); // CareTeamParticipantComponent
           break;
         case -2058947787: // managingOrganization
-          this.managingOrganization = castToReference(value); // Reference
+          this.getManagingOrganization().add(castToReference(value)); // Reference
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -766,8 +801,8 @@ public class CareTeam extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("status"))
           this.status = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("type"))
-          this.getType().add(castToCodeableConcept(value));
+        else if (name.equals("category"))
+          this.getCategory().add(castToCodeableConcept(value));
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("subject"))
@@ -777,7 +812,7 @@ public class CareTeam extends DomainResource {
         else if (name.equals("participant"))
           this.getParticipant().add((CareTeamParticipantComponent) value);
         else if (name.equals("managingOrganization"))
-          this.managingOrganization = castToReference(value); // Reference
+          this.getManagingOrganization().add(castToReference(value));
         else
           super.setProperty(name, value);
       }
@@ -787,12 +822,12 @@ public class CareTeam extends DomainResource {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
         case -892481550:  return getStatus(); // CodeableConcept
-        case 3575610:  return addType(); // CodeableConcept
+        case 50511102:  return addCategory(); // CodeableConcept
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
         case -1867885268:  return getSubject(); // Reference
         case -991726143:  return getPeriod(); // Period
         case 767422259:  return addParticipant(); // CareTeamParticipantComponent
-        case -2058947787:  return getManagingOrganization(); // Reference
+        case -2058947787:  return addManagingOrganization(); // Reference
         default: return super.makeProperty(hash, name);
         }
 
@@ -807,8 +842,8 @@ public class CareTeam extends DomainResource {
           this.status = new CodeableConcept();
           return this.status;
         }
-        else if (name.equals("type")) {
-          return addType();
+        else if (name.equals("category")) {
+          return addCategory();
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type CareTeam.name");
@@ -825,8 +860,7 @@ public class CareTeam extends DomainResource {
           return addParticipant();
         }
         else if (name.equals("managingOrganization")) {
-          this.managingOrganization = new Reference();
-          return this.managingOrganization;
+          return addManagingOrganization();
         }
         else
           return super.addChild(name);
@@ -846,10 +880,10 @@ public class CareTeam extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
-        if (type != null) {
-          dst.type = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : type)
-            dst.type.add(i.copy());
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
         };
         dst.name = name == null ? null : name.copy();
         dst.subject = subject == null ? null : subject.copy();
@@ -859,7 +893,11 @@ public class CareTeam extends DomainResource {
           for (CareTeamParticipantComponent i : participant)
             dst.participant.add(i.copy());
         };
-        dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
+        if (managingOrganization != null) {
+          dst.managingOrganization = new ArrayList<Reference>();
+          for (Reference i : managingOrganization)
+            dst.managingOrganization.add(i.copy());
+        };
         return dst;
       }
 
@@ -874,7 +912,7 @@ public class CareTeam extends DomainResource {
         if (!(other instanceof CareTeam))
           return false;
         CareTeam o = (CareTeam) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(name, o.name, true) && compareDeep(subject, o.subject, true) && compareDeep(period, o.period, true)
            && compareDeep(participant, o.participant, true) && compareDeep(managingOrganization, o.managingOrganization, true)
           ;
@@ -891,7 +929,7 @@ public class CareTeam extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, category
           , name, subject, period, participant, managingOrganization);
       }
 
@@ -993,24 +1031,24 @@ public class CareTeam extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("CareTeam:subject").toLocked();
 
  /**
-   * Search parameter: <b>type</b>
+   * Search parameter: <b>category</b>
    * <p>
    * Description: <b>Type of team</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>CareTeam.type</b><br>
+   * Path: <b>CareTeam.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="CareTeam.type", description="Type of team", type="token" )
-  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="category", path="CareTeam.category", description="Type of team", type="token" )
+  public static final String SP_CATEGORY = "category";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <b>Fluent Client</b> search parameter constant for <b>category</b>
    * <p>
    * Description: <b>Type of team</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>CareTeam.type</b><br>
+   * Path: <b>CareTeam.category</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
 
  /**
    * Search parameter: <b>participant</b>

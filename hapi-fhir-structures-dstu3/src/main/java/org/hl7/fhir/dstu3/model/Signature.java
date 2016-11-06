@@ -29,18 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.
  */
@@ -428,10 +429,10 @@ public class Signature extends Type implements ICompositeType {
           this.when = castToInstant(value); // InstantType
           break;
         case 117694: // who
-          this.who = (Type) value; // Type
+          this.who = castToType(value); // Type
           break;
         case -14402964: // onBehalfOf
-          this.onBehalfOf = (Type) value; // Type
+          this.onBehalfOf = castToType(value); // Type
           break;
         case -389131437: // contentType
           this.contentType = castToCode(value); // CodeType
@@ -451,9 +452,9 @@ public class Signature extends Type implements ICompositeType {
         else if (name.equals("when"))
           this.when = castToInstant(value); // InstantType
         else if (name.equals("who[x]"))
-          this.who = (Type) value; // Type
+          this.who = castToType(value); // Type
         else if (name.equals("onBehalfOf[x]"))
-          this.onBehalfOf = (Type) value; // Type
+          this.onBehalfOf = castToType(value); // Type
         else if (name.equals("contentType"))
           this.contentType = castToCode(value); // CodeType
         else if (name.equals("blob"))

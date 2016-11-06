@@ -29,23 +29,26 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.*;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).
  */
 @ResourceDef(name="OperationDefinition", profile="http://hl7.org/fhir/Profile/OperationDefinition")
-@ChildOrder(names={"url", "version", "name", "status", "kind", "experimental", "date", "publisher", "contact", "description", "useContext", "requirements", "idempotent", "code", "comment", "base", "system", "type", "instance", "parameter"})
-public class OperationDefinition extends BaseConformance {
+@ChildOrder(names={"url", "version", "name", "status", "kind", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "idempotent", "code", "comment", "base", "resource", "system", "type", "instance", "parameter", "overload"})
+public class OperationDefinition extends MetadataResource {
 
     public enum OperationKind {
         /**
@@ -226,238 +229,6 @@ public class OperationDefinition extends BaseConformance {
       return code.getSystem();
       }
     }
-
-    @Block()
-    public static class OperationDefinitionContactComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The name of an individual to contact regarding the operation definition.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the operation definition." )
-        protected StringType name;
-
-        /**
-         * Contact details for individual (if a name was provided) or the publisher.
-         */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
-    /**
-     * Constructor
-     */
-      public OperationDefinitionContactComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (The name of an individual to contact regarding the operation definition.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create OperationDefinitionContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the operation definition.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public OperationDefinitionContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the operation definition.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the operation definition.
-         */
-        public OperationDefinitionContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public OperationDefinitionContactComponent setTelecom(List<ContactPoint> theTelecom) { 
-          this.telecom = theTelecom;
-          return this;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-        public OperationDefinitionContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the operation definition.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.name");
-        }
-        else if (name.equals("telecom")) {
-          return addTelecom();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public OperationDefinitionContactComponent copy() {
-        OperationDefinitionContactComponent dst = new OperationDefinitionContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof OperationDefinitionContactComponent))
-          return false;
-        OperationDefinitionContactComponent o = (OperationDefinitionContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof OperationDefinitionContactComponent))
-          return false;
-        OperationDefinitionContactComponent o = (OperationDefinitionContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
-      }
-
-  public String fhirType() {
-    return "OperationDefinition.contact";
-
-  }
-
-  }
 
     @Block()
     public static class OperationDefinitionParameterComponent extends BackboneElement implements IBaseBackboneElement {
@@ -1364,7 +1135,7 @@ public class OperationDefinition extends BaseConformance {
           this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
           break;
         case -1410174671: // valueSet
-          this.valueSet = (Type) value; // Type
+          this.valueSet = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1376,7 +1147,7 @@ public class OperationDefinition extends BaseConformance {
         if (name.equals("strength"))
           this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
         else if (name.equals("valueSet[x]"))
-          this.valueSet = (Type) value; // Type
+          this.valueSet = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -1447,6 +1218,248 @@ public class OperationDefinition extends BaseConformance {
 
   }
 
+    @Block()
+    public static class OperationDefinitionOverloadComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Name of parameter to include in overload.
+         */
+        @Child(name = "parameterName", type = {StringType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Name of parameter to include in overload", formalDefinition="Name of parameter to include in overload." )
+        protected List<StringType> parameterName;
+
+        /**
+         * Comments to go on overload.
+         */
+        @Child(name = "comment", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Comments to go on overload", formalDefinition="Comments to go on overload." )
+        protected StringType comment;
+
+        private static final long serialVersionUID = -907948545L;
+
+    /**
+     * Constructor
+     */
+      public OperationDefinitionOverloadComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #parameterName} (Name of parameter to include in overload.)
+         */
+        public List<StringType> getParameterName() { 
+          if (this.parameterName == null)
+            this.parameterName = new ArrayList<StringType>();
+          return this.parameterName;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public OperationDefinitionOverloadComponent setParameterName(List<StringType> theParameterName) { 
+          this.parameterName = theParameterName;
+          return this;
+        }
+
+        public boolean hasParameterName() { 
+          if (this.parameterName == null)
+            return false;
+          for (StringType item : this.parameterName)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #parameterName} (Name of parameter to include in overload.)
+         */
+        public StringType addParameterNameElement() {//2 
+          StringType t = new StringType();
+          if (this.parameterName == null)
+            this.parameterName = new ArrayList<StringType>();
+          this.parameterName.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #parameterName} (Name of parameter to include in overload.)
+         */
+        public OperationDefinitionOverloadComponent addParameterName(String value) { //1
+          StringType t = new StringType();
+          t.setValue(value);
+          if (this.parameterName == null)
+            this.parameterName = new ArrayList<StringType>();
+          this.parameterName.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #parameterName} (Name of parameter to include in overload.)
+         */
+        public boolean hasParameterName(String value) { 
+          if (this.parameterName == null)
+            return false;
+          for (StringType v : this.parameterName)
+            if (v.equals(value)) // string
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #comment} (Comments to go on overload.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public StringType getCommentElement() { 
+          if (this.comment == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create OperationDefinitionOverloadComponent.comment");
+            else if (Configuration.doAutoCreate())
+              this.comment = new StringType(); // bb
+          return this.comment;
+        }
+
+        public boolean hasCommentElement() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        public boolean hasComment() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        /**
+         * @param value {@link #comment} (Comments to go on overload.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public OperationDefinitionOverloadComponent setCommentElement(StringType value) { 
+          this.comment = value;
+          return this;
+        }
+
+        /**
+         * @return Comments to go on overload.
+         */
+        public String getComment() { 
+          return this.comment == null ? null : this.comment.getValue();
+        }
+
+        /**
+         * @param value Comments to go on overload.
+         */
+        public OperationDefinitionOverloadComponent setComment(String value) { 
+          if (Utilities.noString(value))
+            this.comment = null;
+          else {
+            if (this.comment == null)
+              this.comment = new StringType();
+            this.comment.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("parameterName", "string", "Name of parameter to include in overload.", 0, java.lang.Integer.MAX_VALUE, parameterName));
+          childrenList.add(new Property("comment", "string", "Comments to go on overload.", 0, java.lang.Integer.MAX_VALUE, comment));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -379607596: /*parameterName*/ return this.parameterName == null ? new Base[0] : this.parameterName.toArray(new Base[this.parameterName.size()]); // StringType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -379607596: // parameterName
+          this.getParameterName().add(castToString(value)); // StringType
+          break;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("parameterName"))
+          this.getParameterName().add(castToString(value));
+        else if (name.equals("comment"))
+          this.comment = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -379607596: throw new FHIRException("Cannot make property parameterName as it is not a complex type"); // StringType
+        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("parameterName")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.parameterName");
+        }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.comment");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public OperationDefinitionOverloadComponent copy() {
+        OperationDefinitionOverloadComponent dst = new OperationDefinitionOverloadComponent();
+        copyValues(dst);
+        if (parameterName != null) {
+          dst.parameterName = new ArrayList<StringType>();
+          for (StringType i : parameterName)
+            dst.parameterName.add(i.copy());
+        };
+        dst.comment = comment == null ? null : comment.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof OperationDefinitionOverloadComponent))
+          return false;
+        OperationDefinitionOverloadComponent o = (OperationDefinitionOverloadComponent) other;
+        return compareDeep(parameterName, o.parameterName, true) && compareDeep(comment, o.comment, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof OperationDefinitionOverloadComponent))
+          return false;
+        OperationDefinitionOverloadComponent o = (OperationDefinitionOverloadComponent) other;
+        return compareValues(parameterName, o.parameterName, true) && compareValues(comment, o.comment, true)
+          ;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(parameterName, comment);
+      }
+
+  public String fhirType() {
+    return "OperationDefinition.overload";
+
+  }
+
+  }
+
     /**
      * Whether this is an operation or a named query.
      */
@@ -1456,65 +1469,37 @@ public class OperationDefinition extends BaseConformance {
     protected Enumeration<OperationKind> kind;
 
     /**
-     * This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * Explains why this operation definition is needed and why it has been designed as it has.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
-    protected BooleanType experimental;
-
-    /**
-     * The name of the individual or organization that published the operation definition.
-     */
-    @Child(name = "publisher", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the operation definition." )
-    protected StringType publisher;
-
-    /**
-     * Contacts to assist a user in finding and communicating with the publisher.
-     */
-    @Child(name = "contact", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
-    protected List<OperationDefinitionContactComponent> contact;
-
-    /**
-     * A free text natural language description of the profile and its use.
-     */
-    @Child(name = "description", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Natural language description of the operation", formalDefinition="A free text natural language description of the profile and its use." )
-    protected MarkdownType description;
-
-    /**
-     * Explains why this operation definition is needed and why it's been constrained as it has.
-     */
-    @Child(name = "requirements", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this resource has been created", formalDefinition="Explains why this operation definition is needed and why it's been constrained as it has." )
-    protected MarkdownType requirements;
+    @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this operation definition is defined", formalDefinition="Explains why this operation definition is needed and why it has been designed as it has." )
+    protected MarkdownType purpose;
 
     /**
      * Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.
      */
-    @Child(name = "idempotent", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "idempotent", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Whether content is unchanged by the operation", formalDefinition="Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST." )
     protected BooleanType idempotent;
 
     /**
      * The name used to invoke the operation.
      */
-    @Child(name = "code", type = {CodeType.class}, order=7, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "code", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Name used to invoke the operation", formalDefinition="The name used to invoke the operation." )
     protected CodeType code;
 
     /**
      * Additional information about how to use this operation or named query.
      */
-    @Child(name = "comment", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "comment", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional information about use", formalDefinition="Additional information about how to use this operation or named query." )
     protected StringType comment;
 
     /**
      * Indicates that this operation definition is a constraining profile on the base.
      */
-    @Child(name = "base", type = {OperationDefinition.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "base", type = {OperationDefinition.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Marks this as a profile of the base", formalDefinition="Indicates that this operation definition is a constraining profile on the base." )
     protected Reference base;
 
@@ -1524,35 +1509,49 @@ public class OperationDefinition extends BaseConformance {
     protected OperationDefinition baseTarget;
 
     /**
+     * The types on which this operation can be executed.
+     */
+    @Child(name = "resource", type = {CodeType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Types this operation applies to", formalDefinition="The types on which this operation can be executed." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
+    protected List<CodeType> resource;
+
+    /**
      * Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context).
      */
-    @Child(name = "system", type = {BooleanType.class}, order=10, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "system", type = {BooleanType.class}, order=7, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Invoke at the system level?", formalDefinition="Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context)." )
     protected BooleanType system;
 
     /**
-     * Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context).
+     * Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).
      */
-    @Child(name = "type", type = {CodeType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Invoke at resource level for these type", formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
-    protected List<CodeType> type;
+    @Child(name = "type", type = {BooleanType.class}, order=8, min=1, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Invole at the type level?", formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context)." )
+    protected BooleanType type;
 
     /**
      * Indicates whether this operation can be invoked on a particular instance of one of the given types.
      */
-    @Child(name = "instance", type = {BooleanType.class}, order=12, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "instance", type = {BooleanType.class}, order=9, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Invoke on an instance?", formalDefinition="Indicates whether this operation can be invoked on a particular instance of one of the given types." )
     protected BooleanType instance;
 
     /**
      * The parameters for the operation/query.
      */
-    @Child(name = "parameter", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "parameter", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Parameters for the operation/query", formalDefinition="The parameters for the operation/query." )
     protected List<OperationDefinitionParameterComponent> parameter;
 
-    private static final long serialVersionUID = -597504387L;
+    /**
+     * Defines an appropriate combination of parameters to use when invoking this operation.
+     */
+    @Child(name = "overload", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="For generating overloaded methods in code", formalDefinition="Defines an appropriate combination of parameters to use when invoking this operation." )
+    protected List<OperationDefinitionOverloadComponent> overload;
+
+    private static final long serialVersionUID = 1292377899L;
 
   /**
    * Constructor
@@ -1564,18 +1563,54 @@ public class OperationDefinition extends BaseConformance {
   /**
    * Constructor
    */
-    public OperationDefinition(StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<OperationKind> kind, CodeType code, BooleanType system, BooleanType instance) {
+    public OperationDefinition(StringType name, Enumeration<PublicationStatus> status, Enumeration<OperationKind> kind, CodeType code, BooleanType system, BooleanType type, BooleanType instance) {
       super();
       this.name = name;
       this.status = status;
       this.kind = kind;
       this.code = code;
       this.system = system;
+      this.type = type;
       this.instance = instance;
     }
 
     /**
-     * @param value An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published.
+     * @return {@link #url} (An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public UriType getUrlElement() { 
+      if (this.url == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create OperationDefinition.url");
+        else if (Configuration.doAutoCreate())
+          this.url = new UriType(); // bb
+      return this.url;
+    }
+
+    public boolean hasUrlElement() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    public boolean hasUrl() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    /**
+     * @param value {@link #url} (An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public OperationDefinition setUrlElement(UriType value) { 
+      this.url = value;
+      return this;
+    }
+
+    /**
+     * @return An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).
+     */
+    public String getUrl() { 
+      return this.url == null ? null : this.url.getValue();
+    }
+
+    /**
+     * @param value An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public OperationDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1589,7 +1624,42 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
+     * @return {@link #version} (The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public StringType getVersionElement() { 
+      if (this.version == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create OperationDefinition.version");
+        else if (Configuration.doAutoCreate())
+          this.version = new StringType(); // bb
+      return this.version;
+    }
+
+    public boolean hasVersionElement() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    public boolean hasVersion() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    /**
+     * @param value {@link #version} (The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public OperationDefinition setVersionElement(StringType value) { 
+      this.version = value;
+      return this;
+    }
+
+    /**
+     * @return The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     */
+    public String getVersion() { 
+      return this.version == null ? null : this.version.getValue();
+    }
+
+    /**
+     * @param value The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
      */
     public OperationDefinition setVersion(String value) { 
       if (Utilities.noString(value))
@@ -1603,7 +1673,42 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @param value A free text natural language name identifying the operation.
+     * @return {@link #name} (A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public StringType getNameElement() { 
+      if (this.name == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create OperationDefinition.name");
+        else if (Configuration.doAutoCreate())
+          this.name = new StringType(); // bb
+      return this.name;
+    }
+
+    public boolean hasNameElement() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    public boolean hasName() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    /**
+     * @param value {@link #name} (A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public OperationDefinition setNameElement(StringType value) { 
+      this.name = value;
+      return this;
+    }
+
+    /**
+     * @return A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     */
+    public String getName() { 
+      return this.name == null ? null : this.name.getValue();
+    }
+
+    /**
+     * @param value A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public OperationDefinition setName(String value) { 
         if (this.name == null)
@@ -1613,11 +1718,46 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @param value The status of the profile.
+     * @return {@link #status} (The status of this operation definition. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public OperationDefinition setStatus(ConformanceResourceStatus value) { 
+    public Enumeration<PublicationStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create OperationDefinition.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of this operation definition. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public OperationDefinition setStatusElement(Enumeration<PublicationStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of this operation definition. Enables tracking the life-cycle of the content.
+     */
+    public PublicationStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of this operation definition. Enables tracking the life-cycle of the content.
+     */
+    public OperationDefinition setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
@@ -1668,7 +1808,7 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @return {@link #experimental} (This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1688,7 +1828,7 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @param value {@link #experimental} (This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public OperationDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1696,14 +1836,14 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @return This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public OperationDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1713,7 +1853,42 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @param value The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes.
+     * @return {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create OperationDefinition.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public OperationDefinition setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
      */
     public OperationDefinition setDate(Date value) { 
       if (value == null)
@@ -1776,18 +1951,18 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
      */
-    public List<OperationDefinitionContactComponent> getContact() { 
+    public List<ContactDetail> getContact() { 
       if (this.contact == null)
-        this.contact = new ArrayList<OperationDefinitionContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       return this.contact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public OperationDefinition setContact(List<OperationDefinitionContactComponent> theContact) { 
+    public OperationDefinition setContact(List<ContactDetail> theContact) { 
       this.contact = theContact;
       return this;
     }
@@ -1795,25 +1970,25 @@ public class OperationDefinition extends BaseConformance {
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
-      for (OperationDefinitionContactComponent item : this.contact)
+      for (ContactDetail item : this.contact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public OperationDefinitionContactComponent addContact() { //3
-      OperationDefinitionContactComponent t = new OperationDefinitionContactComponent();
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
       if (this.contact == null)
-        this.contact = new ArrayList<OperationDefinitionContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return t;
     }
 
-    public OperationDefinition addContact(OperationDefinitionContactComponent t) { //3
+    public OperationDefinition addContact(ContactDetail t) { //3
       if (t == null)
         return this;
       if (this.contact == null)
-        this.contact = new ArrayList<OperationDefinitionContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return this;
     }
@@ -1821,7 +1996,7 @@ public class OperationDefinition extends BaseConformance {
     /**
      * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public OperationDefinitionContactComponent getContactFirstRep() { 
+    public ContactDetail getContactFirstRep() { 
       if (getContact().isEmpty()) {
         addContact();
       }
@@ -1829,7 +2004,7 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the profile and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the operation definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -1849,7 +2024,7 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the profile and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the operation definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public OperationDefinition setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -1857,14 +2032,14 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @return A free text natural language description of the profile and its use.
+     * @return A free text natural language description of the operation definition from the consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the profile and its use.
+     * @param value A free text natural language description of the operation definition from the consumer's perspective.
      */
     public OperationDefinition setDescription(String value) { 
       if (value == null)
@@ -1878,50 +2053,156 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @return {@link #requirements} (Explains why this operation definition is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
      */
-    public MarkdownType getRequirementsElement() { 
-      if (this.requirements == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create OperationDefinition.requirements");
-        else if (Configuration.doAutoCreate())
-          this.requirements = new MarkdownType(); // bb
-      return this.requirements;
-    }
-
-    public boolean hasRequirementsElement() { 
-      return this.requirements != null && !this.requirements.isEmpty();
-    }
-
-    public boolean hasRequirements() { 
-      return this.requirements != null && !this.requirements.isEmpty();
+    public List<UsageContext> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      return this.useContext;
     }
 
     /**
-     * @param value {@link #requirements} (Explains why this operation definition is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public OperationDefinition setRequirementsElement(MarkdownType value) { 
-      this.requirements = value;
+    public OperationDefinition setUseContext(List<UsageContext> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (UsageContext item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public UsageContext addUseContext() { //3
+      UsageContext t = new UsageContext();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    public OperationDefinition addUseContext(UsageContext t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
       return this;
     }
 
     /**
-     * @return Explains why this operation definition is needed and why it's been constrained as it has.
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
      */
-    public String getRequirements() { 
-      return this.requirements == null ? null : this.requirements.getValue();
+    public UsageContext getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
     }
 
     /**
-     * @param value Explains why this operation definition is needed and why it's been constrained as it has.
+     * @return {@link #jurisdiction} (A jurisdiction in which the operation definition is intended to be used.)
      */
-    public OperationDefinition setRequirements(String value) { 
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationDefinition setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public OperationDefinition addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
+    }
+
+    /**
+     * @return {@link #purpose} (Explains why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public MarkdownType getPurposeElement() { 
+      if (this.purpose == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create OperationDefinition.purpose");
+        else if (Configuration.doAutoCreate())
+          this.purpose = new MarkdownType(); // bb
+      return this.purpose;
+    }
+
+    public boolean hasPurposeElement() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    public boolean hasPurpose() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    /**
+     * @param value {@link #purpose} (Explains why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public OperationDefinition setPurposeElement(MarkdownType value) { 
+      this.purpose = value;
+      return this;
+    }
+
+    /**
+     * @return Explains why this operation definition is needed and why it has been designed as it has.
+     */
+    public String getPurpose() { 
+      return this.purpose == null ? null : this.purpose.getValue();
+    }
+
+    /**
+     * @param value Explains why this operation definition is needed and why it has been designed as it has.
+     */
+    public OperationDefinition setPurpose(String value) { 
       if (value == null)
-        this.requirements = null;
+        this.purpose = null;
       else {
-        if (this.requirements == null)
-          this.requirements = new MarkdownType();
-        this.requirements.setValue(value);
+        if (this.purpose == null)
+          this.purpose = new MarkdownType();
+        this.purpose.setValue(value);
       }
       return this;
     }
@@ -2110,6 +2391,67 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
+     * @return {@link #resource} (The types on which this operation can be executed.)
+     */
+    public List<CodeType> getResource() { 
+      if (this.resource == null)
+        this.resource = new ArrayList<CodeType>();
+      return this.resource;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationDefinition setResource(List<CodeType> theResource) { 
+      this.resource = theResource;
+      return this;
+    }
+
+    public boolean hasResource() { 
+      if (this.resource == null)
+        return false;
+      for (CodeType item : this.resource)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #resource} (The types on which this operation can be executed.)
+     */
+    public CodeType addResourceElement() {//2 
+      CodeType t = new CodeType();
+      if (this.resource == null)
+        this.resource = new ArrayList<CodeType>();
+      this.resource.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #resource} (The types on which this operation can be executed.)
+     */
+    public OperationDefinition addResource(String value) { //1
+      CodeType t = new CodeType();
+      t.setValue(value);
+      if (this.resource == null)
+        this.resource = new ArrayList<CodeType>();
+      this.resource.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #resource} (The types on which this operation can be executed.)
+     */
+    public boolean hasResource(String value) { 
+      if (this.resource == null)
+        return false;
+      for (CodeType v : this.resource)
+        if (v.equals(value)) // code
+          return true;
+      return false;
+    }
+
+    /**
      * @return {@link #system} (Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context).). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
      */
     public BooleanType getSystemElement() { 
@@ -2155,64 +2497,48 @@ public class OperationDefinition extends BaseConformance {
     }
 
     /**
-     * @return {@link #type} (Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context).)
+     * @return {@link #type} (Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public List<CodeType> getType() { 
+    public BooleanType getTypeElement() { 
       if (this.type == null)
-        this.type = new ArrayList<CodeType>();
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create OperationDefinition.type");
+        else if (Configuration.doAutoCreate())
+          this.type = new BooleanType(); // bb
       return this.type;
     }
 
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public OperationDefinition setType(List<CodeType> theType) { 
-      this.type = theType;
-      return this;
+    public boolean hasTypeElement() { 
+      return this.type != null && !this.type.isEmpty();
     }
 
     public boolean hasType() { 
-      if (this.type == null)
-        return false;
-      for (CodeType item : this.type)
-        if (!item.isEmpty())
-          return true;
-      return false;
+      return this.type != null && !this.type.isEmpty();
     }
 
     /**
-     * @return {@link #type} (Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context).)
+     * @param value {@link #type} (Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public CodeType addTypeElement() {//2 
-      CodeType t = new CodeType();
-      if (this.type == null)
-        this.type = new ArrayList<CodeType>();
-      this.type.add(t);
-      return t;
-    }
-
-    /**
-     * @param value {@link #type} (Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context).)
-     */
-    public OperationDefinition addType(String value) { //1
-      CodeType t = new CodeType();
-      t.setValue(value);
-      if (this.type == null)
-        this.type = new ArrayList<CodeType>();
-      this.type.add(t);
+    public OperationDefinition setTypeElement(BooleanType value) { 
+      this.type = value;
       return this;
     }
 
     /**
-     * @param value {@link #type} (Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context).)
+     * @return Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).
      */
-    public boolean hasType(String value) { 
-      if (this.type == null)
-        return false;
-      for (CodeType v : this.type)
-        if (v.equals(value)) // code
-          return true;
-      return false;
+    public boolean getType() { 
+      return this.type == null || this.type.isEmpty() ? false : this.type.getValue();
+    }
+
+    /**
+     * @param value Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).
+     */
+    public OperationDefinition setType(boolean value) { 
+        if (this.type == null)
+          this.type = new BooleanType();
+        this.type.setValue(value);
+      return this;
     }
 
     /**
@@ -2313,22 +2639,84 @@ public class OperationDefinition extends BaseConformance {
       return getParameter().get(0);
     }
 
+    /**
+     * @return {@link #overload} (Defines an appropriate combination of parameters to use when invoking this operation.)
+     */
+    public List<OperationDefinitionOverloadComponent> getOverload() { 
+      if (this.overload == null)
+        this.overload = new ArrayList<OperationDefinitionOverloadComponent>();
+      return this.overload;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public OperationDefinition setOverload(List<OperationDefinitionOverloadComponent> theOverload) { 
+      this.overload = theOverload;
+      return this;
+    }
+
+    public boolean hasOverload() { 
+      if (this.overload == null)
+        return false;
+      for (OperationDefinitionOverloadComponent item : this.overload)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public OperationDefinitionOverloadComponent addOverload() { //3
+      OperationDefinitionOverloadComponent t = new OperationDefinitionOverloadComponent();
+      if (this.overload == null)
+        this.overload = new ArrayList<OperationDefinitionOverloadComponent>();
+      this.overload.add(t);
+      return t;
+    }
+
+    public OperationDefinition addOverload(OperationDefinitionOverloadComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.overload == null)
+        this.overload = new ArrayList<OperationDefinitionOverloadComponent>();
+      this.overload.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #overload}, creating it if it does not already exist
+     */
+    public OperationDefinitionOverloadComponent getOverloadFirstRep() { 
+      if (getOverload().isEmpty()) {
+        addOverload();
+      }
+      return getOverload().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
+        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("status", "code", "The status of this operation definition. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("kind", "code", "Whether this is an operation or a named query.", 0, java.lang.Integer.MAX_VALUE, kind));
-        childrenList.add(new Property("experimental", "boolean", "This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the operation definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the profile and its use.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("requirements", "markdown", "Explains why this operation definition is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the operation definition from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the operation definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explains why this operation definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("idempotent", "boolean", "Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.", 0, java.lang.Integer.MAX_VALUE, idempotent));
         childrenList.add(new Property("code", "code", "The name used to invoke the operation.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("comment", "string", "Additional information about how to use this operation or named query.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("base", "Reference(OperationDefinition)", "Indicates that this operation definition is a constraining profile on the base.", 0, java.lang.Integer.MAX_VALUE, base));
+        childrenList.add(new Property("resource", "code", "The types on which this operation can be executed.", 0, java.lang.Integer.MAX_VALUE, resource));
         childrenList.add(new Property("system", "boolean", "Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context).", 0, java.lang.Integer.MAX_VALUE, system));
-        childrenList.add(new Property("type", "code", "Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context).", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("type", "boolean", "Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("instance", "boolean", "Indicates whether this operation can be invoked on a particular instance of one of the given types.", 0, java.lang.Integer.MAX_VALUE, instance));
         childrenList.add(new Property("parameter", "", "The parameters for the operation/query.", 0, java.lang.Integer.MAX_VALUE, parameter));
+        childrenList.add(new Property("overload", "", "Defines an appropriate combination of parameters to use when invoking this operation.", 0, java.lang.Integer.MAX_VALUE, overload));
       }
 
       @Override
@@ -2337,23 +2725,26 @@ public class OperationDefinition extends BaseConformance {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<OperationKind>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // OperationDefinitionContactComponent
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
-        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 1680468793: /*idempotent*/ return this.idempotent == null ? new Base[0] : new Base[] {this.idempotent}; // BooleanType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
         case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
         case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // Reference
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : this.resource.toArray(new Base[this.resource.size()]); // CodeType
         case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // BooleanType
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // BooleanType
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : new Base[] {this.instance}; // BooleanType
         case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // OperationDefinitionParameterComponent
+        case 529823674: /*overload*/ return this.overload == null ? new Base[0] : this.overload.toArray(new Base[this.overload.size()]); // OperationDefinitionOverloadComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2372,7 +2763,7 @@ public class OperationDefinition extends BaseConformance {
           this.name = castToString(value); // StringType
           break;
         case -892481550: // status
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case 3292052: // kind
           this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
@@ -2387,16 +2778,19 @@ public class OperationDefinition extends BaseConformance {
           this.publisher = castToString(value); // StringType
           break;
         case 951526432: // contact
-          this.getContact().add((OperationDefinitionContactComponent) value); // OperationDefinitionContactComponent
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
-          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
           break;
-        case -1619874672: // requirements
-          this.requirements = castToMarkdown(value); // MarkdownType
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -220463842: // purpose
+          this.purpose = castToMarkdown(value); // MarkdownType
           break;
         case 1680468793: // idempotent
           this.idempotent = castToBoolean(value); // BooleanType
@@ -2410,17 +2804,23 @@ public class OperationDefinition extends BaseConformance {
         case 3016401: // base
           this.base = castToReference(value); // Reference
           break;
+        case -341064690: // resource
+          this.getResource().add(castToCode(value)); // CodeType
+          break;
         case -887328209: // system
           this.system = castToBoolean(value); // BooleanType
           break;
         case 3575610: // type
-          this.getType().add(castToCode(value)); // CodeType
+          this.type = castToBoolean(value); // BooleanType
           break;
         case 555127957: // instance
           this.instance = castToBoolean(value); // BooleanType
           break;
         case 1954460585: // parameter
           this.getParameter().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
+          break;
+        case 529823674: // overload
+          this.getOverload().add((OperationDefinitionOverloadComponent) value); // OperationDefinitionOverloadComponent
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2436,7 +2836,7 @@ public class OperationDefinition extends BaseConformance {
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("kind"))
           this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
         else if (name.equals("experimental"))
@@ -2446,13 +2846,15 @@ public class OperationDefinition extends BaseConformance {
         else if (name.equals("publisher"))
           this.publisher = castToString(value); // StringType
         else if (name.equals("contact"))
-          this.getContact().add((OperationDefinitionContactComponent) value);
+          this.getContact().add(castToContactDetail(value));
         else if (name.equals("description"))
           this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
-          this.getUseContext().add(castToCodeableConcept(value));
-        else if (name.equals("requirements"))
-          this.requirements = castToMarkdown(value); // MarkdownType
+          this.getUseContext().add(castToUsageContext(value));
+        else if (name.equals("jurisdiction"))
+          this.getJurisdiction().add(castToCodeableConcept(value));
+        else if (name.equals("purpose"))
+          this.purpose = castToMarkdown(value); // MarkdownType
         else if (name.equals("idempotent"))
           this.idempotent = castToBoolean(value); // BooleanType
         else if (name.equals("code"))
@@ -2461,14 +2863,18 @@ public class OperationDefinition extends BaseConformance {
           this.comment = castToString(value); // StringType
         else if (name.equals("base"))
           this.base = castToReference(value); // Reference
+        else if (name.equals("resource"))
+          this.getResource().add(castToCode(value));
         else if (name.equals("system"))
           this.system = castToBoolean(value); // BooleanType
         else if (name.equals("type"))
-          this.getType().add(castToCode(value));
+          this.type = castToBoolean(value); // BooleanType
         else if (name.equals("instance"))
           this.instance = castToBoolean(value); // BooleanType
         else if (name.equals("parameter"))
           this.getParameter().add((OperationDefinitionParameterComponent) value);
+        else if (name.equals("overload"))
+          this.getOverload().add((OperationDefinitionOverloadComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -2479,23 +2885,26 @@ public class OperationDefinition extends BaseConformance {
         case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<OperationKind>
         case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // OperationDefinitionContactComponent
+        case 951526432:  return addContact(); // ContactDetail
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // CodeableConcept
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
+        case -669707736:  return addUseContext(); // UsageContext
+        case -507075711:  return addJurisdiction(); // CodeableConcept
+        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
         case 1680468793: throw new FHIRException("Cannot make property idempotent as it is not a complex type"); // BooleanType
         case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
         case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
         case 3016401:  return getBase(); // Reference
+        case -341064690: throw new FHIRException("Cannot make property resource as it is not a complex type"); // CodeType
         case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // BooleanType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
+        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // BooleanType
         case 555127957: throw new FHIRException("Cannot make property instance as it is not a complex type"); // BooleanType
         case 1954460585:  return addParameter(); // OperationDefinitionParameterComponent
+        case 529823674:  return addOverload(); // OperationDefinitionOverloadComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -2536,8 +2945,11 @@ public class OperationDefinition extends BaseConformance {
         else if (name.equals("useContext")) {
           return addUseContext();
         }
-        else if (name.equals("requirements")) {
-          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.requirements");
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
+        }
+        else if (name.equals("purpose")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.purpose");
         }
         else if (name.equals("idempotent")) {
           throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.idempotent");
@@ -2552,6 +2964,9 @@ public class OperationDefinition extends BaseConformance {
           this.base = new Reference();
           return this.base;
         }
+        else if (name.equals("resource")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.resource");
+        }
         else if (name.equals("system")) {
           throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.system");
         }
@@ -2563,6 +2978,9 @@ public class OperationDefinition extends BaseConformance {
         }
         else if (name.equals("parameter")) {
           return addParameter();
+        }
+        else if (name.equals("overload")) {
+          return addOverload();
         }
         else
           return super.addChild(name);
@@ -2585,32 +3003,43 @@ public class OperationDefinition extends BaseConformance {
         dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
-          dst.contact = new ArrayList<OperationDefinitionContactComponent>();
-          for (OperationDefinitionContactComponent i : contact)
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
-          dst.useContext = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : useContext)
+          dst.useContext = new ArrayList<UsageContext>();
+          for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
         };
-        dst.requirements = requirements == null ? null : requirements.copy();
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
+        };
+        dst.purpose = purpose == null ? null : purpose.copy();
         dst.idempotent = idempotent == null ? null : idempotent.copy();
         dst.code = code == null ? null : code.copy();
         dst.comment = comment == null ? null : comment.copy();
         dst.base = base == null ? null : base.copy();
-        dst.system = system == null ? null : system.copy();
-        if (type != null) {
-          dst.type = new ArrayList<CodeType>();
-          for (CodeType i : type)
-            dst.type.add(i.copy());
+        if (resource != null) {
+          dst.resource = new ArrayList<CodeType>();
+          for (CodeType i : resource)
+            dst.resource.add(i.copy());
         };
+        dst.system = system == null ? null : system.copy();
+        dst.type = type == null ? null : type.copy();
         dst.instance = instance == null ? null : instance.copy();
         if (parameter != null) {
           dst.parameter = new ArrayList<OperationDefinitionParameterComponent>();
           for (OperationDefinitionParameterComponent i : parameter)
             dst.parameter.add(i.copy());
+        };
+        if (overload != null) {
+          dst.overload = new ArrayList<OperationDefinitionOverloadComponent>();
+          for (OperationDefinitionOverloadComponent i : overload)
+            dst.overload.add(i.copy());
         };
         return dst;
       }
@@ -2626,11 +3055,11 @@ public class OperationDefinition extends BaseConformance {
         if (!(other instanceof OperationDefinition))
           return false;
         OperationDefinition o = (OperationDefinition) other;
-        return compareDeep(kind, o.kind, true) && compareDeep(experimental, o.experimental, true) && compareDeep(publisher, o.publisher, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true) && compareDeep(requirements, o.requirements, true)
-           && compareDeep(idempotent, o.idempotent, true) && compareDeep(code, o.code, true) && compareDeep(comment, o.comment, true)
-           && compareDeep(base, o.base, true) && compareDeep(system, o.system, true) && compareDeep(type, o.type, true)
-           && compareDeep(instance, o.instance, true) && compareDeep(parameter, o.parameter, true);
+        return compareDeep(kind, o.kind, true) && compareDeep(purpose, o.purpose, true) && compareDeep(idempotent, o.idempotent, true)
+           && compareDeep(code, o.code, true) && compareDeep(comment, o.comment, true) && compareDeep(base, o.base, true)
+           && compareDeep(resource, o.resource, true) && compareDeep(system, o.system, true) && compareDeep(type, o.type, true)
+           && compareDeep(instance, o.instance, true) && compareDeep(parameter, o.parameter, true) && compareDeep(overload, o.overload, true)
+          ;
       }
 
       @Override
@@ -2640,17 +3069,16 @@ public class OperationDefinition extends BaseConformance {
         if (!(other instanceof OperationDefinition))
           return false;
         OperationDefinition o = (OperationDefinition) other;
-        return compareValues(kind, o.kind, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
-           && compareValues(idempotent, o.idempotent, true) && compareValues(code, o.code, true) && compareValues(comment, o.comment, true)
+        return compareValues(kind, o.kind, true) && compareValues(purpose, o.purpose, true) && compareValues(idempotent, o.idempotent, true)
+           && compareValues(code, o.code, true) && compareValues(comment, o.comment, true) && compareValues(resource, o.resource, true)
            && compareValues(system, o.system, true) && compareValues(type, o.type, true) && compareValues(instance, o.instance, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, experimental, publisher
-          , contact, description, requirements, idempotent, code, comment, base, system
-          , type, instance, parameter);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, purpose, idempotent
+          , code, comment, base, resource, system, type, instance, parameter, overload
+          );
       }
 
   @Override
@@ -2661,17 +3089,17 @@ public class OperationDefinition extends BaseConformance {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>Date for this version of the operation definition</b><br>
+   * Description: <b>The operation definition publication date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>OperationDefinition.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date" )
+  @SearchParamDefinition(name="date", path="OperationDefinition.date", description="The operation definition publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>Date for this version of the operation definition</b><br>
+   * Description: <b>The operation definition publication date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>OperationDefinition.date</b><br>
    * </p>
@@ -2739,19 +3167,59 @@ public class OperationDefinition extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam KIND = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_KIND);
 
  /**
+   * Search parameter: <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for operation definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.jurisdiction</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="jurisdiction", path="OperationDefinition.jurisdiction", description="Intended jurisdiction for operation definition", type="token" )
+  public static final String SP_JURISDICTION = "jurisdiction";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for operation definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.jurisdiction</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the operation definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>OperationDefinition.description</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="description", path="OperationDefinition.description", description="Text search against the description of the operation definition", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the operation definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>OperationDefinition.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
    * Search parameter: <b>type</b>
    * <p>
-   * Description: <b>Invoke at resource level for these type</b><br>
+   * Description: <b>Invole at the type level?</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
+  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invole at the type level?", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
-   * Description: <b>Invoke at resource level for these type</b><br>
+   * Description: <b>Invole at the type level?</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.type</b><br>
    * </p>
@@ -2761,17 +3229,17 @@ public class OperationDefinition extends BaseConformance {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>Logical id for this version of the operation definition</b><br>
+   * Description: <b>The version identifier of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
+  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="The version identifier of the operation definition", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>Logical id for this version of the operation definition</b><br>
+   * Description: <b>The version identifier of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
@@ -2807,17 +3275,17 @@ public class OperationDefinition extends BaseConformance {
  /**
    * Search parameter: <b>url</b>
    * <p>
-   * Description: <b>Logical URL to reference this operation definition</b><br>
+   * Description: <b>The uri that identifies the operation definition</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>OperationDefinition.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri" )
+  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="The uri that identifies the operation definition", type="uri" )
   public static final String SP_URL = "url";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>url</b>
    * <p>
-   * Description: <b>Logical URL to reference this operation definition</b><br>
+   * Description: <b>The uri that identifies the operation definition</b><br>
    * Type: <b>uri</b><br>
    * Path: <b>OperationDefinition.url</b><br>
    * </p>
@@ -2847,17 +3315,17 @@ public class OperationDefinition extends BaseConformance {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Informal name for this operation</b><br>
+   * Description: <b>Name of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this operation", type="string" )
+  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Name of the operation definition", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Informal name for this operation</b><br>
+   * Description: <b>Name of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.name</b><br>
    * </p>
@@ -2865,39 +3333,19 @@ public class OperationDefinition extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>A use context assigned to the operation definition</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>OperationDefinition.useContext</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="OperationDefinition.useContext", description="A use context assigned to the operation definition", type="token" )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>A use context assigned to the operation definition</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>OperationDefinition.useContext</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
-
- /**
    * Search parameter: <b>publisher</b>
    * <p>
-   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Description: <b>Name of the publisher of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
+  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher of the operation definition", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
    * <p>
-   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Description: <b>Name of the publisher of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.publisher</b><br>
    * </p>
@@ -2907,17 +3355,17 @@ public class OperationDefinition extends BaseConformance {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>draft | active | retired</b><br>
+   * Description: <b>The current status of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
+  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="The current status of the operation definition", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>draft | active | retired</b><br>
+   * Description: <b>The current status of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.status</b><br>
    * </p>

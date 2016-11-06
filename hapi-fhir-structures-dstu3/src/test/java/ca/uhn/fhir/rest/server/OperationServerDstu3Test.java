@@ -8,6 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,8 +27,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Conformance;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestOperationComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestOperationComponent;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.IntegerType;
@@ -90,10 +91,10 @@ public class OperationServerDstu3Test {
 		loggingInterceptor.setLogResponseBody(true);
 		myFhirClient.registerInterceptor(loggingInterceptor);
 
-		Conformance p = myFhirClient.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
+		CapabilityStatement p = myFhirClient.fetchConformance().ofType(CapabilityStatement.class).prettyPrint().execute();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
 		
-		List<ConformanceRestOperationComponent> ops = p.getRest().get(0).getOperation();
+		List<CapabilityStatementRestOperationComponent> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
 
 		List<String> opNames = toOpNames(ops);
@@ -141,9 +142,9 @@ public class OperationServerDstu3Test {
 		
 	}
 
-	private List<String> toOpNames(List<ConformanceRestOperationComponent> theOps) {
+	private List<String> toOpNames(List<CapabilityStatementRestOperationComponent> theOps) {
 		ArrayList<String> retVal = new ArrayList<String>();
-		for (ConformanceRestOperationComponent next : theOps) {
+		for (CapabilityStatementRestOperationComponent next : theOps) {
 			retVal.add(next.getName());
 		}
 		return retVal;
@@ -157,7 +158,7 @@ public class OperationServerDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("instance $everything", ourLastMethod);
@@ -168,8 +169,7 @@ public class OperationServerDstu3Test {
 	
 	@Test
 	public void testInstanceEverythingHapiClient() throws Exception {
-		Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
-		Bundle b = (Bundle) p.getParameterFirstRep().getResource();
+		ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
 
 		assertEquals("instance $everything", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
@@ -187,7 +187,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("instance $everything", ourLastMethod);
@@ -202,7 +202,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
@@ -219,7 +219,7 @@ public class OperationServerDstu3Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			String response = IOUtils.toString(status.getEntity().getContent());
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(response, containsString("Request has parameter PARAM1 of type IntegerType but method expects type StringType"));
 			ourLog.info(response);
 		} finally {
@@ -239,7 +239,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -258,7 +258,7 @@ public class OperationServerDstu3Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		status = ourClient.execute(httpPost);
 
-		response = IOUtils.toString(status.getEntity().getContent());
+		response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(response);
 		assertEquals(400, status.getStatusLine().getStatusCode());
@@ -277,7 +277,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -302,7 +302,7 @@ public class OperationServerDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -326,7 +326,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -349,7 +349,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -372,7 +372,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -389,11 +389,11 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(response);
 		
-		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		ourCtx.newXmlParser().parseResource(Bundle.class, response);
 	}
 
 	@Test
@@ -402,7 +402,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpGet);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -419,7 +419,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpGet);
 
 		assertEquals(405, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
@@ -440,7 +440,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals("$OP_SERVER_LIST_PARAM", ourLastMethod);
@@ -518,7 +518,7 @@ public class OperationServerDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(status.getStatusLine().toString());
@@ -656,6 +656,7 @@ public class OperationServerDstu3Test {
 		}
 
 		//@formatter:off
+		@SuppressWarnings("unused")
 		@Operation(name="$OP_TYPE", idempotent=true)
 		public Parameters opType(
 				@OperationParam(name="PARAM1") StringType theParam1,

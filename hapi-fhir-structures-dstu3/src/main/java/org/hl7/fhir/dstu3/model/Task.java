@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A task to be performed.
  */
@@ -758,7 +761,7 @@ public class Task extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
           break;
         case 111972721: // value
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -770,7 +773,7 @@ public class Task extends DomainResource {
         if (name.equals("type"))
           this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("value[x]"))
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
         else
           super.setProperty(name, value);
       }
@@ -1066,7 +1069,7 @@ public class Task extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
           break;
         case 111972721: // value
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1078,7 +1081,7 @@ public class Task extends DomainResource {
         if (name.equals("type"))
           this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("value[x]"))
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
         else
           super.setProperty(name, value);
       }

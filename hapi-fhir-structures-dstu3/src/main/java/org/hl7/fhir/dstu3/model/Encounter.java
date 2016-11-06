@@ -29,14 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-
-import ca.uhn.fhir.model.api.annotation.*;
 /**
  * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
  */
@@ -552,10 +557,10 @@ public class Encounter extends DomainResource {
         protected List<CodeableConcept> type;
 
         /**
-         * The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period.
+         * The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.
          */
         @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Period of time during the encounter participant was present", formalDefinition="The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period." )
+        @Description(shortDefinition="Period of time during the encounter that the participant participated", formalDefinition="The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period." )
         protected Period period;
 
         /**
@@ -633,7 +638,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return {@link #period} (The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period.)
+         * @return {@link #period} (The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.)
          */
         public Period getPeriod() { 
           if (this.period == null)
@@ -649,7 +654,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @param value {@link #period} (The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period.)
+         * @param value {@link #period} (The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.)
          */
         public EncounterParticipantComponent setPeriod(Period value) { 
           this.period = value;
@@ -698,7 +703,7 @@ public class Encounter extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "CodeableConcept", "Role of participant in encounter.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("period", "Period", "The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period.", 0, java.lang.Integer.MAX_VALUE, period));
+          childrenList.add(new Property("period", "Period", "The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.", 0, java.lang.Integer.MAX_VALUE, period));
           childrenList.add(new Property("individual", "Reference(Practitioner|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, java.lang.Integer.MAX_VALUE, individual));
         }
 

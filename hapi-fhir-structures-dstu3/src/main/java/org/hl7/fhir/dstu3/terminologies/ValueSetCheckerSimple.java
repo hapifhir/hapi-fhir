@@ -5,6 +5,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult;
 import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -32,9 +33,6 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
 
     if (valueset.hasCompose()) {
       boolean ok = false;
-      for (UriType uri : valueset.getCompose().getImport()) {
-        ok = ok || inImport(uri.getValue(), system, code);
-      }
       for (ConceptSetComponent vsi : valueset.getCompose().getInclude()) {
         ok = ok || inComponent(vsi, system, code);
       }
@@ -79,8 +77,17 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
 
 
   private boolean inComponent(ConceptSetComponent vsi, String system, String code) throws Exception {
-    if (!vsi.getSystem().equals(system))
+    if (vsi.hasSystem() && !vsi.getSystem().equals(system))
       return false; 
+    
+    for (UriType uri : vsi.getValueSet()) {
+      if (!inImport(uri.getValue(), system, code))
+        return false;
+    }
+
+    if (!vsi.hasSystem())
+      return false;
+    
     // whether we know the system or not, we'll accept the stated codes at face value
     for (ConceptReferenceComponent cc : vsi.getConcept())
       if (cc.getCode().equals(code)) {
@@ -88,7 +95,7 @@ public class ValueSetCheckerSimple implements ValueSetChecker {
       }
       
     CodeSystem def = context.fetchCodeSystem(system);
-    if (def != null) {
+    if (def != null && def.getContent() == CodeSystemContentMode.COMPLETE) {
       if (!def.getCaseSensitive()) {
         // well, ok, it's not case sensitive - we'll check that too now
         for (ConceptReferenceComponent cc : vsi.getConcept())

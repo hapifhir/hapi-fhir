@@ -34,16 +34,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatusEnumFactory;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatusEnumFactory;
 import org.hl7.fhir.utilities.Utilities;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 /**
- * null
+ * @deprecated Replaced by MetadataResource - This class will be removed soon, and is only provided 
+ * for backwards compatibility during the transition from the "Conformance" resource to the "CapabilityStatement"
+ * resource 
  */
+@Deprecated
 public abstract class BaseConformance extends DomainResource {
 
     /**
@@ -73,7 +77,7 @@ public abstract class BaseConformance extends DomainResource {
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=false)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of this conformance statement." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/conformance-resource-status")
-    protected Enumeration<ConformanceResourceStatus> status;
+    protected Enumeration<PublicationStatus> status;
 
     /**
      * The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
@@ -102,7 +106,7 @@ public abstract class BaseConformance extends DomainResource {
   /**
    * Constructor
    */
-    public BaseConformance(Enumeration<ConformanceResourceStatus> status, DateTimeType date) {
+    public BaseConformance(Enumeration<PublicationStatus> status, DateTimeType date) {
       super();
       this.status = status;
       this.date = date;
@@ -258,12 +262,12 @@ public abstract class BaseConformance extends DomainResource {
     /**
      * @return {@link #status} (The status of this conformance statement.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<ConformanceResourceStatus> getStatusElement() { 
+    public Enumeration<PublicationStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create BaseConformance.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory()); // bb
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -278,7 +282,7 @@ public abstract class BaseConformance extends DomainResource {
     /**
      * @param value {@link #status} (The status of this conformance statement.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public BaseConformance setStatusElement(Enumeration<ConformanceResourceStatus> value) { 
+    public BaseConformance setStatusElement(Enumeration<PublicationStatus> value) { 
       this.status = value;
       return this;
     }
@@ -286,16 +290,16 @@ public abstract class BaseConformance extends DomainResource {
     /**
      * @return The status of this conformance statement.
      */
-    public ConformanceResourceStatus getStatus() { 
+    public PublicationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value The status of this conformance statement.
      */
-    public BaseConformance setStatus(ConformanceResourceStatus value) { 
+    public BaseConformance setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
@@ -413,7 +417,7 @@ public abstract class BaseConformance extends DomainResource {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
@@ -434,7 +438,7 @@ public abstract class BaseConformance extends DomainResource {
           this.name = castToString(value); // StringType
           break;
         case -892481550: // status
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
@@ -456,7 +460,7 @@ public abstract class BaseConformance extends DomainResource {
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("useContext"))
@@ -471,7 +475,7 @@ public abstract class BaseConformance extends DomainResource {
         case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case -669707736:  return addUseContext(); // CodeableConcept
         default: return super.makeProperty(hash, name);

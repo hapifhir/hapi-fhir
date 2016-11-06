@@ -114,6 +114,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				baseResourceNames.remove("binary");
 			}
+			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+				baseResourceNames.remove("conformance");
+			}
 		}
 
 		for (int i = 0; i < baseResourceNames.size(); i++) {

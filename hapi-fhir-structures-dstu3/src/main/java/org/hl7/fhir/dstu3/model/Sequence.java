@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,15 +29,20 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Raw data describing a biological sequence.
  */
@@ -2672,14 +2675,14 @@ public class Sequence extends DomainResource {
          * Structural variant outer.
          */
         @Child(name = "outer", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="", formalDefinition="Structural variant outer." )
+        @Description(shortDefinition="Structural variant outer", formalDefinition="Structural variant outer." )
         protected SequenceStructureVariantOuterComponent outer;
 
         /**
          * Structural variant inner.
          */
         @Child(name = "inner", type = {}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="", formalDefinition="Structural variant inner." )
+        @Description(shortDefinition="Structural variant inner", formalDefinition="Structural variant inner." )
         protected SequenceStructureVariantInnerComponent inner;
 
         private static final long serialVersionUID = 1705627760L;
@@ -3598,7 +3601,7 @@ public class Sequence extends DomainResource {
      * Structural variant.
      */
     @Child(name = "structureVariant", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="", formalDefinition="Structural variant." )
+    @Description(shortDefinition="Structural variant", formalDefinition="Structural variant." )
     protected List<SequenceStructureVariantComponent> structureVariant;
 
     private static final long serialVersionUID = -1713460757L;

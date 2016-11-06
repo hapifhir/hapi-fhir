@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import ca.uhn.fhir.model.api.IElement;
@@ -250,6 +251,15 @@ private Map<String, Object> userData;
 	
 	// -- converters for property setters
 	
+  public Type castToType(Base b) throws FHIRException {
+    if (b instanceof Type)
+      return (Type) b;
+    else if (b.isMetadataBased())
+      return ((org.hl7.fhir.dstu3.elementmodel.Element) b).asType();
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Reference");
+  }
+  
 
 	public BooleanType castToBoolean(Base b) throws FHIRException {
 		if (b instanceof BooleanType)
@@ -373,12 +383,20 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Markdown");
 	}
 		
-	public Annotation castToAnnotation(Base b) throws FHIRException {
-		if (b instanceof Annotation)
-			return (Annotation) b;
-		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an Annotation");
-	}
+  public Annotation castToAnnotation(Base b) throws FHIRException {
+    if (b instanceof Annotation)
+      return (Annotation) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an Annotation");
+  }
+  
+  public DosageInstruction castToDosageInstruction(Base b) throws FHIRException {
+    if (b instanceof DosageInstruction)
+      return (DosageInstruction) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an DosageInstruction");
+  }
+  
 	
 	public Attachment castToAttachment(Base b) throws FHIRException {
 		if (b instanceof Attachment)
@@ -519,11 +537,11 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a UsageContext");
 	}
 
-	public RelatedResource castToRelatedResource(Base b) throws FHIRException {
-		if (b instanceof RelatedResource)
-			return (RelatedResource) b;
+	public RelatedArtifact castToRelatedArtifact(Base b) throws FHIRException {
+		if (b instanceof RelatedArtifact)
+			return (RelatedArtifact) b;
 		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a RelatedResource");
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a RelatedArtifact");
 	}
 
 	public ContactPoint castToContactPoint(Base b) throws FHIRException {
@@ -543,7 +561,12 @@ private Map<String, Object> userData;
 	public Reference castToReference(Base b) throws FHIRException {
 		if (b instanceof Reference)
 			return (Reference) b;
-		else
+		else if (b.isPrimitive() && Utilities.isURL(b.primitiveValue()))
+      return new Reference().setReference(b.primitiveValue());
+    else if (b instanceof org.hl7.fhir.dstu3.elementmodel.Element && b.fhirType().equals("Reference")) {
+      org.hl7.fhir.dstu3.elementmodel.Element e = (org.hl7.fhir.dstu3.elementmodel.Element) b;
+      return new Reference().setReference(e.getChildValue("reference")).setDisplay(e.getChildValue("display"));
+    } else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Reference");
 	}
 	
@@ -636,4 +659,6 @@ private Map<String, Object> userData;
   }
 	
 
+  public abstract String getIdBase();
+  public abstract void setIdBase(String value);
 }

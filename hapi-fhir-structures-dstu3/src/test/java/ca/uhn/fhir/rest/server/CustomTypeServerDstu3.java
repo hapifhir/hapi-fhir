@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -74,14 +75,12 @@ public class CustomTypeServerDstu3 {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("Can not create resource with ID \"2\", an ID element must not be supplied in the resource body on a create (POST) operation", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(201, status.getStatusLine().getStatusCode());
 	}
 
 	@Test

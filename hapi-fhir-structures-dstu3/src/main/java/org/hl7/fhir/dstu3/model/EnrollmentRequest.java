@@ -29,17 +29,20 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the insurance enrollment details to the insurer regarding a specified coverage.
  */
@@ -735,16 +738,16 @@ public class EnrollmentRequest extends DomainResource {
           this.created = castToDateTime(value); // DateTimeType
           break;
         case 1957615864: // insurer
-          this.insurer = (Type) value; // Type
+          this.insurer = castToType(value); // Type
           break;
         case -987494927: // provider
-          this.provider = (Type) value; // Type
+          this.provider = castToType(value); // Type
           break;
         case 1178922291: // organization
-          this.organization = (Type) value; // Type
+          this.organization = castToType(value); // Type
           break;
         case -1867885268: // subject
-          this.subject = (Type) value; // Type
+          this.subject = castToType(value); // Type
           break;
         case -351767064: // coverage
           this.coverage = castToReference(value); // Reference
@@ -767,13 +770,13 @@ public class EnrollmentRequest extends DomainResource {
         else if (name.equals("created"))
           this.created = castToDateTime(value); // DateTimeType
         else if (name.equals("insurer[x]"))
-          this.insurer = (Type) value; // Type
+          this.insurer = castToType(value); // Type
         else if (name.equals("provider[x]"))
-          this.provider = (Type) value; // Type
+          this.provider = castToType(value); // Type
         else if (name.equals("organization[x]"))
-          this.organization = (Type) value; // Type
+          this.organization = castToType(value); // Type
         else if (name.equals("subject[x]"))
-          this.subject = (Type) value; // Type
+          this.subject = castToType(value); // Type
         else if (name.equals("coverage"))
           this.coverage = castToReference(value); // Reference
         else

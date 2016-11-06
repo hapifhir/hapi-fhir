@@ -13,31 +13,73 @@ import java.util.Map;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult;
-import org.hl7.fhir.dstu3.elementmodel.*;
 import org.hl7.fhir.dstu3.elementmodel.Element;
 import org.hl7.fhir.dstu3.elementmodel.Element.SpecialElement;
+import org.hl7.fhir.dstu3.elementmodel.JsonParser;
+import org.hl7.fhir.dstu3.elementmodel.Manager;
 import org.hl7.fhir.dstu3.elementmodel.Manager.FhirFormat;
+import org.hl7.fhir.dstu3.elementmodel.ObjectConverter;
+import org.hl7.fhir.dstu3.elementmodel.ParserBase;
 import org.hl7.fhir.dstu3.elementmodel.ParserBase.ValidationPolicy;
+import org.hl7.fhir.dstu3.elementmodel.XmlParser;
 import org.hl7.fhir.dstu3.formats.FormatUtilities;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.ElementDefinition.*;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.ElementDefinition;
+import org.hl7.fhir.dstu3.model.ElementDefinition.AggregationMode;
+import org.hl7.fhir.dstu3.model.ElementDefinition.ConstraintSeverity;
+import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionConstraintComponent;
+import org.hl7.fhir.dstu3.model.ElementDefinition.PropertyRepresentation;
+import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.BindingStrength;
+import org.hl7.fhir.dstu3.model.ExpressionNode;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu3.model.Range;
+import org.hl7.fhir.dstu3.model.Ratio;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.SampledData;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.ExtensionContext;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionSnapshotComponent;
 import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
+import org.hl7.fhir.dstu3.model.TimeType;
+import org.hl7.fhir.dstu3.model.Timing;
+import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.utils.FluentPathEngine;
-import org.hl7.fhir.dstu3.validation.IResourceValidator.IValidatorResourceFetcher;
 import org.hl7.fhir.dstu3.validation.ValidationMessage.Source;
-import org.hl7.fhir.exceptions.*;
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
+import org.hl7.fhir.exceptions.PathEngineException;
+import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.NodeType;
@@ -122,7 +164,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   /*
    * Keeps track of all profiles associated with a resource element and whether the resource has been checked against those profiles yet
    */
-  private class ResourceProfiles {
+  public class ResourceProfiles {
     private Element resource;
     private HashMap<StructureDefinition, ProfileUsage> profiles;
     private boolean processed;
@@ -660,7 +702,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
   }
 
-  private void checkDeclaredProfiles(ResourceProfiles resourceProfiles, List<ValidationMessage> errors, Element resource, Element element, NodeStack stack) throws FHIRException {
+  protected void checkDeclaredProfiles(ResourceProfiles resourceProfiles, List<ValidationMessage> errors, Element resource, Element element, NodeStack stack) throws FHIRException {
     Element meta = element.getNamedChild("meta");
     if (meta != null) {
       List<Element> profiles = new ArrayList<Element>();
@@ -952,7 +994,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           .matches("-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?)?)?)?"),
           "Not a valid date time");
       rule(errors, IssueType.INVALID, e.line(), e.col(), path, !hasTime(e.primitiveValue()) || hasTimeZone(e.primitiveValue()), "if a date has a time, it must have a timezone");
-
+    }
+    if (type.equals("date")) {
+        rule(errors, IssueType.INVALID, e.line(), e.col(), path, yearIsValid(e.primitiveValue()), "The value '" + e.primitiveValue() + "' does not have a valid year");
+        rule(errors, IssueType.INVALID, e.line(), e.col(), path, e.primitiveValue().matches("-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)?"),
+            "Not a valid date");
     }
     if (type.equals("instant")) {
       rule(errors, IssueType.INVALID, e.line(), e.col(), path,
@@ -986,7 +1032,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
 
     if (context.hasFixed())
-      checkFixedValue(errors,path,e, context.getFixed(), context.getName(), null);
+      checkFixedValue(errors,path,e, context.getFixed(), context.getSliceName(), null);
 
     // for nothing to check
   }
@@ -1031,9 +1077,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }	
   }
 
-  // note that we don't check the type here; it could be string, uri or code.
   private void checkPrimitiveBinding(List<ValidationMessage> errors, String path, String type, ElementDefinition elementContext, Element element, StructureDefinition profile) {
-    if (!isPrimitiveType(type)) {
+    // We ignore bindings that aren't on string, uri or code
+    if (!element.hasPrimitiveValue() || !("code".equals(type) || "string".equals(type) || "uri".equals(type))) {
       return;
     }
 
@@ -1107,10 +1153,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       for (TypeRefComponent type : container.getType()) {
         if (!ok && type.getCode().equals("Reference")) {
           // we validate as much as we can. First, can we infer a type from the profile?  (Need to change this to targetProfile when Grahame's ready)
-          if (!type.hasProfile() || type.getProfile().equals("http://hl7.org/fhir/StructureDefinition/Resource"))
+          if (!type.hasProfile() || type.getTargetProfile().equals("http://hl7.org/fhir/StructureDefinition/Resource"))
             ok = true;
           else {
-            String pr = type.getProfile(); // Need to change to targetProfile when Grahame's ready
+            String pr = type.getTargetProfile(); // Need to change to targetProfile when Grahame's ready
 
             String bt = getBaseType(profile, pr);
             StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + bt);
@@ -1241,7 +1287,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return b.toString();
   }
 
-  private ElementDefinition findElement(StructureDefinition profile, String name) {
+  protected ElementDefinition findElement(StructureDefinition profile, String name) {
     for (ElementDefinition c : profile.getSnapshot().getElement()) {
       if (c.getPath().equals(name)) {
         return c;
@@ -1326,7 +1372,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   private ElementDefinition getCriteriaForDiscriminator(String path, ElementDefinition element, String discriminator, StructureDefinition profile) throws DefinitionException {
     StructureDefinition sd = profile;
     ElementDefinition ed = element;
-
+    
+    if ("value".equals(discriminator) && element.hasFixed())
+      return element;
+    
     String[] dlist = discriminator.split("\\.");
     for (String d : dlist) {
       // get the children of element
@@ -1338,9 +1387,25 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           throw new DefinitionException("Error in profile for " + path + " no children, no type");
         if (ed.getType().size() > 1)
           throw new DefinitionException("Error in profile for " + path + " multiple types defined in slice discriminator");
+        if (ed.hasSlicing()) {
+          List<ElementDefinition> slices = ProfileUtilities.getSliceList(profile, ed);
+          boolean found = false;
+          for (ElementDefinition sed: slices) {
+            childDefinitions = ProfileUtilities.getChildMap(sd, sed);
+            for (ElementDefinition t : childDefinitions) {
+              if (tailMatches(t, d)) {
+                found = true;
+                ed = t;
+                break;
+              }
+            }
+          }
+          if (found)
+            continue;
+        }
         if (ed.getType().get(0).hasProfile() && ed.getType().get(0).getCode().equals("Reference") && d.equals("reference")) {
           long t1 = System.nanoTime();
-          sd = context.fetchResource(StructureDefinition.class, ed.getType().get(0).getProfile());
+          sd = context.fetchResource(StructureDefinition.class, ed.getType().get(0).getTargetProfile());
           sdTime = sdTime + (System.nanoTime() - t1);
           // we've skipped the reference.
           ed = sd.getSnapshot().getElementFirstRep();
@@ -2490,7 +2555,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     //		time = System.nanoTime();
     checkInvariants(errors, stack.getLiteralPath(), profile, definition, null, null, resource, element);
     if (definition.getFixed()!=null)
-      checkFixedValue(errors, stack.getLiteralPath(), element, definition.getFixed(), definition.getName(), null);
+      checkFixedValue(errors, stack.getLiteralPath(), element, definition.getFixed(), definition.getSliceName(), null);
 
 
     // get the list of direct defined children, including slices
@@ -2617,7 +2682,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         for (ElementInfo ei : children)
           if (ei.definition == ed)
             count++;
-        String location = "Profile " + profile.getUrl() + ", Element '" + stack.getLiteralPath() + "." + tail(ed.getPath()) + (ed.hasName()? "[" + ed.getName() + "]": "");
+        String location = "Profile " + profile.getUrl() + ", Element '" + stack.getLiteralPath() + "." + tail(ed.getPath()) + (ed.hasSliceName()? "[" + ed.getSliceName() + "]": "");
         if (ed.getMin() > 0) {
           if (problematicPaths.contains(ed.getPath()))
             hint(errors, IssueType.NOTSUPPORTED, element.line(), element.col(), stack.getLiteralPath(), count >= ed.getMin(),
@@ -3000,7 +3065,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
   }
 
-  private class NodeStack {
+  public class NodeStack {
     private ElementDefinition definition;
     private Element element;
     private ElementDefinition extension;
@@ -3041,7 +3106,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return element;
     }
 
-    private String getLiteralPath() {
+    protected String getLiteralPath() {
       return literalPath == null ? "" : literalPath;
     }
 

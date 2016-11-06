@@ -29,24 +29,26 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
  */
 @ResourceDef(name="NamingSystem", profile="http://hl7.org/fhir/Profile/NamingSystem")
-@ChildOrder(names={"name", "status", "kind", "date", "publisher", "contact", "responsible", "type", "description", "useContext", "usage", "uniqueId", "replacedBy"})
-public class NamingSystem extends BaseConformance {
+@ChildOrder(names={"name", "status", "kind", "date", "publisher", "contact", "responsible", "type", "description", "useContext", "jurisdiction", "usage", "uniqueId", "replacedBy"})
+public class NamingSystem extends MetadataResource {
 
     public enum NamingSystemType {
         /**
@@ -275,238 +277,6 @@ public class NamingSystem extends BaseConformance {
       return code.getSystem();
       }
     }
-
-    @Block()
-    public static class NamingSystemContactComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The name of an individual to contact regarding the naming system.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the naming system." )
-        protected StringType name;
-
-        /**
-         * Contact details for individual (if a name was provided) or the publisher.
-         */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
-    /**
-     * Constructor
-     */
-      public NamingSystemContactComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (The name of an individual to contact regarding the naming system.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create NamingSystemContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the naming system.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public NamingSystemContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the naming system.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the naming system.
-         */
-        public NamingSystemContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public NamingSystemContactComponent setTelecom(List<ContactPoint> theTelecom) { 
-          this.telecom = theTelecom;
-          return this;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-        public NamingSystemContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the naming system.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type NamingSystem.name");
-        }
-        else if (name.equals("telecom")) {
-          return addTelecom();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public NamingSystemContactComponent copy() {
-        NamingSystemContactComponent dst = new NamingSystemContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof NamingSystemContactComponent))
-          return false;
-        NamingSystemContactComponent o = (NamingSystemContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof NamingSystemContactComponent))
-          return false;
-        NamingSystemContactComponent o = (NamingSystemContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
-      }
-
-  public String fhirType() {
-    return "NamingSystem.contact";
-
-  }
-
-  }
 
     @Block()
     public static class NamingSystemUniqueIdComponent extends BackboneElement implements IBaseBackboneElement {
@@ -922,59 +692,38 @@ public class NamingSystem extends BaseConformance {
     protected Enumeration<NamingSystemType> kind;
 
     /**
-     * The name of the individual or organization that published the naming system.
-     */
-    @Child(name = "publisher", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the naming system." )
-    protected StringType publisher;
-
-    /**
-     * Contacts to assist a user in finding and communicating with the publisher.
-     */
-    @Child(name = "contact", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
-    protected List<NamingSystemContactComponent> contact;
-
-    /**
      * The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
      */
-    @Child(name = "responsible", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "responsible", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who maintains system namespace?", formalDefinition="The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision." )
     protected StringType responsible;
 
     /**
      * Categorizes a naming system for easier search by grouping related naming systems.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="e.g. driver,  provider,  patient, bank etc.", formalDefinition="Categorizes a naming system for easier search by grouping related naming systems." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/identifier-type")
     protected CodeableConcept type;
 
     /**
-     * Details about what the namespace identifies including scope, granularity, version labeling, etc.
-     */
-    @Child(name = "description", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="What does naming system identify?", formalDefinition="Details about what the namespace identifies including scope, granularity, version labeling, etc." )
-    protected MarkdownType description;
-
-    /**
      * Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
      */
-    @Child(name = "usage", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "usage", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How/where is it used", formalDefinition="Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc." )
     protected StringType usage;
 
     /**
      * Indicates how the system may be identified when referenced in electronic exchange.
      */
-    @Child(name = "uniqueId", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "uniqueId", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Unique identifiers used for system", formalDefinition="Indicates how the system may be identified when referenced in electronic exchange." )
     protected List<NamingSystemUniqueIdComponent> uniqueId;
 
     /**
      * For naming systems that are retired, indicates the naming system that should be used in their place (if any).
      */
-    @Child(name = "replacedBy", type = {NamingSystem.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "replacedBy", type = {NamingSystem.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use this instead", formalDefinition="For naming systems that are retired, indicates the naming system that should be used in their place (if any)." )
     protected Reference replacedBy;
 
@@ -983,7 +732,7 @@ public class NamingSystem extends BaseConformance {
      */
     protected NamingSystem replacedByTarget;
 
-    private static final long serialVersionUID = -1472594371L;
+    private static final long serialVersionUID = -743416513L;
 
   /**
    * Constructor
@@ -995,7 +744,7 @@ public class NamingSystem extends BaseConformance {
   /**
    * Constructor
    */
-    public NamingSystem(StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<NamingSystemType> kind, DateTimeType date) {
+    public NamingSystem(StringType name, Enumeration<PublicationStatus> status, Enumeration<NamingSystemType> kind, DateTimeType date) {
       super();
       this.name = name;
       this.status = status;
@@ -1004,7 +753,42 @@ public class NamingSystem extends BaseConformance {
     }
 
     /**
-     * @param value The descriptive name of this particular identifier type or code system.
+     * @return {@link #name} (A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public StringType getNameElement() { 
+      if (this.name == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.name");
+        else if (Configuration.doAutoCreate())
+          this.name = new StringType(); // bb
+      return this.name;
+    }
+
+    public boolean hasNameElement() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    public boolean hasName() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    /**
+     * @param value {@link #name} (A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public NamingSystem setNameElement(StringType value) { 
+      this.name = value;
+      return this;
+    }
+
+    /**
+     * @return A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     */
+    public String getName() { 
+      return this.name == null ? null : this.name.getValue();
+    }
+
+    /**
+     * @param value A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public NamingSystem setName(String value) { 
         if (this.name == null)
@@ -1014,11 +798,46 @@ public class NamingSystem extends BaseConformance {
     }
 
     /**
-     * @param value Indicates whether the naming system is "ready for use" or not.
+     * @return {@link #status} (The status of this naming system. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public NamingSystem setStatus(ConformanceResourceStatus value) { 
+    public Enumeration<PublicationStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of this naming system. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public NamingSystem setStatusElement(Enumeration<PublicationStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of this naming system. Enables tracking the life-cycle of the content.
+     */
+    public PublicationStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of this naming system. Enables tracking the life-cycle of the content.
+     */
+    public NamingSystem setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
@@ -1069,7 +888,42 @@ public class NamingSystem extends BaseConformance {
     }
 
     /**
-     * @param value The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the registration changes.
+     * @return {@link #date} (The date  (and optionally time) when the naming system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the naming system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public NamingSystem setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the naming system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the naming system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.
      */
     public NamingSystem setDate(Date value) { 
         if (this.date == null)
@@ -1128,18 +982,18 @@ public class NamingSystem extends BaseConformance {
     }
 
     /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
      */
-    public List<NamingSystemContactComponent> getContact() { 
+    public List<ContactDetail> getContact() { 
       if (this.contact == null)
-        this.contact = new ArrayList<NamingSystemContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       return this.contact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public NamingSystem setContact(List<NamingSystemContactComponent> theContact) { 
+    public NamingSystem setContact(List<ContactDetail> theContact) { 
       this.contact = theContact;
       return this;
     }
@@ -1147,25 +1001,25 @@ public class NamingSystem extends BaseConformance {
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
-      for (NamingSystemContactComponent item : this.contact)
+      for (ContactDetail item : this.contact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public NamingSystemContactComponent addContact() { //3
-      NamingSystemContactComponent t = new NamingSystemContactComponent();
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
       if (this.contact == null)
-        this.contact = new ArrayList<NamingSystemContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return t;
     }
 
-    public NamingSystem addContact(NamingSystemContactComponent t) { //3
+    public NamingSystem addContact(ContactDetail t) { //3
       if (t == null)
         return this;
       if (this.contact == null)
-        this.contact = new ArrayList<NamingSystemContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return this;
     }
@@ -1173,7 +1027,7 @@ public class NamingSystem extends BaseConformance {
     /**
      * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public NamingSystemContactComponent getContactFirstRep() { 
+    public ContactDetail getContactFirstRep() { 
       if (getContact().isEmpty()) {
         addContact();
       }
@@ -1254,7 +1108,7 @@ public class NamingSystem extends BaseConformance {
     }
 
     /**
-     * @return {@link #description} (Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the naming system from the consumer's perspective. Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -1274,7 +1128,7 @@ public class NamingSystem extends BaseConformance {
     }
 
     /**
-     * @param value {@link #description} (Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the naming system from the consumer's perspective. Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public NamingSystem setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -1282,14 +1136,14 @@ public class NamingSystem extends BaseConformance {
     }
 
     /**
-     * @return Details about what the namespace identifies including scope, granularity, version labeling, etc.
+     * @return A free text natural language description of the naming system from the consumer's perspective. Details about what the namespace identifies including scope, granularity, version labeling, etc.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value Details about what the namespace identifies including scope, granularity, version labeling, etc.
+     * @param value A free text natural language description of the naming system from the consumer's perspective. Details about what the namespace identifies including scope, granularity, version labeling, etc.
      */
     public NamingSystem setDescription(String value) { 
       if (value == null)
@@ -1300,6 +1154,112 @@ public class NamingSystem extends BaseConformance {
         this.description.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     */
+    public List<UsageContext> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      return this.useContext;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NamingSystem setUseContext(List<UsageContext> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (UsageContext item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public UsageContext addUseContext() { //3
+      UsageContext t = new UsageContext();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    public NamingSystem addUseContext(UsageContext t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public UsageContext getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
+    }
+
+    /**
+     * @return {@link #jurisdiction} (A jurisdiction in which the naming system is intended to be used.)
+     */
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public NamingSystem setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public NamingSystem addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
     }
 
     /**
@@ -1450,12 +1410,17 @@ public class NamingSystem extends BaseConformance {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
+        childrenList.add(new Property("name", "string", "A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("status", "code", "The status of this naming system. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("kind", "code", "Indicates the purpose for the naming system - what kinds of things does it make unique?", 0, java.lang.Integer.MAX_VALUE, kind));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the naming system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the naming system.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("responsible", "string", "The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.", 0, java.lang.Integer.MAX_VALUE, responsible));
         childrenList.add(new Property("type", "CodeableConcept", "Categorizes a naming system for easier search by grouping related naming systems.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("description", "markdown", "Details about what the namespace identifies including scope, granularity, version labeling, etc.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the naming system from the consumer's perspective. Details about what the namespace identifies including scope, granularity, version labeling, etc.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the naming system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         childrenList.add(new Property("usage", "string", "Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.", 0, java.lang.Integer.MAX_VALUE, usage));
         childrenList.add(new Property("uniqueId", "", "Indicates how the system may be identified when referenced in electronic exchange.", 0, java.lang.Integer.MAX_VALUE, uniqueId));
         childrenList.add(new Property("replacedBy", "Reference(NamingSystem)", "For naming systems that are retired, indicates the naming system that should be used in their place (if any).", 0, java.lang.Integer.MAX_VALUE, replacedBy));
@@ -1465,15 +1430,16 @@ public class NamingSystem extends BaseConformance {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<NamingSystemType>
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // NamingSystemContactComponent
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 1847674614: /*responsible*/ return this.responsible == null ? new Base[0] : new Base[] {this.responsible}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
-        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
         case -294460212: /*uniqueId*/ return this.uniqueId == null ? new Base[0] : this.uniqueId.toArray(new Base[this.uniqueId.size()]); // NamingSystemUniqueIdComponent
         case -1233035097: /*replacedBy*/ return this.replacedBy == null ? new Base[0] : new Base[] {this.replacedBy}; // Reference
@@ -1489,7 +1455,7 @@ public class NamingSystem extends BaseConformance {
           this.name = castToString(value); // StringType
           break;
         case -892481550: // status
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case 3292052: // kind
           this.kind = new NamingSystemTypeEnumFactory().fromType(value); // Enumeration<NamingSystemType>
@@ -1501,7 +1467,7 @@ public class NamingSystem extends BaseConformance {
           this.publisher = castToString(value); // StringType
           break;
         case 951526432: // contact
-          this.getContact().add((NamingSystemContactComponent) value); // NamingSystemContactComponent
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case 1847674614: // responsible
           this.responsible = castToString(value); // StringType
@@ -1513,7 +1479,10 @@ public class NamingSystem extends BaseConformance {
           this.description = castToMarkdown(value); // MarkdownType
           break;
         case -669707736: // useContext
-          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          break;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case 111574433: // usage
           this.usage = castToString(value); // StringType
@@ -1534,7 +1503,7 @@ public class NamingSystem extends BaseConformance {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("kind"))
           this.kind = new NamingSystemTypeEnumFactory().fromType(value); // Enumeration<NamingSystemType>
         else if (name.equals("date"))
@@ -1542,7 +1511,7 @@ public class NamingSystem extends BaseConformance {
         else if (name.equals("publisher"))
           this.publisher = castToString(value); // StringType
         else if (name.equals("contact"))
-          this.getContact().add((NamingSystemContactComponent) value);
+          this.getContact().add(castToContactDetail(value));
         else if (name.equals("responsible"))
           this.responsible = castToString(value); // StringType
         else if (name.equals("type"))
@@ -1550,7 +1519,9 @@ public class NamingSystem extends BaseConformance {
         else if (name.equals("description"))
           this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("useContext"))
-          this.getUseContext().add(castToCodeableConcept(value));
+          this.getUseContext().add(castToUsageContext(value));
+        else if (name.equals("jurisdiction"))
+          this.getJurisdiction().add(castToCodeableConcept(value));
         else if (name.equals("usage"))
           this.usage = castToString(value); // StringType
         else if (name.equals("uniqueId"))
@@ -1565,15 +1536,16 @@ public class NamingSystem extends BaseConformance {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<NamingSystemType>
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // NamingSystemContactComponent
+        case 951526432:  return addContact(); // ContactDetail
         case 1847674614: throw new FHIRException("Cannot make property responsible as it is not a complex type"); // StringType
         case 3575610:  return getType(); // CodeableConcept
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // CodeableConcept
+        case -669707736:  return addUseContext(); // UsageContext
+        case -507075711:  return addJurisdiction(); // CodeableConcept
         case 111574433: throw new FHIRException("Cannot make property usage as it is not a complex type"); // StringType
         case -294460212:  return addUniqueId(); // NamingSystemUniqueIdComponent
         case -1233035097:  return getReplacedBy(); // Reference
@@ -1615,6 +1587,9 @@ public class NamingSystem extends BaseConformance {
         else if (name.equals("useContext")) {
           return addUseContext();
         }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
+        }
         else if (name.equals("usage")) {
           throw new FHIRException("Cannot call addChild on a primitive type NamingSystem.usage");
         }
@@ -1643,17 +1618,22 @@ public class NamingSystem extends BaseConformance {
         dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
-          dst.contact = new ArrayList<NamingSystemContactComponent>();
-          for (NamingSystemContactComponent i : contact)
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
         dst.responsible = responsible == null ? null : responsible.copy();
         dst.type = type == null ? null : type.copy();
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
-          dst.useContext = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : useContext)
+          dst.useContext = new ArrayList<UsageContext>();
+          for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
+        };
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
         };
         dst.usage = usage == null ? null : usage.copy();
         if (uniqueId != null) {
@@ -1676,8 +1656,7 @@ public class NamingSystem extends BaseConformance {
         if (!(other instanceof NamingSystem))
           return false;
         NamingSystem o = (NamingSystem) other;
-        return compareDeep(kind, o.kind, true) && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true)
-           && compareDeep(responsible, o.responsible, true) && compareDeep(type, o.type, true) && compareDeep(description, o.description, true)
+        return compareDeep(kind, o.kind, true) && compareDeep(responsible, o.responsible, true) && compareDeep(type, o.type, true)
            && compareDeep(usage, o.usage, true) && compareDeep(uniqueId, o.uniqueId, true) && compareDeep(replacedBy, o.replacedBy, true)
           ;
       }
@@ -1689,13 +1668,13 @@ public class NamingSystem extends BaseConformance {
         if (!(other instanceof NamingSystem))
           return false;
         NamingSystem o = (NamingSystem) other;
-        return compareValues(kind, o.kind, true) && compareValues(publisher, o.publisher, true) && compareValues(responsible, o.responsible, true)
-           && compareValues(description, o.description, true) && compareValues(usage, o.usage, true);
+        return compareValues(kind, o.kind, true) && compareValues(responsible, o.responsible, true) && compareValues(usage, o.usage, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, publisher, contact
-          , responsible, type, description, usage, uniqueId, replacedBy);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, responsible, type
+          , usage, uniqueId, replacedBy);
       }
 
   @Override
@@ -1706,17 +1685,17 @@ public class NamingSystem extends BaseConformance {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>Publication Date(/time)</b><br>
+   * Description: <b>The naming system publication date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>NamingSystem.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date" )
+  @SearchParamDefinition(name="date", path="NamingSystem.date", description="The naming system publication date", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>Publication Date(/time)</b><br>
+   * Description: <b>The naming system publication date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>NamingSystem.date</b><br>
    * </p>
@@ -1762,6 +1741,46 @@ public class NamingSystem extends BaseConformance {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam KIND = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_KIND);
+
+ /**
+   * Search parameter: <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for naming system</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.jurisdiction</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="jurisdiction", path="NamingSystem.jurisdiction", description="Intended jurisdiction for naming system", type="token" )
+  public static final String SP_JURISDICTION = "jurisdiction";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for naming system</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.jurisdiction</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the naming system</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.description</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="description", path="NamingSystem.description", description="Text search against the description of the naming system", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the naming system</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
    * Search parameter: <b>type</b>
@@ -1846,17 +1865,17 @@ public class NamingSystem extends BaseConformance {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Human-readable label</b><br>
+   * Description: <b>Name of the naming system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>NamingSystem.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string" )
+  @SearchParamDefinition(name="name", path="NamingSystem.name", description="Name of the naming system", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Human-readable label</b><br>
+   * Description: <b>Name of the naming system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>NamingSystem.name</b><br>
    * </p>
@@ -1864,39 +1883,19 @@ public class NamingSystem extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>Content intends to support these contexts</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>NamingSystem.useContext</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token" )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>Content intends to support these contexts</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>NamingSystem.useContext</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
-
- /**
    * Search parameter: <b>publisher</b>
    * <p>
-   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Description: <b>Name of the publisher of the naming system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>NamingSystem.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string" )
+  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher of the naming system", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
    * <p>
-   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Description: <b>Name of the publisher of the naming system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>NamingSystem.publisher</b><br>
    * </p>
@@ -1906,17 +1905,17 @@ public class NamingSystem extends BaseConformance {
  /**
    * Search parameter: <b>telecom</b>
    * <p>
-   * Description: <b>Contact details for individual or publisher</b><br>
+   * Description: <b>Contact details for individual or organization</b><br>
    * Type: <b>token</b><br>
    * Path: <b>NamingSystem.contact.telecom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token" )
+  @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or organization", type="token" )
   public static final String SP_TELECOM = "telecom";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
    * <p>
-   * Description: <b>Contact details for individual or publisher</b><br>
+   * Description: <b>Contact details for individual or organization</b><br>
    * Type: <b>token</b><br>
    * Path: <b>NamingSystem.contact.telecom</b><br>
    * </p>
@@ -1972,17 +1971,17 @@ public class NamingSystem extends BaseConformance {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>draft | active | retired</b><br>
+   * Description: <b>The current status of the naming system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>NamingSystem.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
+  @SearchParamDefinition(name="status", path="NamingSystem.status", description="The current status of the naming system", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>draft | active | retired</b><br>
+   * Description: <b>The current status of the naming system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>NamingSystem.status</b><br>
    * </p>

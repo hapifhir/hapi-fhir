@@ -3,16 +3,17 @@ package org.hl7.fhir.dstu3.elementmodel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.formats.FormatUtilities;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.PropertyRepresentation;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
-import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.model.TypeDetails;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
+import org.hl7.fhir.exceptions.DefinitionException;
 
 public class Property {
 
@@ -58,13 +59,13 @@ public class Property {
         throw new Error("not handled yet");
       boolean found = false;
       for (ElementDefinition d : structure.getSnapshot().getElement()) {
-        if (d.getPath().equals(definition.getContentReference().substring(1))) {
+        if (d.hasId() && d.getId().equals(definition.getContentReference().substring(1))) {
           found = true;
           ed = d;
         }
       }
       if (!found)
-        throw new Error("Unable to resolve "+definition.getContentReference());
+        throw new Error("Unable to resolve "+definition.getContentReference()+" at "+definition.getPath()+" on "+structure.getUrl());
     }
     if (ed.getType().size() == 0)
 			return null;
@@ -115,10 +116,24 @@ public class Property {
 		return structure;
 	}
 
-	public boolean isPrimitive(String name) {
-	  String code = name;
-    StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
-    return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
+	/**
+	 * Is the given name a primitive
+	 * 
+	 * @param E.g. "Observation.status"
+	 */
+	public boolean isPrimitiveName(String name) {
+	  String code = getType(name);
+      return isPrimitive(code);
+	}
+
+	/**
+	 * Is the given type a primitive
+	 * 
+	 * @param E.g. "integer"
+	 */
+	public boolean isPrimitive(String code) {
+		StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
+      return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
 	}
 
 	private String lowFirst(String t) {
@@ -127,7 +142,7 @@ public class Property {
 
 	public boolean isResource() {
 	  if (definition.getType().size() > 0)
-		return definition.getType().size() == 1 && ("Resource".equals(definition.getType().get(0).getCode()) || "DomainResource".equals(definition.getType().get(0).getCode()));
+	    return definition.getType().size() == 1 && ("Resource".equals(definition.getType().get(0).getCode()) || "DomainResource".equals(definition.getType().get(0).getCode()));
 	  else
 	    return !definition.getPath().contains(".") && structure.getKind() == StructureDefinitionKind.RESOURCE;
 	}
@@ -149,8 +164,8 @@ public class Property {
   }
 
 	public boolean IsLogicalAndHasPrimitiveValue(String name) {
-		if (canBePrimitive!= null)
-			return canBePrimitive;
+//		if (canBePrimitive!= null)
+//			return canBePrimitive;
 		
 		canBePrimitive = false;
   	if (structure.getKind() != StructureDefinitionKind.LOGICAL)
@@ -158,6 +173,10 @@ public class Property {
   	if (!hasType(name))
   		return false;
   	StructureDefinition sd = context.fetchResource(StructureDefinition.class, structure.getUrl().substring(0, structure.getUrl().lastIndexOf("/")+1)+getType(name));
+  	if (sd == null)
+  	  sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+getType(name));
+    if (sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE)
+      return true;
   	if (sd == null || sd.getKind() != StructureDefinitionKind.LOGICAL)
   		return false;
   	for (ElementDefinition ed : sd.getSnapshot().getElement()) {
@@ -234,6 +253,45 @@ public class Property {
     return properties;
   }
 
+  protected List<Property> getChildProperties(TypeDetails type) throws DefinitionException {
+    ElementDefinition ed = definition;
+    StructureDefinition sd = structure;
+    List<ElementDefinition> children = ProfileUtilities.getChildMap(sd, ed);
+    if (children.isEmpty()) {
+      // ok, find the right definitions
+      String t = null;
+      if (ed.getType().size() == 1)
+        t = ed.getType().get(0).getCode();
+      else if (ed.getType().size() == 0)
+        throw new Error("types == 0, and no children found");
+      else {
+        t = ed.getType().get(0).getCode();
+        boolean all = true;
+        for (TypeRefComponent tr : ed.getType()) {
+          if (!tr.getCode().equals(t)) {
+            all = false;
+            break;
+          }
+        }
+        if (!all) {
+          // ok, it's polymorphic
+          t = type.getType();
+        }
+      }
+      if (!"xhtml".equals(t)) {
+        sd = context.fetchResource(StructureDefinition.class, t);
+        if (sd == null)
+          throw new DefinitionException("Unable to find class '"+t+"' for name '"+ed.getPath()+"' on property "+definition.getPath());
+        children = ProfileUtilities.getChildMap(sd, sd.getSnapshot().getElement().get(0));
+      }
+    }
+    List<Property> properties = new ArrayList<Property>();
+    for (ElementDefinition child : children) {
+      properties.add(new Property(context, child, sd));
+    }
+    return properties;
+  }
+
   private String tail(String path) {
     return path.contains(".") ? path.substring(path.lastIndexOf(".")+1) : path;
   }
@@ -246,6 +304,30 @@ public class Property {
       }
     }
     return null;
+  }
+
+  public Property getChild(String name, TypeDetails type) throws DefinitionException {
+    List<Property> children = getChildProperties(type);
+    for (Property p : children) {
+      if (p.getName().equals(name) || p.getName().equals(name+"[x]")) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  public Property getChild(String name) throws DefinitionException {
+    List<Property> children = getChildProperties(name, null);
+    for (Property p : children) {
+      if (p.getName().equals(name)) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  public IWorkerContext getContext() {
+    return context;
   }
 
 

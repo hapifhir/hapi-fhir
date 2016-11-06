@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
  */
@@ -1325,7 +1328,7 @@ public class Observation extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
           break;
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         case 1034315687: // dataAbsentReason
           this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
@@ -1346,7 +1349,7 @@ public class Observation extends DomainResource {
         if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else if (name.equals("dataAbsentReason"))
           this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("interpretation"))
@@ -2695,7 +2698,7 @@ public class Observation extends DomainResource {
           this.encounter = castToReference(value); // Reference
           break;
         case -1468651097: // effective
-          this.effective = (Type) value; // Type
+          this.effective = castToType(value); // Type
           break;
         case -1179159893: // issued
           this.issued = castToInstant(value); // InstantType
@@ -2704,7 +2707,7 @@ public class Observation extends DomainResource {
           this.getPerformer().add(castToReference(value)); // Reference
           break;
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         case 1034315687: // dataAbsentReason
           this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
@@ -2756,13 +2759,13 @@ public class Observation extends DomainResource {
         else if (name.equals("encounter"))
           this.encounter = castToReference(value); // Reference
         else if (name.equals("effective[x]"))
-          this.effective = (Type) value; // Type
+          this.effective = castToType(value); // Type
         else if (name.equals("issued"))
           this.issued = castToInstant(value); // InstantType
         else if (name.equals("performer"))
           this.getPerformer().add(castToReference(value));
         else if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else if (name.equals("dataAbsentReason"))
           this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("interpretation"))

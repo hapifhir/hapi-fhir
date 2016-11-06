@@ -34,19 +34,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatusEnumFactory;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatusEnumFactory;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamTypeEnumFactory;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+
 /**
- * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+ * @deprecated Replaced by MetadataResource - This class will be removed soon, and is only provided 
+ * for backwards compatibility during the transition from the "Conformance" resource to the "CapabilityStatement"
+ * resource 
  */
+@Deprecated
 @ResourceDef(name="Conformance", profile="http://hl7.org/fhir/Profile/Conformance")
 @ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "requirements", "copyright", "kind", "instantiates", "software", "implementation", "fhirVersion", "acceptUnknown", "format", "profile", "rest", "messaging", "document"})
 public class Conformance extends BaseConformance implements IBaseConformance {
@@ -7516,7 +7526,7 @@ public class Conformance extends BaseConformance implements IBaseConformance {
   /**
    * Constructor
    */
-    public Conformance(Enumeration<ConformanceResourceStatus> status, DateTimeType date, Enumeration<ConformanceStatementKind> kind, IdType fhirVersion, Enumeration<UnknownContentCode> acceptUnknown) {
+    public Conformance(Enumeration<PublicationStatus> status, DateTimeType date, Enumeration<ConformanceStatementKind> kind, IdType fhirVersion, Enumeration<UnknownContentCode> acceptUnknown) {
       super();
       this.status = status;
       this.date = date;
@@ -7570,9 +7580,9 @@ public class Conformance extends BaseConformance implements IBaseConformance {
     /**
      * @param value The status of this conformance statement.
      */
-    public Conformance setStatus(ConformanceResourceStatus value) { 
+    public Conformance setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
@@ -8447,7 +8457,7 @@ public class Conformance extends BaseConformance implements IBaseConformance {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
@@ -8485,7 +8495,7 @@ public class Conformance extends BaseConformance implements IBaseConformance {
           this.name = castToString(value); // StringType
           break;
         case -892481550: // status
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
@@ -8558,7 +8568,7 @@ public class Conformance extends BaseConformance implements IBaseConformance {
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("experimental"))
           this.experimental = castToBoolean(value); // BooleanType
         else if (name.equals("date"))
@@ -8607,7 +8617,7 @@ public class Conformance extends BaseConformance implements IBaseConformance {
         case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
@@ -8817,7 +8827,7 @@ public class Conformance extends BaseConformance implements IBaseConformance {
 
   @Override
   public ResourceType getResourceType() {
-    return ResourceType.Conformance;
+    return ResourceType.CapabilityStatement;
    }
 
  /**

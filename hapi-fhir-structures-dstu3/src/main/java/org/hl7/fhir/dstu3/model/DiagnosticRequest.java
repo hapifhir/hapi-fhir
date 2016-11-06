@@ -29,17 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a request for a diagnostic investigation service to be performed.
  */
@@ -1380,7 +1382,7 @@ public class DiagnosticRequest extends DomainResource {
           this.context = castToReference(value); // Reference
           break;
         case 1687874001: // occurrence
-          this.occurrence = (Type) value; // Type
+          this.occurrence = castToType(value); // Type
           break;
         case 1433073514: // authored
           this.authored = castToDateTime(value); // DateTimeType
@@ -1434,7 +1436,7 @@ public class DiagnosticRequest extends DomainResource {
         else if (name.equals("context"))
           this.context = castToReference(value); // Reference
         else if (name.equals("occurrence[x]"))
-          this.occurrence = (Type) value; // Type
+          this.occurrence = castToType(value); // Type
         else if (name.equals("authored"))
           this.authored = castToDateTime(value); // DateTimeType
         else if (name.equals("requester"))

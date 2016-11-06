@@ -29,15 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-
-import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a diagnosis during an encounter; populating a problem list or a summary statement, such as a discharge summary.
  */
@@ -325,7 +329,7 @@ public class Condition extends DomainResource {
         /**
          * A simple summary of the stage such as "Stage 3". The determination of the stage is disease-specific.
          */
-        @Child(name = "summary", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "summary", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Simple summary (disease specific)", formalDefinition="A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-stage")
         protected CodeableConcept summary;
@@ -333,7 +337,7 @@ public class Condition extends DomainResource {
         /**
          * Reference to a formal record of the evidence on which the staging assessment is based.
          */
-        @Child(name = "assessment", type = {ClinicalImpression.class, DiagnosticReport.class, Observation.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "assessment", type = {ClinicalImpression.class, DiagnosticReport.class, Observation.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Formal record of assessment", formalDefinition="Reference to a formal record of the evidence on which the staging assessment is based." )
         protected List<Reference> assessment;
         /**
@@ -549,7 +553,7 @@ public class Condition extends DomainResource {
         /**
          * A manifestation or symptom that led to the recording of this condition.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Manifestation/symptom", formalDefinition="A manifestation or symptom that led to the recording of this condition." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/manifestation-or-symptom")
         protected CodeableConcept code;
@@ -557,7 +561,7 @@ public class Condition extends DomainResource {
         /**
          * Links to other relevant information, including pathology reports.
          */
-        @Child(name = "detail", type = {Reference.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "detail", type = {Reference.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Supporting information found elsewhere", formalDefinition="Links to other relevant information, including pathology reports." )
         protected List<Reference> detail;
         /**
@@ -794,15 +798,15 @@ public class Condition extends DomainResource {
     /**
      * A category assigned to the condition.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="complaint | symptom | finding | diagnosis", formalDefinition="A category assigned to the condition." )
+    @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="problem-list-item | encounter-diagnosis", formalDefinition="A category assigned to the condition." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-category")
-    protected CodeableConcept category;
+    protected List<CodeableConcept> category;
 
     /**
      * A subjective assessment of the severity of the condition as evaluated by the clinician.
      */
-    @Child(name = "severity", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "severity", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Subjective severity of condition", formalDefinition="A subjective assessment of the severity of the condition as evaluated by the clinician." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-severity")
     protected CodeableConcept severity;
@@ -838,7 +842,7 @@ public class Condition extends DomainResource {
     /**
      * Encounter during which the condition was first asserted.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Encounter when condition first asserted", formalDefinition="Encounter during which the condition was first asserted." )
     protected Reference context;
 
@@ -857,14 +861,14 @@ public class Condition extends DomainResource {
     /**
      * The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.
      */
-    @Child(name = "abatement", type = {DateTimeType.class, Age.class, BooleanType.class, Period.class, Range.class, StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "abatement", type = {DateTimeType.class, Age.class, BooleanType.class, Period.class, Range.class, StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="If/when in resolution/remission", formalDefinition="The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate." )
     protected Type abatement;
 
     /**
      * A date, when  the Condition statement was documented.
      */
-    @Child(name = "dateRecorded", type = {DateType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "dateRecorded", type = {DateType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When first entered", formalDefinition="A date, when  the Condition statement was documented." )
     protected DateType dateRecorded;
 
@@ -883,25 +887,25 @@ public class Condition extends DomainResource {
     /**
      * Clinical stage or grade of a condition. May include formal severity assessments.
      */
-    @Child(name = "stage", type = {}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "stage", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Stage/grade, usually assessed formally", formalDefinition="Clinical stage or grade of a condition. May include formal severity assessments." )
     protected ConditionStageComponent stage;
 
     /**
      * Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.
      */
-    @Child(name = "evidence", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "evidence", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Supporting evidence", formalDefinition="Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed." )
     protected List<ConditionEvidenceComponent> evidence;
 
     /**
      * Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.
      */
-    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional information about the Condition", formalDefinition="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = 948853814L;
+    private static final long serialVersionUID = 1440494416L;
 
   /**
    * Constructor
@@ -1070,25 +1074,54 @@ public class Condition extends DomainResource {
     /**
      * @return {@link #category} (A category assigned to the condition.)
      */
-    public CodeableConcept getCategory() { 
+    public List<CodeableConcept> getCategory() { 
       if (this.category == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Condition.category");
-        else if (Configuration.doAutoCreate())
-          this.category = new CodeableConcept(); // cc
+        this.category = new ArrayList<CodeableConcept>();
       return this.category;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Condition setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
+      return this;
+    }
+
     public boolean hasCategory() { 
-      return this.category != null && !this.category.isEmpty();
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    public Condition addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #category} (A category assigned to the condition.)
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
      */
-    public Condition setCategory(CodeableConcept value) { 
-      this.category = value;
-      return this;
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
+      }
+      return getCategory().get(0);
     }
 
     /**
@@ -1695,7 +1728,7 @@ public class Condition extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -462853915: /*clinicalStatus*/ return this.clinicalStatus == null ? new Base[0] : new Base[] {this.clinicalStatus}; // Enumeration<ConditionClinicalStatus>
         case -842509843: /*verificationStatus*/ return this.verificationStatus == null ? new Base[0] : new Base[] {this.verificationStatus}; // Enumeration<ConditionVerificationStatus>
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 1478300413: /*severity*/ return this.severity == null ? new Base[0] : new Base[] {this.severity}; // CodeableConcept
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : this.bodySite.toArray(new Base[this.bodySite.size()]); // CodeableConcept
@@ -1726,7 +1759,7 @@ public class Condition extends DomainResource {
           this.verificationStatus = new ConditionVerificationStatusEnumFactory().fromType(value); // Enumeration<ConditionVerificationStatus>
           break;
         case 50511102: // category
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case 1478300413: // severity
           this.severity = castToCodeableConcept(value); // CodeableConcept
@@ -1744,10 +1777,10 @@ public class Condition extends DomainResource {
           this.context = castToReference(value); // Reference
           break;
         case 105901603: // onset
-          this.onset = (Type) value; // Type
+          this.onset = castToType(value); // Type
           break;
         case -921554001: // abatement
-          this.abatement = (Type) value; // Type
+          this.abatement = castToType(value); // Type
           break;
         case 1888120446: // dateRecorded
           this.dateRecorded = castToDate(value); // DateType
@@ -1778,7 +1811,7 @@ public class Condition extends DomainResource {
         else if (name.equals("verificationStatus"))
           this.verificationStatus = new ConditionVerificationStatusEnumFactory().fromType(value); // Enumeration<ConditionVerificationStatus>
         else if (name.equals("category"))
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value));
         else if (name.equals("severity"))
           this.severity = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("code"))
@@ -1790,9 +1823,9 @@ public class Condition extends DomainResource {
         else if (name.equals("context"))
           this.context = castToReference(value); // Reference
         else if (name.equals("onset[x]"))
-          this.onset = (Type) value; // Type
+          this.onset = castToType(value); // Type
         else if (name.equals("abatement[x]"))
-          this.abatement = (Type) value; // Type
+          this.abatement = castToType(value); // Type
         else if (name.equals("dateRecorded"))
           this.dateRecorded = castToDate(value); // DateType
         else if (name.equals("asserter"))
@@ -1813,7 +1846,7 @@ public class Condition extends DomainResource {
         case -1618432855:  return addIdentifier(); // Identifier
         case -462853915: throw new FHIRException("Cannot make property clinicalStatus as it is not a complex type"); // Enumeration<ConditionClinicalStatus>
         case -842509843: throw new FHIRException("Cannot make property verificationStatus as it is not a complex type"); // Enumeration<ConditionVerificationStatus>
-        case 50511102:  return getCategory(); // CodeableConcept
+        case 50511102:  return addCategory(); // CodeableConcept
         case 1478300413:  return getSeverity(); // CodeableConcept
         case 3059181:  return getCode(); // CodeableConcept
         case 1702620169:  return addBodySite(); // CodeableConcept
@@ -1843,8 +1876,7 @@ public class Condition extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type Condition.verificationStatus");
         }
         else if (name.equals("category")) {
-          this.category = new CodeableConcept();
-          return this.category;
+          return addCategory();
         }
         else if (name.equals("severity")) {
           this.severity = new CodeableConcept();
@@ -1945,7 +1977,11 @@ public class Condition extends DomainResource {
         };
         dst.clinicalStatus = clinicalStatus == null ? null : clinicalStatus.copy();
         dst.verificationStatus = verificationStatus == null ? null : verificationStatus.copy();
-        dst.category = category == null ? null : category.copy();
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
+        };
         dst.severity = severity == null ? null : severity.copy();
         dst.code = code == null ? null : code.copy();
         if (bodySite != null) {
@@ -2182,26 +2218,6 @@ public class Condition extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ABATEMENT_BOOLEAN = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ABATEMENT_BOOLEAN);
 
  /**
-   * Search parameter: <b>abatement-info</b>
-   * <p>
-   * Description: <b>Abatement as a string</b><br>
-   * Type: <b>quantity</b><br>
-   * Path: <b>Condition.abatement[x]</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="abatement-info", path="Condition.abatement.as(string)", description="Abatement as a string", type="quantity" )
-  public static final String SP_ABATEMENT_INFO = "abatement-info";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>abatement-info</b>
-   * <p>
-   * Description: <b>Abatement as a string</b><br>
-   * Type: <b>quantity</b><br>
-   * Path: <b>Condition.abatement[x]</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam ABATEMENT_INFO = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_ABATEMENT_INFO);
-
- /**
    * Search parameter: <b>onset-date</b>
    * <p>
    * Description: <b>Date related onsets (dateTime and Period)</b><br>
@@ -2306,6 +2322,26 @@ public class Condition extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam STAGE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STAGE);
+
+ /**
+   * Search parameter: <b>abatement-string</b>
+   * <p>
+   * Description: <b>Abatement as a string</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Condition.abatement[x]</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="abatement-string", path="Condition.abatement.as(string)", description="Abatement as a string", type="string" )
+  public static final String SP_ABATEMENT_STRING = "abatement-string";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>abatement-string</b>
+   * <p>
+   * Description: <b>Abatement as a string</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Condition.abatement[x]</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ABATEMENT_STRING = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ABATEMENT_STRING);
 
  /**
    * Search parameter: <b>patient</b>

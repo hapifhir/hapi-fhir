@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,17 +29,20 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A container for a collection of resources.
  */
@@ -62,7 +63,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         TRANSACTION, 
         /**
-         * The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.
+         * The bundle is a transaction response. Because the response is a transaction response, the transaction has succeeded, and all responses are error free.
          */
         TRANSACTIONRESPONSE, 
         /**
@@ -148,7 +149,7 @@ public class Bundle extends Resource implements IBaseBundle {
             case DOCUMENT: return "The bundle is a document. The first resource is a Composition.";
             case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader.";
             case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit.";
-            case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.";
+            case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transaction has succeeded, and all responses are error free.";
             case BATCH: return "The bundle is a transaction - intended to be processed by a server as a group of actions.";
             case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.";
             case HISTORY: return "The bundle is a list of resources from a history interaction on a server.";

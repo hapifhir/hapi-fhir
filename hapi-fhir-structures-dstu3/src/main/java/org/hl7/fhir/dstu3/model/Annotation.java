@@ -29,16 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
 
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A  text note which also  contains information about who made the statement and when.
  */
@@ -244,7 +246,7 @@ public class Annotation extends Type implements ICompositeType {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1406328437: // author
-          this.author = (Type) value; // Type
+          this.author = castToType(value); // Type
           break;
         case 3560141: // time
           this.time = castToDateTime(value); // DateTimeType
@@ -260,7 +262,7 @@ public class Annotation extends Type implements ICompositeType {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("author[x]"))
-          this.author = (Type) value; // Type
+          this.author = castToType(value); // Type
         else if (name.equals("time"))
           this.time = castToDateTime(value); // DateTimeType
         else if (name.equals("text"))

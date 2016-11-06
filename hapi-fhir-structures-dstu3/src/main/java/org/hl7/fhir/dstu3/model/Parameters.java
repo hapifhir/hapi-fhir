@@ -29,18 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
  */
@@ -257,7 +258,7 @@ public class Parameters extends Resource implements IBaseParameters {
           this.name = castToString(value); // StringType
           break;
         case 111972721: // value
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
           break;
         case -341064690: // resource
           this.resource = castToResource(value); // Resource
@@ -275,7 +276,7 @@ public class Parameters extends Resource implements IBaseParameters {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("value[x]"))
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
         else if (name.equals("resource"))
           this.resource = castToResource(value); // Resource
         else if (name.equals("part"))

@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,21 +29,147 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An authorization for the supply of glasses and/or contact lenses to a patient.
  */
 @ResourceDef(name="VisionPrescription", profile="http://hl7.org/fhir/Profile/VisionPrescription")
 public class VisionPrescription extends DomainResource {
+
+    public enum VisionStatus {
+        /**
+         * The resource instance is currently in-force.
+         */
+        ACTIVE, 
+        /**
+         * The resource instance is withdrawn, rescinded or reversed.
+         */
+        CANCELLED, 
+        /**
+         * A new resource instance the contents of which is not complete.
+         */
+        DRAFT, 
+        /**
+         * The resource instance was entered in error.
+         */
+        ENTEREDINERROR, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static VisionStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown VisionStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ACTIVE: return "active";
+            case CANCELLED: return "cancelled";
+            case DRAFT: return "draft";
+            case ENTEREDINERROR: return "entered-in-error";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ACTIVE: return "http://hl7.org/fhir/vision-status";
+            case CANCELLED: return "http://hl7.org/fhir/vision-status";
+            case DRAFT: return "http://hl7.org/fhir/vision-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/vision-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ACTIVE: return "The resource instance is currently in-force.";
+            case CANCELLED: return "The resource instance is withdrawn, rescinded or reversed.";
+            case DRAFT: return "A new resource instance the contents of which is not complete.";
+            case ENTEREDINERROR: return "The resource instance was entered in error.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ACTIVE: return "Active";
+            case CANCELLED: return "Cancelled";
+            case DRAFT: return "Draft";
+            case ENTEREDINERROR: return "Entered In Error";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class VisionStatusEnumFactory implements EnumFactory<VisionStatus> {
+    public VisionStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return VisionStatus.ACTIVE;
+        if ("cancelled".equals(codeString))
+          return VisionStatus.CANCELLED;
+        if ("draft".equals(codeString))
+          return VisionStatus.DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return VisionStatus.ENTEREDINERROR;
+        throw new IllegalArgumentException("Unknown VisionStatus code '"+codeString+"'");
+        }
+        public Enumeration<VisionStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<VisionStatus>(this, VisionStatus.ACTIVE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<VisionStatus>(this, VisionStatus.CANCELLED);
+        if ("draft".equals(codeString))
+          return new Enumeration<VisionStatus>(this, VisionStatus.DRAFT);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<VisionStatus>(this, VisionStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown VisionStatus code '"+codeString+"'");
+        }
+    public String toCode(VisionStatus code) {
+      if (code == VisionStatus.ACTIVE)
+        return "active";
+      if (code == VisionStatus.CANCELLED)
+        return "cancelled";
+      if (code == VisionStatus.DRAFT)
+        return "draft";
+      if (code == VisionStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      return "?";
+      }
+    public String toSystem(VisionStatus code) {
+      return code.getSystem();
+      }
+    }
 
     public enum VisionEyes {
         /**
@@ -264,7 +388,7 @@ public class VisionPrescription extends DomainResource {
         /**
          * Identifies the type of vision correction product which is required for the patient.
          */
-        @Child(name = "product", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "product", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Product to be supplied", formalDefinition="Identifies the type of vision correction product which is required for the patient." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-product")
         protected Coding product;
@@ -272,7 +396,7 @@ public class VisionPrescription extends DomainResource {
         /**
          * The eye for which the lens applies.
          */
-        @Child(name = "eye", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "eye", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="right | left", formalDefinition="The eye for which the lens applies." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-eye-codes")
         protected Enumeration<VisionEyes> eye;
@@ -280,35 +404,35 @@ public class VisionPrescription extends DomainResource {
         /**
          * Lens power measured in diopters (0.25 units).
          */
-        @Child(name = "sphere", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "sphere", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens sphere", formalDefinition="Lens power measured in diopters (0.25 units)." )
         protected DecimalType sphere;
 
         /**
          * Power adjustment for astigmatism measured in diopters (0.25 units).
          */
-        @Child(name = "cylinder", type = {DecimalType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "cylinder", type = {DecimalType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens cylinder", formalDefinition="Power adjustment for astigmatism measured in diopters (0.25 units)." )
         protected DecimalType cylinder;
 
         /**
          * Adjustment for astigmatism measured in integer degrees.
          */
-        @Child(name = "axis", type = {IntegerType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "axis", type = {IntegerType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens axis", formalDefinition="Adjustment for astigmatism measured in integer degrees." )
         protected IntegerType axis;
 
         /**
          * Amount of prism to compensate for eye alignment in fractional units.
          */
-        @Child(name = "prism", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "prism", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens prism", formalDefinition="Amount of prism to compensate for eye alignment in fractional units." )
         protected DecimalType prism;
 
         /**
          * The relative base, or reference lens edge, for the prism.
          */
-        @Child(name = "base", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "base", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="up | down | in | out", formalDefinition="The relative base, or reference lens edge, for the prism." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-base-codes")
         protected Enumeration<VisionBase> base;
@@ -316,56 +440,56 @@ public class VisionPrescription extends DomainResource {
         /**
          * Power adjustment for multifocal lenses measured in diopters (0.25 units).
          */
-        @Child(name = "add", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "add", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens add", formalDefinition="Power adjustment for multifocal lenses measured in diopters (0.25 units)." )
         protected DecimalType add;
 
         /**
          * Contact lens power measured in diopters (0.25 units).
          */
-        @Child(name = "power", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "power", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contact lens power", formalDefinition="Contact lens power measured in diopters (0.25 units)." )
         protected DecimalType power;
 
         /**
          * Back curvature measured in millimeters.
          */
-        @Child(name = "backCurve", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "backCurve", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contact lens back curvature", formalDefinition="Back curvature measured in millimeters." )
         protected DecimalType backCurve;
 
         /**
          * Contact lens diameter measured in millimeters.
          */
-        @Child(name = "diameter", type = {DecimalType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "diameter", type = {DecimalType.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contact lens diameter", formalDefinition="Contact lens diameter measured in millimeters." )
         protected DecimalType diameter;
 
         /**
          * The recommended maximum wear period for the lens.
          */
-        @Child(name = "duration", type = {SimpleQuantity.class}, order=12, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "duration", type = {SimpleQuantity.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Lens wear duration", formalDefinition="The recommended maximum wear period for the lens." )
         protected SimpleQuantity duration;
 
         /**
          * Special color or pattern.
          */
-        @Child(name = "color", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "color", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Color required", formalDefinition="Special color or pattern." )
         protected StringType color;
 
         /**
          * Brand recommendations or restrictions.
          */
-        @Child(name = "brand", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "brand", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Brand required", formalDefinition="Brand recommendations or restrictions." )
         protected StringType brand;
 
         /**
          * Notes for special requirements such as coatings and lens materials.
          */
-        @Child(name = "notes", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "notes", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Notes for coatings", formalDefinition="Notes for special requirements such as coatings and lens materials." )
         protected StringType notes;
 
@@ -1466,21 +1590,29 @@ public class VisionPrescription extends DomainResource {
     /**
      * Business identifier which may be used by other parties to reference or identify the prescription.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Business identifier", formalDefinition="Business identifier which may be used by other parties to reference or identify the prescription." )
     protected List<Identifier> identifier;
 
     /**
+     * The status of the resource instance.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vision-status")
+    protected Enumeration<VisionStatus> status;
+
+    /**
      * The date (and perhaps time) when the prescription was written.
      */
-    @Child(name = "dateWritten", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "dateWritten", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When prescription was authorized", formalDefinition="The date (and perhaps time) when the prescription was written." )
     protected DateTimeType dateWritten;
 
     /**
      * A link to a resource representing the person to whom the vision products will be supplied.
      */
-    @Child(name = "patient", type = {Patient.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "patient", type = {Patient.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who prescription is for", formalDefinition="A link to a resource representing the person to whom the vision products will be supplied." )
     protected Reference patient;
 
@@ -1492,7 +1624,7 @@ public class VisionPrescription extends DomainResource {
     /**
      * The healthcare professional responsible for authorizing the prescription.
      */
-    @Child(name = "prescriber", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "prescriber", type = {Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who authorizes the vision product", formalDefinition="The healthcare professional responsible for authorizing the prescription." )
     protected Reference prescriber;
 
@@ -1504,7 +1636,7 @@ public class VisionPrescription extends DomainResource {
     /**
      * A link to a resource that identifies the particular occurrence of contact between patient and health care provider.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Created during encounter / admission / stay", formalDefinition="A link to a resource that identifies the particular occurrence of contact between patient and health care provider." )
     protected Reference encounter;
 
@@ -1516,24 +1648,32 @@ public class VisionPrescription extends DomainResource {
     /**
      * Can be the reason or the indication for writing the prescription.
      */
-    @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Reason or indication for writing the prescription", formalDefinition="Can be the reason or the indication for writing the prescription." )
     protected Type reason;
 
     /**
      * Deals with details of the dispense part of the supply specification.
      */
-    @Child(name = "dispense", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "dispense", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Vision supply authorization", formalDefinition="Deals with details of the dispense part of the supply specification." )
     protected List<VisionPrescriptionDispenseComponent> dispense;
 
-    private static final long serialVersionUID = -1108276057L;
+    private static final long serialVersionUID = 1437104980L;
 
   /**
    * Constructor
    */
     public VisionPrescription() {
       super();
+    }
+
+  /**
+   * Constructor
+   */
+    public VisionPrescription(Enumeration<VisionStatus> status) {
+      super();
+      this.status = status;
     }
 
     /**
@@ -1587,6 +1727,51 @@ public class VisionPrescription extends DomainResource {
         addIdentifier();
       }
       return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<VisionStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create VisionPrescription.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<VisionStatus>(new VisionStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public VisionPrescription setStatusElement(Enumeration<VisionStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the resource instance.
+     */
+    public VisionStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the resource instance.
+     */
+    public VisionPrescription setStatus(VisionStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<VisionStatus>(new VisionStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
     }
 
     /**
@@ -1871,6 +2056,7 @@ public class VisionPrescription extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Business identifier which may be used by other parties to reference or identify the prescription.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("dateWritten", "dateTime", "The date (and perhaps time) when the prescription was written.", 0, java.lang.Integer.MAX_VALUE, dateWritten));
         childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the vision products will be supplied.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("prescriber", "Reference(Practitioner)", "The healthcare professional responsible for authorizing the prescription.", 0, java.lang.Integer.MAX_VALUE, prescriber));
@@ -1883,6 +2069,7 @@ public class VisionPrescription extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<VisionStatus>
         case -1496880759: /*dateWritten*/ return this.dateWritten == null ? new Base[0] : new Base[] {this.dateWritten}; // DateTimeType
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 1430631077: /*prescriber*/ return this.prescriber == null ? new Base[0] : new Base[] {this.prescriber}; // Reference
@@ -1900,6 +2087,9 @@ public class VisionPrescription extends DomainResource {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           break;
+        case -892481550: // status
+          this.status = new VisionStatusEnumFactory().fromType(value); // Enumeration<VisionStatus>
+          break;
         case -1496880759: // dateWritten
           this.dateWritten = castToDateTime(value); // DateTimeType
           break;
@@ -1913,7 +2103,7 @@ public class VisionPrescription extends DomainResource {
           this.encounter = castToReference(value); // Reference
           break;
         case -934964668: // reason
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
           break;
         case 284885341: // dispense
           this.getDispense().add((VisionPrescriptionDispenseComponent) value); // VisionPrescriptionDispenseComponent
@@ -1927,6 +2117,8 @@ public class VisionPrescription extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new VisionStatusEnumFactory().fromType(value); // Enumeration<VisionStatus>
         else if (name.equals("dateWritten"))
           this.dateWritten = castToDateTime(value); // DateTimeType
         else if (name.equals("patient"))
@@ -1936,7 +2128,7 @@ public class VisionPrescription extends DomainResource {
         else if (name.equals("encounter"))
           this.encounter = castToReference(value); // Reference
         else if (name.equals("reason[x]"))
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
         else if (name.equals("dispense"))
           this.getDispense().add((VisionPrescriptionDispenseComponent) value);
         else
@@ -1947,6 +2139,7 @@ public class VisionPrescription extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<VisionStatus>
         case -1496880759: throw new FHIRException("Cannot make property dateWritten as it is not a complex type"); // DateTimeType
         case -791418107:  return getPatient(); // Reference
         case 1430631077:  return getPrescriber(); // Reference
@@ -1962,6 +2155,9 @@ public class VisionPrescription extends DomainResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
           return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.status");
         }
         else if (name.equals("dateWritten")) {
           throw new FHIRException("Cannot call addChild on a primitive type VisionPrescription.dateWritten");
@@ -2006,6 +2202,7 @@ public class VisionPrescription extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.status = status == null ? null : status.copy();
         dst.dateWritten = dateWritten == null ? null : dateWritten.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.prescriber = prescriber == null ? null : prescriber.copy();
@@ -2030,7 +2227,7 @@ public class VisionPrescription extends DomainResource {
         if (!(other instanceof VisionPrescription))
           return false;
         VisionPrescription o = (VisionPrescription) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(dateWritten, o.dateWritten, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(dateWritten, o.dateWritten, true)
            && compareDeep(patient, o.patient, true) && compareDeep(prescriber, o.prescriber, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(reason, o.reason, true) && compareDeep(dispense, o.dispense, true);
       }
@@ -2042,12 +2239,12 @@ public class VisionPrescription extends DomainResource {
         if (!(other instanceof VisionPrescription))
           return false;
         VisionPrescription o = (VisionPrescription) other;
-        return compareValues(dateWritten, o.dateWritten, true);
+        return compareValues(status, o.status, true) && compareValues(dateWritten, o.dateWritten, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, dateWritten, patient
-          , prescriber, encounter, reason, dispense);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, dateWritten
+          , patient, prescriber, encounter, reason, dispense);
       }
 
   @Override

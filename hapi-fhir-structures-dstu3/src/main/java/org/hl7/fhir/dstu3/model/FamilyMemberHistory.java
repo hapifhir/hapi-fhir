@@ -29,18 +29,20 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGenderEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Significant health events and conditions for a person related to the patient relevant in the context of care for the patient.
  */
@@ -391,7 +393,7 @@ public class FamilyMemberHistory extends DomainResource {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
           break;
         case 105901603: // onset
-          this.onset = (Type) value; // Type
+          this.onset = castToType(value); // Type
           break;
         case 3387378: // note
           this.note = castToAnnotation(value); // Annotation
@@ -408,7 +410,7 @@ public class FamilyMemberHistory extends DomainResource {
         else if (name.equals("outcome"))
           this.outcome = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("onset[x]"))
-          this.onset = (Type) value; // Type
+          this.onset = castToType(value); // Type
         else if (name.equals("note"))
           this.note = castToAnnotation(value); // Annotation
         else
@@ -1320,16 +1322,16 @@ public class FamilyMemberHistory extends DomainResource {
           this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
           break;
         case 3029833: // born
-          this.born = (Type) value; // Type
+          this.born = castToType(value); // Type
           break;
         case 96511: // age
-          this.age = (Type) value; // Type
+          this.age = castToType(value); // Type
           break;
         case 2130167587: // estimatedAge
           this.estimatedAge = castToBoolean(value); // BooleanType
           break;
         case 561497972: // deceased
-          this.deceased = (Type) value; // Type
+          this.deceased = castToType(value); // Type
           break;
         case 3387378: // note
           this.note = castToAnnotation(value); // Annotation
@@ -1359,13 +1361,13 @@ public class FamilyMemberHistory extends DomainResource {
         else if (name.equals("gender"))
           this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
         else if (name.equals("born[x]"))
-          this.born = (Type) value; // Type
+          this.born = castToType(value); // Type
         else if (name.equals("age[x]"))
-          this.age = (Type) value; // Type
+          this.age = castToType(value); // Type
         else if (name.equals("estimatedAge"))
           this.estimatedAge = castToBoolean(value); // BooleanType
         else if (name.equals("deceased[x]"))
-          this.deceased = (Type) value; // Type
+          this.deceased = castToType(value); // Type
         else if (name.equals("note"))
           this.note = castToAnnotation(value); // Annotation
         else if (name.equals("condition"))

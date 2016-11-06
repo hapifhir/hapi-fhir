@@ -29,26 +29,26 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
-import org.hl7.fhir.dstu3.model.Enumerations.SearchParamTypeEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
 @ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/Profile/SearchParameter")
-@ChildOrder(names={"url", "name", "status", "experimental", "date", "publisher", "contact", "useContext", "requirements", "code", "base", "type", "description", "expression", "xpath", "xpathUsage", "target", "component"})
-public class SearchParameter extends BaseConformance {
+@ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "useContext", "jurisdiction", "purpose", "code", "base", "type", "description", "expression", "xpath", "xpathUsage", "target", "component"})
+public class SearchParameter extends MetadataResource {
 
     public enum XPathUsageType {
         /**
@@ -188,277 +188,24 @@ public class SearchParameter extends BaseConformance {
       }
     }
 
-    @Block()
-    public static class SearchParameterContactComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The name of an individual to contact regarding the search parameter.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Name of an individual to contact", formalDefinition="The name of an individual to contact regarding the search parameter." )
-        protected StringType name;
-
-        /**
-         * Contact details for individual (if a name was provided) or the publisher.
-         */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
     /**
-     * Constructor
+     * Explains why this search parameter is needed and why it has been designed as it has.
      */
-      public SearchParameterContactComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (The name of an individual to contact regarding the search parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SearchParameterContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the search parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public SearchParameterContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the search parameter.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the search parameter.
-         */
-        public SearchParameterContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public SearchParameterContactComponent setTelecom(List<ContactPoint> theTelecom) { 
-          this.telecom = theTelecom;
-          return this;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-        public SearchParameterContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-         */
-        public ContactPoint getTelecomFirstRep() { 
-          if (getTelecom().isEmpty()) {
-            addTelecom();
-          }
-          return getTelecom().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the search parameter.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          break;
-        case -1429363305: // telecom
-          this.getTelecom().add(castToContactPoint(value)); // ContactPoint
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
-          this.name = castToString(value); // StringType
-        else if (name.equals("telecom"))
-          this.getTelecom().add(castToContactPoint(value));
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -1429363305:  return addTelecom(); // ContactPoint
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.name");
-        }
-        else if (name.equals("telecom")) {
-          return addTelecom();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public SearchParameterContactComponent copy() {
-        SearchParameterContactComponent dst = new SearchParameterContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof SearchParameterContactComponent))
-          return false;
-        SearchParameterContactComponent o = (SearchParameterContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof SearchParameterContactComponent))
-          return false;
-        SearchParameterContactComponent o = (SearchParameterContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, telecom);
-      }
-
-  public String fhirType() {
-    return "SearchParameter.contact";
-
-  }
-
-  }
-
-    /**
-     * A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
-     */
-    @Child(name = "experimental", type = {BooleanType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
-    protected BooleanType experimental;
-
-    /**
-     * The name of the individual or organization that published the search parameter.
-     */
-    @Child(name = "publisher", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the search parameter." )
-    protected StringType publisher;
-
-    /**
-     * Contacts to assist a user in finding and communicating with the publisher.
-     */
-    @Child(name = "contact", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
-    protected List<SearchParameterContactComponent> contact;
-
-    /**
-     * The Scope and Usage that this search parameter was created to meet.
-     */
-    @Child(name = "requirements", type = {MarkdownType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this search parameter is defined", formalDefinition="The Scope and Usage that this search parameter was created to meet." )
-    protected MarkdownType requirements;
+    @Child(name = "purpose", type = {MarkdownType.class}, order=0, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this search parameter is defined", formalDefinition="Explains why this search parameter is needed and why it has been designed as it has." )
+    protected MarkdownType purpose;
 
     /**
      * The code used in the URL or the parameter name in a parameters resource for this search parameter.
      */
-    @Child(name = "code", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Code used in URL", formalDefinition="The code used in the URL or the parameter name in a parameters resource for this search parameter." )
     protected CodeType code;
 
     /**
      * The base resource type that this search parameter refers to.
      */
-    @Child(name = "base", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "base", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The resource type this search parameter applies to", formalDefinition="The base resource type that this search parameter refers to." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected CodeType base;
@@ -466,36 +213,29 @@ public class SearchParameter extends BaseConformance {
     /**
      * The type of value a search parameter refers to, and how the content is interpreted.
      */
-    @Child(name = "type", type = {CodeType.class}, order=6, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri", formalDefinition="The type of value a search parameter refers to, and how the content is interpreted." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-param-type")
     protected Enumeration<SearchParamType> type;
 
     /**
-     * A description of the search parameters and how it used.
-     */
-    @Child(name = "description", type = {MarkdownType.class}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Documentation for  search parameter", formalDefinition="A description of the search parameters and how it used." )
-    protected MarkdownType description;
-
-    /**
      * A FluentPath expression that returns a set of elements for the search parameter.
      */
-    @Child(name = "expression", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="FluentPath expression that extracts the values", formalDefinition="A FluentPath expression that returns a set of elements for the search parameter." )
     protected StringType expression;
 
     /**
      * An XPath expression that returns a set of elements for the search parameter.
      */
-    @Child(name = "xpath", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "xpath", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="XPath that extracts the values", formalDefinition="An XPath expression that returns a set of elements for the search parameter." )
     protected StringType xpath;
 
     /**
      * How the search parameter relates to the set of elements returned by evaluating the xpath query.
      */
-    @Child(name = "xpathUsage", type = {CodeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "xpathUsage", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="normal | phonetic | nearby | distance | other", formalDefinition="How the search parameter relates to the set of elements returned by evaluating the xpath query." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-xpath-usage")
     protected Enumeration<XPathUsageType> xpathUsage;
@@ -503,7 +243,7 @@ public class SearchParameter extends BaseConformance {
     /**
      * Types of resource (if a resource is referenced).
      */
-    @Child(name = "target", type = {CodeType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "target", type = {CodeType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Types of resource (if a resource reference)", formalDefinition="Types of resource (if a resource is referenced)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> target;
@@ -511,7 +251,7 @@ public class SearchParameter extends BaseConformance {
     /**
      * Used to define the parts of a composite search parameter.
      */
-    @Child(name = "component", type = {SearchParameter.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "component", type = {SearchParameter.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="For Composite resources to define the parts", formalDefinition="Used to define the parts of a composite search parameter." )
     protected List<Reference> component;
     /**
@@ -520,7 +260,7 @@ public class SearchParameter extends BaseConformance {
     protected List<SearchParameter> componentTarget;
 
 
-    private static final long serialVersionUID = 809759046L;
+    private static final long serialVersionUID = 295034946L;
 
   /**
    * Constructor
@@ -532,10 +272,11 @@ public class SearchParameter extends BaseConformance {
   /**
    * Constructor
    */
-    public SearchParameter(UriType url, StringType name, CodeType code, CodeType base, Enumeration<SearchParamType> type, MarkdownType description) {
+    public SearchParameter(UriType url, StringType name, Enumeration<PublicationStatus> status, CodeType code, CodeType base, Enumeration<SearchParamType> type, MarkdownType description) {
       super();
       this.url = url;
       this.name = name;
+      this.status = status;
       this.code = code;
       this.base = base;
       this.type = type;
@@ -543,7 +284,42 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @param value An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published.
+     * @return {@link #url} (An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public UriType getUrlElement() { 
+      if (this.url == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.url");
+        else if (Configuration.doAutoCreate())
+          this.url = new UriType(); // bb
+      return this.url;
+    }
+
+    public boolean hasUrlElement() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    public boolean hasUrl() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    /**
+     * @param value {@link #url} (An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public SearchParameter setUrlElement(UriType value) { 
+      this.url = value;
+      return this;
+    }
+
+    /**
+     * @return An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).
+     */
+    public String getUrl() { 
+      return this.url == null ? null : this.url.getValue();
+    }
+
+    /**
+     * @param value An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public SearchParameter setUrl(String value) { 
         if (this.url == null)
@@ -553,7 +329,91 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @param value A free text natural language name identifying the search parameter.
+     * @return {@link #version} (The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public StringType getVersionElement() { 
+      if (this.version == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.version");
+        else if (Configuration.doAutoCreate())
+          this.version = new StringType(); // bb
+      return this.version;
+    }
+
+    public boolean hasVersionElement() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    public boolean hasVersion() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    /**
+     * @param value {@link #version} (The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public SearchParameter setVersionElement(StringType value) { 
+      this.version = value;
+      return this;
+    }
+
+    /**
+     * @return The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     */
+    public String getVersion() { 
+      return this.version == null ? null : this.version.getValue();
+    }
+
+    /**
+     * @param value The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     */
+    public SearchParameter setVersion(String value) { 
+      if (Utilities.noString(value))
+        this.version = null;
+      else {
+        if (this.version == null)
+          this.version = new StringType();
+        this.version.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #name} (A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public StringType getNameElement() { 
+      if (this.name == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.name");
+        else if (Configuration.doAutoCreate())
+          this.name = new StringType(); // bb
+      return this.name;
+    }
+
+    public boolean hasNameElement() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    public boolean hasName() { 
+      return this.name != null && !this.name.isEmpty();
+    }
+
+    /**
+     * @param value {@link #name} (A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     */
+    public SearchParameter setNameElement(StringType value) { 
+      this.name = value;
+      return this;
+    }
+
+    /**
+     * @return A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     */
+    public String getName() { 
+      return this.name == null ? null : this.name.getValue();
+    }
+
+    /**
+     * @param value A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public SearchParameter setName(String value) { 
         if (this.name == null)
@@ -563,21 +423,52 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @param value The status of this search parameter definition.
+     * @return {@link #status} (The status of this search parameter. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public SearchParameter setStatus(ConformanceResourceStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
-        if (this.status == null)
-          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
-        this.status.setValue(value);
-      }
+    public Enumeration<PublicationStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of this search parameter. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public SearchParameter setStatusElement(Enumeration<PublicationStatus> value) { 
+      this.status = value;
       return this;
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return The status of this search parameter. Enables tracking the life-cycle of the content.
+     */
+    public PublicationStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of this search parameter. Enables tracking the life-cycle of the content.
+     */
+    public SearchParameter setStatus(PublicationStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #experimental} (A flag to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -597,7 +488,7 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A flag to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public SearchParameter setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -605,14 +496,14 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @return A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A flag to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A flag to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public SearchParameter setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -622,7 +513,42 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @param value The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
+     * @return {@link #date} (The date  (and optionally time) when the search parameter was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the search parameter was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public SearchParameter setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the search parameter was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the search parameter was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
      */
     public SearchParameter setDate(Date value) { 
       if (value == null)
@@ -685,18 +611,18 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
      */
-    public List<SearchParameterContactComponent> getContact() { 
+    public List<ContactDetail> getContact() { 
       if (this.contact == null)
-        this.contact = new ArrayList<SearchParameterContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       return this.contact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public SearchParameter setContact(List<SearchParameterContactComponent> theContact) { 
+    public SearchParameter setContact(List<ContactDetail> theContact) { 
       this.contact = theContact;
       return this;
     }
@@ -704,25 +630,25 @@ public class SearchParameter extends BaseConformance {
     public boolean hasContact() { 
       if (this.contact == null)
         return false;
-      for (SearchParameterContactComponent item : this.contact)
+      for (ContactDetail item : this.contact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public SearchParameterContactComponent addContact() { //3
-      SearchParameterContactComponent t = new SearchParameterContactComponent();
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
       if (this.contact == null)
-        this.contact = new ArrayList<SearchParameterContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return t;
     }
 
-    public SearchParameter addContact(SearchParameterContactComponent t) { //3
+    public SearchParameter addContact(ContactDetail t) { //3
       if (t == null)
         return this;
       if (this.contact == null)
-        this.contact = new ArrayList<SearchParameterContactComponent>();
+        this.contact = new ArrayList<ContactDetail>();
       this.contact.add(t);
       return this;
     }
@@ -730,7 +656,7 @@ public class SearchParameter extends BaseConformance {
     /**
      * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
      */
-    public SearchParameterContactComponent getContactFirstRep() { 
+    public ContactDetail getContactFirstRep() { 
       if (getContact().isEmpty()) {
         addContact();
       }
@@ -738,50 +664,156 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @return {@link #requirements} (The Scope and Usage that this search parameter was created to meet.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
      */
-    public MarkdownType getRequirementsElement() { 
-      if (this.requirements == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SearchParameter.requirements");
-        else if (Configuration.doAutoCreate())
-          this.requirements = new MarkdownType(); // bb
-      return this.requirements;
-    }
-
-    public boolean hasRequirementsElement() { 
-      return this.requirements != null && !this.requirements.isEmpty();
-    }
-
-    public boolean hasRequirements() { 
-      return this.requirements != null && !this.requirements.isEmpty();
+    public List<UsageContext> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      return this.useContext;
     }
 
     /**
-     * @param value {@link #requirements} (The Scope and Usage that this search parameter was created to meet.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public SearchParameter setRequirementsElement(MarkdownType value) { 
-      this.requirements = value;
+    public SearchParameter setUseContext(List<UsageContext> theUseContext) { 
+      this.useContext = theUseContext;
+      return this;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (UsageContext item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public UsageContext addUseContext() { //3
+      UsageContext t = new UsageContext();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    public SearchParameter addUseContext(UsageContext t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
       return this;
     }
 
     /**
-     * @return The Scope and Usage that this search parameter was created to meet.
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
      */
-    public String getRequirements() { 
-      return this.requirements == null ? null : this.requirements.getValue();
+    public UsageContext getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
     }
 
     /**
-     * @param value The Scope and Usage that this search parameter was created to meet.
+     * @return {@link #jurisdiction} (A jurisdiction in which the search parameter is intended to be used.)
      */
-    public SearchParameter setRequirements(String value) { 
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public SearchParameter addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
+    }
+
+    /**
+     * @return {@link #purpose} (Explains why this search parameter is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public MarkdownType getPurposeElement() { 
+      if (this.purpose == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.purpose");
+        else if (Configuration.doAutoCreate())
+          this.purpose = new MarkdownType(); // bb
+      return this.purpose;
+    }
+
+    public boolean hasPurposeElement() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    public boolean hasPurpose() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    /**
+     * @param value {@link #purpose} (Explains why this search parameter is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public SearchParameter setPurposeElement(MarkdownType value) { 
+      this.purpose = value;
+      return this;
+    }
+
+    /**
+     * @return Explains why this search parameter is needed and why it has been designed as it has.
+     */
+    public String getPurpose() { 
+      return this.purpose == null ? null : this.purpose.getValue();
+    }
+
+    /**
+     * @param value Explains why this search parameter is needed and why it has been designed as it has.
+     */
+    public SearchParameter setPurpose(String value) { 
       if (value == null)
-        this.requirements = null;
+        this.purpose = null;
       else {
-        if (this.requirements == null)
-          this.requirements = new MarkdownType();
-        this.requirements.setValue(value);
+        if (this.purpose == null)
+          this.purpose = new MarkdownType();
+        this.purpose.setValue(value);
       }
       return this;
     }
@@ -922,7 +954,7 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @return {@link #description} (A description of the search parameters and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the search parameter from the consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -942,7 +974,7 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @param value {@link #description} (A description of the search parameters and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the search parameter from the consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public SearchParameter setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -950,14 +982,14 @@ public class SearchParameter extends BaseConformance {
     }
 
     /**
-     * @return A description of the search parameters and how it used.
+     * @return A free text natural language description of the search parameter from the consumer's perspective. and how it used.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A description of the search parameters and how it used.
+     * @param value A free text natural language description of the search parameter from the consumer's perspective. and how it used.
      */
     public SearchParameter setDescription(String value) { 
         if (this.description == null)
@@ -1251,14 +1283,21 @@ public class SearchParameter extends BaseConformance {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published. The URL SHOULD include the major version of the search parameter. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("status", "code", "The status of this search parameter. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the search parameter was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the search parameter.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("requirements", "markdown", "The Scope and Usage that this search parameter was created to meet.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the search parameter is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explains why this search parameter is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("base", "code", "The base resource type that this search parameter refers to.", 0, java.lang.Integer.MAX_VALUE, base));
         childrenList.add(new Property("type", "code", "The type of value a search parameter refers to, and how the content is interpreted.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("description", "markdown", "A description of the search parameters and how it used.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the search parameter from the consumer's perspective. and how it used.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("expression", "string", "A FluentPath expression that returns a set of elements for the search parameter.", 0, java.lang.Integer.MAX_VALUE, expression));
         childrenList.add(new Property("xpath", "string", "An XPath expression that returns a set of elements for the search parameter.", 0, java.lang.Integer.MAX_VALUE, xpath));
         childrenList.add(new Property("xpathUsage", "code", "How the search parameter relates to the set of elements returned by evaluating the xpath query.", 0, java.lang.Integer.MAX_VALUE, xpathUsage));
@@ -1270,14 +1309,16 @@ public class SearchParameter extends BaseConformance {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ConformanceResourceStatus>
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // SearchParameterContactComponent
-        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // CodeableConcept
-        case -1619874672: /*requirements*/ return this.requirements == null ? new Base[0] : new Base[] {this.requirements}; // MarkdownType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
         case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // CodeType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SearchParamType>
@@ -1298,11 +1339,14 @@ public class SearchParameter extends BaseConformance {
         case 116079: // url
           this.url = castToUri(value); // UriType
           break;
+        case 351608024: // version
+          this.version = castToString(value); // StringType
+          break;
         case 3373707: // name
           this.name = castToString(value); // StringType
           break;
         case -892481550: // status
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
@@ -1314,13 +1358,16 @@ public class SearchParameter extends BaseConformance {
           this.publisher = castToString(value); // StringType
           break;
         case 951526432: // contact
-          this.getContact().add((SearchParameterContactComponent) value); // SearchParameterContactComponent
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case -669707736: // useContext
-          this.getUseContext().add(castToCodeableConcept(value)); // CodeableConcept
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
           break;
-        case -1619874672: // requirements
-          this.requirements = castToMarkdown(value); // MarkdownType
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
+        case -220463842: // purpose
+          this.purpose = castToMarkdown(value); // MarkdownType
           break;
         case 3059181: // code
           this.code = castToCode(value); // CodeType
@@ -1358,10 +1405,12 @@ public class SearchParameter extends BaseConformance {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
         else if (name.equals("status"))
-          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("experimental"))
           this.experimental = castToBoolean(value); // BooleanType
         else if (name.equals("date"))
@@ -1369,11 +1418,13 @@ public class SearchParameter extends BaseConformance {
         else if (name.equals("publisher"))
           this.publisher = castToString(value); // StringType
         else if (name.equals("contact"))
-          this.getContact().add((SearchParameterContactComponent) value);
+          this.getContact().add(castToContactDetail(value));
         else if (name.equals("useContext"))
-          this.getUseContext().add(castToCodeableConcept(value));
-        else if (name.equals("requirements"))
-          this.requirements = castToMarkdown(value); // MarkdownType
+          this.getUseContext().add(castToUsageContext(value));
+        else if (name.equals("jurisdiction"))
+          this.getJurisdiction().add(castToCodeableConcept(value));
+        else if (name.equals("purpose"))
+          this.purpose = castToMarkdown(value); // MarkdownType
         else if (name.equals("code"))
           this.code = castToCode(value); // CodeType
         else if (name.equals("base"))
@@ -1400,14 +1451,16 @@ public class SearchParameter extends BaseConformance {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
+        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ConformanceResourceStatus>
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // SearchParameterContactComponent
-        case -669707736:  return addUseContext(); // CodeableConcept
-        case -1619874672: throw new FHIRException("Cannot make property requirements as it is not a complex type"); // MarkdownType
+        case 951526432:  return addContact(); // ContactDetail
+        case -669707736:  return addUseContext(); // UsageContext
+        case -507075711:  return addJurisdiction(); // CodeableConcept
+        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
         case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
         case 3016401: throw new FHIRException("Cannot make property base as it is not a complex type"); // CodeType
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<SearchParamType>
@@ -1426,6 +1479,9 @@ public class SearchParameter extends BaseConformance {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("url")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.url");
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.version");
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.name");
@@ -1448,8 +1504,11 @@ public class SearchParameter extends BaseConformance {
         else if (name.equals("useContext")) {
           return addUseContext();
         }
-        else if (name.equals("requirements")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.requirements");
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
+        }
+        else if (name.equals("purpose")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.purpose");
         }
         else if (name.equals("code")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.code");
@@ -1491,22 +1550,28 @@ public class SearchParameter extends BaseConformance {
         SearchParameter dst = new SearchParameter();
         copyValues(dst);
         dst.url = url == null ? null : url.copy();
+        dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
-          dst.contact = new ArrayList<SearchParameterContactComponent>();
-          for (SearchParameterContactComponent i : contact)
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
         if (useContext != null) {
-          dst.useContext = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : useContext)
+          dst.useContext = new ArrayList<UsageContext>();
+          for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
         };
-        dst.requirements = requirements == null ? null : requirements.copy();
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
+        };
+        dst.purpose = purpose == null ? null : purpose.copy();
         dst.code = code == null ? null : code.copy();
         dst.base = base == null ? null : base.copy();
         dst.type = type == null ? null : type.copy();
@@ -1538,11 +1603,10 @@ public class SearchParameter extends BaseConformance {
         if (!(other instanceof SearchParameter))
           return false;
         SearchParameter o = (SearchParameter) other;
-        return compareDeep(experimental, o.experimental, true) && compareDeep(publisher, o.publisher, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(requirements, o.requirements, true) && compareDeep(code, o.code, true)
-           && compareDeep(base, o.base, true) && compareDeep(type, o.type, true) && compareDeep(description, o.description, true)
-           && compareDeep(expression, o.expression, true) && compareDeep(xpath, o.xpath, true) && compareDeep(xpathUsage, o.xpathUsage, true)
-           && compareDeep(target, o.target, true) && compareDeep(component, o.component, true);
+        return compareDeep(purpose, o.purpose, true) && compareDeep(code, o.code, true) && compareDeep(base, o.base, true)
+           && compareDeep(type, o.type, true) && compareDeep(expression, o.expression, true) && compareDeep(xpath, o.xpath, true)
+           && compareDeep(xpathUsage, o.xpathUsage, true) && compareDeep(target, o.target, true) && compareDeep(component, o.component, true)
+          ;
       }
 
       @Override
@@ -1552,23 +1616,180 @@ public class SearchParameter extends BaseConformance {
         if (!(other instanceof SearchParameter))
           return false;
         SearchParameter o = (SearchParameter) other;
-        return compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(requirements, o.requirements, true) && compareValues(code, o.code, true) && compareValues(base, o.base, true)
-           && compareValues(type, o.type, true) && compareValues(description, o.description, true) && compareValues(expression, o.expression, true)
-           && compareValues(xpath, o.xpath, true) && compareValues(xpathUsage, o.xpathUsage, true) && compareValues(target, o.target, true)
-          ;
+        return compareValues(purpose, o.purpose, true) && compareValues(code, o.code, true) && compareValues(base, o.base, true)
+           && compareValues(type, o.type, true) && compareValues(expression, o.expression, true) && compareValues(xpath, o.xpath, true)
+           && compareValues(xpathUsage, o.xpathUsage, true) && compareValues(target, o.target, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(experimental, publisher, contact
-          , requirements, code, base, type, description, expression, xpath, xpathUsage
-          , target, component);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(purpose, code, base, type
+          , expression, xpath, xpathUsage, target, component);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.SearchParameter;
    }
+
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The search parameter publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>SearchParameter.date</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="date", path="SearchParameter.date", description="The search parameter publication date", type="date" )
+  public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The search parameter publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>SearchParameter.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>Code used in URL</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="code", path="SearchParameter.code", description="Code used in URL", type="token" )
+  public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>Code used in URL</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.jurisdiction</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="jurisdiction", path="SearchParameter.jurisdiction", description="Intended jurisdiction for search parameter", type="token" )
+  public static final String SP_JURISDICTION = "jurisdiction";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.jurisdiction</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the search parameter</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>SearchParameter.description</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Text search against the description of the search parameter", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the search parameter</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>SearchParameter.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.type</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token" )
+  public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.version</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="version", path="SearchParameter.version", description="The version identifier of the search parameter", type="token" )
+  public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the search parameter</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>SearchParameter.url</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="url", path="SearchParameter.url", description="The uri that identifies the search parameter", type="uri" )
+  public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the search parameter</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>SearchParameter.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>target</b>
+   * <p>
+   * Description: <b>Types of resource (if a resource reference)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.target</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token" )
+  public static final String SP_TARGET = "target";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>target</b>
+   * <p>
+   * Description: <b>Types of resource (if a resource reference)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.target</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TARGET = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TARGET);
 
  /**
    * Search parameter: <b>component</b>
@@ -1597,39 +1818,19 @@ public class SearchParameter extends BaseConformance {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_COMPONENT = new ca.uhn.fhir.model.api.Include("SearchParameter:component").toLocked();
 
  /**
-   * Search parameter: <b>code</b>
-   * <p>
-   * Description: <b>Code used in URL</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.code</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="code", path="SearchParameter.code", description="Code used in URL", type="token" )
-  public static final String SP_CODE = "code";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>code</b>
-   * <p>
-   * Description: <b>Code used in URL</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.code</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
-
- /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Informal name for this search parameter</b><br>
+   * Description: <b>Name of the search parameter</b><br>
    * Type: <b>string</b><br>
    * Path: <b>SearchParameter.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="SearchParameter.name", description="Informal name for this search parameter", type="string" )
+  @SearchParamDefinition(name="name", path="SearchParameter.name", description="Name of the search parameter", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Informal name for this search parameter</b><br>
+   * Description: <b>Name of the search parameter</b><br>
    * Type: <b>string</b><br>
    * Path: <b>SearchParameter.name</b><br>
    * </p>
@@ -1637,84 +1838,44 @@ public class SearchParameter extends BaseConformance {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
-   * Search parameter: <b>context</b>
+   * Search parameter: <b>publisher</b>
    * <p>
-   * Description: <b>A use context assigned to the search parameter</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.useContext</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="SearchParameter.useContext", description="A use context assigned to the search parameter", type="token" )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>A use context assigned to the search parameter</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.useContext</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
-
- /**
-   * Search parameter: <b>description</b>
-   * <p>
-   * Description: <b>Documentation for  search parameter</b><br>
+   * Description: <b>Name of the publisher of the search parameter</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>SearchParameter.description</b><br>
+   * Path: <b>SearchParameter.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string" )
-  public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name="publisher", path="SearchParameter.publisher", description="Name of the publisher of the search parameter", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
    * <p>
-   * Description: <b>Documentation for  search parameter</b><br>
+   * Description: <b>Name of the publisher of the search parameter</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>SearchParameter.description</b><br>
+   * Path: <b>SearchParameter.publisher</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
 
  /**
-   * Search parameter: <b>type</b>
+   * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Description: <b>The current status of the search parameter</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.type</b><br>
+   * Path: <b>SearchParameter.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token" )
-  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="status", path="SearchParameter.status", description="The current status of the search parameter", type="token" )
+  public static final String SP_STATUS = "status";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Description: <b>The current status of the search parameter</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.type</b><br>
+   * Path: <b>SearchParameter.status</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
-
- /**
-   * Search parameter: <b>url</b>
-   * <p>
-   * Description: <b>Absolute URL used to reference this search parameter</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>SearchParameter.url</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="url", path="SearchParameter.url", description="Absolute URL used to reference this search parameter", type="uri" )
-  public static final String SP_URL = "url";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>url</b>
-   * <p>
-   * Description: <b>Absolute URL used to reference this search parameter</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>SearchParameter.url</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
  /**
    * Search parameter: <b>base</b>
@@ -1735,26 +1896,6 @@ public class SearchParameter extends BaseConformance {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam BASE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_BASE);
-
- /**
-   * Search parameter: <b>target</b>
-   * <p>
-   * Description: <b>Types of resource (if a resource reference)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.target</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token" )
-  public static final String SP_TARGET = "target";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>target</b>
-   * <p>
-   * Description: <b>Types of resource (if a resource reference)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>SearchParameter.target</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TARGET = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TARGET);
 
 
 }

@@ -3,16 +3,33 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.context.IWorkerContext.ILoggingService;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.ExpansionProfile;
+import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
@@ -21,8 +38,8 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
-import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.validation.IResourceValidator;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -266,7 +283,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	@CoverageIgnore
-	public List<BaseConformance> allConformanceResources() {
+	public List<MetadataResource> allConformanceResources() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -326,6 +343,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	@Override
 	public boolean isNoTerminologyServer() {
 		return false;
+	}
+
+	@Override
+	public <T extends Resource> T fetchResourceWithException(Class<T> theClass_, String theUri) throws FHIRException {
+		T retVal = fetchResource(theClass_, theUri);
+		if (retVal == null) {
+			throw new FHIRException("Unable to fetch " + theUri);
+		}
+		return retVal;
 	}
 
 }

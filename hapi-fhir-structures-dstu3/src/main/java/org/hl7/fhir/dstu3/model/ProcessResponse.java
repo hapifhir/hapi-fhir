@@ -29,16 +29,20 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides processing status, errors and notes from the processing of a resource.
  */
@@ -386,9 +390,14 @@ public class ProcessResponse extends DomainResource {
     /**
      * Original request resource reference.
      */
-    @Child(name = "request", type = {Identifier.class, Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "request", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Request reference", formalDefinition="Original request resource reference." )
-    protected Type request;
+    protected Reference request;
+
+    /**
+     * The actual object that is the target of the reference (Original request resource reference.)
+     */
+    protected Resource requestTarget;
 
     /**
      * Transaction status: error, complete, held.
@@ -431,23 +440,38 @@ public class ProcessResponse extends DomainResource {
     /**
      * The organization who produced this adjudicated response.
      */
-    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "organization", type = {Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Authoring Organization", formalDefinition="The organization who produced this adjudicated response." )
-    protected Type organization;
+    protected Reference organization;
+
+    /**
+     * The actual object that is the target of the reference (The organization who produced this adjudicated response.)
+     */
+    protected Organization organizationTarget;
 
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Identifier.class, Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible Practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
-    protected Type requestProvider;
+    protected Reference requestProvider;
+
+    /**
+     * The actual object that is the target of the reference (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    protected Practitioner requestProviderTarget;
 
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestOrganization", type = {Identifier.class, Organization.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestOrganization", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
-    protected Type requestOrganization;
+    protected Reference requestOrganization;
+
+    /**
+     * The actual object that is the target of the reference (The organization which is responsible for the services rendered to the patient.)
+     */
+    protected Organization requestOrganizationTarget;
 
     /**
      * The form to be used for printing the content.
@@ -472,7 +496,7 @@ public class ProcessResponse extends DomainResource {
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adjudication-error")
     protected List<Coding> error;
 
-    private static final long serialVersionUID = 283876814L;
+    private static final long serialVersionUID = -863829800L;
 
   /**
    * Constructor
@@ -590,34 +614,13 @@ public class ProcessResponse extends DomainResource {
     /**
      * @return {@link #request} (Original request resource reference.)
      */
-    public Type getRequest() { 
+    public Reference getRequest() { 
+      if (this.request == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ProcessResponse.request");
+        else if (Configuration.doAutoCreate())
+          this.request = new Reference(); // cc
       return this.request;
-    }
-
-    /**
-     * @return {@link #request} (Original request resource reference.)
-     */
-    public Identifier getRequestIdentifier() throws FHIRException { 
-      if (!(this.request instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.request.getClass().getName()+" was encountered");
-      return (Identifier) this.request;
-    }
-
-    public boolean hasRequestIdentifier() { 
-      return this.request instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #request} (Original request resource reference.)
-     */
-    public Reference getRequestReference() throws FHIRException { 
-      if (!(this.request instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.request.getClass().getName()+" was encountered");
-      return (Reference) this.request;
-    }
-
-    public boolean hasRequestReference() { 
-      return this.request instanceof Reference;
     }
 
     public boolean hasRequest() { 
@@ -627,8 +630,23 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #request} (Original request resource reference.)
      */
-    public ProcessResponse setRequest(Type value) { 
+    public ProcessResponse setRequest(Reference value) { 
       this.request = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
+     */
+    public Resource getRequestTarget() { 
+      return this.requestTarget;
+    }
+
+    /**
+     * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
+     */
+    public ProcessResponse setRequestTarget(Resource value) { 
+      this.requestTarget = value;
       return this;
     }
 
@@ -805,34 +823,13 @@ public class ProcessResponse extends DomainResource {
     /**
      * @return {@link #organization} (The organization who produced this adjudicated response.)
      */
-    public Type getOrganization() { 
+    public Reference getOrganization() { 
+      if (this.organization == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ProcessResponse.organization");
+        else if (Configuration.doAutoCreate())
+          this.organization = new Reference(); // cc
       return this.organization;
-    }
-
-    /**
-     * @return {@link #organization} (The organization who produced this adjudicated response.)
-     */
-    public Identifier getOrganizationIdentifier() throws FHIRException { 
-      if (!(this.organization instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Identifier) this.organization;
-    }
-
-    public boolean hasOrganizationIdentifier() { 
-      return this.organization instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #organization} (The organization who produced this adjudicated response.)
-     */
-    public Reference getOrganizationReference() throws FHIRException { 
-      if (!(this.organization instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Reference) this.organization;
-    }
-
-    public boolean hasOrganizationReference() { 
-      return this.organization instanceof Reference;
     }
 
     public boolean hasOrganization() { 
@@ -842,42 +839,41 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #organization} (The organization who produced this adjudicated response.)
      */
-    public ProcessResponse setOrganization(Type value) { 
+    public ProcessResponse setOrganization(Reference value) { 
       this.organization = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization who produced this adjudicated response.)
+     */
+    public Organization getOrganizationTarget() { 
+      if (this.organizationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ProcessResponse.organization");
+        else if (Configuration.doAutoCreate())
+          this.organizationTarget = new Organization(); // aa
+      return this.organizationTarget;
+    }
+
+    /**
+     * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization who produced this adjudicated response.)
+     */
+    public ProcessResponse setOrganizationTarget(Organization value) { 
+      this.organizationTarget = value;
       return this;
     }
 
     /**
      * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public Type getRequestProvider() { 
+    public Reference getRequestProvider() { 
+      if (this.requestProvider == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ProcessResponse.requestProvider");
+        else if (Configuration.doAutoCreate())
+          this.requestProvider = new Reference(); // cc
       return this.requestProvider;
-    }
-
-    /**
-     * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
-     */
-    public Identifier getRequestProviderIdentifier() throws FHIRException { 
-      if (!(this.requestProvider instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.requestProvider.getClass().getName()+" was encountered");
-      return (Identifier) this.requestProvider;
-    }
-
-    public boolean hasRequestProviderIdentifier() { 
-      return this.requestProvider instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
-     */
-    public Reference getRequestProviderReference() throws FHIRException { 
-      if (!(this.requestProvider instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.requestProvider.getClass().getName()+" was encountered");
-      return (Reference) this.requestProvider;
-    }
-
-    public boolean hasRequestProviderReference() { 
-      return this.requestProvider instanceof Reference;
     }
 
     public boolean hasRequestProvider() { 
@@ -887,42 +883,41 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public ProcessResponse setRequestProvider(Type value) { 
+    public ProcessResponse setRequestProvider(Reference value) { 
       this.requestProvider = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public Practitioner getRequestProviderTarget() { 
+      if (this.requestProviderTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ProcessResponse.requestProvider");
+        else if (Configuration.doAutoCreate())
+          this.requestProviderTarget = new Practitioner(); // aa
+      return this.requestProviderTarget;
+    }
+
+    /**
+     * @param value {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public ProcessResponse setRequestProviderTarget(Practitioner value) { 
+      this.requestProviderTarget = value;
       return this;
     }
 
     /**
      * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public Type getRequestOrganization() { 
+    public Reference getRequestOrganization() { 
+      if (this.requestOrganization == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ProcessResponse.requestOrganization");
+        else if (Configuration.doAutoCreate())
+          this.requestOrganization = new Reference(); // cc
       return this.requestOrganization;
-    }
-
-    /**
-     * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Identifier getRequestOrganizationIdentifier() throws FHIRException { 
-      if (!(this.requestOrganization instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.requestOrganization.getClass().getName()+" was encountered");
-      return (Identifier) this.requestOrganization;
-    }
-
-    public boolean hasRequestOrganizationIdentifier() { 
-      return this.requestOrganization instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Reference getRequestOrganizationReference() throws FHIRException { 
-      if (!(this.requestOrganization instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.requestOrganization.getClass().getName()+" was encountered");
-      return (Reference) this.requestOrganization;
-    }
-
-    public boolean hasRequestOrganizationReference() { 
-      return this.requestOrganization instanceof Reference;
     }
 
     public boolean hasRequestOrganization() { 
@@ -932,8 +927,28 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public ProcessResponse setRequestOrganization(Type value) { 
+    public ProcessResponse setRequestOrganization(Reference value) { 
       this.requestOrganization = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
+     */
+    public Organization getRequestOrganizationTarget() { 
+      if (this.requestOrganizationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ProcessResponse.requestOrganization");
+        else if (Configuration.doAutoCreate())
+          this.requestOrganizationTarget = new Organization(); // aa
+      return this.requestOrganizationTarget;
+    }
+
+    /**
+     * @param value {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
+     */
+    public ProcessResponse setRequestOrganizationTarget(Organization value) { 
+      this.requestOrganizationTarget = value;
       return this;
     }
 
@@ -1071,15 +1086,15 @@ public class ProcessResponse extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("request[x]", "Identifier|Reference(Any)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
+        childrenList.add(new Property("request", "Reference(Any)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("outcome", "Coding", "Transaction status: error, complete, held.", 0, java.lang.Integer.MAX_VALUE, outcome));
         childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication or processing.", 0, java.lang.Integer.MAX_VALUE, disposition));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
         childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The organization who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("requestProvider[x]", "Identifier|Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
-        childrenList.add(new Property("requestOrganization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
+        childrenList.add(new Property("organization", "Reference(Organization)", "The organization who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
+        childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
+        childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
         childrenList.add(new Property("form", "Coding", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
         childrenList.add(new Property("notes", "", "Suite of processing note or additional requirements is the processing has been held.", 0, java.lang.Integer.MAX_VALUE, notes));
         childrenList.add(new Property("error", "Coding", "Processing errors.", 0, java.lang.Integer.MAX_VALUE, error));
@@ -1090,15 +1105,15 @@ public class ProcessResponse extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ProcessResponseStatus>
-        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Type
+        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
         case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Coding
         case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
         case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
         case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
-        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Type
-        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Type
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
+        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
+        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
         case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // Coding
         case 105008833: /*notes*/ return this.notes == null ? new Base[0] : this.notes.toArray(new Base[this.notes.size()]); // ProcessResponseNotesComponent
         case 96784904: /*error*/ return this.error == null ? new Base[0] : this.error.toArray(new Base[this.error.size()]); // Coding
@@ -1117,7 +1132,7 @@ public class ProcessResponse extends DomainResource {
           this.status = new ProcessResponseStatusEnumFactory().fromType(value); // Enumeration<ProcessResponseStatus>
           break;
         case 1095692943: // request
-          this.request = (Type) value; // Type
+          this.request = castToReference(value); // Reference
           break;
         case -1106507950: // outcome
           this.outcome = castToCoding(value); // Coding
@@ -1135,13 +1150,13 @@ public class ProcessResponse extends DomainResource {
           this.created = castToDateTime(value); // DateTimeType
           break;
         case 1178922291: // organization
-          this.organization = (Type) value; // Type
+          this.organization = castToReference(value); // Reference
           break;
         case 1601527200: // requestProvider
-          this.requestProvider = (Type) value; // Type
+          this.requestProvider = castToReference(value); // Reference
           break;
         case 599053666: // requestOrganization
-          this.requestOrganization = (Type) value; // Type
+          this.requestOrganization = castToReference(value); // Reference
           break;
         case 3148996: // form
           this.form = castToCoding(value); // Coding
@@ -1163,8 +1178,8 @@ public class ProcessResponse extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("status"))
           this.status = new ProcessResponseStatusEnumFactory().fromType(value); // Enumeration<ProcessResponseStatus>
-        else if (name.equals("request[x]"))
-          this.request = (Type) value; // Type
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
         else if (name.equals("outcome"))
           this.outcome = castToCoding(value); // Coding
         else if (name.equals("disposition"))
@@ -1175,12 +1190,12 @@ public class ProcessResponse extends DomainResource {
           this.originalRuleset = castToCoding(value); // Coding
         else if (name.equals("created"))
           this.created = castToDateTime(value); // DateTimeType
-        else if (name.equals("organization[x]"))
-          this.organization = (Type) value; // Type
-        else if (name.equals("requestProvider[x]"))
-          this.requestProvider = (Type) value; // Type
-        else if (name.equals("requestOrganization[x]"))
-          this.requestOrganization = (Type) value; // Type
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("requestProvider"))
+          this.requestProvider = castToReference(value); // Reference
+        else if (name.equals("requestOrganization"))
+          this.requestOrganization = castToReference(value); // Reference
         else if (name.equals("form"))
           this.form = castToCoding(value); // Coding
         else if (name.equals("notes"))
@@ -1196,15 +1211,15 @@ public class ProcessResponse extends DomainResource {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ProcessResponseStatus>
-        case 37106577:  return getRequest(); // Type
+        case 1095692943:  return getRequest(); // Reference
         case -1106507950:  return getOutcome(); // Coding
         case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
         case 1548678118:  return getRuleset(); // Coding
         case 1089373397:  return getOriginalRuleset(); // Coding
         case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
-        case 1326483053:  return getOrganization(); // Type
-        case -1694784800:  return getRequestProvider(); // Type
-        case 818740190:  return getRequestOrganization(); // Type
+        case 1178922291:  return getOrganization(); // Reference
+        case 1601527200:  return getRequestProvider(); // Reference
+        case 599053666:  return getRequestOrganization(); // Reference
         case 3148996:  return getForm(); // Coding
         case 105008833:  return addNotes(); // ProcessResponseNotesComponent
         case 96784904:  return addError(); // Coding
@@ -1221,11 +1236,7 @@ public class ProcessResponse extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type ProcessResponse.status");
         }
-        else if (name.equals("requestIdentifier")) {
-          this.request = new Identifier();
-          return this.request;
-        }
-        else if (name.equals("requestReference")) {
+        else if (name.equals("request")) {
           this.request = new Reference();
           return this.request;
         }
@@ -1247,27 +1258,15 @@ public class ProcessResponse extends DomainResource {
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type ProcessResponse.created");
         }
-        else if (name.equals("organizationIdentifier")) {
-          this.organization = new Identifier();
-          return this.organization;
-        }
-        else if (name.equals("organizationReference")) {
+        else if (name.equals("organization")) {
           this.organization = new Reference();
           return this.organization;
         }
-        else if (name.equals("requestProviderIdentifier")) {
-          this.requestProvider = new Identifier();
-          return this.requestProvider;
-        }
-        else if (name.equals("requestProviderReference")) {
+        else if (name.equals("requestProvider")) {
           this.requestProvider = new Reference();
           return this.requestProvider;
         }
-        else if (name.equals("requestOrganizationIdentifier")) {
-          this.requestOrganization = new Identifier();
-          return this.requestOrganization;
-        }
-        else if (name.equals("requestOrganizationReference")) {
+        else if (name.equals("requestOrganization")) {
           this.requestOrganization = new Reference();
           return this.requestOrganization;
         }
@@ -1384,188 +1383,108 @@ public class ProcessResponse extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>request-reference</b>
+   * Search parameter: <b>request</b>
    * <p>
    * Description: <b>The reference to the claim</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.requestReference</b><br>
+   * Path: <b>ProcessResponse.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request-reference", path="ProcessResponse.request.as(Reference)", description="The reference to the claim", type="reference" )
-  public static final String SP_REQUEST_REFERENCE = "request-reference";
+  @SearchParamDefinition(name="request", path="ProcessResponse.request", description="The reference to the claim", type="reference" )
+  public static final String SP_REQUEST = "request";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request</b>
    * <p>
    * Description: <b>The reference to the claim</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.requestReference</b><br>
+   * Path: <b>ProcessResponse.request</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ProcessResponse:request-reference</b>".
+   * the path value of "<b>ProcessResponse:request</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_REFERENCE = new ca.uhn.fhir.model.api.Include("ProcessResponse:request-reference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("ProcessResponse:request").toLocked();
 
  /**
-   * Search parameter: <b>request-organization-reference</b>
+   * Search parameter: <b>organization</b>
    * <p>
-   * Description: <b>The Organization who is responsible the request transaction</b><br>
+   * Description: <b>The organization who generated this resource</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.requestOrganizationReference</b><br>
+   * Path: <b>ProcessResponse.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request-organization-reference", path="ProcessResponse.requestOrganization.as(Reference)", description="The Organization who is responsible the request transaction", type="reference", target={Organization.class } )
-  public static final String SP_REQUEST_ORGANIZATION_REFERENCE = "request-organization-reference";
+  @SearchParamDefinition(name="organization", path="ProcessResponse.organization", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_ORGANIZATION = "organization";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-organization-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
    * <p>
-   * Description: <b>The Organization who is responsible the request transaction</b><br>
+   * Description: <b>The organization who generated this resource</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.requestOrganizationReference</b><br>
+   * Path: <b>ProcessResponse.organization</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_ORGANIZATION_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_ORGANIZATION_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ProcessResponse:request-organization-reference</b>".
+   * the path value of "<b>ProcessResponse:organization</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_ORGANIZATION_REFERENCE = new ca.uhn.fhir.model.api.Include("ProcessResponse:request-organization-reference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("ProcessResponse:organization").toLocked();
 
  /**
-   * Search parameter: <b>organization-reference</b>
+   * Search parameter: <b>request-organization</b>
    * <p>
-   * Description: <b>The organization who generated this resource</b><br>
+   * Description: <b>The Organization who is responsible the request transaction</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.organizationReference</b><br>
+   * Path: <b>ProcessResponse.requestOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization-reference", path="ProcessResponse.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATION_REFERENCE = "organization-reference";
+  @SearchParamDefinition(name="request-organization", path="ProcessResponse.requestOrganization", description="The Organization who is responsible the request transaction", type="reference", target={Organization.class } )
+  public static final String SP_REQUEST_ORGANIZATION = "request-organization";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-organization</b>
    * <p>
-   * Description: <b>The organization who generated this resource</b><br>
+   * Description: <b>The Organization who is responsible the request transaction</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.organizationReference</b><br>
+   * Path: <b>ProcessResponse.requestOrganization</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_ORGANIZATION);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ProcessResponse:organization-reference</b>".
+   * the path value of "<b>ProcessResponse:request-organization</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION_REFERENCE = new ca.uhn.fhir.model.api.Include("ProcessResponse:organization-reference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_ORGANIZATION = new ca.uhn.fhir.model.api.Include("ProcessResponse:request-organization").toLocked();
 
  /**
-   * Search parameter: <b>organization-identifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.organizationIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organization-identifier", path="ProcessResponse.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
-  public static final String SP_ORGANIZATION_IDENTIFIER = "organization-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization-identifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.organizationIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATION_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATION_IDENTIFIER);
-
- /**
-   * Search parameter: <b>request-provide-ridentifier</b>
-   * <p>
-   * Description: <b>The Provider who is responsible the request transaction</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.requestProviderIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="request-provide-ridentifier", path="ProcessResponse.requestProvider.as(Identifier)", description="The Provider who is responsible the request transaction", type="token" )
-  public static final String SP_REQUEST_PROVIDE_RIDENTIFIER = "request-provide-ridentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-provide-ridentifier</b>
-   * <p>
-   * Description: <b>The Provider who is responsible the request transaction</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.requestProviderIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_PROVIDE_RIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_PROVIDE_RIDENTIFIER);
-
- /**
-   * Search parameter: <b>request-identifier</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.requestIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="request-identifier", path="ProcessResponse.request.as(Identifier)", description="The reference to the claim", type="token" )
-  public static final String SP_REQUEST_IDENTIFIER = "request-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-identifier</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.requestIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_IDENTIFIER);
-
- /**
-   * Search parameter: <b>request-organization-identifier</b>
-   * <p>
-   * Description: <b>The Organization who is responsible the request transaction</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.requestOrganizationIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="request-organization-identifier", path="ProcessResponse.requestOrganization.as(Identifier)", description="The Organization who is responsible the request transaction", type="token" )
-  public static final String SP_REQUEST_ORGANIZATION_IDENTIFIER = "request-organization-identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-organization-identifier</b>
-   * <p>
-   * Description: <b>The Organization who is responsible the request transaction</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ProcessResponse.requestOrganizationIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST_ORGANIZATION_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST_ORGANIZATION_IDENTIFIER);
-
- /**
-   * Search parameter: <b>request-provider-reference</b>
+   * Search parameter: <b>request-provider</b>
    * <p>
    * Description: <b>The Provider who is responsible the request transaction</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.requestProviderReference</b><br>
+   * Path: <b>ProcessResponse.requestProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request-provider-reference", path="ProcessResponse.requestProvider.as(Reference)", description="The Provider who is responsible the request transaction", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
-  public static final String SP_REQUEST_PROVIDER_REFERENCE = "request-provider-reference";
+  @SearchParamDefinition(name="request-provider", path="ProcessResponse.requestProvider", description="The Provider who is responsible the request transaction", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  public static final String SP_REQUEST_PROVIDER = "request-provider";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-provider-reference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-provider</b>
    * <p>
    * Description: <b>The Provider who is responsible the request transaction</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ProcessResponse.requestProviderReference</b><br>
+   * Path: <b>ProcessResponse.requestProvider</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_PROVIDER_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_PROVIDER_REFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_PROVIDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_PROVIDER);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ProcessResponse:request-provider-reference</b>".
+   * the path value of "<b>ProcessResponse:request-provider</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_PROVIDER_REFERENCE = new ca.uhn.fhir.model.api.Include("ProcessResponse:request-provider-reference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_PROVIDER = new ca.uhn.fhir.model.api.Include("ProcessResponse:request-provider").toLocked();
 
 
 }

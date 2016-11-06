@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A reference from one resource to another.
  */
@@ -52,17 +51,24 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
      * A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
      */
     @Child(name = "reference", type = {StringType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Relative, internal or absolute URL reference", formalDefinition="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources." )
+    @Description(shortDefinition="Literal reference, Relative, internal or absolute URL", formalDefinition="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources." )
     protected StringType reference;
+
+    /**
+     * An identifier for the other resource. This is used when there is no way to reference the other resource directly, either because the entity is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Logical reference, when literal reference is not known", formalDefinition="An identifier for the other resource. This is used when there is no way to reference the other resource directly, either because the entity is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location." )
+    protected Identifier identifier;
 
     /**
      * Plain text narrative that identifies the resource in addition to the resource reference.
      */
-    @Child(name = "display", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Text alternative for the resource", formalDefinition="Plain text narrative that identifies the resource in addition to the resource reference." )
     protected StringType display;
 
-    private static final long serialVersionUID = 22777321L;
+    private static final long serialVersionUID = -909353281L;
 
   /**
    * Constructor
@@ -148,6 +154,30 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
     }
 
     /**
+     * @return {@link #identifier} (An identifier for the other resource. This is used when there is no way to reference the other resource directly, either because the entity is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location.)
+     */
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Reference.identifier");
+        else if (Configuration.doAutoCreate())
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #identifier} (An identifier for the other resource. This is used when there is no way to reference the other resource directly, either because the entity is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location.)
+     */
+    public Reference setIdentifier(Identifier value) { 
+      this.identifier = value;
+      return this;
+    }
+
+    /**
      * @return {@link #display} (Plain text narrative that identifies the resource in addition to the resource reference.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
      */
     public StringType getDisplayElement() { 
@@ -215,6 +245,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("reference", "string", "A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.", 0, java.lang.Integer.MAX_VALUE, reference));
+        childrenList.add(new Property("identifier", "Identifier", "An identifier for the other resource. This is used when there is no way to reference the other resource directly, either because the entity is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("display", "string", "Plain text narrative that identifies the resource in addition to the resource reference.", 0, java.lang.Integer.MAX_VALUE, display));
       }
 
@@ -222,6 +253,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // StringType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -233,6 +265,9 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
         switch (hash) {
         case -925155509: // reference
           this.reference = castToString(value); // StringType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           break;
         case 1671764162: // display
           this.display = castToString(value); // StringType
@@ -246,6 +281,8 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("reference"))
           this.reference = castToString(value); // StringType
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
         else if (name.equals("display"))
           this.display = castToString(value); // StringType
         else
@@ -256,6 +293,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -925155509: throw new FHIRException("Cannot make property reference as it is not a complex type"); // StringType
+        case -1618432855:  return getIdentifier(); // Identifier
         case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
         default: return super.makeProperty(hash, name);
         }
@@ -266,6 +304,10 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       public Base addChild(String name) throws FHIRException {
         if (name.equals("reference")) {
           throw new FHIRException("Cannot call addChild on a primitive type Reference.reference");
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("display")) {
           throw new FHIRException("Cannot call addChild on a primitive type Reference.display");
@@ -283,6 +325,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
         Reference dst = new Reference();
         copyValues(dst);
         dst.reference = reference == null ? null : reference.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.display = display == null ? null : display.copy();
         return dst;
       }
@@ -298,7 +341,8 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
         if (!(other instanceof Reference))
           return false;
         Reference o = (Reference) other;
-        return compareDeep(reference, o.reference, true) && compareDeep(display, o.display, true);
+        return compareDeep(reference, o.reference, true) && compareDeep(identifier, o.identifier, true)
+           && compareDeep(display, o.display, true);
       }
 
       @Override
@@ -312,7 +356,8 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(reference, display);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(reference, identifier, display
+          );
       }
 
 

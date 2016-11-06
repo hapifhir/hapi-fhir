@@ -19,8 +19,21 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
+    <sch:title>Composition.attester</sch:title>
+    <sch:rule context="f:Composition/f:attester">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
+    <sch:title>Composition.event</sch:title>
+    <sch:rule context="f:Composition/f:event">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
     <sch:title>Composition.section</sch:title>
     <sch:rule context="f:Composition/f:section">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="exists(f:text) or exists(f:entry) or exists(f:section)">A section must at least one of text, entries, or sub-sections (inherited)</sch:assert>
       <sch:assert test="not(exists(f:emptyReason) and exists(f:entry))">A section can only have an emptyReason if it is empty (inherited)</sch:assert>
     </sch:rule>

@@ -29,17 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.
  */
@@ -1469,7 +1471,7 @@ public class DeviceUseRequest extends DomainResource {
           this.stage = castToCodeableConcept(value); // CodeableConcept
           break;
         case -1335157162: // device
-          this.device = (Type) value; // Type
+          this.device = castToType(value); // Type
           break;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
@@ -1478,7 +1480,7 @@ public class DeviceUseRequest extends DomainResource {
           this.context = castToReference(value); // Reference
           break;
         case 1687874001: // occurrence
-          this.occurrence = (Type) value; // Type
+          this.occurrence = castToType(value); // Type
           break;
         case 1433073514: // authored
           this.authored = castToDateTime(value); // DateTimeType
@@ -1529,13 +1531,13 @@ public class DeviceUseRequest extends DomainResource {
         else if (name.equals("stage"))
           this.stage = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("device[x]"))
-          this.device = (Type) value; // Type
+          this.device = castToType(value); // Type
         else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
         else if (name.equals("context"))
           this.context = castToReference(value); // Reference
         else if (name.equals("occurrence[x]"))
-          this.occurrence = (Type) value; // Type
+          this.occurrence = castToType(value); // Type
         else if (name.equals("authored"))
           this.authored = castToDateTime(value); // DateTimeType
         else if (name.equals("requester"))

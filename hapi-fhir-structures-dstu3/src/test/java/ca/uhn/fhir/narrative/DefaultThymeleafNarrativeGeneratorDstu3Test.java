@@ -13,8 +13,8 @@ import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationOrder;
-import org.hl7.fhir.dstu3.model.MedicationOrder.MedicationOrderStatus;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.MedicationRequest.MedicationRequestStatus;
 import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -168,13 +168,13 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	@Test
 	@Ignore
 	public void testGenerateMedicationPrescription() {
-		MedicationOrder mp = new MedicationOrder();
+		MedicationRequest mp = new MedicationRequest();
 		mp.setId("12345");
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 		Reference medRef = new Reference(med);
 		mp.setMedication(medRef);
-		mp.setStatus(MedicationOrderStatus.ACTIVE);
+		mp.setStatus(MedicationRequestStatus.ACTIVE);
 		mp.setDateWrittenElement(new DateTimeType("2014-09-01"));
 
 		Narrative narrative = new Narrative();

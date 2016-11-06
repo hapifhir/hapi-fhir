@@ -23,7 +23,6 @@
       <sch:assert test="not(parent::f:contained and f:text)">dom-1: If the resource is contained in another resource, it SHALL NOT contain any narrative</sch:assert>
       <sch:assert test="not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated</sch:assert>
       <sch:assert test="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))">dom-3: If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource</sch:assert>
-      <sch:assert test="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude))">vsd-2: A value set with only one import SHALL also have an include and/or an exclude</sch:assert>
       <sch:assert test="exists(f:compose) or exists(f:expansion)">vsd-5: Value set SHALL contain at least one of a a compose, or an expansion element</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:text/h:div">
@@ -41,7 +40,7 @@
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:identifier/f:assigner">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a contained resource if a local reference is provided</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:contact/f:telecom">
       <sch:assert test="not(exists(f:value)) or exists(f:system)">cpt-2: A system is required if a value is provided.</sch:assert>
@@ -49,11 +48,22 @@
     <sch:rule context="//f:ValueSet/f:contact/f:telecom/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
-    <sch:rule context="//f:ValueSet/f:compose">
-      <sch:assert test="exists(f:include) or exists(f:import)">vsd-1: A value set composition SHALL have an include or an import</sch:assert>
+    <sch:rule context="//f:ValueSet/f:useContext/f:valueQuantity">
+      <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:ValueSet/f:useContext/f:valueRange">
+      <sch:assert test="not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) &lt;= number(f:high/f:value/@value))">rng-2: If present, low SHALL have a lower value than high</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:ValueSet/f:useContext/f:valueRange/f:low">
+      <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
+    </sch:rule>
+    <sch:rule context="//f:ValueSet/f:useContext/f:valueRange/f:high">
+      <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:compose/f:include">
-      <sch:assert test="not(exists(f:concept)) or not(exists(f:filter))">vsd-11: Cannot have both concept and filter</sch:assert>
+      <sch:assert test="(not(exists(f:concept) or exists(f:filter)) or exists(f:system)">vsd-2: A value set with concepts or filters SHALL include a system</sch:assert>
+      <sch:assert test="not(exists(f:concept)) or not(exists(f:filter))">vsd-3: Cannot have both concept and filter</sch:assert>
+      <sch:assert test="exists(f:valueSet) or exists(f:system)">vsd-1: A value set include/exclude SHALL have a value set or a system</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:expansion/f:contains">
       <sch:assert test="exists(f:code) or exists(f:display)">vsd-6: SHALL have a code or a display</sch:assert>

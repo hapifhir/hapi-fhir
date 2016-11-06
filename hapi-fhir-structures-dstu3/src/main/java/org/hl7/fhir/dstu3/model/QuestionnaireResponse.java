@@ -29,16 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Thu, Aug 25, 2016 23:04-0400 for FHIR v1.6.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
@@ -59,6 +62,10 @@ public class QuestionnaireResponse extends DomainResource {
          */
         AMENDED, 
         /**
+         * This QuestionnaireResponse was entered in error and voided.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -71,6 +78,8 @@ public class QuestionnaireResponse extends DomainResource {
           return COMPLETED;
         if ("amended".equals(codeString))
           return AMENDED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -81,6 +90,7 @@ public class QuestionnaireResponse extends DomainResource {
             case INPROGRESS: return "in-progress";
             case COMPLETED: return "completed";
             case AMENDED: return "amended";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -89,6 +99,7 @@ public class QuestionnaireResponse extends DomainResource {
             case INPROGRESS: return "http://hl7.org/fhir/questionnaire-answers-status";
             case COMPLETED: return "http://hl7.org/fhir/questionnaire-answers-status";
             case AMENDED: return "http://hl7.org/fhir/questionnaire-answers-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/questionnaire-answers-status";
             default: return "?";
           }
         }
@@ -97,6 +108,7 @@ public class QuestionnaireResponse extends DomainResource {
             case INPROGRESS: return "This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.";
             case COMPLETED: return "This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.";
             case AMENDED: return "This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
+            case ENTEREDINERROR: return "This QuestionnaireResponse was entered in error and voided.";
             default: return "?";
           }
         }
@@ -105,6 +117,7 @@ public class QuestionnaireResponse extends DomainResource {
             case INPROGRESS: return "In Progress";
             case COMPLETED: return "Completed";
             case AMENDED: return "Amended";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
         }
@@ -121,6 +134,8 @@ public class QuestionnaireResponse extends DomainResource {
           return QuestionnaireResponseStatus.COMPLETED;
         if ("amended".equals(codeString))
           return QuestionnaireResponseStatus.AMENDED;
+        if ("entered-in-error".equals(codeString))
+          return QuestionnaireResponseStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
         public Enumeration<QuestionnaireResponseStatus> fromType(Base code) throws FHIRException {
@@ -135,6 +150,8 @@ public class QuestionnaireResponse extends DomainResource {
           return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.COMPLETED);
         if ("amended".equals(codeString))
           return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.AMENDED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
     public String toCode(QuestionnaireResponseStatus code) {
@@ -144,6 +161,8 @@ public class QuestionnaireResponse extends DomainResource {
         return "completed";
       if (code == QuestionnaireResponseStatus.AMENDED)
         return "amended";
+      if (code == QuestionnaireResponseStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(QuestionnaireResponseStatus code) {
@@ -879,7 +898,7 @@ public class QuestionnaireResponse extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         case 3242771: // item
           this.getItem().add((QuestionnaireResponseItemComponent) value); // QuestionnaireResponseItemComponent
@@ -892,7 +911,7 @@ public class QuestionnaireResponse extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else if (name.equals("item"))
           this.getItem().add((QuestionnaireResponseItemComponent) value);
         else
@@ -1060,7 +1079,7 @@ public class QuestionnaireResponse extends DomainResource {
      * The lifecycle status of the questionnaire response as a whole.
      */
     @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire response as a whole." )
+    @Description(shortDefinition="in-progress | completed | amended | entered-in-error", formalDefinition="The lifecycle status of the questionnaire response as a whole." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-answers-status")
     protected Enumeration<QuestionnaireResponseStatus> status;
 

@@ -758,7 +758,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Test
 	public void testSearchCodeInValueSetThatImportsInvalidCodeSystem() {
 		ValueSet valueSet = new ValueSet();
-		valueSet.getCompose().addImport("http://non_existant_VS");
+		valueSet.getCompose().addInclude().addValueSet("http://non_existant_VS");
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		IIdType vsid = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
 

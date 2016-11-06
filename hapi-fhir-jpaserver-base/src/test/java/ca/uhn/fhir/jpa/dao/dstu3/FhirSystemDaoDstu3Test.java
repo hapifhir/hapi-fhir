@@ -103,7 +103,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		IdType id = new IdType(output.getEntry().get(1).getResponse().getLocation());
-		MedicationOrder mo = myMedicationOrderDao.read(id);
+		MedicationRequest mo = myMedicationRequestDao.read(id);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
 	}
 
@@ -1844,7 +1844,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
 		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Medication?code=billscodes|theCode");
 
-		MedicationOrder mo = new MedicationOrder();
+		MedicationRequest mo = new MedicationRequest();
 		mo.setMedication(new Reference(medId));
 		bundle.addEntry().setResource(mo).setFullUrl(mo.getIdElement().getValue()).getRequest().setMethod(HTTPVerb.POST);
 
@@ -1868,7 +1868,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
 		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Medication?code=billscodes|theCode");
 
-		mo = new MedicationOrder();
+		mo = new MedicationRequest();
 		mo.setMedication(new Reference(medId));
 		bundle.addEntry().setResource(mo).setFullUrl(mo.getIdElement().getValue()).getRequest().setMethod(HTTPVerb.POST);
 

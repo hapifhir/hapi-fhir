@@ -33,6 +33,18 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
+    <sch:title>DocumentReference.relatesTo</sch:title>
+    <sch:rule context="f:DocumentReference/f:relatesTo">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
+    <sch:title>DocumentReference.content</sch:title>
+    <sch:rule context="f:DocumentReference/f:content">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
     <sch:title>f:DocumentReference/f:content/f:attachment</sch:title>
     <sch:rule context="f:DocumentReference/f:content/f:attachment">
       <sch:assert test="count(f:id) &lt;= 1">id: maximum cardinality of 'id' is 1</sch:assert>
@@ -52,6 +64,18 @@
     <sch:rule context="f:DocumentReference/f:context">
       <sch:assert test="count(f:encounter) &lt;= 0">encounter: maximum cardinality of 'encounter' is 0</sch:assert>
       <sch:assert test="count(f:period) &gt;= 1">period: minimum cardinality of 'period' is 1</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
+    <sch:title>DocumentReference.context</sch:title>
+    <sch:rule context="f:DocumentReference/f:context">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
+    <sch:title>DocumentReference.context.related</sch:title>
+    <sch:rule context="f:DocumentReference/f:context/f:related">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>
