@@ -26,13 +26,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -42,6 +40,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ValidateUtil;
 
 @SuppressWarnings("deprecation")
 public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryParameterType , IQueryParameterOr<DateParam> {
@@ -82,7 +81,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	 * Constructor
 	 */
 	public DateParam(ParamPrefixEnum thePrefix, long theDate) {
-		Validate.inclusiveBetween(1, Long.MAX_VALUE, theDate, "theDate must not be 0 or negative");
+		ValidateUtil.isGreaterThan(theDate, 0, "theDate must not be 0 or negative");
 		setPrefix(thePrefix);
 		setValue(new Date(theDate));
 	}
@@ -139,7 +138,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	 */
 	@Deprecated
 	public DateParam(QuantityCompararatorEnum theComparator, long theDate) {
-		Validate.inclusiveBetween(1, Long.MAX_VALUE, theDate, "theDate must not be 0 or negative");
+		ValidateUtil.isGreaterThan(theDate, 0, "theDate must not be 0 or negative");
 		setPrefix(toPrefix(theComparator));
 		setValue(new Date(theDate));
 	}
@@ -163,7 +162,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	 *           The string
 	 */
 	public DateParam(String theString) {
-		setValueAsQueryToken(null, theString);
+		setValueAsQueryToken(null, null, null, theString);
 	}
 
 	@Override
@@ -186,7 +185,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	}
 
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		setValueAsString(theValue);
 	}
 
@@ -286,7 +285,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	}
 
 	@Override
-	public void  setValuesAsQueryTokens(QualifiedParamList theParameters) {
+	public void  setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 		setMissing(null);
 		setPrefix(null);
 		setValueAsString(null);

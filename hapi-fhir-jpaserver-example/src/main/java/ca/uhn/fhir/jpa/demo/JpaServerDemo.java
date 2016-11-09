@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -93,8 +94,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * is a nice addition.
 		 */
 		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			IFhirSystemDao<List<IResource>, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu1",
-					IFhirSystemDao.class);
+			IFhirSystemDao<List<IResource>, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
@@ -105,10 +105,9 @@ public class JpaServerDemo extends RestfulServer {
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx
-					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
+			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class));
+			myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
@@ -135,7 +134,9 @@ public class JpaServerDemo extends RestfulServer {
 		/*
 		 * -- New in HAPI FHIR 1.5 --
 		 * This configures the server to page search results to and from
-		 * the database
+		 * the database, instead of only paging them to memory. This may mean
+		 * a performance hit when performing searches that return lots of results,
+		 * but makes the server much more scalable.
 		 */
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
@@ -155,6 +156,16 @@ public class JpaServerDemo extends RestfulServer {
 		 */
 		//setServerAddressStrategy(new HardcodedServerAddressStrategy("http://mydomain.com/fhir/baseDstu2"));
 		
+		/*
+		 * If you are using DSTU3+, you may want to add a terminology uploader, which allows 
+		 * uploading of external terminologies such as Snomed CT. Note that this uploader
+		 * does not have any security attached (any anonymous user may use it by default)
+		 * so it is a potential security vulnerability. Consider using an AuthorizationInterceptor
+		 * with this feature.
+		 */
+		//if (fhirVersion == FhirVersionEnum.DSTU3) {
+		//	 registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+		//}
 	}
 
 }

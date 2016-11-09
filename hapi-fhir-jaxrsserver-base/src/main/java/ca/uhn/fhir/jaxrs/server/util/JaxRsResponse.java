@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -63,17 +65,21 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	 * by the server.
 	 */
 	@Override
-	public Writer getResponseWriter(int statusCode, String contentType, String charset, boolean respondGzip)
+	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip)
 			throws UnsupportedEncodingException, IOException {
 		return new StringWriter();
 	}
 
 	@Override
-	public Response sendWriterResponse(int status, String contentType, String charset, Writer writer) {
-		String charContentType = contentType + "; charset="
-				+ StringUtils.defaultIfBlank(charset, Constants.CHARSET_NAME_UTF8);
-		return buildResponse(status).header(Constants.HEADER_CONTENT_TYPE, charContentType).entity(writer.toString())
-				.build();
+	public Response sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) {
+		ResponseBuilder builder = buildResponse(theStatus);
+		if (isNotBlank(theContentType)) {
+			String charContentType = theContentType + "; charset=" + StringUtils.defaultIfBlank(theCharset, Constants.CHARSET_NAME_UTF8);
+			builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
+		}
+		builder.entity(theWriter.toString());
+		Response retVal = builder.build();
+		return retVal;
 	}
 
 	@Override
@@ -98,7 +104,7 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	}
 
 	protected String getParserType() {
-		EncodingEnum encodingEnum = RestfulServerUtils.determineResponseEncodingWithDefault(getRequestDetails());
+		EncodingEnum encodingEnum = RestfulServerUtils.determineResponseEncodingWithDefault(getRequestDetails()).getEncoding();
 		return encodingEnum == EncodingEnum.JSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
 	}
 

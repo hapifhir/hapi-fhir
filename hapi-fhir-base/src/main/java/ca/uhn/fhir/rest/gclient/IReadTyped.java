@@ -25,10 +25,26 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IReadTyped<T extends IBaseResource> {
 
+	/**
+	 * Perform a search by resource ID
+	 * 
+	 * @param theId The resource ID, e.g. "123"
+	 */
 	IReadExecutable<T> withId(String theId);
 
+	/**
+	 * Perform a search by resource ID and version
+	 * 
+	 * @param theId The resource ID, e.g. "123"
+	 * @param theVersion The resource version, eg. "5"
+	 */
 	IReadExecutable<T> withIdAndVersion(String theId, String theVersion);
 
+	/**
+	 * Perform a search by resource ID
+	 * 
+	 * @param theId The resource ID, e.g. "123"
+	 */
 	IReadExecutable<T> withId(Long theId);
 	
 	/**

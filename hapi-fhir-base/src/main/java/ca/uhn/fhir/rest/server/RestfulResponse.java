@@ -21,10 +21,13 @@ package ca.uhn.fhir.rest.server;
  */
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -32,25 +35,13 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 
 public abstract class RestfulResponse<T extends RequestDetails> implements IRestfulResponse {
 
-	private T theRequestDetails;
+	private IIdType myOperationResourceId;
+	private IPrimitiveType<Date> myOperationResourceLastUpdated;
 	private ConcurrentHashMap<String, String> theHeaders = new ConcurrentHashMap<String, String>();
+	private T theRequestDetails;
 
 	public RestfulResponse(T requestDetails) {
 		this.theRequestDetails = requestDetails;
-	}
-
-	@Override
-	public final Object streamResponseAsResource(IBaseResource resource, boolean prettyPrint, Set<SummaryEnum> summaryMode,
-			int statusCode, boolean respondGzip, boolean addContentLocationHeader)
-					throws IOException {
-		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), resource, summaryMode, statusCode, addContentLocationHeader, respondGzip, getRequestDetails());
-
-	}
-
-	@Override
-	public Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser)
-					throws IOException {
-		return RestfulServerUtils.streamResponseAsBundle(theRequestDetails.getServer(), bundle, summaryMode, respondGzip, getRequestDetails());
 	}
 
 	@Override
@@ -74,12 +65,36 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 		return theRequestDetails;
 	}
 
+	@Override
+	public void setOperationResourceId(IIdType theOperationResourceId) {
+		myOperationResourceId = theOperationResourceId;
+	}
+
+	@Override
+	public void setOperationResourceLastUpdated(IPrimitiveType<Date> theOperationResourceLastUpdated) {
+		myOperationResourceLastUpdated = theOperationResourceLastUpdated;
+	}
+
 	/**
 	 * Set the requestDetails
 	 * @param requestDetails the requestDetails to set
 	 */
 	public void setRequestDetails(T requestDetails) {
 		this.theRequestDetails = requestDetails;
+	}
+
+	@Override
+	public Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser)
+					throws IOException {
+		return RestfulServerUtils.streamResponseAsBundle(theRequestDetails.getServer(), bundle, summaryMode, respondGzip, getRequestDetails());
+	}
+
+	@Override
+	public final Object streamResponseAsResource(IBaseResource theResource, boolean thePrettyPrint, Set<SummaryEnum> theSummaryMode,
+			int theStatusCode, String theStatusMessage, boolean theRespondGzip, boolean theAddContentLocation)
+					throws IOException {
+		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResource, theSummaryMode, theStatusCode, theStatusMessage, theAddContentLocation, theRespondGzip, getRequestDetails(), myOperationResourceId, myOperationResourceLastUpdated);
+
 	}
 
 }

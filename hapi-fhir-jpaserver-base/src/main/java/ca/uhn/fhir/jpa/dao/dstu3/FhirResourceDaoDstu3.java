@@ -26,12 +26,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueType;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,6 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.Bundle;
@@ -104,7 +104,7 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 
 	@Override
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource, getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, theResource, null, theId);
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 
 		if (theMode == ValidationModeEnum.DELETE) {
@@ -130,8 +130,21 @@ public class FhirResourceDaoDstu3<T extends IAnyResource> extends BaseHapiFhirRe
 
 		validator.registerValidatorModule(new IdChecker(theMode));
 
+		IBaseResource resourceToValidateById = null;
+		if (theId != null && theId.hasResourceType() && theId.hasIdPart()) {
+			Class<? extends IBaseResource> type = getContext().getResourceDefinition(theId.getResourceType()).getImplementingClass();
+			IFhirResourceDao<? extends IBaseResource> dao = getDao(type);
+			resourceToValidateById = dao.read(theId, theRequestDetails);
+		}
+		
 		ValidationResult result;
-		if (isNotBlank(theRawResource)) {
+		if (theResource == null) {
+			if (resourceToValidateById != null) {
+				result = validator.validateWithResult(resourceToValidateById);
+			} else {
+				throw new InvalidRequestException("No resource supplied for $validate operation (resource is required unless mode is \"delete\")");
+			}
+		} else if (isNotBlank(theRawResource)) {
 			result = validator.validateWithResult(theRawResource);
 		} else {
 			result = validator.validateWithResult(theResource);

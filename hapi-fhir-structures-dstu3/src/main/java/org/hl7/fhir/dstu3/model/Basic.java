@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Basic is used for handling concepts not yet defined in FHIR, narrative-only resources that don't map to an existing resource, and custom resources not appropriate for inclusion in the FHIR specification.
  */
@@ -58,12 +59,13 @@ public class Basic extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="Kind of Resource", formalDefinition="Identifies the 'type' of resource - equivalent to the resource name for other resources." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/basic-resource-type")
     protected CodeableConcept code;
 
     /**
      * Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.
      */
-    @Child(name = "subject", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifies the focus of this resource", formalDefinition="Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource." )
     protected Reference subject;
 
@@ -118,16 +120,6 @@ public class Basic extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Basic setIdentifier(List<Identifier> theIdentifier) { 
@@ -144,10 +136,6 @@ public class Basic extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier assigned to the resource for business purposes, outside the context of FHIR.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -156,7 +144,6 @@ public class Basic extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Basic addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -164,6 +151,16 @@ public class Basic extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -461,8 +458,8 @@ public class Basic extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, subject, created
-          , author);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, code, subject
+          , created, author);
       }
 
   @Override
@@ -478,7 +475,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Basic.identifier", description="Business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Basic.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -498,7 +495,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Basic.code", description="Kind of Resource", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Basic.code", description="Kind of Resource", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -544,7 +541,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.created</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date", target={} )
+  @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date" )
   public static final String SP_CREATED = "created";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>created</b>
@@ -564,7 +561,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the focus of this resource", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the focus of this resource", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -590,7 +587,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

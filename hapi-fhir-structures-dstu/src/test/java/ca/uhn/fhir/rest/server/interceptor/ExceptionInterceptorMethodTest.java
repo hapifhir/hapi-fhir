@@ -41,7 +41,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class ExceptionInterceptorMethodTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionInterceptorMethodTest.class);
 	private static int ourPort;
 	private static Server ourServer;

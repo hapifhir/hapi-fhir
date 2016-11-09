@@ -82,7 +82,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 	private IdDt myId;
 
-	@Child(name = "language", order = 0, min = 0, max = Child.MAX_UNLIMITED)
+	@Child(name = "language", order = 0, min = 0, max = 1)
 	private CodeDt myLanguage;
 
 	private ResourceMetadataMap myResourceMetadata;
@@ -307,6 +307,8 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			myId = (IdDt) theId;
 		} else if (theId != null) {
 			myId = new IdDt(theId.getValue());
+		} else {
+			myId = null;
 		}
 		return this;
 	}

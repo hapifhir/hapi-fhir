@@ -1,11 +1,12 @@
 package ca.uhn.fhir.validator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -22,6 +23,18 @@ public class ValidatorAcrossVersionsTest {
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@Test
+	public void testWrongContextVersion() {
+		FhirContext ctxDstu2 = FhirContext.forDstu2();
+		try {
+			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"", e.getMessage());
+		}
+		
 	}
 
 

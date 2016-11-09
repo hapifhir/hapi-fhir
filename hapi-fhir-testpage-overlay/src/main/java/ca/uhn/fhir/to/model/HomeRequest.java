@@ -187,4 +187,18 @@ public class HomeRequest {
 		return theCtx.newXmlParser();
 	}
 
+	public String getApiKey(HttpServletRequest theServletRequest, TesterConfig theConfig) {
+		Boolean allowsApiKey;
+		if (isBlank(myServerId) && !theConfig.getIdToFhirVersion().containsKey(myServerId)) {
+			allowsApiKey = theConfig.getIdToAllowsApiKey().entrySet().iterator().next().getValue();
+		} else {
+			allowsApiKey = theConfig.getIdToAllowsApiKey().get(myServerId);
+		}
+		if (!Boolean.TRUE.equals(allowsApiKey)) {
+			return null;
+		}
+		
+		return defaultString(theServletRequest.getParameter("apiKey"));
+	}
+
 }

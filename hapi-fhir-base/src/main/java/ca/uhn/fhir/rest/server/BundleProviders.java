@@ -26,6 +26,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Utility methods for working with {@link IBundleProvider}
@@ -33,6 +34,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 public class BundleProviders {
 
 	/** Non instantiable */
+	@CoverageIgnore
 	private BundleProviders() {
 		//nothing
 	}

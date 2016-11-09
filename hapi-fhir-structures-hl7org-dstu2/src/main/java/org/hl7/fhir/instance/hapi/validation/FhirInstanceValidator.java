@@ -154,6 +154,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
     v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
     v.setAnyExtensionsAllowed(true);
+    v.setRequireResourceId(false);
+    v.setSuppressLoincSnomedMessages(true);
 
     List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
 

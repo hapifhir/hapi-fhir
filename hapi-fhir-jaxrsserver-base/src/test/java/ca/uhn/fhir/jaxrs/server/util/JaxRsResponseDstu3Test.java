@@ -50,7 +50,7 @@ public class JaxRsResponseDstu3Test {
         boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), bundle, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, request);
 		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_FHIR_JSON+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(Constants.CT_FHIR_JSON_NEW+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 	}
@@ -100,16 +100,16 @@ public class JaxRsResponseDstu3Test {
 	@Test
 	public void testReturnResponse() throws IOException {
 		IdType theId = new IdType(15L);
-		ParseAction<?> outcome = ParseAction.create(createPatient());
 		int operationStatus = 200;
 		boolean allowPrefer = true;
 		String resourceName = "Patient";
 		MethodOutcome methodOutcome = new MethodOutcome(theId);
-		Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
+		boolean addContentLocationHeader = true;
+		boolean respondGzip = true;
+		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_JSON+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		System.out.println(result.getEntity().toString());
-		assertTrue(result.getEntity().toString().contains("resourceType\":\"Patient"));
+		assertEquals(Constants.CT_FHIR_JSON_NEW+"; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertTrue(result.getEntity().toString().contains("resourceType\": \"Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 		
 	}
@@ -117,30 +117,28 @@ public class JaxRsResponseDstu3Test {
 	@Test
 	public void testReturnResponseAsXml() throws IOException {
 		IdType theId = new IdType(15L);
-		ParseAction<?> outcome = ParseAction.create(createPatient());
 		int operationStatus = 200;
 		boolean allowPrefer = true;
 		String resourceName = "Patient";
 		MethodOutcome methodOutcome = new MethodOutcome(theId);
 		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
-		Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
+		boolean addContentLocationHeader = true;
+		boolean respondGzip = true;
+		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_XML+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("<Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 	}
 	
 	@Test
 	public void testNoOutcomeXml() throws IOException {
-		ParseAction<?> outcome = ParseAction.create((IBaseResource) null);
-		int operationStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
-		boolean allowPrefer = true;
-		String resourceName = "Patient";
-		MethodOutcome methodOutcome = new MethodOutcome(null);
 		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
-		Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
+		boolean addContentLocationHeader = true;
+		boolean respondGzip = true;
+		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), null, theSummaryMode, 204, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(204, result.getStatus());
-		assertEquals(Constants.CT_XML+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(null, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 	}
 
 	private Bundle getSinglePatientResource() {

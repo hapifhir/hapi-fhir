@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.util.CoverageIgnore;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -22,6 +24,14 @@ package ca.uhn.fhir.jpa.util;
 
 public class LogicUtil {
 
+	/**
+	 * Non instantiable
+	 */
+	@CoverageIgnore
+	private LogicUtil() {
+		// nothing
+	}
+	
 	public static boolean multiXor(boolean... theValues) {
 		int count = 0;
 		for (int i = 0; i < theValues.length; i++) {

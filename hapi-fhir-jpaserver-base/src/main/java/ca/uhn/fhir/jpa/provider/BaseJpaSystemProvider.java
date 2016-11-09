@@ -24,41 +24,32 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.util.ParametersUtil;
 
 public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 
+	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	
 	private IFhirSystemDao<T, MT> myDao;
 
 	public BaseJpaSystemProvider() {
 		// nothing
-	}
-
-	@Required
-	public void setDao(IFhirSystemDao<T, MT> theDao) {
-		myDao = theDao;
-	}
-
-	@History
-	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
-		startRequest(theRequest);
-		try {
-			return myDao.history(theDate, theRequestDetails);
-		} finally {
-			endRequest(theRequest);
-		}
-	}
-
-	protected IFhirSystemDao<T, MT> getDao() {
-		return myDao;
 	}
 
 	@GetTags
@@ -69,6 +60,26 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 		} finally {
 			endRequest(theRequest);
 		}
+	}
+
+	protected IFhirSystemDao<T, MT> getDao() {
+		return myDao;
+	}
+
+	@History
+	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate, @At DateRangeParam theAt, RequestDetails theRequestDetails) {
+		startRequest(theRequest);
+		try {
+			DateRangeParam range = super.processSinceOrAt(theDate, theAt);
+			return myDao.history(range.getLowerBoundAsInstant(), range.getUpperBoundAsInstant(), theRequestDetails);
+		} finally {
+			endRequest(theRequest);
+		}
+	}
+
+	@Required
+	public void setDao(IFhirSystemDao<T, MT> theDao) {
+		myDao = theDao;
 	}
 
 }

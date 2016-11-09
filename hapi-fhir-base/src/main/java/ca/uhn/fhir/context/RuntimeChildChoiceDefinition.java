@@ -21,20 +21,10 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -46,6 +36,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	private Map<Class<? extends IBase>, String> myDatatypeToElementName;
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myDatatypeToElementDefinition;
 	private String myReferenceSuffix;
+	private List<Class<? extends IBaseResource>> myResourceTypes;
 
 	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBase>> theChoiceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
@@ -86,6 +77,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myNameToChildDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
+		myResourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 
 		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			myReferenceSuffix = "Resource";
@@ -106,6 +98,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
 				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
+				
+				myResourceTypes.add((Class<? extends IBaseResource>) next);
 
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
@@ -166,9 +160,13 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
 		myDatatypeToElementName = Collections.unmodifiableMap(myDatatypeToElementName);
 		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
-
+		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
 	}
 
+
+	public List<Class<? extends IBaseResource>> getResourceTypes() {
+		return myResourceTypes;
+	}
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {

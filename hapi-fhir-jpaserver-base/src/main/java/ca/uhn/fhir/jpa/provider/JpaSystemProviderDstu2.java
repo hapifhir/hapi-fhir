@@ -50,7 +50,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle, MetaDt> {
+public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundle, MetaDt> {
 
 	@Autowired()
 	@Qualifier("mySystemDaoDstu2")
@@ -169,18 +169,6 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle, MetaDt
 		return retVal;
 	}
 
-	//@formatter:off
-	@Operation(name="$mark-all-resources-for-reindexing", idempotent=true, returnParameters= {
-		@OperationParam(name="count", type=IntegerDt.class)
-	})
-	//@formatter:on
-	public Parameters markAllResourcesForReindexing() {
-		int count = mySystemDao.markAllResourcesForReindexing();
-		
-		Parameters retVal = new Parameters();
-		retVal.addParameter().setName("count").setValue(new IntegerDt(count));
-		return retVal;
-	}
 
 	//@formatter:off
 	@Operation(name="$meta", idempotent=true, returnParameters= {

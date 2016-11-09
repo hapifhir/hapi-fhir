@@ -28,6 +28,9 @@
 		formalDefinition="${child.definition}"
 	)
 #end
+#if ( $child.hasBindingUrl )
+	@ca.uhn.fhir.model.api.annotation.Binding(valueSet = "${child.bindingUrl}")
+#end
 	private ${child.referenceType} ${child.variableName};
 	
 #end
@@ -92,7 +95,7 @@
 	/**
 	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
 	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * not exist. This method may return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>

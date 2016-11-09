@@ -3,11 +3,15 @@ package ca.uhn.fhir.context;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Property;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -24,13 +28,14 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
-public class ResourceWithExtensionsDstu3A extends BaseResource {
+public class ResourceWithExtensionsDstu3A extends Resource {
 
 	/*
 	 * NB: several unit tests depend on the structure here
 	 * so check the unit tests immediately after any changes 
 	 */
 	
+	private static final long serialVersionUID = 1L;
 
 	@Child(name = "foo1", type = StringType.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	@Extension(url = "http://foo/#f1", definedLocally=true, isModifier=false)
@@ -198,37 +203,32 @@ public class ResourceWithExtensionsDstu3A extends BaseResource {
 	
 	
 	@Override
-	public FhirVersionEnum getStructureFhirVersionEnum() {
-		return FhirVersionEnum.DSTU1;
-	}
-
-	@Override
 	public String getId() {
 		return null;
 	}
 
 	@Override
-	public IIdType getIdElement() {
+	public IdType getIdElement() {
 		return null;
 	}
 
 	@Override
-	public IPrimitiveType<String> getLanguageElement() {
+	public CodeType getLanguageElement() {
 		return null;
 	}
 
 	@Override
-	public IAnyResource setId(String theId) {
+	public Resource setId(String theId) {
 		return null;
 	}
 
 	@Override
-	public IBaseMetaType getMeta() {
+	public Meta getMeta() {
 		return null;
 	}
 
 	@Override
-	public BaseResource setIdElement(IdType theIdType) {
+	public Resource setIdElement(IdType theIdType) {
 		return null;
 	}
 
@@ -240,6 +240,16 @@ public class ResourceWithExtensionsDstu3A extends BaseResource {
 	@Override
 	protected void listChildren(List<Property> theResult) {
 		// nothing
+	}
+
+	@Override
+	public Resource copy() {
+		return null;
+	}
+
+	@Override
+	public ResourceType getResourceType() {
+		return null;
 	}
 
 

@@ -77,7 +77,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
 	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
 	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS") 
+	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS")
 })
 @AnalyzerDefs({
 	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
@@ -119,7 +119,11 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
 		filters = {
 			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-		}) // Def
+		}),
+	@AnalyzerDef(name = "exactAnalyzer",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+		filters = {
+		})
 	}
 )
 //@formatter:on
@@ -149,8 +153,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private boolean myHasLinks;
 
 	@Id
-	@SequenceGenerator(name="SEQ_RESOURCE_ID", sequenceName="SEQ_RESOURCE_ID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_RESOURCE_ID")
+	@SequenceGenerator(name = "SEQ_RESOURCE_ID", sequenceName = "SEQ_RESOURCE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	private Long myId;
 
@@ -160,9 +164,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
 
-	@Column(name = "IS_CONTAINED", nullable = true)
-	private boolean myIsContainedResource;
-
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	private String myLanguage;
 
@@ -170,7 +171,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
 	@Transient()
-	@Field()
+	@Fields({
+		@Field(name = "myNarrativeText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
+		@Field(name = "myNarrativeTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
+		@Field(name = "myNarrativeTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
+		@Field(name = "myNarrativeTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
+	})
 	private String myNarrativeText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
@@ -187,7 +193,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
-	
+
 	@Column(name = "SP_NUMBER_PRESENT")
 	private boolean myParamsNumberPopulated;
 
@@ -353,10 +359,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myHasLinks;
 	}
 
-	public boolean isIsContainedResource() {
-		return myIsContainedResource;
-	}
-
 	public boolean isParamsCoordsPopulated() {
 		return myParamsCoordsPopulated;
 	}
@@ -399,10 +401,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
-	}
-
-	public void setIsContainedResource(boolean theIsContainedResource) {
-		myIsContainedResource = theIsContainedResource;
 	}
 
 	public void setLanguage(String theLanguage) {
@@ -540,14 +538,14 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setForcedId(getForcedId());
 
 		retVal.getTags().clear();
-		
+
 		retVal.setHasTags(isHasTags());
 		if (isHasTags()) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}
 		}
-		
+
 		return retVal;
 	}
 

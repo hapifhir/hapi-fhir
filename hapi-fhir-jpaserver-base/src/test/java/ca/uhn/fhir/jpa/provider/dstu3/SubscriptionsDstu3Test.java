@@ -14,6 +14,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -35,28 +36,9 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final String WEBSOCKET_PATH = "/websocket/dstu3";
-
-	public class BaseSocket {
-		protected String myError;
-		protected boolean myGotBound;
-		protected int myPingCount;
-		protected String mySubsId;
-
-	}
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu3Test.class);
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
-	@Before
-	public void beforeEnableScheduling() {
-		myDaoConfig.setSchedulingDisabled(false);
-	}
+	private static final String WEBSOCKET_PATH = "/websocket/dstu3";
 
 	@Override
 	public void beforeCreateInterceptor() {
@@ -66,6 +48,12 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		interceptor.setDao(mySubscriptionDao);
 		myDaoConfig.getInterceptors().add(interceptor);
 	}
+
+	@Before
+	public void beforeEnableScheduling() {
+		myDaoConfig.setSchedulingDisabled(false);
+	}
+
 
 	private void sleepUntilPingCount(BaseSocket socket, int wantPingCount) throws InterruptedException {
 		/*
@@ -106,6 +94,27 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(wantPingCount, socket.myPingCount);
 	}
 
+	private void stopClientAndWaitForStopped(WebSocketClient client) throws Exception {
+		client.stop();
+
+		/* 
+		 * When websocket closes, the subscription is automatically deleted. This
+		 * can cause deadlocks if the test returns too quickly since it also 
+		 * tries to delete the subscription
+		 */ 
+		Bundle found = null;
+		for (int i = 0; i < 10; i++) {
+			found = ourClient.search().forResource("Subscription").returnBundle(Bundle.class).execute();
+			if (found.getEntry().size() > 0) {
+				Thread.sleep(200);
+			} else {
+				break;
+			}
+		}
+		assertEquals(0, found.getEntry().size());
+		
+	}
+
 	@Test
 	public void testCreateInvalidNoStatus() {
 		Subscription subs = new Subscription();
@@ -129,36 +138,6 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		subs.setStatus(SubscriptionStatus.REQUESTED);
 		ourClient.update().resource(subs).execute();
 	}
-
-	@Test
-	public void testUpdateToInvalidStatus() {
-		Subscription subs = new Subscription();
-		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
-		subs.setCriteria("Observation?identifier=123");
-		subs.setStatus(SubscriptionStatus.REQUESTED);
-		IIdType id = ourClient.create().resource(subs).execute().getId();
-		subs.setId(id);
-
-		try {
-			subs.setStatus(SubscriptionStatus.ACTIVE);
-			ourClient.update().resource(subs).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
-		}
-
-		try {
-			subs.setStatus((SubscriptionStatus) null);
-			ourClient.update().resource(subs).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Can not update resource: Subscription.status must be populated", e.getMessage());
-		}
-
-		subs.setStatus(SubscriptionStatus.OFF);
-		ourClient.update().resource(subs).execute();
-	}
-
 
 	@Test
 	public void testCreateInvalidWrongStatus() {
@@ -237,7 +216,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		} finally {
 			try {
-				client.stop();
+				stopClientAndWaitForStopped(client);
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
 				fail(e.getMessage());
@@ -246,7 +225,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
-	
+
 	@Test
 	public void testSubscriptionDynamicXml() throws Exception {
 		myDaoConfig.setSubscriptionEnabled(true);
@@ -303,7 +282,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		} finally {
 			try {
-				client.stop();
+				stopClientAndWaitForStopped(client);
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
 				fail(e.getMessage());
@@ -311,7 +290,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 	}
-	
+
 	@Test
 	public void testSubscriptionSimple() throws Exception {
 		myDaoConfig.setSubscriptionEnabled(true);
@@ -372,6 +351,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
+
 	@Test
 	public void testUpdateFails() {
 		Subscription subs = new Subscription();
@@ -399,6 +379,97 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);
+	}
+
+	
+	@Test
+	public void testUpdateToInvalidStatus() {
+		Subscription subs = new Subscription();
+		subs.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subs.setCriteria("Observation?identifier=123");
+		subs.setStatus(SubscriptionStatus.REQUESTED);
+		IIdType id = ourClient.create().resource(subs).execute().getId();
+		subs.setId(id);
+
+		try {
+			subs.setStatus(SubscriptionStatus.ACTIVE);
+			ourClient.update().resource(subs).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
+		}
+
+		try {
+			subs.setStatus((SubscriptionStatus) null);
+			ourClient.update().resource(subs).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("HTTP 422 Unprocessable Entity: Can not update resource: Subscription.status must be populated", e.getMessage());
+		}
+
+		subs.setStatus(SubscriptionStatus.OFF);
+		ourClient.update().resource(subs).execute();
+	}
+	
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	public class BaseSocket {
+		protected String myError;
+		protected boolean myGotBound;
+		protected int myPingCount;
+		protected String mySubsId;
+
+	}
+
+	/**
+	 * Basic Echo Client Socket
+	 */
+	@WebSocket(maxTextMessageSize = 64 * 1024)
+	public class DynamicEchoSocket extends BaseSocket {
+
+		private String myCriteria;
+		private EncodingEnum myEncoding;
+		private List<IBaseResource> myReceived = new ArrayList<IBaseResource>();
+		@SuppressWarnings("unused")
+		private Session session;
+
+		public DynamicEchoSocket(String theCriteria, EncodingEnum theEncoding) {
+			myCriteria = theCriteria;
+			myEncoding = theEncoding;
+		}
+
+		@OnWebSocketConnect
+		public void onConnect(Session session) {
+			ourLog.info("Got connect: {}", session);
+			this.session = session;
+			try {
+				String sending = "bind " + myCriteria;
+				ourLog.info("Sending: {}", sending);
+				session.getRemote().sendString(sending);
+			} catch (Throwable t) {
+				ourLog.error("Failure", t);
+			}
+		}
+
+		@OnWebSocketMessage
+		public void onMessage(String theMsg) {
+			ourLog.info("Got msg: {}", theMsg);
+			if (theMsg.startsWith("bound ")) {
+				myGotBound = true;
+				mySubsId = (theMsg.substring("bound ".length()));
+				myPingCount++;
+			} else if (myGotBound && theMsg.startsWith("add " + mySubsId + "\n")) {
+				String text = theMsg.substring(("add " + mySubsId + "\n").length());
+				IBaseResource res = myEncoding.newParser(myFhirCtx).parseResource(text);
+				myReceived.add(res);
+				myPingCount++;
+			} else {
+				myError = "Unexpected message: " + theMsg;
+			}
+		}
 	}
 
 	/**
@@ -433,54 +504,6 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			if (theMsg.equals("bound " + mySubsId)) {
 				myGotBound = true;
 			} else if (myGotBound && theMsg.startsWith("ping " + mySubsId)) {
-				myPingCount++;
-			} else {
-				myError = "Unexpected message: " + theMsg;
-			}
-		}
-	}
-
-	/**
-	 * Basic Echo Client Socket
-	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
-	public class DynamicEchoSocket extends BaseSocket {
-
-		private List<IBaseResource> myReceived = new ArrayList<IBaseResource>();
-		@SuppressWarnings("unused")
-		private Session session;
-		private String myCriteria;
-		private EncodingEnum myEncoding;
-
-		public DynamicEchoSocket(String theCriteria, EncodingEnum theEncoding) {
-			myCriteria = theCriteria;
-			myEncoding = theEncoding;
-		}
-
-		@OnWebSocketConnect
-		public void onConnect(Session session) {
-			ourLog.info("Got connect: {}", session);
-			this.session = session;
-			try {
-				String sending = "bind " + myCriteria;
-				ourLog.info("Sending: {}", sending);
-				session.getRemote().sendString(sending);
-			} catch (Throwable t) {
-				ourLog.error("Failure", t);
-			}
-		}
-
-		@OnWebSocketMessage
-		public void onMessage(String theMsg) {
-			ourLog.info("Got msg: {}", theMsg);
-			if (theMsg.startsWith("bound ")) {
-				myGotBound = true;
-				mySubsId = (theMsg.substring("bound ".length()));
-				myPingCount++;
-			} else if (myGotBound && theMsg.startsWith("add " + mySubsId + "\n")) {
-				String text = theMsg.substring(("add " + mySubsId + "\n").length());
-				IBaseResource res = myEncoding.newParser(myFhirCtx).parseResource(text);
-				myReceived.add(res);
 				myPingCount++;
 			} else {
 				myError = "Unexpected message: " + theMsg;

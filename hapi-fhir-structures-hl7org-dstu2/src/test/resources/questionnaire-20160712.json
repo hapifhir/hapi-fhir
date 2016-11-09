@@ -1,0 +1,58 @@
+{
+	"resourceType": "Questionnaire",
+	"status": "draft",
+	"publisher": "New South Wales Department of Health",
+	"subjectType": [
+		"Patient"
+	],
+	"group": {
+		"linkId": "PHR",
+		"title": "NSW Government My Personal Health Record",
+		"required": true,
+		"group": [
+			{
+				"linkId": "birthDetails",
+				"title": "Birth details - To be completed by health professional",
+				"group": [
+					{
+						"linkId": "neonatalInformation",
+						"title": "Neonatal Information",
+						"question": [
+							{
+								"linkId": "birthWeight",
+								"text": "Birth weight (kg)",
+								"type": "decimal"
+							},
+							{
+								"linkId": "birthLength",
+								"text": "Birth length (cm)",
+								"type": "decimal"
+							},
+							{
+								"linkId": "vitaminKgiven",
+								"text": "Vitamin K given",
+								"group": [
+									{
+										"linkId": "vitaminKgivenDoses",
+										"question": [
+											{
+												"linkId": "vitaminiKDose1",
+												"text": "1st dose",
+												"type": "date"
+											},
+											{
+												"linkId": "vitaminiKDose2",
+												"text": "2nd dose",
+												"type": "date"
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}

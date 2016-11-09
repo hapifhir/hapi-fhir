@@ -1,6 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -33,10 +38,11 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MoneyDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestOperation;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -47,6 +53,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -64,6 +71,7 @@ public class OperationServerDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
+	private IGenericClient myFhirClient;
 
 	@Before
 	public void before() {
@@ -74,25 +82,80 @@ public class OperationServerDstu2Test {
 		ourLastParamMoney1 = null;
 		ourLastId = null;
 		ourLastMethod = "";
+		
+		myFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
-
 
 	@Test
 	public void testConformance() throws Exception {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
-		Conformance p = client.fetchConformance().ofType(Conformance.class).execute();
+		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+		loggingInterceptor.setLogResponseBody(true);
+		myFhirClient.registerInterceptor(loggingInterceptor);
+
+		Conformance p = myFhirClient.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
 		List<RestOperation> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size(), greaterThan(1));
 		assertNull(ops.get(0).getDefinition().getReference().getBaseUrl());
 		assertThat(ops.get(0).getDefinition().getReference().getValue(), startsWith("OperationDefinition/"));
-		
-		OperationDefinition def = client.read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
+
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
 		assertThat(def.getCode(), not(blankOrNullString()));
+
+		List<String> opNames = toOpNames(ops);
+		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
+		
+		assertEquals("OperationDefinition/Patient--OP_TYPE", ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue());
+	}
+
+	/**
+	 * See #380
+	 */
+	@Test
+	public void testOperationDefinition() {
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient--OP_TYPE").execute();
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
+		
+//		@OperationParam(name="PARAM1") StringType theParam1,
+//		@OperationParam(name="PARAM2") Patient theParam2,
+//		@OperationParam(name="PARAM3", min=2, max=5) List<StringType> theParam3,
+//		@OperationParam(name="PARAM4", min=1) List<StringType> theParam4,
+
+		assertEquals(4, def.getParameter().size());
+		assertEquals("PARAM1", def.getParameter().get(0).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(0).getUse());
+		assertEquals(0, def.getParameter().get(0).getMin().intValue());
+		assertEquals("1", def.getParameter().get(0).getMax());
+		
+		assertEquals("PARAM2", def.getParameter().get(1).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(1).getUse());
+		assertEquals(0, def.getParameter().get(1).getMin().intValue());
+		assertEquals("1", def.getParameter().get(1).getMax());
+		
+		assertEquals("PARAM3", def.getParameter().get(2).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(2).getUse());
+		assertEquals(2, def.getParameter().get(2).getMin().intValue());
+		assertEquals("5", def.getParameter().get(2).getMax());
+		
+		assertEquals("PARAM4", def.getParameter().get(3).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(3).getUse());
+		assertEquals(1, def.getParameter().get(3).getMin().intValue());
+		assertEquals("*", def.getParameter().get(3).getMax());
+		
+	}
+
+	
+	private List<String> toOpNames(List<RestOperation> theOps) {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (RestOperation next : theOps) {
+			retVal.add(next.getName());
+		}
+		return retVal;
 	}
 
 	@Test
 	public void testInstanceEverythingGet() throws Exception {
-		
+
 		// Try with a GET
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$everything");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -104,9 +167,9 @@ public class OperationServerDstu2Test {
 		assertEquals("instance $everything", ourLastMethod);
 		assertThat(response, startsWith("<Bundle"));
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
-		
+
 	}
-	
+
 	@Test
 	public void testInstanceEverythingHapiClient() throws Exception {
 		Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdDt("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
@@ -115,13 +178,12 @@ public class OperationServerDstu2Test {
 		assertEquals("instance $everything", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
-		
 	}
 
 	@Test
 	public void testInstanceEverythingPost() throws Exception {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(new Parameters());
-		
+
 		// Try with a POST
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$everything");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -151,6 +213,24 @@ public class OperationServerDstu2Test {
 	}
 
 	@Test
+	public void testOperationWrongParameterType() throws Exception {
+		Parameters p = new Parameters();
+		p.addParameter().setName("PARAM1").setValue(new IntegerDt(123));
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			String response = IOUtils.toString(status.getEntity().getContent());
+			assertThat(response, containsString("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt"));
+			ourLog.info(response);
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+	}
+
+	@Test
 	public void testOperationOnInstance() throws Exception {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
@@ -172,11 +252,11 @@ public class OperationServerDstu2Test {
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
-		
+
 		/*
 		 * Against type should fail
 		 */
-		
+
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_INSTANCE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		status = ourClient.execute(httpPost);
@@ -210,7 +290,7 @@ public class OperationServerDstu2Test {
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
-		
+
 	}
 
 	@Test
@@ -219,7 +299,7 @@ public class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
-		
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_INSTANCE_OR_TYPE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
@@ -315,7 +395,7 @@ public class OperationServerDstu2Test {
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(response);
-		
+
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 	}
 
@@ -335,7 +415,7 @@ public class OperationServerDstu2Test {
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
-	
+
 	@Test
 	public void testOperationWithGetUsingParamsFailsWithNonPrimitive() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo");
@@ -349,7 +429,6 @@ public class OperationServerDstu2Test {
 		assertThat(response, containsString("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype"));
 	}
 
-	
 	@Test
 	public void testOperationWithListParam() throws Exception {
 		Parameters p = new Parameters();
@@ -461,7 +540,6 @@ public class OperationServerDstu2Test {
 		assertEquals("read", ourLastMethod);
 	}
 
-
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
@@ -476,9 +554,9 @@ public class OperationServerDstu2Test {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-		
+
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
-		
+
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(new PatientProvider());
 		servlet.setPlainProviders(new PlainProvider());
@@ -581,7 +659,9 @@ public class OperationServerDstu2Test {
 		@Operation(name="$OP_TYPE", idempotent=true)
 		public Parameters opType(
 				@OperationParam(name="PARAM1") StringDt theParam1,
-				@OperationParam(name="PARAM2") Patient theParam2
+				@OperationParam(name="PARAM2") Patient theParam2,
+				@OperationParam(name="PARAM3", min=2, max=5) List<StringDt> theParam3,
+				@OperationParam(name="PARAM4", min=1) List<StringDt> theParam4
 				) {
 			//@formatter:on
 
@@ -626,7 +706,7 @@ public class OperationServerDstu2Test {
 			return retVal;
 		}
 
-		@Operation(name = "$everything", idempotent=true)
+		@Operation(name = "$everything", idempotent = true)
 		public Bundle patientEverything(@IdParam IdDt thePatientId) {
 			ourLastMethod = "instance $everything";
 			ourLastId = thePatientId;

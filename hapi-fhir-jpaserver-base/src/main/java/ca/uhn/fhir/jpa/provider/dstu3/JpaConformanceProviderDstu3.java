@@ -35,6 +35,7 @@ import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.Conformance.ResourceVersionPolicy;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -87,6 +89,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 			for (ConformanceRestResourceComponent nextResource : nextRest.getResource()) {
 
+				nextResource.setVersioning(ResourceVersionPolicy.VERSIONEDUPDATE);
+				
 				ConditionalDeleteStatus conditionalDelete = nextResource.getConditionalDelete();
 				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE && myDaoConfig.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
@@ -114,9 +118,18 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 			}
 		}
 
+		massage(retVal);
+		
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected void massage(Conformance theStatement) {
+		// nothing
 	}
 
 	public void setDaoConfig(DaoConfig myDaoConfig) {

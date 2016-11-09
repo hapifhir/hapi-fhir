@@ -2,7 +2,6 @@
 /target
 *.log
 *.log*
-.project
 /target/
 /target/
 
@@ -94,7 +93,6 @@ crashlytics-build.properties
 
 
 ### Eclipse ###
-*.pydevproject
 .metadata
 .gradle
 bin/
@@ -105,9 +103,6 @@ tmp/
 *~.nib
 local.properties
 .loadpath
-
-# Eclipse Core
-.project
 
 # External tool builders
 .externalToolBuilders/

@@ -6,27 +6,31 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-
+	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>
+			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+		</param-value>
+	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			/WEB-INF/hapi-fhir-tester-application-context.xml
-			classpath:hapi-fhir-tester-config.xml
+			ca.uhn.fhir.jpa.test.FhirServerConfig
 		</param-value>
 	</context-param>
 
-	<!-- Processes application requests -->
 	<servlet>
 		<servlet-name>spring</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>
-				/WEB-INF/hapi-fhir-tester-application-context.xml
-				classpath:hapi-fhir-tester-config.xml
-			</param-value>
+			<param-name>contextClass</param-name>
+			<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
 		</init-param>
-		<load-on-startup>1</load-on-startup>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>ca.uhn.fhir.jpa.test.FhirTesterConfig</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>

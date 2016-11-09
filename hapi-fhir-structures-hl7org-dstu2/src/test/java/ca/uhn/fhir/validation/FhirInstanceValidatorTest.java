@@ -9,12 +9,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
@@ -24,11 +26,13 @@ import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.validation.InstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,7 +49,27 @@ public class FhirInstanceValidatorTest {
 
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorTest.class);
-  private static DefaultProfileValidationSupport ourDefaultValidationSupport = new DefaultProfileValidationSupport();
+  private static DefaultProfileValidationSupport ourDefaultValidationSupport = new DefaultProfileValidationSupport() {
+    @Override
+    public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+      if (theUri.equals("http://fhir.hl7.org.nz/dstu2/StructureDefinition/ohAllergyIntolerance")) {
+        String contents;
+        try {
+          contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-sd-david.json"), "UTF-8");
+        } catch (IOException e) {
+          throw new Error(e);
+        }
+        StructureDefinition sd = ourCtx.newJsonParser().parseResource(StructureDefinition.class, contents);
+        return (T) sd;
+      }
+      T retVal = super.fetchResource(theContext, theClass, theUri);
+      if (retVal == null) {
+        ourLog.warn("Can not fetch: {}", theUri);
+      }
+      return retVal;
+    }
+    
+  };
   private FhirInstanceValidator myInstanceVal;
   private IValidationSupport myMockSupport;
 
@@ -102,9 +126,10 @@ public class FhirInstanceValidatorTest {
         .thenAnswer(new Answer<IBaseResource>() {
           @Override
           public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-            IBaseResource retVal = ourDefaultValidationSupport.fetchResource(
-                (FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1],
-                (String) theInvocation.getArguments()[2]);
+            FhirContext fhirContext = (FhirContext) theInvocation.getArguments()[0];
+            Class<IBaseResource> type = (Class<IBaseResource>) theInvocation.getArguments()[1];
+            String uri = (String) theInvocation.getArguments()[2];
+            IBaseResource retVal = ourDefaultValidationSupport.fetchResource(fhirContext, type, uri);
             ourLog.info("fetchResource({}, {}) : {}",
                 new Object[] { theInvocation.getArguments()[1], theInvocation.getArguments()[2], retVal });
             return retVal;
@@ -186,6 +211,20 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     assertEquals(output.toString(), 0, output.getMessages().size());
+  }
+
+  /**
+   * Received by email from David Hay
+   */
+  @Test
+  public void testValidateAllergyIntoleranceFromDavid() throws Exception {
+
+    String input = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-david.json"), "UTF-8");
+    
+    // Just make sure this doesn't crash
+    ValidationResult output = myVal.validateWithResult(input);
+    ourLog.info(output.toString());
+
   }
 
   @Test
@@ -327,7 +366,7 @@ public class FhirInstanceValidatorTest {
         + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
     ValidationResult output = myVal.validateWithResult(input);
     assertEquals(
-        "The value provided is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
+        "Coded value notvalidcode is not in value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status)",
         output.getMessages().get(0).getMessage());
   }
 
@@ -342,16 +381,16 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(patient);
     List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-    assertEquals(1, all.size());
+    assertEquals(2, all.size());
     assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
-    assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code", all.get(0).getMessage());
+    assertEquals("None of the codes are in the expected value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type)", all.get(0).getMessage());
     assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
     patient = new Patient();
     patient.addIdentifier().setSystem("http://system").setValue("12345").getType().addCoding().setSystem("http://hl7.org/fhir/v2/0203").setCode("MR");
 
     output = myVal.validateWithResult(patient);
-    all = logResultsAndReturnAll(output);
+    all = logResultsAndReturnNonInformationalOnes(output);
     assertEquals(0, all.size());
   }
 
@@ -367,8 +406,8 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-    assertEquals(errors.toString(), 0, errors.size());
-
+    assertEquals(errors.toString(), 1, errors.size());
+    assertEquals("Unable to validate code \"12345\" in code system \"http://loinc.org\"", errors.get(0).getMessage());
   }
 
   @Test
@@ -402,8 +441,8 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-    assertEquals(errors.toString(), 0, errors.size());
-    
+    assertEquals(errors.toString(), 1, errors.size());
+    assertEquals("Unable to validate code \"1234\" in code system \"http://loinc.org\"", errors.get(0).getMessage());   
     
   }
 
@@ -418,7 +457,7 @@ public class FhirInstanceValidatorTest {
     input.getCode().addCoding().setSystem("http://acme.org").setCode("12345");
 
     ValidationResult output = myVal.validateWithResult(input);
-    List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
+    List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
     assertEquals(errors.toString(), 0, errors.size());
   }
 

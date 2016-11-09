@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -37,10 +37,11 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A request for a procedure to be performed. May be a proposal or an order.
  */
@@ -89,7 +90,7 @@ public class ProcedureRequest extends DomainResource {
          */
         ABORTED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ProcedureRequestStatus fromCode(String codeString) throws FHIRException {
@@ -115,7 +116,10 @@ public class ProcedureRequest extends DomainResource {
           return REJECTED;
         if ("aborted".equals(codeString))
           return ABORTED;
-        throw new FHIRException("Unknown ProcedureRequestStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ProcedureRequestStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -280,7 +284,7 @@ public class ProcedureRequest extends DomainResource {
          */
         ASAP, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ProcedureRequestPriority fromCode(String codeString) throws FHIRException {
@@ -294,7 +298,10 @@ public class ProcedureRequest extends DomainResource {
           return STAT;
         if ("asap".equals(codeString))
           return ASAP;
-        throw new FHIRException("Unknown ProcedureRequestPriority code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ProcedureRequestPriority code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -405,6 +412,7 @@ public class ProcedureRequest extends DomainResource {
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What procedure to perform", formalDefinition="The specific procedure that is ordered. Use text if the exact nature of the procedure cannot be coded." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-code")
     protected CodeableConcept code;
 
     /**
@@ -412,6 +420,7 @@ public class ProcedureRequest extends DomainResource {
      */
     @Child(name = "bodySite", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What part of body to perform on", formalDefinition="Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
     protected List<CodeableConcept> bodySite;
 
     /**
@@ -419,6 +428,7 @@ public class ProcedureRequest extends DomainResource {
      */
     @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Why procedure should occur", formalDefinition="The reason why the procedure is being proposed or ordered. This procedure request may be motivated by a Condition for instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-reason")
     protected Type reason;
 
     /**
@@ -457,33 +467,46 @@ public class ProcedureRequest extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=8, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted", formalDefinition="The status of the order." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-request-status")
     protected Enumeration<ProcedureRequestStatus> status;
+
+    /**
+     * Information that may be needed by/relevant to the performer in their execution of this request.
+     */
+    @Child(name = "supportingInfo", type = {Reference.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Extra information to use in performing request", formalDefinition="Information that may be needed by/relevant to the performer in their execution of this request." )
+    protected List<Reference> supportingInfo;
+    /**
+     * The actual objects that are the target of the reference (Information that may be needed by/relevant to the performer in their execution of this request.)
+     */
+    protected List<Resource> supportingInfoTarget;
+
 
     /**
      * Any other notes associated with this proposal or order - e.g. provider instructions.
      */
-    @Child(name = "notes", type = {Annotation.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "notes", type = {Annotation.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Additional information about desired procedure", formalDefinition="Any other notes associated with this proposal or order - e.g. provider instructions." )
     protected List<Annotation> notes;
 
     /**
      * If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.
      */
-    @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Preconditions for procedure", formalDefinition="If a CodeableConcept is present, it indicates the pre-condition for performing the procedure." )
     protected Type asNeeded;
 
     /**
      * The time when the request was made.
      */
-    @Child(name = "orderedOn", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "orderedOn", type = {DateTimeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When request was created", formalDefinition="The time when the request was made." )
     protected DateTimeType orderedOn;
 
     /**
      * The healthcare professional responsible for proposing or ordering the procedure.
      */
-    @Child(name = "orderer", type = {Practitioner.class, Patient.class, RelatedPerson.class, Device.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "orderer", type = {Practitioner.class, Patient.class, RelatedPerson.class, Device.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who made request", formalDefinition="The healthcare professional responsible for proposing or ordering the procedure." )
     protected Reference orderer;
 
@@ -495,11 +518,12 @@ public class ProcedureRequest extends DomainResource {
     /**
      * The clinical priority associated with this order.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "priority", type = {CodeType.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="The clinical priority associated with this order." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-request-priority")
     protected Enumeration<ProcedureRequestPriority> priority;
 
-    private static final long serialVersionUID = -916650578L;
+    private static final long serialVersionUID = -1513148416L;
 
   /**
    * Constructor
@@ -527,16 +551,6 @@ public class ProcedureRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ProcedureRequest setIdentifier(List<Identifier> theIdentifier) { 
@@ -553,10 +567,6 @@ public class ProcedureRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifiers assigned to this order by the order or by the receiver.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -565,7 +575,6 @@ public class ProcedureRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcedureRequest addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -573,6 +582,16 @@ public class ProcedureRequest extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -648,16 +667,6 @@ public class ProcedureRequest extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #bodySite}, creating it if it does not already exist
-     */
-    public CodeableConcept getBodySiteFirstRep() { 
-      if (getBodySite().isEmpty()) {
-        addBodySite();
-      }
-      return getBodySite().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ProcedureRequest setBodySite(List<CodeableConcept> theBodySite) { 
@@ -674,10 +683,6 @@ public class ProcedureRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #bodySite} (Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites).)
-     */
-    // syntactic sugar
     public CodeableConcept addBodySite() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.bodySite == null)
@@ -686,7 +691,6 @@ public class ProcedureRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcedureRequest addBodySite(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -694,6 +698,16 @@ public class ProcedureRequest extends DomainResource {
         this.bodySite = new ArrayList<CodeableConcept>();
       this.bodySite.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #bodySite}, creating it if it does not already exist
+     */
+    public CodeableConcept getBodySiteFirstRep() { 
+      if (getBodySite().isEmpty()) {
+        addBodySite();
+      }
+      return getBodySite().get(0);
     }
 
     /**
@@ -932,22 +946,75 @@ public class ProcedureRequest extends DomainResource {
     }
 
     /**
+     * @return {@link #supportingInfo} (Information that may be needed by/relevant to the performer in their execution of this request.)
+     */
+    public List<Reference> getSupportingInfo() { 
+      if (this.supportingInfo == null)
+        this.supportingInfo = new ArrayList<Reference>();
+      return this.supportingInfo;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ProcedureRequest setSupportingInfo(List<Reference> theSupportingInfo) { 
+      this.supportingInfo = theSupportingInfo;
+      return this;
+    }
+
+    public boolean hasSupportingInfo() { 
+      if (this.supportingInfo == null)
+        return false;
+      for (Reference item : this.supportingInfo)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addSupportingInfo() { //3
+      Reference t = new Reference();
+      if (this.supportingInfo == null)
+        this.supportingInfo = new ArrayList<Reference>();
+      this.supportingInfo.add(t);
+      return t;
+    }
+
+    public ProcedureRequest addSupportingInfo(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.supportingInfo == null)
+        this.supportingInfo = new ArrayList<Reference>();
+      this.supportingInfo.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #supportingInfo}, creating it if it does not already exist
+     */
+    public Reference getSupportingInfoFirstRep() { 
+      if (getSupportingInfo().isEmpty()) {
+        addSupportingInfo();
+      }
+      return getSupportingInfo().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getSupportingInfoTarget() { 
+      if (this.supportingInfoTarget == null)
+        this.supportingInfoTarget = new ArrayList<Resource>();
+      return this.supportingInfoTarget;
+    }
+
+    /**
      * @return {@link #notes} (Any other notes associated with this proposal or order - e.g. provider instructions.)
      */
     public List<Annotation> getNotes() { 
       if (this.notes == null)
         this.notes = new ArrayList<Annotation>();
       return this.notes;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
-     */
-    public Annotation getNotesFirstRep() { 
-      if (getNotes().isEmpty()) {
-        addNotes();
-      }
-      return getNotes().get(0);
     }
 
     /**
@@ -967,10 +1034,6 @@ public class ProcedureRequest extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #notes} (Any other notes associated with this proposal or order - e.g. provider instructions.)
-     */
-    // syntactic sugar
     public Annotation addNotes() { //3
       Annotation t = new Annotation();
       if (this.notes == null)
@@ -979,7 +1042,6 @@ public class ProcedureRequest extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ProcedureRequest addNotes(Annotation t) { //3
       if (t == null)
         return this;
@@ -987,6 +1049,16 @@ public class ProcedureRequest extends DomainResource {
         this.notes = new ArrayList<Annotation>();
       this.notes.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #notes}, creating it if it does not already exist
+     */
+    public Annotation getNotesFirstRep() { 
+      if (getNotes().isEmpty()) {
+        addNotes();
+      }
+      return getNotes().get(0);
     }
 
     /**
@@ -1182,6 +1254,7 @@ public class ProcedureRequest extends DomainResource {
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter within which the procedure proposal or request was created.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("performer", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "For example, the surgeon, anaethetist, endoscopist, etc.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("status", "code", "The status of the order.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("supportingInfo", "Reference(Any)", "Information that may be needed by/relevant to the performer in their execution of this request.", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
         childrenList.add(new Property("notes", "Annotation", "Any other notes associated with this proposal or order - e.g. provider instructions.", 0, java.lang.Integer.MAX_VALUE, notes));
         childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
         childrenList.add(new Property("orderedOn", "dateTime", "The time when the request was made.", 0, java.lang.Integer.MAX_VALUE, orderedOn));
@@ -1201,6 +1274,7 @@ public class ProcedureRequest extends DomainResource {
         case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ProcedureRequestStatus>
+        case 1922406657: /*supportingInfo*/ return this.supportingInfo == null ? new Base[0] : this.supportingInfo.toArray(new Base[this.supportingInfo.size()]); // Reference
         case 105008833: /*notes*/ return this.notes == null ? new Base[0] : this.notes.toArray(new Base[this.notes.size()]); // Annotation
         case -1432923513: /*asNeeded*/ return this.asNeeded == null ? new Base[0] : new Base[] {this.asNeeded}; // Type
         case -391079124: /*orderedOn*/ return this.orderedOn == null ? new Base[0] : new Base[] {this.orderedOn}; // DateTimeType
@@ -1227,10 +1301,10 @@ public class ProcedureRequest extends DomainResource {
           this.getBodySite().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case -934964668: // reason
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
           break;
         case -160710483: // scheduled
-          this.scheduled = (Type) value; // Type
+          this.scheduled = castToType(value); // Type
           break;
         case 1524132147: // encounter
           this.encounter = castToReference(value); // Reference
@@ -1241,11 +1315,14 @@ public class ProcedureRequest extends DomainResource {
         case -892481550: // status
           this.status = new ProcedureRequestStatusEnumFactory().fromType(value); // Enumeration<ProcedureRequestStatus>
           break;
+        case 1922406657: // supportingInfo
+          this.getSupportingInfo().add(castToReference(value)); // Reference
+          break;
         case 105008833: // notes
           this.getNotes().add(castToAnnotation(value)); // Annotation
           break;
         case -1432923513: // asNeeded
-          this.asNeeded = (Type) value; // Type
+          this.asNeeded = castToType(value); // Type
           break;
         case -391079124: // orderedOn
           this.orderedOn = castToDateTime(value); // DateTimeType
@@ -1272,19 +1349,21 @@ public class ProcedureRequest extends DomainResource {
         else if (name.equals("bodySite"))
           this.getBodySite().add(castToCodeableConcept(value));
         else if (name.equals("reason[x]"))
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
         else if (name.equals("scheduled[x]"))
-          this.scheduled = (Type) value; // Type
+          this.scheduled = castToType(value); // Type
         else if (name.equals("encounter"))
           this.encounter = castToReference(value); // Reference
         else if (name.equals("performer"))
           this.performer = castToReference(value); // Reference
         else if (name.equals("status"))
           this.status = new ProcedureRequestStatusEnumFactory().fromType(value); // Enumeration<ProcedureRequestStatus>
+        else if (name.equals("supportingInfo"))
+          this.getSupportingInfo().add(castToReference(value));
         else if (name.equals("notes"))
           this.getNotes().add(castToAnnotation(value));
         else if (name.equals("asNeeded[x]"))
-          this.asNeeded = (Type) value; // Type
+          this.asNeeded = castToType(value); // Type
         else if (name.equals("orderedOn"))
           this.orderedOn = castToDateTime(value); // DateTimeType
         else if (name.equals("orderer"))
@@ -1307,6 +1386,7 @@ public class ProcedureRequest extends DomainResource {
         case 1524132147:  return getEncounter(); // Reference
         case 481140686:  return getPerformer(); // Reference
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ProcedureRequestStatus>
+        case 1922406657:  return addSupportingInfo(); // Reference
         case 105008833:  return addNotes(); // Annotation
         case -544329575:  return getAsNeeded(); // Type
         case -391079124: throw new FHIRException("Cannot make property orderedOn as it is not a complex type"); // DateTimeType
@@ -1364,6 +1444,9 @@ public class ProcedureRequest extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type ProcedureRequest.status");
         }
+        else if (name.equals("supportingInfo")) {
+          return addSupportingInfo();
+        }
         else if (name.equals("notes")) {
           return addNotes();
         }
@@ -1414,6 +1497,11 @@ public class ProcedureRequest extends DomainResource {
         dst.encounter = encounter == null ? null : encounter.copy();
         dst.performer = performer == null ? null : performer.copy();
         dst.status = status == null ? null : status.copy();
+        if (supportingInfo != null) {
+          dst.supportingInfo = new ArrayList<Reference>();
+          for (Reference i : supportingInfo)
+            dst.supportingInfo.add(i.copy());
+        };
         if (notes != null) {
           dst.notes = new ArrayList<Annotation>();
           for (Annotation i : notes)
@@ -1440,8 +1528,9 @@ public class ProcedureRequest extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(code, o.code, true)
            && compareDeep(bodySite, o.bodySite, true) && compareDeep(reason, o.reason, true) && compareDeep(scheduled, o.scheduled, true)
            && compareDeep(encounter, o.encounter, true) && compareDeep(performer, o.performer, true) && compareDeep(status, o.status, true)
-           && compareDeep(notes, o.notes, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(orderedOn, o.orderedOn, true)
-           && compareDeep(orderer, o.orderer, true) && compareDeep(priority, o.priority, true);
+           && compareDeep(supportingInfo, o.supportingInfo, true) && compareDeep(notes, o.notes, true) && compareDeep(asNeeded, o.asNeeded, true)
+           && compareDeep(orderedOn, o.orderedOn, true) && compareDeep(orderer, o.orderer, true) && compareDeep(priority, o.priority, true)
+          ;
       }
 
       @Override
@@ -1456,9 +1545,9 @@ public class ProcedureRequest extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, code, bodySite
-          , reason, scheduled, encounter, performer, status, notes, asNeeded, orderedOn, orderer, priority
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, code
+          , bodySite, reason, scheduled, encounter, performer, status, supportingInfo, notes
+          , asNeeded, orderedOn, orderer, priority);
       }
 
   @Override
@@ -1474,7 +1563,7 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ProcedureRequest.identifier", description="A unique identifier of the Procedure Request", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="ProcedureRequest.identifier", description="A unique identifier of the Procedure Request", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1494,7 +1583,7 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="ProcedureRequest.performer", description="Who should perform the procedure", type="reference", target={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="performer", path="ProcedureRequest.performer", description="Who should perform the procedure", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -1513,6 +1602,26 @@ public class ProcedureRequest extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("ProcedureRequest:performer").toLocked();
 
  /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>What procedure to perform</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="code", path="ProcedureRequest.code", description="What procedure to perform", type="token" )
+  public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>What procedure to perform</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
    * Search parameter: <b>subject</b>
    * <p>
    * Description: <b>Search by subject</b><br>
@@ -1520,7 +1629,7 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference", target={Group.class, Patient.class} )
+  @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Group.class, Patient.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1546,7 +1655,7 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1572,7 +1681,7 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.orderer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="orderer", path="ProcedureRequest.orderer", description="Who made request", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="orderer", path="ProcedureRequest.orderer", description="Who made request", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_ORDERER = "orderer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>orderer</b>
@@ -1598,7 +1707,7 @@ public class ProcedureRequest extends DomainResource {
    * Path: <b>ProcedureRequest.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="ProcedureRequest.encounter", description="Encounter request created during", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="ProcedureRequest.encounter", description="Encounter request created during", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1615,6 +1724,46 @@ public class ProcedureRequest extends DomainResource {
    * the path value of "<b>ProcedureRequest:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("ProcedureRequest:encounter").toLocked();
+
+ /**
+   * Search parameter: <b>body-site</b>
+   * <p>
+   * Description: <b>What part of body to perform on</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.bodySite</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="body-site", path="ProcedureRequest.bodySite", description="What part of body to perform on", type="token" )
+  public static final String SP_BODY_SITE = "body-site";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>body-site</b>
+   * <p>
+   * Description: <b>What part of body to perform on</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.bodySite</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam BODY_SITE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_BODY_SITE);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.status</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="status", path="ProcedureRequest.status", description="proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted", type="token" )
+  public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
 
 }

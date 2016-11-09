@@ -32,22 +32,6 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 @DatatypeDef(name = "uri")
 public class UriDt extends BasePrimitive<String> {
 
-	/**
-	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
-	 * in the value of the newly created UriDt, per the FHIR specification).
-	 * 
-	 * @param theOid
-	 *            The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a
-	 *            <code>null</code> value)
-	 * @return A new UriDt instance
-	 */
-	public static UriDt fromOid(String theOid) {
-		if (theOid == null) {
-			return new UriDt();
-		}
-		return new UriDt("urn:oid:" + theOid);
-	}
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UriDt.class);
 
 	/**
@@ -119,24 +103,37 @@ public class UriDt extends BasePrimitive<String> {
 		URI retVal;
 		try {
 			retVal = new URI(theValue).normalize();
-		} catch (URISyntaxException e1) {
-			ourLog.debug("Failed to normalize URL '{}', message was: {}", theValue, e1.toString());
+			String urlString = retVal.toString();
+			if (urlString.endsWith("/") && urlString.length() > 1) {
+				retVal = new URI(urlString.substring(0, urlString.length() - 1));
+			}
+		} catch (URISyntaxException e) {
+			ourLog.debug("Failed to normalize URL '{}', message was: {}", theValue, e.toString());
 			return theValue;
 		}
-		String urlString = retVal.toString();
-		if (urlString.endsWith("/") && urlString.length() > 1) {
-			try {
-				retVal = new URI(urlString.substring(0, urlString.length() - 1));
-			} catch (URISyntaxException e) {
-				ourLog.debug("Failed to normalize URL '{}', message was: {}", urlString, e.toString());
-			}
-		}
+
 		return retVal.toASCIIString();
 	}
 
 	@Override
 	protected String parse(String theValue) {
 		return theValue;
+	}
+
+	/**
+	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
+	 * in the value of the newly created UriDt, per the FHIR specification).
+	 * 
+	 * @param theOid
+	 *           The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a
+	 *           <code>null</code> value)
+	 * @return A new UriDt instance
+	 */
+	public static UriDt fromOid(String theOid) {
+		if (theOid == null) {
+			return new UriDt();
+		}
+		return new UriDt("urn:oid:" + theOid);
 	}
 
 }

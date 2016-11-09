@@ -29,18 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
  */
@@ -77,7 +78,7 @@ public class Timing extends Type implements ICompositeType {
          */
         A, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static UnitsOfTime fromCode(String codeString) throws FHIRException {
@@ -97,7 +98,10 @@ public class Timing extends Type implements ICompositeType {
           return MO;
         if ("a".equals(codeString))
           return A;
-        throw new FHIRException("Unknown UnitsOfTime code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown UnitsOfTime code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -272,7 +276,7 @@ public class Timing extends Type implements ICompositeType {
          */
         PCV, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static EventTiming fromCode(String codeString) throws FHIRException {
@@ -306,7 +310,10 @@ public class Timing extends Type implements ICompositeType {
           return PCD;
         if ("PCV".equals(codeString))
           return PCV;
-        throw new FHIRException("Unknown EventTiming code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown EventTiming code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -535,6 +542,7 @@ public class Timing extends Type implements ICompositeType {
          */
         @Child(name = "durationUnit", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition="The units of time for the duration, in UCUM units." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/units-of-time")
         protected Enumeration<UnitsOfTime> durationUnit;
 
         /**
@@ -570,6 +578,7 @@ public class Timing extends Type implements ICompositeType {
          */
         @Child(name = "periodUnit", type = {CodeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition="The units of time for the period in UCUM units." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/units-of-time")
         protected Enumeration<UnitsOfTime> periodUnit;
 
         /**
@@ -577,6 +586,7 @@ public class Timing extends Type implements ICompositeType {
          */
         @Child(name = "when", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Regular life events the event is tied to", formalDefinition="A real world event that the occurrence of the event should be tied to." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/event-timing")
         protected Enumeration<EventTiming> when;
 
         /**
@@ -1335,7 +1345,7 @@ public class Timing extends Type implements ICompositeType {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1383205195: // bounds
-          this.bounds = (Type) value; // Type
+          this.bounds = castToType(value); // Type
           break;
         case 94851343: // count
           this.count = castToInteger(value); // IntegerType
@@ -1381,7 +1391,7 @@ public class Timing extends Type implements ICompositeType {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("bounds[x]"))
-          this.bounds = (Type) value; // Type
+          this.bounds = castToType(value); // Type
         else if (name.equals("count"))
           this.count = castToInteger(value); // IntegerType
         else if (name.equals("countMax"))
@@ -1533,9 +1543,9 @@ public class Timing extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(bounds, count, countMax, duration
-          , durationMax, durationUnit, frequency, frequencyMax, period, periodMax, periodUnit, when, offset
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(bounds, count, countMax
+          , duration, durationMax, durationUnit, frequency, frequencyMax, period, periodMax
+          , periodUnit, when, offset);
       }
 
   public String fhirType() {
@@ -1563,7 +1573,8 @@ public class Timing extends Type implements ICompositeType {
      * A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing.
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +", formalDefinition="A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing." )
+    @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | Q4H | Q6H +", formalDefinition="A code for the timing pattern. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/timing-abbreviation")
     protected CodeableConcept code;
 
     private static final long serialVersionUID = 791565112L;
@@ -1582,16 +1593,6 @@ public class Timing extends Type implements ICompositeType {
       if (this.event == null)
         this.event = new ArrayList<DateTimeType>();
       return this.event;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #event}, creating it if it does not already exist
-     */
-    public DateTimeType getEventFirstRep() { 
-      if (getEvent().isEmpty()) {
-        addEventElement();
-      }
-      return getEvent().get(0);
     }
 
     /**
@@ -1614,7 +1615,6 @@ public class Timing extends Type implements ICompositeType {
     /**
      * @return {@link #event} (Identifies specific times when the event occurs.)
      */
-    // syntactic sugar
     public DateTimeType addEventElement() {//2 
       DateTimeType t = new DateTimeType();
       if (this.event == null)

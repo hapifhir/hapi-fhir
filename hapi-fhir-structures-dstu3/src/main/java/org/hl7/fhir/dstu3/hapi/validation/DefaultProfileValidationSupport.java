@@ -4,23 +4,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
@@ -223,26 +214,44 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
 		if (cs != null) {
-			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept());
+			boolean caseSensitive = true;
+			if (cs.hasCaseSensitive()) {
+				caseSensitive = cs.getCaseSensitive();
+			}
+			
+			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
 			
 			if (retVal != null) {
 				return retVal;
 			}
 		}
 
-		return new CodeValidationResult(IssueSeverity.INFORMATION, "Unknown code: " + theCodeSystem + " / " + theCode);
+		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
 
-	private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList) {
+	private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
+		String code = theCode;
+		if (theCaseSensitive == false) {
+			code = code.toUpperCase();
+		}
+		
+		return testIfConceptIsInListInner(conceptList, theCaseSensitive, code);
+	}
+
+	private CodeValidationResult testIfConceptIsInListInner(List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
 		CodeValidationResult retVal = null;
 		for (ConceptDefinitionComponent next : conceptList) {
-			if (next.getCode().equals(theCode)) {
+			String nextCandidate = next.getCode();
+			if (theCaseSensitive == false) {
+				nextCandidate = nextCandidate.toUpperCase();
+			}
+			if (nextCandidate.equals(code)) {
 				retVal = new CodeValidationResult(next);
 				break;
 			}
 
 			// recurse
-			retVal = testIfConceptIsInList(theCode, next.getConcept());
+			retVal = testIfConceptIsInList(code, next.getConcept(), theCaseSensitive);
 			if (retVal != null) {
 				break;
 			}

@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Optional Extensions Element - found in all resources.
  */
@@ -179,7 +180,7 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
           this.url = castToUri(value); // UriType
           break;
         case 111972721: // value
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -191,7 +192,7 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
         if (name.equals("url"))
           this.url = castToUri(value); // UriType
         else if (name.equals("value[x]"))
-          this.value = (org.hl7.fhir.dstu3.model.Type) value; // org.hl7.fhir.dstu3.model.Type
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
         else
           super.setProperty(name, value);
       }

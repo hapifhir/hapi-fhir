@@ -6,11 +6,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu1;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 
 @Configuration
 @Import(CommonConfig.class)
@@ -43,6 +45,9 @@ public class TestDstu1Config extends BaseJavaConfigDstu1 {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(false);
 		retVal.setAllowMultipleDelete(false);
+		retVal.setAllowExternalReferences(true);
+		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu1");
+		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu1");
 		return retVal;
 	}
 
@@ -77,6 +82,7 @@ public class TestDstu1Config extends BaseJavaConfigDstu1 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
+		extraProperties.put("hibernate.dialect", DerbyTenSevenDialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

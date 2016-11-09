@@ -1,0 +1,1 @@
+Move use of Saxon and Inflector out of Utilities.java (saxon isn't needed and Inflector has GPL license)

@@ -47,7 +47,7 @@
 		</label>
 	</div>
 
-	<script type="text/javascript">
+	<script type="text/javascript" th:inline="javascript">
 		
 	$( document ).ready(function() {
 		
@@ -55,39 +55,32 @@
 		// so that they wrap at the same time if the page is narrow
 		$('#prettyBtnGroup').width($('#encodingBtnGroup').width());
 		
-		// Set the buttons' initial state correctly
-		<th:block th:switch="${encoding}">
-			<th:block th:case="'xml'">
+		var encoding = [[${encoding}]];
+		if (encoding == 'xml') {
 				$('#encode-xml').trigger("click");
-			</th:block>
-			<th:block th:case="'json'">
+		} else if (encoding == 'json') {
 				$('#encode-json').trigger("click");
-			</th:block>
-		</th:block>
-		<th:block th:switch="${pretty}">
-			<th:block th:case="'true'">
+		}
+			
+		var pretty = [[${pretty}]];
+		if (pretty){
 				$('#pretty-true').trigger("click");
-			</th:block>
-			<th:block th:case="'false'">
+		} else {
 				$('#pretty-false').trigger("click");
-			</th:block>
-		</th:block>
-		<th:block th:switch="${_summary}">
-			<th:block th:case="'true'">
+		}
+
+		var summary = [[${_summary}]];
+		if (summary == 'true') {
 				$('#summary-true').trigger("click");
-			</th:block>
-			<th:block th:case="'text'">
+		} else if (summary == 'text') {
 				$('#summary-text').trigger("click");
-			</th:block>
-			<th:block th:case="'data'">
+		} else if (summary == 'data') {
 				$('#summary-data').trigger("click");
-			</th:block>
-			<th:block th:case="'count'">
+		} else if (summary == 'count') {
 				$('#summary-count').trigger("click");
-			</th:block>
-		</th:block>
-		
-		<th:block th:if="${!#strings.isEmpty(resultBody)}">
+		}
+
+		if ([[${!#strings.isEmpty(resultBody)}]]) {
 			// When we're displaying a result page, the options buttons should
 			// actually apply their values to the current search/action
 			$('#encode-default').change( function(){ location.href=updateURLParameter(location.href, 'encoding', '') });
@@ -96,7 +89,7 @@
 			$('#pretty-default').change( function(){ location.href=updateURLParameter(location.href, 'pretty', '') });
 			$('#pretty-true').change( function(){ location.href=updateURLParameter(location.href, 'pretty', 'true') });
 			$('#pretty-false').change( function(){ location.href=updateURLParameter(location.href, 'pretty', 'false') });
-		</th:block>
+		}
 		
 	});
 	

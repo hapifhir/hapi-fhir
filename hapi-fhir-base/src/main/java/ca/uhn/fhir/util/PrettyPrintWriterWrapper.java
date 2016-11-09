@@ -55,31 +55,37 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 		myTarget.flush();
 	}
 
+	@CoverageIgnore
 	@Override
 	public NamespaceContext getNamespaceContext() {
 		return myTarget.getNamespaceContext();
 	}
 
+	@CoverageIgnore
 	@Override
 	public String getPrefix(String theUri) throws XMLStreamException {
 		return myTarget.getPrefix(theUri);
 	}
 
+	@CoverageIgnore
 	@Override
 	public Object getProperty(String theName) throws IllegalArgumentException {
 		return myTarget.getProperty(theName);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void setDefaultNamespace(String theUri) throws XMLStreamException {
 		myTarget.setDefaultNamespace(theUri);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void setNamespaceContext(NamespaceContext theContext) throws XMLStreamException {
 		myTarget.setNamespaceContext(theContext);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void setPrefix(String thePrefix, String theUri) throws XMLStreamException {
 		myTarget.setPrefix(thePrefix, theUri);
@@ -90,16 +96,19 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 		myTarget.writeAttribute(theLocalName, theValue);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeAttribute(String theNamespaceURI, String theLocalName, String theValue) throws XMLStreamException {
 		myTarget.writeAttribute(theNamespaceURI, theLocalName, theValue);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeAttribute(String thePrefix, String theNamespaceURI, String theLocalName, String theValue) throws XMLStreamException {
 		myTarget.writeAttribute(thePrefix, theNamespaceURI, theLocalName, theValue);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeCData(String theData) throws XMLStreamException {
 		myTarget.writeCData(theData);
@@ -130,29 +139,34 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 		myTarget.writeDefaultNamespace(theNamespaceURI);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeDTD(String theDtd) throws XMLStreamException {
 		myTarget.writeDTD(theDtd);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeEmptyElement(String theLocalName) throws XMLStreamException {
 		indent();
 		myTarget.writeEmptyElement(theLocalName);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeEmptyElement(String theNamespaceURI, String theLocalName) throws XMLStreamException {
 		indent();
 		myTarget.writeEmptyElement(theNamespaceURI, theLocalName);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeEmptyElement(String thePrefix, String theLocalName, String theNamespaceURI) throws XMLStreamException {
 		indent();
 		myTarget.writeEmptyElement(thePrefix, theLocalName, theNamespaceURI);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeEndDocument() throws XMLStreamException {
 		decrementAndIndent();
@@ -170,6 +184,7 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeEntityRef(String theName) throws XMLStreamException {
 		myTarget.writeEntityRef(theName);
@@ -180,11 +195,13 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 		myTarget.writeNamespace(thePrefix, theNamespaceURI);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeProcessingInstruction(String theTarget) throws XMLStreamException {
 		myTarget.writeProcessingInstruction(theTarget);
 	}
 
+	@CoverageIgnore
 	@Override
 	public void writeProcessingInstruction(String theTarget, String theData) throws XMLStreamException {
 		myTarget.writeProcessingInstruction(theTarget, theData);

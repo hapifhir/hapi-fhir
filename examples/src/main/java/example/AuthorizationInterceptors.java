@@ -1,16 +1,24 @@
 package example;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
@@ -87,4 +95,43 @@ public class AuthorizationInterceptors {
    }
    //END SNIPPET: patientAndAdmin
 
+   
+   //START SNIPPET: conditionalUpdate
+   @Update()
+   public MethodOutcome update(
+         @IdParam IdDt theId, 
+         @ResourceParam Patient theResource, 
+         @ConditionalUrlParam String theConditionalUrl, 
+         RequestDetails theRequestDetails) {
+
+      // If we're processing a conditional URL...
+      if (isNotBlank(theConditionalUrl)) {
+         
+         // Pretend we've done the conditional processing. Now let's
+         // notify the interceptors that an update has been performed
+         // and supply the actual ID that's being updated
+         IdDt actual = new IdDt("Patient", "1123");
+         
+         // There are a number of possible constructors for ActionRequestDetails.
+         // You should supply as much detail about the sub-operation as possible
+         IServerInterceptor.ActionRequestDetails subRequest = 
+               new IServerInterceptor.ActionRequestDetails(theRequestDetails, actual);
+         
+         // Notify the interceptors
+         subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
+      }
+      
+      // In a real server, perhaps we would process the conditional 
+      // request differently and follow a separate path. Either way,
+      // let's pretend there is some storage code here.
+      
+      theResource.setId(theId.withVersion("2"));
+      MethodOutcome retVal = new MethodOutcome();
+      retVal.setCreated(true);
+      retVal.setResource(theResource);
+      return retVal;
+   }
+   //END SNIPPET: conditionalUpdate
+
+   
 }

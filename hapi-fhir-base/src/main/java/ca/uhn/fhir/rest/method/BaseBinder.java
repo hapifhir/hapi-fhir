@@ -38,6 +38,7 @@ class BaseBinder<T> {
 		myType = theType;
 		myCompositeTypes = theCompositeTypes;
 		
+		
 		if (myType.equals(CompositeParam.class)) {
 			if (myCompositeTypes.size() != 2) {
 				throw new ConfigurationException("Search parameter of type " + myType.getName() + " must have 2 composite types declared in parameter annotation, found " + theCompositeTypes.size());

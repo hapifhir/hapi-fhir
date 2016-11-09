@@ -32,11 +32,17 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 
@@ -44,13 +50,29 @@ import ca.uhn.fhir.validation.IValidatorModule;
 @EnableTransactionManagement
 public class BaseDstu3Config extends BaseConfig {
 
-	@Bean
-	@Primary
-	public FhirContext defaultFhirContext() {
-		return fhirContextDstu3();
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IHapiTerminologySvcDstu3 terminologyService() {
+		return new HapiTerminologySvcDstu3();
+	}
+	
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
+		return new TerminologyLoaderSvc();
 	}
 
-	@Bean(name="myInstanceValidatorDstu3")
+	@Bean
+	@Primary
+	public FhirContext fhirContextDstu3() {
+		FhirContext retVal = FhirContext.forDstu3();
+		
+		// Don't strip versions in some places
+		ParserOptions parserOptions = retVal.getParserOptions();
+		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		
+		return retVal;
+	}
+
+	@Bean(name = "myInstanceValidatorDstu3")
 	@Lazy
 	public IValidatorModule instanceValidatorDstu3() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
@@ -64,7 +86,7 @@ public class BaseDstu3Config extends BaseConfig {
 		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
 		return retVal;
 	}
-	
+
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IFulltextSearchSvc searchDaoDstu3() {
 		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
@@ -80,19 +102,28 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(name = "mySystemProviderDstu3")
 	public ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 systemProviderDstu3() {
 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 retVal = new ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3();
+		retVal.setContext(fhirContextDstu3());
 		retVal.setDao(systemDaoDstu3());
 		return retVal;
 	}
 
 	@Primary
-	@Bean(autowire=Autowire.BY_NAME, name="myJpaValidationSupportChainDstu3")
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu3")
 	public IValidationSupport validationSupportChainDstu3() {
 		return new JpaValidationSupportChainDstu3();
 	}
 
-	@Bean(autowire=Autowire.BY_TYPE)
+	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorDstu3 searchParamExtractor() {
 		return new SearchParamExtractorDstu3();
 	}
+
+	@Bean(autowire=Autowire.BY_TYPE)
+	public TerminologyUploaderProviderDstu3 terminologyUploaderProvider() {
+		TerminologyUploaderProviderDstu3 retVal = new TerminologyUploaderProviderDstu3();
+		retVal.setContext(fhirContextDstu3());
+		return retVal;
+	}
 	
+
 }

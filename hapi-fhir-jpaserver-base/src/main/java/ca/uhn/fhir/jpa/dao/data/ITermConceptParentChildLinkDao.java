@@ -21,9 +21,16 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 
 public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConceptParentChildLink, Long> {
-	// nothing
+
+	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
+	@Modifying
+	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	
 }

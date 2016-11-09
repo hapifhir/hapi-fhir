@@ -1,5 +1,7 @@
 package ca.uhn.fhirtest;
 
+import java.util.UUID;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -20,18 +22,25 @@ public class UhnFhirTestApp {
 	public static void main(String[] args) throws Exception {
 
 		int myPort = 8888;
-		String base = "http://localhost:" + myPort + "/baseDstu3";
+		String base = "http://localhost:" + myPort + "/baseDstu2";
 
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
 		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
-		System.setProperty("fhir.db.location.dstu3", "./target/testdb_dstu3");
 		System.setProperty("fhir.lucene.location.dstu2", "./target/testlucene_dstu2");
+		System.setProperty("fhir.db.location.dstu3", "./target/fhirtest_dstu3");
 		System.setProperty("fhir.lucene.location.dstu3", "./target/testlucene_dstu3");
+		System.setProperty("fhir.db.location.tdl2", "./target/testdb_tdl2");
+		System.setProperty("fhir.lucene.location.tdl2", "./target/testlucene_tdl2");
+		System.setProperty("fhir.db.location.tdl3", "./target/testdb_tdl3");
+		System.setProperty("fhir.lucene.location.tdl3", "./target/testlucene_tdl3");
 		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu2", base);
 		System.setProperty("fhir.baseurl.dstu3", base.replace("Dstu2", "Dstu3"));
-
+		System.setProperty("fhir.baseurl.tdl2", base.replace("baseDstu2", "testDataLibraryDstu2"));
+		System.setProperty("fhir.baseurl.tdl3", base.replace("baseDstu2", "testDataLibraryStu3"));
+		System.setProperty("fhir.tdlpass", "aa,bb");
+		
 		Server server = new Server(myPort);
 
 		WebAppContext root = new WebAppContext();
@@ -49,12 +58,11 @@ public class UhnFhirTestApp {
 		} catch (Exception e) {
 			ourLog.error("Failure during startup", e);
 		}
-		server.stop();
 
 		// base = "http://fhir.healthintersections.com.au/open";
 		// base = "http://spark.furore.com/fhir";
 
-		if (true) {
+		if (false) {
 			FhirContext ctx = FhirContext.forDstu3();
 			IGenericClient client = ctx.newRestfulGenericClient(base);
 			//			client.setLogRequestAndResponse(true);
@@ -68,7 +76,7 @@ public class UhnFhirTestApp {
 			p1.getMeta().addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
 			p1.addIdentifier().setSystem("foo:bar").setValue("12345");
 			p1.addName().addFamily("Smith").addGiven("John");
-			p1.getManagingOrganization().setReferenceElement(orgId);
+			p1.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
 
 			Subscription subs = new Subscription();
 			subs.setStatus(SubscriptionStatus.ACTIVE);

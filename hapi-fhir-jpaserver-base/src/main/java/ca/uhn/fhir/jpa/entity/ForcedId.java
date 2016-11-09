@@ -61,8 +61,10 @@ public class ForcedId {
 	@Column(name = "RESOURCE_PID", nullable = false, updatable = false, insertable=false)
 	private Long myResourcePid;
 
+	// This is updatable=true because it was added in 1.6 and needs to be set.. At some
+	// point we should remove the default and make it not updatable
 	@ColumnDefault("''")
-	@Column(name = "RESOURCE_TYPE", nullable = true, length = 100, updatable = false)
+	@Column(name = "RESOURCE_TYPE", nullable = true, length = 100, updatable = true)
 	private String myResourceType;
 
 	/**

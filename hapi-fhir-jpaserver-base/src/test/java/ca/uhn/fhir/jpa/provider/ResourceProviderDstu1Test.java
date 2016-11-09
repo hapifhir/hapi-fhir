@@ -10,7 +10,11 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,9 +27,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
@@ -63,7 +69,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderDstu1Test  extends BaseJpaTest {
@@ -80,6 +85,8 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	private static Server ourServer;
 	private static String ourServerBase;
 	private static CloseableHttpClient ourHttpClient;
+	private static EntityManager ourEntityManager;
+	private static PlatformTransactionManager ourTxManager;
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -88,6 +95,10 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Override
+	protected FhirContext getContext() {
+		return ourCtx;
+	}
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -121,18 +132,18 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(10).execute();
+		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).count(10).execute();
 		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(10, found.getEntries().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(999).execute();
+		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).count(999).execute();
 		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(50, found.getEntries().size());
 
 	}
 
 	@Test
-	public void testCreateWithClientSuppliedId() {
+	public void testCreateWithClientSuppliedId() throws Exception {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testCreateWithId01");
 
 		Patient p1 = new Patient();
@@ -362,12 +373,12 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
-		IIdType o1id = ourClient.create().resource(o1).execute().getId();
+		IIdType o1id = ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt(o1id));
+		p1.setManagingOrganization(new ResourceReferenceDt(o1id.toUnqualifiedVersionless()));
 		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
 
 		//@formatter:off
@@ -398,7 +409,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue("testSearchWithInclude02");
-		pat.getManagingOrganization().setReference(orgId);
+		pat.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless());
 		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
 		//@formatter:off
@@ -537,9 +548,10 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
 
 		ourDaoConfig = (DaoConfig) ourAppCtx.getBean(DaoConfig.class);
-
 		ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
-
+		ourEntityManager = ourAppCtx.getBean(EntityManager.class);
+		ourTxManager = ourAppCtx.getBean(PlatformTransactionManager.class);
+		
 		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServer.setResourceProviders(rpsDev);
 
@@ -576,6 +588,12 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		builder.setConnectionManager(connectionManager);
 		ourHttpClient = builder.build();
 
+
+	}
+	
+	@Before
+	public void before() {
+		super.purgeDatabase(ourEntityManager, ourTxManager);
 	}
 
 }

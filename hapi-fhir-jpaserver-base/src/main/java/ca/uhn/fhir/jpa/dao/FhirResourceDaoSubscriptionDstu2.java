@@ -52,7 +52,6 @@ import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -60,13 +59,12 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subscription>implements IFhirResourceDaoSubscription<Subscription> {
 
@@ -149,7 +147,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
-		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
+		SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
 
 		criteriaUrl = new SearchParameterMap();
 		long start = theSubscriptionTable.getMostRecentMatch().getTime();
@@ -162,8 +160,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getId().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
 
 		DateRangeParam range = new DateRangeParam();
-		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
-		range.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN, end));
+		range.setLowerBound(new DateParam(ParamPrefixEnum.GREATERTHAN, start));
+		range.setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, end));
 		criteriaUrl.setLastUpdated(range);
 		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
@@ -252,7 +250,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 			txTemplate.execute(new TransactionCallback<Void>() {
 				@Override
 				public Void doInTransaction(TransactionStatus theStatus) {
-					delete(subscriptionId, new ServletRequestDetails());
+					delete(subscriptionId, null);
 					return null;
 				}
 			});
@@ -260,9 +258,9 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	}
 
 	@Override
-	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-			Date theUpdateTime, RequestDetails theRequestDetails) {
-		ResourceTable retVal = super.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theRequestDetails);
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+			Date theUpdateTime) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
 
 		Subscription resource = (Subscription) theResource;
 		Long resourceId = theEntity.getId();
@@ -311,8 +309,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	}
 
 	@Override
-	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave, RequestDetails theRequestDetails) {
-		super.validateResourceForStorage(theResource, theEntityToSave, theRequestDetails);
+	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
 
 		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
 

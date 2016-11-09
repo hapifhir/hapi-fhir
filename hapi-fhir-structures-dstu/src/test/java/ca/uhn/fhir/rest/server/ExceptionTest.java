@@ -47,14 +47,11 @@ import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import junit.framework.AssertionFailedError;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ExceptionTest {
 
 	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);

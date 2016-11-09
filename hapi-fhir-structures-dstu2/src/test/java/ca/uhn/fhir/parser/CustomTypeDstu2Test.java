@@ -5,8 +5,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +21,21 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.CustomResource364Dstu2.CustomResource364CustomDate;
 import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class CustomTypeDstu2Test {
 
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeDstu2Test.class);
 
 	@AfterClass
@@ -42,6 +43,101 @@ public class CustomTypeDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	/**
+	 * See #368
+	 */
+	@Test
+	public void testConstrainedFieldContainedResource() {
+		Medication medication = new Medication();
+		medication.getCode().setText("MED TEXT");
+		
+		CustomMedicationOrderDstu2 mo = new CustomMedicationOrderDstu2();
+		mo.setMedication(new ResourceReferenceDt());
+		mo.getMedication().setResource(medication);
+		
+		String string = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
+		ourLog.info(string);
+		
+		//@formatter:on
+		assertThat(string, stringContainsInOrder(
+				"<MedicationOrder xmlns=\"http://hl7.org/fhir\">", 
+				"   <contained>", 
+				"      <Medication xmlns=\"http://hl7.org/fhir\">", 
+				"         <id value=\"1\"/>", 
+				"         <code>", 
+				"            <text value=\"MED TEXT\"/>", 
+				"         </code>", 
+				"      </Medication>", 
+				"   </contained>", 
+				"   <medication>", 
+				"      <reference value=\"#1\"/>", 
+				"   </medication>", 
+				"</MedicationOrder>"));
+		//@formatter:on
+		
+		mo = ourCtx.newXmlParser().parseResource(CustomMedicationOrderDstu2.class, string);
+		
+		medication = (Medication) mo.getMedication().getResource();
+		assertNotNull(medication);
+		assertEquals("#1", medication.getId().getValue());
+		assertEquals("MED TEXT", medication.getCode().getText());
+		
+	}
+	
+	/**
+	 * See #364
+	 */
+	@Test
+	public void testCustomTypeWithCustomDatatype() {
+		FhirContext context = FhirContext.forDstu2();
+		context.registerCustomType(CustomResource364Dstu2.class);
+		context.registerCustomType(CustomResource364CustomDate.class);
+		IParser parser = context.newXmlParser();
+
+		CustomResource364Dstu2 resource = new CustomResource364Dstu2();
+		resource.setBaseValues(new CustomResource364CustomDate().setDate(new DateTimeDt("2016-05-13")));
+
+		String xml = parser.encodeResourceToString(resource);
+		ourLog.info(xml);
+
+		//@formatter:on
+		assertThat(xml, stringContainsInOrder(
+			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+			"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
+			"</CustomResource>"
+		));
+		//@formatter:on
+		
+		CustomResource364Dstu2 parsedResource = parser.parseResource(CustomResource364Dstu2.class, xml);
+		assertEquals("2016-05-13", ((CustomResource364CustomDate)parsedResource.getBaseValues()).getDate().getValueAsString());
+	}
+
+	/**
+	 * See #364
+	 */
+	@Test
+	public void testCustomTypeWithPrimitiveType() {
+		FhirContext context = FhirContext.forDstu2();
+		IParser parser = context.newXmlParser();
+
+		CustomResource364Dstu2 resource = new CustomResource364Dstu2();
+		resource.setBaseValues(new StringDt("2016-05-13"));
+
+		String xml = parser.encodeResourceToString(resource);
+
+		//@formatter:on
+		assertThat(xml, stringContainsInOrder(
+			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+			"<baseValueString value=\"2016-05-13\"/>",
+			"</CustomResource>"
+		));
+		//@formatter:on
+		
+		CustomResource364Dstu2 parsedResource = parser.parseResource(CustomResource364Dstu2.class, xml);
+		assertEquals("2016-05-13", ((StringDt)parsedResource.getBaseValues()).getValueAsString());
+	}
 
 	@Before
 	public void before() {

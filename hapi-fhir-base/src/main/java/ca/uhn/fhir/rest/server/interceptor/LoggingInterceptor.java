@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
@@ -41,10 +42,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 /**
  * Server interceptor which logs each request using a defined format
@@ -73,7 +78,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * </tr>
  * <tr>
  * <td>${remoteAddr}</td>
- * <td>The originaring IP of the request</td>
+ * <td>The originating IP of the request</td>
  * </tr>
  * <tr>
  * <td>${requestHeader.XXXX}</td>
@@ -114,12 +119,21 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * </tr>
  * </table>
  */
+
+/*
+ * TODO: implement this, but it needs the logging to happen at the end
+ * <tr>
+ * <td>${processingTimeMillis}</td>
+ * <td>The number of milliseconds spent processing this request</td>
+ * </tr>
+
+ */
 public class LoggingInterceptor extends InterceptorAdapter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
-	private String myErrorMessageFormat = "ERROR - ${idOrResourceName}";
-	private boolean myLogExceptions;
+	private String myErrorMessageFormat = "ERROR - ${operationType} - ${idOrResourceName}";
+	private boolean myLogExceptions = true;
 	private Logger myLogger = ourLog;
 	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
 
@@ -145,18 +159,16 @@ public class LoggingInterceptor extends InterceptorAdapter {
 		return true;
 	}
 
-	@Override
-	public boolean incomingRequestPostProcessed(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 
+	@Override
+	public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
 		// Perform any string substitutions from the message format
-		StrLookup<?> lookup = new MyLookup(theRequest, theRequestDetails);
+		StrLookup<?> lookup = new MyLookup(theRequestDetails.getServletRequest(), theRequestDetails);
 		StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
 
 		// Actuall log the line
 		String line = subs.replace(myMessageFormat);
 		myLogger.info(line);
-
-		return true;
 	}
 
 	/**
@@ -283,9 +295,9 @@ public class LoggingInterceptor extends InterceptorAdapter {
 			} else if (theKey.startsWith("remoteAddr")) {
 				return StringUtils.defaultString(myRequest.getRemoteAddr());
 			} else if (theKey.equals("responseEncodingNoDefault")) {
-				EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
+				ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
 				if (encoding != null) {
-					return encoding.name();
+					return encoding.getEncoding().name();
 				} else {
 					return "";
 				}
@@ -307,10 +319,16 @@ public class LoggingInterceptor extends InterceptorAdapter {
 					EncodingEnum encoding = EncodingEnum.forContentType(contentType);
 					if (encoding != null) {
 						byte[] requestContents = myRequestDetails.loadRequestContents();
-						return new String(requestContents, Charsets.UTF_8);
+						return new String(requestContents, Constants.CHARSET_UTF8);
 					}
 				}
 				return "";
+			} else if ("processingTimeMillis".equals(theKey)) {
+				Date startTime = (Date) myRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
+				if (startTime != null) {
+					long time = System.currentTimeMillis() - startTime.getTime();
+					return Long.toString(time);
+				}
 			}
 
 			return "!VAL!";

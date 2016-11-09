@@ -251,7 +251,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		HttpGet get = new HttpGet(ourServerBase);
 //		get.addHeader("Accept", "application/xml, text/html");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
-		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/json+fhir"));
+		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/fhir+json"));
 	}
 	
 
@@ -315,7 +315,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent());
 			ourLog.info(response);
-			assertThat(response, not(containsString("_format")));
+			assertThat(response, containsString("_format=json"));
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			http.close();
@@ -367,6 +367,19 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	@Test
+	public void testMarkResourcesForReindexing() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing");
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		try {
+			String output = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(output);
+			assertEquals(200, http.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(http);;
+		}
+	}
+	
 	@Transactional(propagation = Propagation.NEVER)
 	@Test
 	public void testSuggestKeywords() throws Exception {
@@ -453,8 +466,8 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testGetOperationDefinition() {
-		OperationDefinition op = ourClient.read(OperationDefinition.class, "get-resource-counts");
-		assertEquals("$get-resource-counts", op.getCode());
+		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
+		assertEquals("get-resource-counts", op.getCode());
 	}
 
 	@Test

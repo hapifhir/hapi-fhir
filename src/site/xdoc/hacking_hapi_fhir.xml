@@ -97,8 +97,43 @@
 [INFO] Total time: 20:45 min
 [INFO] Finished at: 2016-02-27T15:05:35+00:00</pre> 
 			</p>
+			
+			<subsection name="Troubleshooting">
+				
+				<p>
+					If the build fails to execute successfully, try the following:
+				</p>
+				<ul>
+					<li>
+						The first thing to try is always a fresh clean build when things aren't working:<br/>
+						<pre>mvn clean install</pre>
+					</li>
+					<li>
+						<b>If you are trying to build a submodule</b> (e.g. <code>hapi-fhir-jpaserver-example</code>), 
+						try building the root project first. Especially when building from the Git <code>master</code>,
+						often times there will be dependencies that require a fresh complete build (note that this is
+						not generally an issue when building from a release version)<br/>
+						<pre><![CDATA[cd [workspace]/hapi-fhir
+mvn install]]></pre>
+					</li>
+					<li>
+						<b>If the build fails with memory issues (or mysteriously dies during unit tests)</b>,
+						your build environment may be running out of memory. By default, the HAPI build executes
+						unit tests in multiple parallel JVMs in order to save time. This can consume a lot of RAM
+						and sometimes causes issues. Try executing with the following command to disable
+						this behaviour:<br/>
+						<pre>mvn -P ALLMODULES,NOPARALLEL install</pre>
+					</li>
+					<li>
+						If you figure something else out, please <b>let us know</b> so that we can add it
+						to this list!
+					</li>
+				</ul>
+			
+			</subsection>
+			
 		</section>
-
+		
 		<section name="Importing into Eclipse">
 			<p>
 				This section shows how to import HAPI into Eclipse. There is no requirement
@@ -120,6 +155,29 @@
 				import more later.
 			</p>
 			<img src="./images/hacking_import_step2.png"/>
+			
+			<subsection name="Troubleshooting">
+			
+				<p>
+					When importing the HAPI projects into Eclipse, sometimes Eclipse 
+					will fail to correctly import libraries. If you import a module
+					into Eclipse and it fails to compile with many errors relating to
+					packages other than HAPI's, the following steps will fix this:
+				</p>
+				<ul>
+					<li>Delete the project from your Eclipse workspace</li>
+					<li>
+						On the local filesystem, delete the files <code>.project</code>
+						and <code>.classpath</code>, and the directory <code>.settings</code>
+						from each module you want to open.
+					</li>
+					<li>
+						Import each module again using the instructions above
+					</li>
+				</ul>
+				
+			</subsection>
+			
 		</section>
 	</body>
 

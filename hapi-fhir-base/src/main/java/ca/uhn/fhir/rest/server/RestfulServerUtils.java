@@ -10,7 +10,7 @@ package ca.uhn.fhir.rest.server;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,8 +46,10 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -59,6 +61,8 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.method.ElementsParameter;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.SummaryEnumParameter;
@@ -168,6 +172,9 @@ public class RestfulServerUtils {
 		}
 	}
 
+	/**
+	 * @TODO: this method is only called from one place and should be removed anyway
+	 */
 	public static EncodingEnum determineRequestEncoding(RequestDetails theReq) {
 		EncodingEnum retVal = determineRequestEncodingNoDefault(theReq);
 		if (retVal != null) {
@@ -177,24 +184,36 @@ public class RestfulServerUtils {
 	}
 
 	public static EncodingEnum determineRequestEncodingNoDefault(RequestDetails theReq) {
-		EncodingEnum retVal = null;
-		Iterator<String> acceptValues = theReq.getHeaders(Constants.HEADER_CONTENT_TYPE).iterator();
-		if (acceptValues != null) {
-			while (acceptValues.hasNext() && retVal == null) {
-				String nextAcceptHeaderValue = acceptValues.next();
-				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
-					for (String nextPart : nextAcceptHeaderValue.split(",")) {
-						int scIdx = nextPart.indexOf(';');
-						if (scIdx == 0) {
-							continue;
-						}
-						if (scIdx != -1) {
-							nextPart = nextPart.substring(0, scIdx);
-						}
-						nextPart = nextPart.trim();
-						retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
-						if (retVal != null) {
-							break;
+		ResponseEncoding retVal = determineRequestEncodingNoDefaultReturnRE(theReq);
+		if (retVal == null) {
+			return null;
+		}
+		return retVal.getEncoding();
+	}
+
+	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(RequestDetails theReq) {
+		ResponseEncoding retVal = null;
+		List<String> headers = theReq.getHeaders(Constants.HEADER_CONTENT_TYPE);
+		if (headers != null) {
+			Iterator<String> acceptValues = headers.iterator();
+			if (acceptValues != null) {
+				while (acceptValues.hasNext() && retVal == null) {
+					String nextAcceptHeaderValue = acceptValues.next();
+					if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
+						for (String nextPart : nextAcceptHeaderValue.split(",")) {
+							int scIdx = nextPart.indexOf(';');
+							if (scIdx == 0) {
+								continue;
+							}
+							if (scIdx != -1) {
+								nextPart = nextPart.substring(0, scIdx);
+							}
+							nextPart = nextPart.trim();
+							EncodingEnum encoding = EncodingEnum.forContentType(nextPart);
+							if (encoding != null) {
+								retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), encoding, nextPart);
+								break;
+							}
 						}
 					}
 				}
@@ -204,15 +223,16 @@ public class RestfulServerUtils {
 	}
 
 	/**
-	 * Returns null if the request doesn't express that it wants FHIR. If it expresses that it wants XML and JSON equally, returns thePrefer.
+	 * Returns null if the request doesn't express that it wants FHIR. If it expresses that it wants XML and JSON
+	 * equally, returns thePrefer.
 	 */
-	public static EncodingEnum determineResponseEncodingNoDefault(RequestDetails theReq, EncodingEnum thePrefer) {
+	public static ResponseEncoding determineResponseEncodingNoDefault(RequestDetails theReq, EncodingEnum thePrefer) {
 		String[] format = theReq.getParameters().get(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {
-				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
+				EncodingEnum retVal = EncodingEnum.forContentType(nextFormat);
 				if (retVal != null) {
-					return retVal;
+					return new ResponseEncoding(theReq.getServer().getFhirContext(), retVal, nextFormat);
 				}
 			}
 		}
@@ -226,11 +246,11 @@ public class RestfulServerUtils {
 		 * since Binary is supposed to use native content types unless the client has
 		 * explicitly requested FHIR.
 		 */
-		Map<String, EncodingEnum> contentTypeToEncoding = Constants.FORMAT_VAL_TO_ENCODING;
+		boolean strict = false;
 		if ("Binary".equals(theReq.getResourceName())) {
-			contentTypeToEncoding = EncodingEnum.getContentTypeToEncodingStrict();
+			strict = true;
 		}
-		
+
 		/*
 		 * The Accept header is kind of ridiculous, e.g.
 		 */
@@ -238,9 +258,9 @@ public class RestfulServerUtils {
 
 		List<String> acceptValues = theReq.getHeaders(Constants.HEADER_ACCEPT);
 		float bestQ = -1f;
-		EncodingEnum retVal = null;
-		if (acceptValues != null) {		
-		for (String nextAcceptHeaderValue : acceptValues) {
+		ResponseEncoding retVal = null;
+		if (acceptValues != null) {
+			for (String nextAcceptHeaderValue : acceptValues) {
 				StringTokenizer tok = new StringTokenizer(nextAcceptHeaderValue, ",");
 				while (tok.hasMoreTokens()) {
 					String nextToken = tok.nextToken();
@@ -265,15 +285,15 @@ public class RestfulServerUtils {
 					}
 
 					float q = 1.0f;
-					EncodingEnum encoding;
+					ResponseEncoding encoding;
 					if (endSpaceIndex == -1) {
 						if (startSpaceIndex == 0) {
-							encoding = contentTypeToEncoding.get(nextToken);
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken);
 						} else {
-							encoding = contentTypeToEncoding.get(nextToken.substring(startSpaceIndex));
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex));
 						}
 					} else {
-						encoding = contentTypeToEncoding.get(nextToken.substring(startSpaceIndex, endSpaceIndex));
+						encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex, endSpaceIndex));
 						String remaining = nextToken.substring(endSpaceIndex + 1);
 						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
 						while (qualifierTok.hasMoreTokens()) {
@@ -295,7 +315,7 @@ public class RestfulServerUtils {
 					}
 
 					if (encoding != null) {
-						if (q > bestQ || (q == bestQ && encoding == thePrefer)) {
+						if (q > bestQ || (q == bestQ && encoding.getEncoding() == thePrefer)) {
 							retVal = encoding;
 							bestQ = q;
 						}
@@ -303,57 +323,31 @@ public class RestfulServerUtils {
 
 				}
 
-				//
-				//
-				//
-				//
-				// Matcher m = ACCEPT_HEADER_PATTERN.matcher(nextAcceptHeaderValue);
-				// float q = 1.0f;
-				// while (m.find()) {
-				// String contentTypeGroup = m.group(1);
-				// EncodingEnum encoding = Constants.FORMAT_VAL_TO_ENCODING.get(contentTypeGroup);
-				// if (encoding != null) {
-				//
-				// String name = m.group(3);
-				// String value = m.group(4);
-				// if (name != null && value != null) {
-				// if ("q".equals(name)) {
-				// try {
-				// q = Float.parseFloat(value);
-				// q = Math.max(q, 0.0f);
-				// } catch (NumberFormatException e) {
-				// ourLog.debug("Invalid Accept header q value: {}", value);
-				// }
-				// }
-				// }
-				// }
-				//
-				// if (encoding != null) {
-				// if (q > bestQ || (q == bestQ && encoding == thePrefer)) {
-				// retVal = encoding;
-				// bestQ = q;
-				// }
-				// }
-				//
-				// if (!",".equals(m.group(5))) {
-				// break;
-				// }
-				// }
-				//
 			}
 
-			return retVal;
 		}
-		return null;
+
+		/*
+		 * If the client hasn't given any indication about which response
+		 * encoding they want, let's try the request encoding in case that
+		 * is useful (basically this catches the case where the request
+		 * has a Content-Type header but not an Accept header)
+		 */
+		if (retVal == null) {
+			retVal = determineRequestEncodingNoDefaultReturnRE(theReq);
+		}
+
+		return retVal;
 	}
 
 	/**
-	 * Determine whether a response should be given in JSON or XML format based on the incoming HttpServletRequest's <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
+	 * Determine whether a response should be given in JSON or XML format based on the incoming HttpServletRequest's
+	 * <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
 	 */
-	public static EncodingEnum determineResponseEncodingWithDefault(RequestDetails theReq) {
-		EncodingEnum retVal = determineResponseEncodingNoDefault(theReq, theReq.getServer().getDefaultResponseEncoding());
+	public static ResponseEncoding determineResponseEncodingWithDefault(RequestDetails theReq) {
+		ResponseEncoding retVal = determineResponseEncodingNoDefault(theReq, theReq.getServer().getDefaultResponseEncoding());
 		if (retVal == null) {
-			retVal = theReq.getServer().getDefaultResponseEncoding();
+			retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), theReq.getServer().getDefaultResponseEncoding(), null);
 		}
 		return retVal;
 	}
@@ -365,7 +359,8 @@ public class RestfulServerUtils {
 
 		if (retVal == null) {
 			/*
-			 * HAPI originally supported a custom parameter called _narrative, but this has been superceded by an official parameter called _summary
+			 * HAPI originally supported a custom parameter called _narrative, but this has been superceded by an official
+			 * parameter called _summary
 			 */
 			String[] narrative = requestParams.get(Constants.PARAM_NARRATIVE);
 			if (narrative != null && narrative.length > 0) {
@@ -398,10 +393,48 @@ public class RestfulServerUtils {
 		return RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_COUNT);
 	}
 
+	public static IPrimitiveType<Date> extractLastUpdatedFromResource(IBaseResource theResource) {
+		IPrimitiveType<Date> lastUpdated = null;
+		if (theResource instanceof IResource) {
+			lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) theResource);
+		} else if (theResource instanceof IAnyResource) {
+			lastUpdated = new InstantDt(((IAnyResource) theResource).getMeta().getLastUpdated());
+		}
+		return lastUpdated;
+	}
+
+	public static IIdType fullyQualifyResourceIdOrReturnNull(IRestfulServerDefaults theServer, IBaseResource theResource, String theServerBase, IIdType theResourceId) {
+		IIdType retVal = null;
+		if (theResourceId.hasIdPart() && isNotBlank(theServerBase)) {
+			String resName = theResourceId.getResourceType();
+			if (theResource != null && isBlank(resName)) {
+				resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
+			}
+			if (isNotBlank(resName)) {
+				retVal = theResourceId.withServerBase(theServerBase, resName);
+			}
+		}
+		return retVal;
+	}
+
+	private static ResponseEncoding getEncodingForContentType(FhirContext theFhirContext, boolean theStrict, String theContentType) {
+		EncodingEnum encoding;
+		if (theStrict) {
+			encoding = EncodingEnum.forContentTypeStrict(theContentType);
+		} else {
+			encoding = EncodingEnum.forContentType(theContentType);
+		}
+		if (encoding == null) {
+			return null;
+		} else {
+			return new ResponseEncoding(theFhirContext, encoding, theContentType);
+		}
+	}
+
 	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails).getEncoding();
 		IParser parser;
 		switch (responseEncoding) {
 		case JSON:
@@ -439,8 +472,7 @@ public class RestfulServerUtils {
 								try {
 									q = Float.parseFloat(value);
 									q = Math.max(q, 0.0f);
-								}
-								catch (NumberFormatException e) {
+								} catch (NumberFormatException e) {
 									ourLog.debug("Invalid Accept header q value: {}", value);
 								}
 							}
@@ -525,17 +557,17 @@ public class RestfulServerUtils {
 	}
 
 	public static Object streamResponseAsBundle(IRestfulServerDefaults theServer, Bundle bundle, Set<SummaryEnum> theSummaryMode, boolean respondGzip, RequestDetails theRequestDetails)
-					throws IOException {
+			throws IOException {
 
 		int status = 200;
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails).getEncoding();
 
 		String contentType = responseEncoding.getBundleContentType();
 
 		String charset = Constants.CHARSET_NAME_UTF8;
-		Writer writer = theRequestDetails.getResponse().getResponseWriter(status, contentType, charset, respondGzip);
+		Writer writer = theRequestDetails.getResponse().getResponseWriter(status, null, contentType, charset, respondGzip);
 
 		try {
 			IParser parser = RestfulServerUtils.getNewParser(theServer.getFhirContext(), theRequestDetails);
@@ -543,34 +575,46 @@ public class RestfulServerUtils {
 				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			}
 			parser.encodeBundleToWriter(bundle, writer);
-		}
-		catch (Exception e) {
-			//always send a response, even if the parsing went wrong
+		} catch (Exception e) {
+			// always send a response, even if the parsing went wrong
 		}
 		return theRequestDetails.getResponse().sendWriterResponse(status, contentType, charset, writer);
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode,
-			int stausCode, boolean theAddContentLocationHeader, boolean respondGzip,
-			RequestDetails theRequestDetails)
-					throws IOException {
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theAddContentLocationHeader,
+			boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
+		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
+	}
+
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStausCode, String theStatusMessage,
+			boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
+			throws IOException {
 		IRestfulResponse restUtil = theRequestDetails.getResponse();
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails,
-				theServer.getDefaultResponseEncoding());
+		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, theServer.getDefaultResponseEncoding());
 
 		String serverBase = theRequestDetails.getFhirServerBase();
-		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart()
-				&& isNotBlank(serverBase)) {
-			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
-			IIdType fullId = theResource.getIdElement().withServerBase(serverBase, resName);
-			restUtil.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+		IIdType fullId = null;
+		if (theOperationResourceId != null) {
+			fullId = theOperationResourceId;
+		} else if (theResource != null) {
+			if (theResource.getIdElement() != null) {
+				IIdType resourceId = theResource.getIdElement();
+				fullId = fullyQualifyResourceIdOrReturnNull(theServer, theResource, serverBase, resourceId);
+			}
+		}
+
+		if (theAddContentLocationHeader && fullId != null) {
+			if (theServer.getFhirContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				restUtil.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+			}
+			restUtil.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
-			if (theResource.getIdElement().hasVersionIdPart()) {
-				restUtil.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getIdElement().getVersionIdPart() + '"');
+			if (fullId != null && fullId.hasVersionIdPart()) {
+				restUtil.addHeader(Constants.HEADER_ETAG, "W/\"" + fullId.getVersionIdPart() + '"');
 			}
 		}
 
@@ -586,16 +630,19 @@ public class RestfulServerUtils {
 			// malicious images or HTML blocks being served up as content.
 			restUtil.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 
-			return restUtil.sendAttachmentResponse(bin, stausCode, contentType);
+			return restUtil.sendAttachmentResponse(bin, theStausCode, contentType);
 		}
 
 		// Ok, we're not serving a binary resource, so apply default encoding
-		responseEncoding = responseEncoding != null ? responseEncoding : theServer.getDefaultResponseEncoding();
+		if (responseEncoding == null) {
+			responseEncoding = new ResponseEncoding(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), null);
+		}
 
 		boolean encodingDomainResourceAsText = theSummaryMode.contains(SummaryEnum.TEXT);
 		if (encodingDomainResourceAsText) {
 			/*
-			 * If the user requests "text" for a bundle, only suppress the non text elements in the Element.entry.resource parts, we're not streaming just the narrative as HTML (since bundles don't even
+			 * If the user requests "text" for a bundle, only suppress the non text elements in the Element.entry.resource
+			 * parts, we're not streaming just the narrative as HTML (since bundles don't even
 			 * have one)
 			 */
 			if ("Bundle".equals(theServer.getFhirContext().getResourceDefinition(theResource).getName())) {
@@ -603,19 +650,25 @@ public class RestfulServerUtils {
 			}
 		}
 
-		if (encodingDomainResourceAsText) {
-			contentType = Constants.CT_HTML;
+		/*
+		 * Last-Modified header
+		 */
+
+		IPrimitiveType<Date> lastUpdated;
+		if (theOperationResourceLastUpdated != null) {
+			lastUpdated = theOperationResourceLastUpdated;
 		} else {
-			contentType = responseEncoding.getResourceContentType();
+			lastUpdated = extractLastUpdatedFromResource(theResource);
 		}
-		String charset = Constants.CHARSET_NAME_UTF8;
+		if (lastUpdated != null && lastUpdated.isEmpty() == false) {
+			restUtil.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
+		}
 
-		if (theResource instanceof IResource) {
-			InstantDt lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) theResource);
-			if (lastUpdated != null && lastUpdated.isEmpty() == false) {
-				restUtil.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
-			}
+		/*
+		 * Category header (DSTU1 only)
+		 */
 
+		if (theResource instanceof IResource && theServer.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			TagList list = (TagList) ((IResource) theResource).getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 			if (list != null) {
 				for (Tag tag : list) {
@@ -624,23 +677,45 @@ public class RestfulServerUtils {
 					}
 				}
 			}
-		} else {
-			Date lastUpdated = ((IAnyResource) theResource).getMeta().getLastUpdated();
-			if (lastUpdated != null) {
-				restUtil.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated));
-			}
 		}
 
-		Writer writer = restUtil.getResponseWriter(stausCode, contentType, charset, respondGzip);
-		
-		if (encodingDomainResourceAsText && theResource instanceof IResource) {
+		/*
+		 * Stream the response body
+		 */
+
+		if (theResource == null) {
+			contentType = null;
+		} else if (encodingDomainResourceAsText) {
+			contentType = Constants.CT_HTML;
+		} else {
+			contentType = responseEncoding.getResourceContentType();
+		}
+		String charset = Constants.CHARSET_NAME_UTF8;
+
+		Writer writer = restUtil.getResponseWriter(theStausCode, theStatusMessage, contentType, charset, respondGzip);
+		if (theResource == null) {
+			// No response is being returned
+		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
 			writer.append(((IResource) theResource).getText().getDiv().getValueAsString());
 		} else {
 			IParser parser = getNewParser(theServer.getFhirContext(), theRequestDetails);
 			parser.encodeResourceToWriter(theResource, writer);
 		}
-		
-		return restUtil.sendWriterResponse(stausCode, contentType, charset, writer);
+
+		return restUtil.sendWriterResponse(theStausCode, contentType, charset, writer);
+	}
+
+	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
+		String[] retVal = theRequest.getParameters().get(theParamName);
+		if (retVal == null) {
+			return null;
+		}
+		try {
+			return Integer.parseInt(retVal[0]);
+		} catch (NumberFormatException e) {
+			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] { theParamName, retVal[0], e });
+			return null;
+		}
 	}
 
 	// static Integer tryToExtractNamedParameter(HttpServletRequest theRequest, String name) {
@@ -656,19 +731,6 @@ public class RestfulServerUtils {
 	// return count;
 	// }
 
-	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
-		String[] retVal = theRequest.getParameters().get(theParamName);
-		if (retVal == null) {
-			return null;
-		}
-		try {
-			return Integer.parseInt(retVal[0]);
-		} catch (NumberFormatException e) {
-			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] { theParamName, retVal[0], e });
-			return null;
-		}
-	}
-
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
 			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
@@ -681,6 +743,71 @@ public class RestfulServerUtils {
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
+	}
+
+	/**
+	 * Return type for {@link RestfulServerUtils#determineRequestEncodingNoDefault(RequestDetails)}
+	 */
+	public static class ResponseEncoding {
+		private final EncodingEnum myEncoding;
+		private final Boolean myNonLegacy;
+
+		public ResponseEncoding(FhirContext theCtx, EncodingEnum theEncoding, String theContentType) {
+			super();
+			myEncoding = theEncoding;
+			if (theContentType != null) {
+				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
+					myNonLegacy = !theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3);
+				} else {
+					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
+				}
+			} else {
+				if (theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+					myNonLegacy = null;
+				} else {
+					myNonLegacy = Boolean.TRUE;
+				}
+			}
+		}
+
+		public EncodingEnum getEncoding() {
+			return myEncoding;
+		}
+
+		public String getResourceContentType() {
+			if (Boolean.TRUE.equals(isNonLegacy())) {
+				return getEncoding().getResourceContentTypeNonLegacy();
+			} else {
+				return getEncoding().getResourceContentType();
+			}
+		}
+
+		public Boolean isNonLegacy() {
+			return myNonLegacy;
+		}
+	}
+
+	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest, FhirContext theContext) {
+		if (theEncoding == null) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
+			}
+		} else if (theEncoding == EncodingEnum.JSON) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+			}
+		} else if (theEncoding == EncodingEnum.XML) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
+			} else {
+				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
+			}
+		}
+
 	}
 
 }

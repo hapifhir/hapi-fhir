@@ -40,6 +40,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
+
 //@formatter:off
 @Embeddable
 @Entity
@@ -139,8 +141,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
-		b.append("valueLow", getValueLow());
-		b.append("valueHigh", getValueHigh());
+		b.append("valueLow", new InstantDt(getValueLow()));
+		b.append("valueHigh", new InstantDt(getValueHigh()));
 		return b.build();
 	}
 }

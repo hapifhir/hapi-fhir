@@ -94,6 +94,8 @@ public class Configuration {
 	  // 1: error
 	  // 2: return null
 
+	private static boolean acceptInvalidEnums;
+	
 	public static boolean errorOnAutoCreate() {
 	  return status == 1;
   }
@@ -103,4 +105,15 @@ public class Configuration {
 	  return status == 0;
   }
 
+
+	public static boolean isAcceptInvalidEnums() {
+		return acceptInvalidEnums;
+	}
+
+
+	public static void setAcceptInvalidEnums(boolean value) {
+		acceptInvalidEnums = value;
+	}
+
+	
 }

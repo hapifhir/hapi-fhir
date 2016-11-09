@@ -21,5 +21,5 @@ package ca.uhn.fhir.rest.api;
  */
 
 public enum RequestTypeEnum {
-	DELETE, GET, OPTIONS, POST, PUT
+	CONNECT, DELETE, GET, OPTIONS, PATCH, POST, PUT, TRACE, TRACK, HEAD
 }

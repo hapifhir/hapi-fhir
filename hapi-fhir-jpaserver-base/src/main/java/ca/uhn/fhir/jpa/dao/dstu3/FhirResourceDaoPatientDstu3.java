@@ -64,7 +64,7 @@ public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>im
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
 		
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao);
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao, myTerminologySvc);
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(paramMap);
 	}
@@ -72,7 +72,7 @@ public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>im
 	@Override
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, getResourceName(), getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE, requestDetails);
 
 		return doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative);
@@ -81,7 +81,7 @@ public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>im
 	@Override
 	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, getResourceName(), getContext(), theRequestDetails);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, requestDetails);
 
 		return doEverythingOperation(null, theCount, theLastUpdated, theSort, theContent, theNarrative);

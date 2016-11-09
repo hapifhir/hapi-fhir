@@ -101,7 +101,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		});
 		assertEquals(null, entity.getIndexStatus());
 
-		mySystemDao.performReindexingPass(null, mySrd);
+		mySystemDao.performReindexingPass(null);
 
 		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
 			@Override
@@ -112,7 +112,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
 		// Just make sure this doesn't cause a choke
-		mySystemDao.performReindexingPass(100000, mySrd);
+		mySystemDao.performReindexingPass(100000);
 
 		// Try making the resource unparseable
 
@@ -134,7 +134,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			}
 		});
 
-		mySystemDao.performReindexingPass(null, mySrd);
+		mySystemDao.performReindexingPass(null);
 
 		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
 			@Override
@@ -325,6 +325,96 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	}
 	
+	/**
+	 * ?identifier=
+	 */
+	@Test
+	public void testTransactionCreateMatchUrlWithOneMatchNoResourceName1() {
+		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("?identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerbEnum.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		Entry respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), endsWith("Patient/" + id.getIdPart() + "/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		respEntry = resp.getEntry().get(1);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		o = (Observation) myObservationDao.read(new IdDt(respEntry.getResponse().getLocationElement()), mySrd);
+		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals("1", o.getId().getVersionIdPart());
+
+	}
+
+	/**
+	 * identifier=
+	 */
+	@Test
+	public void testTransactionCreateMatchUrlWithOneMatchNoResourceName2() {
+		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerbEnum.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		Entry respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), endsWith("Patient/" + id.getIdPart() + "/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		respEntry = resp.getEntry().get(1);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		o = (Observation) myObservationDao.read(new IdDt(respEntry.getResponse().getLocationElement()), mySrd);
+		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals("1", o.getId().getVersionIdPart());
+
+	}
+
 	@Test
 	public void testTransactionCreateMatchUrlWithTwoMatch() {
 		String methodName = "testTransactionCreateMatchUrlWithTwoMatch";
@@ -745,7 +835,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			// ok
 		}
 
-		IBundleProvider history = myPatientDao.history(id, null, mySrd);
+		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
 		assertEquals(2, history.size());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 1).get(0)));
@@ -1172,13 +1262,15 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(2, resp.getEntry().size());
+		
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		Entry nextEntry = resp.getEntry().get(0);
 		assertEquals("200 OK", nextEntry.getResponse().getStatus());
 		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getId().toVersionless());
-		assertNotEquals(id, p.getId());
 		assertThat(p.getId().toString(), endsWith("/_history/2"));
+		assertNotEquals(id, p.getId());
 
 		nextEntry = resp.getEntry().get(0);
 		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());

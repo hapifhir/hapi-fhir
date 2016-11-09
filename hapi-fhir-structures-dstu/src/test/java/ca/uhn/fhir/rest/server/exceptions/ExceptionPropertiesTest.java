@@ -10,11 +10,31 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ExceptionPropertiesTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionPropertiesTest.class);
 
+	@Test
+	public void testConstructors() {
+		new FhirClientConnectionException("");
+		new FhirClientConnectionException("", new Exception());
+		new FhirClientConnectionException(new Exception());
+		new NotImplementedOperationException("");
+		new NotImplementedOperationException(null, new OperationOutcome());
+		new FhirClientInappropriateForServerException(new Exception());
+		new FhirClientInappropriateForServerException("", new Exception());
+		
+		assertEquals("Resource Patient/123 is gone/deleted", new ResourceGoneException(new IdDt("Patient/123")).getMessage());
+		assertEquals("FOO", new ResourceGoneException("FOO", new OperationOutcome()).getMessage());
+		assertEquals("Resource of type Practitioner with ID Patient/123 is gone/deleted", new ResourceGoneException(Practitioner.class, new IdDt("Patient/123")).getMessage());
+	}
+	
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testExceptionsAreGood() throws Exception {

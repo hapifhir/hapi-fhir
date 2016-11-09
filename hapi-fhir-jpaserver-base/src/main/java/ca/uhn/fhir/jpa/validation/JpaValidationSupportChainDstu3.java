@@ -28,6 +28,8 @@ import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+
 public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
@@ -35,6 +37,9 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 	@Autowired
 	@Qualifier("myJpaValidationSupportDstu3")
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 myJpaValidationSupportDstu3;
+	
+	@Autowired
+	private IHapiTerminologySvcDstu3 myTerminologyService;
 	
 	public JpaValidationSupportChainDstu3() {
 		super();
@@ -48,6 +53,7 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 	public void postConstruct() {
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupportDstu3);
+		addValidationSupport(myTerminologyService);
 	}
 	
 	@PreDestroy

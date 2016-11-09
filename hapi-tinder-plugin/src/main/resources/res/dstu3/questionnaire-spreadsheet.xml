@@ -7,16 +7,16 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Lloyd</LastAuthor>
+  <LastAuthor>lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-03-26T19:55:07Z</LastSaved>
+  <LastSaved>2016-07-16T23:11:02Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>12795</WindowHeight>
+  <WindowHeight>14010</WindowHeight>
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
@@ -973,7 +973,7 @@
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
         x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates a regular expression that the value of this element must meet.  Only allowed for simple data types.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s73"><Data ss:Type="String">Short Label</Data><Comment
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Short Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1644,7 +1644,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">group | display | boolean | decimal | integer | date | dateTime +</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">group | display | question | boolean | decimal | integer | date | dateTime +</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1672,7 +1672,8 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1716,7 +1717,7 @@
     <Cell ss:Index="23" ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="210">
-    <Cell ss:StyleID="s96"><Data ss:Type="String">Questionnaire.item.enableWhen.answered</Data><NamedCell
+    <Cell ss:StyleID="s96"><Data ss:Type="String">Questionnaire.item.enableWhen.hasAnswer</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1966,7 +1967,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><Data ss:Type="String">100;400</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
@@ -4137,9 +4139,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>19</TopRowBottomPane>
+   <TopRowBottomPane>26</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>14</LeftColumnRightPane>
+   <LeftColumnRightPane>16</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4155,7 +4157,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>20</ActiveRow>
+     <ActiveRow>29</ActiveRow>
      <ActiveCol>22</ActiveCol>
     </Pane>
    </Panes>
@@ -4231,7 +4233,7 @@
     <Cell ss:StyleID="s91"/>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Questionnaire</Data></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">The link ids for groups and questions must be unique within the questionnaire</Data></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">descendents().linkId.distinct()</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">descendants().linkId.isDistinct()</Data></Cell>
     <Cell ss:StyleID="s113"><Data ss:Type="String">count(descendant::f:linkId/@value)=count(distinct-values(descendant::f:linkId/@value))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -4261,7 +4263,7 @@
     <Cell ss:StyleID="s91"/>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Questionnaire.item</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Only 'choice' items can have options</Data></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">(type!='choice' and type!='open-choice') or (options.empty() and option.empty())</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">(type ='choice' or type = 'open-choice') or (options.empty() and option.empty())</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">f:type/@value=('choice','open-choice') or not(f:option or f:options)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -4281,7 +4283,7 @@
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Questionnaire.item.enableWhen</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">enableWhen must contain either an 'answer' or an 'answered' element</Data></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">answered or answer</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">hasAnswer.exists() xor answer.exists()</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">count(*[starts-with(local-name(.), 'answer')]|answered) = 1</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
@@ -4699,8 +4701,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4988,8 +4989,8 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Operations!R1C1:R2C9"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="52" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s118" ss:DefaultRowHeight="15">
+  <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="51" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s118" ss:DefaultRowHeight="14.4375">
    <Column ss:StyleID="s118" ss:AutoFitWidth="0" ss:Width="130.5"/>
    <Column ss:StyleID="s118" ss:AutoFitWidth="0" ss:Width="124.5"/>
    <Column ss:StyleID="s118" ss:Width="24"/>
@@ -4999,7 +5000,7 @@
    <Column ss:StyleID="s118" ss:AutoFitWidth="0" ss:Width="253.5" ss:Span="1"/>
    <Column ss:Index="10" ss:StyleID="s118" ss:Width="87"/>
    <Column ss:StyleID="s118" ss:Width="94.5"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0" ss:Height="15">
     <Cell ss:StyleID="s130"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
         x:Family="Swiss" html:Size="8" html:Color="#000000">The name of the operation or parameter (parameters prefixed by operation name + &quot;.&quot;) </Font>       </ss:Data></Comment><NamedCell
@@ -5039,7 +5040,7 @@
     <Cell><Data ss:Type="String">Example.Request</Data></Cell>
     <Cell><Data ss:Type="String">Example.Response</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="360">
+   <Row ss:AutoFitHeight="0" ss:Height="409.6875">
     <Cell ss:StyleID="s120"><Data ss:Type="String">populate</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Resource | Instance</Data><NamedCell
@@ -5053,12 +5054,12 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">Generates a [[[QuestionnaireResponse]]] instance  based on a specified [[[Questionnaire]]], filling in answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the [[[Questionnaire]]].&#10;&#10;If the operation is not called at the instance level, one and only one of the identifier, questionnaire or questionnaireRef 'in' parameters must be provided. If called at the instance level, these parameters will be ignored.&#10;&#10;The response will contain a [[[QuestionnaireResponse]]] instance based on the specified [[[Questionnaire]]] and/or an [[[OperationOutcome]]] resource with errors or warnings.&#10;&#10;The [[[QuestionnaireResponse]]] instance will be populated with an unanswered set of questions following the group and question structure of the specified [[[Questionnaire]]].  If  *content* parameters were specified or the *local* parameter was set to true, some of the questions may have answers filled in as well.  In the case of repeating questions or groups, typically only one repetition will be provided unless answer values exist that would support populating multiple repetitions.&#10;&#10;Population of the [[[QuestionnaireResponse]]] with appropriate data is dependent on the questions and/or groups in the [[[Questionnaire]]] having metadata that allows the server to recognize the questions.  This might be through *Questionnaire.group.question.code*, through extensions such as the [[[http://hl7.org/fhir/StructureDefinition/questionnaire-deReference]]] extension or through use of the [[[ConceptMap]]] resource.&#10;&#10;Regardless of the mechanism used to link the questions in a questionnaire to a &quot;known&quot; mappable concept, solutions using this operation should ensure that the details of the question and associated linkage element are sufficiently similar as to safely allow auto-population; i.e. the question text and context must be sufficiently the same, the value set for the question must fall within the value set for the mapped element, the data types must be the same or convertible, etc.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s136"><Data ss:Type="String">While it is theoretically possible for a [[[QuestionnaireResponse]]] instance to be completely auto-populated and submitted without human review, the intention of this transaction is merely to reduce redundant data entry.  A client **SHOULD** ensure that a human submitter has an opportunity to review the auto-populated answers to confirm correctness as well as to complete or expand on information provided by the auto-population process.&#10;&#10;When creating an &quot;empty&quot; questionnaire, the general algorithm is to create a QuestionnaireResponse with one item for every item in the source Questionnaire, including items with &quot;enableWhen&quot;, &quot;display&quot; items, etc.  If a question has a default, the default answer should be populated.  And the QuestionnaireResponse should point back to the originating Questionnaire.  Repeating items will typically only include a single repetition.  Other extensions and/or &#10;&#10;Complex form designs with conditional logic or tight constraints on cardinalities may be challenging to auto-populate.  A server MAY choose to traverse the questionnaire as if it were a human respondent, answering only those questions that are enabled based on previously answered questions.  However, doing so may result in minimal population.  Alternatively, systems may choose to populate all known answers, independent of dependencies and other constraints.  This may cause questions to be answered that should not be answered.  It will be up to the client to appropriately prune the final populated questionnaire once human review has taken place.&#10;&#10;Invoking this operation with the ''content'' parameter may involve the disclosure of personally identifiable healthcare information to the system which is performing the population process.  No such disclosures should be made unless the system on which the operation is being invoked is a &quot;trusted&quot; system and appropriate agreements are in place to protect the confidentiality of any information shared with that system.</Data><NamedCell
+    <Cell ss:StyleID="s136"><Data ss:Type="String">While it is theoretically possible for a [[[QuestionnaireResponse]]] instance to be completely auto-populated and submitted without human review, the intention of this transaction is merely to reduce redundant data entry.  A client **SHOULD** ensure that a human submitter has an opportunity to review the auto-populated answers to confirm correctness as well as to complete or expand on information provided by the auto-population process.&#10;&#10;When creating an &quot;empty&quot; questionnaire, the general algorithm is to create a QuestionnaireResponse with one item for every item in the source Questionnaire, including items with &quot;enableWhen&quot;, &quot;display&quot; items, etc.  If a question has a default, the default answer should be populated.  And the QuestionnaireResponse should point back to the originating Questionnaire.  Repeating items will typically only include a single repetition.  Other extensions and/or elements may also be populated if the system is aware of appropriate values.&#10;&#10;Complex form designs with conditional logic or tight constraints on cardinalities may be challenging to auto-populate.  A server MAY choose to traverse the questionnaire as if it were a human respondent, answering only those questions that are enabled based on previously answered questions.  However, doing so may result in minimal population.  Alternatively, systems may choose to populate all known answers, independent of dependencies and other constraints.  This may cause questions to be answered that should not be answered.  It will be up to the client to appropriately prune the final populated questionnaire once human review has taken place.&#10;&#10;Invoking this operation with the ''content'' parameter may involve the disclosure of personally identifiable healthcare information to the system which is performing the population process.  No such disclosures should be made unless the system on which the operation is being invoked is a &quot;trusted&quot; system and appropriate agreements are in place to protect the confidentiality of any information shared with that system.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">$populate-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$populate-response.txt</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="60">
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.identifier</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
@@ -5069,7 +5070,7 @@
     <Cell ss:StyleID="s138"><Data ss:Type="String">A logical questionnaire identifier (i.e. ''Questionnaire.identifier''). The server must know the questionnaire or be able to retrieve it from other known repositories.</Data></Cell>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="45">
+   <Row ss:AutoFitHeight="0" ss:Height="43.3125">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.questionnaire</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
@@ -5080,7 +5081,7 @@
     <Cell ss:StyleID="s138"><Data ss:Type="String">The [[[Questionnaire]]] is provided directly as part of the request. Servers may choose not to accept questionnaires in this fashion</Data></Cell>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="75">
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.questionnaireRef</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
@@ -5091,7 +5092,7 @@
     <Cell ss:StyleID="s138"><Data ss:Type="String">The [[[Questionnaire]]] is provided as a resource reference. Servers may choose not to accept questionnaires in this fashion or may fail if they cannot resolve or access the referenced questionnaire.</Data></Cell>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="105">
+   <Row ss:AutoFitHeight="0" ss:Height="86.4375">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.subject</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
@@ -5102,7 +5103,7 @@
     <Cell ss:StyleID="s138"><Data ss:Type="String">The resource that is to be the *QuestionnaireResponse.subject*. The [[[QuestionnaireResponse]]] instance will reference the provided subject.  In addition, if the *local* parameter is set to true, server information about the specified subject will be used to populate the instance.</Data></Cell>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="120">
+   <Row ss:AutoFitHeight="0" ss:Height="100.6875">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.content</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
@@ -5113,7 +5114,7 @@
     <Cell ss:StyleID="s138"><Data ss:Type="String">Resources containing information to be used to help populate the [[[QuestionnaireResponse]]].  These may be FHIR resources or may be binaries containing FHIR documents, CDA documents or other source materials.  Servers may not support all possible source materials and may ignore materials they do not recognize.  (They MAY provide warnings if ignoring submitted resources.)</Data></Cell>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="60">
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.local</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
@@ -5124,7 +5125,7 @@
     <Cell ss:StyleID="s138"><Data ss:Type="String">If specified and set to 'true' (and the server is capable), the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions.</Data></Cell>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="30">
+   <Row ss:AutoFitHeight="0" ss:Height="28.6875">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.questionnaire</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">out</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
@@ -5135,8 +5136,188 @@
     <Cell ss:StyleID="s138"><Data ss:Type="String">The partially (or fully)-populated set of answers for the specified Questionnaire</Data></Cell>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0">
+   <Row ss:AutoFitHeight="0" ss:Height="100.6875">
     <Cell ss:StyleID="s123"><Data ss:Type="String">populate.issues</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">OperationOutcome</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">A list of hints and warnings about problems encountered while populating the questionnaire. These might be show to the user as an advisory note. Note: if the questionnaire cannot be populated at all, then the operation should fail, and an OperationOutcome is returned directly with the failure, rather than using this parameter</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="409.6875">
+    <Cell ss:StyleID="s120"><Data ss:Type="String">populatehtml</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Resource | Instance</Data></Cell>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">operation</Data></Cell>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Geneate HTML for Questionnaire</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">Generates an HTML page as a [[[Binary]]] instance  based on a specified [[[Questionnaire]]], filling in answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the [[[Questionnaire]]].&#10;&#10;If the operation is not called at the instance level, one and only one of the identifier, questionnaire or questionnaireRef 'in' parameters must be provided. If called at the instance level, these parameters will be ignored.&#10;&#10;The response will contain a [[[Binary]]] instance containing an HTML page for filling in and submitting the specified [[[Questionnaire]]] and/or an [[[OperationOutcome]]] resource with errors or warnings.&#10;&#10;The generated HTML form instance will be populated with an unanswered set of questions following the group and question structure of the specified [[[Questionnaire]]].  If  *content* parameters were specified or the *local* parameter was set to true, some of the questions may have answers filled in as well.  In the case of repeating questions or groups, typically only one repetition will be provided unless answer values exist that would support populating multiple repetitions.&#10;&#10;Population of the HTML form with appropriate data is dependent on the questions and/or groups in the [[[Questionnaire]]] having metadata that allows the server to recognize the questions.  This might be through *Questionnaire.group.question.code*, through extensions such as the [[[http://hl7.org/fhir/StructureDefinition/questionnaire-deReference]]] extension or through use of the [[[ConceptMap]]] resource.&#10;&#10;Regardless of the mechanism used to link the questions in a questionnaire to a &quot;known&quot; mappable concept, solutions using this operation should ensure that the details of the question and associated linkage element are sufficiently similar as to safely allow auto-population; i.e. the question text and context must be sufficiently the same, the value set for the question must fall within the value set for the mapped element, the data types must be the same or convertible, etc.</Data></Cell>
+    <Cell ss:StyleID="s136"><Data ss:Type="String">While it is theoretically possible for an HTML form to be completely auto-populated and submitted without human review, the intention of this transaction is merely to reduce redundant data entry.  The HTML form **SHOULD** ensure that a human submitter has an opportunity to review the auto-populated answers to confirm correctness as well as to complete or expand on information provided by the auto-population process.&#10;&#10;Complex form designs with conditional logic or tight constraints on cardinalities may be challenging to auto-populate.  A server MAY choose to traverse the questionnaire as if it were a human respondent, answering only those questions that are enabled based on previously answered questions.  However, doing so may result in minimal population.  Alternatively, systems may choose to populate all known answers, independent of dependencies and other constraints.  This may cause questions to be answered that should not be answered.  The generated HTML form is responsible for pruning the final populated questionnaire once human review has taken place.&#10;&#10;Invoking this operation with the ''content'' parameter may involve the disclosure of personally identifiable healthcare information to the system which is performing the population process.  No such disclosures should be made unless the system on which the operation is being invoked is a &quot;trusted&quot; system and appropriate agreements are in place to protect the confidentiality of any information shared with that system.</Data></Cell>
+    <Cell><Data ss:Type="String">$populatehtml-request.txt</Data></Cell>
+    <Cell><Data ss:Type="String">$populatehtml-response.txt</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatehtml.identifier</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">A logical questionnaire identifier (i.e. ''Questionnaire.identifier''). The server must know the questionnaire or be able to retrieve it from other known repositories.</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="43.3125">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatehtml.questionnaire</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Questionnaire</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">The [[[Questionnaire]]] is provided directly as part of the request. Servers may choose not to accept questionnaires in this fashion</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatehtml.questionnaireRef</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Reference(Questionnaire)</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">The [[[Questionnaire]]] is provided as a resource reference. Servers may choose not to accept questionnaires in this fashion or may fail if they cannot resolve or access the referenced questionnaire.</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="100.6875">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatehtml.content</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Reference(Any)</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">Resources containing information to be used to help populate the generated HTML form.  These may be FHIR resources or may be binaries containing FHIR documents, CDA documents or other source materials.  Servers may not support all possible source materials and may ignore materials they do not recognize.  (They MAY provide warnings if ignoring submitted resources.)</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatehtml.local</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">boolean</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">If specified and set to 'true' (and the server is capable), the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions.</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatehtml.form</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">The URL for the web form  that supports capturing the information defined by questionnaire, possibly partially (or fully)-populated with a set of answers for the specified Questionnaire</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="100.6875">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatehtml.issues</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">OperationOutcome</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">A list of hints and warnings about problems encountered while populating the questionnaire. These might be show to the user as an advisory note. Note: if the questionnaire cannot be populated at all, then the operation should fail, and an OperationOutcome is returned directly with the failure, rather than using this parameter</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="409.6875">
+    <Cell ss:StyleID="s120"><Data ss:Type="String">populatelink</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Resource | Instance</Data></Cell>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">operation</Data></Cell>
+    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">Generate a link to a Questionnaire completion webpage</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">Generates a link to a web page to be used to answer a specified [[[Questionnaire]]].  The form at the specified location will be pre-filled with answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the [[[Questionnaire]]].&#10;&#10;If the operation is not called at the instance level, one and only one of the identifier, questionnaire or questionnaireRef 'in' parameters must be provided. If called at the instance level, these parameters will be ignored.&#10;&#10;The response will contain a url for the web page to direct the user to.  The page will allow the user to complete/verify the questionnaire answers and to submit the form.&#10;&#10;The specified page will be populated with an unanswered set of questions following the group and question structure of the specified [[[Questionnaire]]].  If  *content* parameters were specified or the *local* parameter was set to true, some of the questions may have answers filled in as well.  In the case of repeating questions or groups, typically only one repetition will be provided unless answer values exist that would support populating multiple repetitions.&#10;&#10;Population of the page with appropriate data is dependent on the questions and/or groups in the [[[Questionnaire]]] having metadata that allows the server to recognize the questions.  This might be through *Questionnaire.group.question.code*, through extensions such as the [[[http://hl7.org/fhir/StructureDefinition/questionnaire-deReference]]] extension or through use of the [[[ConceptMap]]] resource.&#10;&#10;Regardless of the mechanism used to link the questions in a questionnaire to a &quot;known&quot; mappable concept, solutions using this operation should ensure that the details of the question and associated linkage element are sufficiently similar as to safely allow auto-population; i.e. the question text and context must be sufficiently the same, the value set for the question must fall within the value set for the mapped element, the data types must be the same or convertible, etc.</Data></Cell>
+    <Cell ss:StyleID="s136"><Data ss:Type="String">While it is theoretically possible for the questionnaire response to be completely auto-populated and submitted without human review, the intention of this transaction is merely to reduce redundant data entry.  The web page **SHOULD** ensure that a human submitter has an opportunity to review the auto-populated answers to confirm correctness as well as to complete or expand on information provided by the auto-population process.&#10;&#10;Complex form designs with conditional logic or tight constraints on cardinalities may be challenging to auto-populate.  A server MAY choose to traverse the questionnaire as if it were a human respondent, answering only those questions that are enabled based on previously answered questions.  However, doing so may result in minimal population.  Alternatively, systems may choose to populate all known answers, independent of dependencies and other constraints.  This may cause questions to be answered that should not be answered.  The web form is responsible for pruning the final populated questionnaire once human review has taken place.&#10;&#10;Invoking this operation with the ''content'' parameter may involve the disclosure of personally identifiable healthcare information to the system which is performing the population process.  No such disclosures should be made unless the system on which the operation is being invoked is a &quot;trusted&quot; system and appropriate agreements are in place to protect the confidentiality of any information shared with that system.</Data></Cell>
+    <Cell><Data ss:Type="String">$populatelink-request.txt</Data></Cell>
+    <Cell><Data ss:Type="String">$populatelink-response.txt</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatelink.identifier</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">A logical questionnaire identifier (i.e. ''Questionnaire.identifier''). The server must know the questionnaire or be able to retrieve it from other known repositories.</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="43.3125">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatelink.questionnaire</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Questionnaire</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">The [[[Questionnaire]]] is provided directly as part of the request. Servers may choose not to accept questionnaires in this fashion</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatelink.questionnaireRef</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Reference(Questionnaire)</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">The [[[Questionnaire]]] is provided as a resource reference. Servers may choose not to accept questionnaires in this fashion or may fail if they cannot resolve or access the referenced questionnaire.</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="100.6875">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatelink.content</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Reference(Any)</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">Resources containing information to be used to help populate the generated HTML form.  These may be FHIR resources or may be binaries containing FHIR documents, CDA documents or other source materials.  Servers may not support all possible source materials and may ignore materials they do not recognize.  (They MAY provide warnings if ignoring submitted resources.)</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatelink.local</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">boolean</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">If specified and set to 'true' (and the server is capable), the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions.</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="57.5625">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatelink.link</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Binary</Data></Cell>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">The generated HTML page that supports capturing the information defined by questionnaire, possibly partially (or fully)-populated with a set of answers for the specified Questionnaire</Data></Cell>
+    <Cell ss:StyleID="s139"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="100.6875">
+    <Cell ss:StyleID="s123"><Data ss:Type="String">populatelink.issues</Data></Cell>
     <Cell ss:StyleID="s124"><Data ss:Type="String">out</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">0</Data></Cell>
     <Cell ss:StyleID="s137"><Data ss:Type="Number">1</Data></Cell>
@@ -5399,194 +5580,7 @@
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s139"/>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s137"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s138"/>
-    <Cell ss:StyleID="s139"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+   <Row ss:AutoFitHeight="0" ss:Height="15">
     <Cell ss:StyleID="s126"/>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s140"/>
@@ -5597,7 +5591,7 @@
     <Cell ss:StyleID="s141"/>
     <Cell ss:StyleID="s142"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -5609,7 +5603,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>19</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5622,10 +5616,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>24</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

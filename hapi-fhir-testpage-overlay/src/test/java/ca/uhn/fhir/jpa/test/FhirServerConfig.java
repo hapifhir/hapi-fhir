@@ -24,98 +24,13 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 @Configuration
 @EnableTransactionManagement()
-public class FhirServerConfig extends BaseJavaConfigDstu2 {
+public class FhirServerConfig {
 
-	/**
-	 * Configure FHIR properties around the the JPA server via this bean
-	 */
 	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
-		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(5000);
-		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
-		retVal.setAllowMultipleDelete(true);
 		return retVal;
 	}
 
-	/**
-	 * The following bean configures the database connection. The 'url' property value of "jdbc:derby:directory:jpaserver_derby_files;create=true" indicates that the server should save resources in a
-	 * directory called "jpaserver_derby_files".
-	 * 
-	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
-	 */
-	@Bean(destroyMethod = "close")
-	public DataSource dataSource() {
-		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:directory:target/jpaserver_derby_files;create=true");
-		retVal.setUsername("");
-		retVal.setPassword("");
-		return retVal;
-	}
-
-	@Bean()
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-		retVal.setPersistenceUnitName("HAPI_PU");
-		retVal.setDataSource(dataSource());
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
-		retVal.setJpaProperties(jpaProperties());
-		return retVal;
-	}
-
-	private Properties jpaProperties() {
-		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
-		extraProperties.put("hibernate.format_sql", "true");
-		extraProperties.put("hibernate.show_sql", "false");
-		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.jdbc.batch_size", "20");
-		extraProperties.put("hibernate.cache.use_query_cache", "false");
-		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
-		extraProperties.put("hibernate.cache.use_structured_entries", "false");
-		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
-		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
-		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		return extraProperties;
-	}
-
-	/**
-	 * Do some fancy logging to create a nice access log that has details about each incoming request.
-	 */
-	public IServerInterceptor loggingInterceptor() {
-		LoggingInterceptor retVal = new LoggingInterceptor();
-		retVal.setLoggerName("fhirtest.access");
-		retVal.setMessageFormat(
-				"Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${operationName} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] ResponseEncoding[${responseEncodingNoDefault}]");
-		retVal.setLogExceptions(true);
-		retVal.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
-		return retVal;
-	}
-
-	/**
-	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
-	 */
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor responseHighlighterInterceptor() {
-		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
-		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor subscriptionSecurityInterceptor() {
-		SubscriptionsRequireManualActivationInterceptorDstu2 retVal = new SubscriptionsRequireManualActivationInterceptorDstu2();
-		return retVal;
-	}
-
-	@Bean()
-	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-		JpaTransactionManager retVal = new JpaTransactionManager();
-		retVal.setEntityManagerFactory(entityManagerFactory);
-		return retVal;
-	}
 
 }

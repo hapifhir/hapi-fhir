@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.param;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
@@ -37,11 +38,11 @@ abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQue
 //	}
 	
 	@Override
-	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
+	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 		myList.clear();
 		for (String next : theParameters) {
 			PT nextParam = newInstance();
-			nextParam.setValueAsQueryToken(theParameters.getQualifier(), next);
+			nextParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(), next);
 			myList.add(nextParam);
 		}
 	}

@@ -1,13 +1,16 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +28,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -41,16 +45,17 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class InterceptorDstu3Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 	private static Server ourServer;
-	private static RestfulServer servlet;
+	private static RestfulServer ourServlet;
 	private IServerInterceptor myInterceptor1;
 	private IServerInterceptor myInterceptor2;
 
@@ -58,7 +63,7 @@ public class InterceptorDstu3Test {
 	public void before() {
 		myInterceptor1 = mock(IServerInterceptor.class);
 		myInterceptor2 = mock(IServerInterceptor.class);
-		servlet.setInterceptors(myInterceptor1, myInterceptor2);
+		ourServlet.setInterceptors(myInterceptor1, myInterceptor2);
 	}
 
 
@@ -109,6 +114,12 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
 		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
+		
+		// Avoid concurrency issues
+		Thread.sleep(500);
+		
+		order.verify(myInterceptor2, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
+		order.verify(myInterceptor1, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
 		verifyNoMoreInteractions(myInterceptor1);
 		verifyNoMoreInteractions(myInterceptor2);
 		
@@ -121,6 +132,13 @@ public class InterceptorDstu3Test {
 		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
+	
+	@After
+	public void after() {
+		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourServlet.getInterceptors())) {
+			ourServlet.unregisterInterceptor(next);
+		}
+	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -130,9 +148,9 @@ public class InterceptorDstu3Test {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setResourceProviders(patientProvider);
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();

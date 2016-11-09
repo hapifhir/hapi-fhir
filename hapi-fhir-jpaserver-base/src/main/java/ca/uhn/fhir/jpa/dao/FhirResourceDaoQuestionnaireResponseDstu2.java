@@ -35,7 +35,6 @@ import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -64,8 +63,8 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 	}
 	
 	@Override
-	protected void validateResourceForStorage(QuestionnaireResponse theResource, ResourceTable theEntityToSave, RequestDetails theRequestDetails) {
-		super.validateResourceForStorage(theResource, theEntityToSave, theRequestDetails);
+	protected void validateResourceForStorage(QuestionnaireResponse theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
 		if (!myValidateResponses) {
 			return;
 		}
@@ -80,7 +79,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 		val.setValidateAgainstStandardSchematron(false);
 
 		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
-		module.setResourceLoader(new JpaResourceLoader(theRequestDetails));
+		module.setResourceLoader(new JpaResourceLoader());
 		val.registerValidatorModule(module);
 
 		ValidationResult result = val.validateWithResult(myRefImplCtx.newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(qa)));
@@ -92,10 +91,8 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 
 	public class JpaResourceLoader implements IResourceLoader {
 
-		private RequestDetails myRequestDetails;
-
-		public JpaResourceLoader(RequestDetails theRequestDetails) {
-			myRequestDetails = theRequestDetails;
+		public JpaResourceLoader() {
+			super();
 		}
 
 		@Override
@@ -107,7 +104,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 			 */
 			if ("ValueSet".equals(theType.getSimpleName())) {
 				IFhirResourceDao<ValueSet> dao = getDao(ValueSet.class);
-				ValueSet in = dao.read(theId, myRequestDetails);
+				ValueSet in = dao.read(theId, null);
 				String encoded = getContext().newJsonParser().encodeResourceToString(in);
 
 				// TODO: this is temporary until structures-dstu2 catches up to structures-hl7org.dstu2
@@ -116,7 +113,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 				return myRefImplCtx.newJsonParser().parseResource(theType, encoded);
 			} else if ("Questionnaire".equals(theType.getSimpleName())) {
 				IFhirResourceDao<Questionnaire> dao = getDao(Questionnaire.class);
-				Questionnaire vs = dao.read(theId, myRequestDetails);
+				Questionnaire vs = dao.read(theId, null);
 				return myRefImplCtx.newJsonParser().parseResource(theType, getContext().newJsonParser().encodeResourceToString(vs));
 			} else {
 				// Should not happen, validator will only ask for these two

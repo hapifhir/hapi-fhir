@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.
  */
@@ -79,16 +80,6 @@ public class CodeableConcept extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #coding}, creating it if it does not already exist
-     */
-    public Coding getCodingFirstRep() { 
-      if (getCoding().isEmpty()) {
-        addCoding();
-      }
-      return getCoding().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public CodeableConcept setCoding(List<Coding> theCoding) { 
@@ -105,10 +96,6 @@ public class CodeableConcept extends Type implements ICompositeType {
       return false;
     }
 
-    /**
-     * @return {@link #coding} (A reference to a code defined by a terminology system.)
-     */
-    // syntactic sugar
     public Coding addCoding() { //3
       Coding t = new Coding();
       if (this.coding == null)
@@ -117,7 +104,6 @@ public class CodeableConcept extends Type implements ICompositeType {
       return t;
     }
 
-    // syntactic sugar
     public CodeableConcept addCoding(Coding t) { //3
       if (t == null)
         return this;
@@ -125,6 +111,16 @@ public class CodeableConcept extends Type implements ICompositeType {
         this.coding = new ArrayList<Coding>();
       this.coding.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #coding}, creating it if it does not already exist
+     */
+    public Coding getCodingFirstRep() { 
+      if (getCoding().isEmpty()) {
+        addCoding();
+      }
+      return getCoding().get(0);
     }
 
     /**

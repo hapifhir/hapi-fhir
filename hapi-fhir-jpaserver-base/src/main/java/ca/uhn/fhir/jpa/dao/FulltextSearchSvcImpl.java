@@ -66,7 +66,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
-	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName) {
+	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
 		if (theTerms == null) {
 			return;
 		}
@@ -80,8 +80,21 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 				}
 			}
 			if (terms.isEmpty() == false) {
-				String joinedTerms = StringUtils.join(terms, ' ');
-				theBoolean.must(theQueryBuilder.keyword().onField(theFieldName).matching(joinedTerms).createQuery());
+				if (terms.size() == 1) {
+					//@formatter:off
+					Query textQuery = theQueryBuilder
+						.phrase()
+						.withSlop(2)
+						.onField(theFieldName).boostedTo(4.0f)
+//						.andField(theFieldNameEdgeNGram).boostedTo(2.0f)
+//						.andField(theFieldNameNGram).boostedTo(1.0f)
+						.sentence(terms.iterator().next().toLowerCase()).createQuery();
+					//@formatter:on
+					
+					theBoolean.must(textQuery);
+				} else {
+					String joinedTerms = StringUtils.join(terms, ' ');
+					theBoolean.must(theQueryBuilder.keyword().onField(theFieldName).matching(joinedTerms).createQuery());				}
 			}
 		}
 	}
@@ -143,13 +156,13 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 		 * Handle _content parameter (resource body content)
 		 */
 		List<List<? extends IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-		addTextSearch(qb, bool, contentAndTerms, "myContentText");
+		addTextSearch(qb, bool, contentAndTerms, "myContentText", "myContentTextEdgeNGram", "myContentTextNGram");
 
 		/*
 		 * Handle _text parameter (resource narrative content)
 		 */
 		List<List<? extends IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-		addTextSearch(qb, bool, textAndTerms, "myNarrativeText");
+		addTextSearch(qb, bool, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
 
 		if (theReferencingPid != null) {
 			bool.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(theReferencingPid).createQuery());
@@ -353,7 +366,7 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 			myPartialMatchScores.add(1.0f);
 		}
 
-		public void setAnalyzer(String theString) {
+		public void setAnalyzer(String theString) { 
 			myAnalyzer = theString;
 		}
 
@@ -379,6 +392,19 @@ public class FulltextSearchSvcImpl extends BaseHapiFhirDao<IBaseResource> implem
 			return null;
 		}
 
+	}
+
+	@Override
+	public boolean isDisabled() {
+		try {
+			FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+			em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		} catch (Exception e) {
+			ourLog.trace("FullText test failed", e);
+			ourLog.debug("Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
+			return true;
+		}
+		return false;
 	}
 
 }

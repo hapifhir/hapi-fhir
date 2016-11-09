@@ -49,13 +49,11 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler implements ISubscriptionWebsocketHandler, Runnable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandlerDstu3.class);
 
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	private FhirContext myCtx;
 
 	private ScheduledFuture<?> myScheduleFuture;
@@ -146,7 +144,7 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 		public void closing() {
 			ourLog.info("Deleting subscription {}", mySubscriptionId);
 			try {
-				mySubscriptionDao.delete(mySubscriptionId, new ServletRequestDetails());
+				mySubscriptionDao.delete(mySubscriptionId, null);
 			} catch (Exception e) {
 				handleFailure(e);
 			}
@@ -233,7 +231,7 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 			}
 
 			try {
-				Subscription subscription = mySubscriptionDao.read(id, new ServletRequestDetails());
+				Subscription subscription = mySubscriptionDao.read(id, null);
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
 				myState = new BoundStaticSubscipriptionState(theSession);
@@ -263,14 +261,14 @@ public class SubscriptionWebsocketHandlerDstu3 extends TextWebSocketHandler impl
 				EncodingEnum encoding = EncodingEnum.JSON;
 				for (NameValuePair nameValuePair : paramValues) {
 					if (Constants.PARAM_FORMAT.equals(nameValuePair.getName())) {
-						EncodingEnum nextEncoding = Constants.FORMAT_VAL_TO_ENCODING.get(nameValuePair.getValue());
+						EncodingEnum nextEncoding = EncodingEnum.forContentType(nameValuePair.getValue());
 						if (nextEncoding != null) {
 							encoding = nextEncoding;
 						}
 					}
 				}
 				
-				IIdType id = mySubscriptionDao.create(subscription, new ServletRequestDetails()).getId();
+				IIdType id = mySubscriptionDao.create(subscription).getId();
 
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();

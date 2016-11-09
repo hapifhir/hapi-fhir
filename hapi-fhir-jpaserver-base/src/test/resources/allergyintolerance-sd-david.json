@@ -1,0 +1,3282 @@
+{
+    "resourceType":"StructureDefinition",
+    "id":"ohAllergyIntolerance",
+    "meta":{
+        "versionId":"30",
+        "lastUpdated":"2016-05-17T22:02:57.692-04:00"
+    },
+    "extension":[
+        {
+            "url":"http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+            "valueInteger":0
+        }
+    ],
+    "url":"http://fhir.hl7.org.nz/dstu2/StructureDefinition/ohAllergyIntolerance",
+    "version":".1",
+    "name":"ohAllergyIntolerance",
+    "status":"draft",
+    "publisher":"OrionHealth",
+    "date":"2016-04-04T00:00:00+12:00",
+    "description":"StructureDefinition for Orion Health AllergyIntolerance Resource",
+    "requirements":"To record a clinical assessment of a propensity, or potential risk to an individual, of an adverse reaction upon future exposure to the specified substance, or class of substance.",
+    "fhirVersion":"1.0.1",
+    "mapping":[
+        {
+            "identity":"w5",
+            "uri":"http://hl7.org/fhir/w5",
+            "name":"W5 Mapping"
+        },
+        {
+            "identity":"v2",
+            "uri":"http://hl7.org/v2",
+            "name":"HL7 v2"
+        },
+        {
+            "identity":"rim",
+            "uri":"http://hl7.org/v3",
+            "name":"RIM"
+        }
+    ],
+    "kind":"resource",
+    "constrainedType":"AllergyIntolerance",
+    "abstract":false,
+    "base":"http://hl7.org/fhir/StructureDefinition/AllergyIntolerance",
+    "snapshot":{
+        "element":[
+            {
+                "path":"AllergyIntolerance",
+                "short":"Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)",
+                "definition":"Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.",
+                "comments":"Substances include, but are not limited to: a therapeutic substance administered correctly at an appropriate dosage for the individual; food; material derived from plants or animals; or venom from insect stings.",
+                "alias":[
+                    "Allergy",
+                    "Intolerance",
+                    "Adverse Reaction"
+                ],
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"AllergyIntolerance",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"AllergyIntolerance"
+                    }
+                ],
+                "mapping":[
+                    {
+                        "identity":"w5",
+                        "map":"clinical.general"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"certainty",
+                "label":"Certainty",
+                "definition":"The certainty that the allergy is correct",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-certainty"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"reasonClosed",
+                "definition":"the reason the allergy was closed",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-reasonClosed"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"classification",
+                "definition":"The classification of the allergy",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-classification"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"endDate",
+                "definition":"The time of life when this allergy was considered no longer relevant",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-endDate"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"reporterRole",
+                "short":"The role of the reported",
+                "definition":"The role of the person asserting the allergy",
+                "base":{
+                    "path":"AllergyIntolerance.extension"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-informantRole"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier",
+                "short":"External ids for this item",
+                "definition":"This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.identifier",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Identifier"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-7"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":".id"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"id"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.use",
+                "short":"usual | official | temp | secondary (If known)",
+                "definition":"The purpose of this identifier.",
+                "comments":"This is labeled as \"Is Modifier\" because applications should not mistake a temporary id for a permanent one. Applications can assume that an identifier is permanent unless it explicitly says that it is temporary.",
+                "requirements":"Allows the appropriate identifier for a particular context of use to be selected from among a set of identifiers.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Identifier.use",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isModifier":true,
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Identifies the purpose for this identifier, if known .",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/identifier-use"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"N/A"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Role.code or implied by context"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type",
+                "short":"Description of identifier",
+                "definition":"A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.",
+                "comments":"This element deals only with general categories of identifiers.  It SHOULD not be used for codes that correspond 1..1 with the Identifier.system. Some identifiers may fall into multiple categories due to common usage.   Where the system is known, a type is unnecessary because the type is always part of the system definition. However systems often need to handle identifiers where the system is not known. There is not a 1:1 relationship between type and system, since many different systems have the same type.",
+                "requirements":"Allows users to make use of identifiers when the identifier system is not known.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Identifier.type",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"CodeableConcept"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"extensible",
+                    "description":"A coded type for an identifier that can be used to determine which identifier to use for a specific purpose.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/identifier-type"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"CX.5"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Role.code or implied by context"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type.coding",
+                "short":"Code defined by a terminology system",
+                "definition":"A reference to a code defined by a terminology system.",
+                "comments":"Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labelled as UserSelected = true.",
+                "requirements":"Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings.",
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"CodeableConcept.coding",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Coding"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1-8, C*E.10-22"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"union(., ./translation)"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type.coding.system",
+                "short":"Identity of the terminology system",
+                "definition":"The identification of the code system that defines the meaning of the symbol in the code.",
+                "comments":"The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously.",
+                "requirements":"Need to be unambiguous about the source of the definition of the symbol.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.system",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"uri"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.3"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystem"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.system rdfs:subPropertyOf dt:CDCoding.codeSystem"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type.coding.version",
+                "short":"Version of the system - if relevant",
+                "definition":"The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.",
+                "comments":"Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.version",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.7"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystemVersion"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.version rdfs:subPropertyOf dt:CDCoding.codeSystemVersion"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type.coding.code",
+                "short":"Symbol in syntax defined by the system",
+                "definition":"A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).",
+                "requirements":"Need to refer to a particular code in the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.code",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./code"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.code rdfs:subPropertyOf dt:CDCoding.code"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type.coding.display",
+                "short":"Representation defined by the system",
+                "definition":"A representation of the meaning of the code in the system, following the rules of the system.",
+                "requirements":"Need to be able to carry a human-readable meaning of the code for readers that do not know  the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.display",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.2 - but note this is not well followed"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CV.displayName"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.display rdfs:subPropertyOf dt:CDCoding.displayName"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type.coding.userSelected",
+                "short":"If this coding was chosen directly by the user",
+                "definition":"Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).",
+                "comments":"Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly 'directly chosen' implies, and trading partner agreement may be needed to clarify the use of this element and its consequences more completely.",
+                "requirements":"This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.userSelected",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"boolean"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"Sometimes implied by being first"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CD.codingRationale"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.userSelected fhir:mapsTo dt:CDCoding.codingRationale. fhir:Coding.userSelected fhir:hasMap fhir:Coding.userSelected.map. fhir:Coding.userSelected.map a fhir:Map;   fhir:target dt:CDCoding.codingRationale. fhir:Coding.userSelected\\#true a [     fhir:source \"true\";     fhir:target dt:CDCoding.codingRationale\\#O   ]"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.type.text",
+                "short":"Plain text representation of the concept",
+                "definition":"A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+                "comments":"Very often the text is the same as a displayName of one of the codings.",
+                "requirements":"The codes from the terminologies do not always capture the correct meaning with all the nuances of the human using them, or sometimes there is no appropriate code at all. In these cases, the text is used to capture the full meaning of the source.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"CodeableConcept.text",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.9. But note many systems use C*E.2 for this"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./originalText[mediaType/code=\"text/plain\"]/data"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.text rdfs:subPropertyOf dt:CD.originalText"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.system",
+                "short":"The namespace for the identifier",
+                "definition":"Establishes the namespace in which set of possible id values is unique.",
+                "requirements":"There are many sequences of identifiers.  To perform matching, we need to know what sequence we're dealing with. The system identifies a particular sequence or set of unique identifiers.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Identifier.system",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"uri"
+                    }
+                ],
+                "exampleUri":"http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri",
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"CX.4 / EI-2-4"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"II.root or Role.id.root"
+                    },
+                    {
+                        "identity":"servd",
+                        "map":"./IdentifierType"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.value",
+                "short":"The value that is unique",
+                "definition":"The portion of the identifier typically displayed to the user and which is unique within the context of the system.",
+                "comments":"If the value is a full URI, then the system SHALL be urn:ietf:rfc:3986.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Identifier.value",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "exampleString":"123456",
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"CX.1 / EI.1"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"II.extension or II.root if system indicates OID or GUID (Or Role.id.extension or root)"
+                    },
+                    {
+                        "identity":"servd",
+                        "map":"./Value"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.period",
+                "short":"Time period when id is/was valid for use",
+                "definition":"Time period during which identifier is/was valid for use.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Identifier.period",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Period"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"CX.7 + CX.8"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Role.effectiveTime or implied by context"
+                    },
+                    {
+                        "identity":"servd",
+                        "map":"./StartDate and ./EndDate"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.period.start",
+                "short":"Starting time with inclusive boundary",
+                "definition":"The start of the period. The boundary is inclusive.",
+                "comments":"If the low element is missing, the meaning is that the low boundary is not known.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Period.start",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "condition":[
+                    "per-1"
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"DR.1"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./low"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.period.end",
+                "short":"End time with inclusive boundary, if not ongoing",
+                "definition":"The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.",
+                "comments":"The high value includes any matching date/time. i.e. 2012-02-03T10:00:00 is in a period that has a end value of 2012-02-03.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Period.end",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "meaningWhenMissing":"If the end of the period is missing, it means that the period is ongoing",
+                "condition":[
+                    "per-1"
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"DR.2"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./high"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.assigner",
+                "short":"Organization that issued id (may be just text)",
+                "definition":"Organization that issued/manages the identifier.",
+                "comments":"The reference may be just a text description of the assigner.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Identifier.assigner",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Organization"
+                        ]
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"CX.4 / (CX.4,CX.9,CX.10)"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"II.assigningAuthorityName but note that this is an improper use by the definition of the field.  Also Role.scoper"
+                    },
+                    {
+                        "identity":"servd",
+                        "map":"./IdentifierIssuingAuthority"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.assigner.reference",
+                "short":"Relative, internal or absolute URL reference",
+                "definition":"A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.",
+                "comments":"Using absolute URLs provides a stable scalable approach suitable for a cloud/web context, while using relative/logical references provides a flexible approach suitable for use when trading across closed eco-system boundaries.   Absolute URLs do not need to point to a FHIR RESTful server, though this is the preferred approach. If the URL conforms to the structure \"/[type]/[id]\" then it should be assumed that the reference is to a FHIR RESTful server.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Reference.reference",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "condition":[
+                    "ref-1"
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"rim",
+                        "map":"N/A"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier.assigner.display",
+                "short":"Text alternative for the resource",
+                "definition":"Plain text narrative that identifies the resource in addition to the resource reference.",
+                "comments":"This is generally not the same as the Resource.text of the referenced resource.  The purpose is to identify what's being referenced, not to fully describe it.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Reference.display",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"rim",
+                        "map":"N/A"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.onset",
+                "short":"Date(/time) when manifestations showed",
+                "definition":"Record of the date and/or time of the onset of the Allergy or Intolerance.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.onset",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "isSummary":true
+            },
+            {
+                "path":"AllergyIntolerance.onset.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.onset.extension",
+                "name":"timeOfLife",
+                "short":"When the allergy was noted",
+                "definition":"when the allergy was noted, if it can't be expressed as a date",
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-TimeOfLife"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.recordedDate",
+                "short":"When recorded",
+                "definition":"Date when the sensitivity was recorded.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.recordedDate",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-20"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":".participation[typeCode=AUT].time"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"when.recorded"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.recorder",
+                "short":"Who recorded the sensitivity",
+                "definition":"Individual who recorded the record and takes responsibility for its conten.",
+                "alias":[
+                    "Author"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.recorder",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Patient"
+                        ]
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"rim",
+                        "map":".participation[typeCode=AUT].role"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"who.author"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.patient",
+                "short":"Who the sensitivity is for",
+                "definition":"The patient who has the allergy or intolerance.",
+                "alias":[
+                    "Patient"
+                ],
+                "min":1,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.patient",
+                    "min":1,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Patient"
+                        ]
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"(PID-3)"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":".participation[typeCode=SBJ].role[classCode=PAT]"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"who.focus"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.patient.reference",
+                "short":"Relative, internal or absolute URL reference",
+                "definition":"A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.",
+                "comments":"Using absolute URLs provides a stable scalable approach suitable for a cloud/web context, while using relative/logical references provides a flexible approach suitable for use when trading across closed eco-system boundaries.   Absolute URLs do not need to point to a FHIR RESTful server, though this is the preferred approach. If the URL conforms to the structure \"/[type]/[id]\" then it should be assumed that the reference is to a FHIR RESTful server.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Reference.reference",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "condition":[
+                    "ref-1"
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"rim",
+                        "map":"N/A"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.patient.display",
+                "short":"Text alternative for the resource",
+                "definition":"Plain text narrative that identifies the resource in addition to the resource reference.",
+                "comments":"This is generally not the same as the Resource.text of the referenced resource.  The purpose is to identify what's being referenced, not to fully describe it.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Reference.display",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"rim",
+                        "map":"N/A"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reporter",
+                "short":"Source of the information about the allergy",
+                "definition":"The source of the information about the allergy that is recorded.",
+                "comments":"The recorder takes repsonsibility for the content, but can reference the source from where they got it.",
+                "alias":[
+                    "Source",
+                    "Informant"
+                ],
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.reporter",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Patient"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                        ]
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-14 (if patient) / IAM-18 (if practitioner)"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"who.source"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance",
+                "short":"Substance, (or class) considered to be responsible for risk",
+                "definition":"Identification of a substance, or a class of substances, that is considered to be responsible for the adverse reaction risk.",
+                "comments":"It is strongly recommended that the substance be coded with a terminology, where possible. For example, some terminologies used include RxNorm, SNOMED CT, DM+D, NDFRT, ICD-9, IDC-10, UNI, ATC and CPT. Plain text should only be used if there is no appropriate terminology available. Additional details about a substance can be specified in the text.",
+                "alias":[
+                    "Agent"
+                ],
+                "min":1,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.substance",
+                    "min":1,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"CodeableConcept"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"example",
+                    "description":"Type of the substance and Negation codes for reporting no known allergies.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergyintolerance-substance-code"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"AL1-3 / IAM-3"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"what"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.substance.extension",
+                "name":"originalValue",
+                "label":"originalValue",
+                "short":"originalValue",
+                "definition":"originalValue",
+                "base":{
+                    "path":"AllergyIntolerance.substance.extension"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/originalValue"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.coding",
+                "short":"Code defined by a terminology system",
+                "definition":"A reference to a code defined by a terminology system.",
+                "comments":"Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labelled as UserSelected = true.",
+                "requirements":"Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings.",
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"CodeableConcept.coding",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Coding"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1-8, C*E.10-22"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"union(., ./translation)"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.coding.system",
+                "short":"Identity of the terminology system",
+                "definition":"The identification of the code system that defines the meaning of the symbol in the code.",
+                "comments":"The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously.",
+                "requirements":"Need to be unambiguous about the source of the definition of the symbol.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.system",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"uri"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.3"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystem"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.system rdfs:subPropertyOf dt:CDCoding.codeSystem"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.coding.version",
+                "short":"Version of the system - if relevant",
+                "definition":"The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.",
+                "comments":"Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.version",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.7"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystemVersion"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.version rdfs:subPropertyOf dt:CDCoding.codeSystemVersion"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.coding.code",
+                "short":"Symbol in syntax defined by the system",
+                "definition":"A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).",
+                "requirements":"Need to refer to a particular code in the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.code",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./code"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.code rdfs:subPropertyOf dt:CDCoding.code"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.coding.display",
+                "short":"Representation defined by the system",
+                "definition":"A representation of the meaning of the code in the system, following the rules of the system.",
+                "requirements":"Need to be able to carry a human-readable meaning of the code for readers that do not know  the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.display",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.2 - but note this is not well followed"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CV.displayName"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.display rdfs:subPropertyOf dt:CDCoding.displayName"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.coding.userSelected",
+                "short":"If this coding was chosen directly by the user",
+                "definition":"Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).",
+                "comments":"Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly 'directly chosen' implies, and trading partner agreement may be needed to clarify the use of this element and its consequences more completely.",
+                "requirements":"This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.userSelected",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"boolean"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"Sometimes implied by being first"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CD.codingRationale"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.userSelected fhir:mapsTo dt:CDCoding.codingRationale. fhir:Coding.userSelected fhir:hasMap fhir:Coding.userSelected.map. fhir:Coding.userSelected.map a fhir:Map;   fhir:target dt:CDCoding.codingRationale. fhir:Coding.userSelected\\#true a [     fhir:source \"true\";     fhir:target dt:CDCoding.codingRationale\\#O   ]"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.text",
+                "short":"Plain text representation of the concept",
+                "definition":"A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+                "comments":"Very often the text is the same as a displayName of one of the codings.",
+                "requirements":"The codes from the terminologies do not always capture the correct meaning with all the nuances of the human using them, or sometimes there is no appropriate code at all. In these cases, the text is used to capture the full meaning of the source.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"CodeableConcept.text",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.9. But note many systems use C*E.2 for this"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./originalText[mediaType/code=\"text/plain\"]/data"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.text rdfs:subPropertyOf dt:CD.originalText"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.status",
+                "short":"active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error",
+                "definition":"Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance.",
+                "comments":"Decision support would typically raise alerts for 'Unconfirmed', 'Confirmed', and 'Resolved' and ignore a 'Refuted' reaction. In particular, 'Refuted' may be useful for reconciliation of the Adverse Reaction List. Some implementations may choose to make this field mandatory.",
+                "alias":[
+                    "State"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.status",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isModifier":true,
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergy-intolerance-status"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-17"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"status"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.criticality",
+                "short":"CRITL | CRITH | CRITU",
+                "definition":"Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance.",
+                "comments":"The default criticality value for any propensity to an adverse reaction should be 'Low Risk', indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. 'High Risk' is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere).",
+                "alias":[
+                    "Severity",
+                    "Seriousness",
+                    "Contra-indication",
+                    "Risk"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.criticality",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"w5",
+                        "map":"grade"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.type",
+                "short":"allergy | intolerance - Underlying mechanism (if known)",
+                "definition":"Identification of the underlying physiological mechanism for the reaction risk.",
+                "comments":"Allergic (typically immune-mediated) reactions have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be immune-mediated are, in fact, non-immune, but in some cases can still pose a life threatening risk. It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction. Often the term \"allergy\" is used rather generically and may overlap with the use of \"intolerance\" - in practice the boundaries between these two concepts may not be well-defined or understood. This data element is included nevertheless, because many legacy systems have captured this attribute. Immunologic testing may provide supporting evidence for the basis of the reaction and the causative substance, but no tests are 100% sensitive or specific for sensitivity to a particular substance. If, as is commonly the case, it is unclear whether the reaction is due to an allergy or an intolerance, then the type element should be omitted from the resource.",
+                "alias":[
+                    "Category",
+                    "Class"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.type",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Identification of the underlying physiological mechanism for a Reaction Risk.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergy-intolerance-type"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-9"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"class"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.category",
+                "short":"food | medication | environment | other - Category of Substance",
+                "definition":"Category of the identified Substance.",
+                "comments":"This data element has been included because it is currently being captured in some clinical systems. This data can be derived from the Substance where coding systems are used, and is effectively redundant in that situation.",
+                "alias":[
+                    "Category",
+                    "Type",
+                    "Reaction Type",
+                    "Class"
+                ],
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.category",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Category of an identified Substance.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergy-intolerance-category"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"w5",
+                        "map":"class"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.lastOccurence",
+                "short":"Date(/time) of last known occurrence of a reaction",
+                "definition":"Represents the date and/or time of the last known occurrence of a reaction event.",
+                "comments":"This date may be replicated by one of the Onset of Reaction dates. Where a textual representation of the date of last occurrence is required e.g. 'In Childhood, '10 years ago' the Comment element should be used.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.lastOccurence",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "isSummary":true
+            },
+            {
+                "path":"AllergyIntolerance.lastOccurence.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.lastOccurence.extension",
+                "name":"timeOfLife",
+                "short":"time of life",
+                "definition":"The last occurrance if it can't be expressed as a date",
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-TimeOfLife"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.note",
+                "short":"Additional text not captured in other fields",
+                "definition":"Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.",
+                "comments":"For example: including reason for flagging a seriousness of 'High Risk'; and instructions related to future exposure or administration of the Substance, such as administration within an Intensive Care Unit or under corticosteroid cover. The notes should be related to an allergy or intolerance as a condition in general and not related to any particular episode of it. For episode notes and descriptions, use AllergyIntolerance.event.description and  AllergyIntolerance.event.notes.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.note",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Annotation"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.note.author[x]",
+                "short":"Individual responsible for the annotation",
+                "definition":"The individual responsible for making the annotation.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Annotation.author[x]",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Patient"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                        ]
+                    },
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"N/A"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Act.participant[typeCode=AUT].role"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.note.time",
+                "short":"When the annotation was made",
+                "definition":"Indicates when this particular annotation was made.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Annotation.time",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"N/A"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Act.effectiveTime"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.note.text",
+                "short":"The annotation  - text content",
+                "definition":"The text of the annotation.",
+                "min":1,
+                "max":"1",
+                "base":{
+                    "path":"Annotation.text",
+                    "min":1,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"N/A"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Act.text"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction",
+                "short":"Adverse Reaction Events linked to exposure to substance",
+                "definition":"Details about each adverse reaction event linked to exposure to the identified Substance.",
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"AllergyIntolerance.reaction",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"BackboneElement"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.modifierExtension",
+                "short":"Extensions that cannot be ignored",
+                "definition":"May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.",
+                "comments":"There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+                "alias":[
+                    "extensions",
+                    "user content",
+                    "modifiers"
+                ],
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"BackboneElement.modifierExtension",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Extension"
+                    }
+                ],
+                "isModifier":true,
+                "mapping":[
+                    {
+                        "identity":"rim",
+                        "map":"N/A"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance",
+                "short":"Specific substance considered to be responsible for event",
+                "definition":"Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance.",
+                "comments":"Coding of the specific substance with a terminology capable of triggering decision support should be used wherever possible.  The substance field allows for the use of a specific substance or a group or class of substances, for example \"Penicillins\". The specific substance field could be used for Amoxycillin. Duplication is acceptable when a specific substance has been recorded in the 'substance' field.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.substance",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"CodeableConcept"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"example",
+                    "description":"Codes defining the type of the substance.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/substance-code"
+                    }
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance.coding",
+                "short":"Code defined by a terminology system",
+                "definition":"A reference to a code defined by a terminology system.",
+                "comments":"Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labelled as UserSelected = true.",
+                "requirements":"Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings.",
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"CodeableConcept.coding",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Coding"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1-8, C*E.10-22"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"union(., ./translation)"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance.coding.system",
+                "short":"Identity of the terminology system",
+                "definition":"The identification of the code system that defines the meaning of the symbol in the code.",
+                "comments":"The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously.",
+                "requirements":"Need to be unambiguous about the source of the definition of the symbol.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.system",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"uri"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.3"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystem"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.system rdfs:subPropertyOf dt:CDCoding.codeSystem"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance.coding.version",
+                "short":"Version of the system - if relevant",
+                "definition":"The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.",
+                "comments":"Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.version",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.7"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystemVersion"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.version rdfs:subPropertyOf dt:CDCoding.codeSystemVersion"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance.coding.code",
+                "short":"Symbol in syntax defined by the system",
+                "definition":"A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).",
+                "requirements":"Need to refer to a particular code in the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.code",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./code"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.code rdfs:subPropertyOf dt:CDCoding.code"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance.coding.display",
+                "short":"Representation defined by the system",
+                "definition":"A representation of the meaning of the code in the system, following the rules of the system.",
+                "requirements":"Need to be able to carry a human-readable meaning of the code for readers that do not know  the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.display",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.2 - but note this is not well followed"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CV.displayName"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.display rdfs:subPropertyOf dt:CDCoding.displayName"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance.coding.userSelected",
+                "short":"If this coding was chosen directly by the user",
+                "definition":"Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).",
+                "comments":"Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly 'directly chosen' implies, and trading partner agreement may be needed to clarify the use of this element and its consequences more completely.",
+                "requirements":"This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.userSelected",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"boolean"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"Sometimes implied by being first"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CD.codingRationale"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.userSelected fhir:mapsTo dt:CDCoding.codingRationale. fhir:Coding.userSelected fhir:hasMap fhir:Coding.userSelected.map. fhir:Coding.userSelected.map a fhir:Map;   fhir:target dt:CDCoding.codingRationale. fhir:Coding.userSelected\\#true a [     fhir:source \"true\";     fhir:target dt:CDCoding.codingRationale\\#O   ]"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.substance.text",
+                "short":"Plain text representation of the concept",
+                "definition":"A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+                "comments":"Very often the text is the same as a displayName of one of the codings.",
+                "requirements":"The codes from the terminologies do not always capture the correct meaning with all the nuances of the human using them, or sometimes there is no appropriate code at all. In these cases, the text is used to capture the full meaning of the source.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"CodeableConcept.text",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.9. But note many systems use C*E.2 for this"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./originalText[mediaType/code=\"text/plain\"]/data"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.text rdfs:subPropertyOf dt:CD.originalText"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.certainty",
+                "short":"unlikely | likely | confirmed - clinical certainty about the specific substance",
+                "definition":"Statement about the degree of clinical certainty that the specific substance was the cause of the manifestation in this reaction event.",
+                "alias":[
+                    "Cause"
+                ],
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.certainty",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/reaction-event-certainty"
+                    }
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.certainty.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.certainty.extension",
+                "name":"originalValue",
+                "short":"Original value",
+                "definition":"The original value that was received - and mapped to the code",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.certainty.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/originalValue"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation",
+                "short":"Clinical symptoms/signs associated with the Event",
+                "definition":"Clinical symptoms and/or signs that are observed or associated with the adverse reaction event.",
+                "comments":"Manifestation can be expressed as a single word, phrase or brief description. For example: nausea, rash or no reaction. It is preferable that manifestation should be coded with a terminology, where possible. The values entered here may be used to display on an application screen as part of a list of adverse reactions, as recommended in the UK NHS CUI guidelines.  Terminologies commonly used include, but are not limited to, SNOMED CT or ICD10.",
+                "alias":[
+                    "Symptoms",
+                    "Signs"
+                ],
+                "min":1,
+                "max":"*",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.manifestation",
+                    "min":1,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"CodeableConcept"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"example",
+                    "description":"Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/manifestation-codes"
+                    }
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.extension",
+                "name":"Severity",
+                "definition":"the severity of the manifestation",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.manifestation.extension"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-manifestationSeverity"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.coding",
+                "short":"Code defined by a terminology system",
+                "definition":"A reference to a code defined by a terminology system.",
+                "comments":"Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labelled as UserSelected = true.",
+                "requirements":"Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings.",
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"CodeableConcept.coding",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Coding"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1-8, C*E.10-22"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"union(., ./translation)"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.coding.system",
+                "short":"Identity of the terminology system",
+                "definition":"The identification of the code system that defines the meaning of the symbol in the code.",
+                "comments":"The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously.",
+                "requirements":"Need to be unambiguous about the source of the definition of the symbol.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.system",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"uri"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.3"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystem"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.system rdfs:subPropertyOf dt:CDCoding.codeSystem"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.coding.version",
+                "short":"Version of the system - if relevant",
+                "definition":"The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.",
+                "comments":"Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.version",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.7"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystemVersion"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.version rdfs:subPropertyOf dt:CDCoding.codeSystemVersion"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.coding.code",
+                "short":"Symbol in syntax defined by the system",
+                "definition":"A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).",
+                "requirements":"Need to refer to a particular code in the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.code",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./code"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.code rdfs:subPropertyOf dt:CDCoding.code"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.coding.display",
+                "short":"Representation defined by the system",
+                "definition":"A representation of the meaning of the code in the system, following the rules of the system.",
+                "requirements":"Need to be able to carry a human-readable meaning of the code for readers that do not know  the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.display",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.2 - but note this is not well followed"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CV.displayName"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.display rdfs:subPropertyOf dt:CDCoding.displayName"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.coding.userSelected",
+                "short":"If this coding was chosen directly by the user",
+                "definition":"Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).",
+                "comments":"Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly 'directly chosen' implies, and trading partner agreement may be needed to clarify the use of this element and its consequences more completely.",
+                "requirements":"This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.userSelected",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"boolean"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"Sometimes implied by being first"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CD.codingRationale"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.userSelected fhir:mapsTo dt:CDCoding.codingRationale. fhir:Coding.userSelected fhir:hasMap fhir:Coding.userSelected.map. fhir:Coding.userSelected.map a fhir:Map;   fhir:target dt:CDCoding.codingRationale. fhir:Coding.userSelected\\#true a [     fhir:source \"true\";     fhir:target dt:CDCoding.codingRationale\\#O   ]"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.text",
+                "short":"Plain text representation of the concept",
+                "definition":"A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+                "comments":"Very often the text is the same as a displayName of one of the codings.",
+                "requirements":"The codes from the terminologies do not always capture the correct meaning with all the nuances of the human using them, or sometimes there is no appropriate code at all. In these cases, the text is used to capture the full meaning of the source.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"CodeableConcept.text",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.9. But note many systems use C*E.2 for this"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./originalText[mediaType/code=\"text/plain\"]/data"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.text rdfs:subPropertyOf dt:CD.originalText"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.description",
+                "short":"Description of the event as a whole",
+                "definition":"Text description about the reaction as a whole, including details of the manifestation if required.",
+                "comments":"Use the description to provide any details of a particular event of the occurred reaction such as circumstances, reaction specifics, what happened before/after. Information, related to the event, but not describing a particular care should be captured in the comment field. For example: at the age of four, the patient was given penicillin for strep throat and subsequently developed severe hives.",
+                "alias":[
+                    "Narrative",
+                    "Text"
+                ],
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.description",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.onset",
+                "short":"Date(/time) when manifestations showed",
+                "definition":"Record of the date and/or time of the onset of the Reaction.",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.onset",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "isSummary":true
+            },
+            {
+                "path":"AllergyIntolerance.reaction.severity",
+                "short":"mild | moderate | severe (of event as a whole)",
+                "definition":"Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.",
+                "comments":"It is acknowledged that this assessment is very subjective. There may be some some specific practice domains where objective scales have been applied. Objective scales can be included in this model as extensions.",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.severity",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/reaction-event-severity"
+                    }
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute",
+                "short":"How the subject was exposed to the substance",
+                "definition":"Identification of the route by which the subject was exposed to the substance.",
+                "comments":"Coding of the route of exposure with a terminology should be used wherever possible.",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.exposureRoute",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"CodeableConcept"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"example",
+                    "description":"A coded concept describing the route or physiological path of administration of a therapeutic agent into or onto the body of a subject.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/route-codes"
+                    }
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute.coding",
+                "short":"Code defined by a terminology system",
+                "definition":"A reference to a code defined by a terminology system.",
+                "comments":"Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labelled as UserSelected = true.",
+                "requirements":"Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings.",
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"CodeableConcept.coding",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Coding"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1-8, C*E.10-22"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"union(., ./translation)"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute.coding.system",
+                "short":"Identity of the terminology system",
+                "definition":"The identification of the code system that defines the meaning of the symbol in the code.",
+                "comments":"The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously.",
+                "requirements":"Need to be unambiguous about the source of the definition of the symbol.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.system",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"uri"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.3"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystem"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.system rdfs:subPropertyOf dt:CDCoding.codeSystem"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute.coding.version",
+                "short":"Version of the system - if relevant",
+                "definition":"The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.",
+                "comments":"Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.version",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.7"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./codeSystemVersion"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.version rdfs:subPropertyOf dt:CDCoding.codeSystemVersion"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute.coding.code",
+                "short":"Symbol in syntax defined by the system",
+                "definition":"A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).",
+                "requirements":"Need to refer to a particular code in the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.code",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.1"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./code"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.code rdfs:subPropertyOf dt:CDCoding.code"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute.coding.display",
+                "short":"Representation defined by the system",
+                "definition":"A representation of the meaning of the code in the system, following the rules of the system.",
+                "requirements":"Need to be able to carry a human-readable meaning of the code for readers that do not know  the system.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.display",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.2 - but note this is not well followed"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CV.displayName"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.display rdfs:subPropertyOf dt:CDCoding.displayName"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute.coding.userSelected",
+                "short":"If this coding was chosen directly by the user",
+                "definition":"Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).",
+                "comments":"Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly 'directly chosen' implies, and trading partner agreement may be needed to clarify the use of this element and its consequences more completely.",
+                "requirements":"This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Coding.userSelected",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"boolean"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"Sometimes implied by being first"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"CD.codingRationale"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:Coding.userSelected fhir:mapsTo dt:CDCoding.codingRationale. fhir:Coding.userSelected fhir:hasMap fhir:Coding.userSelected.map. fhir:Coding.userSelected.map a fhir:Map;   fhir:target dt:CDCoding.codingRationale. fhir:Coding.userSelected\\#true a [     fhir:source \"true\";     fhir:target dt:CDCoding.codingRationale\\#O   ]"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute.text",
+                "short":"Plain text representation of the concept",
+                "definition":"A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+                "comments":"Very often the text is the same as a displayName of one of the codings.",
+                "requirements":"The codes from the terminologies do not always capture the correct meaning with all the nuances of the human using them, or sometimes there is no appropriate code at all. In these cases, the text is used to capture the full meaning of the source.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"CodeableConcept.text",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"C*E.9. But note many systems use C*E.2 for this"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"./originalText[mediaType/code=\"text/plain\"]/data"
+                    },
+                    {
+                        "identity":"orim",
+                        "map":"fhir:CodeableConcept.text rdfs:subPropertyOf dt:CD.originalText"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.note",
+                "short":"Text about event not captured in other fields",
+                "definition":"Additional text about the adverse reaction event not captured in other fields.",
+                "comments":"Use this field to record information indirectly related to a particular event and not captured in the description. For example: Clinical records are no longer available, recorded based on information provided to the patient by her mother and her mother is deceased.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.note",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Annotation"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.note.author[x]",
+                "short":"Individual responsible for the annotation",
+                "definition":"The individual responsible for making the annotation.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Annotation.author[x]",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Patient"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                        ]
+                    },
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"N/A"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Act.participant[typeCode=AUT].role"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.note.time",
+                "short":"When the annotation was made",
+                "definition":"Indicates when this particular annotation was made.",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"Annotation.time",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"N/A"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Act.effectiveTime"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.note.text",
+                "short":"The annotation  - text content",
+                "definition":"The text of the annotation.",
+                "min":1,
+                "max":"1",
+                "base":{
+                    "path":"Annotation.text",
+                    "min":1,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"string"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"N/A"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":"Act.text"
+                    }
+                ]
+            }
+        ]
+    },
+    "differential":{
+        "element":[
+            {
+                "path":"AllergyIntolerance",
+                "short":"Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)",
+                "definition":"Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.",
+                "comments":"Substances include, but are not limited to: a therapeutic substance administered correctly at an appropriate dosage for the individual; food; material derived from plants or animals; or venom from insect stings.",
+                "alias":[
+                    "Allergy",
+                    "Intolerance",
+                    "Adverse Reaction"
+                ],
+                "min":0,
+                "max":"*",
+                "base":{
+                    "path":"AllergyIntolerance",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"AllergyIntolerance"
+                    }
+                ],
+                "mapping":[
+                    {
+                        "identity":"w5",
+                        "map":"clinical.general"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"certainty",
+                "label":"Certainty",
+                "definition":"The certainty that the allergy is correct",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-certainty"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"reasonClosed",
+                "definition":"the reason the allergy was closed",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-reasonClosed"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"classification",
+                "definition":"The classification of the allergy",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-classification"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"endDate",
+                "definition":"The date the allergy was ended",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-TimeOfLife"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.extension",
+                "name":"reporterRole",
+                "short":"The role of the reported",
+                "definition":"The role of the person asserting the allergy",
+                "base":{
+                    "path":"AllergyIntolerance.extension"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-informantRole"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.identifier",
+                "short":"External ids for this item",
+                "definition":"This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.identifier",
+                    "min":0,
+                    "max":"*"
+                },
+                "type":[
+                    {
+                        "code":"Identifier"
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-7"
+                    },
+                    {
+                        "identity":"rim",
+                        "map":".id"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"id"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.onset.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.onset.extension",
+                "name":"timeOfLife",
+                "short":"When the allergy was noted",
+                "definition":"when the allergy was noted, if it can't be expressed as a date",
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-TimeOfLife"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.recorder",
+                "short":"Who recorded the sensitivity",
+                "definition":"Individual who recorded the record and takes responsibility for its conten.",
+                "alias":[
+                    "Author"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.recorder",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                        ]
+                    },
+                    {
+                        "code":"Reference",
+                        "profile":[
+                            "http://hl7.org/fhir/StructureDefinition/Patient"
+                        ]
+                    }
+                ],
+                "isSummary":true,
+                "mapping":[
+                    {
+                        "identity":"rim",
+                        "map":".participation[typeCode=AUT].role"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"who.author"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.substance.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.substance.extension",
+                "name":"originalValue",
+                "label":"originalValue",
+                "short":"originalValue",
+                "definition":"originalValue",
+                "base":{
+                    "path":"AllergyIntolerance.substance.extension"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/originalValue"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.status",
+                "short":"active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error",
+                "definition":"Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance.",
+                "comments":"Decision support would typically raise alerts for 'Unconfirmed', 'Confirmed', and 'Resolved' and ignore a 'Refuted' reaction. In particular, 'Refuted' may be useful for reconciliation of the Adverse Reaction List. Some implementations may choose to make this field mandatory.",
+                "alias":[
+                    "State"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.status",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isModifier":true,
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergy-intolerance-status"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-17"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"status"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.criticality",
+                "short":"CRITL | CRITH | CRITU",
+                "definition":"Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance.",
+                "comments":"The default criticality value for any propensity to an adverse reaction should be 'Low Risk', indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. 'High Risk' is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere).",
+                "alias":[
+                    "Severity",
+                    "Seriousness",
+                    "Contra-indication",
+                    "Risk"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.criticality",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"w5",
+                        "map":"grade"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.type",
+                "short":"allergy | intolerance - Underlying mechanism (if known)",
+                "definition":"Identification of the underlying physiological mechanism for the reaction risk.",
+                "comments":"Allergic (typically immune-mediated) reactions have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be immune-mediated are, in fact, non-immune, but in some cases can still pose a life threatening risk. It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction. Often the term \"allergy\" is used rather generically and may overlap with the use of \"intolerance\" - in practice the boundaries between these two concepts may not be well-defined or understood. This data element is included nevertheless, because many legacy systems have captured this attribute. Immunologic testing may provide supporting evidence for the basis of the reaction and the causative substance, but no tests are 100% sensitive or specific for sensitivity to a particular substance. If, as is commonly the case, it is unclear whether the reaction is due to an allergy or an intolerance, then the type element should be omitted from the resource.",
+                "alias":[
+                    "Category",
+                    "Class"
+                ],
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.type",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Identification of the underlying physiological mechanism for a Reaction Risk.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/allergy-intolerance-type"
+                    }
+                },
+                "mapping":[
+                    {
+                        "identity":"v2",
+                        "map":"IAM-9"
+                    },
+                    {
+                        "identity":"w5",
+                        "map":"class"
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.lastOccurence.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.lastOccurence.extension",
+                "name":"timeOfLife",
+                "short":"time of life",
+                "definition":"The last occurrance if it can't be expressed as a date",
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-TimeOfLife"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.certainty.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.certainty.extension",
+                "name":"originalValue",
+                "short":"Original value",
+                "definition":"The original value that was received - and mapped to the code",
+                "min":0,
+                "max":"1",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.certainty.extension",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/originalValue"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.extension",
+                "slicing":{
+                    "discriminator":[
+                        "url"
+                    ],
+                    "rules":"openAtEnd"
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.manifestation.extension",
+                "name":"Severity",
+                "definition":"the severity of the manifestation",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.manifestation.extension"
+                },
+                "type":[
+                    {
+                        "code":"Extension",
+                        "profile":[
+                            "http://fhir.hl7.org.nz/dstu2/StructureDefinition/al-manifestationSeverity"
+                        ]
+                    }
+                ]
+            },
+            {
+                "path":"AllergyIntolerance.reaction.onset",
+                "short":"Date(/time) when manifestations showed",
+                "definition":"Record of the date and/or time of the onset of the Reaction.",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.onset",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"dateTime"
+                    }
+                ],
+                "isSummary":true
+            },
+            {
+                "path":"AllergyIntolerance.reaction.severity",
+                "short":"mild | moderate | severe (of event as a whole)",
+                "definition":"Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.",
+                "comments":"It is acknowledged that this assessment is very subjective. There may be some some specific practice domains where objective scales have been applied. Objective scales can be included in this model as extensions.",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.severity",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"code"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"required",
+                    "description":"Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/reaction-event-severity"
+                    }
+                }
+            },
+            {
+                "path":"AllergyIntolerance.reaction.exposureRoute",
+                "short":"How the subject was exposed to the substance",
+                "definition":"Identification of the route by which the subject was exposed to the substance.",
+                "comments":"Coding of the route of exposure with a terminology should be used wherever possible.",
+                "min":0,
+                "max":"0",
+                "base":{
+                    "path":"AllergyIntolerance.reaction.exposureRoute",
+                    "min":0,
+                    "max":"1"
+                },
+                "type":[
+                    {
+                        "code":"CodeableConcept"
+                    }
+                ],
+                "isSummary":true,
+                "binding":{
+                    "strength":"example",
+                    "description":"A coded concept describing the route or physiological path of administration of a therapeutic agent into or onto the body of a subject.",
+                    "valueSetReference":{
+                        "reference":"http://hl7.org/fhir/ValueSet/route-codes"
+                    }
+                }
+            }
+        ]
+    }
+}

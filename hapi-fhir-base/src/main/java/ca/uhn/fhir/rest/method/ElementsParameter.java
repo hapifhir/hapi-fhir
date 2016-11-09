@@ -108,6 +108,10 @@ public class ElementsParameter implements IParameter {
 			if (retVal.isEmpty()) {
 				return null;
 			}
+			
+			// Always include the meta element even for subsetted values
+			retVal.add("meta");
+			
 			return retVal;
 		} else {
 			return null;

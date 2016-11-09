@@ -20,37 +20,19 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.List;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-
-final class StringBinder implements IParamBinder<String> {
+final class StringBinder extends BaseJavaPrimitiveBinder<String> {
 	StringBinder() {
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException {
-		String retVal = ((String) theString);
-		List<?> retValList = Collections.singletonList(MethodUtil.singleton(new StringParam(retVal)));
-		return (List<IQueryParameterOr<?>>) retValList;
+	protected String doEncode(String theString) {
+		return theString;
 	}
 
 	@Override
-	public String parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
-		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
-			return "";
-		}
-		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND) values for this param.");
-		}
-
-		return theParams.get(0).get(0);
+	protected String doParse(String theString) {
+		return theString;
 	}
+
 
 }

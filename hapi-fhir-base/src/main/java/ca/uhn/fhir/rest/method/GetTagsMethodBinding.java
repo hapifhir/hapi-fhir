@@ -153,7 +153,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	@Override
 	public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 		if (theResponseStatusCode == Constants.STATUS_HTTP_200_OK) {
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode, null);
 			TagList retVal = parser.parseTagList(theResponseReader);
 			return retVal;
 		} else {

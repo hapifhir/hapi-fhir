@@ -20,6 +20,7 @@ public class TesterConfig {
 	public static final String SYSPROP_FORCE_SERVERS = "ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS";
 
 	private ITestingUiClientFactory myClientFactory;
+	private LinkedHashMap<String, Boolean> myIdToAllowsApiKey = new LinkedHashMap<String, Boolean>();
 	private LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<String, FhirVersionEnum>();
 	private LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<String, String>();
 	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
@@ -41,6 +42,7 @@ public class TesterConfig {
 			myIdToFhirVersion.put(next.myId, next.myVersion);
 			myIdToServerBase.put(next.myId, next.myBaseUrl);
 			myIdToServerName.put(next.myId, next.myName);
+			myIdToAllowsApiKey.put(next.myId, next.myAllowsApiKey);
 		}
 		myServerBuilders.clear();
 	}
@@ -51,6 +53,10 @@ public class TesterConfig {
 
 	public boolean getDebugTemplatesMode() {
 		return true;
+	}
+
+	public LinkedHashMap<String, Boolean> getIdToAllowsApiKey() {
+		return myIdToAllowsApiKey;
 	}
 
 	public LinkedHashMap<String, FhirVersionEnum> getIdToFhirVersion() {
@@ -131,11 +137,14 @@ public class TesterConfig {
 	public interface IServerBuilderStep5 {
 
 		IServerBuilderStep1 addServer();
+		
+		IServerBuilderStep5 allowsApiKey();
 
 	}
 
 	public class ServerBuilder implements IServerBuilderStep1, IServerBuilderStep2, IServerBuilderStep3, IServerBuilderStep4, IServerBuilderStep5 {
 
+		private boolean myAllowsApiKey;
 		private String myBaseUrl;
 		private String myId;
 		private String myName;
@@ -146,6 +155,12 @@ public class TesterConfig {
 			ServerBuilder retVal = new ServerBuilder();
 			myServerBuilders.add(retVal);
 			return retVal;
+		}
+
+		@Override
+		public IServerBuilderStep5 allowsApiKey() {
+			myAllowsApiKey = true;
+			return this;
 		}
 
 		@Override

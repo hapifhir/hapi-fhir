@@ -21,7 +21,6 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,14 +34,14 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	private static final Class<Void> VOID_CLASS = Void.class;
 	
-	private final String myName;
-	private final Class<? extends T> myImplementingClass;
+	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<Class<?>, Constructor<T>>());
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
-	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
+	private final Class<? extends T> myImplementingClass;
+	private final String myName;
 	private final boolean myStandardType;
-	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<Class<?>, Constructor<T>>());
+	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
 
 	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
 		assert StringUtils.isNotBlank(theName);
@@ -60,15 +59,6 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		myImplementingClass = theImplementingClass;
 	}
 
-	public boolean isStandardType() {
-		return myStandardType;
-	}
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName()+"[" + getName() + ", " + getImplementingClass().getSimpleName() + "]";
-	}
-
 	public void addExtension(RuntimeChildDeclaredExtensionDefinition theExtension) {
 		if (theExtension == null) {
 			throw new NullPointerException();
@@ -76,56 +66,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		myExtensions.add(theExtension);
 	}
 
-	public List<RuntimeChildDeclaredExtensionDefinition> getExtensions() {
-		return myExtensions;
-	}
-
-	public List<RuntimeChildDeclaredExtensionDefinition> getExtensionsModifier() {
-		return myExtensionsModifier;
-	}
-
-	public List<RuntimeChildDeclaredExtensionDefinition> getExtensionsNonModifier() {
-		return myExtensionsNonModifier;
-	}
-
-	/**
-	 * @return Returns null if none
-	 */
-	public RuntimeChildDeclaredExtensionDefinition getDeclaredExtension(String theExtensionUrl) {
-		return myUrlToExtension.get(theExtensionUrl);
-	}
-
-	/**
-	 * @return Returns the runtime name for this resource (i.e. the name that
-	 *         will be used in encoded messages)
-	 */
-	public String getName() {
-		return myName;
-	}
-
-	public T newInstance() {
-		return newInstance(null);
-	}
-
-	public T newInstance(Object theArgument) {
-		try {
-			if (theArgument == null) {
-				return getConstructor(null).newInstance(null);
-			} else {
-				return getConstructor(theArgument).newInstance(theArgument);
-			}
-		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
-		} catch (IllegalArgumentException e) {
-			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
-		} catch (InvocationTargetException e) {
-			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
-		} catch (SecurityException e) {
-			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
-		}
-	}
+	public abstract ChildTypeEnum getChildType();
 
 	@SuppressWarnings("unchecked")
 	private Constructor<T> getConstructor(Object theArgument) {
@@ -160,8 +101,59 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		return retVal;
 	}
 
+	/**
+	 * @return Returns null if none
+	 */
+	public RuntimeChildDeclaredExtensionDefinition getDeclaredExtension(String theExtensionUrl) {
+		validateSealed();
+		return myUrlToExtension.get(theExtensionUrl);
+	}
+
+	public List<RuntimeChildDeclaredExtensionDefinition> getExtensions() {
+		validateSealed();
+		return myExtensions;
+	}
+
+	public List<RuntimeChildDeclaredExtensionDefinition> getExtensionsModifier() {
+		validateSealed();
+		return myExtensionsModifier;
+	}
+
+	public List<RuntimeChildDeclaredExtensionDefinition> getExtensionsNonModifier() {
+		validateSealed();
+		return myExtensionsNonModifier;
+	}
+
 	public Class<? extends T> getImplementingClass() {
 		return myImplementingClass;
+	}
+
+	/**
+	 * @return Returns the runtime name for this resource (i.e. the name that
+	 *         will be used in encoded messages)
+	 */
+	public String getName() {
+		return myName;
+	}
+
+	public boolean isStandardType() {
+		return myStandardType;
+	}
+
+	public T newInstance() {
+		return newInstance(null);
+	}
+
+	public T newInstance(Object theArgument) {
+		try {
+			if (theArgument == null) {
+				return getConstructor(null).newInstance(null);
+			} else {
+				return getConstructor(theArgument).newInstance(theArgument);
+			}
+		} catch (Exception e) {
+			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
+		}
 	}
 
 	/**
@@ -192,29 +184,41 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		myExtensions = Collections.unmodifiableList(myExtensions);
 	}
 
-	public abstract ChildTypeEnum getChildType();
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+"[" + getName() + ", " + getImplementingClass().getSimpleName() + "]";
+	}
+
+	protected void validateSealed() {
+		/* 
+		 * this does nothing, but BaseRuntimeElementCompositeDefinition
+		 * overrides this method to provide functionality because that class
+		 * defers the dealing process
+		 */
+		
+	}
 
 	public enum ChildTypeEnum {
-		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE, RESOURCE_REF, RESOURCE_BLOCK, 
-		/**
+		COMPOSITE_DATATYPE, /**
+		 * HL7.org structure style.
+		 */
+		CONTAINED_RESOURCE_LIST, /**
+		 * HAPI structure style.
+		 */
+		CONTAINED_RESOURCES, EXTENSION_DECLARED, 
+		ID_DATATYPE, 
+		PRIMITIVE_DATATYPE, /**
 		 * HAPI style.
 		 */
 		PRIMITIVE_XHTML, 
-		UNDECL_EXT, EXTENSION_DECLARED, 
-		/**
-		 * HAPI structure style.
-		 */
-		CONTAINED_RESOURCES, 
-		ID_DATATYPE, 
-		/**
-		 * HL7.org structure style.
-		 */
-		CONTAINED_RESOURCE_LIST, 
-		
 		/**
 		 * HL7.org style.
 		 */
 		PRIMITIVE_XHTML_HL7ORG, 
+		RESOURCE, 
+		RESOURCE_BLOCK, 
+		
+		UNDECL_EXT, 
 		
 	}
 

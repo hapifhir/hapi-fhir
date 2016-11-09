@@ -1,16 +1,20 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -32,6 +36,30 @@ public class DateRangeParamTest {
 	}
 
 	@Test
+	public void testRangeFromDates() {
+		TimeZone tz = TimeZone.getDefault();
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Toronto"));
+		try {
+			Date startDate = new InstantDt("2010-01-01T00:00:00.000Z").getValue();
+			Date endDate = new InstantDt("2010-01-01T00:00:00.001Z").getValue();
+			DateTimeDt startDateTime = new DateTimeDt(startDate, TemporalPrecisionEnum.MILLI);
+			DateTimeDt endDateTime = new DateTimeDt(endDate, TemporalPrecisionEnum.MILLI);
+
+			DateRangeParam range = new DateRangeParam(startDateTime, endDateTime);
+			assertEquals("2009-12-31T19:00:00.000-05:00", range.getValuesAsQueryTokens().get(0).getValueAsString());
+			assertEquals("2009-12-31T19:00:00.001-05:00", range.getValuesAsQueryTokens().get(1).getValueAsString());
+
+			// Now try with arguments reversed (should still create same range)
+			range = new DateRangeParam(endDateTime, startDateTime);
+			assertEquals("2009-12-31T19:00:00.000-05:00", range.getValuesAsQueryTokens().get(0).getValueAsString());
+			assertEquals("2009-12-31T19:00:00.001-05:00", range.getValuesAsQueryTokens().get(1).getValueAsString());
+
+		} finally {
+			TimeZone.setDefault(tz);
+		}
+	}
+
+	@Test
 	public void testRange() {
 		InstantDt start = new InstantDt("2015-09-23T07:43:34.811-04:00");
 		InstantDt end = new InstantDt("2015-09-23T07:43:34.899-04:00");
@@ -41,8 +69,7 @@ public class DateRangeParamTest {
 		assertEquals(QuantityCompararatorEnum.LESSTHAN, upperBound.getComparator());
 
 		/*
-		 * When DateParam (which extends DateTimeDt) gets passed in, make sure we preserve the 
-		 * comparators..
+		 * When DateParam (which extends DateTimeDt) gets passed in, make sure we preserve the comparators..
 		 */
 		DateRangeParam param = new DateRangeParam(lowerBound, upperBound);
 		ourLog.info(param.toString());
@@ -55,7 +82,7 @@ public class DateRangeParamTest {
 		assertEquals(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, param.getUpperBound().getComparator());
 
 	}
-	
+
 	@Test
 	public void testAddAnd() {
 		assertEquals(1, new DateAndListParam().addAnd(new DateOrListParam()).getValuesAsQueryTokens().size());
@@ -157,10 +184,12 @@ public class DateRangeParamTest {
 		if (theUpper != null) {
 			tokens.add(QualifiedParamList.singleton(null, theUpper));
 		}
-		p.setValuesAsQueryTokens(tokens);
+		p.setValuesAsQueryTokens(ourCtx, null, tokens);
 		return p;
 	}
 
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	
 	public static Date parse(String theString) throws ParseException {
 		return ourFmt.parse(theString);
 	}
@@ -168,7 +197,6 @@ public class DateRangeParamTest {
 	public static Date parseM1(String theString) throws ParseException {
 		return new Date(ourFmt.parse(theString).getTime() - 1L);
 	}
-
 
 	@AfterClass
 	public static void afterClassClearContext() {

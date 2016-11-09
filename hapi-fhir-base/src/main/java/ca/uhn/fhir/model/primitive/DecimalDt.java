@@ -78,7 +78,7 @@ public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<D
 		if (getValue() == null && theObj.getValue() == null) {
 			return 0;
 		}
-		if (getValue() != null && theObj.getValue() == null) {
+		if (getValue() != null && (theObj == null || theObj.getValue() == null)) {
 			return 1;
 		}
 		if (getValue() == null && theObj.getValue() != null) {

@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ServerInvalidDefinitionTest {
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	/**
 	 * Normal, should initialize properly

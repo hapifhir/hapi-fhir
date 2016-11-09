@@ -20,9 +20,10 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * Used internally by HAPI to log the version of the HAPI FHIR framework
@@ -49,20 +50,11 @@ public class VersionUtil {
 			p.load(is);
 			ourVersion = p.getProperty("version");
 			ourLog.info("HAPI FHIR version is: " + ourVersion);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			ourLog.warn("Unable to determine HAPI version information", e);
 		} finally {
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
+			IOUtils.closeQuietly(is);
 		}
 	}
 	
-	public static void main(String[] args) {
-		getVersion();
-	}
 }

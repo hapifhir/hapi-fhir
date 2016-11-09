@@ -7,12 +7,26 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ContextHolder {
 
+	private static boolean ourAllowExternalRefs;
 	private static FhirContext ourCtx;
 	private static String ourPath;
 
 	public static FhirContext getCtx() {
 		Validate.notNull(ourPath, "Context not set");
 		return ourCtx;
+	}
+
+	public static String getPath() {
+		Validate.notNull(ourPath, "Context not set");
+		return ourPath;
+	}
+
+	public static boolean isAllowExternalRefs() {
+		return ourAllowExternalRefs;
+	}
+
+	public static void setAllowExternalRefs(boolean theAllowExternalRefs) {
+		ourAllowExternalRefs = theAllowExternalRefs;
 	}
 
 	public static void setCtx(FhirContext theCtx) throws ParseException {
@@ -28,11 +42,6 @@ public class ContextHolder {
 		}
 
 		ourCtx = theCtx;
-	}
-
-	public static String getPath() {
-		Validate.notNull(ourPath, "Context not set");
-		return ourPath;
 	}
 	
 }

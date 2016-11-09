@@ -1,6 +1,6 @@
 package org.hl7.fhir.dstu3.utils;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.ExpressionNode;
 import org.hl7.fhir.dstu3.model.ExpressionNode.SourceLocation;
 import org.hl7.fhir.utilities.Utilities;

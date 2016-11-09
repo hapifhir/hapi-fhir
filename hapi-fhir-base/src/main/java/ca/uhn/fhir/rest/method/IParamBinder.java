@@ -29,8 +29,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 interface IParamBinder<T> {
 	
-	List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException;
+	List<IQueryParameterOr<?>> encode(FhirContext theContext, T theString) throws InternalErrorException;
 
-	T parse(String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
+	T parse(FhirContext theContext, String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
 
 }

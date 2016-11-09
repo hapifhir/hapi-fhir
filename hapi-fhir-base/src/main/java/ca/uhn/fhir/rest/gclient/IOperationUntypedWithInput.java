@@ -20,9 +20,9 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IOperationUntypedWithInput<T extends IBaseParameters> extends IClientExecutable<IOperationUntypedWithInput<T>, T> {
+public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperationUntypedWithInput<T>, T> {
 
 	/**
 	 * The client should invoke this method using an HTTP GET instead of an HTTP POST. Note that
@@ -34,5 +34,13 @@ public interface IOperationUntypedWithInput<T extends IBaseParameters> extends I
 	 * </p>
 	 */
 	IOperationUntypedWithInput<T> useHttpGet();
+
+	/**
+	 * If this operation returns a single resource body as its return type instead of a <code>Parameters</code>
+	 * resource, use this method to specify that resource type. This is useful for certain
+	 * operations (e.g. <code>Patient/NNN/$everything</code>) which return a bundle instead of
+	 * a Parameters resource.
+	 */
+	<R extends IBaseResource> IOperationUntypedWithInput<R> returnResourceType(Class<R> theReturnType);
 
 }

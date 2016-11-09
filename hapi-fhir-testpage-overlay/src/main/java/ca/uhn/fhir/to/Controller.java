@@ -5,23 +5,22 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.json.Json;
-import javax.json.stream.JsonGenerator;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,10 +28,11 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.gson.stream.JsonWriter;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -376,14 +376,16 @@ public class Controller extends BaseController {
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/search" })
-	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
+	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) throws IOException {
 		addCommonParams(theReq, theRequest, theModel);
 
 		StringWriter clientCodeJsonStringWriter = new StringWriter();
-		JsonGenerator clientCodeJsonWriter = Json.createGenerator(clientCodeJsonStringWriter);
-		clientCodeJsonWriter.writeStartObject();
-		clientCodeJsonWriter.write("action", "search");
-		clientCodeJsonWriter.write("base", (String) theModel.get("base"));
+		JsonWriter clientCodeJsonWriter = new JsonWriter(clientCodeJsonStringWriter);
+		clientCodeJsonWriter.beginObject();
+		clientCodeJsonWriter.name("action");
+		clientCodeJsonWriter.value("search");
+		clientCodeJsonWriter.name("base");
+		clientCodeJsonWriter.value((String) theModel.get("base"));
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
@@ -397,27 +399,34 @@ public class Controller extends BaseController {
 				theModel.put("errorMsg", e.toString());
 				return "resource";
 			}
-			clientCodeJsonWriter.write("resource", theReq.getParameter("resource"));
+			clientCodeJsonWriter.name("resource");
+			clientCodeJsonWriter.value(theReq.getParameter("resource"));
 		} else {
 			query = search.forAllResources();
-			clientCodeJsonWriter.writeNull("resource");
+			clientCodeJsonWriter.name("resource");
+			clientCodeJsonWriter.nullValue();
 		}
 
-		if (client.getPrettyPrint() != null) {
-			clientCodeJsonWriter.write("pretty", client.getPrettyPrint().toString());
+		if (client.isPrettyPrint()) {
+			clientCodeJsonWriter.name("pretty");
+			clientCodeJsonWriter.value("true");
 		} else {
-			clientCodeJsonWriter.writeNull("pretty");
+			clientCodeJsonWriter.name("pretty");
+			clientCodeJsonWriter.nullValue();
 		}
 
 		if (client.getEncoding() != null) {
-			clientCodeJsonWriter.write("format", client.getEncoding().getRequestContentType());
+			clientCodeJsonWriter.name("format");
+			clientCodeJsonWriter.value(client.getEncoding().getRequestContentType());
 		} else {
-			clientCodeJsonWriter.writeNull("format");
+			clientCodeJsonWriter.name("format");
+			clientCodeJsonWriter.nullValue();
 		}
 
 		String outcomeDescription = "Search for Resources";
 
-		clientCodeJsonWriter.writeStartArray("params");
+		clientCodeJsonWriter.name("params");
+		clientCodeJsonWriter.beginArray();
 		int paramIdx = -1;
 		while (true) {
 			paramIdx++;
@@ -428,31 +437,33 @@ public class Controller extends BaseController {
 				break;
 			}
 		}
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endArray();
 
-		clientCodeJsonWriter.writeStartArray("includes");
+		clientCodeJsonWriter.name("includes");
+		clientCodeJsonWriter.beginArray();
 		String[] incValues = theReq.getParameterValues(Constants.PARAM_INCLUDE);
 		if (incValues != null) {
 			for (String next : incValues) {
 				if (isNotBlank(next)) {
 					query.include(new Include(next));
-					clientCodeJsonWriter.write(next);
+					clientCodeJsonWriter.value(next);
 				}
 			}
 		}
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endArray();
 
-		clientCodeJsonWriter.writeStartArray("revincludes");
+		clientCodeJsonWriter.name("revincludes");
+		clientCodeJsonWriter.beginArray();
 		String[] revIncValues = theReq.getParameterValues(Constants.PARAM_REVINCLUDE);
 		if (revIncValues != null) {
 			for (String next : revIncValues) {
 				if (isNotBlank(next)) {
 					query.revInclude(new Include(next));
-					clientCodeJsonWriter.write(next);
+					clientCodeJsonWriter.value(next);
 				}
 			}
 		}
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endArray();
 
 		String limit = theReq.getParameter("resource-search-limit");
 		if (isNotBlank(limit)) {
@@ -462,9 +473,11 @@ public class Controller extends BaseController {
 			}
 			int limitInt = Integer.parseInt(limit);
 			query.limitTo(limitInt);
-			clientCodeJsonWriter.write("limit", limit);
+			clientCodeJsonWriter.name("limit");
+			clientCodeJsonWriter.value(limit);
 		} else {
-			clientCodeJsonWriter.writeNull("limit");
+			clientCodeJsonWriter.name("limit");
+			clientCodeJsonWriter.nullValue();
 		}
 
 		String[] sort = theReq.getParameterValues("sort_by");
@@ -487,7 +500,7 @@ public class Controller extends BaseController {
 		if (client.getFhirContext().getVersion().getVersion() != FhirVersionEnum.DSTU1) {
 			query.returnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass());
 		}
-		
+
 		long start = System.currentTimeMillis();
 		ResultType returnsResource;
 		try {
@@ -502,7 +515,7 @@ public class Controller extends BaseController {
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
-		clientCodeJsonWriter.writeEnd();
+		clientCodeJsonWriter.endObject();
 		clientCodeJsonWriter.close();
 		String clientCodeJson = clientCodeJsonStringWriter.toString();
 		theModel.put("clientCodeJson", clientCodeJson);
@@ -515,16 +528,16 @@ public class Controller extends BaseController {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
+		FhirContext context = getContext(theRequest);
+		GenericClient client = theRequest.newClient(theServletRequest, context, myConfig, interceptor);
 
 		String body = preProcessMessageBody(theRequest.getTransactionBody());
 
-		Bundle bundle;
 		try {
 			if (body.startsWith("{")) {
-				bundle = getContext(theRequest).newJsonParser().parseBundle(body);
+				// JSON content
 			} else if (body.startsWith("<")) {
-				bundle = getContext(theRequest).newXmlParser().parseBundle(body);
+				// XML content
 			} else {
 				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
 				return "home";
@@ -538,8 +551,8 @@ public class Controller extends BaseController {
 		ResultType returnsResource = ResultType.BUNDLE;
 		long start = System.currentTimeMillis();
 		try {
-			ourLog.info(logPrefix(theModel) + "Executing transaction with {} resources", bundle.size());
-			client.transaction().withBundle(bundle).execute();
+			ourLog.info(logPrefix(theModel) + "Executing transaction");
+			client.transaction().withBundle(body).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -680,7 +693,7 @@ public class Controller extends BaseController {
 		long start = System.currentTimeMillis();
 		try {
 			ourLog.info(logPrefix(theModel) + "Retrieving history for type {} ID {} since {}", new Object[] { type, id, since });
-			
+
 			IHistory hist0 = client.history();
 			IHistoryUntyped hist1;
 			if (isNotBlank(id)) {
@@ -690,21 +703,21 @@ public class Controller extends BaseController {
 			} else {
 				hist1 = hist0.onServer();
 			}
-			
+
 			IHistoryTyped<?> hist2;
 			if (client.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				hist2 = hist1.andReturnDstu1Bundle();
 			} else {
 				hist2 = hist1.andReturnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
 			}
-			
+
 			if (since != null) {
 				hist2.since(since);
 			}
 			if (limit != null) {
 				hist2.count(limit);
 			}
-			
+
 			hist2.execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
@@ -715,8 +728,7 @@ public class Controller extends BaseController {
 
 	}
 
-	private boolean extractSearchParamsDstu1(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
-			List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu1(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
 		Conformance conformance = (Conformance) theConformance;
 		for (Rest nextRest : conformance.getRest()) {
 			for (RestResource nextRes : nextRest.getResource()) {
@@ -764,8 +776,7 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
-			List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
 		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
 			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
@@ -801,8 +812,7 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDstu3(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
-			List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu3(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
 		org.hl7.fhir.dstu3.model.Conformance conformance = (org.hl7.fhir.dstu3.model.Conformance) theConformance;
 		for (ConformanceRestComponent nextRest : conformance.getRest()) {
 			for (ConformanceRestResourceComponent nextRes : nextRest.getResource()) {
@@ -838,7 +848,7 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery<?> theQuery, JsonGenerator theClientCodeJsonWriter) {
+	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery<?> theQuery, JsonWriter theClientCodeJsonWriter) throws IOException {
 		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
 		if (isBlank(nextName)) {
 			return false;
@@ -922,12 +932,16 @@ public class Controller extends BaseController {
 
 		for (String nextValue : values) {
 
-			theClientCodeJsonWriter.writeStartObject();
-			theClientCodeJsonWriter.write("type", nextType);
-			theClientCodeJsonWriter.write("name", nextName);
-			theClientCodeJsonWriter.write("qualifier", nextQualifier);
-			theClientCodeJsonWriter.write("value", nextValue);
-			theClientCodeJsonWriter.writeEnd();
+			theClientCodeJsonWriter.beginObject();
+			theClientCodeJsonWriter.name("type");
+			theClientCodeJsonWriter.value(nextType);
+			theClientCodeJsonWriter.name("name");
+			theClientCodeJsonWriter.value(nextName);
+			theClientCodeJsonWriter.name("qualifier");
+			theClientCodeJsonWriter.value(nextQualifier);
+			theClientCodeJsonWriter.name("value");
+			theClientCodeJsonWriter.value(nextValue);
+			theClientCodeJsonWriter.endObject();
 			if (addToWhere) {
 				theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
 			}

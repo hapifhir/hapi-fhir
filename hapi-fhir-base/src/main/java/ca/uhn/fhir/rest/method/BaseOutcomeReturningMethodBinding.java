@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -39,15 +40,16 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -57,6 +59,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
+
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE);
 
 	private boolean myReturnVoid;
 
@@ -88,74 +92,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	 * operation in the URL if this method returns null.
 	 */
 	protected abstract String getMatchingOperation();
-
-	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		Set<RequestTypeEnum> allowableRequestTypes = provideAllowableRequestTypes();
-		RequestTypeEnum requestType = theRequest.getRequestType();
-		if (!allowableRequestTypes.contains(requestType)) {
-			return false;
-		}
-		if (!getResourceName().equals(theRequest.getResourceName())) {
-			return false;
-		}
-		if (getMatchingOperation() == null && StringUtils.isNotBlank(theRequest.getOperation())) {
-			return false;
-		}
-		if (getMatchingOperation() != null && !getMatchingOperation().equals(theRequest.getOperation())) {
-			return false;
-		}
-		
-		/*
-		 * Note: Technically this will match an update (PUT) method even if
-		 * there is no ID in the URL - We allow this here because there is no
-		 * better match for that, and this allows the update/PUT method to give
-		 * a helpful error if the client has forgotten to include the 
-		 * ID in the URL.
-		 * 
-		 * It's also needed for conditional update..
-		 */
-		
-		return true;
-	}
-
-	@Override
-	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-		if (theResponseStatusCode >= 200 && theResponseStatusCode < 300) {
-			if (myReturnVoid) {
-				return null;
-			}
-			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), getResourceName(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
-			return retVal;
-		} else {
-			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
-		}
-	}
-
-	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-
-		Object[] params = createParametersForServerRequest(theRequest);
-		addParametersForServerRequest(theRequest, params);
-
-		/*
-		 * No need to catch and handle exceptions here, we already handle them one level up including invoking interceptors
-		 * on them
-		 */
-		MethodOutcome response;
-		response = (MethodOutcome) invokeServerMethod(theServer, theRequest, params);
-
-		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
-			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {
-				throw new InternalErrorException("Server method returned invalid resource ID: " + response.getId().getValue());
-			}
-		}
-
-		IBaseOperationOutcome outcome = response != null ? response.getOperationOutcome() : null;
-		IBaseResource resource = response != null ? response.getResource() : null;
-
-		return returnResponse(theServer, theRequest, response, outcome, resource);
-	}
 
 	private int getOperationStatus(MethodOutcome response) {
 		switch (getRestOperationType()) {
@@ -194,12 +130,92 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 	}
 
+	@Override
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		Set<RequestTypeEnum> allowableRequestTypes = provideAllowableRequestTypes();
+		RequestTypeEnum requestType = theRequest.getRequestType();
+		if (!allowableRequestTypes.contains(requestType)) {
+			return false;
+		}
+		if (!getResourceName().equals(theRequest.getResourceName())) {
+			return false;
+		}
+		if (getMatchingOperation() == null && StringUtils.isNotBlank(theRequest.getOperation())) {
+			return false;
+		}
+		if (getMatchingOperation() != null && !getMatchingOperation().equals(theRequest.getOperation())) {
+			return false;
+		}
+		
+		/*
+		 * Note: Technically this will match an update (PUT) method even if
+		 * there is no ID in the URL - We allow this here because there is no
+		 * better match for that, and this allows the update/PUT method to give
+		 * a helpful error if the client has forgotten to include the 
+		 * ID in the URL.
+		 * 
+		 * It's also needed for conditional update..
+		 */
+		
+		return true;
+	}
+
+	@Override
+	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		if (theResponseStatusCode >= 200 && theResponseStatusCode < 300) {
+			if (myReturnVoid) {
+				return null;
+			}
+			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+			return retVal;
+		} else {
+			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
+		}
+	}
+
+	@Override
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+
+		Object[] params = createParametersForServerRequest(theRequest);
+		addParametersForServerRequest(theRequest, params);
+
+		/*
+		 * No need to catch and handle exceptions here, we already handle them one level up including invoking interceptors
+		 * on them
+		 */
+		MethodOutcome response;
+		Object methodReturn = invokeServerMethod(theServer, theRequest, params);
+		
+		if (methodReturn instanceof IBaseOperationOutcome) {
+			response = new MethodOutcome();
+			response.setOperationOutcome((IBaseOperationOutcome) methodReturn);
+		} else {
+			response = (MethodOutcome) methodReturn;
+		}
+		
+		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
+			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {
+				throw new InternalErrorException("Server method returned invalid resource ID: " + response.getId().getValue());
+			}
+		}
+
+		IBaseOperationOutcome outcome = response != null ? response.getOperationOutcome() : null;
+		IBaseResource resource = response != null ? response.getResource() : null;
+
+		return returnResponse(theServer, theRequest, response, outcome, resource);
+	}
+	public boolean isReturnVoid() {
+		return myReturnVoid;
+	}
+
+	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
+
 	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
 		boolean allowPrefer = false;
 		int operationStatus = getOperationStatus(response);
 		IBaseResource outcome = originalOutcome;
 
-		if (EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE).contains(getRestOperationType())) {
+		if (ourOperationsWhichAllowPreferHeader.contains(getRestOperationType())) {
 			allowPrefer = true;
 		}
 
@@ -220,15 +236,32 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				return null;
 			}
 		}
+		
+		IRestfulResponse restfulResponse = theRequest.getResponse();
+		
+		if (response != null) {
+			if (response.getResource() != null) {
+				restfulResponse.setOperationResourceLastUpdated(RestfulServerUtils.extractLastUpdatedFromResource(response.getResource()));
+			}
+			
+			IIdType responseId = response.getId();
+			if (responseId != null && responseId.getResourceType() == null && responseId.hasIdPart()) {
+				responseId = responseId.withResourceType(getResourceName());
+			}
+			
+			if (responseId != null) {
+				String serverBase = theRequest.getFhirServerBase();
+				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(theServer, resource, serverBase, responseId);
+				restfulResponse.setOperationResourceId(responseId);
+			}
+		}
 
-		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+		Set<SummaryEnum> summaryMode = Collections.emptySet();
+
+		return restfulResponse.streamResponseAsResource(outcome, prettyPrint, summaryMode, operationStatus, null, theRequest.isRespondGzip(), true);
+//		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
 	}
-
-	public boolean isReturnVoid() {
-		return myReturnVoid;
-	}
-
-	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
 	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, RequestDetails theRequest) throws IOException {
 		theResponse.setStatus(theE.getStatusCode());
@@ -256,7 +289,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 	}
 
-	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theResourceName, String theLocationHeader) {
+	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
 		if (StringUtils.isBlank(theLocationHeader)) {
 			return;
 		}
@@ -264,22 +297,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		IIdType id = theContext.getVersion().newIdType();
 		id.setValue(theLocationHeader);
 		theOutcomeToPopulate.setId(id);
-
-		String resourceNamePart = "/" + theResourceName + "/";
-		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);
-		if (resourceIndex > -1) {
-			int idIndexStart = resourceIndex + resourceNamePart.length();
-			int idIndexEnd = theLocationHeader.indexOf('/', idIndexStart);
-			if (idIndexEnd == -1) {
-				// nothing
-			} else {
-				String versionIdPart = "/_history/";
-				int historyIdStart = theLocationHeader.indexOf(versionIdPart, idIndexEnd);
-				if (historyIdStart != -1) {
-					theOutcomeToPopulate.setVersionId(new IdDt(theLocationHeader.substring(historyIdStart + versionIdPart.length())));
-				}
-			}
-		}
 	}
 
 }

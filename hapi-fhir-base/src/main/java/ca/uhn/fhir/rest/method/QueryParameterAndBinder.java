@@ -37,17 +37,17 @@ final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd<?>> im
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException {
+	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterAnd<?> theString) throws InternalErrorException {
 		List<IQueryParameterOr<?>> retVal = (List<IQueryParameterOr<?>>) ((IQueryParameterAnd<?>) theString).getValuesAsQueryTokens();
 		return retVal;
 	}
 
 	@Override
-	public IQueryParameterAnd<?> parse(String theName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public IQueryParameterAnd<?> parse(FhirContext theContext, String theParamName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		IQueryParameterAnd<?> dt;
 		try {
 			dt = newInstance();
-			dt.setValuesAsQueryTokens(theString);
+			dt.setValuesAsQueryTokens(theContext, theParamName, theString);
 		} catch (SecurityException e) {
 			throw new InternalErrorException(e);
 		}

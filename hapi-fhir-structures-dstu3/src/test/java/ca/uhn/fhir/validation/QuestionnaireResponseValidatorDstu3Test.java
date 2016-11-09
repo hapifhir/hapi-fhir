@@ -13,12 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -29,9 +34,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemC
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +45,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class QuestionnaireResponseValidatorDstu3Test {
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorDstu3Test.class);
 
 	private FhirInstanceValidator myInstanceVal;
@@ -73,7 +76,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			if (messages.get(i).getMessage().contains("has no source, so can't")) {
 				messages.remove(i);
 				i--;
-			}
+			} 
 		}
 		
 		return new ValidationResult(ourCtx, messages);
@@ -105,14 +108,16 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq("http://example.com/Questionnaire/q1"))).thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl("http://codesystems.com/system");
 		codeSystem.addConcept().setCode("code0");
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(CodeSystem.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
 
 		CodeSystem codeSystem2 = new CodeSystem();
+		codeSystem2.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem2.setUrl("http://codesystems.com/system2");
 		codeSystem2.addConcept().setCode("code2");
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(CodeSystem.class), eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
+		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
@@ -174,6 +179,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No LinkId, so can't be validated"));
 	}
+	
 
 	@Test
 	public void testItemWithNoType() {
@@ -226,20 +232,24 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl("http://codesystems.com/system");
 		codeSystem.addConcept().setCode("code0");
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(CodeSystem.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
 
 		CodeSystem codeSystem2 = new CodeSystem();
+		codeSystem2.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem2.setUrl("http://codesystems.com/system2");
 		codeSystem2.addConcept().setCode("code2");
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(CodeSystem.class), eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
+		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
+		when(myValSupport.validateCode(any(FhirContext.class), eq("http://codesystems.com/system"), eq("code0"), any(String.class))).thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType("code0"))));
+		
 		QuestionnaireResponse qa;
 		ValidationResult errors;
 

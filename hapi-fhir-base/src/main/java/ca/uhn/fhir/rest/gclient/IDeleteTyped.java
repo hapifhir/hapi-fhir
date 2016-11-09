@@ -20,9 +20,9 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, BaseOperationOutcome> {
+public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, IBaseOperationOutcome> {
 	
 	// nothing for now
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -37,10 +37,11 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
@@ -65,7 +66,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         INFORMATION, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static IssueSeverity fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return WARNING;
         if ("information".equals(codeString))
           return INFORMATION;
-        throw new FHIRException("Unknown IssueSeverity code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown IssueSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -284,7 +288,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         INFORMATIONAL, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static IssueType fromCode(String codeString) throws FHIRException {
@@ -348,7 +352,10 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return THROTTLED;
         if ("informational".equals(codeString))
           return INFORMATIONAL;
-        throw new FHIRException("Unknown IssueType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown IssueType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -692,6 +699,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         @Child(name = "severity", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
         @Description(shortDefinition="fatal | error | warning | information", formalDefinition="Indicates whether the issue indicates a variation from successful processing." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/issue-severity")
         protected Enumeration<IssueSeverity> severity;
 
         /**
@@ -699,6 +707,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Error or warning code", formalDefinition="Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/issue-type")
         protected Enumeration<IssueType> code;
 
         /**
@@ -706,6 +715,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         @Child(name = "details", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Additional details about the error", formalDefinition="Additional details about the error. This may be a text description of the error, or a system code that identifies the error." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-outcome")
         protected CodeableConcept details;
 
         /**
@@ -920,16 +930,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return The first repetition of repeating field {@link #location}, creating it if it does not already exist
-         */
-        public StringType getLocationFirstRep() { 
-          if (getLocation().isEmpty()) {
-            addLocationElement();
-          }
-          return getLocation().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public OperationOutcomeIssueComponent setLocation(List<StringType> theLocation) { 
@@ -949,7 +949,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         /**
          * @return {@link #location} (A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
          */
-    // syntactic sugar
         public StringType addLocationElement() {//2 
           StringType t = new StringType();
           if (this.location == null)
@@ -992,16 +991,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return The first repetition of repeating field {@link #expression}, creating it if it does not already exist
-         */
-        public StringType getExpressionFirstRep() { 
-          if (getExpression().isEmpty()) {
-            addExpressionElement();
-          }
-          return getExpression().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public OperationOutcomeIssueComponent setExpression(List<StringType> theExpression) { 
@@ -1021,7 +1010,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         /**
          * @return {@link #expression} (A simple FluentPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
          */
-    // syntactic sugar
         public StringType addExpressionElement() {//2 
           StringType t = new StringType();
           if (this.expression == null)
@@ -1205,8 +1193,8 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(severity, code, details, diagnostics
-          , location, expression);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(severity, code, details
+          , diagnostics, location, expression);
       }
 
   public String fhirType() {
@@ -1242,16 +1230,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
     }
 
     /**
-     * @return The first repetition of repeating field {@link #issue}, creating it if it does not already exist
-     */
-    public OperationOutcomeIssueComponent getIssueFirstRep() { 
-      if (getIssue().isEmpty()) {
-        addIssue();
-      }
-      return getIssue().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public OperationOutcome setIssue(List<OperationOutcomeIssueComponent> theIssue) { 
@@ -1268,10 +1246,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       return false;
     }
 
-    /**
-     * @return {@link #issue} (An error, warning or information message that results from a system action.)
-     */
-    // syntactic sugar
     public OperationOutcomeIssueComponent addIssue() { //3
       OperationOutcomeIssueComponent t = new OperationOutcomeIssueComponent();
       if (this.issue == null)
@@ -1280,7 +1254,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       return t;
     }
 
-    // syntactic sugar
     public OperationOutcome addIssue(OperationOutcomeIssueComponent t) { //3
       if (t == null)
         return this;
@@ -1288,6 +1261,16 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         this.issue = new ArrayList<OperationOutcomeIssueComponent>();
       this.issue.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #issue}, creating it if it does not already exist
+     */
+    public OperationOutcomeIssueComponent getIssueFirstRep() { 
+      if (getIssue().isEmpty()) {
+        addIssue();
+      }
+      return getIssue().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {

@@ -73,6 +73,7 @@ public class DynamicSearchParameter implements IParameter {
 		for (String next : theRequest.getParameters().keySet()) {
 			String qualifier = null;
 			String qualifiedParamName = next;
+			String unqualifiedParamName = next;
 			RuntimeSearchParam param = myNameToParam.get(next);
 			if (param == null) {
 				int colonIndex = next.indexOf(':');
@@ -86,6 +87,7 @@ public class DynamicSearchParameter implements IParameter {
 					}
 					qualifier = next.substring(index);
 					next = next.substring(0, index);
+					unqualifiedParamName = next;
 					param = myNameToParam.get(next);
 				}
 			}
@@ -95,48 +97,50 @@ public class DynamicSearchParameter implements IParameter {
 				for (String nextValue : theRequest.getParameters().get(qualifiedParamName)) {
 					QualifiedParamList paramList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, nextValue);
 
+					FhirContext ctx = theRequest.getServer().getFhirContext();
+					
 					switch (param.getParamType()) {
 					case COMPOSITE:
 						Class<? extends IQueryParameterType> left = toParamType(param.getCompositeOf().get(0));
 						Class<? extends IQueryParameterType> right = toParamType(param.getCompositeOf().get(0));
 						@SuppressWarnings({ "rawtypes" })
 						CompositeOrListParam compositeOrListParam = new CompositeOrListParam(left, right);
-						compositeOrListParam.setValuesAsQueryTokens(paramList);
+						compositeOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, compositeOrListParam);
 						break;
 					case DATE:
 						DateOrListParam dateOrListParam = new DateOrListParam();
-						dateOrListParam.setValuesAsQueryTokens(paramList);
+						dateOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, dateOrListParam);
 						break;
 					case NUMBER:
 						NumberOrListParam numberOrListParam = new NumberOrListParam();
-						numberOrListParam.setValuesAsQueryTokens(paramList);
+						numberOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, numberOrListParam);
 						break;
 					case QUANTITY:
 						QuantityOrListParam quantityOrListParam = new QuantityOrListParam();
-						quantityOrListParam.setValuesAsQueryTokens(paramList);
+						quantityOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, quantityOrListParam);
 						break;
 					case REFERENCE:
 						ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-						referenceOrListParam.setValuesAsQueryTokens(paramList);
+						referenceOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, referenceOrListParam);
 						break;
 					case STRING:
 						StringOrListParam stringOrListParam = new StringOrListParam();
-						stringOrListParam.setValuesAsQueryTokens(paramList);
+						stringOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, stringOrListParam);
 						break;
 					case TOKEN:
 						TokenOrListParam tokenOrListParam = new TokenOrListParam();
-						tokenOrListParam.setValuesAsQueryTokens(paramList);
+						tokenOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, tokenOrListParam);
 						break;
 					case URI:
 						UriOrListParam uriOrListParam = new UriOrListParam();
-						uriOrListParam.setValuesAsQueryTokens(paramList);
+						uriOrListParam.setValuesAsQueryTokens(ctx, unqualifiedParamName, paramList);
 						retVal.add(next, uriOrListParam);
 						break;
 					}

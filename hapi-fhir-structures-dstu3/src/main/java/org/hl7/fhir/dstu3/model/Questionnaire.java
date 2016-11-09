@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -38,10 +38,11 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
@@ -62,7 +63,7 @@ public class Questionnaire extends DomainResource {
          */
         RETIRED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static QuestionnaireStatus fromCode(String codeString) throws FHIRException {
@@ -74,7 +75,10 @@ public class Questionnaire extends DomainResource {
           return PUBLISHED;
         if ("retired".equals(codeString))
           return RETIRED;
-        throw new FHIRException("Unknown QuestionnaireStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown QuestionnaireStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -225,7 +229,7 @@ public class Questionnaire extends DomainResource {
          */
         QUANTITY, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static QuestionnaireItemType fromCode(String codeString) throws FHIRException {
@@ -267,7 +271,10 @@ public class Questionnaire extends DomainResource {
           return REFERENCE;
         if ("quantity".equals(codeString))
           return QUANTITY;
-        throw new FHIRException("Unknown QuestionnaireItemType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown QuestionnaireItemType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -508,6 +515,7 @@ public class Questionnaire extends DomainResource {
          */
         @Child(name = "concept", type = {Coding.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Concept that represents this item within in a questionnaire", formalDefinition="Identifies a how this group of questions is known in a particular terminology such as LOINC." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
         protected List<Coding> concept;
 
         /**
@@ -528,13 +536,14 @@ public class Questionnaire extends DomainResource {
          * Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.).
          */
         @Child(name = "type", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="group | display | boolean | decimal | integer | date | dateTime +", formalDefinition="Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.)." )
+        @Description(shortDefinition="group | display | question | boolean | decimal | integer | date | dateTime +", formalDefinition="Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/item-type")
         protected Enumeration<QuestionnaireItemType> type;
 
         /**
          * If present, indicates that this item should only be enabled (displayed/allow answers to be captured) when the specified condition is true.
          */
-        @Child(name = "enableWhen", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=false)
+        @Child(name = "enableWhen", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
         @Description(shortDefinition="Only allow data when:", formalDefinition="If present, indicates that this item should only be enabled (displayed/allow answers to be captured) when the specified condition is true." )
         protected List<QuestionnaireItemEnableWhenComponent> enableWhen;
 
@@ -588,7 +597,7 @@ public class Questionnaire extends DomainResource {
         /**
          * The value that should be pre-populated when rendering the questionnaire for user input.
          */
-        @Child(name = "initial", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "initial", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Initial presumed answer for question", formalDefinition="The value that should be pre-populated when rendering the questionnaire for user input." )
         protected Type initial;
 
@@ -675,16 +684,6 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
-         */
-        public Coding getConceptFirstRep() { 
-          if (getConcept().isEmpty()) {
-            addConcept();
-          }
-          return getConcept().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireItemComponent setConcept(List<Coding> theConcept) { 
@@ -701,10 +700,6 @@ public class Questionnaire extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #concept} (Identifies a how this group of questions is known in a particular terminology such as LOINC.)
-         */
-    // syntactic sugar
         public Coding addConcept() { //3
           Coding t = new Coding();
           if (this.concept == null)
@@ -713,7 +708,6 @@ public class Questionnaire extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireItemComponent addConcept(Coding t) { //3
           if (t == null)
             return this;
@@ -721,6 +715,16 @@ public class Questionnaire extends DomainResource {
             this.concept = new ArrayList<Coding>();
           this.concept.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+         */
+        public Coding getConceptFirstRep() { 
+          if (getConcept().isEmpty()) {
+            addConcept();
+          }
+          return getConcept().get(0);
         }
 
         /**
@@ -876,16 +880,6 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #enableWhen}, creating it if it does not already exist
-         */
-        public QuestionnaireItemEnableWhenComponent getEnableWhenFirstRep() { 
-          if (getEnableWhen().isEmpty()) {
-            addEnableWhen();
-          }
-          return getEnableWhen().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireItemComponent setEnableWhen(List<QuestionnaireItemEnableWhenComponent> theEnableWhen) { 
@@ -902,10 +896,6 @@ public class Questionnaire extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #enableWhen} (If present, indicates that this item should only be enabled (displayed/allow answers to be captured) when the specified condition is true.)
-         */
-    // syntactic sugar
         public QuestionnaireItemEnableWhenComponent addEnableWhen() { //3
           QuestionnaireItemEnableWhenComponent t = new QuestionnaireItemEnableWhenComponent();
           if (this.enableWhen == null)
@@ -914,7 +904,6 @@ public class Questionnaire extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireItemComponent addEnableWhen(QuestionnaireItemEnableWhenComponent t) { //3
           if (t == null)
             return this;
@@ -922,6 +911,16 @@ public class Questionnaire extends DomainResource {
             this.enableWhen = new ArrayList<QuestionnaireItemEnableWhenComponent>();
           this.enableWhen.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #enableWhen}, creating it if it does not already exist
+         */
+        public QuestionnaireItemEnableWhenComponent getEnableWhenFirstRep() { 
+          if (getEnableWhen().isEmpty()) {
+            addEnableWhen();
+          }
+          return getEnableWhen().get(0);
         }
 
         /**
@@ -1158,16 +1157,6 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #option}, creating it if it does not already exist
-         */
-        public QuestionnaireItemOptionComponent getOptionFirstRep() { 
-          if (getOption().isEmpty()) {
-            addOption();
-          }
-          return getOption().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireItemComponent setOption(List<QuestionnaireItemOptionComponent> theOption) { 
@@ -1184,10 +1173,6 @@ public class Questionnaire extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #option} (For a "choice" question, identifies one of the permitted answers for the question.)
-         */
-    // syntactic sugar
         public QuestionnaireItemOptionComponent addOption() { //3
           QuestionnaireItemOptionComponent t = new QuestionnaireItemOptionComponent();
           if (this.option == null)
@@ -1196,7 +1181,6 @@ public class Questionnaire extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireItemComponent addOption(QuestionnaireItemOptionComponent t) { //3
           if (t == null)
             return this;
@@ -1204,6 +1188,16 @@ public class Questionnaire extends DomainResource {
             this.option = new ArrayList<QuestionnaireItemOptionComponent>();
           this.option.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #option}, creating it if it does not already exist
+         */
+        public QuestionnaireItemOptionComponent getOptionFirstRep() { 
+          if (getOption().isEmpty()) {
+            addOption();
+          }
+          return getOption().get(0);
         }
 
         /**
@@ -1404,16 +1398,6 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-         */
-        public QuestionnaireItemComponent getItemFirstRep() { 
-          if (getItem().isEmpty()) {
-            addItem();
-          }
-          return getItem().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireItemComponent setItem(List<QuestionnaireItemComponent> theItem) { 
@@ -1430,10 +1414,6 @@ public class Questionnaire extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #item} (Allows text, questions and other groups to be nested beneath a question or group.)
-         */
-    // syntactic sugar
         public QuestionnaireItemComponent addItem() { //3
           QuestionnaireItemComponent t = new QuestionnaireItemComponent();
           if (this.item == null)
@@ -1442,7 +1422,6 @@ public class Questionnaire extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireItemComponent addItem(QuestionnaireItemComponent t) { //3
           if (t == null)
             return this;
@@ -1450,6 +1429,16 @@ public class Questionnaire extends DomainResource {
             this.item = new ArrayList<QuestionnaireItemComponent>();
           this.item.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+         */
+        public QuestionnaireItemComponent getItemFirstRep() { 
+          if (getItem().isEmpty()) {
+            addItem();
+          }
+          return getItem().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1532,7 +1521,7 @@ public class Questionnaire extends DomainResource {
           this.getOption().add((QuestionnaireItemOptionComponent) value); // QuestionnaireItemOptionComponent
           break;
         case 1948342084: // initial
-          this.initial = (Type) value; // Type
+          this.initial = castToType(value); // Type
           break;
         case 3242771: // item
           this.getItem().add((QuestionnaireItemComponent) value); // QuestionnaireItemComponent
@@ -1569,7 +1558,7 @@ public class Questionnaire extends DomainResource {
         else if (name.equals("option"))
           this.getOption().add((QuestionnaireItemOptionComponent) value);
         else if (name.equals("initial[x]"))
-          this.initial = (Type) value; // Type
+          this.initial = castToType(value); // Type
         else if (name.equals("item"))
           this.getItem().add((QuestionnaireItemComponent) value);
         else
@@ -1759,8 +1748,9 @@ public class Questionnaire extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, concept, prefix, text, type
-          , enableWhen, required, repeats, readOnly, maxLength, options, option, initial, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, concept, prefix
+          , text, type, enableWhen, required, repeats, readOnly, maxLength, options, option
+          , initial, item);
       }
 
   public String fhirType() {
@@ -1789,7 +1779,7 @@ public class Questionnaire extends DomainResource {
         /**
          * If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer.
          */
-        @Child(name = "answer", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "answer", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Value question must have", formalDefinition="If present, then the answer for the referenced question must match this answer for all components present in the enableWhen.answer." )
         protected Type answer;
 
@@ -2116,7 +2106,7 @@ public class Questionnaire extends DomainResource {
           this.hasAnswer = castToBoolean(value); // BooleanType
           break;
         case -1412808770: // answer
-          this.answer = (Type) value; // Type
+          this.answer = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2130,7 +2120,7 @@ public class Questionnaire extends DomainResource {
         else if (name.equals("hasAnswer"))
           this.hasAnswer = castToBoolean(value); // BooleanType
         else if (name.equals("answer[x]"))
-          this.answer = (Type) value; // Type
+          this.answer = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -2241,7 +2231,8 @@ public class Questionnaire extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(question, hasAnswer, answer);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(question, hasAnswer, answer
+          );
       }
 
   public String fhirType() {
@@ -2258,6 +2249,7 @@ public class Questionnaire extends DomainResource {
          */
         @Child(name = "value", type = {IntegerType.class, DateType.class, TimeType.class, StringType.class, Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Answer value", formalDefinition="Identifies a specific answer that's allowed as the answer to a question." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-answers")
         protected Type value;
 
         private static final long serialVersionUID = -732981989L;
@@ -2379,7 +2371,7 @@ public class Questionnaire extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2389,7 +2381,7 @@ public class Questionnaire extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -2493,6 +2485,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | published | retired", formalDefinition="The lifecycle status of the questionnaire as a whole." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-status")
     protected Enumeration<QuestionnaireStatus> status;
 
     /**
@@ -2521,6 +2514,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "useContext", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Questionnaire intends to support these contexts", formalDefinition="A code that identifies the questionnaire as falling into a particular group of like questionnaires; e.g. \"Pediatric\", \"Admissions\", \"Research\", \"Demographic\", \"Opinion Survey\", etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/use-context")
     protected List<CodeableConcept> useContext;
 
     /**
@@ -2535,6 +2529,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "concept", type = {Coding.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Concept that represents the overall questionnaire", formalDefinition="Identifies a how this question or group of questions is known in a particular terminology such as LOINC." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
     protected List<Coding> concept;
 
     /**
@@ -2542,6 +2537,7 @@ public class Questionnaire extends DomainResource {
      */
     @Child(name = "subjectType", type = {CodeType.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Resource that can be subject of QuestionnaireResponse", formalDefinition="Identifies the types of subjects that can be the subject of the questionnaire." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> subjectType;
 
     /**
@@ -2627,16 +2623,6 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Questionnaire setIdentifier(List<Identifier> theIdentifier) { 
@@ -2653,10 +2639,6 @@ public class Questionnaire extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (This records identifiers associated with this question set that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -2665,7 +2647,6 @@ public class Questionnaire extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Questionnaire addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -2673,6 +2654,16 @@ public class Questionnaire extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -2877,16 +2868,6 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-     */
-    public ContactPoint getTelecomFirstRep() { 
-      if (getTelecom().isEmpty()) {
-        addTelecom();
-      }
-      return getTelecom().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Questionnaire setTelecom(List<ContactPoint> theTelecom) { 
@@ -2903,10 +2884,6 @@ public class Questionnaire extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #telecom} (Contact details to assist a user in finding and communicating with the publisher.)
-     */
-    // syntactic sugar
     public ContactPoint addTelecom() { //3
       ContactPoint t = new ContactPoint();
       if (this.telecom == null)
@@ -2915,7 +2892,6 @@ public class Questionnaire extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Questionnaire addTelecom(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -2926,22 +2902,22 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
+    }
+
+    /**
      * @return {@link #useContext} (A code that identifies the questionnaire as falling into a particular group of like questionnaires; e.g. "Pediatric", "Admissions", "Research", "Demographic", "Opinion Survey", etc.)
      */
     public List<CodeableConcept> getUseContext() { 
       if (this.useContext == null)
         this.useContext = new ArrayList<CodeableConcept>();
       return this.useContext;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
-     */
-    public CodeableConcept getUseContextFirstRep() { 
-      if (getUseContext().isEmpty()) {
-        addUseContext();
-      }
-      return getUseContext().get(0);
     }
 
     /**
@@ -2961,10 +2937,6 @@ public class Questionnaire extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #useContext} (A code that identifies the questionnaire as falling into a particular group of like questionnaires; e.g. "Pediatric", "Admissions", "Research", "Demographic", "Opinion Survey", etc.)
-     */
-    // syntactic sugar
     public CodeableConcept addUseContext() { //3
       CodeableConcept t = new CodeableConcept();
       if (this.useContext == null)
@@ -2973,7 +2945,6 @@ public class Questionnaire extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Questionnaire addUseContext(CodeableConcept t) { //3
       if (t == null)
         return this;
@@ -2981,6 +2952,16 @@ public class Questionnaire extends DomainResource {
         this.useContext = new ArrayList<CodeableConcept>();
       this.useContext.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
+     */
+    public CodeableConcept getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
+      }
+      return getUseContext().get(0);
     }
 
     /**
@@ -3042,16 +3023,6 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
-     */
-    public Coding getConceptFirstRep() { 
-      if (getConcept().isEmpty()) {
-        addConcept();
-      }
-      return getConcept().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Questionnaire setConcept(List<Coding> theConcept) { 
@@ -3068,10 +3039,6 @@ public class Questionnaire extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #concept} (Identifies a how this question or group of questions is known in a particular terminology such as LOINC.)
-     */
-    // syntactic sugar
     public Coding addConcept() { //3
       Coding t = new Coding();
       if (this.concept == null)
@@ -3080,7 +3047,6 @@ public class Questionnaire extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Questionnaire addConcept(Coding t) { //3
       if (t == null)
         return this;
@@ -3091,22 +3057,22 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
+     * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+     */
+    public Coding getConceptFirstRep() { 
+      if (getConcept().isEmpty()) {
+        addConcept();
+      }
+      return getConcept().get(0);
+    }
+
+    /**
      * @return {@link #subjectType} (Identifies the types of subjects that can be the subject of the questionnaire.)
      */
     public List<CodeType> getSubjectType() { 
       if (this.subjectType == null)
         this.subjectType = new ArrayList<CodeType>();
       return this.subjectType;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #subjectType}, creating it if it does not already exist
-     */
-    public CodeType getSubjectTypeFirstRep() { 
-      if (getSubjectType().isEmpty()) {
-        addSubjectTypeElement();
-      }
-      return getSubjectType().get(0);
     }
 
     /**
@@ -3129,7 +3095,6 @@ public class Questionnaire extends DomainResource {
     /**
      * @return {@link #subjectType} (Identifies the types of subjects that can be the subject of the questionnaire.)
      */
-    // syntactic sugar
     public CodeType addSubjectTypeElement() {//2 
       CodeType t = new CodeType();
       if (this.subjectType == null)
@@ -3172,16 +3137,6 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-     */
-    public QuestionnaireItemComponent getItemFirstRep() { 
-      if (getItem().isEmpty()) {
-        addItem();
-      }
-      return getItem().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Questionnaire setItem(List<QuestionnaireItemComponent> theItem) { 
@@ -3198,10 +3153,6 @@ public class Questionnaire extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #item} (The questions and groupings of questions that make up the questionnaire.)
-     */
-    // syntactic sugar
     public QuestionnaireItemComponent addItem() { //3
       QuestionnaireItemComponent t = new QuestionnaireItemComponent();
       if (this.item == null)
@@ -3210,7 +3161,6 @@ public class Questionnaire extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Questionnaire addItem(QuestionnaireItemComponent t) { //3
       if (t == null)
         return this;
@@ -3218,6 +3168,16 @@ public class Questionnaire extends DomainResource {
         this.item = new ArrayList<QuestionnaireItemComponent>();
       this.item.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public QuestionnaireItemComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -3470,8 +3430,9 @@ public class Questionnaire extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version, status
-          , date, publisher, telecom, useContext, title, concept, subjectType, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version
+          , status, date, publisher, telecom, useContext, title, concept, subjectType
+          , item);
       }
 
   @Override
@@ -3487,7 +3448,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -3507,7 +3468,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -3527,7 +3488,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.item.concept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token", target={} )
+  @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -3547,7 +3508,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.useContext</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="Questionnaire.useContext", description="A use context assigned to the questionnaire", type="token", target={} )
+  @SearchParamDefinition(name="context", path="Questionnaire.useContext", description="A use context assigned to the questionnaire", type="token" )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
@@ -3567,7 +3528,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.publisher</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string", target={} )
+  @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string" )
   public static final String SP_PUBLISHER = "publisher";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
@@ -3587,7 +3548,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string", target={} )
+  @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
@@ -3607,7 +3568,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string", target={} )
+  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
@@ -3627,7 +3588,7 @@ public class Questionnaire extends DomainResource {
    * Path: <b>Questionnaire.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

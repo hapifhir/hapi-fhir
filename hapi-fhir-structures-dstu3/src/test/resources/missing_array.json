@@ -1,0 +1,11 @@
+{
+	"resourceType": "RelatedPerson",
+	"name": {
+		"family": [
+			"Doe"
+		],
+		"given": [
+			"John"
+		]
+	}
+}

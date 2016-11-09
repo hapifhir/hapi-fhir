@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -31,16 +33,21 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.TestDstu3Config;
+import ca.uhn.fhirtest.config.TdlDstu2Config;
+import ca.uhn.fhirtest.config.TdlDstu3Config;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 
 public class TestRestfulServer extends RestfulServer {
 
+	public static final String FHIR_BASEURL_DSTU1 = "fhir.baseurl.dstu1";
 	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
 	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
-	public static final String FHIR_BASEURL_DSTU1 = "fhir.baseurl.dstu1";
+	public static final String FHIR_BASEURL_TDL2 = "fhir.baseurl.tdl2";
+	public static final String FHIR_BASEURL_TDL3 = "fhir.baseurl.tdl3";
 
 	private static final long serialVersionUID = 1L;
 
@@ -67,13 +74,12 @@ public class TestRestfulServer extends RestfulServer {
 		// retrieve all the appropriate resource providers and the
 		// conformance provider
 		List<IResourceProvider> beans;
-		JpaSystemProviderDstu1 systemProviderDstu1 = null;
-		JpaSystemProviderDstu2 systemProviderDstu2 = null;
-		JpaSystemProviderDstu3 systemProviderDstu3 = null;
 		@SuppressWarnings("rawtypes")
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
 		String baseUrlProperty;
+		List<Object> plainProviders = new ArrayList<Object>();
+		
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU1": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
@@ -83,7 +89,7 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
-			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+			plainProviders.add(myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class));
 			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.DISABLED;
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
@@ -92,38 +98,51 @@ public class TestRestfulServer extends RestfulServer {
 			baseUrlProperty = FHIR_BASEURL_DSTU1;
 			break;
 		}
+		case "TDL2":
 		case "DSTU2": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
 			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
-			myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+			if ("TDL2".equals(fhirVersionParam.trim().toUpperCase())) {
+				myAppCtx.register(TdlDstu2Config.class);
+				baseUrlProperty = FHIR_BASEURL_TDL2;
+			} else {
+				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU2;
+			}
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
-			systemProviderDstu2 = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+			plainProviders.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 			systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = FHIR_BASEURL_DSTU2;
 			break;
 		}
+		case "TDL3":
 		case "DSTU3": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
 			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
-			myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
+			if ("TDL3".equals(fhirVersionParam.trim().toUpperCase())) {
+				myAppCtx.register(TdlDstu3Config.class);
+				baseUrlProperty = FHIR_BASEURL_TDL3;
+			} else {
+				myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU3;
+			}
 			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu3());
 			beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
-			systemProviderDstu3 = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
+			plainProviders.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 			systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = FHIR_BASEURL_DSTU3;
+			plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 			break;
 		}
 		default:
@@ -151,23 +170,14 @@ public class TestRestfulServer extends RestfulServer {
 		}
 		setResourceProviders(beans);
 
-		List<Object> provList = new ArrayList<Object>();
-		if (systemProviderDstu1 != null) {
-			provList.add(systemProviderDstu1);
-		}
-		if (systemProviderDstu2 != null) {
-			provList.add(systemProviderDstu2);
-		}
-		if (systemProviderDstu3 != null) {
-			provList.add(systemProviderDstu3);
-		}
-		setPlainProviders(provList);
+		setPlainProviders(plainProviders);
 
 		/*
 		 * We want to format the response using nice HTML if it's a browser, since this
 		 * makes things a little easier for testers.
 		 */
 		registerInterceptor(new ResponseHighlighterInterceptor());
+		registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
 		
 		/*
 		 * Default to JSON with pretty printing
@@ -191,11 +201,10 @@ public class TestRestfulServer extends RestfulServer {
 		setServerAddressStrategy(new MyHardcodedServerAddressStrategy(baseUrl));
 		
 		/*
-		 * This is a simple paging strategy that keeps the last 10 
-		 * searches in memory
+		 * Spool results to the database 
 		 */
-		setPagingProvider(new FifoMemoryPagingProvider(10));
-
+		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
+		
 		/*
 		 * Load interceptors for the server from Spring
 		 */

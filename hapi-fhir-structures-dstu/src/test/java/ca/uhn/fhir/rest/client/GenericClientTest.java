@@ -15,7 +15,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -33,6 +35,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -82,6 +85,8 @@ public class GenericClientTest {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
+		
+		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
 	}
 
 	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {
@@ -89,6 +94,24 @@ public class GenericClientTest {
 		return body;
 	}
 
+	@Test
+	public void testInvalidCalls() {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		
+		try {
+			client.meta();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Can not call $meta operations on a DSTU1 client", e.getMessage());
+		}
+		try {
+			client.operation();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Operations are only supported in FHIR DSTU2 and later. This client was created using a context configured for DSTU1", e.getMessage());
+		}
+	}
+	
 	private String getPatientFeedWithOneResult() {
 		//@formatter:off
 		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" + 
@@ -155,6 +178,9 @@ public class GenericClientTest {
 		resp = client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
 		assertNull(resp.getCreated());
 
+		ourLog.info("lastRequest: {}", ((GenericClient)client).getLastRequest());
+		ourLog.info("lastResponse: {}", ((GenericClient)client).getLastResponse());
+		ourLog.info("lastResponseBody: {}", ((GenericClient)client).getLastResponseBody());
 	}
 
 	@Test
@@ -344,7 +370,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), Charset.forName("UTF-8")));
 		outcome = (OperationOutcome) client.delete().resourceById(new IdDt("Location", "123", "456")).prettyPrint().encodedJson().execute();
 
-		assertEquals("http://example.com/fhir/Location/123?_format=json&_pretty=true", capt.getAllValues().get(1).getURI().toString());
+		assertEquals("http://example.com/fhir/Location/123?_pretty=true", capt.getAllValues().get(1).getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
 		assertEquals(null, outcome);
 
@@ -1471,6 +1497,25 @@ public class GenericClientTest {
 
 	}
 
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testTransactionOldStyle() throws Exception {
+		String bundleStr = IOUtils.toString(getClass().getResourceAsStream("/bundle.json"));
+		Bundle bundle = ourCtx.newJsonParser().parseBundle(bundleStr);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(bundleStr), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		List<IBaseResource> input = new ArrayList<IBaseResource>();
+		input.addAll(bundle.toListOfResources());
+		client.transaction(input);
+	}
+
 	@Test
 	public void testTransactionJson() throws Exception {
 		String bundleStr = IOUtils.toString(getClass().getResourceAsStream("/bundle.json"));
@@ -1497,7 +1542,7 @@ public class GenericClientTest {
 		assertNotNull(ct);
 		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", ct.getValue());
 
-		assertEquals("http://example.com/fhir?_format=json", value.getURI().toString());
+		assertEquals("http://example.com/fhir", value.getURI().toString());
 		assertThat(IOUtils.toString(value.getEntity().getContent()), StringContains.containsString("\"resourceType\""));
 		assertEquals(bundle.getEntries().get(0).getResource().getId(), response.getEntries().get(0).getResource().getId());
 	}

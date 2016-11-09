@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -38,10 +38,11 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This is the base resource type for everything.
  */
@@ -73,6 +74,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
      */
     @Child(name = "language", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Language of the resource content", formalDefinition="The base language in which the resource is written." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected CodeType language;
 
     private static final long serialVersionUID = -559462759L;
@@ -376,10 +378,20 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(id, meta, implicitRules, language
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(id, meta, implicitRules
+          , language);
       }
 
+
+  @Override
+  public String getIdBase() {
+    return getId();
+  }
+  
+  @Override
+  public void setIdBase(String value) {
+    setId(value);
+  }
   public abstract ResourceType getResourceType();
 
 }

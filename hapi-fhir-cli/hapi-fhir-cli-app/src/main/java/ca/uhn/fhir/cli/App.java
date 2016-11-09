@@ -40,6 +40,7 @@ public class App {
 		ourCommands.add(new ValidateCommand());
 		ourCommands.add(new ValidationDataUploader());
 		ourCommands.add(new WebsocketSubscribeCommand());
+		ourCommands.add(new UploadTerminologyCommand());
 
 		Collections.sort(ourCommands);
 	}
@@ -179,7 +180,9 @@ public class App {
 		try {
 			String[] args = Arrays.asList(theArgs).subList(1, theArgs.length).toArray(new String[theArgs.length - 1]);
 			parsedOptions = parser.parse(options, args, true);
-
+			if (parsedOptions.getArgList().isEmpty()==false) {
+				throw new ParseException("Unrecognized argument: " + parsedOptions.getArgList().get(0).toString());
+			}
 			
 			// Actually execute the command
 			command.run(parsedOptions);

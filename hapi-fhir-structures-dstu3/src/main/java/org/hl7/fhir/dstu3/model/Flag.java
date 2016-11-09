@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -37,10 +37,11 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
  */
@@ -61,7 +62,7 @@ public class Flag extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static FlagStatus fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class Flag extends DomainResource {
           return INACTIVE;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new FHIRException("Unknown FlagStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown FlagStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -162,6 +166,7 @@ public class Flag extends DomainResource {
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-category")
     protected CodeableConcept category;
 
     /**
@@ -169,6 +174,7 @@ public class Flag extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Supports basic workflow." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-status")
     protected Enumeration<FlagStatus> status;
 
     /**
@@ -179,14 +185,14 @@ public class Flag extends DomainResource {
     protected Period period;
 
     /**
-     * The patient, location, group , organization , or practitioner this is about record this flag is associated with.
+     * The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.
      */
-    @Child(name = "subject", type = {Patient.class, Location.class, Group.class, Organization.class, Practitioner.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who/What is flag about?", formalDefinition="The patient, location, group , organization , or practitioner this is about record this flag is associated with." )
+    @Child(name = "subject", type = {Patient.class, Location.class, Group.class, Organization.class, Practitioner.class, PlanDefinition.class, Medication.class, Procedure.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who/What is flag about?", formalDefinition="The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The patient, location, group , organization , or practitioner this is about record this flag is associated with.)
+     * The actual object that is the target of the reference (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
      */
     protected Resource subjectTarget;
 
@@ -218,7 +224,8 @@ public class Flag extends DomainResource {
      * The coded value or textual component of the flag to display to the user.
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition="The coded value or textual component of the flag to display to the user." )
+    @Description(shortDefinition="Coded or textual message to display to user", formalDefinition="The coded value or textual component of the flag to display to the user." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-code")
     protected CodeableConcept code;
 
     private static final long serialVersionUID = 701147751L;
@@ -250,16 +257,6 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Flag setIdentifier(List<Identifier> theIdentifier) { 
@@ -276,10 +273,6 @@ public class Flag extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Identifier assigned to the flag for external use (outside the FHIR environment).)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -288,7 +281,6 @@ public class Flag extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Flag addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -296,6 +288,16 @@ public class Flag extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -392,7 +394,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (The patient, location, group , organization , or practitioner this is about record this flag is associated with.)
+     * @return {@link #subject} (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -408,7 +410,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (The patient, location, group , organization , or practitioner this is about record this flag is associated with.)
+     * @param value {@link #subject} (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
      */
     public Flag setSubject(Reference value) { 
       this.subject = value;
@@ -416,14 +418,14 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient, location, group , organization , or practitioner this is about record this flag is associated with.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient, location, group , organization , or practitioner this is about record this flag is associated with.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
      */
     public Flag setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -543,7 +545,7 @@ public class Flag extends DomainResource {
         childrenList.add(new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("status", "code", "Supports basic workflow.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner)", "The patient, location, group , organization , or practitioner this is about record this flag is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, java.lang.Integer.MAX_VALUE, code));
@@ -721,8 +723,8 @@ public class Flag extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, category, status, period
-          , subject, encounter, author, code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, category, status
+          , period, subject, encounter, author, code);
       }
 
   @Override
@@ -738,7 +740,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.period</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date", target={} )
+  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -758,7 +760,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", target={Practitioner.class, Group.class, Organization.class, Patient.class, Location.class} )
+  @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", target={Group.class, Location.class, Medication.class, Organization.class, Patient.class, PlanDefinition.class, Practitioner.class, Procedure.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -784,7 +786,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -810,7 +812,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", target={Practitioner.class, Organization.class, Device.class, Patient.class} )
+  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Patient.class, Practitioner.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -836,7 +838,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference", target={Encounter.class} )
+  @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference", target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

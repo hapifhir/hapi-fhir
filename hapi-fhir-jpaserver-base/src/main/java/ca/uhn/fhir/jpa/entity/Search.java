@@ -120,6 +120,10 @@ public class Search implements Serializable {
 		return myLastUpdatedHigh;
 	}
 
+	public Date getLastUpdatedLow() {
+		return myLastUpdatedLow;
+	}
+
 	public DateRangeParam getLastUpdated() {
 		if (myLastUpdatedLow == null && myLastUpdatedHigh == null) {
 			return null;

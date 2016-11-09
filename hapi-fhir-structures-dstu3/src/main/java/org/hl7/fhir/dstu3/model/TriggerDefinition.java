@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A description of a triggering event.
  */
@@ -76,7 +77,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
          */
         DATAACCESSENDED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static TriggerType fromCode(String codeString) throws FHIRException {
@@ -96,7 +97,10 @@ public class TriggerDefinition extends Type implements ICompositeType {
           return DATAACCESSED;
         if ("data-access-ended".equals(codeString))
           return DATAACCESSENDED;
-        throw new FHIRException("Unknown TriggerType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown TriggerType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -218,6 +222,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
      */
     @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="named-event | periodic | data-added | data-modified | data-removed | data-accessed | data-access-ended", formalDefinition="The type of triggering event." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/trigger-type")
     protected Enumeration<TriggerType> type;
 
     /**
@@ -477,7 +482,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
           this.eventName = castToString(value); // StringType
           break;
         case 125465476: // eventTiming
-          this.eventTiming = (Type) value; // Type
+          this.eventTiming = castToType(value); // Type
           break;
         case 30931300: // eventData
           this.eventData = castToDataRequirement(value); // DataRequirement
@@ -494,7 +499,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         else if (name.equals("eventName"))
           this.eventName = castToString(value); // StringType
         else if (name.equals("eventTiming[x]"))
-          this.eventTiming = (Type) value; // Type
+          this.eventTiming = castToType(value); // Type
         else if (name.equals("eventData"))
           this.eventData = castToDataRequirement(value); // DataRequirement
         else
@@ -586,8 +591,8 @@ public class TriggerDefinition extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, eventName, eventTiming, eventData
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, eventName, eventTiming
+          , eventData);
       }
 
 

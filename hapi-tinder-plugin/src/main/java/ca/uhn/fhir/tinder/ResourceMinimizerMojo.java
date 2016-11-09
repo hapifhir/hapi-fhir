@@ -63,6 +63,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			throw new MojoFailureException("Unknown version: " + fhirVersion);
 		}
 
+		ourLog.info("Looking for files in directory: {}", targetDirectory.getAbsolutePath());
+		
 		Collection<File> files = FileUtils.listFiles(targetDirectory, new String[] { "xml", "json" }, true);
 		for (File nextFile : files) {
 			ourLog.debug("Checking file: {}", nextFile);
@@ -93,6 +95,13 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 					if (nextEntry.getResource() instanceof DomainResource) {
 						((DomainResource) nextEntry.getResource()).getText().getDiv().setValueAsString((String) null);
 						((DomainResource) nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
+					}
+				}
+			} else if (input instanceof org.hl7.fhir.dstu3.model.Bundle) {
+				for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent nextEntry : ((org.hl7.fhir.dstu3.model.Bundle) input).getEntry()) {
+					if (nextEntry.getResource() instanceof org.hl7.fhir.dstu3.model.DomainResource) {
+						((org.hl7.fhir.dstu3.model.DomainResource) nextEntry.getResource()).getText().getDiv().setValueAsString((String) null);
+						((org.hl7.fhir.dstu3.model.DomainResource) nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
 					}
 				}
 			} else if (input instanceof DomainResource) {
@@ -151,7 +160,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 	}
 
 	public static void main(String[] args) throws Exception {
-		FhirContext ctx = FhirContext.forDstu2();
+		FhirContext ctxDstu2 = FhirContext.forDstu2();
+		FhirContext ctxDstu3 = FhirContext.forDstu3();
 		
 		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
 		URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(loggerContext);
@@ -163,25 +173,41 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		long byteCount = 0;
 		
 		ResourceMinimizerMojo m = new ResourceMinimizerMojo();
-		m.myCtx = ctx;
-		m.targetDirectory = new File("../hapi-tinder-plugin/src/main/resources/vs/dstu2");
-		m.fhirVersion = "DSTU2";
+//		m.myCtx = ctxDstu2;
+//		m.targetDirectory = new File("../hapi-tinder-plugin/src/main/resources/vs/dstu2");
+//		m.fhirVersion = "DSTU2";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+//
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2;
+//		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/valueset");
+//		m.fhirVersion = "DSTU2";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+//
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxDstu2;
+//		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/profile");
+//		m.fhirVersion = "DSTU2";
+//		m.execute();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxDstu3;
+		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/profile");
+		m.fhirVersion = "DSTU3";
 		m.execute();
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
-		m.myCtx = ctx;
-		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/valueset");
-		m.fhirVersion = "DSTU2";
-		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
-
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctx;
-		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/profile");
-		m.fhirVersion = "DSTU2";
+		m.myCtx = ctxDstu3;
+		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset");
+		m.fhirVersion = "DSTU3";
 		m.execute();
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();

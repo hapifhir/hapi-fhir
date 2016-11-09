@@ -30,12 +30,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -49,6 +44,7 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.VersionUtil;
@@ -148,13 +144,7 @@ public class ApacheHttpClient implements IHttpClient {
 		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		theHttpRequest.addHeader("Accept-Encoding", "gzip");
 
-		if (theEncoding == null) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON);
-		} else if (theEncoding == EncodingEnum.JSON) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
-		} else if (theEncoding == EncodingEnum.XML) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
-		}
+		RestfulServerUtils.addAcceptHeaderToRequest(theEncoding, theHttpRequest, theContext);
 	}
 
 	private ApacheHttpRequest createHttpRequest(HttpEntity theEntity) {
@@ -193,6 +183,10 @@ public class ApacheHttpClient implements IHttpClient {
 		switch (myRequestType) {
 		case DELETE:
 			return new HttpDelete(url);
+		case PATCH:
+			HttpPatch httpPatch = new HttpPatch(url);
+			httpPatch.setEntity(theEntity);
+			return httpPatch;
 		case OPTIONS:
 			return new HttpOptions(url);
 		case POST:

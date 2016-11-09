@@ -12,19 +12,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.XmlParserDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
@@ -60,7 +54,7 @@ public class ResourceValidatorDstu3Test {
 
 		List<Reference> conditions = new ArrayList<Reference>();
 		Condition condition = new Condition();
-		condition.getPatient().setReference("Patient/123");
+		condition.getSubject().setReference("Patient/123");
 		condition.addBodySite().setText("BODY SITE");
 		condition.getCode().setText("CODE");
 		condition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
@@ -84,7 +78,7 @@ public class ResourceValidatorDstu3Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(ooencoded, containsString("No issues"));
+		assertThat(ooencoded, containsString("Unknown extension http://foo"));
 	}
 
 	/**

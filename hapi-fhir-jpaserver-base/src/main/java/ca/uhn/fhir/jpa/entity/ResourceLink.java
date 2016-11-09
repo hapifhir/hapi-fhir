@@ -38,6 +38,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.search.annotations.Field;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 @Entity
 @Table(name = "HFJ_RES_LINK" , indexes= {
@@ -70,11 +71,11 @@ public class ResourceLink implements Serializable {
 	@Field()
 	private String mySourceResourceType;
 
-	@ManyToOne(optional = false, fetch=FetchType.LAZY)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(optional = true, fetch=FetchType.LAZY)
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true)
 	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = true)
 	@Field()
 	private Long myTargetResourcePid;
 
@@ -82,6 +83,10 @@ public class ResourceLink implements Serializable {
 	@ColumnDefault("''") // TODO: remove this (it's only here for simplifying upgrades of 1.3 -> 1.4)
 	@Field()
 	private String myTargetResourceType;
+
+	@Column(name = "TARGET_RESOURCE_URL", length=200, nullable = true)
+	@Field()
+	private String myTargetResourceUrl;
 
 	public ResourceLink() {
 		super();
@@ -92,6 +97,13 @@ public class ResourceLink implements Serializable {
 		setSourcePath(theSourcePath);
 		setSourceResource(theSourceResource);
 		setTargetResource(theTargetResource);
+	}
+
+	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl) {
+		super();
+		setSourcePath(theSourcePath);
+		setSourceResource(theSourceResource);
+		setTargetResourceUrl(theTargetResourceUrl);
 	}
 
 	@Override
@@ -110,6 +122,7 @@ public class ResourceLink implements Serializable {
 		b.append(mySourcePath, obj.mySourcePath);
 		b.append(mySourceResource, obj.mySourceResource);
 		b.append(myTargetResourcePid, obj.myTargetResourcePid);
+		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
 		return b.isEquals();
 	}
 
@@ -133,12 +146,17 @@ public class ResourceLink implements Serializable {
 		return myTargetResourcePid;
 	}
 
+	public String getTargetResourceUrl() {
+		return myTargetResourceUrl;
+	}
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(mySourcePath);
 		b.append(mySourceResource);
 		b.append(myTargetResourcePid);
+		b.append(myTargetResourceUrl);
 		return b.toHashCode();
 	}
 
@@ -159,6 +177,15 @@ public class ResourceLink implements Serializable {
 		myTargetResourceType = theTargetResource.getResourceType();
 	}
 
+	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
+		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
+		Validate.isTrue(theTargetResourceUrl.hasResourceType());
+		Validate.isTrue(theTargetResourceUrl.hasIdPart());
+		
+		myTargetResourceType = theTargetResourceUrl.getResourceType();
+		myTargetResourceUrl = theTargetResourceUrl.getValue();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
@@ -166,6 +193,7 @@ public class ResourceLink implements Serializable {
 		b.append("path=").append(mySourcePath);
 		b.append(", src=").append(mySourceResourcePid);
 		b.append(", target=").append(myTargetResourcePid);
+		b.append(", targetUrl=").append(myTargetResourceUrl);
 
 		b.append("]");
 		return b.toString();

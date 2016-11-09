@@ -47,7 +47,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
+		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
 		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
@@ -57,13 +57,13 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
+		extraProperties.put("hibernate.jdbc.batch_size", "50");
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
-		extraProperties.put("hibernate.search.default.directory_provider" ,"filesystem");
-		extraProperties.put("hibernate.search.default.indexBase", "target/lucene_index_dstu3");
-		extraProperties.put("hibernate.search.lucene_version","LUCENE_CURRENT");
+		extraProperties.put("hibernate.search.default.directory_provider", "ram");
+		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
 		return extraProperties;
 	}

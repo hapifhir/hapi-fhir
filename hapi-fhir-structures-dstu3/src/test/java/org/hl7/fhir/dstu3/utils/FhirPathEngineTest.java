@@ -1,17 +1,15 @@
 package org.hl7.fhir.dstu3.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
-import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,7 +20,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirPathEngineTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static FHIRPathEngine ourEngine;
+	private static FluentPathEngine ourEngine;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
 
 	@Test
@@ -60,7 +58,7 @@ public class FhirPathEngineTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
+		ourEngine = new FluentPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
 	}
 
 }

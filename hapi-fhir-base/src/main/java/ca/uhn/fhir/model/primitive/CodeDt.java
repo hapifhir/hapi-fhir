@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
 @DatatypeDef(name = "code", profileOf=StringDt.class)
-public class CodeDt extends BasePrimitive<String> implements ICodedDatatype, Comparable<CodeDt> {
+public class CodeDt extends BasePrimitive<String> implements Comparable<CodeDt> {
 
 	/**
 	 * Constructor

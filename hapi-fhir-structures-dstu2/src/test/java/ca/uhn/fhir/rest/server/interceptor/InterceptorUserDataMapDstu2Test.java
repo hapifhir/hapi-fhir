@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -8,12 +9,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -59,7 +55,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class InterceptorUserDataMapDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
@@ -80,7 +76,7 @@ public class InterceptorUserDataMapDstu2Test {
 	@Before
 	public void beforePurgeMap() {
 		myMap = null;
-		myMapCheckMethods= new HashSet<String>();
+		myMapCheckMethods= new LinkedHashSet<String>();
 	}
 
 	
@@ -96,7 +92,7 @@ public class InterceptorUserDataMapDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods, containsInAnyOrder("incomingRequestPreHandled", "handleException", "incomingRequestPostProcessed", "preProcessOutgoingException"));
+		assertThat(myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException"));
 	}
 
 	@Test
@@ -110,8 +106,14 @@ public class InterceptorUserDataMapDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		for (int i = 0; i < 10; i++) {
+			if (!myMapCheckMethods.contains("processingCompletedNormally")) {
+				Thread.sleep(100);
+			}
+		}
+		
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods, containsInAnyOrder("incomingRequestPreHandled", "incomingRequestPostProcessed", "outgoingResponse"));
+		assertThat(myMapCheckMethods.toString(), myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
 	}
 
 	protected void updateMapUsing(Map<Object, Object> theUserData, Method theMethod) {

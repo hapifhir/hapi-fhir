@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +24,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
@@ -59,18 +62,19 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
-		if (!theQualifier.startsWith(":")) {
-			throwInvalidSyntaxException(theQualifier);
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+		String qualifier = defaultString(theQualifier);
+		if (!qualifier.startsWith(":")) {
+			throwInvalidSyntaxException(Constants.PARAM_HAS + qualifier);
 		}
-		int colonIndex0 = theQualifier.indexOf(':', 1);
-		validateColon(theQualifier, colonIndex0);
-		int colonIndex1 = theQualifier.indexOf(':', colonIndex0 + 1);
-		validateColon(theQualifier, colonIndex1);
+		int colonIndex0 = qualifier.indexOf(':', 1);
+		validateColon(qualifier, colonIndex0);
+		int colonIndex1 = qualifier.indexOf(':', colonIndex0 + 1);
+		validateColon(qualifier, colonIndex1);
 		
-		myTargetResourceType = theQualifier.substring(1, colonIndex0);
-		myOwningFieldName = theQualifier.substring(colonIndex0 + 1, colonIndex1);
-		myParameterName = theQualifier.substring(colonIndex1 + 1);
+		myTargetResourceType = qualifier.substring(1, colonIndex0);
+		myOwningFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
+		myParameterName = qualifier.substring(colonIndex1 + 1);
 		myParameterValue = theValue;
 	}
 

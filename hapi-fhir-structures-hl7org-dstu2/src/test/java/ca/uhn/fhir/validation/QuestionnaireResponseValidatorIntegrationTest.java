@@ -23,6 +23,7 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -31,15 +32,18 @@ import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class QuestionnaireResponseValidatorIntegrationTest {
-	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-
+	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorIntegrationTest.class);
-
 	private IResourceLoader myResourceLoaderMock;
-
 	private FhirValidator myVal;
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 	@Before
 	public void before() {
@@ -123,6 +127,19 @@ public class QuestionnaireResponseValidatorIntegrationTest {
 		}
 	}
 
+	 @Test
+	  public void testGroupWithNoAnswer() throws Exception {
+	    Questionnaire q = ourCtx.newJsonParser().parseResource(Questionnaire.class, IOUtils.toString(getClass().getResourceAsStream("/questionnaire-20160712.json")));
+	    QuestionnaireResponse qa = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, IOUtils.toString(getClass().getResourceAsStream("/questionnaire-20160712-response.json")));
+
+	    when(myResourceLoaderMock.load(Mockito.eq(Questionnaire.class), Mockito.any(IdType.class))).thenReturn(q);
+	    ValidationResult errors = myVal.validateWithResult(qa);
+
+	    ourLog.info(errors.toString());
+	    assertEquals(true, errors.isSuccessful());
+	  }
+
+	
 	@Test
 	public void testCodedAnswer() {
 		String questionnaireRef = "http://example.com/Questionnaire/q1";

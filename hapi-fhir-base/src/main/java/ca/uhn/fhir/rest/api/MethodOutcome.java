@@ -24,7 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 public class MethodOutcome {
 
@@ -32,7 +32,6 @@ public class MethodOutcome {
 	private IIdType myId;
 	private IBaseOperationOutcome myOperationOutcome;
 	private IBaseResource myResource;
-	private IdDt myVersionId;
 
 	/**
 	 * Constructor
@@ -51,6 +50,7 @@ public class MethodOutcome {
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
+	@CoverageIgnore
 	public MethodOutcome(IIdType theId, Boolean theCreated) {
 		myId = theId;
 		myCreated = theCreated;
@@ -90,25 +90,6 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * @deprecated Use the constructor which accepts a single IIdType parameter, and include the logical ID and version ID in that IIdType instance
-	 */
-	@Deprecated
-	public MethodOutcome(IIdType theId, IdDt theVersionId) {
-		myId = theId;
-		myVersionId = theVersionId;
-	}
-
-	/**
-	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
-	 */
-	@Deprecated
-	public MethodOutcome(IIdType theId, IdDt theVersionId, IBaseOperationOutcome theBaseOperationOutcome) {
-		myId = theId;
-		myVersionId = theVersionId;
-		myOperationOutcome = theBaseOperationOutcome;
-	}
-
-	/**
 	 * Constructor
 	 * 
 	 * @param theId
@@ -116,6 +97,16 @@ public class MethodOutcome {
 	 */
 	public MethodOutcome(IIdType theId) {
 		myId = theId;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theOperationOutcome
+	 *            The operation outcome resource to return
+	 */
+	public MethodOutcome(IBaseOperationOutcome theOperationOutcome) {
+		myOperationOutcome = theOperationOutcome;
 	}
 
 	/**
@@ -149,14 +140,6 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available
-	 */
-	@Deprecated
-	public IdDt getVersionId() {
-		return myVersionId;
-	}
-
-	/**
 	 * If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called whether the
 	 * result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 * <p>
@@ -166,6 +149,7 @@ public class MethodOutcome {
 	 * @param theCreated
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
 	public MethodOutcome setCreated(Boolean theCreated) {
 		myCreated = theCreated;
@@ -175,16 +159,20 @@ public class MethodOutcome {
 	/**
 	 * @param theId
 	 *            The ID of the created/updated resource
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
-	public void setId(IIdType theId) {
+	public MethodOutcome setId(IIdType theId) {
 		myId = theId;
+		return this;
 	}
 
 	/**
 	 * Sets the {@link IBaseOperationOutcome} resource to return to the client. Set to <code>null</code> (which is the default) if none.
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
-	public void setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
+	public MethodOutcome setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
 		myOperationOutcome = theBaseOperationOutcome;
+		return this;
 	}
 
 	/**
@@ -195,17 +183,11 @@ public class MethodOutcome {
 	 * This field is optional, but if it is populated the server will return the resource body if requested to
 	 * do so via the HTTP Prefer header.
 	 * </p> 
+	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
-	public void setResource(IBaseResource theResource) {
+	public MethodOutcome setResource(IBaseResource theResource) {
 		myResource = theResource;
-	}
-
-	/**
-	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IIdType)}
-	 */
-	@Deprecated
-	public void setVersionId(IdDt theVersionId) {
-		myVersionId = theVersionId;
+		return this;
 	}
 
 }

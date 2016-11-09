@@ -65,7 +65,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		if (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
 			setExact(true);
 		} else {

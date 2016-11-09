@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
+import java.util.Date;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -25,11 +27,44 @@ public class StopWatch {
 
 	private long myStarted = System.currentTimeMillis();
 	
+	/**
+	 * Constructor
+	 */
+	public StopWatch() {
+		super();
+	}
+	
+	/**
+	 * Constructor
+	 */
+	public StopWatch(Date theNow) {
+		myStarted = theNow.getTime();
+	}
+
 	public long getMillisAndRestart() {
 		long now = System.currentTimeMillis();
 		long retVal = now - myStarted;
 		myStarted = now;
 		return retVal;
+	}
+	
+	public long getMillis() {
+		long now = System.currentTimeMillis();
+		long retVal = now - myStarted;
+		return retVal;
+	}
+	
+	public long getMillis(Date theNow) {
+		long retVal = theNow.getTime() - myStarted;
+		return retVal;
+	}
+
+	public Date getStartedDate() {
+		return new Date(myStarted);
+	}
+	
+	public double getMillisPerOperation(int theNumOperations) {
+		return ((double)getMillis()) / Math.max(1.0, theNumOperations);
 	}
 	
 }

@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -31,11 +32,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.util.PortUtil;
@@ -49,31 +46,27 @@ public class CreateDstu3Test {
 	private static int ourPort;
 	private static Server ourServer;
 
+	/**
+	 * #472
+	 */
 	@Test
-	public void testRead() throws Exception {
+	public void testCreateReturnsLocationHeader() throws Exception {
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2?_format=xml&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		
-		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"2\"/>", 
-				"<meta>", 
-					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
-				"</meta>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-					"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
-			"</Patient>"));
-		//@formatter:on
+		assertEquals(201, status.getStatusLine().getStatusCode());
+
+		assertEquals(1, status.getHeaders("Location").length);
+		assertEquals(0, status.getHeaders("Content-Location").length);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
+
 	}
 
 	/**
@@ -81,19 +74,77 @@ public class CreateDstu3Test {
 	 */
 	@Test
 	public void testCreateWithInvalidContent() throws Exception {
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity("FOO", ContentType.parse("application/xml+fhir; charset=utf-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		String expected = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F' (code 70) in prolog; expected '&lt;'&#xa; at [row,col {unknown-source}]: [1,1]\"/></issue></OperationOutcome>";
-		assertEquals(expected, responseContent);
-		
+
+		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
+		assertThat(responseContent, containsString("Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
+
+	}
+
+	@Test
+	public void testCreateWithIncorrectContent1() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/xml+fhir; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
+		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+
+	}
+
+	@Test
+	public void testCreateWithIncorrectContent2() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+xml; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
+		assertThat(responseContent, containsString("Failed to parse request body as XML resource."));
+
+	}
+
+	@Test
+	public void testCreateWithIncorrectContent3() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"foo\":\"bar\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, containsString("Failed to parse request body as JSON resource."));
+
 	}
 
 	@Test
@@ -102,13 +153,13 @@ public class CreateDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=xml&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
+
 		//@formatter:off
 		assertThat(responseContent, stringContainsInOrder(
 			"<Patient xmlns=\"http://hl7.org/fhir\">", 
@@ -121,7 +172,7 @@ public class CreateDstu3Test {
 				"</modifierExtension>", 
 			"</Patient>"));
 		//@formatter:on
-		
+
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
 	}
 
@@ -156,6 +207,11 @@ public class CreateDstu3Test {
 
 	public static class PatientProvider implements IResourceProvider {
 
+		@Create()
+		public MethodOutcome create(@ResourceParam Patient theIdParam) {
+			return new MethodOutcome(new IdType("Patient", "1"), true);
+		}
+
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
@@ -167,11 +223,6 @@ public class CreateDstu3Test {
 			p0.setId(theIdParam);
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
-		}
-
-		@Create()
-		public MethodOutcome read(@ResourceParam Patient theIdParam) {
-			return new MethodOutcome(new IdType("Patient", "1"), true);
 		}
 
 		@Search

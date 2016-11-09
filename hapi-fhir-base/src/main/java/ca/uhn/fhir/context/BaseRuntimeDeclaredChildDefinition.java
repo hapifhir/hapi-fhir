@@ -30,23 +30,25 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.util.ValidateUtil;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
 	private final IAccessor myAccessor;
+	private String myBindingValueSet;
 	private final String myElementName;
 	private final Field myField;
 	private final String myFormalDefinition;
 	private final int myMax;
 	private final int myMin;
 	private boolean myModifier;
-	private final IMutator myMutator;
 
+	private final IMutator myMutator;
 	private final String myShortDefinition;
 	private boolean mySummary;
 	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
 		Validate.notNull(theField, "No field speficied");
-		Validate.inclusiveBetween(0, Integer.MAX_VALUE, theChildAnnotation.min(), "Min must be >= 0");
+		ValidateUtil.isGreaterThanOrEqualTo(theChildAnnotation.min(), 0, "Min must be >= 0");
 		Validate.isTrue(theChildAnnotation.max() == -1 || theChildAnnotation.max() >= theChildAnnotation.min(), "Max must be >= Min (unless it is -1 / unlimited)");
 		Validate.notBlank(theElementName, "Element name must not be blank");
 
@@ -79,6 +81,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	@Override
 	public IAccessor getAccessor() {
 		return myAccessor;
+	}
+
+	public String getBindingValueSet() {
+		return myBindingValueSet;
 	}
 
 	@Override
@@ -127,6 +133,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	@Override
 	public boolean isSummary() {
 		return mySummary;
+	}
+
+	void setBindingValueSet(String theBindingValueSet) {
+		myBindingValueSet = theBindingValueSet;
 	}
 
 	protected void setModifier(boolean theModifier) {

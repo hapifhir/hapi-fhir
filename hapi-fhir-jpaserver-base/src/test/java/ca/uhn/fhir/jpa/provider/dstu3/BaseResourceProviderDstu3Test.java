@@ -50,6 +50,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	private static Server ourServer;
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
+	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
 
 	public BaseResourceProviderDstu3Test() {
 		super();
@@ -78,7 +79,9 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 	
-			ourRestServer.setPlainProviders(mySystemProvider);
+			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
+			
+			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
 	
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");

@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.config;
 
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -31,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -40,24 +35,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.term.ITerminologySvc;
-import ca.uhn.fhir.jpa.term.TerminologySvcImpl;
 
 @Configuration
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 public class BaseConfig implements SchedulingConfigurer {
 
-	private static FhirContext ourFhirContextDstu1;
-	private static FhirContext ourFhirContextDstu2;
-	private static FhirContext ourFhirContextDstu2Hl7Org;
-	private static FhirContext ourFhirContextDstu3;
 
 	@Resource
 	private ApplicationContext myAppCtx;
@@ -72,43 +59,8 @@ public class BaseConfig implements SchedulingConfigurer {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		return new DatabaseBackedPagingProvider(10);
-	}
-
-	@Bean(name = "myFhirContextDstu1")
-	@Lazy
-	public FhirContext fhirContextDstu1() {
-		if (ourFhirContextDstu1 == null) {
-			ourFhirContextDstu1 = FhirContext.forDstu1();
-		}
-		return ourFhirContextDstu1;
-	}
-
-	@Bean(name = "myFhirContextDstu2")
-	@Lazy
-	public FhirContext fhirContextDstu2() {
-		if (ourFhirContextDstu2 == null) {
-			ourFhirContextDstu2 = FhirContext.forDstu2();
-		}
-		return ourFhirContextDstu2;
-	}
-
-	@Bean(name = "myFhirContextDstu2Hl7Org")
-	@Lazy
-	public FhirContext fhirContextDstu2Hl7Org() {
-		if (ourFhirContextDstu2Hl7Org == null) {
-			ourFhirContextDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
-		}
-		return ourFhirContextDstu2Hl7Org;
-	}
-
-	@Bean(name = "myFhirContextDstu3")
-	@Lazy
-	public FhirContext fhirContextDstu3() {
-		if (ourFhirContextDstu3 == null) {
-			ourFhirContextDstu3 = FhirContext.forDstu3();
-		}
-		return ourFhirContextDstu3;
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider(10);
+		return retVal;
 	}
 
 	@Bean(autowire=Autowire.BY_TYPE)
@@ -132,11 +84,6 @@ public class BaseConfig implements SchedulingConfigurer {
 //		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
 //		retVal.setPoolSize(5);
 //		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public ITerminologySvc terminologyService() {
-		return new TerminologySvcImpl();
 	}
 	
 	// @PostConstruct

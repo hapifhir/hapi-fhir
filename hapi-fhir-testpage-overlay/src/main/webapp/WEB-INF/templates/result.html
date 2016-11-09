@@ -40,8 +40,9 @@
 						<div class="panel-body clientCodeBox" id="clientCodeBody">
 						</div>
 						<script type="text/javascript" src="js/ClientCodeGeneratorHapi.js"></script>
-						<script type="text/javascript">
-							var jsonClientCode = <th:block th:utext="${clientCodeJson}"/>;
+						<script type="text/javascript" th:utext="'var jsonClientCode = ' + ${clientCodeJson} + ';'">
+						</script>
+						<script type="text/javascript" th:inline="javascript">
 							generateHapi(jsonClientCode, $('#clientCodeBody'));
 						</script>
 					</div>
@@ -95,8 +96,8 @@
 										Response
 									</td>
 									<td>
-										<i th:if="${resultStatus.contains(' 2')}" class="fa fa-check" style="color:#4E4;"/>
-										<i th:if="${!resultStatus.contains(' 2')}" class="fa fa-warning" style="color:#E44;"/>
+										<i th:if="${resultStatus.contains(' 2')}" class="fa fa-check" style="color:#4E4;"></i>
+										<i th:if="${!resultStatus.contains(' 2')}" class="fa fa-warning" style="color:#E44;"></i>
 										<th:block th:text="${resultStatus}"/>
 									</td>
 								</tr>
@@ -142,8 +143,8 @@
 																<span class="glyphicon glyphicon-step-backward"></span>
 																Prev Page
 															</button>
-															<script type="text/javascript">
-																if (<th:block th:text="${bundle.linkPrevious.empty}"/>) {
+															<script type="text/javascript" th:inline="javascript">
+																if ([[${bundle.linkPrevious.empty}]]) {
 																	$('#page-prev-btn').prop('disabled', true);
 																}
 																$('#page-prev-btn').click(function() {
@@ -159,8 +160,8 @@
 																<span class="glyphicon glyphicon-step-forward"></span>
 																Next Page
 															</button>
-															<script type="text/javascript">
-																if (<th:block th:text="${bundle.linkNext.empty}"/>) {
+															<script type="text/javascript" th:inline="javascript">
+																if ([[${bundle.linkNext.empty}]]) {
 																	$('#page-next-btn').prop('disabled', true);
 																}
 																$('#page-next-btn').click(function() {
@@ -202,7 +203,7 @@
 																	<a th:if="${entry.resource} != null" th:href="${entry.resource.id}" th:text="${entry.resource.id.toUnqualified()}" style="font-size: 0.8em"/>
 																</td>
 																<td>
-																	<small th:text="${entry.title}"/>
+																	<!-- Title used to go here -->
 																</td>
 																<td th:if="${entry.updated.value} == null"></td>
 																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == true" th:text="${#dates.format(entry.updated.value, 'HH:mm:ss')}"></td>
@@ -252,8 +253,8 @@
 																<span class="glyphicon glyphicon-step-backward"></span>
 																Prev Page
 															</button>
-															<script type="text/javascript">
-																if (<th:block th:text="${riBundle.getLink('prev') == null}"/>) {
+															<script type="text/javascript" th:inline="javascript">
+																if ([[${riBundle.getLink('prev') == null}]]) {
 																	$('#page-prev-btn').prop('disabled', true);
 																}
 																$('#page-prev-btn').click(function() {
@@ -269,8 +270,8 @@
 																<span class="glyphicon glyphicon-step-forward"></span>
 																Next Page
 															</button>
-															<script type="text/javascript">
-																if (<th:block th:text="${riBundle.getLink('next') == null}"/>) {
+															<script type="text/javascript" th:inline="javascript">
+																if ([[${riBundle.getLink('next') == null}]]) {
 																	$('#page-next-btn').prop('disabled', true);
 																}
 																$('#page-next-btn').click(function() {

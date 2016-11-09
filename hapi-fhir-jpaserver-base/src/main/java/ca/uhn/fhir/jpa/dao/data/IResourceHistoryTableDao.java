@@ -1,11 +1,8 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.TemporalType;
-
-import org.springframework.data.domain.Pageable;
 
 /*
  * #%L
@@ -68,36 +65,36 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		@Param("type") String theType
 		);
 
-	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myUpdated >= :cutoff ORDER BY t.myUpdated DESC")
-	List<ResourceHistoryTable> findForAllResourceTypes(
-		@Temporal(value=TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff, 
-		Pageable thePageable);
-
-	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myUpdated >= :cutoff ORDER BY t.myUpdated DESC")
-	List<ResourceHistoryTable> findForResourceInstance(
-		@Param("id") Long theId,
-		@Temporal(value=TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff, 
-		Pageable thePageable);
-
-	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceType = :type AND t.myUpdated >= :cutoff ORDER BY t.myUpdated DESC")
-	List<ResourceHistoryTable> findForResourceType(
-		@Param("type") String theType,
-		@Temporal(value=TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff, 
-		Pageable thePageable);
-
-	@Query("SELECT t FROM ResourceHistoryTable t ORDER BY t.myUpdated DESC")
-	List<ResourceHistoryTable> findForAllResourceTypes(
-		Pageable thePageable);
-
-	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id ORDER BY t.myUpdated DESC")
-	List<ResourceHistoryTable> findForResourceInstance(
-		@Param("id") Long theId,
-		Pageable thePageable);
-
-	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceType = :type ORDER BY t.myUpdated DESC")
-	List<ResourceHistoryTable> findForResourceType(
-		@Param("type") String theType,
-		Pageable thePageable);
+//	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myUpdated >= :cutoff ORDER BY t.myUpdated DESC")
+//	List<ResourceHistoryTable> findForAllResourceTypes(
+//		@Temporal(value=TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff, 
+//		Pageable thePageable);
+//
+//	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myUpdated >= :cutoff ORDER BY t.myUpdated DESC")
+//	List<ResourceHistoryTable> findForResourceInstance(
+//		@Param("id") Long theId,
+//		@Temporal(value=TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff, 
+//		Pageable thePageable);
+//
+//	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceType = :type AND t.myUpdated >= :cutoff ORDER BY t.myUpdated DESC")
+//	List<ResourceHistoryTable> findForResourceType(
+//		@Param("type") String theType,
+//		@Temporal(value=TemporalType.TIMESTAMP) @Param("cutoff") Date theCutoff, 
+//		Pageable thePageable);
+//
+//	@Query("SELECT t FROM ResourceHistoryTable t ORDER BY t.myUpdated DESC")
+//	List<ResourceHistoryTable> findForAllResourceTypes(
+//		Pageable thePageable);
+//
+//	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id ORDER BY t.myUpdated DESC")
+//	List<ResourceHistoryTable> findForResourceInstance(
+//		@Param("id") Long theId,
+//		Pageable thePageable);
+//
+//	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceType = :type ORDER BY t.myUpdated DESC")
+//	List<ResourceHistoryTable> findForResourceType(
+//		@Param("type") String theType,
+//		Pageable thePageable);
 
 	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myResourceVersion = :version")
 	ResourceHistoryTable findForIdAndVersion(@Param("id") long theId, @Param("version") long theVersion);

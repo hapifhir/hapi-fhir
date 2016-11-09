@@ -104,7 +104,7 @@ public class ETagServerTest {
 
 	@Test
 	public void testLastModifiedHeader() throws Exception {
-		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
+		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.222Z").getValue();
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/_history/3");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -118,7 +118,7 @@ public class ETagServerTest {
 
 			Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 			assertNotNull(cl);
-			assertEquals("Sun, 25 Nov 2012 02:34:47 GMT", cl.getValue());
+			assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl.getValue());
 		} finally {
 			if (status.getEntity() != null) {
 				IOUtils.closeQuietly(status.getEntity().getContent());

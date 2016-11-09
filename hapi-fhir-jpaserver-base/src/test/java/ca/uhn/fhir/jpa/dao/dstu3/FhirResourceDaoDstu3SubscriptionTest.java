@@ -390,7 +390,7 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 		 */
 		
 		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(100, mySrd);
+		mySystemDao.performReindexingPass(100);
 
 		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
 

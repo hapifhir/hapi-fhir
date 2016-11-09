@@ -28,14 +28,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Required;
 
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.rest.annotation.GetTags;
-import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -57,21 +56,35 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		return myDao;
 	}
 
+	//@formatter:off
 	@History
-	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theId, @Since Date theDate, RequestDetails theRequestDetails) {
+	public IBundleProvider getHistoryForResourceInstance(
+			HttpServletRequest theRequest, 
+			@IdParam IIdType theId, 
+			@Since Date theSince, 
+			@At DateRangeParam theAt, 
+			RequestDetails theRequestDetails) {
+	//@formatter:on
+		
 		startRequest(theRequest);
 		try {
-			return myDao.history(theId, theDate, theRequestDetails);
+			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
+			return myDao.history(theId, sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceType(HttpServletRequest theRequest, @Since Date theDate, RequestDetails theRequestDetails) {
+	public IBundleProvider getHistoryForResourceType(
+			HttpServletRequest theRequest, 
+			@Since Date theSince, 
+			@At DateRangeParam theAt, 
+			RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theDate, theRequestDetails);
+			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
+			return myDao.history(sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
@@ -107,6 +120,16 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		startRequest(theRequest);
 		try {
 			return myDao.read(theId, theRequestDetails);
+		} finally {
+			endRequest(theRequest);
+		}
+	}
+
+	@Patch
+	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
+		startRequest(theRequest);
+		try {
+			return myDao.patch(theId, thePatchType, theBody, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

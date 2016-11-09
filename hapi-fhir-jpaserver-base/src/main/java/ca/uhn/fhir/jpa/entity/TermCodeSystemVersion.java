@@ -27,6 +27,7 @@ import java.util.Collection;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,6 +37,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import ca.uhn.fhir.util.CoverageIgnore;
 
 //@formatter:off
 @Table(name="TRM_CODESYSTEM_VER", uniqueConstraints= {
@@ -53,20 +56,69 @@ public class TermCodeSystemVersion implements Serializable {
 	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
 	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
-	private Long myPid;
+	private Long myId;
 
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false)
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey=@ForeignKey(name="FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_VERSION_ID", nullable = false, updatable = false)
 	private Long myResourceVersionId;
+
+	/**
+	 * Constructor
+	 */
+	public TermCodeSystemVersion() {
+		super();
+	}
 
 	public Collection<TermConcept> getConcepts() {
 		if (myConcepts == null) {
 			myConcepts = new ArrayList<TermConcept>();
 		}
 		return myConcepts;
+	}
+
+	public Long getPid() {
+		return myId;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myResource.getId() == null) ? 0 : myResource.getId().hashCode());
+		result = prime * result + ((myResourceVersionId == null) ? 0 : myResourceVersionId.hashCode());
+		return result;
+	}
+
+	@CoverageIgnore
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof TermCodeSystemVersion)) {
+			return false;
+		}
+		TermCodeSystemVersion other = (TermCodeSystemVersion) obj;
+		if ((myResource.getId() == null) != (other.myResource.getId() == null)) {
+			return false;
+		} else if (!myResource.getId().equals(other.myResource.getId())) {
+			return false;
+		}
+		
+		if (myResourceVersionId == null) {
+			if (other.myResourceVersionId != null) {
+				return false;
+			}
+		} else if (!myResourceVersionId.equals(other.myResourceVersionId)) {
+			return false;
+		}
+		return true;
 	}
 
 	public ResourceTable getResource() {

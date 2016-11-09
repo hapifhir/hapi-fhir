@@ -201,6 +201,18 @@ public class SearchDstu2Test {
 	}
 
 	@Test
+	public void testSearchMethodReturnsNull() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchReturnNull");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals("searchReturnNull", ourLastMethod);
+		assertThat(responseContent, containsString("<total value=\"0\"/>"));
+	}
+
+	@Test
 	public void testSearchByPostWithBodyAndUrlParams() throws Exception {
 		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=json");
 		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
@@ -510,6 +522,14 @@ public class SearchDstu2Test {
 			ourLastMethod = "searchNoList";
 			ourLastRef = theParam;
 			return Collections.emptyList();
+		}
+		//@formatter:on
+
+		//@formatter:off
+		@Search(queryName="searchReturnNull")
+		public List<Patient> searchNoList() {
+			ourLastMethod = "searchReturnNull";
+			return null;
 		}
 		//@formatter:on
 

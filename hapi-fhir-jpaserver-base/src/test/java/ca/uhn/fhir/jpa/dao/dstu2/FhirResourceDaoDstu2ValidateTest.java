@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -29,7 +32,6 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
@@ -40,6 +42,16 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	
+	@Before
+	public void before() {
+		myDaoConfig.setAllowExternalReferences(true);
+	}
+	
+	@After
+	public void after() {
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+	}
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {

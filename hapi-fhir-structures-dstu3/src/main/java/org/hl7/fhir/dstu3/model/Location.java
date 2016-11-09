@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -38,10 +38,11 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
  */
@@ -62,7 +63,7 @@ public class Location extends DomainResource {
          */
         INACTIVE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static LocationStatus fromCode(String codeString) throws FHIRException {
@@ -74,7 +75,10 @@ public class Location extends DomainResource {
           return SUSPENDED;
         if ("inactive".equals(codeString))
           return INACTIVE;
-        throw new FHIRException("Unknown LocationStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown LocationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -161,7 +165,7 @@ public class Location extends DomainResource {
          */
         KIND, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static LocationMode fromCode(String codeString) throws FHIRException {
@@ -171,7 +175,10 @@ public class Location extends DomainResource {
           return INSTANCE;
         if ("kind".equals(codeString))
           return KIND;
-        throw new FHIRException("Unknown LocationMode code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown LocationMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -577,7 +584,8 @@ public class Location extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(longitude, latitude, altitude);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(longitude, latitude, altitude
+          );
       }
 
   public String fhirType() {
@@ -599,6 +607,7 @@ public class Location extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | suspended | inactive", formalDefinition="active | suspended | inactive." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/location-status")
     protected Enumeration<LocationStatus> status;
 
     /**
@@ -609,58 +618,68 @@ public class Location extends DomainResource {
     protected StringType name;
 
     /**
+     * A list of alternate names that the location is known as, or was known as in the past.
+     */
+    @Child(name = "alias", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="A list of alternate names that the location is known as, or was known as in the past", formalDefinition="A list of alternate names that the location is known as, or was known as in the past." )
+    protected List<StringType> alias;
+
+    /**
      * Description of the Location, which helps in finding or referencing the place.
      */
-    @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional details about the location that could be displayed as further information to identify the location beyond its name", formalDefinition="Description of the Location, which helps in finding or referencing the place." )
     protected StringType description;
 
     /**
      * Indicates whether a resource instance represents a specific location or a class of locations.
      */
-    @Child(name = "mode", type = {CodeType.class}, order=4, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "mode", type = {CodeType.class}, order=5, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="instance | kind", formalDefinition="Indicates whether a resource instance represents a specific location or a class of locations." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/location-mode")
     protected Enumeration<LocationMode> mode;
 
     /**
      * Indicates the type of function performed at the location.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Type of function performed", formalDefinition="Indicates the type of function performed at the location." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ServiceDeliveryLocationRoleType")
     protected CodeableConcept type;
 
     /**
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contact details of the location", formalDefinition="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites." )
     protected List<ContactPoint> telecom;
 
     /**
      * Physical location.
      */
-    @Child(name = "address", type = {Address.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "address", type = {Address.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Physical location", formalDefinition="Physical location." )
     protected Address address;
 
     /**
      * Physical form of the location, e.g. building, room, vehicle, road.
      */
-    @Child(name = "physicalType", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "physicalType", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Physical form of the location", formalDefinition="Physical form of the location, e.g. building, room, vehicle, road." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/location-physical-type")
     protected CodeableConcept physicalType;
 
     /**
      * The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML).
      */
-    @Child(name = "position", type = {}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "position", type = {}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The absolute geographic location", formalDefinition="The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML)." )
     protected LocationPositionComponent position;
 
     /**
      * The organization responsible for the provisioning and upkeep of the location.
      */
-    @Child(name = "managingOrganization", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Organization responsible for provisioning and upkeep", formalDefinition="The organization responsible for the provisioning and upkeep of the location." )
     protected Reference managingOrganization;
 
@@ -672,7 +691,7 @@ public class Location extends DomainResource {
     /**
      * Another Location which this Location is physically part of.
      */
-    @Child(name = "partOf", type = {Location.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "partOf", type = {Location.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Another Location this one is physically part of", formalDefinition="Another Location which this Location is physically part of." )
     protected Reference partOf;
 
@@ -681,7 +700,19 @@ public class Location extends DomainResource {
      */
     protected Location partOfTarget;
 
-    private static final long serialVersionUID = -2100435761L;
+    /**
+     * Technical endpoints providing access to services operated for the location.
+     */
+    @Child(name = "endpoint", type = {Endpoint.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Technical endpoints providing access to services operated for the location", formalDefinition="Technical endpoints providing access to services operated for the location." )
+    protected List<Reference> endpoint;
+    /**
+     * The actual objects that are the target of the reference (Technical endpoints providing access to services operated for the location.)
+     */
+    protected List<Endpoint> endpointTarget;
+
+
+    private static final long serialVersionUID = -573853423L;
 
   /**
    * Constructor
@@ -697,16 +728,6 @@ public class Location extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       return this.identifier;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
     }
 
     /**
@@ -726,10 +747,6 @@ public class Location extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (Unique code or number identifying the location to its users.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -738,7 +755,6 @@ public class Location extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Location addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -746,6 +762,16 @@ public class Location extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -844,6 +870,67 @@ public class Location extends DomainResource {
         this.name.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public List<StringType> getAlias() { 
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      return this.alias;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Location setAlias(List<StringType> theAlias) { 
+      this.alias = theAlias;
+      return this;
+    }
+
+    public boolean hasAlias() { 
+      if (this.alias == null)
+        return false;
+      for (StringType item : this.alias)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public StringType addAliasElement() {//2 
+      StringType t = new StringType();
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      this.alias.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public Location addAlias(String value) { //1
+      StringType t = new StringType();
+      t.setValue(value);
+      if (this.alias == null)
+        this.alias = new ArrayList<StringType>();
+      this.alias.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     */
+    public boolean hasAlias(String value) { 
+      if (this.alias == null)
+        return false;
+      for (StringType v : this.alias)
+        if (v.equals(value)) // string
+          return true;
+      return false;
     }
 
     /**
@@ -978,16 +1065,6 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
-     */
-    public ContactPoint getTelecomFirstRep() { 
-      if (getTelecom().isEmpty()) {
-        addTelecom();
-      }
-      return getTelecom().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Location setTelecom(List<ContactPoint> theTelecom) { 
@@ -1004,10 +1081,6 @@ public class Location extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #telecom} (The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites.)
-     */
-    // syntactic sugar
     public ContactPoint addTelecom() { //3
       ContactPoint t = new ContactPoint();
       if (this.telecom == null)
@@ -1016,7 +1089,6 @@ public class Location extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public Location addTelecom(ContactPoint t) { //3
       if (t == null)
         return this;
@@ -1024,6 +1096,16 @@ public class Location extends DomainResource {
         this.telecom = new ArrayList<ContactPoint>();
       this.telecom.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #telecom}, creating it if it does not already exist
+     */
+    public ContactPoint getTelecomFirstRep() { 
+      if (getTelecom().isEmpty()) {
+        addTelecom();
+      }
+      return getTelecom().get(0);
     }
 
     /**
@@ -1186,11 +1268,87 @@ public class Location extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #endpoint} (Technical endpoints providing access to services operated for the location.)
+     */
+    public List<Reference> getEndpoint() { 
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      return this.endpoint;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Location setEndpoint(List<Reference> theEndpoint) { 
+      this.endpoint = theEndpoint;
+      return this;
+    }
+
+    public boolean hasEndpoint() { 
+      if (this.endpoint == null)
+        return false;
+      for (Reference item : this.endpoint)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addEndpoint() { //3
+      Reference t = new Reference();
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      this.endpoint.add(t);
+      return t;
+    }
+
+    public Location addEndpoint(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      this.endpoint.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #endpoint}, creating it if it does not already exist
+     */
+    public Reference getEndpointFirstRep() { 
+      if (getEndpoint().isEmpty()) {
+        addEndpoint();
+      }
+      return getEndpoint().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Endpoint> getEndpointTarget() { 
+      if (this.endpointTarget == null)
+        this.endpointTarget = new ArrayList<Endpoint>();
+      return this.endpointTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Endpoint addEndpointTarget() { 
+      Endpoint r = new Endpoint();
+      if (this.endpointTarget == null)
+        this.endpointTarget = new ArrayList<Endpoint>();
+      this.endpointTarget.add(r);
+      return r;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "active | suspended | inactive.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("alias", "string", "A list of alternate names that the location is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         childrenList.add(new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, java.lang.Integer.MAX_VALUE, mode));
         childrenList.add(new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type));
@@ -1200,6 +1358,7 @@ public class Location extends DomainResource {
         childrenList.add(new Property("position", "", "The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML).", 0, java.lang.Integer.MAX_VALUE, position));
         childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the provisioning and upkeep of the location.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
         childrenList.add(new Property("partOf", "Reference(Location)", "Another Location which this Location is physically part of.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        childrenList.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the location.", 0, java.lang.Integer.MAX_VALUE, endpoint));
       }
 
       @Override
@@ -1208,6 +1367,7 @@ public class Location extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<LocationStatus>
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 92902992: /*alias*/ return this.alias == null ? new Base[0] : this.alias.toArray(new Base[this.alias.size()]); // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<LocationMode>
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
@@ -1217,6 +1377,7 @@ public class Location extends DomainResource {
         case 747804969: /*position*/ return this.position == null ? new Base[0] : new Base[] {this.position}; // LocationPositionComponent
         case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : new Base[] {this.partOf}; // Reference
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1233,6 +1394,9 @@ public class Location extends DomainResource {
           break;
         case 3373707: // name
           this.name = castToString(value); // StringType
+          break;
+        case 92902992: // alias
+          this.getAlias().add(castToString(value)); // StringType
           break;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -1261,6 +1425,9 @@ public class Location extends DomainResource {
         case -995410646: // partOf
           this.partOf = castToReference(value); // Reference
           break;
+        case 1741102485: // endpoint
+          this.getEndpoint().add(castToReference(value)); // Reference
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -1274,6 +1441,8 @@ public class Location extends DomainResource {
           this.status = new LocationStatusEnumFactory().fromType(value); // Enumeration<LocationStatus>
         else if (name.equals("name"))
           this.name = castToString(value); // StringType
+        else if (name.equals("alias"))
+          this.getAlias().add(castToString(value));
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
         else if (name.equals("mode"))
@@ -1292,6 +1461,8 @@ public class Location extends DomainResource {
           this.managingOrganization = castToReference(value); // Reference
         else if (name.equals("partOf"))
           this.partOf = castToReference(value); // Reference
+        else if (name.equals("endpoint"))
+          this.getEndpoint().add(castToReference(value));
         else
           super.setProperty(name, value);
       }
@@ -1302,6 +1473,7 @@ public class Location extends DomainResource {
         case -1618432855:  return addIdentifier(); // Identifier
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<LocationStatus>
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
+        case 92902992: throw new FHIRException("Cannot make property alias as it is not a complex type"); // StringType
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
         case 3357091: throw new FHIRException("Cannot make property mode as it is not a complex type"); // Enumeration<LocationMode>
         case 3575610:  return getType(); // CodeableConcept
@@ -1311,6 +1483,7 @@ public class Location extends DomainResource {
         case 747804969:  return getPosition(); // LocationPositionComponent
         case -2058947787:  return getManagingOrganization(); // Reference
         case -995410646:  return getPartOf(); // Reference
+        case 1741102485:  return addEndpoint(); // Reference
         default: return super.makeProperty(hash, name);
         }
 
@@ -1326,6 +1499,9 @@ public class Location extends DomainResource {
         }
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type Location.name");
+        }
+        else if (name.equals("alias")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Location.alias");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Location.description");
@@ -1360,6 +1536,9 @@ public class Location extends DomainResource {
           this.partOf = new Reference();
           return this.partOf;
         }
+        else if (name.equals("endpoint")) {
+          return addEndpoint();
+        }
         else
           return super.addChild(name);
       }
@@ -1379,6 +1558,11 @@ public class Location extends DomainResource {
         };
         dst.status = status == null ? null : status.copy();
         dst.name = name == null ? null : name.copy();
+        if (alias != null) {
+          dst.alias = new ArrayList<StringType>();
+          for (StringType i : alias)
+            dst.alias.add(i.copy());
+        };
         dst.description = description == null ? null : description.copy();
         dst.mode = mode == null ? null : mode.copy();
         dst.type = type == null ? null : type.copy();
@@ -1392,6 +1576,11 @@ public class Location extends DomainResource {
         dst.position = position == null ? null : position.copy();
         dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
         dst.partOf = partOf == null ? null : partOf.copy();
+        if (endpoint != null) {
+          dst.endpoint = new ArrayList<Reference>();
+          for (Reference i : endpoint)
+            dst.endpoint.add(i.copy());
+        };
         return dst;
       }
 
@@ -1407,10 +1596,10 @@ public class Location extends DomainResource {
           return false;
         Location o = (Location) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(name, o.name, true)
-           && compareDeep(description, o.description, true) && compareDeep(mode, o.mode, true) && compareDeep(type, o.type, true)
-           && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true) && compareDeep(physicalType, o.physicalType, true)
-           && compareDeep(position, o.position, true) && compareDeep(managingOrganization, o.managingOrganization, true)
-           && compareDeep(partOf, o.partOf, true);
+           && compareDeep(alias, o.alias, true) && compareDeep(description, o.description, true) && compareDeep(mode, o.mode, true)
+           && compareDeep(type, o.type, true) && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true)
+           && compareDeep(physicalType, o.physicalType, true) && compareDeep(position, o.position, true) && compareDeep(managingOrganization, o.managingOrganization, true)
+           && compareDeep(partOf, o.partOf, true) && compareDeep(endpoint, o.endpoint, true);
       }
 
       @Override
@@ -1420,13 +1609,14 @@ public class Location extends DomainResource {
         if (!(other instanceof Location))
           return false;
         Location o = (Location) other;
-        return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
-           && compareValues(mode, o.mode, true);
+        return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(alias, o.alias, true)
+           && compareValues(description, o.description, true) && compareValues(mode, o.mode, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, name, description
-          , mode, type, telecom, address, physicalType, position, managingOrganization, partOf);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, name
+          , alias, description, mode, type, telecom, address, physicalType, position, managingOrganization
+          , partOf, endpoint);
       }
 
   @Override
@@ -1442,7 +1632,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="Location.identifier", description="Unique code or number identifying the location to its users", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="Location.identifier", description="Unique code or number identifying the location to its users", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1462,7 +1652,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference", target={Location.class} )
+  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference", target={Location.class } )
   public static final String SP_PARTOF = "partof";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>partof</b>
@@ -1483,22 +1673,26 @@ public class Location extends DomainResource {
  /**
    * Search parameter: <b>near-distance</b>
    * <p>
-   * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br>
-   * Type: <b>token</b><br>
+   * Description: <b>A distance quantity to limit the near search to locations within a specific distance
+
+Requires the near parameter to be included also</b><br>
+   * Type: <b>quantity</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance", type="token", target={} )
+  @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance\n\nRequires the near parameter to be included also", type="quantity" )
   public static final String SP_NEAR_DISTANCE = "near-distance";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near-distance</b>
    * <p>
-   * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br>
-   * Type: <b>token</b><br>
+   * Description: <b>A distance quantity to limit the near search to locations within a specific distance
+
+Requires the near parameter to be included also</b><br>
+   * Type: <b>quantity</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam NEAR_DISTANCE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_NEAR_DISTANCE);
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam NEAR_DISTANCE = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_NEAR_DISTANCE);
 
  /**
    * Search parameter: <b>address</b>
@@ -1508,7 +1702,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string", target={} )
+  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
@@ -1528,7 +1722,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="Location.address.state", description="A state specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-state", path="Location.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
@@ -1548,7 +1742,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token", target={} )
+  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1568,7 +1762,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="Location.address.postalCode", description="A postal code specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-postalcode", path="Location.address.postalCode", description="A postal code specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
@@ -1588,7 +1782,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="Location.address.country", description="A country specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-country", path="Location.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
@@ -1608,7 +1802,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference", target={Organization.class} )
+  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference", target={Organization.class } )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -1629,19 +1823,19 @@ public class Location extends DomainResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A (portion of the) name of the location</b><br>
+   * Description: <b>A (portion of the) name of the location or alias</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Location.name</b><br>
+   * Path: <b>Location.name, Location.alias</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string", target={} )
+  @SearchParamDefinition(name="name", path="Location.name or Location.alias", description="A (portion of the) name of the location or alias", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A (portion of the) name of the location</b><br>
+   * Description: <b>A (portion of the) name of the location or alias</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Location.name</b><br>
+   * Path: <b>Location.name, Location.alias</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
@@ -1654,7 +1848,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="Location.address.use", description="A use code specified in an address", type="token", target={} )
+  @SearchParamDefinition(name="address-use", path="Location.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
@@ -1669,17 +1863,21 @@ public class Location extends DomainResource {
  /**
    * Search parameter: <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br>
+   * Description: <b>The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
+
+Requires the near-distance parameter to be provided also</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token", target={} )
+  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). \n\nRequires the near-distance parameter to be provided also", type="token" )
   public static final String SP_NEAR = "near";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br>
+   * Description: <b>The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
+
+Requires the near-distance parameter to be provided also</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
@@ -1694,7 +1892,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="Location.address.city", description="A city specified in an address", type="string", target={} )
+  @SearchParamDefinition(name="address-city", path="Location.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
@@ -1714,7 +1912,7 @@ public class Location extends DomainResource {
    * Path: <b>Location.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token", target={} )
+  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

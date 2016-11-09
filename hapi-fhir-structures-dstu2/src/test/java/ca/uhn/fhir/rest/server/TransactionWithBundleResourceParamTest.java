@@ -38,9 +38,6 @@ import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class TransactionWithBundleResourceParamTest {
 
 
@@ -108,7 +105,7 @@ public class TransactionWithBundleResourceParamTest {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		assertEquals(3, bundle.getEntry().size());
 
 		Entry entry0 = bundle.getEntry().get(0);

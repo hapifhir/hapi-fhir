@@ -9,15 +9,19 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.model.dstu2.resource.Appointment;
 import ca.uhn.fhir.model.dstu2.resource.Claim;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner.PractitionerRole;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ModelDstu2Test {
@@ -28,7 +32,17 @@ public class ModelDstu2Test {
 	public void testCompositeNames() {
 		assertEquals(MetaDt.class, ourCtx.getElementDefinition("meta").getImplementingClass());
 	}
-	
+
+	@Test
+	public void testModelBindings() {
+		FhirTerser t = ourCtx.newTerser();
+		RuntimeResourceDefinition def = ourCtx.getResourceDefinition(Patient.class);
+		assertEquals("http://hl7.org/fhir/ValueSet/administrative-gender", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("gender")).getBindingValueSet());
+		assertEquals("http://hl7.org/fhir/ValueSet/link-type", ((BaseRuntimeDeclaredChildDefinition)t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet());
+
+		def = ourCtx.getResourceDefinition(Appointment.class);
+		assertEquals("http://hl7.org/fhir/ValueSet/appointmentstatus", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("status")).getBindingValueSet());
+	}
 
 	/**
 	 * See #320

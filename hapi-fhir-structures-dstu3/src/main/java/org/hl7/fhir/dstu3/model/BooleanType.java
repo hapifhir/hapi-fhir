@@ -34,6 +34,7 @@ package org.hl7.fhir.dstu3.model;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.parser.DataFormatException;
 
 /**
  * Primitive type "boolean" in FHIR "true" or "false"
@@ -96,7 +97,7 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 		} else if ("false".equals(value)) {
 			return Boolean.FALSE;
 		} else {
-			throw new IllegalArgumentException("Invalid boolean string: '" + theValue + "'");
+			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
 		}
 	}
 }

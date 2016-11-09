@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>1.6-SNAPSHOT</version>
+		<version>2.1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -17,13 +17,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -147,9 +147,39 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<classFolders>
+						<classFolder>${basedir}/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
+					</classFolders>
+					<sourceFolders>
+						<sourceFolder>${basedir}/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
+					</sourceFolders>
+					<dumpOnExit>true</dumpOnExit>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>1.6-SNAPSHOT</version>
+				<version>2.1-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>generate</id>

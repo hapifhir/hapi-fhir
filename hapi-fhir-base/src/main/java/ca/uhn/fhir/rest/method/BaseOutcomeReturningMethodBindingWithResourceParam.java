@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
@@ -38,7 +37,6 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
@@ -106,12 +104,16 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				resource.setId(urlId);
 			} else {
+				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+					resource.setId(theRequest.getId());
+				}
+
 				String matchUrl = null;
 				if (myConditionalUrlIndex != -1) {
 					matchUrl = (String) theParams[myConditionalUrlIndex];
 					matchUrl = defaultIfBlank(matchUrl, null);
 				}
-				validateResourceIdAndUrlIdForNonConditionalOperation(resourceId, urlId, matchUrl);
+				validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
 			}
 		}
 	}
@@ -151,7 +153,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	 * Subclasses may override
 	 */
 	@SuppressWarnings("unused")
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(String theResourceId, String theUrlId, String theMatchUrl) {
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		// nothing by default
 	}
 

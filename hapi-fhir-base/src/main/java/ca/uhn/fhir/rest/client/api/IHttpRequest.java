@@ -56,4 +56,14 @@ public interface IHttpRequest {
 	 */
 	public String getRequestBodyFromStream() throws IOException;
 
+	/**
+	 * Return the request URI, or null
+	 */
+	public String getUri();
+	
+	/**
+	 * Return the HTTP verb (e.g. "GET")
+	 */
+	public String getHttpVerbName();
+	
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import java.util.Date;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -30,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.MDC;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class BaseJpaProvider {
@@ -40,6 +44,9 @@ public class BaseJpaProvider {
 
 	private FhirContext myContext;
 
+	/**
+	 * @param theRequest The servlet request 
+	 */
 	public void endRequest(HttpServletRequest theRequest) {
 		MDC.remove(REMOTE_ADDR);
 		MDC.remove(REMOTE_UA);
@@ -53,10 +60,25 @@ public class BaseJpaProvider {
 		return myContext;
 	}
 
+	protected DateRangeParam processSinceOrAt(Date theSince, DateRangeParam theAt) {
+		boolean haveAt = theAt != null && (theAt.getLowerBoundAsInstant() != null || theAt.getUpperBoundAsInstant() != null);
+		if (haveAt && theSince != null) {
+			String msg = getContext().getLocalizer().getMessage(BaseJpaProvider.class, "cantCombintAtAndSince");
+			throw new InvalidRequestException(msg);
+		}
+		
+		if (haveAt) {
+			return theAt;
+		}
+		
+		return new DateRangeParam(theSince, null);
+	}
+
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 	}
 
+	
 	public void startRequest(HttpServletRequest theRequest) {
 		if (theRequest == null) {
 			return;

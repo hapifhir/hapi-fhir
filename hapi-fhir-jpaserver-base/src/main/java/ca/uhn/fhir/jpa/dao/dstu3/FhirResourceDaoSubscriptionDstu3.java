@@ -64,7 +64,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
@@ -153,7 +152,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
-		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
+		SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
 
 		criteriaUrl = new SearchParameterMap();
 		long start = theSubscriptionTable.getMostRecentMatch().getTime();
@@ -257,7 +256,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 			txTemplate.execute(new TransactionCallback<Void>() {
 				@Override
 				public Void doInTransaction(TransactionStatus theStatus) {
-					delete(subscriptionId, new ServletRequestDetails());
+					delete(subscriptionId, null);
 					return null;
 				}
 			});
@@ -265,9 +264,9 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	}
 
 	@Override
-	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-			Date theUpdateTime, RequestDetails theRequestDetails) {
-		ResourceTable retVal = super.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theRequestDetails);
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+			Date theUpdateTime) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
 
 		Subscription resource = (Subscription) theResource;
 		Long resourceId = theEntity.getId();
@@ -316,8 +315,8 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	}
 
 	@Override
-	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave, RequestDetails theRequestDetails) {
-		super.validateResourceForStorage(theResource, theEntityToSave, theRequestDetails);
+	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
 
 		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
 

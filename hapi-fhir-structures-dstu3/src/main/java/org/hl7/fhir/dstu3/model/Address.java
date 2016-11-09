@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.
  */
@@ -64,7 +65,7 @@ public class Address extends Type implements ICompositeType {
          */
         OLD, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AddressUse fromCode(String codeString) throws FHIRException {
@@ -78,7 +79,10 @@ public class Address extends Type implements ICompositeType {
           return TEMP;
         if ("old".equals(codeString))
           return OLD;
-        throw new FHIRException("Unknown AddressUse code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AddressUse code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -179,7 +183,7 @@ public class Address extends Type implements ICompositeType {
          */
         BOTH, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static AddressType fromCode(String codeString) throws FHIRException {
@@ -191,7 +195,10 @@ public class Address extends Type implements ICompositeType {
           return PHYSICAL;
         if ("both".equals(codeString))
           return BOTH;
-        throw new FHIRException("Unknown AddressType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown AddressType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -273,6 +280,7 @@ public class Address extends Type implements ICompositeType {
      */
     @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="home | work | temp | old - purpose of this address", formalDefinition="The purpose of this address." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/address-use")
     protected Enumeration<AddressUse> use;
 
     /**
@@ -280,6 +288,7 @@ public class Address extends Type implements ICompositeType {
      */
     @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="postal | physical | both", formalDefinition="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/address-type")
     protected Enumeration<AddressType> type;
 
     /**
@@ -504,16 +513,6 @@ public class Address extends Type implements ICompositeType {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #line}, creating it if it does not already exist
-     */
-    public StringType getLineFirstRep() { 
-      if (getLine().isEmpty()) {
-        addLineElement();
-      }
-      return getLine().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Address setLine(List<StringType> theLine) { 
@@ -533,7 +532,6 @@ public class Address extends Type implements ICompositeType {
     /**
      * @return {@link #line} (This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.)
      */
-    // syntactic sugar
     public StringType addLineElement() {//2 
       StringType t = new StringType();
       if (this.line == null)
@@ -1042,8 +1040,8 @@ public class Address extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, type, text, line, city, district
-          , state, postalCode, country, period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, type, text, line
+          , city, district, state, postalCode, country, period);
       }
 
 

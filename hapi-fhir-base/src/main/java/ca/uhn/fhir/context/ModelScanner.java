@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -35,34 +34,24 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IBoundCodeableConcept;
-import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -72,15 +61,9 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Compartment;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -96,13 +79,12 @@ class ModelScanner {
 	private Map<String, Class<? extends IBaseResource>> myNameToResourceType = new HashMap<String, Class<? extends IBaseResource>>();
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private Set<Class<? extends IBase>> myScanAlso = new HashSet<Class<? extends IBase>>();
-	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 	private FhirVersionEnum myVersion;
 
 	private Set<Class<? extends IBase>> myVersionTypes;
 
 	ModelScanner(FhirContext theContext, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions,
-			Collection<Class<? extends IElement>> theResourceTypes) throws ConfigurationException {
+			Collection<Class<? extends IBase>> theResourceTypes) throws ConfigurationException {
 		myContext = theContext;
 		myVersion = theVersion;
 		Set<Class<? extends IBase>> toScan;
@@ -114,14 +96,7 @@ class ModelScanner {
 		init(theExistingDefinitions, toScan);
 	}
 
-	private void addScanAlso(Class<? extends IBase> theType) {
-		if (theType.isInterface() || Modifier.isAbstract(theType.getModifiers())) {
-			return;
-		}
-		myScanAlso.add(theType);
-	}
-
-	private Class<?> determineElementType(Field next) {
+	static Class<?> determineElementType(Field next) {
 		Class<?> nextElementType = next.getType();
 		if (List.class.equals(nextElementType)) {
 			nextElementType = ReflectionUtil.getGenericCollectionTypeOfField(next);
@@ -132,23 +107,18 @@ class ModelScanner {
 	}
 
 	@SuppressWarnings("unchecked")
-	private IValueSetEnumBinder<Enum<?>> getBoundCodeBinder(Field theNext) {
+	static IValueSetEnumBinder<Enum<?>> getBoundCodeBinder(Field theNext) {
 		Class<?> bound = getGenericCollectionTypeOfCodedField(theNext);
 		if (bound == null) {
 			throw new ConfigurationException("Field '" + theNext + "' has no parameter for " + BoundCodeDt.class.getSimpleName() + " to determine enum type");
 		}
 
+		String fieldName = "VALUESET_BINDER";
 		try {
-			Field bindingField = bound.getField("VALUESET_BINDER");
+			Field bindingField = bound.getField(fieldName);
 			return (IValueSetEnumBinder<Enum<?>>) bindingField.get(null);
-		} catch (IllegalArgumentException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
-		} catch (NoSuchFieldException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
-		} catch (SecurityException e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field", e);
+		} catch (Exception e) {
+			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field (must have a field called " + fieldName + ")", e);
 		}
 	}
 
@@ -180,7 +150,7 @@ class ModelScanner {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
-	private void init(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IBase>> theDatatypes) {
+	private void init(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IBase>> theTypesToScan) {
 		if (theExistingDefinitions != null) {
 			myClassToElementDefinitions.putAll(theExistingDefinitions);
 		}
@@ -189,17 +159,11 @@ class ModelScanner {
 		long start = System.currentTimeMillis();
 		Map<String, Class<? extends IBaseResource>> resourceTypes = myNameToResourceType;
 
-		myVersionTypes = scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
-
-		// toScan.add(DateDt.class);
-		// toScan.add(CodeDt.class);
-		// toScan.add(DecimalDt.class);
-		// toScan.add(AttachmentDt.class);
-		// toScan.add(ResourceReferenceDt.class);
-		// toScan.add(QuantityDt.class);
+		Set<Class<? extends IBase>> typesToScan = theTypesToScan;
+		myVersionTypes = scanVersionPropertyFile(typesToScan, resourceTypes, myVersion, myClassToElementDefinitions);
 
 		do {
-			for (Class<? extends IBase> nextClass : theDatatypes) {
+			for (Class<? extends IBase> nextClass : typesToScan) {
 				scan(nextClass);
 			}
 			for (Iterator<Class<? extends IBase>> iter = myScanAlso.iterator(); iter.hasNext();) {
@@ -207,17 +171,26 @@ class ModelScanner {
 					iter.remove();
 				}
 			}
-			theDatatypes.clear();
-			theDatatypes.addAll(myScanAlso);
+			typesToScan.clear();
+			typesToScan.addAll(myScanAlso);
 			myScanAlso.clear();
-		} while (!theDatatypes.isEmpty());
+		} while (!typesToScan.isEmpty());
 
 		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> nextEntry : myClassToElementDefinitions.entrySet()) {
 			if (theExistingDefinitions != null && theExistingDefinitions.containsKey(nextEntry.getKey())) {
 				continue;
 			}
 			BaseRuntimeElementDefinition<?> next = nextEntry.getValue();
-			next.sealAndInitialize(myContext, myClassToElementDefinitions);
+			
+			boolean deferredSeal = false;
+			if (myContext.getPerformanceOptions().contains(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)) {
+				if (next instanceof BaseRuntimeElementCompositeDefinition) {
+					deferredSeal = true;
+				}
+			}
+			if (!deferredSeal) {
+				next.sealAndInitialize(myContext, myClassToElementDefinitions);
+			}
 		}
 
 		myRuntimeChildUndeclaredExtensionDefinition = new RuntimeChildUndeclaredExtensionDefinition();
@@ -238,7 +211,7 @@ class ModelScanner {
 	 * ones. Annotations can't extend each other or implement interfaces or anything like that, so rather than duplicate all of the annotation processing code this method just creates an interface
 	 * Proxy to simulate the HAPI annotations if the HL7.org ones are found instead.
 	 */
-	private <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
+	static <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
 		T retVal = theTarget.getAnnotation(theAnnotationType);
 		return retVal;
 	}
@@ -258,6 +231,7 @@ class ModelScanner {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseResource> resClass = (Class<? extends IBaseResource>) theClass;
 			scanResource(resClass, resourceDefinition);
+			return;
 		}
 
 		DatatypeDef datatypeDefinition = pullAnnotation(theClass, DatatypeDef.class);
@@ -270,11 +244,9 @@ class ModelScanner {
 				@SuppressWarnings({ "unchecked" })
 				Class<? extends IPrimitiveType<?>> resClass = (Class<? extends IPrimitiveType<?>>) theClass;
 				scanPrimitiveDatatype(resClass, datatypeDefinition);
-			} else {
-				return;
-				// throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " +
-				// theClass.getCanonicalName());
-			}
+			} 
+				
+			return;
 		}
 
 		Block blockDefinition = pullAnnotation(theClass, Block.class);
@@ -301,345 +273,35 @@ class ModelScanner {
 			throw new ConfigurationException("Block type @" + Block.class.getSimpleName() + " annotation contains no name: " + theClass.getCanonicalName());
 		}
 
-		RuntimeResourceBlockDefinition resourceDef = new RuntimeResourceBlockDefinition(resourceName, theClass, isStandardType(theClass));
-		myClassToElementDefinitions.put(theClass, resourceDef);
-
-		scanCompositeElementForChildren(theClass, resourceDef);
+		RuntimeResourceBlockDefinition blockDef = new RuntimeResourceBlockDefinition(resourceName, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
+		myClassToElementDefinitions.put(theClass, blockDef);
 	}
 
 	private void scanCompositeDatatype(Class<? extends ICompositeType> theClass, DatatypeDef theDatatypeDefinition) {
 		ourLog.debug("Scanning datatype class: {}", theClass.getName());
 
-		RuntimeCompositeDatatypeDefinition resourceDef;
+		RuntimeCompositeDatatypeDefinition elementDef;
 		if (theClass.equals(ExtensionDt.class)) {
-			resourceDef = new RuntimeExtensionDtDefinition(theDatatypeDefinition, theClass, true);
+			elementDef = new RuntimeExtensionDtDefinition(theDatatypeDefinition, theClass, true, myContext, myClassToElementDefinitions);
 			// } else if (IBaseMetaType.class.isAssignableFrom(theClass)) {
 			// resourceDef = new RuntimeMetaDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		} else {
-			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
+			elementDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);
 		}
-		myClassToElementDefinitions.put(theClass, resourceDef);
-		myNameToElementDefinitions.put(resourceDef.getName().toLowerCase(), resourceDef);
-		scanCompositeElementForChildren(theClass, resourceDef);
-	}
-
-	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends IBase> theClass, BaseRuntimeElementCompositeDefinition<?> theDefinition) {
-		Set<String> elementNames = new HashSet<String>();
-		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
-		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
-
-		LinkedList<Class<? extends IBase>> classes = new LinkedList<Class<? extends IBase>>();
+		myClassToElementDefinitions.put(theClass, elementDef);
+		myNameToElementDefinitions.put(elementDef.getName().toLowerCase(), elementDef);
 
 		/*
-		 * We scan classes for annotated fields in the class but also all of its superclasses
+		 * See #423:
+		 * If the type contains a field that has a custom type, we want to make
+		 * sure that this type gets scanned as well
 		 */
-		Class<? extends IBase> current = theClass;
-		do {
-			classes.push(current);
-			if (IBase.class.isAssignableFrom(current.getSuperclass())) {
-				current = (Class<? extends IBase>) current.getSuperclass();
-			} else {
-				current = null;
-			}
-		} while (current != null);
-
-		for (Class<? extends IBase> next : classes) {
-			scanCompositeElementForChildren(next, elementNames, orderToElementDef, orderToExtensionDef);
-		}
-
-		// while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() <
-		// 0) {
-		// BaseRuntimeDeclaredChildDefinition elementDef =
-		// orderToElementDef.remove(orderToElementDef.firstKey());
-		// if (elementDef.getElementName().equals("identifier")) {
-		// orderToElementDef.put(theIdentifierOrder, elementDef);
-		// } else {
-		// throw new ConfigurationException("Don't know how to handle element: "
-		// + elementDef.getElementName());
-		// }
-		// }
-
-		TreeSet<Integer> orders = new TreeSet<Integer>();
-		orders.addAll(orderToElementDef.keySet());
-		orders.addAll(orderToExtensionDef.keySet());
-
-		for (Integer i : orders) {
-			BaseRuntimeChildDefinition nextChild = orderToElementDef.get(i);
-			if (nextChild != null) {
-				theDefinition.addChild(nextChild);
-			}
-			BaseRuntimeDeclaredChildDefinition nextExt = orderToExtensionDef.get(i);
-			if (nextExt != null) {
-				theDefinition.addExtension((RuntimeChildDeclaredExtensionDefinition) nextExt);
-			}
-		}
-
+		elementDef.populateScanAlso(myScanAlso);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void scanCompositeElementForChildren(Class<? extends IBase> theClass, Set<String> elementNames, TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToElementDef,
-			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> theOrderToExtensionDef) {
-		int baseElementOrder = theOrderToElementDef.isEmpty() ? 0 : theOrderToElementDef.lastEntry().getKey() + 1;
 
-		for (Field next : theClass.getDeclaredFields()) {
 
-			if (Modifier.isFinal(next.getModifiers())) {
-				ourLog.trace("Ignoring constant {} on target type {}", next.getName(), theClass);
-				continue;
-			}
-
-			Child childAnnotation = pullAnnotation(next, Child.class);
-			if (childAnnotation == null) {
-				ourLog.trace("Ignoring non @Child field {} on target type {}", next.getName(), theClass);
-				continue;
-			}
-
-			Description descriptionAnnotation = pullAnnotation(next, Description.class);
-
-			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
-			Extension extensionAttr = pullAnnotation(next, Extension.class);
-			if (extensionAttr != null) {
-				orderMap = theOrderToExtensionDef;
-			}
-
-			String elementName = childAnnotation.name();
-			int order = childAnnotation.order();
-			boolean childIsChoiceType = false;
-			if (order == Child.REPLACE_PARENT) {
-
-				if (extensionAttr != null) {
-
-					for (Entry<Integer, BaseRuntimeDeclaredChildDefinition> nextEntry : orderMap.entrySet()) {
-						BaseRuntimeDeclaredChildDefinition nextDef = nextEntry.getValue();
-						if (nextDef instanceof RuntimeChildDeclaredExtensionDefinition) {
-							if (nextDef.getExtensionUrl().equals(extensionAttr.url())) {
-								order = nextEntry.getKey();
-								orderMap.remove(nextEntry.getKey());
-								elementNames.remove(elementName);
-								break;
-							}
-						}
-					}
-					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
-								+ ") but no parent element with extension URL " + extensionAttr.url() + " could be found on type " + next.getDeclaringClass().getSimpleName());
-					}
-
-				} else {
-
-					for (Entry<Integer, BaseRuntimeDeclaredChildDefinition> nextEntry : orderMap.entrySet()) {
-						BaseRuntimeDeclaredChildDefinition nextDef = nextEntry.getValue();
-						if (elementName.equals(nextDef.getElementName())) {
-							order = nextEntry.getKey();
-							BaseRuntimeDeclaredChildDefinition existing = orderMap.remove(nextEntry.getKey());
-							elementNames.remove(elementName);
-							
-							/*
-							 * See #350 - If the original field (in the superclass) with the given name is a choice, then we need to make sure
-							 * that the field which replaces is a choice even if it's only a choice of one type - this is because the
-							 * element name when serialized still needs to reflect the datatype
-							 */
-							if (existing instanceof RuntimeChildChoiceDefinition) {
-								childIsChoiceType = true;
-							}
-							break;
-						}
-					}
-					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
-								+ ") but no parent element with name " + elementName + " could be found on type " + next.getDeclaringClass().getSimpleName());
-					}
-
-				}
-
-			}
-			if (order < 0 && order != Child.ORDER_UNKNOWN) {
-				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
-			}
-			if (order != Child.ORDER_UNKNOWN) {
-				order = order + baseElementOrder;
-			}
-			// int min = childAnnotation.min();
-			// int max = childAnnotation.max();
-
-			/*
-			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict with any given IDs and can be figured out later
-			 */
-			if (order == Child.ORDER_UNKNOWN) {
-				order = Integer.MIN_VALUE;
-				while (orderMap.containsKey(order)) {
-					order++;
-				}
-			}
-
-			List<Class<? extends IBase>> choiceTypes = new ArrayList<Class<? extends IBase>>();
-			for (Class<? extends IBase> nextChoiceType : childAnnotation.type()) {
-				choiceTypes.add(nextChoiceType);
-			}
-
-			if (orderMap.containsKey(order)) {
-				throw new ConfigurationException("Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
-			}
-
-			if (elementNames.contains(elementName)) {
-				throw new ConfigurationException("Detected duplicate field name '" + elementName + "' in type '" + theClass.getCanonicalName() + "'");
-			}
-
-			Class<?> nextElementType = determineElementType(next);
-
-			if (childAnnotation.name().equals("extension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
-				RuntimeChildExtension def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
-				orderMap.put(order, def);
-			} else if (childAnnotation.name().equals("modifierExtension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
-				RuntimeChildExtension def = new RuntimeChildExtension(next, childAnnotation.name(), childAnnotation, descriptionAnnotation);
-				orderMap.put(order, def);
-			} else if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IBaseResource.class.isAssignableFrom(nextElementType))) {
-				/*
-				 * Child is contained resources
-				 */
-				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
-				orderMap.put(order, def);
-
-			} else if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
-				/*
-				 * Child is a resource as a direct child, as in Bundle.entry.resource
-				 */
-				RuntimeChildDirectResource def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
-				orderMap.put(order, def);
-
-			} else {
-				childIsChoiceType |= choiceTypes.size() > 1;
-				if (childIsChoiceType && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
-					/*
-					 * Child is a choice element
-					 */
-					for (Class<? extends IBase> nextType : choiceTypes) {
-						addScanAlso(nextType);
-					}
-					RuntimeChildChoiceDefinition def = new RuntimeChildChoiceDefinition(next, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
-					orderMap.put(order, def);
-
-				} else if (next.getType().equals(ExtensionDt.class)) {
-
-					RuntimeChildExtensionDt def = new RuntimeChildExtensionDt(next, elementName, childAnnotation, descriptionAnnotation);
-					orderMap.put(order, def);
-					if (IElement.class.isAssignableFrom(nextElementType)) {
-						addScanAlso((Class<? extends IElement>) nextElementType);
-					}
-
-				} else if (extensionAttr != null) {
-					/*
-					 * Child is an extension
-					 */
-					Class<? extends IBase> et = (Class<? extends IBase>) nextElementType;
-
-					Object binder = null;
-					if (BoundCodeDt.class.isAssignableFrom(nextElementType) || IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
-						binder = getBoundCodeBinder(next);
-					}
-
-					RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et,
-							binder);
-
-					if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-						def.setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next));
-					}
-
-					orderMap.put(order, def);
-					if (IBase.class.isAssignableFrom(nextElementType)) {
-						addScanAlso((Class<? extends IBase>) nextElementType);
-					}
-				} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || IBaseReference.class.isAssignableFrom(nextElementType)) {
-					/*
-					 * Child is a resource reference
-					 */
-					List<Class<? extends IBaseResource>> refTypesList = new ArrayList<Class<? extends IBaseResource>>();
-					for (Class<? extends IElement> nextType : childAnnotation.type()) {
-						if (IBaseReference.class.isAssignableFrom(nextType)) {
-							refTypesList.add(myVersion.isRi() ? IAnyResource.class : IResource.class);
-							continue;
-						} else if (IBaseResource.class.isAssignableFrom(nextType) == false) {
-							throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
-						}
-						refTypesList.add((Class<? extends IBaseResource>) nextType);
-						addScanAlso(nextType);
-					}
-					RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
-					orderMap.put(order, def);
-
-				} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBaseBackboneElement.class.isAssignableFrom(nextElementType)
-						|| IBaseDatatypeElement.class.isAssignableFrom(nextElementType)) {
-					/*
-					 * Child is a resource block (i.e. a sub-tag within a resource) TODO: do these have a better name according to HL7?
-					 */
-
-					Class<? extends IBase> blockDef = (Class<? extends IBase>) nextElementType;
-					addScanAlso(blockDef);
-					RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, childAnnotation, descriptionAnnotation, elementName, blockDef);
-					orderMap.put(order, def);
-
-				} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "Type".equals(nextElementType.getSimpleName())
-						|| IBaseDatatype.class.equals(nextElementType)) {
-
-					RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
-					orderMap.put(order, def);
-
-				} else if (IDatatype.class.isAssignableFrom(nextElementType) || IPrimitiveType.class.isAssignableFrom(nextElementType) || ICompositeType.class.isAssignableFrom(nextElementType)
-						|| IBaseDatatype.class.isAssignableFrom(nextElementType) || IBaseExtension.class.isAssignableFrom(nextElementType)) {
-					Class<? extends IBase> nextDatatype = (Class<? extends IBase>) nextElementType;
-
-					addScanAlso(nextDatatype);
-					BaseRuntimeChildDatatypeDefinition def;
-					if (IPrimitiveType.class.isAssignableFrom(nextElementType)) {
-						if (nextElementType.equals(BoundCodeDt.class)) {
-							IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
-							Class<? extends Enum<?>> enumType = determineEnumTypeForBoundField(next);
-							def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
-						} else if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-							Class<? extends Enum<?>> binderType = determineEnumTypeForBoundField(next);
-							def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
-						} else {
-							def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
-						}
-					} else if (IBaseXhtml.class.isAssignableFrom(nextElementType)) {
-						def = new RuntimeChildXhtmlDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
-					} else {
-						if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
-							IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
-							Class<? extends Enum<?>> enumType = determineEnumTypeForBoundField(next);
-							def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder, enumType);
-						} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || INarrative.class.isAssignableFrom(nextElementType)) {
-							def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
-						} else {
-							def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
-						}
-					}
-
-					CodeableConceptElement concept = pullAnnotation(next, CodeableConceptElement.class);
-					if (concept != null) {
-						if (!ICodedDatatype.class.isAssignableFrom(nextDatatype)) {
-							throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is marked as @" + CodeableConceptElement.class.getCanonicalName()
-									+ " but type is not a subtype of " + ICodedDatatype.class.getName());
-						} else {
-							Class<? extends ICodeEnum> type = concept.type();
-							myScanAlsoCodeTable.add(type);
-							def.setCodeType(type);
-						}
-					}
-
-					orderMap.put(order, def);
-
-				} else {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is not a valid child type: " + nextElementType);
-				}
-			}
-
-			elementNames.add(elementName);
-		}
-	}
-
-	private Class<? extends Enum<?>> determineEnumTypeForBoundField(Field next) {
+	static Class<? extends Enum<?>> determineEnumTypeForBoundField(Field next) {
 		@SuppressWarnings("unchecked")
 		Class<? extends Enum<?>> enumType = (Class<? extends Enum<?>>) ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
 		return enumType;
@@ -653,28 +315,28 @@ class ModelScanner {
 			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
 
-		BaseRuntimeElementDefinition<?> resourceDef;
+		BaseRuntimeElementDefinition<?> elementDef;
 		if (theClass.equals(XhtmlDt.class)) {
 			@SuppressWarnings("unchecked")
 			Class<XhtmlDt> clazz = (Class<XhtmlDt>) theClass;
-			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, clazz, isStandardType(clazz));
+			elementDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, clazz, isStandardType(clazz));
 		} else if (IBaseXhtml.class.isAssignableFrom(theClass)) {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseXhtml> clazz = (Class<? extends IBaseXhtml>) theClass;
-			resourceDef = new RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(resourceName, clazz, isStandardType(clazz));
+			elementDef = new RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(resourceName, clazz, isStandardType(clazz));
 		} else if (IIdType.class.isAssignableFrom(theClass)) {
-			resourceDef = new RuntimeIdDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
+			elementDef = new RuntimeIdDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		} else {
-			resourceDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
+			elementDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		}
-		myClassToElementDefinitions.put(theClass, resourceDef);
+		myClassToElementDefinitions.put(theClass, elementDef);
 		if (!theDatatypeDefinition.isSpecialization()) {
 			if (myVersion.isRi() && IDatatype.class.isAssignableFrom(theClass)) {
 				ourLog.debug("Not adding non RI type {} to RI context", theClass);
 			} else if (!myVersion.isRi() && !IDatatype.class.isAssignableFrom(theClass)) {
 				ourLog.debug("Not adding RI type {} to non RI context", theClass);
 			} else {
-				myNameToElementDefinitions.put(resourceName, resourceDef);
+				myNameToElementDefinitions.put(resourceName, elementDef);
 			}
 		}
 
@@ -702,7 +364,8 @@ class ModelScanner {
 			}
 		}
 
-		Class<? extends IBaseResource> builtInType = myNameToResourceType.get(resourceName.toLowerCase());
+		String resourceNameLowerCase = resourceName.toLowerCase();
+		Class<? extends IBaseResource> builtInType = myNameToResourceType.get(resourceNameLowerCase);
 		boolean standardType = builtInType != null && builtInType.equals(theClass) == true;
 		if (primaryNameProvider) {
 			if (builtInType != null && builtInType.equals(theClass) == false) {
@@ -718,18 +381,24 @@ class ModelScanner {
 			}
 		}
 
-		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition, standardType);
+		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition, standardType, myClassToElementDefinitions);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {
 			if (resourceDef.getStructureVersion() == myVersion) {
-				myNameToResourceDefinitions.put(resourceName.toLowerCase(), resourceDef);
+				myNameToResourceDefinitions.put(resourceNameLowerCase, resourceDef);
 			}
 		}
-		scanCompositeElementForChildren(theClass, resourceDef);
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);
 
 		scanResourceForSearchParams(theClass, resourceDef);
+
+		/*
+		 * See #423:
+		 * If the type contains a field that has a custom type, we want to make
+		 * sure that this type gets scanned as well
+		 */
+		resourceDef.populateScanAlso(myScanAlso);
 
 		return resourceName;
 	}
@@ -821,10 +490,10 @@ class ModelScanner {
 		return type;
 	}
 
-	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum version) {
+	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingElementDefinitions) {
 		Set<Class<? extends IBase>> retVal = new HashSet<Class<? extends IBase>>();
 
-		InputStream str = version.getVersionImplementation().getFhirVersionPropertiesFile();
+		InputStream str = theVersion.getVersionImplementation().getFhirVersionPropertiesFile();
 		Properties prop = new Properties();
 		try {
 			prop.load(str);
@@ -839,6 +508,9 @@ class ModelScanner {
 
 							@SuppressWarnings("unchecked")
 							Class<? extends IBase> dtType = (Class<? extends IBase>) Class.forName(nextValue);
+							if (theExistingElementDefinitions.containsKey(dtType)) {
+								continue;
+							}
 							retVal.add(dtType);
 
 							if (IElement.class.isAssignableFrom(dtType)) {
@@ -864,6 +536,9 @@ class ModelScanner {
 					try {
 						@SuppressWarnings("unchecked")
 						Class<? extends IBaseResource> nextClass = (Class<? extends IBaseResource>) Class.forName(nextValue);
+						if (theExistingElementDefinitions.containsKey(nextClass)) {
+							continue;
+						}
 						if (!IBaseResource.class.isAssignableFrom(nextClass)) {
 							throw new ConfigurationException("Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
 						}
@@ -878,6 +553,8 @@ class ModelScanner {
 			}
 		} catch (IOException e) {
 			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		} finally {
+			IOUtils.closeQuietly(str);
 		}
 
 		return retVal;

@@ -1,0 +1,146 @@
+{
+	"resourceType": "Communication",
+	"id": "111211",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2016-07-06T15:45:04.663-04:00"
+	},
+	"contained": [
+		{
+			"resourceType": "Organization",
+			"id": "OrgSchool1",
+			"identifier": [
+				{
+					"system": "[id-system-local-base]/school-id",
+					"value": "unknown"
+				}
+			],
+			"name": "Fake School"
+		},
+		{
+			"resourceType": "Patient",
+			"id": "Patient1",
+			"identifier": [
+				{
+					"use": "official",
+					"system": "[id-system-global-base]/ca-on-patient-hcn",
+					"value": "2222222222"
+				}
+			],
+			"name": [
+				{
+					"use": "official",
+					"family": [
+						"Tester"
+					],
+					"given": [
+						"Joe",
+						"Fake"
+					]
+				}
+			],
+			"gender": "female",
+			"birthDate": "2011-03-02",
+			"address": [
+				{
+					"extension": [
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber",
+							"valueString": "33"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetName",
+							"valueString": "DUNDURN ST N"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetNameType",
+							"valueString": "ST"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-direction",
+							"valueString": "N"
+						},
+						{
+							"url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-unitID",
+							"valueString": "600"
+						}
+					],
+					"use": "home",
+					"line": [
+						"unknown"
+					],
+					"city": "HAMILTON",
+					"state": "Ontario"
+				}
+			],
+			"contact": [
+				{
+					"organization": {
+						"reference": "#OrgSchool1"
+					}
+				}
+			]
+		},
+		{
+			"resourceType": "RelatedPerson",
+			"id": "RelatedPerson1",
+			"patient": {
+				"reference": "#Patient1"
+			},
+			"relationship": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/patient-contact-relationship",
+						"code": "Self"
+					}
+				]
+			},
+			"name": {
+				"family": [
+					"Tester"
+				],
+				"given": [
+					"Jane"
+				]
+			},
+			"telecom": [
+				{
+					"system": "phone",
+					"value": "2899199119",
+					"use": "home"
+				}
+			]
+		}
+	],
+	"identifier": [
+		{
+			"system": "[id-system-local-base]/submission-id",
+			"value": "1000212"
+		}
+	],
+	"sender": {
+		"reference": "#RelatedPerson1"
+	},
+	"payload": [
+		{
+			"contentAttachment": {
+				"contentType": "image/gif",
+				"data": "…"
+			}
+		},
+		{
+			"contentReference": {
+				"reference": "#Immunization1"
+			}
+		},
+		{
+			"contentString": "Scanned copy of MRM immunization receipt and Flu shot chart page"
+		}
+	],
+	"status": "completed",
+	"sent": "2016-07-06T19:45:45.514Z",
+	"received": "2016-07-06T19:45:45.514Z",
+	"subject": {
+		"reference": "#Patient1"
+	}
+}

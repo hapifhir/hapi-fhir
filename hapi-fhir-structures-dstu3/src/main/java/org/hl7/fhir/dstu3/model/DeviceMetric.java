@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -37,10 +37,11 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes a measurement, calculation or setting capability of a medical device.
  */
@@ -61,7 +62,7 @@ public class DeviceMetric extends DomainResource {
          */
         STANDBY, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DeviceMetricOperationalStatus fromCode(String codeString) throws FHIRException {
@@ -73,7 +74,10 @@ public class DeviceMetric extends DomainResource {
           return OFF;
         if ("standby".equals(codeString))
           return STANDBY;
-        throw new FHIRException("Unknown DeviceMetricOperationalStatus code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DeviceMetricOperationalStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -184,7 +188,7 @@ public class DeviceMetric extends DomainResource {
          */
         WHITE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DeviceMetricColor fromCode(String codeString) throws FHIRException {
@@ -206,7 +210,10 @@ public class DeviceMetric extends DomainResource {
           return CYAN;
         if ("white".equals(codeString))
           return WHITE;
-        throw new FHIRException("Unknown DeviceMetricColor code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DeviceMetricColor code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -351,7 +358,7 @@ public class DeviceMetric extends DomainResource {
          */
         UNSPECIFIED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DeviceMetricCategory fromCode(String codeString) throws FHIRException {
@@ -365,7 +372,10 @@ public class DeviceMetric extends DomainResource {
           return CALCULATION;
         if ("unspecified".equals(codeString))
           return UNSPECIFIED;
-        throw new FHIRException("Unknown DeviceMetricCategory code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DeviceMetricCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -470,7 +480,7 @@ public class DeviceMetric extends DomainResource {
          */
         TWOPOINT, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DeviceMetricCalibrationType fromCode(String codeString) throws FHIRException {
@@ -484,7 +494,10 @@ public class DeviceMetric extends DomainResource {
           return GAIN;
         if ("two-point".equals(codeString))
           return TWOPOINT;
-        throw new FHIRException("Unknown DeviceMetricCalibrationType code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DeviceMetricCalibrationType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -589,7 +602,7 @@ public class DeviceMetric extends DomainResource {
          */
         UNSPECIFIED, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static DeviceMetricCalibrationState fromCode(String codeString) throws FHIRException {
@@ -603,7 +616,10 @@ public class DeviceMetric extends DomainResource {
           return CALIBRATED;
         if ("unspecified".equals(codeString))
           return UNSPECIFIED;
-        throw new FHIRException("Unknown DeviceMetricCalibrationState code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DeviceMetricCalibrationState code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -697,6 +713,7 @@ public class DeviceMetric extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="unspecified | offset | gain | two-point", formalDefinition="Describes the type of the calibration method." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/metric-calibration-type")
         protected Enumeration<DeviceMetricCalibrationType> type;
 
         /**
@@ -704,6 +721,7 @@ public class DeviceMetric extends DomainResource {
          */
         @Child(name = "state", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="not-calibrated | calibration-required | calibrated | unspecified", formalDefinition="Describes the state of the calibration." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/metric-calibration-state")
         protected Enumeration<DeviceMetricCalibrationState> state;
 
         /**
@@ -1034,6 +1052,7 @@ public class DeviceMetric extends DomainResource {
      */
     @Child(name = "operationalStatus", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="on | off | standby", formalDefinition="Indicates current operational state of the device. For example: On, Off, Standby, etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/metric-operational-status")
     protected Enumeration<DeviceMetricOperationalStatus> operationalStatus;
 
     /**
@@ -1041,6 +1060,7 @@ public class DeviceMetric extends DomainResource {
      */
     @Child(name = "color", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="black | red | green | yellow | blue | magenta | cyan | white", formalDefinition="Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/metric-color")
     protected Enumeration<DeviceMetricColor> color;
 
     /**
@@ -1048,6 +1068,7 @@ public class DeviceMetric extends DomainResource {
      */
     @Child(name = "category", type = {CodeType.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="measurement | setting | calculation | unspecified", formalDefinition="Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/metric-category")
     protected Enumeration<DeviceMetricCategory> category;
 
     /**
@@ -1420,16 +1441,6 @@ public class DeviceMetric extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #calibration}, creating it if it does not already exist
-     */
-    public DeviceMetricCalibrationComponent getCalibrationFirstRep() { 
-      if (getCalibration().isEmpty()) {
-        addCalibration();
-      }
-      return getCalibration().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public DeviceMetric setCalibration(List<DeviceMetricCalibrationComponent> theCalibration) { 
@@ -1446,10 +1457,6 @@ public class DeviceMetric extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #calibration} (Describes the calibrations that have been performed or that are required to be performed.)
-     */
-    // syntactic sugar
     public DeviceMetricCalibrationComponent addCalibration() { //3
       DeviceMetricCalibrationComponent t = new DeviceMetricCalibrationComponent();
       if (this.calibration == null)
@@ -1458,7 +1465,6 @@ public class DeviceMetric extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public DeviceMetric addCalibration(DeviceMetricCalibrationComponent t) { //3
       if (t == null)
         return this;
@@ -1466,6 +1472,16 @@ public class DeviceMetric extends DomainResource {
         this.calibration = new ArrayList<DeviceMetricCalibrationComponent>();
       this.calibration.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #calibration}, creating it if it does not already exist
+     */
+    public DeviceMetricCalibrationComponent getCalibrationFirstRep() { 
+      if (getCalibration().isEmpty()) {
+        addCalibration();
+      }
+      return getCalibration().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1695,7 +1711,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference", target={DeviceComponent.class} )
+  @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference", target={DeviceComponent.class } )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
@@ -1721,7 +1737,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1741,7 +1757,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference", target={Device.class} )
+  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") }, target={Device.class } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1767,7 +1783,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token", target={} )
+  @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
@@ -1787,7 +1803,7 @@ public class DeviceMetric extends DomainResource {
    * Path: <b>DeviceMetric.category</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token", target={} )
+  @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token" )
   public static final String SP_CATEGORY = "category";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>

@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -66,36 +67,7 @@ class ConditionalParamBinder implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-
-		if (myOperationType == RestOperationTypeEnum.CREATE) {
-			String retVal = theRequest.getHeader(Constants.HEADER_IF_NONE_EXIST);
-			if (isBlank(retVal)) {
-				return null;
-			}
-			if (retVal.startsWith(theRequest.getFhirServerBase())) {
-				retVal = retVal.substring(theRequest.getFhirServerBase().length());
-			}
-			return retVal;
-		} else if (myOperationType != RestOperationTypeEnum.DELETE && myOperationType != RestOperationTypeEnum.UPDATE) {
-			return null;
-		}
-		
-		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
-			return null;
-		}
-		boolean haveParam = false;
-		for (String next : theRequest.getParameters().keySet()) {
-			if (!next.startsWith("_")) {
-				haveParam=true;
-				break;
-			}
-		}
-		if (!haveParam) {
-			return null;
-		}
-		
-		int questionMarkIndex = theRequest.getCompleteUrl().indexOf('?');
-		return theRequest.getResourceName() + theRequest.getCompleteUrl().substring(questionMarkIndex);
+		return theRequest.getConditionalUrl(myOperationType);
 	}
 
 }

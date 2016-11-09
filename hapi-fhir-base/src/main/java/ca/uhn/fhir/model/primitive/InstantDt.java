@@ -185,5 +185,4 @@ public class InstantDt extends BaseDateTimeDt {
 		return DEFAULT_PRECISION;
 	}
 
-
 }

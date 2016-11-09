@@ -47,7 +47,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	Map<String, Long> getResourceCounts();
 
-	IBundleProvider history(Date theDate, RequestDetails theRequestDetails);
+	IBundleProvider history(Date theDate, Date theUntil, RequestDetails theRequestDetails);
 
 	/**
 	 * Marks all indexes as needing fresh indexing
@@ -62,7 +62,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	 */
 	MT metaGetOperation(RequestDetails theRequestDetails);
 
-	int performReindexingPass(Integer theCount, RequestDetails theRequestDetails);
+	int performReindexingPass(Integer theCount);
 
 	T transaction(RequestDetails theRequestDetails, T theResources);
 

@@ -26,7 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ValidateUtil {
 
-	public static void isNotNullOrThrowInvalidRequest(boolean theSuccess, String theMessage) {
+	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage) {
 		if (theSuccess == false) {
 			throw new InvalidRequestException(theMessage);
 		}
@@ -35,6 +35,24 @@ public class ValidateUtil {
 	public static void isNotBlankOrThrowInvalidRequest(String theString, String theMessage) {
 		if (isBlank(theString)) {
 			throw new InvalidRequestException(theMessage);
+		}
+	}
+
+	/**
+	 * Throws {@link IllegalArgumentException} if theValue is <= theMinimum
+	 */
+	public static void isGreaterThan(long theValue, long theMinimum, String theMessage) {
+		if (theValue <= theMinimum) {
+			throw new IllegalArgumentException(theMessage);
+		}
+	}
+
+	/**
+	 * Throws {@link IllegalArgumentException} if theValue is <= theMinimum
+	 */
+	public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
+		if (theValue < theMinimum) {
+			throw new IllegalArgumentException(theMessage);
 		}
 	}
 

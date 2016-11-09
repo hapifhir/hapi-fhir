@@ -163,7 +163,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	@Override
 	public HttpGetClientInvocation invokeClient(Object[] theArgs) {
 		HttpGetClientInvocation retVal;
-		IdDt id = ((IdDt) theArgs[myIdIndex]);
+		IIdType id = ((IIdType) theArgs[myIdIndex]);
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
 			if (id.hasVersionIdPart()) {

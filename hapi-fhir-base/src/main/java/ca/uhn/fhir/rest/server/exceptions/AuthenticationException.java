@@ -44,5 +44,16 @@ public class AuthenticationException extends BaseServerResponseException {
 	public AuthenticationException(String theMessage, Throwable theCause) {
 		super(STATUS_CODE, theMessage, theCause);
 	}
+	
+	/**
+	 * Adds a <code>WWW-Authenticate</code> header to the response, of the form:<br/>
+	 * <code>WWW-Authenticate: Basic realm="theRealm"</code> 
+	 * 
+	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 */
+	public AuthenticationException addAuthenticateHeaderForRealm(String theRealm) {
+		addResponseHeader("WWW-Authenticate", "Basic realm=\"" + theRealm + "\"");
+		return this;
+	}
 
 }

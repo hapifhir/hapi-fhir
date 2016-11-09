@@ -36,8 +36,8 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 	private Class<? extends IBaseDatatype> myProfileOfType;
 	private BaseRuntimeElementDefinition<?> myProfileOf;
 
-	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType) {
-		super(theDef.name(), theImplementingClass, theStandardType);
+	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType, FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super(theDef.name(), theImplementingClass, theStandardType, theContext, theClassToElementDefinitions);
 		
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {
@@ -81,6 +81,7 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 
 	@Override
 	public boolean isProfileOf(Class<? extends IBaseDatatype> theType) {
+		validateSealed();
 		if (myProfileOfType != null) {
 			if (myProfileOfType.equals(theType)) {
 				return true;

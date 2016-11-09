@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>1.6-SNAPSHOT</version>
+		<version>2.1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -19,37 +19,37 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>1.6-SNAPSHOT</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -94,7 +94,9 @@
 						<configuration>
 							<target>
 								<copy todir="target/sources">
-									<fileset dir="../hapi-fhir-base/src/main/java" />
+									<fileset dir="../hapi-fhir-base/src/main/java">
+										<exclude name="**/TestUtil.java"/>
+									</fileset>
 									<fileset dir="../hapi-fhir-structures-dstu/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu/target/generated-sources/tinder" />
 									<fileset dir="../hapi-fhir-structures-dstu2/src/main/java" />
@@ -132,10 +134,10 @@
 				<configuration>
 					<instructions>
 						<!--<Export-Package>ca.uhn.fhir</Export-Package> <Export-Package>org.hl7.fhir</Export-Package> -->
-						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<!--<Embed-Dependency>*;scope=!provided|test</Embed-Dependency> <Embed-Directory>lib</Embed-Directory> <Embed-Transitive>true</Embed-Transitive> -->
 						<_nouses>true</_nouses>
-						<_removeheaders>Built-By, Include-Resource, Private-Package</_removeheaders>
+						<_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
 						<!-- <Private-Package>org.foo.myproject.*</Private-Package> <Bundle-Activator>org.foo.myproject.impl1.Activator</Bundle-Activator> -->
 						<!-- <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=hapi-fhir-*</Embed-Dependency> -->
 						<Import-Package>
@@ -146,6 +148,7 @@
 							com.google.*;resolution:=optional;-remove-attribute:=version,
 							com.phloc.commons;resolution:=optional;-remove-attribute:=version,
 							com.phloc.*;resolution:=optional;-remove-attribute:=version,
+							javassist;-remove-attribute:=version,
 							javax.*;-remove-attribute:=version,
 							net.sf.saxon;resolution:=optional,
 							org.apache.commons.*;-remove-attribute:=version,

@@ -48,6 +48,17 @@ public interface IOperationUntyped {
 	 * Use chained method calls to construct a Parameters input. This form is a convenience
 	 * in order to allow simple method chaining to be used to build up a parameters
 	 * resource for the input of an operation without needing to manually construct one.
+	 * <p>
+	 * A sample invocation of this class could look like:<br/>
+	 * <pre>Bundle bundle = client.operation()
+	 *   .onInstance(new IdType("Patient/A161443"))
+	 *   .named("everything")
+	 *   .withParameter(Parameters.class, "_count", new IntegerType(50))
+	 *   .useHttpGet()
+	 *   .returnResourceType(Bundle.class)
+	 *   .execute();
+	 * </pre>
+	 * </p>
 	 * 
 	 * @param theParameterType The type to use for the output parameters (this should be set to
 	 * <code>Parameters.class</code> drawn from the version of the FHIR structures you are using)

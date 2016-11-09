@@ -27,6 +27,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
@@ -103,6 +104,18 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 				if (next.startsWith("resource.")) {
 					baseResourceNames.add(next.substring("resource.".length()).toLowerCase());
 				}
+			}
+			
+			/*
+			 * No spreadsheet existed for Binary in DSTU1 so we don't generate it.. this
+			 * is something we could work around, but at this point why bother since it's 
+			 * only an issue for DSTU1
+			 */
+			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+				baseResourceNames.remove("binary");
+			}
+			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+				baseResourceNames.remove("conformance");
 			}
 		}
 

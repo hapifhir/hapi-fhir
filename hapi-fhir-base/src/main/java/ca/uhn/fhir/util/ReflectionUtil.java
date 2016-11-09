@@ -30,9 +30,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.api.IQueryParameterType;
+import javassist.Modifier;
 
 public class ReflectionUtil {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
 
 	public static LinkedHashSet<Method> getDeclaredMethods(Class<?> theClazz) {
 		LinkedHashSet<Method> retVal = new LinkedHashSet<Method>();
@@ -134,6 +136,26 @@ public class ReflectionUtil {
 		} catch (Exception e) {
 			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T newInstanceOrReturnNull(String theClassName, Class<T> theType) {
+		try {
+			Class<?> clazz = Class.forName(theClassName);
+			if (!theType.isAssignableFrom(clazz)) {
+				throw new ConfigurationException(theClassName + " is not assignable to " + theType);
+			}
+			return (T) clazz.newInstance();
+		} catch (ConfigurationException e) {
+			throw e;
+		} catch (Exception e) {
+			ourLog.info("Failed to instantiate {}: {}", theClassName, e.toString());
+			return null;
+		}
+	}
+
+	public static boolean isInstantiable(Class<?> theType) {
+		return !theType.isInterface() && !Modifier.isAbstract(theType.getModifiers());
 	}
 
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -48,14 +50,16 @@ class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionIn
 	@Override
 	public String getParameterValue(FhirContext theContext) {
 		StringBuilder b = new StringBuilder();
-		if (myPrefix != null) {
-			b.append(ParameterUtil.escapeWithDefault(myPrefix.getValueForContext(theContext)));
+		if (isNotBlank(myValue) || isNotBlank(mySystem) || isNotBlank(myUnits)) {
+			if (myPrefix != null) {
+				b.append(ParameterUtil.escapeWithDefault(myPrefix.getValueForContext(theContext)));
+			}
+			b.append(ParameterUtil.escapeWithDefault(myValue));
+			b.append('|');
+			b.append(ParameterUtil.escapeWithDefault(mySystem));
+			b.append('|');
+			b.append(ParameterUtil.escapeWithDefault(myUnits));
 		}
-		b.append(ParameterUtil.escapeWithDefault(myValue));
-		b.append('|');
-		b.append(ParameterUtil.escapeWithDefault(mySystem));
-		b.append('|');
-		b.append(ParameterUtil.escapeWithDefault(myUnits));
 		return b.toString();
 	}
 

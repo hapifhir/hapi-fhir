@@ -191,7 +191,7 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 
 		@Override
 		public ICriterion<QuantityClientParam> andUnits(String theUnits) {
-			return andUnits(theUnits, null);
+			return andUnits(null, theUnits);
 		}
 
 		@Override

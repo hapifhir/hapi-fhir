@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.gclient;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +48,7 @@ class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInte
 		myValue = ParameterUtil.escapeWithDefault(theValue);
 	}
 
-	public StringCriterion(String theName, List<String> theValue) {
+	public StringCriterion(String theName, Collection<String> theValue) {
 		myName=theName;
 		StringBuilder b = new StringBuilder();
 		for (String next : theValue) {
@@ -67,6 +70,9 @@ class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInte
 
 	@Override
 	public String getParameterValue(FhirContext theContext) {
+		if (isBlank(myValue)) {
+			return "";
+		}
 		if (myPrefix != null) {
 			return myPrefix.getValueForContext(theContext) + myValue;
 		}

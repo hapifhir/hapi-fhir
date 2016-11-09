@@ -8,9 +8,13 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.dstu3.model.CarePlan;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Property;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -149,7 +153,7 @@ public class ModelScannerDstu3Test {
 	}
 
 	@ResourceDef(name = "Bundle")
-	public static class MyBundle extends BaseResource {
+	public static class MyBundle extends Resource {
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -163,17 +167,17 @@ public class ModelScannerDstu3Test {
 		}
 
 		@Override
-		public IIdType getIdElement() {
+		public IdType getIdElement() {
 			return null;
 		}
 
 		@Override
-		public IPrimitiveType<String> getLanguageElement() {
+		public CodeType getLanguageElement() {
 			return null;
 		}
 
 		@Override
-		public IBaseMetaType getMeta() {
+		public Meta getMeta() {
 			return null;
 		}
 
@@ -183,12 +187,22 @@ public class ModelScannerDstu3Test {
 		}
 
 		@Override
-		public IAnyResource setId(String theId) {
+		public Resource setId(String theId) {
 			return null;
 		}
 
 		@Override
-		public BaseResource setIdElement(IdType theIdType) {
+		public Resource setIdElement(IdType theIdType) {
+			return null;
+		}
+
+		@Override
+		public Resource copy() {
+			return null;
+		}
+
+		@Override
+		public ResourceType getResourceType() {
 			return null;
 		}
 

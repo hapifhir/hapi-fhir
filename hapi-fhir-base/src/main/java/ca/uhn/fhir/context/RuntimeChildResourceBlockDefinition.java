@@ -34,19 +34,25 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 
 	private RuntimeResourceBlockDefinition myElementDef;
 	private Class<? extends IBase> myResourceBlockType;
+	private FhirContext myContext;
 
-	public RuntimeChildResourceBlockDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName, Class<? extends IBase> theResourceBlockType) throws ConfigurationException {
+	public RuntimeChildResourceBlockDefinition(FhirContext theContext, Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName, Class<? extends IBase> theResourceBlockType) throws ConfigurationException {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
+		myContext = theContext;
 		myResourceBlockType = theResourceBlockType;
 	}
 
 	@Override
 	public RuntimeResourceBlockDefinition getChildByName(String theName) {
 		if (getElementName().equals(theName)) {
-			return myElementDef;
+			return getDefinition();
 		}else {
 			return null;
 		}
+	}
+
+	private RuntimeResourceBlockDefinition getDefinition() {
+		return (RuntimeResourceBlockDefinition) myContext.getElementDefinition(myResourceBlockType);
 	}
 
 	@Override
@@ -60,7 +66,7 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
 		if (myResourceBlockType.equals(theDatatype)) {
-			return myElementDef;
+			return getDefinition();
 		}
 		return null;
 	}
@@ -72,7 +78,7 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myElementDef = (RuntimeResourceBlockDefinition) theClassToElementDefinitions.get(myResourceBlockType);
+//		myElementDef = (RuntimeResourceBlockDefinition) theClassToElementDefinitions.get(myResourceBlockType);
 	}
 
 }

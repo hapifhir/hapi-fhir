@@ -34,13 +34,17 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 
 	private List<BaseRuntimeChildDefinition> myChildren;
 
-	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType) {
-		super(theDef, theImplementingClass, theStandardType);
+	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType, FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super(theDef, theImplementingClass, theStandardType, theContext, theClassToElementDefinitions);
 	}
 
 	@Override
 	public List<BaseRuntimeChildDefinition> getChildren() {
 		return myChildren;
+	}
+
+	public List<BaseRuntimeChildDefinition> getChildrenIncludingUrl() {
+		return super.getChildren();
 	}
 
 	@Override

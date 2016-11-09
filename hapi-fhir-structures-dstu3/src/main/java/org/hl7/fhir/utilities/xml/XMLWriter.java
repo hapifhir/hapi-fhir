@@ -672,6 +672,7 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
 		element(null, name, content);
 	}
 
+  @Override
   public void element(String name) throws IOException {
     element(null, name, null);
   }
@@ -844,6 +845,7 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
 		this.attributeLineWrap = attributeLineWrap;
 	}
 
+	@Override
 	public void escapedText(String content) throws IOException {
 		text("");
 		int i = content.length();
@@ -857,6 +859,12 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
     write("<?"+value+"?>");
     if (isPrettyHeader())
       write("\r\n");
+  }
+
+  @Override
+  public void link(String href) {
+    // ignore this
+    
   }
 	
 	

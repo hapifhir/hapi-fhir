@@ -34,24 +34,32 @@ public enum FhirVersionEnum {
 	 * ***********************
 	 */
 	
-	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1", null, false), 
+	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1", null, false, "0.0.82"), 
 	
-	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null, false),
+	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null, false, "1.0.2"),
 	
-	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true), 
+	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2, true, "1.0.2"), 
 	
-	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2, true);
+	DSTU2_1("NONE", null, true, "1.4.0"), 
+
+	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true, "1.6.0");
 
 	private final FhirVersionEnum myEquivalent;
+	private final String myFhirVersionString;
 	private final boolean myIsRi;
 	private volatile Boolean myPresentOnClasspath;
 	private final String myVersionClass;
 	private volatile IFhirVersion myVersionImplementation;
 
-	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent, boolean theIsRi) {
+	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent, boolean theIsRi, String theFhirVersion) {
 		myVersionClass = theVersionClass;
 		myEquivalent = theEquivalent;
 		myIsRi = theIsRi;
+		myFhirVersionString = theFhirVersion;
+	}
+
+	public String getFhirVersionString() {
+		return myFhirVersionString;
 	}
 
 	public IFhirVersion getVersionImplementation() {
@@ -82,6 +90,10 @@ public enum FhirVersionEnum {
 		return ordinal() > theVersion.ordinal();
 	}
 	
+	public boolean isOlderThan(FhirVersionEnum theVersion) {
+		return ordinal() < theVersion.ordinal();
+	}
+
 	/**
 	 * Returns true if the given version is present on the classpath
 	 */

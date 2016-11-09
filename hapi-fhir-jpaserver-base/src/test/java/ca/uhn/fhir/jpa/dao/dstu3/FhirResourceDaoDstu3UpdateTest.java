@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -36,11 +37,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -105,7 +108,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		 * Get history
 		 */
 
-		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, mySrd);
+		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
 
 		assertEquals(2, historyBundle.size());
 		
@@ -147,6 +150,120 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		assertNotEquals(id, p.getIdElement());
 		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
 
+	}
+
+	@Test
+	public void testCreateAndUpdateWithoutRequest() throws Exception {
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		IIdType id = myPatientDao.create(p).getId().toUnqualified();
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		IIdType id2 = myPatientDao.create(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
+		assertEquals(id.getValue(), id2.getValue());
+		
+		p = new Patient();
+		p.setId(id);
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.update(p).getId();
+
+		id2 = myPatientDao.update(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
+		assertEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("3", id2.getVersionIdPart());
+
+		Patient newPatient = myPatientDao.read(id);
+		assertEquals("1", newPatient.getIdElement().getVersionIdPart());
+
+		newPatient = myPatientDao.read(id.toVersionless());
+		assertEquals("3", newPatient.getIdElement().getVersionIdPart());
+		
+		myPatientDao.delete(id.toVersionless());
+		
+		try {
+			myPatientDao.read(id.toVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			// nothing
+		}
+		
+	}
+	
+	
+	@Test
+	public void testUpdateConditionalByLastUpdated() throws Exception {
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.create(p, mySrd).getId();
+
+		InstantDt start = InstantDt.withCurrentTime();
+		ourLog.info("First time: {}", start.getValueAsString());
+		Thread.sleep(100);
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got ID: {}", id);
+
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+
+		String matchUrl = "Patient?_lastUpdated=gt" + start.getValueAsString();
+		ourLog.info("URL is: {}", matchUrl);
+		myPatientDao.update(p, matchUrl, mySrd);
+
+		p = myPatientDao.read(id.toVersionless(), mySrd);
+		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
+		assertNotEquals(id, p.getIdElement());
+		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+
+	}
+
+	@Test
+	public void testUpdateConditionalByLastUpdatedWithWrongTimezone() throws Exception {
+		TimeZone def = TimeZone.getDefault();
+		try {
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0:00"));
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.create(p, mySrd).getId();
+
+		InstantDt start = InstantDt.withCurrentTime();
+		Thread.sleep(100);
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.setId("Patient/" + methodName);
+
+		myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
+
+		p = myPatientDao.read(id.toVersionless(), mySrd);
+		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
+		assertNotEquals(id, p.getIdElement());
+		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+		} finally {
+			TimeZone.setDefault(def);
+		}
 	}
 
 	@Test

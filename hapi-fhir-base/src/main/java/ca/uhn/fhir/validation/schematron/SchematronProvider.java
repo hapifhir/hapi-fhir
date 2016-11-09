@@ -23,6 +23,7 @@ package ca.uhn.fhir.validation.schematron;
 import java.lang.reflect.Constructor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
 
@@ -32,7 +33,8 @@ public class SchematronProvider {
 	private static final String I18N_KEY_NO_PHLOC_WARNING = FhirValidator.class.getName() + ".noPhlocWarningOnStartup";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
 	
-	public static boolean isScematronAvailable(FhirContext theFhirContext) {
+	@CoverageIgnore
+	public static boolean isSchematronAvailable(FhirContext theFhirContext) {
 		try {
 			Class.forName("com.phloc.schematron.ISchematronResource");
 			return true;
@@ -42,6 +44,8 @@ public class SchematronProvider {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	@CoverageIgnore
 	public static Class<? extends IValidatorModule> getSchematronValidatorClass() {
 		try {
 			return (Class<? extends IValidatorModule>) Class.forName("ca.uhn.fhir.validation.schematron.SchematronBaseValidator");
@@ -50,6 +54,7 @@ public class SchematronProvider {
 		}
 	}
 	
+	@CoverageIgnore
 	public static IValidatorModule getSchematronValidatorInstance(FhirContext myContext) {
 		try {
 			Class<? extends IValidatorModule> cls = getSchematronValidatorClass();

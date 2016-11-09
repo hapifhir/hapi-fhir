@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -38,10 +38,11 @@ import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
@@ -58,7 +59,7 @@ public class Binary extends BaseBinary implements IBaseBinary {
     /**
      * The actual content, base64 encoded.
      */
-    @Child(name = "content", type = {Base64BinaryType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "content", type = {Base64BinaryType.class}, order=1, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The actual content", formalDefinition="The actual content, base64 encoded." )
     protected Base64BinaryType content;
 
@@ -286,7 +287,7 @@ public class Binary extends BaseBinary implements IBaseBinary {
    * Path: <b>Binary.contentType</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="contenttype", path="Binary.contentType", description="MimeType of the binary content", type="token", target={} )
+  @SearchParamDefinition(name="contenttype", path="Binary.contentType", description="MimeType of the binary content", type="token" )
   public static final String SP_CONTENTTYPE = "contenttype";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>contenttype</b>

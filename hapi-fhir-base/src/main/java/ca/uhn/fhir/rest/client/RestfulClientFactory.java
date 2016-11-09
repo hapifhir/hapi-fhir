@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -194,7 +195,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, BaseClient theClient) {
 		String serverBase = normalizeBaseUrlForMap(theServerBase);
 
-		switch (myServerValidationMode) {
+		switch (getServerValidationMode()) {
 		case NEVER:
 			break;
 		case ONCE:
@@ -267,22 +268,6 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		myPoolMaxPerRoute = thePoolMaxPerRoute;
 		resetHttpClient();
 	}
-	
-	 /**
-	 * Instantiates a new client invocation handler
-	 * @param theClient 
-	 *                 the client which will invoke the call
-	 * @param theUrlBase 
-	 *                 the url base
-	 * @param theMethodToReturnValue
-	 * @param theBindings
-	 * @param theMethodToLambda
-	 * @return a newly created client invocation handler
-	 */
-	ClientInvocationHandler newInvocationHandler(IHttpClient theClient, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ClientInvocationHandlerFactory.ILambda> theMethodToLambda) {
-		return new ClientInvocationHandler(theClient, getFhirContext(), theUrlBase.toString(), theMethodToReturnValue,
-				theBindings, theMethodToLambda, this);
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -296,11 +281,27 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		
 		IBaseResource conformance;
 		try {
+			String capabilityStatementResourceName = "CapabilityStatement";
+			if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				capabilityStatementResourceName = "Conformance";
+			}
+			
 			@SuppressWarnings("rawtypes")
-			Class implementingClass = myContext.getResourceDefinition("Conformance").getImplementingClass();
-			conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+			Class implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+			try {
+				conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+			} catch (FhirClientConnectionException e) {
+				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) && e.getCause() instanceof DataFormatException) {
+					capabilityStatementResourceName = "Conformance";
+					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+					conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+				} else {
+					throw e;
+				}
+			}
 		} catch (FhirClientConnectionException e) {
-			throw new FhirClientConnectionException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA), e);
+			String msg = myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA);
+			throw new FhirClientConnectionException(msg, e);
 		}
 
 		FhirTerser t = myContext.newTerser();

@@ -1,6 +1,7 @@
 package example;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
@@ -32,6 +33,19 @@ public class ClientExamples {
       // Create the client
       IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
       // END SNIPPET: proxy
+   }
+
+   @SuppressWarnings("unused")
+   public void createOkHttp() {
+      // START SNIPPET: okhttp
+      FhirContext ctx = FhirContext.forDstu3();
+
+      // Use OkHttp
+      ctx.setRestfulClientFactory(new OkHttpRestfulClientFactory(ctx));
+      
+      // Create the client
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      // END SNIPPET: okhttp
    }
 
    @SuppressWarnings("unused")

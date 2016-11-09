@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
  */
@@ -68,7 +69,7 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         OTHER, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ContactPointSystem fromCode(String codeString) throws FHIRException {
@@ -84,7 +85,10 @@ public class ContactPoint extends Type implements ICompositeType {
           return PAGER;
         if ("other".equals(codeString))
           return OTHER;
-        throw new FHIRException("Unknown ContactPointSystem code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ContactPointSystem code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -203,7 +207,7 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         MOBILE, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static ContactPointUse fromCode(String codeString) throws FHIRException {
@@ -219,7 +223,10 @@ public class ContactPoint extends Type implements ICompositeType {
           return OLD;
         if ("mobile".equals(codeString))
           return MOBILE;
-        throw new FHIRException("Unknown ContactPointUse code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ContactPointUse code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -321,6 +328,7 @@ public class ContactPoint extends Type implements ICompositeType {
      */
     @Child(name = "system", type = {CodeType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="phone | fax | email | pager | other", formalDefinition="Telecommunications form for contact point - what communications system is required to make use of the contact." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contact-point-system")
     protected Enumeration<ContactPointSystem> system;
 
     /**
@@ -335,6 +343,7 @@ public class ContactPoint extends Type implements ICompositeType {
      */
     @Child(name = "use", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="home | work | temp | old | mobile - purpose of this contact point", formalDefinition="Identifies the purpose for the contact point." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contact-point-use")
     protected Enumeration<ContactPointUse> use;
 
     /**
@@ -715,8 +724,8 @@ public class ContactPoint extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, value, use, rank, period
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, value, use, rank
+          , period);
       }
 
 

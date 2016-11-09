@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.demo;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -74,13 +76,14 @@ public class JpaServerDemo extends RestfulServer {
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
-		Object systemProvider;
+		List<Object> systemProvider = new ArrayList<Object>();
 		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class));
 		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
+			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
+			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 		} else {
 			throw new IllegalStateException();
 		}
@@ -144,6 +147,9 @@ public class JpaServerDemo extends RestfulServer {
 			this.registerInterceptor(interceptor);
 		}
 
+		DaoConfig daoConfig = myAppCtx.getBean(DaoConfig.class);
+		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
+		
 	}
 
 }

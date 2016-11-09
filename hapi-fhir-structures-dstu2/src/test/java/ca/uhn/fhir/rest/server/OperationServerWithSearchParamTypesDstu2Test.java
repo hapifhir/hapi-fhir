@@ -164,24 +164,24 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		assertThat(conf, stringContainsInOrder(
 			"<type value=\"Patient\"/>",
 			"<operation>", 
-			"<name value=\"$andlist\"/>"
+			"<name value=\"andlist\"/>"
 		));
 		assertThat(conf, stringContainsInOrder(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
-				"<name value=\"$nonrepeating\"/>"
+				"<name value=\"nonrepeating\"/>"
 			));
 		assertThat(conf, stringContainsInOrder(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
-				"<name value=\"$orlist\"/>"
+				"<name value=\"orlist\"/>"
 			));
 		//@formatter:on
 
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdDt("OperationDefinition/andlist"));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient--andlist"));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off

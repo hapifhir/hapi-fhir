@@ -80,6 +80,110 @@ $ mvn install]]></source>
 			</subsection>
 		</section>
 		
+		<section name="Configuring The JPA Server">
+			
+			<p>
+				The JPA server is configured through a series of configuration files, most
+				of which are documented inline. 
+			</p>
+			<ul>
+				<li>
+					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java"><b>FhirServerConfig.java</b></a>:
+					Configures the database connection settings 
+				</li>
+			</ul>
+			
+		</section>
+			
+		<section name="DaoConfig">
+				
+			<p>
+				The Spring confguration contains a definition for a bean called <code>daoConfig</code>,
+				which will look something like the following:
+			</p>
+			<source><![CDATA[@Bean()
+public DaoConfig daoConfig() {
+	DaoConfig retVal = new DaoConfig();
+	retVal.setAllowMultipleDelete(true);
+	retVal.setAllowInlineMatchUrlReferences(true);
+	return retVal;
+}]]></source>
+				
+			<p>
+				You can use this method to change various configuration settings on the DaoConfig bean
+				which define the way that the JPA server will behave.
+				See the <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig JavaDoc</a>
+				for information about the available settings.
+			</p>
+
+			<subsection name="External/Absolute Resource References">
+				
+				<p>
+					Clients may sometimes post resources to your server that contain
+					absolute resource references. For example, consider the following resource:
+				</p>
+				<source><![CDATA[<Patient xmlns="http://hl7.org/fhir">
+   <id value="patient-infant-01"/>
+   <name>
+      <use value="official"/>
+      <family value="Miller"/>
+      <given value="Samuel"/>
+   </name>
+   <managingOrganization>
+      <reference value="http://example.com/fhir/Organization/123"/>
+   </managingOrganization>
+</Patient>]]></source>
+				
+				<p>
+					By default, the server will reject this reference, as only
+					local references are permitted by the server. This can be changed
+					however.
+				</p>
+				<p>
+					If you want the server to recognize that this URL is actually a local
+					reference (i.e. because the server will be deployed to the base URL 
+					<code>http://example.com/fhir/</code>) you can
+					configure the server to recognize this URL via the following DaoConfig
+					setting:
+				</p>
+				<source><![CDATA[@Bean()
+public DaoConfig daoConfig() {
+	DaoConfig retVal = new DaoConfig();
+	// ... other config ...
+	retVal.getTreatBaseUrlsAsLocal().add("http://example.com/fhir/");
+	return retVal;
+}]]></source>
+
+				<p>
+					On the other hand, if you want the server to be configurable to
+					allow remote references, you can set this with the confguration below.
+					Using the <code>setAllowInlineMatchUrlReferences</code> means that
+					it will be possible to search for references that refer to these
+					external references.
+				</p>
+				
+				<source><![CDATA[@Bean()
+public DaoConfig daoConfig() {
+	DaoConfig retVal = new DaoConfig();
+	// Allow external references
+	retVal.setAllowInlineMatchUrlReferences(true);
+	
+	// If you are allowing external references, it is recommended to
+	// also tell the server which references actually will be local
+	retVal.getTreatBaseUrlsAsLocal().add("http://mydomain.com/fhir");
+	return retVal;
+}]]></source>
+			</subsection>
+			
+		</section>
+		
+		<section name="Not yet complete">
+			<p>
+				The documentation for the JPA server is not yet complete. Please get in touch
+				if you are able to help us complete it!
+			</p>
+		</section>
+
 		<section name="Architecture">
 		
 			<img src="images/jpa_architecture.png" alt="Architecture" align="right"/>
@@ -135,27 +239,52 @@ $ mvn install]]></source>
 			
 		</section>
 		
-		<section name="Configuring The JPA Server">
-			
-			<p>
-				The JPA server is configured through a series of configuration files, most
-				of which are documented inline. 
-			</p>
+		<section name="Additional Information">
+		
 			<ul>
 				<li>
-					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java"><b>FhirServerConfig.java</b></a>:
-					Configures the database connection settings 
+					<a href="https://www.openhealthhub.org/t/hapi-terminology-server-uk-snomed-ct-import/592">This page</a>
+					has information on loading national editions (UK specifically) of SNOMED CT files into
+					the database.
 				</li>
 			</ul>
+			
 		</section>
 		
-		<section name="Not yet complete">
-			<p>
-				The documentation for the JPA server is not yet complete. Please get in touch
-				if you are able to help us complete it!
-			</p>
-		</section>
+		<!-- 
+		alter table hfj_res_link ALTER COLUMN "TARGET_RESOURCE_ID" NULL;
 		
+		select sp_index_status, count(*) from hfj_resource group by sp_index_status
+delete from hfj_history_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_coords where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_number where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_quantity where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_string where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_token where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_uri where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_search_result where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_link where src_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_link where target_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_subscription where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_subscription_flag_res where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+
+
+delete from trm_concept_pc_link where pid in (select pid from trm_concept where codesystem_pid in (select pid from trm_codesystem_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2)));
+delete from trm_concept where codesystem_pid in (select pid from trm_codesystem_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2));
+delete from trm_codesystem_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from trm_codesystem where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+
+update hfj_resource set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+update hfj_res_ver set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_forced_id where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_resource where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+		
+		
+		
+		 -->
+				
 	</body>
 
 </document>

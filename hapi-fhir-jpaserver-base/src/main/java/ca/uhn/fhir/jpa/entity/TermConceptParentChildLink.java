@@ -24,6 +24,8 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -46,7 +48,7 @@ public class TermConceptParentChildLink implements Serializable {
 	@JoinColumn(name="CODESYSTEM_PID", nullable=false, foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@ManyToOne()
+	@ManyToOne(cascade= {})
 	@JoinColumn(name="PARENT_PID", nullable=false, referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_TERM_CONCEPTPC_PARENT"))
 	private TermConcept myParent;
 
@@ -56,8 +58,16 @@ public class TermConceptParentChildLink implements Serializable {
 	@Column(name="PID")
 	private Long myPid;
 
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name="REL_TYPE", length=5, nullable=true)
+	private RelationshipTypeEnum myRelationshipType;
+
 	public TermConcept getChild() {
 		return myChild;
+	}
+
+	public RelationshipTypeEnum getRelationshipType() {
+		return myRelationshipType;
 	}
 
 	public TermCodeSystemVersion getCodeSystem() {
@@ -80,4 +90,61 @@ public class TermConceptParentChildLink implements Serializable {
 		myParent = theParent;
 	}
 	
+	
+	public void setRelationshipType(RelationshipTypeEnum theRelationshipType) {
+		myRelationshipType = theRelationshipType;
+	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myChild == null) ? 0 : myChild.hashCode());
+		result = prime * result + ((myCodeSystem == null) ? 0 : myCodeSystem.hashCode());
+		result = prime * result + ((myParent == null) ? 0 : myParent.hashCode());
+		result = prime * result + ((myRelationshipType == null) ? 0 : myRelationshipType.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TermConceptParentChildLink other = (TermConceptParentChildLink) obj;
+		if (myChild == null) {
+			if (other.myChild != null)
+				return false;
+		} else if (!myChild.equals(other.myChild))
+			return false;
+		if (myCodeSystem == null) {
+			if (other.myCodeSystem != null)
+				return false;
+		} else if (!myCodeSystem.equals(other.myCodeSystem))
+			return false;
+		if (myParent == null) {
+			if (other.myParent != null)
+				return false;
+		} else if (!myParent.equals(other.myParent))
+			return false;
+		if (myRelationshipType != other.myRelationshipType)
+			return false;
+		return true;
+	}
+
+
+	public enum RelationshipTypeEnum{
+		// ********************************************
+		// IF YOU ADD HERE MAKE SURE ORDER IS PRESERVED
+		ISA
+	}
+
+
+	public Long getId() {
+		return myPid;
+	}
 }

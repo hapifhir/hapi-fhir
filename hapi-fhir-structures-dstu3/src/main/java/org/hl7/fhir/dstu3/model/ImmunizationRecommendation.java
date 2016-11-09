@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -37,10 +37,11 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.
  */
@@ -61,6 +62,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         @Child(name = "vaccineCode", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Vaccine recommendation applies to", formalDefinition="Vaccine that pertains to the recommendation." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/vaccine-code")
         protected CodeableConcept vaccineCode;
 
         /**
@@ -75,6 +77,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         @Child(name = "forecastStatus", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Vaccine administration status", formalDefinition="Vaccine administration status." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-recommendation-status")
         protected CodeableConcept forecastStatus;
 
         /**
@@ -282,16 +285,6 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #dateCriterion}, creating it if it does not already exist
-         */
-        public ImmunizationRecommendationRecommendationDateCriterionComponent getDateCriterionFirstRep() { 
-          if (getDateCriterion().isEmpty()) {
-            addDateCriterion();
-          }
-          return getDateCriterion().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ImmunizationRecommendationRecommendationComponent setDateCriterion(List<ImmunizationRecommendationRecommendationDateCriterionComponent> theDateCriterion) { 
@@ -308,10 +301,6 @@ public class ImmunizationRecommendation extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #dateCriterion} (Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.)
-         */
-    // syntactic sugar
         public ImmunizationRecommendationRecommendationDateCriterionComponent addDateCriterion() { //3
           ImmunizationRecommendationRecommendationDateCriterionComponent t = new ImmunizationRecommendationRecommendationDateCriterionComponent();
           if (this.dateCriterion == null)
@@ -320,7 +309,6 @@ public class ImmunizationRecommendation extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ImmunizationRecommendationRecommendationComponent addDateCriterion(ImmunizationRecommendationRecommendationDateCriterionComponent t) { //3
           if (t == null)
             return this;
@@ -328,6 +316,16 @@ public class ImmunizationRecommendation extends DomainResource {
             this.dateCriterion = new ArrayList<ImmunizationRecommendationRecommendationDateCriterionComponent>();
           this.dateCriterion.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #dateCriterion}, creating it if it does not already exist
+         */
+        public ImmunizationRecommendationRecommendationDateCriterionComponent getDateCriterionFirstRep() { 
+          if (getDateCriterion().isEmpty()) {
+            addDateCriterion();
+          }
+          return getDateCriterion().get(0);
         }
 
         /**
@@ -364,16 +362,6 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #supportingImmunization}, creating it if it does not already exist
-         */
-        public Reference getSupportingImmunizationFirstRep() { 
-          if (getSupportingImmunization().isEmpty()) {
-            addSupportingImmunization();
-          }
-          return getSupportingImmunization().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public ImmunizationRecommendationRecommendationComponent setSupportingImmunization(List<Reference> theSupportingImmunization) { 
@@ -390,10 +378,6 @@ public class ImmunizationRecommendation extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #supportingImmunization} (Immunization event history that supports the status and recommendation.)
-         */
-    // syntactic sugar
         public Reference addSupportingImmunization() { //3
           Reference t = new Reference();
           if (this.supportingImmunization == null)
@@ -402,7 +386,6 @@ public class ImmunizationRecommendation extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ImmunizationRecommendationRecommendationComponent addSupportingImmunization(Reference t) { //3
           if (t == null)
             return this;
@@ -413,18 +396,29 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #supportingImmunization} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Immunization event history that supports the status and recommendation.)
+         * @return The first repetition of repeating field {@link #supportingImmunization}, creating it if it does not already exist
          */
+        public Reference getSupportingImmunizationFirstRep() { 
+          if (getSupportingImmunization().isEmpty()) {
+            addSupportingImmunization();
+          }
+          return getSupportingImmunization().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Immunization> getSupportingImmunizationTarget() { 
           if (this.supportingImmunizationTarget == null)
             this.supportingImmunizationTarget = new ArrayList<Immunization>();
           return this.supportingImmunizationTarget;
         }
 
-    // syntactic sugar
         /**
-         * @return {@link #supportingImmunization} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Immunization event history that supports the status and recommendation.)
+         * @deprecated Use Reference#setResource(IBaseResource) instead
          */
+        @Deprecated
         public Immunization addSupportingImmunizationTarget() { 
           Immunization r = new Immunization();
           if (this.supportingImmunizationTarget == null)
@@ -440,16 +434,6 @@ public class ImmunizationRecommendation extends DomainResource {
           if (this.supportingPatientInformation == null)
             this.supportingPatientInformation = new ArrayList<Reference>();
           return this.supportingPatientInformation;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #supportingPatientInformation}, creating it if it does not already exist
-         */
-        public Reference getSupportingPatientInformationFirstRep() { 
-          if (getSupportingPatientInformation().isEmpty()) {
-            addSupportingPatientInformation();
-          }
-          return getSupportingPatientInformation().get(0);
         }
 
         /**
@@ -469,10 +453,6 @@ public class ImmunizationRecommendation extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #supportingPatientInformation} (Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.)
-         */
-    // syntactic sugar
         public Reference addSupportingPatientInformation() { //3
           Reference t = new Reference();
           if (this.supportingPatientInformation == null)
@@ -481,7 +461,6 @@ public class ImmunizationRecommendation extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public ImmunizationRecommendationRecommendationComponent addSupportingPatientInformation(Reference t) { //3
           if (t == null)
             return this;
@@ -492,8 +471,19 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #supportingPatientInformation} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.)
+         * @return The first repetition of repeating field {@link #supportingPatientInformation}, creating it if it does not already exist
          */
+        public Reference getSupportingPatientInformationFirstRep() { 
+          if (getSupportingPatientInformation().isEmpty()) {
+            addSupportingPatientInformation();
+          }
+          return getSupportingPatientInformation().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
         public List<Resource> getSupportingPatientInformationTarget() { 
           if (this.supportingPatientInformationTarget == null)
             this.supportingPatientInformationTarget = new ArrayList<Resource>();
@@ -681,8 +671,9 @@ public class ImmunizationRecommendation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(date, vaccineCode, doseNumber, forecastStatus
-          , dateCriterion, protocol, supportingImmunization, supportingPatientInformation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(date, vaccineCode, doseNumber
+          , forecastStatus, dateCriterion, protocol, supportingImmunization, supportingPatientInformation
+          );
       }
 
   public String fhirType() {
@@ -699,6 +690,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Type of date", formalDefinition="Date classification of recommendation.  For example, earliest date to give, latest date to give, etc." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-recommendation-date-criterion")
         protected CodeableConcept code;
 
         /**
@@ -902,9 +894,9 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.
          */
-        @Child(name = "doseSequence", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Dose number within sequence", formalDefinition="Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol." )
-        protected IntegerType doseSequence;
+        protected PositiveIntType doseSequence;
 
         /**
          * Contains the description about the protocol under which the vaccine was administered.
@@ -932,7 +924,7 @@ public class ImmunizationRecommendation extends DomainResource {
         @Description(shortDefinition="Name of vaccination series", formalDefinition="One possible path to achieve presumed immunity against a disease - within the context of an authority." )
         protected StringType series;
 
-        private static final long serialVersionUID = -512702014L;
+        private static final long serialVersionUID = 215094970L;
 
     /**
      * Constructor
@@ -944,12 +936,12 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * @return {@link #doseSequence} (Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.). This is the underlying object with id, value and extensions. The accessor "getDoseSequence" gives direct access to the value
          */
-        public IntegerType getDoseSequenceElement() { 
+        public PositiveIntType getDoseSequenceElement() { 
           if (this.doseSequence == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationProtocolComponent.doseSequence");
             else if (Configuration.doAutoCreate())
-              this.doseSequence = new IntegerType(); // bb
+              this.doseSequence = new PositiveIntType(); // bb
           return this.doseSequence;
         }
 
@@ -964,7 +956,7 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * @param value {@link #doseSequence} (Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.). This is the underlying object with id, value and extensions. The accessor "getDoseSequence" gives direct access to the value
          */
-        public ImmunizationRecommendationRecommendationProtocolComponent setDoseSequenceElement(IntegerType value) { 
+        public ImmunizationRecommendationRecommendationProtocolComponent setDoseSequenceElement(PositiveIntType value) { 
           this.doseSequence = value;
           return this;
         }
@@ -981,7 +973,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         public ImmunizationRecommendationRecommendationProtocolComponent setDoseSequence(int value) { 
             if (this.doseSequence == null)
-              this.doseSequence = new IntegerType();
+              this.doseSequence = new PositiveIntType();
             this.doseSequence.setValue(value);
           return this;
         }
@@ -1130,7 +1122,7 @@ public class ImmunizationRecommendation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("doseSequence", "integer", "Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.", 0, java.lang.Integer.MAX_VALUE, doseSequence));
+          childrenList.add(new Property("doseSequence", "positiveInt", "Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.", 0, java.lang.Integer.MAX_VALUE, doseSequence));
           childrenList.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  For example, ACIP.", 0, java.lang.Integer.MAX_VALUE, authority));
           childrenList.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, java.lang.Integer.MAX_VALUE, series));
@@ -1139,7 +1131,7 @@ public class ImmunizationRecommendation extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 550933246: /*doseSequence*/ return this.doseSequence == null ? new Base[0] : new Base[] {this.doseSequence}; // IntegerType
+        case 550933246: /*doseSequence*/ return this.doseSequence == null ? new Base[0] : new Base[] {this.doseSequence}; // PositiveIntType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 1475610435: /*authority*/ return this.authority == null ? new Base[0] : new Base[] {this.authority}; // Reference
         case -905838985: /*series*/ return this.series == null ? new Base[0] : new Base[] {this.series}; // StringType
@@ -1152,7 +1144,7 @@ public class ImmunizationRecommendation extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 550933246: // doseSequence
-          this.doseSequence = castToInteger(value); // IntegerType
+          this.doseSequence = castToPositiveInt(value); // PositiveIntType
           break;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -1171,7 +1163,7 @@ public class ImmunizationRecommendation extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("doseSequence"))
-          this.doseSequence = castToInteger(value); // IntegerType
+          this.doseSequence = castToPositiveInt(value); // PositiveIntType
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
         else if (name.equals("authority"))
@@ -1185,7 +1177,7 @@ public class ImmunizationRecommendation extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 550933246: throw new FHIRException("Cannot make property doseSequence as it is not a complex type"); // IntegerType
+        case 550933246: throw new FHIRException("Cannot make property doseSequence as it is not a complex type"); // PositiveIntType
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
         case 1475610435:  return getAuthority(); // Reference
         case -905838985: throw new FHIRException("Cannot make property series as it is not a complex type"); // StringType
@@ -1246,8 +1238,8 @@ public class ImmunizationRecommendation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(doseSequence, description, authority
-          , series);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(doseSequence, description
+          , authority, series);
       }
 
   public String fhirType() {
@@ -1310,16 +1302,6 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
-     */
-    public Identifier getIdentifierFirstRep() { 
-      if (getIdentifier().isEmpty()) {
-        addIdentifier();
-      }
-      return getIdentifier().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ImmunizationRecommendation setIdentifier(List<Identifier> theIdentifier) { 
@@ -1336,10 +1318,6 @@ public class ImmunizationRecommendation extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #identifier} (A unique identifier assigned to this particular recommendation record.)
-     */
-    // syntactic sugar
     public Identifier addIdentifier() { //3
       Identifier t = new Identifier();
       if (this.identifier == null)
@@ -1348,7 +1326,6 @@ public class ImmunizationRecommendation extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ImmunizationRecommendation addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
@@ -1356,6 +1333,16 @@ public class ImmunizationRecommendation extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1412,16 +1399,6 @@ public class ImmunizationRecommendation extends DomainResource {
     }
 
     /**
-     * @return The first repetition of repeating field {@link #recommendation}, creating it if it does not already exist
-     */
-    public ImmunizationRecommendationRecommendationComponent getRecommendationFirstRep() { 
-      if (getRecommendation().isEmpty()) {
-        addRecommendation();
-      }
-      return getRecommendation().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public ImmunizationRecommendation setRecommendation(List<ImmunizationRecommendationRecommendationComponent> theRecommendation) { 
@@ -1438,10 +1415,6 @@ public class ImmunizationRecommendation extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #recommendation} (Vaccine administration recommendations.)
-     */
-    // syntactic sugar
     public ImmunizationRecommendationRecommendationComponent addRecommendation() { //3
       ImmunizationRecommendationRecommendationComponent t = new ImmunizationRecommendationRecommendationComponent();
       if (this.recommendation == null)
@@ -1450,7 +1423,6 @@ public class ImmunizationRecommendation extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public ImmunizationRecommendation addRecommendation(ImmunizationRecommendationRecommendationComponent t) { //3
       if (t == null)
         return this;
@@ -1458,6 +1430,16 @@ public class ImmunizationRecommendation extends DomainResource {
         this.recommendation = new ArrayList<ImmunizationRecommendationRecommendationComponent>();
       this.recommendation.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #recommendation}, creating it if it does not already exist
+     */
+    public ImmunizationRecommendationRecommendationComponent getRecommendationFirstRep() { 
+      if (getRecommendation().isEmpty()) {
+        addRecommendation();
+      }
+      return getRecommendation().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1599,7 +1581,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="Date recommendation created", type="date", target={} )
+  @SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="Date recommendation created", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -1619,7 +1601,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="Business identifier", type="token", target={} )
+  @SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
@@ -1639,7 +1621,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Dose number within sequence", type="number", target={} )
+  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Dose number within sequence", type="number" )
   public static final String SP_DOSE_SEQUENCE = "dose-sequence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
@@ -1659,7 +1641,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1685,7 +1667,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.vaccineCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineCode", description="Vaccine recommendation applies to", type="token", target={} )
+  @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineCode", description="Vaccine recommendation applies to", type="token" )
   public static final String SP_VACCINE_TYPE = "vaccine-type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>vaccine-type</b>
@@ -1705,7 +1687,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number", type="number", target={} )
+  @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number", type="number" )
   public static final String SP_DOSE_NUMBER = "dose-number";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-number</b>
@@ -1725,7 +1707,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="Patient observations supporting recommendation", type="reference", target={AllergyIntolerance.class, Observation.class} )
+  @SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="Patient observations supporting recommendation", type="reference", target={AllergyIntolerance.class, Observation.class } )
   public static final String SP_INFORMATION = "information";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>information</b>
@@ -1751,7 +1733,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="Past immunizations supporting recommendation", type="reference", target={Immunization.class} )
+  @SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="Past immunizations supporting recommendation", type="reference", target={Immunization.class } )
   public static final String SP_SUPPORT = "support";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>support</b>
@@ -1777,7 +1759,7 @@ public class ImmunizationRecommendation extends DomainResource {
    * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="Vaccine administration status", type="token", target={} )
+  @SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="Vaccine administration status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

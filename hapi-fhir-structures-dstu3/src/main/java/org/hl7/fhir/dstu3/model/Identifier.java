@@ -29,18 +29,19 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A technical identifier - identifies some entity uniquely and unambiguously.
  */
@@ -65,7 +66,7 @@ public class Identifier extends Type implements ICompositeType {
          */
         SECONDARY, 
         /**
-         * added to help the parsers
+         * added to help the parsers with the generic types
          */
         NULL;
         public static IdentifierUse fromCode(String codeString) throws FHIRException {
@@ -79,7 +80,10 @@ public class Identifier extends Type implements ICompositeType {
           return TEMP;
         if ("secondary".equals(codeString))
           return SECONDARY;
-        throw new FHIRException("Unknown IdentifierUse code '"+codeString+"'");
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown IdentifierUse code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -171,6 +175,7 @@ public class Identifier extends Type implements ICompositeType {
      */
     @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="usual | official | temp | secondary (If known)", formalDefinition="The purpose of this identifier." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/identifier-use")
     protected Enumeration<IdentifierUse> use;
 
     /**
@@ -178,6 +183,7 @@ public class Identifier extends Type implements ICompositeType {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Description of identifier", formalDefinition="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/identifier-type")
     protected CodeableConcept type;
 
     /**
@@ -615,8 +621,8 @@ public class Identifier extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, type, system, value, period
-          , assigner);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(use, type, system, value
+          , period, assigner);
       }
 
 

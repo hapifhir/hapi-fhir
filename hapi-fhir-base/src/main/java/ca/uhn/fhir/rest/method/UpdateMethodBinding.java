@@ -11,7 +11,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,9 +26,11 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -61,18 +63,13 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			id.setValue(locationHeader);
 			if (isNotBlank(id.getResourceType())) {
 				if (!getResourceName().equals(id.getResourceType())) {
-					throw new InvalidRequestException("Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
+					throw new InvalidRequestException(
+							"Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
 				}
 			}
 		}
 
-		String ifMatchValue = theRequest.getHeader(Constants.HEADER_IF_MATCH);
-		if (isNotBlank(ifMatchValue)) {
-			ifMatchValue = MethodUtil.parseETagValue(ifMatchValue);
-			if (id != null && id.hasVersionIdPart() == false) {
-				id = id.withVersion(ifMatchValue);
-			}
-		}
+		id = applyETagAsVersion(theRequest, id);
 
 		if (theRequest.getId() != null && theRequest.getId().hasVersionIdPart() == false) {
 			if (id != null && id.hasVersionIdPart()) {
@@ -82,7 +79,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
-			parseContentLocation(getContext(), mo, getResourceName(), locationHeader);
+			parseContentLocation(getContext(), mo, locationHeader);
 			if (mo.getId() == null || mo.getId().isEmpty()) {
 				throw new InvalidRequestException("Invalid Content-Location header for resource " + getResourceName() + ": " + locationHeader);
 			}
@@ -91,10 +88,15 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		super.addParametersForServerRequest(theRequest, theParams);
 	}
 
-	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		// TODO Auto-generated method stub
-		return super.incomingServerRequestMatchesMethod(theRequest);
+	public static IIdType applyETagAsVersion(RequestDetails theRequest, IIdType id) {
+		String ifMatchValue = theRequest.getHeader(Constants.HEADER_IF_MATCH);
+		if (isNotBlank(ifMatchValue)) {
+			ifMatchValue = MethodUtil.parseETagValue(ifMatchValue);
+			if (id != null && id.hasVersionIdPart() == false) {
+				id = id.withVersion(ifMatchValue);
+			}
+		}
+		return id;
 	}
 
 	@Override
@@ -139,21 +141,26 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(String theResourceId, String theUrlId, String theMatchUrl) {
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isBlank(theMatchUrl)) {
-			if (isBlank(theResourceId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
-				throw new InvalidRequestException(msg);
-			}
 			if (isBlank(theUrlId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
 				throw new InvalidRequestException(msg);
 			}
-			if (!theResourceId.equals(theUrlId)) {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
-				throw new InvalidRequestException(msg);
+			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				if (isBlank(theResourceId)) {
+					ourLog.warn("No resource ID found in resource body for update");
+					theResource.setId(theUrlId);
+				} else {
+					if (!theResourceId.equals(theUrlId)) {
+						String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
+						throw new InvalidRequestException(msg);
+					}
+				}
 			}
+		} else {
+			theResource.setId((IIdType)null);
 		}
+		
 	}
-
 }

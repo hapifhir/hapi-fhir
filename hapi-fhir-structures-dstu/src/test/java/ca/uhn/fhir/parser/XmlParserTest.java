@@ -1,7 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,7 +45,6 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
@@ -44,6 +52,7 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.dstu.resource.CarePlan;
 import ca.uhn.fhir.model.dstu.resource.Composition;
 import ca.uhn.fhir.model.dstu.resource.Condition;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -67,6 +76,7 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdrefDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -94,7 +104,29 @@ public class XmlParserTest {
 		// comp.
 
 	}
+	
+	@Test
+	public void testUnknownElementInDstu1() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/old_07_feed.xml"));
+		Bundle b = ourCtx.newXmlParser().parseBundle(input);
+		assertEquals(1, b.getEntries().size());
+	}
 
+	@Test
+	public void testEncodeAndParseIdref() {
+		CarePlan cp = new CarePlan();
+		cp.addGoal().setNotes("Goal Notes").setElementSpecificId("goalId0");
+		
+		IdrefDt idref = new IdrefDt();
+		idref.setValue("#goalId0");
+		idref.setTarget(cp);
+		idref.getTarget();
+		cp.addActivity().getGoal().add(idref);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(cp);
+		ourLog.info(encoded);
+	}
+	
 	/**
 	 * Test for #82 - Not yet enabled because the test won't pass
 	 */
@@ -151,7 +183,7 @@ public class XmlParserTest {
 		MyPatientWithUnorderedExtensions pat = new MyPatientWithUnorderedExtensions();
 		pat.getExtAtt1().setValue(true);
 		pat.getExtAtt2().setValue("val2");
-		pat.getExtAtt3().setValueAsString("20110102");
+		pat.getExtAtt3().setValueAsString("2011-01-02");
 
 		String string = ourCtx.newXmlParser().encodeResourceToString(pat);
 		ourLog.info(string);
@@ -160,7 +192,7 @@ public class XmlParserTest {
 		assertThat(string, stringContainsInOrder(Arrays.asList(
 			"<extension url=\"urn:ex1\"><valueBoolean value=\"true\"/></extension>",
 			"<extension url=\"urn:ex2\"><valueString value=\"val2\"/></extension>",
-			"<extension url=\"urn:ex3\"><valueDate value=\"20110102\"/></extension>"
+			"<extension url=\"urn:ex3\"><valueDate value=\"2011-01-02\"/></extension>"
 			)));
 		//@formatter:on
 
@@ -393,6 +425,25 @@ public class XmlParserTest {
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
 		assertThat(bundleString, not(containsString("at:by")));
+
+	}
+
+	@Test
+	public void testEncodeBundleEntryAuthor() {
+
+		Bundle b = new Bundle();
+		BundleEntry e = b.addEntry();
+		e.getAuthorName().setValue("The Author");
+		e.setResource(new Patient());
+
+		String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(val);
+
+		assertThat(val, StringContains.containsString("<name>The Author</name>"));
+
+		b = ourCtx.newXmlParser().parseBundle(val);
+		assertEquals(1, b.getEntries().size());
+		assertEquals("The Author", b.getEntries().get(0).getAuthorName().getValue());
 
 	}
 

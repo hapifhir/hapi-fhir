@@ -29,16 +29,17 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sun, May 1, 2016 19:50-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Base definition for all elements that are defined inside a resource - but not those in a data type.
  */
@@ -71,16 +72,6 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
     }
 
     /**
-     * @return The first repetition of repeating field {@link #modifierExtension}, creating it if it does not already exist
-     */
-    public Extension getModifierExtensionFirstRep() { 
-      if (getModifierExtension().isEmpty()) {
-        addModifierExtension();
-      }
-      return getModifierExtension().get(0);
-    }
-
-    /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public BackboneElement setModifierExtension(List<Extension> theModifierExtension) { 
@@ -97,10 +88,6 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
       return false;
     }
 
-    /**
-     * @return {@link #modifierExtension} (May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.)
-     */
-    // syntactic sugar
     public Extension addModifierExtension() { //3
       Extension t = new Extension();
       if (this.modifierExtension == null)
@@ -109,7 +96,6 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
       return t;
     }
 
-    // syntactic sugar
     public BackboneElement addModifierExtension(Extension t) { //3
       if (t == null)
         return this;
@@ -117,6 +103,16 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
         this.modifierExtension = new ArrayList<Extension>();
       this.modifierExtension.add(t);
       return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #modifierExtension}, creating it if it does not already exist
+     */
+    public Extension getModifierExtensionFirstRep() { 
+      if (getModifierExtension().isEmpty()) {
+        addModifierExtension();
+      }
+      return getModifierExtension().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -177,6 +173,7 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
       public abstract BackboneElement copy();
 
       public void copyValues(BackboneElement dst) {
+        super.copyValues(dst);
         if (modifierExtension != null) {
           dst.modifierExtension = new ArrayList<Extension>();
           for (Extension i : modifierExtension)

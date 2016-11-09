@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 
 /*
  * #%L
@@ -68,6 +69,27 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
 			ourLog.warn("Multiple repetitions of non-repeatable element '{}' found while parsing", theElementName);
+		}
+	}
+
+	@Override
+	public void containedResourceWithNoId(IParseLocation theLocation) {
+		if (myLogErrors) {
+			ourLog.warn("Resource has contained child resource with no ID");
+		}
+	}
+
+	@Override
+	public void unknownReference(IParseLocation theLocation, String theReference) {
+		if (myLogErrors) {
+			ourLog.warn("Resource has invalid reference: {}", theReference);
+		}
+	}
+
+	@Override
+	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
+		if (myLogErrors) {
+			ourLog.warn("Resource is missing required element: {}", theElementName);
 		}
 	}
 

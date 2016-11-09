@@ -47,12 +47,9 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class CreateTest {
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateTest.class);
@@ -85,7 +82,7 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toUpperCase(), StringContains.containsString("UTF-8"));
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("<Patient ", "<identifier>","<value value=\"001"));
 		assertEquals(EncodingEnum.XML, ourLastEncoding);
@@ -176,7 +173,7 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Organization/001", status.getFirstHeader("location").getValue());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsStringIgnoringCase("utf-8"));
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"","\"value\":\"001"));
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);
@@ -225,7 +222,7 @@ public class CreateTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Unexpected char"));
+		assertThat(responseContent, containsString("Content does not appear to be FHIR JSON, first non-whitespace character was: '<' (must be '{')"));
 	}
 
 	@Test

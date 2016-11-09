@@ -25,6 +25,14 @@ import java.io.IOException;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
+/**
+ * This interface represents an interceptor which can be used to access (and optionally change or take actions upon)
+ * requests that are being sent by the HTTP client, and responses received by it.
+ * <p>
+ * See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client_interceptor.html">HAPI Documentation Client Interceptor</a>
+ * page for more information on how to use this feature.
+ * </p> 
+ */
 public interface IClientInterceptor {
 
 	/**

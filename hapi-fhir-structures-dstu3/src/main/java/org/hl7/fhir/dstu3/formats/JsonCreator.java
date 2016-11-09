@@ -35,4 +35,6 @@ public interface JsonCreator {
 
   void finish() throws IOException;
 
+  // only used by an creator that actually produces xhtml
+  void link(String href);
 }

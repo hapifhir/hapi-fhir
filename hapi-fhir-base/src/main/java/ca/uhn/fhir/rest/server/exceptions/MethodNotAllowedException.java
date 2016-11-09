@@ -1,8 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -20,7 +18,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,11 +46,11 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 * Constructor
 	 * 
 	 * @param theMessage
-	 *            The message
+	 *           The message
 	 * @param theOperationOutcome
-	 *            The OperationOutcome resource to return to the client
+	 *           The OperationOutcome resource to return to the client
 	 * @param theAllowedMethods
-	 *            A list of allowed methods (see {@link #setAllowedMethods(RequestTypeEnum...)} )
+	 *           A list of allowed methods (see {@link #setAllowedMethods(RequestTypeEnum...)} )
 	 */
 	public MethodNotAllowedException(String theMessage, IBaseOperationOutcome theOperationOutcome, RequestTypeEnum... theAllowedMethods) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
@@ -63,9 +61,9 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 * Constructor
 	 * 
 	 * @param theMessage
-	 *            The message
+	 *           The message
 	 * @param theAllowedMethods
-	 *            A list of allowed methods (see {@link #setAllowedMethods(RequestTypeEnum...)} )
+	 *           A list of allowed methods (see {@link #setAllowedMethods(RequestTypeEnum...)} )
 	 */
 	public MethodNotAllowedException(String theMessage, RequestTypeEnum... theAllowedMethods) {
 		super(STATUS_CODE, theMessage);
@@ -76,9 +74,9 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 * Constructor
 	 * 
 	 * @param theMessage
-	 *            The message
+	 *           The message
 	 * @param theOperationOutcome
-	 *            The OperationOutcome resource to return to the client
+	 *           The OperationOutcome resource to return to the client
 	 */
 	public MethodNotAllowedException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
@@ -88,7 +86,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 * Constructor
 	 * 
 	 * @param theMessage
-	 *            The message
+	 *           The message
 	 */
 	public MethodNotAllowedException(String theMessage) {
 		super(STATUS_CODE, theMessage);
@@ -99,22 +97,6 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 */
 	public Set<RequestTypeEnum> getAllowedMethods() {
 		return myAllowedMethods;
-	}
-
-	@Override
-	public Map<String, String[]> getAssociatedHeaders() {
-		if (myAllowedMethods != null && myAllowedMethods.size() > 0) {
-			StringBuilder b = new StringBuilder();
-			for (RequestTypeEnum next : myAllowedMethods) {
-				if (b.length() > 0) {
-					b.append(',');
-				}
-				b.append(next.name());
-			}
-			return Collections.singletonMap(Constants.HEADER_ALLOW, new String[] { b.toString() });
-		} else {
-			return super.getAssociatedHeaders();
-		}
 	}
 
 	/**
@@ -129,6 +111,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 				myAllowedMethods.add(next);
 			}
 		}
+		updateAllowHeader();
 	}
 
 	/**
@@ -136,6 +119,20 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 */
 	public void setAllowedMethods(Set<RequestTypeEnum> theAllowedMethods) {
 		myAllowedMethods = theAllowedMethods;
+		updateAllowHeader();
+	}
+
+	private void updateAllowHeader() {
+		getResponseHeaders().remove(Constants.HEADER_ALLOW);
+
+		StringBuilder b = new StringBuilder();
+		for (RequestTypeEnum next : myAllowedMethods) {
+			if (b.length() > 0) {
+				b.append(',');
+			}
+			b.append(next.name());
+		}
+		addResponseHeader(Constants.HEADER_ALLOW, b.toString());
 	}
 
 }

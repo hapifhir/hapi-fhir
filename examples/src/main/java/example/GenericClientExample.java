@@ -3,9 +3,11 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -25,13 +27,39 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 
 public class GenericClientExample {
+   public static void deferModelScanning() {
+      // START SNIPPET: deferModelScanning
+      // Create a context and configure it for deferred child scanning
+      FhirContext ctx = FhirContext.forDstu2();
+      ctx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+      
+      // Now create a client and use it
+      String serverBase = "http://fhirtest.uhn.ca/baseDstu2";
+      IGenericClient client = ctx.newRestfulGenericClient(serverBase);
+      // END SNIPPET: deferModelScanning
+   }
+   
+   public static void performance() {
+      // START SNIPPET: dontValidate
+      // Create a context
+      FhirContext ctx = FhirContext.forDstu2();
 
+      // Disable server validation (don't pull the server's metadata first)
+      ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+      
+      // Now create a client and use it
+      String serverBase = "http://fhirtest.uhn.ca/baseDstu2";
+      IGenericClient client = ctx.newRestfulGenericClient(serverBase);
+      // END SNIPPET: dontValidate
+   }
+   
    public static void simpleExample() {
       // START SNIPPET: simple
       // We're connecting to a DSTU1 compliant server in this example
@@ -207,7 +235,7 @@ public class GenericClientExample {
       }
       {
          // START SNIPPET: delete
-          BaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
+          IBaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
 
          // outcome may be null if the server didn't return one
           if (resp != null) {

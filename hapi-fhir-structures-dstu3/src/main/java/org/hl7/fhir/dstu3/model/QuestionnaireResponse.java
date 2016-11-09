@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, May 2, 2016 22:48-0400 for FHIR v1.4.0
+// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
 
 import java.util.*;
 
@@ -37,10 +37,11 @@ import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
@@ -61,7 +62,11 @@ public class QuestionnaireResponse extends DomainResource {
          */
         AMENDED, 
         /**
-         * added to help the parsers
+         * This QuestionnaireResponse was entered in error and voided.
+         */
+        ENTEREDINERROR, 
+        /**
+         * added to help the parsers with the generic types
          */
         NULL;
         public static QuestionnaireResponseStatus fromCode(String codeString) throws FHIRException {
@@ -73,13 +78,19 @@ public class QuestionnaireResponse extends DomainResource {
           return COMPLETED;
         if ("amended".equals(codeString))
           return AMENDED;
-        throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case INPROGRESS: return "in-progress";
             case COMPLETED: return "completed";
             case AMENDED: return "amended";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -88,6 +99,7 @@ public class QuestionnaireResponse extends DomainResource {
             case INPROGRESS: return "http://hl7.org/fhir/questionnaire-answers-status";
             case COMPLETED: return "http://hl7.org/fhir/questionnaire-answers-status";
             case AMENDED: return "http://hl7.org/fhir/questionnaire-answers-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/questionnaire-answers-status";
             default: return "?";
           }
         }
@@ -96,6 +108,7 @@ public class QuestionnaireResponse extends DomainResource {
             case INPROGRESS: return "This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.";
             case COMPLETED: return "This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.";
             case AMENDED: return "This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
+            case ENTEREDINERROR: return "This QuestionnaireResponse was entered in error and voided.";
             default: return "?";
           }
         }
@@ -104,6 +117,7 @@ public class QuestionnaireResponse extends DomainResource {
             case INPROGRESS: return "In Progress";
             case COMPLETED: return "Completed";
             case AMENDED: return "Amended";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
         }
@@ -120,6 +134,8 @@ public class QuestionnaireResponse extends DomainResource {
           return QuestionnaireResponseStatus.COMPLETED;
         if ("amended".equals(codeString))
           return QuestionnaireResponseStatus.AMENDED;
+        if ("entered-in-error".equals(codeString))
+          return QuestionnaireResponseStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
         public Enumeration<QuestionnaireResponseStatus> fromType(Base code) throws FHIRException {
@@ -134,6 +150,8 @@ public class QuestionnaireResponse extends DomainResource {
           return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.COMPLETED);
         if ("amended".equals(codeString))
           return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.AMENDED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<QuestionnaireResponseStatus>(this, QuestionnaireResponseStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
     public String toCode(QuestionnaireResponseStatus code) {
@@ -143,6 +161,8 @@ public class QuestionnaireResponse extends DomainResource {
         return "completed";
       if (code == QuestionnaireResponseStatus.AMENDED)
         return "amended";
+      if (code == QuestionnaireResponseStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(QuestionnaireResponseStatus code) {
@@ -169,7 +189,7 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.
          */
-        @Child(name = "subject", type = {}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "subject", type = {Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The subject this group's answers are about", formalDefinition="More specific subject this section's answers are about, details the subject given in QuestionnaireResponse." )
         protected Reference subject;
 
@@ -348,16 +368,6 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #answer}, creating it if it does not already exist
-         */
-        public QuestionnaireResponseItemAnswerComponent getAnswerFirstRep() { 
-          if (getAnswer().isEmpty()) {
-            addAnswer();
-          }
-          return getAnswer().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireResponseItemComponent setAnswer(List<QuestionnaireResponseItemAnswerComponent> theAnswer) { 
@@ -374,10 +384,6 @@ public class QuestionnaireResponse extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #answer} (The respondent's answer(s) to the question.)
-         */
-    // syntactic sugar
         public QuestionnaireResponseItemAnswerComponent addAnswer() { //3
           QuestionnaireResponseItemAnswerComponent t = new QuestionnaireResponseItemAnswerComponent();
           if (this.answer == null)
@@ -386,7 +392,6 @@ public class QuestionnaireResponse extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addAnswer(QuestionnaireResponseItemAnswerComponent t) { //3
           if (t == null)
             return this;
@@ -397,22 +402,22 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
+         * @return The first repetition of repeating field {@link #answer}, creating it if it does not already exist
+         */
+        public QuestionnaireResponseItemAnswerComponent getAnswerFirstRep() { 
+          if (getAnswer().isEmpty()) {
+            addAnswer();
+          }
+          return getAnswer().get(0);
+        }
+
+        /**
          * @return {@link #item} (Questions or sub-groups nested beneath a question or group.)
          */
         public List<QuestionnaireResponseItemComponent> getItem() { 
           if (this.item == null)
             this.item = new ArrayList<QuestionnaireResponseItemComponent>();
           return this.item;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-         */
-        public QuestionnaireResponseItemComponent getItemFirstRep() { 
-          if (getItem().isEmpty()) {
-            addItem();
-          }
-          return getItem().get(0);
         }
 
         /**
@@ -432,10 +437,6 @@ public class QuestionnaireResponse extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #item} (Questions or sub-groups nested beneath a question or group.)
-         */
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addItem() { //3
           QuestionnaireResponseItemComponent t = new QuestionnaireResponseItemComponent();
           if (this.item == null)
@@ -444,7 +445,6 @@ public class QuestionnaireResponse extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addItem(QuestionnaireResponseItemComponent t) { //3
           if (t == null)
             return this;
@@ -452,6 +452,16 @@ public class QuestionnaireResponse extends DomainResource {
             this.item = new ArrayList<QuestionnaireResponseItemComponent>();
           this.item.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+         */
+        public QuestionnaireResponseItemComponent getItemFirstRep() { 
+          if (getItem().isEmpty()) {
+            addItem();
+          }
+          return getItem().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -591,8 +601,8 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, text, subject, answer, item
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, text, subject, answer
+          , item);
       }
 
   public String fhirType() {
@@ -607,7 +617,7 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * The answer (or one of the answers) provided by the respondent to the question.
          */
-        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Single-valued answer to the question", formalDefinition="The answer (or one of the answers) provided by the respondent to the question." )
         protected Type value;
 
@@ -825,16 +835,6 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-         */
-        public QuestionnaireResponseItemComponent getItemFirstRep() { 
-          if (getItem().isEmpty()) {
-            addItem();
-          }
-          return getItem().get(0);
-        }
-
-        /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
         public QuestionnaireResponseItemAnswerComponent setItem(List<QuestionnaireResponseItemComponent> theItem) { 
@@ -851,10 +851,6 @@ public class QuestionnaireResponse extends DomainResource {
           return false;
         }
 
-        /**
-         * @return {@link #item} (Nested groups and/or questions found within this particular answer.)
-         */
-    // syntactic sugar
         public QuestionnaireResponseItemComponent addItem() { //3
           QuestionnaireResponseItemComponent t = new QuestionnaireResponseItemComponent();
           if (this.item == null)
@@ -863,7 +859,6 @@ public class QuestionnaireResponse extends DomainResource {
           return t;
         }
 
-    // syntactic sugar
         public QuestionnaireResponseItemAnswerComponent addItem(QuestionnaireResponseItemComponent t) { //3
           if (t == null)
             return this;
@@ -871,6 +866,16 @@ public class QuestionnaireResponse extends DomainResource {
             this.item = new ArrayList<QuestionnaireResponseItemComponent>();
           this.item.add(t);
           return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+         */
+        public QuestionnaireResponseItemComponent getItemFirstRep() { 
+          if (getItem().isEmpty()) {
+            addItem();
+          }
+          return getItem().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -893,7 +898,7 @@ public class QuestionnaireResponse extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         case 3242771: // item
           this.getItem().add((QuestionnaireResponseItemComponent) value); // QuestionnaireResponseItemComponent
@@ -906,7 +911,7 @@ public class QuestionnaireResponse extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else if (name.equals("item"))
           this.getItem().add((QuestionnaireResponseItemComponent) value);
         else
@@ -1035,9 +1040,33 @@ public class QuestionnaireResponse extends DomainResource {
     protected Identifier identifier;
 
     /**
+     * Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.
+     */
+    @Child(name = "basedOn", type = {DiagnosticRequest.class, ReferralRequest.class, CarePlan.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Request fulfilled by this Questionnaire", formalDefinition="Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire." )
+    protected List<Reference> basedOn;
+    /**
+     * The actual objects that are the target of the reference (Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.)
+     */
+    protected List<Resource> basedOnTarget;
+
+
+    /**
+     * Identifies a procedure or observation that this questionnaire was performed as part of the execution of.
+     */
+    @Child(name = "parent", type = {Observation.class, Procedure.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Part of this action", formalDefinition="Identifies a procedure or observation that this questionnaire was performed as part of the execution of." )
+    protected List<Reference> parent;
+    /**
+     * The actual objects that are the target of the reference (Identifies a procedure or observation that this questionnaire was performed as part of the execution of.)
+     */
+    protected List<Resource> parentTarget;
+
+
+    /**
      * Indicates the Questionnaire resource that defines the form for which answers are being provided.
      */
-    @Child(name = "questionnaire", type = {Questionnaire.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "questionnaire", type = {Questionnaire.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Form being answered", formalDefinition="Indicates the Questionnaire resource that defines the form for which answers are being provided." )
     protected Reference questionnaire;
 
@@ -1049,14 +1078,15 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * The lifecycle status of the questionnaire response as a whole.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire response as a whole." )
+    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="in-progress | completed | amended | entered-in-error", formalDefinition="The lifecycle status of the questionnaire response as a whole." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-answers-status")
     protected Enumeration<QuestionnaireResponseStatus> status;
 
     /**
      * The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.
      */
-    @Child(name = "subject", type = {}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Reference.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The subject of the questions", formalDefinition="The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information." )
     protected Reference subject;
 
@@ -1066,9 +1096,21 @@ public class QuestionnaireResponse extends DomainResource {
     protected Resource subjectTarget;
 
     /**
+     * The encounter or episode of care with primary association to the questionnaire.
+     */
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Encounter or Episode during which questionnaire was completed", formalDefinition="The encounter or episode of care with primary association to the questionnaire." )
+    protected Reference context;
+
+    /**
+     * The actual object that is the target of the reference (The encounter or episode of care with primary association to the questionnaire.)
+     */
+    protected Resource contextTarget;
+
+    /**
      * Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.
      */
-    @Child(name = "author", type = {Device.class, Practitioner.class, Patient.class, RelatedPerson.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Device.class, Practitioner.class, Patient.class, RelatedPerson.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Person who received and recorded the answers", formalDefinition="Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system." )
     protected Reference author;
 
@@ -1080,14 +1122,14 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * The date and/or time that this version of the questionnaire response was authored.
      */
-    @Child(name = "authored", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "authored", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date this version was authored", formalDefinition="The date and/or time that this version of the questionnaire response was authored." )
     protected DateTimeType authored;
 
     /**
      * The person who answered the questions about the subject.
      */
-    @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The person who answered the questions", formalDefinition="The person who answered the questions about the subject." )
     protected Reference source;
 
@@ -1097,25 +1139,13 @@ public class QuestionnaireResponse extends DomainResource {
     protected Resource sourceTarget;
 
     /**
-     * Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.
-     */
-    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Primary encounter during which the answers were collected", formalDefinition="Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers." )
-    protected Reference encounter;
-
-    /**
-     * The actual object that is the target of the reference (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
-     */
-    protected Encounter encounterTarget;
-
-    /**
      * Corresponds to a group or question item from the original questionnaire.
      */
-    @Child(name = "item", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "item", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Groups and questions", formalDefinition="Corresponds to a group or question item from the original questionnaire." )
     protected List<QuestionnaireResponseItemComponent> item;
 
-    private static final long serialVersionUID = 850624885L;
+    private static final long serialVersionUID = -380712978L;
 
   /**
    * Constructor
@@ -1154,6 +1184,132 @@ public class QuestionnaireResponse extends DomainResource {
     public QuestionnaireResponse setIdentifier(Identifier value) { 
       this.identifier = value;
       return this;
+    }
+
+    /**
+     * @return {@link #basedOn} (Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.)
+     */
+    public List<Reference> getBasedOn() { 
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      return this.basedOn;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public QuestionnaireResponse setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
+      return this;
+    }
+
+    public boolean hasBasedOn() { 
+      if (this.basedOn == null)
+        return false;
+      for (Reference item : this.basedOn)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addBasedOn() { //3
+      Reference t = new Reference();
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return t;
+    }
+
+    public QuestionnaireResponse addBasedOn(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
+     */
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
+      }
+      return getBasedOn().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getBasedOnTarget() { 
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<Resource>();
+      return this.basedOnTarget;
+    }
+
+    /**
+     * @return {@link #parent} (Identifies a procedure or observation that this questionnaire was performed as part of the execution of.)
+     */
+    public List<Reference> getParent() { 
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      return this.parent;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public QuestionnaireResponse setParent(List<Reference> theParent) { 
+      this.parent = theParent;
+      return this;
+    }
+
+    public boolean hasParent() { 
+      if (this.parent == null)
+        return false;
+      for (Reference item : this.parent)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addParent() { //3
+      Reference t = new Reference();
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      this.parent.add(t);
+      return t;
+    }
+
+    public QuestionnaireResponse addParent(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      this.parent.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #parent}, creating it if it does not already exist
+     */
+    public Reference getParentFirstRep() { 
+      if (getParent().isEmpty()) {
+        addParent();
+      }
+      return getParent().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getParentTarget() { 
+      if (this.parentTarget == null)
+        this.parentTarget = new ArrayList<Resource>();
+      return this.parentTarget;
     }
 
     /**
@@ -1285,6 +1441,45 @@ public class QuestionnaireResponse extends DomainResource {
     }
 
     /**
+     * @return {@link #context} (The encounter or episode of care with primary association to the questionnaire.)
+     */
+    public Reference getContext() { 
+      if (this.context == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create QuestionnaireResponse.context");
+        else if (Configuration.doAutoCreate())
+          this.context = new Reference(); // cc
+      return this.context;
+    }
+
+    public boolean hasContext() { 
+      return this.context != null && !this.context.isEmpty();
+    }
+
+    /**
+     * @param value {@link #context} (The encounter or episode of care with primary association to the questionnaire.)
+     */
+    public QuestionnaireResponse setContext(Reference value) { 
+      this.context = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter or episode of care with primary association to the questionnaire.)
+     */
+    public Resource getContextTarget() { 
+      return this.contextTarget;
+    }
+
+    /**
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter or episode of care with primary association to the questionnaire.)
+     */
+    public QuestionnaireResponse setContextTarget(Resource value) { 
+      this.contextTarget = value;
+      return this;
+    }
+
+    /**
      * @return {@link #author} (Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.)
      */
     public Reference getAuthor() { 
@@ -1412,66 +1607,12 @@ public class QuestionnaireResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #encounter} (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
-     */
-    public Reference getEncounter() { 
-      if (this.encounter == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireResponse.encounter");
-        else if (Configuration.doAutoCreate())
-          this.encounter = new Reference(); // cc
-      return this.encounter;
-    }
-
-    public boolean hasEncounter() { 
-      return this.encounter != null && !this.encounter.isEmpty();
-    }
-
-    /**
-     * @param value {@link #encounter} (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
-     */
-    public QuestionnaireResponse setEncounter(Reference value) { 
-      this.encounter = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
-     */
-    public Encounter getEncounterTarget() { 
-      if (this.encounterTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireResponse.encounter");
-        else if (Configuration.doAutoCreate())
-          this.encounterTarget = new Encounter(); // aa
-      return this.encounterTarget;
-    }
-
-    /**
-     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
-     */
-    public QuestionnaireResponse setEncounterTarget(Encounter value) { 
-      this.encounterTarget = value;
-      return this;
-    }
-
-    /**
      * @return {@link #item} (Corresponds to a group or question item from the original questionnaire.)
      */
     public List<QuestionnaireResponseItemComponent> getItem() { 
       if (this.item == null)
         this.item = new ArrayList<QuestionnaireResponseItemComponent>();
       return this.item;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
-     */
-    public QuestionnaireResponseItemComponent getItemFirstRep() { 
-      if (getItem().isEmpty()) {
-        addItem();
-      }
-      return getItem().get(0);
     }
 
     /**
@@ -1491,10 +1632,6 @@ public class QuestionnaireResponse extends DomainResource {
       return false;
     }
 
-    /**
-     * @return {@link #item} (Corresponds to a group or question item from the original questionnaire.)
-     */
-    // syntactic sugar
     public QuestionnaireResponseItemComponent addItem() { //3
       QuestionnaireResponseItemComponent t = new QuestionnaireResponseItemComponent();
       if (this.item == null)
@@ -1503,7 +1640,6 @@ public class QuestionnaireResponse extends DomainResource {
       return t;
     }
 
-    // syntactic sugar
     public QuestionnaireResponse addItem(QuestionnaireResponseItemComponent t) { //3
       if (t == null)
         return this;
@@ -1513,16 +1649,28 @@ public class QuestionnaireResponse extends DomainResource {
       return this;
     }
 
+    /**
+     * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+     */
+    public QuestionnaireResponseItemComponent getItemFirstRep() { 
+      if (getItem().isEmpty()) {
+        addItem();
+      }
+      return getItem().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("basedOn", "Reference(DiagnosticRequest|ReferralRequest|CarePlan)", "Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("parent", "Reference(Observation|Procedure)", "Identifies a procedure or observation that this questionnaire was performed as part of the execution of.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("questionnaire", "Reference(Questionnaire)", "Indicates the Questionnaire resource that defines the form for which answers are being provided.", 0, java.lang.Integer.MAX_VALUE, questionnaire));
         childrenList.add(new Property("status", "code", "The lifecycle status of the questionnaire response as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care with primary association to the questionnaire.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("authored", "dateTime", "The date and/or time that this version of the questionnaire response was authored.", 0, java.lang.Integer.MAX_VALUE, authored));
         childrenList.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("item", "", "Corresponds to a group or question item from the original questionnaire.", 0, java.lang.Integer.MAX_VALUE, item));
       }
 
@@ -1530,13 +1678,15 @@ public class QuestionnaireResponse extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
+        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : this.parent.toArray(new Base[this.parent.size()]); // Reference
         case -1017049693: /*questionnaire*/ return this.questionnaire == null ? new Base[0] : new Base[] {this.questionnaire}; // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<QuestionnaireResponseStatus>
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
         case 1433073514: /*authored*/ return this.authored == null ? new Base[0] : new Base[] {this.authored}; // DateTimeType
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
-        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // QuestionnaireResponseItemComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1549,6 +1699,12 @@ public class QuestionnaireResponse extends DomainResource {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
           break;
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
+          break;
+        case -995424086: // parent
+          this.getParent().add(castToReference(value)); // Reference
+          break;
         case -1017049693: // questionnaire
           this.questionnaire = castToReference(value); // Reference
           break;
@@ -1558,6 +1714,9 @@ public class QuestionnaireResponse extends DomainResource {
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           break;
+        case 951530927: // context
+          this.context = castToReference(value); // Reference
+          break;
         case -1406328437: // author
           this.author = castToReference(value); // Reference
           break;
@@ -1566,9 +1725,6 @@ public class QuestionnaireResponse extends DomainResource {
           break;
         case -896505829: // source
           this.source = castToReference(value); // Reference
-          break;
-        case 1524132147: // encounter
-          this.encounter = castToReference(value); // Reference
           break;
         case 3242771: // item
           this.getItem().add((QuestionnaireResponseItemComponent) value); // QuestionnaireResponseItemComponent
@@ -1582,20 +1738,24 @@ public class QuestionnaireResponse extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("basedOn"))
+          this.getBasedOn().add(castToReference(value));
+        else if (name.equals("parent"))
+          this.getParent().add(castToReference(value));
         else if (name.equals("questionnaire"))
           this.questionnaire = castToReference(value); // Reference
         else if (name.equals("status"))
           this.status = new QuestionnaireResponseStatusEnumFactory().fromType(value); // Enumeration<QuestionnaireResponseStatus>
         else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
+        else if (name.equals("context"))
+          this.context = castToReference(value); // Reference
         else if (name.equals("author"))
           this.author = castToReference(value); // Reference
         else if (name.equals("authored"))
           this.authored = castToDateTime(value); // DateTimeType
         else if (name.equals("source"))
           this.source = castToReference(value); // Reference
-        else if (name.equals("encounter"))
-          this.encounter = castToReference(value); // Reference
         else if (name.equals("item"))
           this.getItem().add((QuestionnaireResponseItemComponent) value);
         else
@@ -1606,13 +1766,15 @@ public class QuestionnaireResponse extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return getIdentifier(); // Identifier
+        case -332612366:  return addBasedOn(); // Reference
+        case -995424086:  return addParent(); // Reference
         case -1017049693:  return getQuestionnaire(); // Reference
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<QuestionnaireResponseStatus>
         case -1867885268:  return getSubject(); // Reference
+        case 951530927:  return getContext(); // Reference
         case -1406328437:  return getAuthor(); // Reference
         case 1433073514: throw new FHIRException("Cannot make property authored as it is not a complex type"); // DateTimeType
         case -896505829:  return getSource(); // Reference
-        case 1524132147:  return getEncounter(); // Reference
         case 3242771:  return addItem(); // QuestionnaireResponseItemComponent
         default: return super.makeProperty(hash, name);
         }
@@ -1625,6 +1787,12 @@ public class QuestionnaireResponse extends DomainResource {
           this.identifier = new Identifier();
           return this.identifier;
         }
+        else if (name.equals("basedOn")) {
+          return addBasedOn();
+        }
+        else if (name.equals("parent")) {
+          return addParent();
+        }
         else if (name.equals("questionnaire")) {
           this.questionnaire = new Reference();
           return this.questionnaire;
@@ -1636,6 +1804,10 @@ public class QuestionnaireResponse extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
+        else if (name.equals("context")) {
+          this.context = new Reference();
+          return this.context;
+        }
         else if (name.equals("author")) {
           this.author = new Reference();
           return this.author;
@@ -1646,10 +1818,6 @@ public class QuestionnaireResponse extends DomainResource {
         else if (name.equals("source")) {
           this.source = new Reference();
           return this.source;
-        }
-        else if (name.equals("encounter")) {
-          this.encounter = new Reference();
-          return this.encounter;
         }
         else if (name.equals("item")) {
           return addItem();
@@ -1667,13 +1835,23 @@ public class QuestionnaireResponse extends DomainResource {
         QuestionnaireResponse dst = new QuestionnaireResponse();
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
+        if (basedOn != null) {
+          dst.basedOn = new ArrayList<Reference>();
+          for (Reference i : basedOn)
+            dst.basedOn.add(i.copy());
+        };
+        if (parent != null) {
+          dst.parent = new ArrayList<Reference>();
+          for (Reference i : parent)
+            dst.parent.add(i.copy());
+        };
         dst.questionnaire = questionnaire == null ? null : questionnaire.copy();
         dst.status = status == null ? null : status.copy();
         dst.subject = subject == null ? null : subject.copy();
+        dst.context = context == null ? null : context.copy();
         dst.author = author == null ? null : author.copy();
         dst.authored = authored == null ? null : authored.copy();
         dst.source = source == null ? null : source.copy();
-        dst.encounter = encounter == null ? null : encounter.copy();
         if (item != null) {
           dst.item = new ArrayList<QuestionnaireResponseItemComponent>();
           for (QuestionnaireResponseItemComponent i : item)
@@ -1693,10 +1871,10 @@ public class QuestionnaireResponse extends DomainResource {
         if (!(other instanceof QuestionnaireResponse))
           return false;
         QuestionnaireResponse o = (QuestionnaireResponse) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(questionnaire, o.questionnaire, true)
-           && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true) && compareDeep(author, o.author, true)
-           && compareDeep(authored, o.authored, true) && compareDeep(source, o.source, true) && compareDeep(encounter, o.encounter, true)
-           && compareDeep(item, o.item, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(parent, o.parent, true)
+           && compareDeep(questionnaire, o.questionnaire, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(context, o.context, true) && compareDeep(author, o.author, true) && compareDeep(authored, o.authored, true)
+           && compareDeep(source, o.source, true) && compareDeep(item, o.item, true);
       }
 
       @Override
@@ -1710,8 +1888,8 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, questionnaire, status
-          , subject, author, authored, source, encounter, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent
+          , questionnaire, status, subject, context, author, authored, source, item);
       }
 
   @Override
@@ -1727,7 +1905,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date", target={} )
+  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authored</b>
@@ -1740,6 +1918,52 @@ public class QuestionnaireResponse extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam AUTHORED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_AUTHORED);
 
  /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>The unique identifier for the questionnaire response</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>QuestionnaireResponse.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="identifier", path="QuestionnaireResponse.identifier", description="The unique identifier for the questionnaire response", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>The unique identifier for the questionnaire response</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>QuestionnaireResponse.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>parent</b>
+   * <p>
+   * Description: <b>Procedure or observation this questionnaire response is part of</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.parent</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="parent", path="QuestionnaireResponse.parent", description="Procedure or observation this questionnaire response is part of", type="reference", target={Observation.class, Procedure.class } )
+  public static final String SP_PARENT = "parent";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>parent</b>
+   * <p>
+   * Description: <b>Procedure or observation this questionnaire response is part of</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.parent</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>QuestionnaireResponse:parent</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:parent").toLocked();
+
+ /**
    * Search parameter: <b>questionnaire</b>
    * <p>
    * Description: <b>The questionnaire the answers are provided for</b><br>
@@ -1747,7 +1971,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.questionnaire</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference", target={Questionnaire.class} )
+  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference", target={Questionnaire.class } )
   public static final String SP_QUESTIONNAIRE = "questionnaire";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>questionnaire</b>
@@ -1766,6 +1990,32 @@ public class QuestionnaireResponse extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_QUESTIONNAIRE = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:questionnaire").toLocked();
 
  /**
+   * Search parameter: <b>based-on</b>
+   * <p>
+   * Description: <b>Plan/proposal/order fulfilled by this questionnaire response</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.basedOn</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="based-on", path="QuestionnaireResponse.basedOn", description="Plan/proposal/order fulfilled by this questionnaire response", type="reference", target={CarePlan.class, DiagnosticRequest.class, ReferralRequest.class } )
+  public static final String SP_BASED_ON = "based-on";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>based-on</b>
+   * <p>
+   * Description: <b>Plan/proposal/order fulfilled by this questionnaire response</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.basedOn</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam BASED_ON = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_BASED_ON);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>QuestionnaireResponse:based-on</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_BASED_ON = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:based-on").toLocked();
+
+ /**
    * Search parameter: <b>subject</b>
    * <p>
    * Description: <b>The subject of the questionnaire</b><br>
@@ -1773,7 +2023,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference" )
+  @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -1799,7 +2049,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", target={Practitioner.class, Device.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -1825,7 +2075,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference", target={Patient.class} )
+  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1844,30 +2094,30 @@ public class QuestionnaireResponse extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:patient").toLocked();
 
  /**
-   * Search parameter: <b>encounter</b>
+   * Search parameter: <b>context</b>
    * <p>
-   * Description: <b>Encounter during which questionnaire was authored</b><br>
+   * Description: <b>Encounter or episode during which questionnaire was authored</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>QuestionnaireResponse.encounter</b><br>
+   * Path: <b>QuestionnaireResponse.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference", target={Encounter.class} )
-  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name="context", path="QuestionnaireResponse.context", description="Encounter or episode during which questionnaire was authored", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class, EpisodeOfCare.class } )
+  public static final String SP_CONTEXT = "context";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
    * <p>
-   * Description: <b>Encounter during which questionnaire was authored</b><br>
+   * Description: <b>Encounter or episode during which questionnaire was authored</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>QuestionnaireResponse.encounter</b><br>
+   * Path: <b>QuestionnaireResponse.context</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>QuestionnaireResponse:encounter</b>".
+   * the path value of "<b>QuestionnaireResponse:context</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:encounter").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:context").toLocked();
 
  /**
    * Search parameter: <b>source</b>
@@ -1877,7 +2127,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.source</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference", target={Practitioner.class, Patient.class, RelatedPerson.class} )
+  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -1903,7 +2153,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token", target={} )
+  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>

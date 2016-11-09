@@ -51,7 +51,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 
 	
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
+	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		getComparatorElement().setValue(null);
 		setCode( null);
 		setSystem(null);

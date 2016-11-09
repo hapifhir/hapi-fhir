@@ -50,23 +50,22 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		theHttpResponse.setStatus(stausCode);
 		theHttpResponse.setContentType(contentType);
 		if (bin.getContent() == null || bin.getContent().length == 0) {
-			return null;
+			return theHttpResponse.getOutputStream();
 		} else {
 			theHttpResponse.setContentLength(bin.getContent().length);
 			ServletOutputStream oos = theHttpResponse.getOutputStream();
 			oos.write(bin.getContent());
-			oos.close();
-			return null;
+			return oos;
 		}
 	}
 
 	@Override
-	public Writer getResponseWriter(int statusCode, String contentType, String charset, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
+	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
-		theHttpResponse.setCharacterEncoding(charset);
-		theHttpResponse.setStatus(statusCode);
-		theHttpResponse.setContentType(contentType);
+		theHttpResponse.setCharacterEncoding(theCharset);
+		theHttpResponse.setStatus(theStatusCode);
+		theHttpResponse.setContentType(theContentType);
 		if (theRespondGzip) {
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), Constants.CHARSET_NAME_UTF8);
@@ -84,9 +83,8 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 	}
 
 	@Override
-	public final Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException {
-		writer.close();
-		return null;
+	public final Object sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) throws IOException {
+		return theWriter;
 	}
 
 	@Override

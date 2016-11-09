@@ -46,6 +46,14 @@ public class RuntimeChildExtension extends RuntimeChildAny {
 	public Set<String> getValidChildNames() {
 		return Collections.singleton(getElementName());
 	}
+
+	@Override
+	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
+		if ("extension".equals(theName) || "modifierExtension".equals(theName)) {
+			return super.getChildByName("extensionExtension");
+		}
+		return super.getChildByName(theName);
+	}
 	
 //	@Override
 //	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {

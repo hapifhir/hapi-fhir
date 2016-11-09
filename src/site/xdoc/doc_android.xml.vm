@@ -59,6 +59,31 @@
 			</subsection>
 		</section>
 		
+		<section name="Performance">
+			<p>
+				On mobile devices, performance problems are particularly noticeable. This
+				is made worse by the fact that some Android devices have much slower performance
+				than modern desktop computers. See the
+				<a href="./doc_rest_client_http_config.html#performance">Client Configuration Performance</a>
+				page for some tips on how to improve client performance.
+			</p>
+		</section>
+		
+		<section name="Examples">
+			
+			<p>
+				The following is intended to be a selection of publicly available open source
+				Android applications which use HAPI FHIR and might be useful as a reference.
+			</p>
+			<p>
+				If you know of others, please let us know!
+			</p>
+			<ul>
+				<li><a href="https://github.com/SynappzMA/FHIR-Android">https://github.com/SynappzMA/FHIR-Android</a> (Nice FHIR DSTU2 search app)</li>
+			</ul>
+			
+		</section>
+		
 	</body>
 
 </document>

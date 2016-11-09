@@ -88,7 +88,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class RestfulServerMethodTest {
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerMethodTest.class);
 	private static int ourPort;
 	private static DummyDiagnosticReportResourceProvider ourReportProvider;
@@ -953,9 +953,15 @@ public class RestfulServerMethodTest {
 	@Test
 	public void testServerProfileProviderFindsProfiles() {
 		ServerProfileProvider profileProvider = (ServerProfileProvider)ourRestfulServer.getServerProfilesProvider();
+
 		IdDt id = new IdDt("Profile", "observation");
 		Profile profile = profileProvider.getProfileById(createHttpServletRequest(), id);
 		assertNotNull(profile);
+		
+		id = new IdDt("Profile", "patient");
+		profile = profileProvider.getProfileById(createHttpServletRequest(), id);
+		assertNotNull(profile);
+
 	}
 
 	@Test

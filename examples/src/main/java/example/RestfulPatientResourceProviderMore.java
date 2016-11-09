@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hl7.fhir.dstu3.model.IdType;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.AddTags;
+import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -107,6 +110,23 @@ public List<Organization> getAllOrganizations() {
 }
 //END SNIPPET: searchAll
 
+//START SNIPPET: updateEtag
+@Update
+public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient) {
+   String resourceId = theId.getIdPart();
+   String versionId = theId.getVersionIdPart(); // this will contain the ETag
+   
+   String currentVersion = "1"; // populate this with the current version
+   
+   if (!versionId.equals(currentVersion)) {
+      throw new ResourceVersionConflictException("Expected version " + currentVersion);
+   }
+   
+   // ... perform the update ...
+   return new MethodOutcome();
+   
+}
+//END SNIPPET: updateEtag
 
 //START SNIPPET: summaryAndElements
 @Search
@@ -363,7 +383,11 @@ public void deletePatientConditional(@IdParam IdDt theId, @ConditionalUrlParam S
 
 //START SNIPPET: history
 @History()
-public List<Patient> getPatientHistory(@IdParam IdDt theId) {
+public List<Patient> getPatientHistory(
+      @IdParam IdDt theId,
+      @Since InstantDt theSince,
+      @At DateRangeParam theAt
+      ) {
    List<Patient> retVal = new ArrayList<Patient>();
    
    Patient patient = new Patient();
@@ -593,7 +617,7 @@ public List<DiagnosticReport> getDiagnosticReport(
                @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
                TokenParam theIdentifier,
                
-               @IncludeParam(allow= {"DiagnosticReport.subject"}) 
+               @IncludeParam(allow= {"DiagnosticReport:subject"}) 
                Set<Include> theIncludes ) {
 	
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
@@ -602,7 +626,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   DiagnosticReport report = loadSomeDiagnosticReportFromDatabase(theIdentifier);
 
   // If the client has asked for the subject to be included:
-  if (theIncludes.contains(new Include("DiagnosticReport.subject"))) {
+  if (theIncludes.contains(new Include("DiagnosticReport:subject"))) {
 	 
     // The resource reference should contain the ID of the patient
     IdDt subjectId = report.getSubject().getReference();
@@ -641,7 +665,7 @@ public List<DiagnosticReport> getDiagnosticReport(
              @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
              TokenParam theIdentifier,
              
-             @IncludeParam(allow= {"DiagnosticReport.subject"}) 
+             @IncludeParam(allow= {"DiagnosticReport:subject"}) 
              String theInclude ) {
 	
   List<DiagnosticReport> retVal = new ArrayList<DiagnosticReport>();
@@ -650,7 +674,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   DiagnosticReport report = loadSomeDiagnosticReportFromDatabase(theIdentifier);
 
   // If the client has asked for the subject to be included:
-  if ("DiagnosticReport.subject".equals(theInclude)) {
+  if ("DiagnosticReport:subject".equals(theInclude)) {
 	 
     // The resource reference should contain the ID of the patient
     IdDt subjectId = report.getSubject().getReference();

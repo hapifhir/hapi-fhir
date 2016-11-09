@@ -64,6 +64,21 @@
 				<param name="id" value="basicAuthInterceptor" />
 				<param name="file" value="examples/src/main/java/example/SecurityInterceptors.java" />
 			</macro>
+
+			<subsection name="HTTP Basic Auth">
+			
+				<p>
+					Note that if you are implementing HTTP Basic Auth, you may want to 
+					return a <code>WWW-Authenticate</code> header with the response.
+					The following snippet shows how to add such a header with a custom
+					realm:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="basicAuthInterceptorRealm" />
+					<param name="file" value="examples/src/main/java/example/SecurityInterceptors.java" />
+				</macro>
+				
+			</subsection>
 			
 		</section>
 		
@@ -76,8 +91,10 @@
 			<p>
 				This interceptor can help with the complicated task of determining whether a user
 				has the appropriate permission to perform a given task on a FHIR server. This is
-				done by declaring
+				done by declaring a set of rules that can selectively allow (whitelist) and/or selectively
+				block (blacklist) requests.
 			</p>
+
 			<p class="doc_info_bubble">
 				AuthorizationInterceptor is a new feature in HAPI FHIR, and has not yet
 				been heavily tested. Use with caution, and do lots of testing! We welcome
@@ -118,22 +135,83 @@
 					the response from the server in order to determine whether "read" operations
 					are legal.
 				</p>
+
+			</subsection>
+			
+			<subsection name="Authorizing Read Operations">			
+					
 				<p>
-					This approach has limitations however: If a request has a conditional operation, 
-					such as a delete operation which uses a search URL, or a create operation which
-					uses an <code>If-None-Exist</code> header, the interceptor will not know the
-					actual target until the server actually processes the request. 
+					When authorizing a read operation, the AuthorizationInterceptor 
+					always allows client code to execute and generate a response. 
+					It then examines the response that would be returned before
+					actually returning it to the client, and if rules do not permit
+					that data to be shown to the client the interceptor aborts the 
+					request.
+				</p>
+
+				<p>
+					Note that there are performance implications to this mechanism,
+					since an unauthorized user can still cause the server to fetch data
+					even if they won't get to see it. This mechanism should be comprehensive
+					however, since it will prevent clients from using various features
+					in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to
+					"trick" the server into showing them date they shouldn't be allowed to
+					see.					
+				</p>
+
+				<p>
+					See the following diagram for an example of how this works.
+				</p>
+				
+				<img src="./images/hapi_authorizationinterceptor_read_normal.svg" alt="Write Authorization"/>
+				
+			</subsection>
+
+			<subsection name="Authorizing Write Operations">
+				
+				<p>
+					Write operations (create, update, etc.) are typically authorized
+					by the interceptor by examining the parsed URL and making a decision
+					about whether to authorize the operation before allowing Resource Provider
+					code to proceed. This means that client code will not have a chance to execute
+					and create resources that the client does not have permissions to create.   
+				</p>
+				
+				<p>
+					See the following diagram for an example of how this works.
+				</p>
+				
+				<img src="./images/hapi_authorizationinterceptor_write_normal.svg" alt="Write Authorization"/>
+
+			</subsection>
+
+			<subsection name="Authorizing Sub-Operations">
+			
+				<p>
+					There are a number of situations where the REST framework doesn't 
+					actually know exactly what operation is going to be performed by
+					the implementing server code. For example, if your server implements
+					a <code>conditional update</code> operation, the server might not know 
+					which resource is actually being updated until the server code
+					is executed.
 				</p>
 				<p>
-					For better security, individual resource providers should notify interceptors
-					about their actual targets in the event of any "write" operations (create, 
-					operations embedded in transactions, etc.)
+					Because client code is actually determining which resources are
+					being modified, the server can not automatically apply security 
+					rules against these modifications without being provided hints
+					from client code. 
 				</p>
-				<p>
-					The mechanism for doing this isn't yet fully documented, this will be improved
-					over the next release cycle (post 1.5). Please get in touch on our google group
-					if you want to help! 
+				<p> 
+					In this type of situation, it is important to manually
+					notify the interceptor chain about the "sub-operation" being performed.
+					The following snippet shows how to notify interceptors about
+					a conditional create.
 				</p>
+
+				<macro name="snippet">
+					<param name="id" value="conditionalUpdate" />
+					<param name="file" value="examples/src/main/java/example/AuthorizationInterceptors.java" />
+				</macro>
 				
 			</subsection>
 			

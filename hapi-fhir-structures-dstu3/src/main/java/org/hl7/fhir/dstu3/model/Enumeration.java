@@ -114,7 +114,7 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 		}
 		return null;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void readExternal(ObjectInput theIn) throws IOException, ClassNotFoundException {
