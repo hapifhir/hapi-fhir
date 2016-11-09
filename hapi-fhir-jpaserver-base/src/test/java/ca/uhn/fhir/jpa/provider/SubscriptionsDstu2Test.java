@@ -15,6 +15,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -51,6 +52,27 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+
+	private void stopClientAndWaitForStopped(WebSocketClient client) throws Exception {
+		client.stop();
+
+		/* 
+		 * When websocket closes, the subscription is automatically deleted. This
+		 * can cause deadlocks if the test returns too quickly since it also 
+		 * tries to delete the subscription
+		 */ 
+		ca.uhn.fhir.model.dstu2.resource.Bundle found = null;
+		for (int i = 0; i < 10; i++) {
+			found = ourClient.search().forResource("Subscription").returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).execute();
+			if (found.getEntry().size() > 0) {
+				Thread.sleep(200);
+			} else {
+				break;
+			}
+		}
+		assertEquals(0, found.getEntry().size());
+		
+	}
 
 	@Before
 	public void beforeEnableScheduling() {
@@ -251,7 +273,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 		} finally {
 			try {
-				client.stop();
+				stopClientAndWaitForStopped(client);
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
 				fail(e.getMessage());
@@ -317,7 +339,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 		} finally {
 			try {
-				client.stop();
+				stopClientAndWaitForStopped(client);
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
 				fail(e.getMessage());

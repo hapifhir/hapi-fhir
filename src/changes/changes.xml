@@ -256,6 +256,10 @@
 				Correct several documentation issues. Thanks to Vadim Peretokin
 				for the pull requests!
 			</action>
+			<action type="add">
+				Remove an unneccesary database flush
+				from JPA persistence operations
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">

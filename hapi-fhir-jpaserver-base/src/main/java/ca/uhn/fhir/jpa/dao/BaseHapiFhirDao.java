@@ -1422,8 +1422,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		theEntity = myEntityManager.merge(theEntity);
 
-		myEntityManager.flush();
-
 		if (theResource != null) {
 			populateResourceId(theResource, theEntity);
 		}
