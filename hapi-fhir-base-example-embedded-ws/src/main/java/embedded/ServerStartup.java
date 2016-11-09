@@ -1,4 +1,5 @@
 package embedded;
+
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
@@ -16,10 +17,12 @@ public class ServerStartup {
 		final Server server = new Server(9090);
 		final ServletContextHandler sch = new ServletContextHandler(server, "/");
 		sch.addEventListener(new ContextListener());
-		sch.addFilter(GuiceFilter.class, "/*",
-				EnumSet.of(DispatcherType.REQUEST));
+		sch.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		sch.addServlet(DefaultServlet.class, "/");
-		server.start(); 
+		server.start();
+
+		// Service is now accessible through
+		// http://localhost:9090/model/Practitioner
 	}
 
 }
