@@ -61,7 +61,7 @@
       <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
     <sch:rule context="//f:ValueSet/f:compose/f:include">
-      <sch:assert test="(not(exists(f:concept) or exists(f:filter)) or exists(f:system)">vsd-2: A value set with concepts or filters SHALL include a system</sch:assert>
+      <sch:assert test="not(exists(f:concept) or exists(f:filter)) or exists(f:system)">vsd-2: A value set with concepts or filters SHALL include a system</sch:assert>
       <sch:assert test="not(exists(f:concept)) or not(exists(f:filter))">vsd-3: Cannot have both concept and filter</sch:assert>
       <sch:assert test="exists(f:valueSet) or exists(f:system)">vsd-1: A value set include/exclude SHALL have a value set or a system</sch:assert>
     </sch:rule>
