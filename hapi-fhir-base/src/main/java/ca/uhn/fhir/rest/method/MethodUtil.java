@@ -160,24 +160,18 @@ public class MethodUtil {
 		return PatchMethodBinding.createPatchInvocation(theContext, theId, thePatchType, theBody);
 	}
 	
-	/** End Patch **/
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrl, PatchTypeEnum thePatchType, String theBody) {
+		return PatchMethodBinding.createPatchInvocation(theContext, theUrl, thePatchType, theBody);
+	}
+
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, PatchTypeEnum thePatchType, String theBody, String theResourceType, Map<String, List<String>> theMatchParams) {
+		return PatchMethodBinding.createPatchInvocation(theContext, thePatchType, theBody, theResourceType, theMatchParams);
+	}
 
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
-		StringBuilder b = new StringBuilder();
-
 		String resourceType = theContext.getResourceDefinition(theResource).getName();
-		b.append(resourceType);
 
-		boolean haveQuestionMark = false;
-		for (Entry<String, List<String>> nextEntry : theMatchParams.entrySet()) {
-			for (String nextValue : nextEntry.getValue()) {
-				b.append(haveQuestionMark ? '&' : '?');
-				haveQuestionMark = true;
-				b.append(UrlUtil.escape(nextEntry.getKey()));
-				b.append('=');
-				b.append(UrlUtil.escape(nextValue));
-			}
-		}
+		StringBuilder b = createUrl(resourceType, theMatchParams);
 
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
@@ -189,6 +183,25 @@ public class MethodUtil {
 		addTagsToPostOrPut(theContext, theResource, retVal);
 
 		return retVal;
+	}
+
+
+	public static StringBuilder createUrl(String theResourceType, Map<String, List<String>> theMatchParams) {
+		StringBuilder b = new StringBuilder();
+
+		b.append(theResourceType);
+
+		boolean haveQuestionMark = false;
+		for (Entry<String, List<String>> nextEntry : theMatchParams.entrySet()) {
+			for (String nextValue : nextEntry.getValue()) {
+				b.append(haveQuestionMark ? '&' : '?');
+				haveQuestionMark = true;
+				b.append(UrlUtil.escape(nextEntry.getKey()));
+				b.append('=');
+				b.append(UrlUtil.escape(nextValue));
+			}
+		}
+		return b;
 	}
 
 	
