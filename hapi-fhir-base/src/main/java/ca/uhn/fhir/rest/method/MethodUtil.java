@@ -354,7 +354,7 @@ public class MethodUtil {
 			}
 			
 			/* 
-			 * Note: for the frst two here, we're using strings instead of static binding
+			 * Note: for the first two here, we're using strings instead of static binding
 			 * so that we don't need the java.servlet JAR on the classpath in order to use
 			 * this class 
 			 */

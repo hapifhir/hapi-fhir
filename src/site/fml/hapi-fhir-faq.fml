@@ -12,13 +12,32 @@
 					the <a href="https://groups.google.com/d/forum/hapi-fhir">HAPI FHIR Google Group</a>.
 					This group is a great resource, with lots of helpful people who can assist. The
 					HAPI FHIR developers are regular contributors to this group.
+				</p> 
+				<p>
+					Please do not email us at our personal email addressees with questions about how to use HAPI!
+					We are much more likely to respond if you post your question in the group, since there are
+					a fixed number of hours in the day and we prefer to help in a place that benefits 
+					everyone. Also, please do not post a question on the <a href="https://github.com/jamesagnew/hapi-fhir/issues">GitHub Issue Tracker</a>
+					unless you are sure it is actually a bug. If you're not sure whether you have a question or a bug, 
+					please post your question on the Google Group.
 				</p>
 				<p>
 					If you have questions which are about FHIR itself (e.g. which resource should 
-					I use for a specific purpose, how to I model my data, etc.) you might want
-					to also consider posting on <a href="http://stackoverflow.com/questions/tagged/hl7_fhir">Stackoverflow</a>,
-					as there are a number of FHIR experts who aren't HAPI/Java users who monitor
-					that site.
+					I use for a specific purpose, how to I model my data, etc.) 
+					there are two great resources that can help you:
+					<ul>
+						<li>
+							The <a href="https://chat.fhir.org/">chat.fhir.org</a> server offers a live chat that is
+							very popular with people using FHIR. That community extends far beyond just HAPI users, so
+							there is a large pool of people who might have answers to your questions. 
+						</li>
+						<li>
+							You might want
+							to also consider posting on <a href="http://stackoverflow.com/questions/tagged/hl7_fhir">Stackoverflow</a>,
+							as there are a number of FHIR experts who aren't HAPI/Java users who monitor
+							that site.
+						</li>
+					</ul>
 				</p>
 			</answer>
 		</faq>

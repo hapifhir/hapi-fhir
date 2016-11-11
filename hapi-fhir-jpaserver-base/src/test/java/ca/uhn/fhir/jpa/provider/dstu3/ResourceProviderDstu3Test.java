@@ -165,6 +165,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		return retVal;
 	}
+	
+	@Test
+	public void testResourceSorting() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/two_questionnaires.json"), StandardCharsets.UTF_8);
+		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
+		ourLog.info(respString);
+		
+		ourHttpClient.execute(new HttpGet("http://localhost:" + ourPort + "/QuestionnaireResponse?patient=QR3295&questionnaire=profile&_sort:desc=authored&_count=5&_include=QuestionnaireResponse:questionnaire&_include=QuestionnaireResponse:subject"));
+//		Bundle bundle = 
+	}
 
 	/**
 	 * See #484
