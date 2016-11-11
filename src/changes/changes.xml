@@ -260,6 +260,10 @@
 				Remove an unneccesary database flush
 				from JPA persistence operations
 			</action>
+			<action type="add" issue="470">
+				Add method to fluent client to allow OR search across several
+				profiles. Thanks to Thomas Andersen for the pull request!
+			</action>
 		</release>
 		<release version="2.0" date="2016-08-30">
 			<action type="fix">
