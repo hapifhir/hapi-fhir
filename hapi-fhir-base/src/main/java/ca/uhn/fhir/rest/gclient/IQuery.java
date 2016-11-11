@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -81,6 +83,13 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 */
 	IQuery<T> withProfile(String theProfileUri);
 
+	/**
+	 * Matches any of the profiles given as argument. This would result in an OR search for resources matching one or more profiles.
+	 * To do an AND search, make multiple calls to {@link #withProfile(String)}.
+	 * @param theProfileUris The URIs of a given profile to search for resources which match.
+	 */
+	IQuery<T> withAnyProfile(Collection<String> theProfileUris);
+	
 	/**
 	 * Forces the query to perform the search using the given method (allowable methods are described in the 
 	 * <a href="http://www.hl7.org/fhir/search.html">FHIR Search Specification</a>)

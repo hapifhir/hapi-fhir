@@ -26,9 +26,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1900,7 +1903,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private List<Include> myInclude = new ArrayList<Include>();
 		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
-		private List<String> myProfile = new ArrayList<String>();
+		private List<Collection<String>> myProfiles = new ArrayList<Collection<String>>();
 		private String myResourceId;
 		private String myResourceName;
 		private Class<? extends IBaseResource> myResourceType;
@@ -1981,8 +1984,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken(myContext));
 			}
 
-			for (String next : myProfile) {
-				addParam(params, Constants.PARAM_PROFILE, next);
+			for (Collection<String> profileUris : myProfiles) {
+				StringBuilder builder = new StringBuilder();
+				for (Iterator<String> profileItr = profileUris.iterator(); profileItr.hasNext(); ) {
+					builder.append(profileItr.next());
+					if (profileItr.hasNext()) {
+						builder.append(',');
+					}
+				}
+				addParam(params, Constants.PARAM_PROFILE, builder.toString());
 			}
 
 			for (Include next : myInclude) {
@@ -2144,7 +2154,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IQuery<Object> withProfile(String theProfileUri) {
 			Validate.notBlank(theProfileUri, "theProfileUri must not be null or empty");
-			myProfile.add(theProfileUri);
+			myProfiles.add(Collections.singletonList(theProfileUri));
+			return this;
+		}
+		
+		@Override
+		public IQuery<Object> withAnyProfile(Collection<String> theProfileUris) {
+			Validate.notEmpty(theProfileUris, "theProfileUris must not be null or empty");
+			myProfiles.add(theProfileUris);
 			return this;
 		}
 
@@ -2365,6 +2382,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		// TODO: This is not longer used.. Deprecate it or just remove it?
 		@Override
 		public IPatchTyped conditionalByUrl(String theSearchUrl) {
 			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
