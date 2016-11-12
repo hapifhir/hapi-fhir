@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="2.1" date="TBD">
+		<release version="2.1" date="2016-11-11">
 			<action type="add">
 				STU3 structure definitions have been updated to the 
 				STU3 latest definitions (1.7.0 - SVN 10129). In 

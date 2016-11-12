@@ -499,17 +499,17 @@
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-api</artifactId>
-				<version>1.9.4</version>
+				<version>1.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-manager-plexus</artifactId>
-				<version>1.9.4</version>
+				<version>1.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-provider-gitexe</artifactId>
-				<version>1.9.4</version>
+				<version>1.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -928,6 +928,7 @@
 						<skipDeploy>true</skipDeploy>
 						<inputEncoding>UTF-8</inputEncoding>
 						<outputEncoding>UTF-8</outputEncoding>
+						<relativizeDecorationLinks>false</relativizeDecorationLinks>
 					</configuration>
 					<dependencies>
 						<dependency>
