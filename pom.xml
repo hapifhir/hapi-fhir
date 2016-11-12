@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>2.1</version>
+	<version>2.2-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<url>https://hapifhir.io</url>
 
