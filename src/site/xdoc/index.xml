@@ -3,7 +3,7 @@
 
 	<properties>
 		<title>The Open Source HL7 API for Java</title>
-		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+		<author email="jamesagnew@gmail.com">James Agnew</author>
 	</properties>
 
 	<body>
@@ -61,6 +61,55 @@
 
 		<section name="Announcements">
 			<p>
+				<b>November 11, 2016 - HAPI FHIR 2.1 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings several primary changes:
+				<ul>
+					<li>
+						STU3 definitions have been updated to the 
+						latest definitions (FHIR 1.7.0 - SVN 10129)
+					</li>
+					<li>
+						Add support for FHIR Patch operation (thanks to
+						Peter Girard of McKesson for his help on this!)
+					</li>
+					<li>
+						Android library has been streamlined to use the
+						OkHttp client by default (no more fighting with
+						out-of-date Apache HttpClient. Thanks to Matt Clarke of Orion Health
+						for his help on this!)
+					</li>
+					<li>
+						The STU3 client now supports both the Conformance resource
+						(which is going away) and the new CapabilityStatement
+						(which replaces it). This should allow for a bridge 
+						while servers are migrated to the new resource type
+						being returned by the <![CDATA[<code>/metadata</code>]]> endpoint.
+					</li>
+				</ul>
+			</p>
+			<p>
+				This release also brings a number of bugfixes and also quite a few enhancements.
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version. Among the enhancements in this release are:
+			</p>
+			<p>
+				As always, we welcome new contributions and contributors! Please feel free to get 
+				in touch if you are interested in getting involved with HAPI but don't know
+				where to start.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+
+
+
+			<p>
 				<b>August 30, 2016 - HAPI FHIR 2.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
 				GitHub's releases section.
@@ -104,6 +153,8 @@
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
+
+			<!--
 			<br/><br/>
 			<p>
 				<b>July 7, 2016 - HAPI FHIR 1.6 Released</b> -
@@ -156,7 +207,7 @@
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
-
+-->
 			<!--
 			<p>
 				<b>April 20, 2016 - HAPI FHIR 1.5 Released</b> -
