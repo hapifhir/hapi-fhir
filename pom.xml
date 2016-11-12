@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 	<version>2.1</version>
 	<name>HAPI-FHIR</name>
-	<url>https://github.com/jamesagnew/hapi-fhir</url>
+	<url>https://hapifhir.io</url>
 
 	<organization>
 		<name>University Health Network</name>
