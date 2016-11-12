@@ -6,6 +6,12 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="2.2" date="TBD">
+			<action type="fix">
+				Fix issue in AuthorizationIntetceptor where
+				transactions are blocked even when they
+				should not be
+			</action>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
 				STU3 structure definitions have been updated to the 
