@@ -312,155 +312,156 @@
 <a class="jxr_linenumber" name="L304" href="#L304">304</a> 							parameters.add(QualifiedParamList.singleton(paramValues[1]));
 <a class="jxr_linenumber" name="L305" href="#L305">305</a> 						}
 <a class="jxr_linenumber" name="L306" href="#L306">306</a> 						DateRangeParam dateRangeParam = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/param/DateRangeParam.html">DateRangeParam</a>();
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 						dateRangeParam.setValuesAsQueryTokens(parameters);
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> 						matchingParamValues.add(dateRangeParam);
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> 					} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (String.<strong class="jxr_keyword">class</strong>.isAssignableFrom(myParameterType)) {
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> 
-<a class="jxr_linenumber" name="L311" href="#L311">311</a> 						<strong class="jxr_keyword">for</strong> (String next : paramValues) {
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 							matchingParamValues.add(next);
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 						}
-<a class="jxr_linenumber" name="L314" href="#L314">314</a> 					} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ValidationModeEnum.<strong class="jxr_keyword">class</strong>.equals(myParameterType)) {
-<a class="jxr_linenumber" name="L315" href="#L315">315</a> 						
-<a class="jxr_linenumber" name="L316" href="#L316">316</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(paramValues[0])) {
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 							ValidationModeEnum validationMode = ValidationModeEnum.forCode(paramValues[0]);
-<a class="jxr_linenumber" name="L318" href="#L318">318</a> 							<strong class="jxr_keyword">if</strong> (validationMode != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L319" href="#L319">319</a> 								matchingParamValues.add(validationMode);
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 							} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 								throwInvalidMode(paramValues[0]);
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 							}
-<a class="jxr_linenumber" name="L323" href="#L323">323</a> 						}
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 						
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 						<strong class="jxr_keyword">for</strong> (String nextValue : paramValues) {
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 							FhirContext ctx = theRequest.getServer().getFhirContext();
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 							RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition((Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;) myParameterType);
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 							IPrimitiveType&lt;?&gt; instance = def.newInstance();
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 							instance.setValueAsString(nextValue);
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 							matchingParamValues.add(instance);
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 						}
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 					}
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 					HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 					String msg = localizer.getMessage(OperationParameter.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"urlParamNotPrimitive"</span>, myOperationName, myName);
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/MethodNotAllowedException.html">MethodNotAllowedException</a>(msg, RequestTypeEnum.POST);
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 				}
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 			}
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> 		}
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 	}
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> translateQueryParametersIntoServerArgumentForPost(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, List&lt;Object&gt; matchingParamValues) {
-<a class="jxr_linenumber" name="L344" href="#L344">344</a> 		IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
-<a class="jxr_linenumber" name="L345" href="#L345">345</a> 		RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		<strong class="jxr_keyword">if</strong> (def.getName().equals(<span class="jxr_string">"Parameters"</span>)) {
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> 
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> 			BaseRuntimeChildDefinition paramChild = def.getChildByName(<span class="jxr_string">"parameter"</span>);
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> 			BaseRuntimeElementCompositeDefinition&lt;?&gt; paramChildElem = (BaseRuntimeElementCompositeDefinition&lt;?&gt;) paramChild.getChildByName(<span class="jxr_string">"parameter"</span>);
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 			RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName(<span class="jxr_string">"name"</span>);
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> 			BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName(<span class="jxr_string">"value[x]"</span>);
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 			BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName(<span class="jxr_string">"resource"</span>);
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> 
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> 			IAccessor paramChildAccessor = paramChild.getAccessor();
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 			List&lt;IBase&gt; values = paramChildAccessor.getValues(requestContents);
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 			<strong class="jxr_keyword">for</strong> (IBase nextParameter : values) {
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 				List&lt;IBase&gt; nextNames = nameChild.getAccessor().getValues(nextParameter);
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> 				<strong class="jxr_keyword">if</strong> (nextNames != <strong class="jxr_keyword">null</strong> &amp;&amp; nextNames.size() &gt; 0) {
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> 					IPrimitiveType&lt;?&gt; nextName = (IPrimitiveType&lt;?&gt;) nextNames.get(0);
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> 					<strong class="jxr_keyword">if</strong> (myName.equals(nextName.getValueAsString())) {
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> 						<strong class="jxr_keyword">if</strong> (myParameterType.isAssignableFrom(nextParameter.getClass())) {
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 							matchingParamValues.add(nextParameter);
-<a class="jxr_linenumber" name="L365" href="#L365">365</a> 						} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> 							List&lt;IBase&gt; paramValues = valueChild.getAccessor().getValues(nextParameter);
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 							List&lt;IBase&gt; paramResources = resourceChild.getAccessor().getValues(nextParameter);
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> 							<strong class="jxr_keyword">if</strong> (paramValues != <strong class="jxr_keyword">null</strong> &amp;&amp; paramValues.size() &gt; 0) {
-<a class="jxr_linenumber" name="L369" href="#L369">369</a> 								tryToAddValues(paramValues, matchingParamValues);
-<a class="jxr_linenumber" name="L370" href="#L370">370</a> 							} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (paramResources != <strong class="jxr_keyword">null</strong> &amp;&amp; paramResources.size() &gt; 0) {
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> 								tryToAddValues(paramResources, matchingParamValues);
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 							}
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 						}
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
-<a class="jxr_linenumber" name="L375" href="#L375">375</a> 					}
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 				}
-<a class="jxr_linenumber" name="L377" href="#L377">377</a> 			}
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> 
-<a class="jxr_linenumber" name="L379" href="#L379">379</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 			<strong class="jxr_keyword">if</strong> (myParameterType.isAssignableFrom(requestContents.getClass())) {
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> 				tryToAddValues(Arrays.asList((IBase) requestContents), matchingParamValues);
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 			}
-<a class="jxr_linenumber" name="L384" href="#L384">384</a> 
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> 		}
-<a class="jxr_linenumber" name="L386" href="#L386">386</a> 	}
-<a class="jxr_linenumber" name="L387" href="#L387">387</a> 
-<a class="jxr_linenumber" name="L388" href="#L388">388</a> 	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> tryToAddValues(List&lt;IBase&gt; theParamValues, List&lt;Object&gt; theMatchingParamValues) {
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 		<strong class="jxr_keyword">for</strong> (Object nextValue : theParamValues) {
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 			<strong class="jxr_keyword">if</strong> (nextValue == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 				<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L393" href="#L393">393</a> 			}
-<a class="jxr_linenumber" name="L394" href="#L394">394</a> 			<strong class="jxr_keyword">if</strong> (myConverter != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L395" href="#L395">395</a> 				nextValue = myConverter.incomingServer(nextValue);
-<a class="jxr_linenumber" name="L396" href="#L396">396</a> 			}
-<a class="jxr_linenumber" name="L397" href="#L397">397</a> 			<strong class="jxr_keyword">if</strong> (!myParameterType.isAssignableFrom(nextValue.getClass())) {
-<a class="jxr_linenumber" name="L398" href="#L398">398</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt; sourceType = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt;) nextValue.getClass();
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt; targetType = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt;) myParameterType;
-<a class="jxr_linenumber" name="L400" href="#L400">400</a> 				BaseRuntimeElementDefinition&lt;?&gt; sourceTypeDef = myContext.getElementDefinition(sourceType);
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 				BaseRuntimeElementDefinition&lt;?&gt; targetTypeDef = myContext.getElementDefinition(targetType);
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> 				<strong class="jxr_keyword">if</strong> (targetTypeDef instanceof IRuntimeDatatypeDefinition &amp;&amp; sourceTypeDef instanceof IRuntimeDatatypeDefinition) {
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 					IRuntimeDatatypeDefinition targetTypeDtDef = (IRuntimeDatatypeDefinition) targetTypeDef;
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> 					<strong class="jxr_keyword">if</strong> (targetTypeDtDef.isProfileOf(sourceType)) {
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> 						FhirTerser terser = myContext.newTerser();
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 						IBase newTarget = targetTypeDef.newInstance();
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 						terser.cloneInto((IBase) nextValue, newTarget, <strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 						theMatchingParamValues.add(newTarget);
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> 						<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> 					}
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 				}
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 				throwWrongParamType(nextValue);
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> 			}
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> 			
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> 			addValueToList(theMatchingParamValues, nextValue);
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> 		}
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> 	}
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> 
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> throwInvalidMode(String paramValues) {
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"Invalid mode value: \&quot;"</span> + paramValues + <span class="jxr_string">"\&quot;"</span>);
-<a class="jxr_linenumber" name="L421" href="#L421">421</a> 	}
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 	<strong class="jxr_keyword">interface</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">IOperationParamConverter</a> {
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> 		Object incomingServer(Object theObject);
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> 
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> 		Object outgoingClient(Object theObject);
-<a class="jxr_linenumber" name="L428" href="#L428">428</a> 
-<a class="jxr_linenumber" name="L429" href="#L429">429</a> 	}
-<a class="jxr_linenumber" name="L430" href="#L430">430</a> 
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> 	<strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">OperationParamConverter</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">IOperationParamConverter</a> {
-<a class="jxr_linenumber" name="L432" href="#L432">432</a> 
-<a class="jxr_linenumber" name="L433" href="#L433">433</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">OperationParamConverter</a>() {
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 			Validate.isTrue(mySearchParameterBinding != <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 		}
-<a class="jxr_linenumber" name="L436" href="#L436">436</a> 
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 		@Override
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 		<strong class="jxr_keyword">public</strong> Object incomingServer(Object theObject) {
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> 			IPrimitiveType&lt;?&gt; obj = (IPrimitiveType&lt;?&gt;) theObject;
-<a class="jxr_linenumber" name="L440" href="#L440">440</a> 			List&lt;QualifiedParamList&gt; paramList = Collections.singletonList(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(<strong class="jxr_keyword">null</strong>, obj.getValueAsString()));
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 			<strong class="jxr_keyword">return</strong> mySearchParameterBinding.parse(myContext, paramList);
-<a class="jxr_linenumber" name="L442" href="#L442">442</a> 		}
-<a class="jxr_linenumber" name="L443" href="#L443">443</a> 
-<a class="jxr_linenumber" name="L444" href="#L444">444</a> 		@Override
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		<strong class="jxr_keyword">public</strong> Object outgoingClient(Object theObject) {
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> 			IQueryParameterType obj = (IQueryParameterType) theObject;
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 			IPrimitiveType&lt;?&gt; retVal = (IPrimitiveType&lt;?&gt;) myContext.getElementDefinition(<span class="jxr_string">"string"</span>).newInstance();
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> 			retVal.setValueAsString(obj.getValueAsQueryToken(myContext));
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> 			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L450" href="#L450">450</a> 		}
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> 	}
-<a class="jxr_linenumber" name="L453" href="#L453">453</a> 
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 						FhirContext ctx = theRequest.getServer().getFhirContext();
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 						dateRangeParam.setValuesAsQueryTokens(ctx, myName, parameters);
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 						matchingParamValues.add(dateRangeParam);
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 					} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (String.<strong class="jxr_keyword">class</strong>.isAssignableFrom(myParameterType)) {
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 						<strong class="jxr_keyword">for</strong> (String next : paramValues) {
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 							matchingParamValues.add(next);
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 						}
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 					} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (ValidationModeEnum.<strong class="jxr_keyword">class</strong>.equals(myParameterType)) {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 						
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(paramValues[0])) {
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 							ValidationModeEnum validationMode = ValidationModeEnum.forCode(paramValues[0]);
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 							<strong class="jxr_keyword">if</strong> (validationMode != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 								matchingParamValues.add(validationMode);
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 							} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 								throwInvalidMode(paramValues[0]);
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 							}
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 						}
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 						
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 						<strong class="jxr_keyword">for</strong> (String nextValue : paramValues) {
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 							FhirContext ctx = theRequest.getServer().getFhirContext();
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 							RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) ctx.getElementDefinition((Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;) myParameterType);
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 							IPrimitiveType&lt;?&gt; instance = def.newInstance();
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 							instance.setValueAsString(nextValue);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 							matchingParamValues.add(instance);
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 						}
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 					}
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 					HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 					String msg = localizer.getMessage(OperationParameter.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"urlParamNotPrimitive"</span>, myOperationName, myName);
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/MethodNotAllowedException.html">MethodNotAllowedException</a>(msg, RequestTypeEnum.POST);
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 				}
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 			}
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 		}
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 	}
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> translateQueryParametersIntoServerArgumentForPost(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, List&lt;Object&gt; matchingParamValues) {
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 		IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 		<strong class="jxr_keyword">if</strong> (def.getName().equals(<span class="jxr_string">"Parameters"</span>)) {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 			BaseRuntimeChildDefinition paramChild = def.getChildByName(<span class="jxr_string">"parameter"</span>);
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 			BaseRuntimeElementCompositeDefinition&lt;?&gt; paramChildElem = (BaseRuntimeElementCompositeDefinition&lt;?&gt;) paramChild.getChildByName(<span class="jxr_string">"parameter"</span>);
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 			RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName(<span class="jxr_string">"name"</span>);
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 			BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName(<span class="jxr_string">"value[x]"</span>);
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 			BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName(<span class="jxr_string">"resource"</span>);
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 			IAccessor paramChildAccessor = paramChild.getAccessor();
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 			List&lt;IBase&gt; values = paramChildAccessor.getValues(requestContents);
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 			<strong class="jxr_keyword">for</strong> (IBase nextParameter : values) {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 				List&lt;IBase&gt; nextNames = nameChild.getAccessor().getValues(nextParameter);
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 				<strong class="jxr_keyword">if</strong> (nextNames != <strong class="jxr_keyword">null</strong> &amp;&amp; nextNames.size() &gt; 0) {
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 					IPrimitiveType&lt;?&gt; nextName = (IPrimitiveType&lt;?&gt;) nextNames.get(0);
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 					<strong class="jxr_keyword">if</strong> (myName.equals(nextName.getValueAsString())) {
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 						<strong class="jxr_keyword">if</strong> (myParameterType.isAssignableFrom(nextParameter.getClass())) {
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 							matchingParamValues.add(nextParameter);
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 						} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 							List&lt;IBase&gt; paramValues = valueChild.getAccessor().getValues(nextParameter);
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 							List&lt;IBase&gt; paramResources = resourceChild.getAccessor().getValues(nextParameter);
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 							<strong class="jxr_keyword">if</strong> (paramValues != <strong class="jxr_keyword">null</strong> &amp;&amp; paramValues.size() &gt; 0) {
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 								tryToAddValues(paramValues, matchingParamValues);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 							} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (paramResources != <strong class="jxr_keyword">null</strong> &amp;&amp; paramResources.size() &gt; 0) {
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 								tryToAddValues(paramResources, matchingParamValues);
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> 							}
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 						}
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 					}
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 				}
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 			}
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> 
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 			<strong class="jxr_keyword">if</strong> (myParameterType.isAssignableFrom(requestContents.getClass())) {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 				tryToAddValues(Arrays.asList((IBase) requestContents), matchingParamValues);
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 			}
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 		}
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 	}
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> tryToAddValues(List&lt;IBase&gt; theParamValues, List&lt;Object&gt; theMatchingParamValues) {
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 		<strong class="jxr_keyword">for</strong> (Object nextValue : theParamValues) {
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 			<strong class="jxr_keyword">if</strong> (nextValue == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 				<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 			}
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> 			<strong class="jxr_keyword">if</strong> (myConverter != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 				nextValue = myConverter.incomingServer(nextValue);
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 			}
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 			<strong class="jxr_keyword">if</strong> (!myParameterType.isAssignableFrom(nextValue.getClass())) {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt; sourceType = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt;) nextValue.getClass();
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt; targetType = (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt;) myParameterType;
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 				BaseRuntimeElementDefinition&lt;?&gt; sourceTypeDef = myContext.getElementDefinition(sourceType);
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 				BaseRuntimeElementDefinition&lt;?&gt; targetTypeDef = myContext.getElementDefinition(targetType);
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 				<strong class="jxr_keyword">if</strong> (targetTypeDef instanceof IRuntimeDatatypeDefinition &amp;&amp; sourceTypeDef instanceof IRuntimeDatatypeDefinition) {
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 					IRuntimeDatatypeDefinition targetTypeDtDef = (IRuntimeDatatypeDefinition) targetTypeDef;
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 					<strong class="jxr_keyword">if</strong> (targetTypeDtDef.isProfileOf(sourceType)) {
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 						FhirTerser terser = myContext.newTerser();
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 						IBase newTarget = targetTypeDef.newInstance();
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 						terser.cloneInto((IBase) nextValue, newTarget, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 						theMatchingParamValues.add(newTarget);
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 						<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 					}
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 				}
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 				throwWrongParamType(nextValue);
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 			}
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 			
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 			addValueToList(theMatchingParamValues, nextValue);
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 		}
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 	}
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> throwInvalidMode(String paramValues) {
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"Invalid mode value: \&quot;"</span> + paramValues + <span class="jxr_string">"\&quot;"</span>);
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 	}
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 	<strong class="jxr_keyword">interface</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">IOperationParamConverter</a> {
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 		Object incomingServer(Object theObject);
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> 		Object outgoingClient(Object theObject);
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 	}
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> 	<strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">OperationParamConverter</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">IOperationParamConverter</a> {
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OperationParameter.html">OperationParamConverter</a>() {
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 			Validate.isTrue(mySearchParameterBinding != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 		}
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 		@Override
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 		<strong class="jxr_keyword">public</strong> Object incomingServer(Object theObject) {
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 			IPrimitiveType&lt;?&gt; obj = (IPrimitiveType&lt;?&gt;) theObject;
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 			List&lt;QualifiedParamList&gt; paramList = Collections.singletonList(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(<strong class="jxr_keyword">null</strong>, obj.getValueAsString()));
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 			<strong class="jxr_keyword">return</strong> mySearchParameterBinding.parse(myContext, paramList);
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 		}
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		@Override
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 		<strong class="jxr_keyword">public</strong> Object outgoingClient(Object theObject) {
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 			IQueryParameterType obj = (IQueryParameterType) theObject;
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 			IPrimitiveType&lt;?&gt; retVal = (IPrimitiveType&lt;?&gt;) myContext.getElementDefinition(<span class="jxr_string">"string"</span>).newInstance();
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 			retVal.setValueAsString(obj.getValueAsQueryToken(myContext));
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 		}
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 	}
 <a class="jxr_linenumber" name="L454" href="#L454">454</a> 
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> }
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

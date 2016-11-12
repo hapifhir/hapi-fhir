@@ -73,7 +73,7 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  	}
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  	@Override
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">void</strong> doSetValueAsQueryToken(String theQualifier, String theValue) {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">void</strong> doSetValueAsQueryToken(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, String theParamName, String theQualifier, String theValue) {
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  		<strong class="jxr_keyword">if</strong> (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  			setExact(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  		} <strong class="jxr_keyword">else</strong> {

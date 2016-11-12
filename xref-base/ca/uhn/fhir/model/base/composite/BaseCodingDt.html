@@ -102,7 +102,7 @@
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment">	 * {@inheritDoc}</em>
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  	@Override
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValueAsQueryToken(String theQualifier, String theParameter) {
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValueAsQueryToken(<a href="../../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, String theParamName, String theQualifier, String theParameter) {
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  		<strong class="jxr_keyword">int</strong> barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  		<strong class="jxr_keyword">if</strong> (barIndex != -1) {
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			setSystem(theParameter.substring(0, barIndex));

@@ -242,7 +242,7 @@
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_comment">	 */</em>
 <a class="jxr_linenumber" name="L235" href="#L235">235</a> 	@Override
 <a class="jxr_linenumber" name="L236" href="#L236">236</a> 	<strong class="jxr_keyword">public</strong> Object parse(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, List&lt;QualifiedParamList&gt; theString) <strong class="jxr_keyword">throws</strong> InternalErrorException, InvalidRequestException {
-<a class="jxr_linenumber" name="L237" href="#L237">237</a> 		<strong class="jxr_keyword">return</strong> myParamBinder.parse(getName(), theString);
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 		<strong class="jxr_keyword">return</strong> myParamBinder.parse(theContext, getName(), theString);
 <a class="jxr_linenumber" name="L238" href="#L238">238</a> 	}
 <a class="jxr_linenumber" name="L239" href="#L239">239</a> 
 <a class="jxr_linenumber" name="L240" href="#L240">240</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {

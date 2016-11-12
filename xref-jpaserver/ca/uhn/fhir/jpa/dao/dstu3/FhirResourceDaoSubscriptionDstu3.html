@@ -160,7 +160,7 @@
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> pollForNewUndeliveredResources(<a href="../../../../../../ca/uhn/fhir/jpa/entity/SubscriptionTable.html">SubscriptionTable</a> theSubscriptionTable) {
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 		Subscription subscription = toResource(Subscription.<strong class="jxr_keyword">class</strong>, theSubscriptionTable.getSubscriptionResource(), false);
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 		SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 		criteriaUrl = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 		<strong class="jxr_keyword">long</strong> start = theSubscriptionTable.getMostRecentMatch().getTime();

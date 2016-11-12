@@ -351,46 +351,64 @@
 <a class="jxr_linenumber" name="L343" href="#L343">343</a> 
 <a class="jxr_linenumber" name="L344" href="#L344">344</a> 				@Override
 <a class="jxr_linenumber" name="L345" href="#L345">345</a> 				<strong class="jxr_keyword">public</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleOpClassifierFinished.html">IAuthRuleBuilderRuleOpClassifierFinished</a> onType(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theType) {
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 					Validate.notNull(theType, <span class="jxr_string">"theType must not be null"</span>);
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 					validateType(theType);
 <a class="jxr_linenumber" name="L347" href="#L347">347</a> 
 <a class="jxr_linenumber" name="L348" href="#L348">348</a> 					OperationRule rule = createRule();
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> 					HashSet&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; appliesToTypes = <strong class="jxr_keyword">new</strong> HashSet&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;();
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 					appliesToTypes.add(theType);
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 					rule.appliesToTypes(appliesToTypes);
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> 					myRules.add(rule);
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderFinished</a>();
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> 				}
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> 
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 			}
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 					rule.appliesToTypes(toTypeSet(theType));
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 					myRules.add(rule);
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderFinished</a>();
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 				}
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 				<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> validateType(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theType) {
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 					Validate.notNull(theType, <span class="jxr_string">"theType must not be null"</span>);
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 				}
 <a class="jxr_linenumber" name="L357" href="#L357">357</a> 
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 		}
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> 
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderRuleTransaction</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleTransaction.html">IAuthRuleBuilderRuleTransaction</a> {
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 				@Override
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 				<strong class="jxr_keyword">public</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleOpClassifierFinished.html">IAuthRuleBuilderRuleOpClassifierFinished</a> onInstancesOfType(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theType) {
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 					validateType(theType);
 <a class="jxr_linenumber" name="L361" href="#L361">361</a> 
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> 			@Override
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> 			<strong class="jxr_keyword">public</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleTransactionOp.html">IAuthRuleBuilderRuleTransactionOp</a> withAnyOperation() {
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderRuleTransactionOp</a>();
-<a class="jxr_linenumber" name="L365" href="#L365">365</a> 			}
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> 
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 			<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderRuleTransactionOp</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleTransactionOp.html">IAuthRuleBuilderRuleTransactionOp</a> {
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> 
-<a class="jxr_linenumber" name="L369" href="#L369">369</a> 				@Override
-<a class="jxr_linenumber" name="L370" href="#L370">370</a> 				<strong class="jxr_keyword">public</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleOpClassifierFinished.html">IAuthRuleBuilderRuleOpClassifierFinished</a> andApplyNormalRules() {
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> 					RuleImplOp rule = <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleImplOp.html">RuleImplOp</a>(myRuleName);
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 					rule.setMode(myRuleMode);
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 					rule.setOp(myRuleOp);
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> 					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
-<a class="jxr_linenumber" name="L375" href="#L375">375</a> 					myRules.add(rule);
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderFinished</a>();
-<a class="jxr_linenumber" name="L377" href="#L377">377</a> 				}
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> 
-<a class="jxr_linenumber" name="L379" href="#L379">379</a> 			}
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 		}
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> 
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 	}
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 					OperationRule rule = createRule();
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 					rule.appliesToInstancesOfType(toTypeSet(theType));
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 					myRules.add(rule);
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderFinished</a>();
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 				}
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 				<strong class="jxr_keyword">private</strong> HashSet&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; toTypeSet(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theType) {
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 					HashSet&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; appliesToTypes = <strong class="jxr_keyword">new</strong> HashSet&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;();
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 					appliesToTypes.add(theType);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 					<strong class="jxr_keyword">return</strong> appliesToTypes;
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 				}
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> 
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 			}
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 		}
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderRuleTransaction</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleTransaction.html">IAuthRuleBuilderRuleTransaction</a> {
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> 
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 			@Override
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 			<strong class="jxr_keyword">public</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleTransactionOp.html">IAuthRuleBuilderRuleTransactionOp</a> withAnyOperation() {
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderRuleTransactionOp</a>();
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 			}
 <a class="jxr_linenumber" name="L384" href="#L384">384</a> 
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> }
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 			<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderRuleTransactionOp</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleTransactionOp.html">IAuthRuleBuilderRuleTransactionOp</a> {
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 				@Override
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 				<strong class="jxr_keyword">public</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/IAuthRuleBuilderRuleOpClassifierFinished.html">IAuthRuleBuilderRuleOpClassifierFinished</a> andApplyNormalRules() {
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 					RuleImplOp rule = <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleImplOp.html">RuleImplOp</a>(myRuleName);
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 					rule.setMode(myRuleMode);
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 					rule.setOp(myRuleOp);
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 					myRules.add(rule);
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../../ca/uhn/fhir/rest/server/interceptor/auth/RuleBuilder.html">RuleBuilderFinished</a>();
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> 				}
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 			}
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 		}
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> 
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 	}
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -52,19 +52,20 @@
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  		myAllowedMethods.add(RequestTypeEnum.DELETE);
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  		myAllowedMethods.add(RequestTypeEnum.PUT);
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  		myAllowedMethods.add(RequestTypeEnum.POST);
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	}
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Override
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  		RequestTypeEnum requestType = RequestTypeEnum.valueOf(theRequest.getMethod());
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		<strong class="jxr_keyword">if</strong> (myAllowedMethods.contains(requestType)) {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		}
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  		
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/MethodNotAllowedException.html">MethodNotAllowedException</a>(<span class="jxr_string">"Method not supported: "</span> + theRequest.getMethod());
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	}
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  }
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  		myAllowedMethods.add(RequestTypeEnum.HEAD);
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	}
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	@Override
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		RequestTypeEnum requestType = RequestTypeEnum.valueOf(theRequest.getMethod());
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		<strong class="jxr_keyword">if</strong> (myAllowedMethods.contains(requestType)) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  		}
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  		
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/MethodNotAllowedException.html">MethodNotAllowedException</a>(<span class="jxr_string">"Method not supported: "</span> + theRequest.getMethod());
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	}
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

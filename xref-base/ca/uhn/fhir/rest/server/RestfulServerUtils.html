@@ -219,7 +219,7 @@
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> 							nextPart = nextPart.trim();
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 							EncodingEnum encoding = EncodingEnum.forContentType(nextPart);
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> 							<strong class="jxr_keyword">if</strong> (encoding != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L214" href="#L214">214</a> 								retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(encoding, nextPart);
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 								retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(theReq.getServer().getFhirContext(), encoding, nextPart);
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> 								<strong class="jxr_keyword">break</strong>;
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 							}
 <a class="jxr_linenumber" name="L217" href="#L217">217</a> 						}
@@ -240,7 +240,7 @@
 <a class="jxr_linenumber" name="L232" href="#L232">232</a> 			<strong class="jxr_keyword">for</strong> (String nextFormat : format) {
 <a class="jxr_linenumber" name="L233" href="#L233">233</a> 				EncodingEnum retVal = EncodingEnum.forContentType(nextFormat);
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> 				<strong class="jxr_keyword">if</strong> (retVal != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L235" href="#L235">235</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(retVal, nextFormat);
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(theReq.getServer().getFhirContext(), retVal, nextFormat);
 <a class="jxr_linenumber" name="L236" href="#L236">236</a> 				}
 <a class="jxr_linenumber" name="L237" href="#L237">237</a> 			}
 <a class="jxr_linenumber" name="L238" href="#L238">238</a> 		}
@@ -296,12 +296,12 @@
 <a class="jxr_linenumber" name="L288" href="#L288">288</a> 					ResponseEncoding encoding;
 <a class="jxr_linenumber" name="L289" href="#L289">289</a> 					<strong class="jxr_keyword">if</strong> (endSpaceIndex == -1) {
 <a class="jxr_linenumber" name="L290" href="#L290">290</a> 						<strong class="jxr_keyword">if</strong> (startSpaceIndex == 0) {
-<a class="jxr_linenumber" name="L291" href="#L291">291</a> 							encoding = getEncodingForContentType(strict, nextToken);
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken);
 <a class="jxr_linenumber" name="L292" href="#L292">292</a> 						} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L293" href="#L293">293</a> 							encoding = getEncodingForContentType(strict, nextToken.substring(startSpaceIndex));
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex));
 <a class="jxr_linenumber" name="L294" href="#L294">294</a> 						}
 <a class="jxr_linenumber" name="L295" href="#L295">295</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L296" href="#L296">296</a> 						encoding = getEncodingForContentType(strict, nextToken.substring(startSpaceIndex, endSpaceIndex));
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 						encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex, endSpaceIndex));
 <a class="jxr_linenumber" name="L297" href="#L297">297</a> 						String remaining = nextToken.substring(endSpaceIndex + 1);
 <a class="jxr_linenumber" name="L298" href="#L298">298</a> 						StringTokenizer qualifierTok = <strong class="jxr_keyword">new</strong> StringTokenizer(remaining, <span class="jxr_string">";"</span>);
 <a class="jxr_linenumber" name="L299" href="#L299">299</a> 						<strong class="jxr_keyword">while</strong> (qualifierTok.hasMoreTokens()) {
@@ -355,7 +355,7 @@
 <a class="jxr_linenumber" name="L347" href="#L347">347</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a> determineResponseEncodingWithDefault(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theReq) {
 <a class="jxr_linenumber" name="L348" href="#L348">348</a> 		ResponseEncoding retVal = determineResponseEncodingNoDefault(theReq, theReq.getServer().getDefaultResponseEncoding());
 <a class="jxr_linenumber" name="L349" href="#L349">349</a> 		<strong class="jxr_keyword">if</strong> (retVal == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 			retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(theReq.getServer().getDefaultResponseEncoding(), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 			retVal = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(theReq.getServer().getFhirContext(), theReq.getServer().getDefaultResponseEncoding(), <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L351" href="#L351">351</a> 		}
 <a class="jxr_linenumber" name="L352" href="#L352">352</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L353" href="#L353">353</a> 	}
@@ -425,7 +425,7 @@
 <a class="jxr_linenumber" name="L417" href="#L417">417</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L418" href="#L418">418</a> 	}
 <a class="jxr_linenumber" name="L419" href="#L419">419</a> 
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a> getEncodingForContentType(<strong class="jxr_keyword">boolean</strong> theStrict, String theContentType) {
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a> getEncodingForContentType(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theFhirContext, <strong class="jxr_keyword">boolean</strong> theStrict, String theContentType) {
 <a class="jxr_linenumber" name="L421" href="#L421">421</a> 		EncodingEnum encoding;
 <a class="jxr_linenumber" name="L422" href="#L422">422</a> 		<strong class="jxr_keyword">if</strong> (theStrict) {
 <a class="jxr_linenumber" name="L423" href="#L423">423</a> 			encoding = EncodingEnum.forContentTypeStrict(theContentType);
@@ -435,7 +435,7 @@
 <a class="jxr_linenumber" name="L427" href="#L427">427</a> 		<strong class="jxr_keyword">if</strong> (encoding == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L428" href="#L428">428</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L429" href="#L429">429</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L430" href="#L430">430</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(encoding, theContentType);
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(theFhirContext, encoding, theContentType);
 <a class="jxr_linenumber" name="L431" href="#L431">431</a> 		}
 <a class="jxr_linenumber" name="L432" href="#L432">432</a> 	}
 <a class="jxr_linenumber" name="L433" href="#L433">433</a> 
@@ -615,9 +615,9 @@
 <a class="jxr_linenumber" name="L607" href="#L607">607</a> 
 <a class="jxr_linenumber" name="L608" href="#L608">608</a> 		<strong class="jxr_keyword">if</strong> (theAddContentLocationHeader &amp;&amp; fullId != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L609" href="#L609">609</a> 			<strong class="jxr_keyword">if</strong> (theServer.getFhirContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-<a class="jxr_linenumber" name="L610" href="#L610">610</a> 				restUtil.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> 				restUtil.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 <a class="jxr_linenumber" name="L611" href="#L611">611</a> 			}
-<a class="jxr_linenumber" name="L612" href="#L612">612</a> 			restUtil.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> 			restUtil.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
 <a class="jxr_linenumber" name="L613" href="#L613">613</a> 		}
 <a class="jxr_linenumber" name="L614" href="#L614">614</a> 
 <a class="jxr_linenumber" name="L615" href="#L615">615</a> 		<strong class="jxr_keyword">if</strong> (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
@@ -643,7 +643,7 @@
 <a class="jxr_linenumber" name="L635" href="#L635">635</a> 
 <a class="jxr_linenumber" name="L636" href="#L636">636</a> 		<em class="jxr_comment">// Ok, we're not serving a binary resource, so apply default encoding</em>
 <a class="jxr_linenumber" name="L637" href="#L637">637</a> 		<strong class="jxr_keyword">if</strong> (responseEncoding == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L638" href="#L638">638</a> 			responseEncoding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(theServer.getDefaultResponseEncoding(), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L638" href="#L638">638</a> 			responseEncoding = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L639" href="#L639">639</a> 		}
 <a class="jxr_linenumber" name="L640" href="#L640">640</a> 
 <a class="jxr_linenumber" name="L641" href="#L641">641</a> 		<strong class="jxr_keyword">boolean</strong> encodingDomainResourceAsText = theSummaryMode.contains(SummaryEnum.TEXT);
@@ -760,49 +760,65 @@
 <a class="jxr_linenumber" name="L752" href="#L752">752</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> myEncoding;
 <a class="jxr_linenumber" name="L753" href="#L753">753</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Boolean myNonLegacy;
 <a class="jxr_linenumber" name="L754" href="#L754">754</a> 
-<a class="jxr_linenumber" name="L755" href="#L755">755</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(<a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> theEncoding, String theContentType) {
+<a class="jxr_linenumber" name="L755" href="#L755">755</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/RestfulServerUtils.html">ResponseEncoding</a>(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theCtx, <a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> theEncoding, String theContentType) {
 <a class="jxr_linenumber" name="L756" href="#L756">756</a> 			<strong class="jxr_keyword">super</strong>();
 <a class="jxr_linenumber" name="L757" href="#L757">757</a> 			myEncoding = theEncoding;
 <a class="jxr_linenumber" name="L758" href="#L758">758</a> 			<strong class="jxr_keyword">if</strong> (theContentType != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L759" href="#L759">759</a> 				myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
-<a class="jxr_linenumber" name="L760" href="#L760">760</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L761" href="#L761">761</a> 				myNonLegacy = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L762" href="#L762">762</a> 			}
-<a class="jxr_linenumber" name="L763" href="#L763">763</a> 		}
-<a class="jxr_linenumber" name="L764" href="#L764">764</a> 
-<a class="jxr_linenumber" name="L765" href="#L765">765</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> getEncoding() {
-<a class="jxr_linenumber" name="L766" href="#L766">766</a> 			<strong class="jxr_keyword">return</strong> myEncoding;
-<a class="jxr_linenumber" name="L767" href="#L767">767</a> 		}
-<a class="jxr_linenumber" name="L768" href="#L768">768</a> 
-<a class="jxr_linenumber" name="L769" href="#L769">769</a> 		<strong class="jxr_keyword">public</strong> String getResourceContentType() {
-<a class="jxr_linenumber" name="L770" href="#L770">770</a> 			<strong class="jxr_keyword">if</strong> (Boolean.TRUE.equals(isNonLegacy())) {
-<a class="jxr_linenumber" name="L771" href="#L771">771</a> 				<strong class="jxr_keyword">return</strong> getEncoding().getResourceContentTypeNonLegacy();
-<a class="jxr_linenumber" name="L772" href="#L772">772</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L773" href="#L773">773</a> 				<strong class="jxr_keyword">return</strong> getEncoding().getResourceContentType();
-<a class="jxr_linenumber" name="L774" href="#L774">774</a> 			}
+<a class="jxr_linenumber" name="L759" href="#L759">759</a> 				<strong class="jxr_keyword">if</strong> (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
+<a class="jxr_linenumber" name="L760" href="#L760">760</a> 					myNonLegacy = !theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3);
+<a class="jxr_linenumber" name="L761" href="#L761">761</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L762" href="#L762">762</a> 					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
+<a class="jxr_linenumber" name="L763" href="#L763">763</a> 				}
+<a class="jxr_linenumber" name="L764" href="#L764">764</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L765" href="#L765">765</a> 				<strong class="jxr_keyword">if</strong> (theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+<a class="jxr_linenumber" name="L766" href="#L766">766</a> 					myNonLegacy = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L767" href="#L767">767</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L768" href="#L768">768</a> 					myNonLegacy = Boolean.TRUE;
+<a class="jxr_linenumber" name="L769" href="#L769">769</a> 				}
+<a class="jxr_linenumber" name="L770" href="#L770">770</a> 			}
+<a class="jxr_linenumber" name="L771" href="#L771">771</a> 		}
+<a class="jxr_linenumber" name="L772" href="#L772">772</a> 
+<a class="jxr_linenumber" name="L773" href="#L773">773</a> 		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> getEncoding() {
+<a class="jxr_linenumber" name="L774" href="#L774">774</a> 			<strong class="jxr_keyword">return</strong> myEncoding;
 <a class="jxr_linenumber" name="L775" href="#L775">775</a> 		}
 <a class="jxr_linenumber" name="L776" href="#L776">776</a> 
-<a class="jxr_linenumber" name="L777" href="#L777">777</a> 		<strong class="jxr_keyword">public</strong> Boolean isNonLegacy() {
-<a class="jxr_linenumber" name="L778" href="#L778">778</a> 			<strong class="jxr_keyword">return</strong> myNonLegacy;
-<a class="jxr_linenumber" name="L779" href="#L779">779</a> 		}
-<a class="jxr_linenumber" name="L780" href="#L780">780</a> 	}
-<a class="jxr_linenumber" name="L781" href="#L781">781</a> 
-<a class="jxr_linenumber" name="L782" href="#L782">782</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> addAcceptHeaderToRequest(<a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> theEncoding, <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpRequest.html">IHttpRequest</a> theHttpRequest, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext) {
-<a class="jxr_linenumber" name="L783" href="#L783">783</a> 		<strong class="jxr_keyword">if</strong> (theEncoding == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L784" href="#L784">784</a> 			<strong class="jxr_keyword">if</strong> (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
-<a class="jxr_linenumber" name="L785" href="#L785">785</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
-<a class="jxr_linenumber" name="L786" href="#L786">786</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L787" href="#L787">787</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
-<a class="jxr_linenumber" name="L788" href="#L788">788</a> 			}
-<a class="jxr_linenumber" name="L789" href="#L789">789</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theEncoding == EncodingEnum.JSON) {
-<a class="jxr_linenumber" name="L790" href="#L790">790</a> 			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
-<a class="jxr_linenumber" name="L791" href="#L791">791</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theEncoding == EncodingEnum.XML) {
-<a class="jxr_linenumber" name="L792" href="#L792">792</a> 			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
-<a class="jxr_linenumber" name="L793" href="#L793">793</a> 		}
-<a class="jxr_linenumber" name="L794" href="#L794">794</a> 
-<a class="jxr_linenumber" name="L795" href="#L795">795</a> 	}
-<a class="jxr_linenumber" name="L796" href="#L796">796</a> 
-<a class="jxr_linenumber" name="L797" href="#L797">797</a> }
+<a class="jxr_linenumber" name="L777" href="#L777">777</a> 		<strong class="jxr_keyword">public</strong> String getResourceContentType() {
+<a class="jxr_linenumber" name="L778" href="#L778">778</a> 			<strong class="jxr_keyword">if</strong> (Boolean.TRUE.equals(isNonLegacy())) {
+<a class="jxr_linenumber" name="L779" href="#L779">779</a> 				<strong class="jxr_keyword">return</strong> getEncoding().getResourceContentTypeNonLegacy();
+<a class="jxr_linenumber" name="L780" href="#L780">780</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> 				<strong class="jxr_keyword">return</strong> getEncoding().getResourceContentType();
+<a class="jxr_linenumber" name="L782" href="#L782">782</a> 			}
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> 		}
+<a class="jxr_linenumber" name="L784" href="#L784">784</a> 
+<a class="jxr_linenumber" name="L785" href="#L785">785</a> 		<strong class="jxr_keyword">public</strong> Boolean isNonLegacy() {
+<a class="jxr_linenumber" name="L786" href="#L786">786</a> 			<strong class="jxr_keyword">return</strong> myNonLegacy;
+<a class="jxr_linenumber" name="L787" href="#L787">787</a> 		}
+<a class="jxr_linenumber" name="L788" href="#L788">788</a> 	}
+<a class="jxr_linenumber" name="L789" href="#L789">789</a> 
+<a class="jxr_linenumber" name="L790" href="#L790">790</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> addAcceptHeaderToRequest(<a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> theEncoding, <a href="../../../../../ca/uhn/fhir/rest/client/api/IHttpRequest.html">IHttpRequest</a> theHttpRequest, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext) {
+<a class="jxr_linenumber" name="L791" href="#L791">791</a> 		<strong class="jxr_keyword">if</strong> (theEncoding == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L792" href="#L792">792</a> 			<strong class="jxr_keyword">if</strong> (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+<a class="jxr_linenumber" name="L793" href="#L793">793</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+<a class="jxr_linenumber" name="L794" href="#L794">794</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L795" href="#L795">795</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
+<a class="jxr_linenumber" name="L796" href="#L796">796</a> 			}
+<a class="jxr_linenumber" name="L797" href="#L797">797</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theEncoding == EncodingEnum.JSON) {
+<a class="jxr_linenumber" name="L798" href="#L798">798</a> 			<strong class="jxr_keyword">if</strong> (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+<a class="jxr_linenumber" name="L799" href="#L799">799</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+<a class="jxr_linenumber" name="L800" href="#L800">800</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L801" href="#L801">801</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+<a class="jxr_linenumber" name="L802" href="#L802">802</a> 			}
+<a class="jxr_linenumber" name="L803" href="#L803">803</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theEncoding == EncodingEnum.XML) {
+<a class="jxr_linenumber" name="L804" href="#L804">804</a> 			<strong class="jxr_keyword">if</strong> (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2) == false) {
+<a class="jxr_linenumber" name="L805" href="#L805">805</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
+<a class="jxr_linenumber" name="L806" href="#L806">806</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L807" href="#L807">807</a> 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
+<a class="jxr_linenumber" name="L808" href="#L808">808</a> 			}
+<a class="jxr_linenumber" name="L809" href="#L809">809</a> 		}
+<a class="jxr_linenumber" name="L810" href="#L810">810</a> 
+<a class="jxr_linenumber" name="L811" href="#L811">811</a> 	}
+<a class="jxr_linenumber" name="L812" href="#L812">812</a> 
+<a class="jxr_linenumber" name="L813" href="#L813">813</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

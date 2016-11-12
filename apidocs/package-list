@@ -10,6 +10,7 @@ ca.uhn.fhir.model.valueset
 ca.uhn.fhir.model.view
 ca.uhn.fhir.narrative
 ca.uhn.fhir.parser
+ca.uhn.fhir.parser.json
 ca.uhn.fhir.rest.annotation
 ca.uhn.fhir.rest.api
 ca.uhn.fhir.rest.client

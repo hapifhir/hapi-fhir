@@ -38,7 +38,7 @@
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.tuple.Pair;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.exceptions.FHIRException;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.context.IWorkerContext;
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.*;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
@@ -46,7 +46,7 @@
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.utils.FluentPathEngine;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.utils.IWorkerContext;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.exceptions.FHIRException;
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -690,44 +690,47 @@
 <a class="jxr_linenumber" name="L682" href="#L682">682</a> 		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L683" href="#L683">683</a> 			String[] nextPathsSplit = SPLIT.split(thePaths);
 <a class="jxr_linenumber" name="L684" href="#L684">684</a> 			<strong class="jxr_keyword">for</strong> (String nextPath : nextPathsSplit) {
-<a class="jxr_linenumber" name="L685" href="#L685">685</a> 				values.addAll(fp.evaluate((Base) theResource, nextPath));
-<a class="jxr_linenumber" name="L686" href="#L686">686</a> 			}
-<a class="jxr_linenumber" name="L687" href="#L687">687</a> 		} <strong class="jxr_keyword">catch</strong> (FHIRException e) {
-<a class="jxr_linenumber" name="L688" href="#L688">688</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InternalErrorException(e);
-<a class="jxr_linenumber" name="L689" href="#L689">689</a> 		}
-<a class="jxr_linenumber" name="L690" href="#L690">690</a> 		<strong class="jxr_keyword">return</strong> values;
-<a class="jxr_linenumber" name="L691" href="#L691">691</a> 	}
-<a class="jxr_linenumber" name="L692" href="#L692">692</a> 
-<a class="jxr_linenumber" name="L693" href="#L693">693</a> 	@Override
-<a class="jxr_linenumber" name="L694" href="#L694">694</a> 	<strong class="jxr_keyword">public</strong> List&lt;PathAndRef&gt; extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
-<a class="jxr_linenumber" name="L695" href="#L695">695</a> 		ArrayList&lt;PathAndRef&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;PathAndRef&gt;();
-<a class="jxr_linenumber" name="L696" href="#L696">696</a> 
-<a class="jxr_linenumber" name="L697" href="#L697">697</a> 		String[] nextPathsSplit = SPLIT.split(theNextSpDef.getPath());
-<a class="jxr_linenumber" name="L698" href="#L698">698</a> 		<strong class="jxr_keyword">for</strong> (String path : nextPathsSplit) {
-<a class="jxr_linenumber" name="L699" href="#L699">699</a> 			path = path.trim();
-<a class="jxr_linenumber" name="L700" href="#L700">700</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(path)) {
-<a class="jxr_linenumber" name="L701" href="#L701">701</a> 				<strong class="jxr_keyword">for</strong> (Object next : extractValues(path, theResource)) {
-<a class="jxr_linenumber" name="L702" href="#L702">702</a> 					retVal.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/PathAndRef.html">PathAndRef</a>(path, next));
-<a class="jxr_linenumber" name="L703" href="#L703">703</a> 				}
-<a class="jxr_linenumber" name="L704" href="#L704">704</a> 			}
-<a class="jxr_linenumber" name="L705" href="#L705">705</a> 		}
-<a class="jxr_linenumber" name="L706" href="#L706">706</a> 
-<a class="jxr_linenumber" name="L707" href="#L707">707</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L708" href="#L708">708</a> 	}
+<a class="jxr_linenumber" name="L685" href="#L685">685</a> 				List&lt;Base&gt; allValues = fp.evaluate((Base) theResource, nextPath);
+<a class="jxr_linenumber" name="L686" href="#L686">686</a> 				<strong class="jxr_keyword">if</strong> (allValues.isEmpty() == false) {
+<a class="jxr_linenumber" name="L687" href="#L687">687</a> 					values.addAll(allValues);
+<a class="jxr_linenumber" name="L688" href="#L688">688</a> 				}
+<a class="jxr_linenumber" name="L689" href="#L689">689</a> 			}
+<a class="jxr_linenumber" name="L690" href="#L690">690</a> 		} <strong class="jxr_keyword">catch</strong> (FHIRException e) {
+<a class="jxr_linenumber" name="L691" href="#L691">691</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InternalErrorException(e);
+<a class="jxr_linenumber" name="L692" href="#L692">692</a> 		}
+<a class="jxr_linenumber" name="L693" href="#L693">693</a> 		<strong class="jxr_keyword">return</strong> values;
+<a class="jxr_linenumber" name="L694" href="#L694">694</a> 	}
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> 
+<a class="jxr_linenumber" name="L696" href="#L696">696</a> 	@Override
+<a class="jxr_linenumber" name="L697" href="#L697">697</a> 	<strong class="jxr_keyword">public</strong> List&lt;PathAndRef&gt; extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> 		ArrayList&lt;PathAndRef&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;PathAndRef&gt;();
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> 
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> 		String[] nextPathsSplit = SPLIT.split(theNextSpDef.getPath());
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> 		<strong class="jxr_keyword">for</strong> (String path : nextPathsSplit) {
+<a class="jxr_linenumber" name="L702" href="#L702">702</a> 			path = path.trim();
+<a class="jxr_linenumber" name="L703" href="#L703">703</a> 			<strong class="jxr_keyword">if</strong> (isNotBlank(path)) {
+<a class="jxr_linenumber" name="L704" href="#L704">704</a> 				<strong class="jxr_keyword">for</strong> (Object next : extractValues(path, theResource)) {
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> 					retVal.add(<strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/PathAndRef.html">PathAndRef</a>(path, next));
+<a class="jxr_linenumber" name="L706" href="#L706">706</a> 				}
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> 			}
+<a class="jxr_linenumber" name="L708" href="#L708">708</a> 		}
 <a class="jxr_linenumber" name="L709" href="#L709">709</a> 
-<a class="jxr_linenumber" name="L710" href="#L710">710</a> 	@VisibleForTesting
-<a class="jxr_linenumber" name="L711" href="#L711">711</a> 	<strong class="jxr_keyword">void</strong> setValidationSupportForTesting(org.hl7.fhir.dstu3.hapi.validation.IValidationSupport theValidationSupport) {
-<a class="jxr_linenumber" name="L712" href="#L712">712</a> 		myValidationSupport = theValidationSupport;
-<a class="jxr_linenumber" name="L713" href="#L713">713</a> 	}
-<a class="jxr_linenumber" name="L714" href="#L714">714</a> 
-<a class="jxr_linenumber" name="L715" href="#L715">715</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; String extractSystem(Enumeration&lt;T&gt; theBoundCode) {
-<a class="jxr_linenumber" name="L716" href="#L716">716</a> 		<strong class="jxr_keyword">if</strong> (theBoundCode.getValue() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L717" href="#L717">717</a> 			<strong class="jxr_keyword">return</strong> theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
-<a class="jxr_linenumber" name="L718" href="#L718">718</a> 		}
-<a class="jxr_linenumber" name="L719" href="#L719">719</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L720" href="#L720">720</a> 	}
-<a class="jxr_linenumber" name="L721" href="#L721">721</a> 
-<a class="jxr_linenumber" name="L722" href="#L722">722</a> }
+<a class="jxr_linenumber" name="L710" href="#L710">710</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L711" href="#L711">711</a> 	}
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> 
+<a class="jxr_linenumber" name="L713" href="#L713">713</a> 	@VisibleForTesting
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> 	<strong class="jxr_keyword">void</strong> setValidationSupportForTesting(org.hl7.fhir.dstu3.hapi.validation.IValidationSupport theValidationSupport) {
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> 		myValidationSupport = theValidationSupport;
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> 	}
+<a class="jxr_linenumber" name="L717" href="#L717">717</a> 
+<a class="jxr_linenumber" name="L718" href="#L718">718</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; String extractSystem(Enumeration&lt;T&gt; theBoundCode) {
+<a class="jxr_linenumber" name="L719" href="#L719">719</a> 		<strong class="jxr_keyword">if</strong> (theBoundCode.getValue() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> 			<strong class="jxr_keyword">return</strong> theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> 		}
+<a class="jxr_linenumber" name="L722" href="#L722">722</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L723" href="#L723">723</a> 	}
+<a class="jxr_linenumber" name="L724" href="#L724">724</a> 
+<a class="jxr_linenumber" name="L725" href="#L725">725</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

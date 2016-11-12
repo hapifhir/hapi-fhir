@@ -274,7 +274,7 @@
 <a class="jxr_linenumber" name="L266" href="#L266">266</a> 	@Override
 <a class="jxr_linenumber" name="L267" href="#L267">267</a> 	<strong class="jxr_keyword">public</strong> List&lt;VersionIndependentConcept&gt; expandValueSet(String theValueSet) {
 <a class="jxr_linenumber" name="L268" href="#L268">268</a> 		ValueSet source = <strong class="jxr_keyword">new</strong> ValueSet();
-<a class="jxr_linenumber" name="L269" href="#L269">269</a> 		source.getCompose().addImport(theValueSet);
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 		source.getCompose().addInclude().addValueSet(theValueSet);
 <a class="jxr_linenumber" name="L270" href="#L270">270</a> 		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L271" href="#L271">271</a> 			ArrayList&lt;VersionIndependentConcept&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;VersionIndependentConcept&gt;();
 <a class="jxr_linenumber" name="L272" href="#L272">272</a> 

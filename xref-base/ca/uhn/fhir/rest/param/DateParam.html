@@ -170,7 +170,7 @@
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">	 *           The string</em>
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/param/DateParam.html">DateParam</a>(String theString) {
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 		setValueAsQueryToken(<strong class="jxr_keyword">null</strong>, theString);
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 		setValueAsQueryToken(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, theString);
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 	}
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 	@Override
@@ -193,7 +193,7 @@
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> 	}
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> 
 <a class="jxr_linenumber" name="L187" href="#L187">187</a> 	@Override
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 	<strong class="jxr_keyword">void</strong> doSetValueAsQueryToken(String theQualifier, String theValue) {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 	<strong class="jxr_keyword">void</strong> doSetValueAsQueryToken(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, String theParamName, String theQualifier, String theValue) {
 <a class="jxr_linenumber" name="L189" href="#L189">189</a> 		setValueAsString(theValue);
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 	}
 <a class="jxr_linenumber" name="L191" href="#L191">191</a> 
@@ -293,7 +293,7 @@
 <a class="jxr_linenumber" name="L285" href="#L285">285</a> 	}
 <a class="jxr_linenumber" name="L286" href="#L286">286</a> 
 <a class="jxr_linenumber" name="L287" href="#L287">287</a> 	@Override
-<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong>  setValuesAsQueryTokens(QualifiedParamList theParameters) {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong>  setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 <a class="jxr_linenumber" name="L289" href="#L289">289</a> 		setMissing(<strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L290" href="#L290">290</a> 		setPrefix(<strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L291" href="#L291">291</a> 		setValueAsString(<strong class="jxr_keyword">null</strong>);
