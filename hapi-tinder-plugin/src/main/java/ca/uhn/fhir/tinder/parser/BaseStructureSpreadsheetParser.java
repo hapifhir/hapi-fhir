@@ -317,7 +317,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						if (sp.getType().equals("composite")) {
 							compositeParams.add(sp);
 						} else {
-							theResource.addSearchParameter(getVersion(), sp);
+							theResource.addSearchParameter(sp);
 						}
 					}
 
@@ -397,7 +397,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					for (SearchParameter part1 : compositeOf.get(0)) {
 						for (SearchParameter part2 : compositeOf.get(1)) {
 							SearchParameter composite = new SearchParameter(getVersion(), theResource.getName());
-							theResource.addSearchParameter(getVersion(), composite);
+							theResource.addSearchParameter(composite);
 							composite.setName(part1.getName() + "-" + part2.getName());
 							composite.setDescription(nextCompositeParam.getDescription());
 							composite.setPath(nextCompositeParam.getPath());

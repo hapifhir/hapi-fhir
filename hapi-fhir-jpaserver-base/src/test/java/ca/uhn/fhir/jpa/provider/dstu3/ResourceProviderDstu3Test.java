@@ -100,6 +100,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
@@ -673,6 +674,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
+	}
+
+	@Test
+	public void testMetadataSuperParamsAreIncluded() throws IOException {
+		StructureDefinition p = new StructureDefinition();
+		p.setAbstract(true);
+		p.setUrl("http://example.com/foo");
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		Bundle resp = ourClient
+			.search()
+			.forResource(StructureDefinition.class)
+			.where(StructureDefinition.URL.matches().value("http://example.com/foo"))
+			.returnBundle(Bundle.class)
+			.execute();
+		
+		assertEquals(1, resp.getTotal());
 	}
 
 	@Test

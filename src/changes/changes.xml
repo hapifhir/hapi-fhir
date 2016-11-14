@@ -12,6 +12,13 @@
 				transactions are blocked even when they
 				should not be
 			</action>
+			<action type="fix">
+				Fix regression in HAPI FHIR 2.1 JPA 
+				server where some search parameters on
+				metadata resources did not appear
+				(e.g. "StructureDefinition.url"). Thanks
+				to David Hay for reporting!
+			</action>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
 				STU3 structure definitions have been updated to the 
