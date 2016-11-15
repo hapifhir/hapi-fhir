@@ -111,6 +111,9 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 			break;
 		case BATCH:
 		case TRANSACTION:
+			if (!(theOperation == RestOperationTypeEnum.TRANSACTION)) {
+				return null;
+			}
 			if (theInputResource != null && requestAppliesToTransaction(ctx, myOp, theInputResource)) {
 				if (getMode() == PolicyEnum.DENY) {
 					return new Verdict(PolicyEnum.DENY, this);

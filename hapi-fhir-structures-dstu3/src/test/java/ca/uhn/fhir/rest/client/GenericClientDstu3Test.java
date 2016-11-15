@@ -29,6 +29,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.dstu3.model.*;
@@ -116,6 +118,246 @@ public class GenericClientDstu3Test {
 			}
 		});
 		return capt;
+	}
+
+	@Test
+	public void testPatchJsonByIdString() throws Exception {
+		OperationOutcome conf = new OperationOutcome();
+		conf.getText().setDivAsString("OK!");
+		final String respString = ourCtx.newJsonParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+
+		MethodOutcome outcome = client
+			.patch()
+			.withBody(patch)
+			.withId("Patient/123")
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
+		assertEquals(patch, extractBodyAsString(capt));
+		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		idx++;
+		
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+	}
+	@Test
+	public void testPatchJsonByIdType() throws Exception {
+		OperationOutcome conf = new OperationOutcome();
+		conf.getText().setDivAsString("OK!");
+		final String respString = ourCtx.newJsonParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+
+		MethodOutcome outcome = client
+			.patch()
+			.withBody(patch)
+			.withId(new IdType("http://localhost/fhir/Patient/123/_history/234"))
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
+		assertEquals(patch, extractBodyAsString(capt));
+		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		idx++;
+		
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+	}
+	@Test
+	public void testPatchJsonByConditionalString() throws Exception {
+		OperationOutcome conf = new OperationOutcome();
+		conf.getText().setDivAsString("OK!");
+		final String respString = ourCtx.newJsonParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+
+		MethodOutcome outcome = client
+			.patch()
+			.withBody(patch)
+			.conditionalByUrl("Patient?foo=bar")
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient?foo=bar", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
+		assertEquals(patch, extractBodyAsString(capt));
+		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		idx++;
+		
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+	}
+	@Test
+	public void testPatchJsonByConditionalParam() throws Exception {
+		OperationOutcome conf = new OperationOutcome();
+		conf.getText().setDivAsString("OK!");
+		final String respString = ourCtx.newJsonParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+
+		MethodOutcome outcome = client
+			.patch()
+			.withBody(patch)
+			.conditional("Patient").where(Patient.NAME.matches().value("TEST"))
+			.and(Patient.FAMILY.matches().value("TEST2"))
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient?name=TEST&family=TEST2", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
+		assertEquals(patch, extractBodyAsString(capt));
+		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		idx++;
+		
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+	}
+	@Test
+	public void testPatchJsonByConditionalParamResourceType() throws Exception {
+		OperationOutcome conf = new OperationOutcome();
+		conf.getText().setDivAsString("OK!");
+		final String respString = ourCtx.newJsonParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+
+		MethodOutcome outcome = client
+			.patch()
+			.withBody(patch)
+			.conditional(Patient.class).where(Patient.NAME.matches().value("TEST"))
+			.and(Patient.FAMILY.matches().value("TEST2"))
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient?name=TEST&family=TEST2", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
+		assertEquals(patch, extractBodyAsString(capt));
+		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		idx++;
+		
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+	}
+	@Test
+	public void testPatchXmlByIdString() throws Exception {
+		OperationOutcome conf = new OperationOutcome();
+		conf.getText().setDivAsString("OK!");
+		final String respString = ourCtx.newJsonParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		int idx = 0;
+
+		String patch = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
+
+		MethodOutcome outcome = client
+			.patch()
+			.withBody(patch)
+			.withId("Patient/123")
+			.execute();
+
+		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
+		assertEquals(patch, extractBodyAsString(capt));
+		assertEquals(Constants.CT_XML_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		idx++;
+		
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		assertThat(oo.getText().getDivAsString(), containsString("OK!"));
+	}
+	
+	@Test
+	public void testPatchInvalid() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		try {
+			client
+				.patch()
+				.withBody("AA")
+				.withId("Patient/123")
+				.execute();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Unable to determine encoding of patch", e.getMessage());
+		}
 	}
 
 	@Test

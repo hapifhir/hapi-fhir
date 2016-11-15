@@ -56,7 +56,7 @@ public abstract class BaseRootType extends BaseElement {
 		return retVal;
 	}
 
-	public void addSearchParameter(String theVersion, SearchParameter theParam) {
+	public void addSearchParameter(SearchParameter theParam) {
 		getSearchParameters();
 		mySearchParameters.add(theParam);
 		

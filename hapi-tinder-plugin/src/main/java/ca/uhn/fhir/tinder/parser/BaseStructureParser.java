@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
@@ -66,11 +67,24 @@ public abstract class BaseStructureParser {
 	protected List<BaseRootType> myResources = new ArrayList<BaseRootType>();
 	private String myVersion;
 	private boolean myIsRi;
+	private FhirContext myCtx;
 
 	public BaseStructureParser(String theVersion, String theBaseDir) {
 		myVersion = theVersion;
 		myBaseDir = theBaseDir;
 		myIsRi = myVersion.equals("dstu3");
+
+		if (myVersion.equals("dstu3")) {
+			myCtx = FhirContext.forDstu3();
+		} else if (myVersion.equals("dstu2")) {
+			myCtx = FhirContext.forDstu2();
+		} else if (myVersion.equals("dstu")) {
+			myCtx = FhirContext.forDstu1();
+		}
+	}
+
+	public FhirContext getCtx() {
+		return myCtx;
 	}
 
 	public String getVersion() {
@@ -175,7 +189,7 @@ public abstract class BaseStructureParser {
 	}
 
 	protected abstract String getTemplate();
-	
+
 	protected abstract File getTemplateFile();
 
 	protected boolean isSpreadsheet(String theFileName) {
@@ -228,7 +242,7 @@ public abstract class BaseStructureParser {
 					// not found
 				}
 			}
-			
+
 			try {
 				return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName).getName();
 			} catch (ClassNotFoundException e) {
@@ -447,7 +461,7 @@ public abstract class BaseStructureParser {
 		if (determineVersionEnum().isRi()) {
 			packageSuffix = "." + myVersion;
 		}
-		
+
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("includeDescriptionAnnotations", true);
 		ctx.put("packageBase", thePackageBase);
@@ -489,8 +503,7 @@ public abstract class BaseStructureParser {
 		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
-		InputStream templateIs =
-			getTemplateFile() != null
+		InputStream templateIs = getTemplateFile() != null
 				? new FileInputStream(getTemplateFile())
 				: ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(getTemplate());
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
@@ -573,7 +586,7 @@ public abstract class BaseStructureParser {
 				myNameToDatatypeClass.put("boundCode", BoundCodeDt.class.getName());
 				myNameToDatatypeClass.put("boundCodeableConcept", ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt.class.getName());
 			}
-			
+
 			try {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
 				OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(versionFile, false), "UTF-8");
@@ -584,7 +597,7 @@ public abstract class BaseStructureParser {
 				if (determineVersionEnum().isRi()) {
 					packageSuffix = "." + myVersion;
 				}
-				
+
 				VelocityContext ctx = new VelocityContext();
 				ctx.put("nameToResourceClass", myNameToResourceClass);
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);

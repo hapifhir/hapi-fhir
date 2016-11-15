@@ -45,17 +45,13 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 		myContentType = theContentType;
 		myContents = theContents;
 	}
-//
-//	public HttpDeleteClientInvocation(FhirContext theContext, String theSearchUrl) {
-//		super(theContext);
-//		myUrlPath = theSearchUrl;
-//	}
-//
-//	public HttpDeleteClientInvocation(FhirContext theContext, String theResourceType, Map<String, List<String>> theParams) {
-//		super(theContext);
-//		myUrlPath = theResourceType;
-//		myParams = theParams;
-//	}
+
+	public HttpPatchClientInvocation(FhirContext theContext, String theUrlPath, String theContentType, String theContents) {
+		super(theContext);
+		myUrlPath = theUrlPath;
+		myContentType = theContentType;
+		myContents = theContents;
+	}
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {

@@ -22,10 +22,7 @@ package ca.uhn.fhir.rest.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -138,6 +135,11 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		return retVal;
 	}
 
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrlPath, PatchTypeEnum thePatchType, String theBody) {
+		HttpPatchClientInvocation retVal = new HttpPatchClientInvocation(theContext, theUrlPath, thePatchType.getContentType(), theBody);
+		return retVal;
+	}
+
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		IIdType id = theRequest.getId();
@@ -148,6 +150,13 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	@Override
 	protected String getMatchingOperation() {
 		return null;
+	}
+
+	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, PatchTypeEnum thePatchType, String theBody, String theResourceType, Map<String, List<String>> theMatchParams) {
+		StringBuilder urlBuilder = MethodUtil.createUrl(theResourceType, theMatchParams);
+		String url = urlBuilder.toString();
+		HttpPatchClientInvocation retVal = new HttpPatchClientInvocation(theContext, url, thePatchType.getContentType(), theBody);
+		return retVal;
 	}
 
 }
