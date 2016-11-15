@@ -12,6 +12,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,8 +74,12 @@ public class JsonParserDstu3Test {
 		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bug477.json"), StandardCharsets.UTF_8);
 		
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
-		
+
+		// Do it once without the custom error handler just for the logging
 		IParser p = ourCtx.newJsonParser();
+		p.parseResource(Patient.class, input);
+
+		p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(errorHandler);
 		
 		Patient parsed = p.parseResource(Patient.class, input);
@@ -83,7 +88,10 @@ public class JsonParserDstu3Test {
 		ArgumentCaptor<String> elementName = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ValueType> actual = ArgumentCaptor.forClass(ValueType.class);
-		verify(errorHandler, times(1)).incorrectJsonType(Mockito.any(IParseLocation.class),elementName.capture(), expected.capture(), actual.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class),elementName.capture(), expected.capture(), actual.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class),Mockito.eq("_id"), Mockito.eq(ValueType.OBJECT), Mockito.eq(ValueType.SCALAR));
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class),Mockito.eq("__v"), Mockito.eq(ValueType.OBJECT), Mockito.eq(ValueType.SCALAR));
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class),Mockito.eq("_status"), Mockito.eq(ValueType.OBJECT), Mockito.eq(ValueType.SCALAR));
 		
 		assertEquals("_id", elementName.getAllValues().get(0));
 		assertEquals(ValueType.OBJECT, expected.getAllValues().get(0));

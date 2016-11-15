@@ -1308,12 +1308,16 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			for (String alternateName : keySet) {
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
 					JsonLikeValue nextValue = theObject.get(alternateName);
-					if (nextValue != null && nextValue.isObject()) {
-						String nextName = alternateName.substring(1);
-						if (theObject.get(nextName) == null) {
-							theState.enteringNewElement(null, nextName);
-							parseAlternates(nextValue, theState, alternateName);
-							theState.endingElement();
+					if (nextValue != null) {
+						if (nextValue.isObject()) {
+							String nextName = alternateName.substring(1);
+							if (theObject.get(nextName) == null) {
+								theState.enteringNewElement(null, nextName);
+								parseAlternates(nextValue, theState, alternateName);
+								theState.endingElement();
+							}
+						} else {
+							getErrorHandler().incorrectJsonType(null, alternateName, ValueType.OBJECT, nextValue.getJsonType());
 						}
 					}
 				}

@@ -6,6 +6,7 @@
 	"link": [],
 	"careProvider": [],
 	"communication": [],
+	"_status" : "This should be an object",
 	"animal": {
 		"genderStatus": {
 			"coding": []
