@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
 /*
  * #%L
@@ -36,6 +36,19 @@ public interface IParserErrorHandler {
 	 * @since 2.0
 	 */
 	void containedResourceWithNoId(IParseLocation theLocation);
+
+	/**
+	 * Invoked if the wrong type of element is found while parsing JSON. For example if a given element is
+	 * expected to be a JSON Object and is a JSON array
+	 * @param theLocation
+	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
+	 * @param theElementName
+	 *           The name of the element that was found.
+	 * @param theFound The datatype that was found at this location
+	 * @param theExpected The datatype that was expected at this location
+	 * @since 2.2
+	 */
+	void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound);
 
 	/**
 	 * Resource was missing a required element

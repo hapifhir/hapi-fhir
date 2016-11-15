@@ -12,76 +12,42 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.AuditEvent;
-import org.hl7.fhir.dstu3.model.Basic;
-import org.hl7.fhir.dstu3.model.Binary;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Communication;
-import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
-import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.DiagnosticReport;
-import org.hl7.fhir.dstu3.model.EnumFactory;
 import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
-import org.hl7.fhir.dstu3.model.Linkage;
-import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationRequest;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.PrimitiveType;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
-import org.hl7.fhir.dstu3.model.SampledData;
-import org.hl7.fhir.dstu3.model.SimpleQuantity;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import com.google.common.collect.Sets;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
 import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -97,6 +63,31 @@ public class JsonParserDstu3Test {
 	@After
 	public void after() {
 		ourCtx.setNarrativeGenerator(null);
+	}
+
+	/**
+	 * See #477
+	 */
+	@Test
+	public void testUnexpectedElementsWithUnderscoreAtStartOfName() throws Exception {
+		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bug477.json"), StandardCharsets.UTF_8);
+		
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+		
+		IParser p = ourCtx.newJsonParser();
+		p.setParserErrorHandler(errorHandler);
+		
+		Patient parsed = p.parseResource(Patient.class, input);
+		assertEquals("1", parsed.getIdElement().getIdPart());
+		
+		ArgumentCaptor<String> elementName = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
+		ArgumentCaptor<ValueType> actual = ArgumentCaptor.forClass(ValueType.class);
+		verify(errorHandler, times(1)).incorrectJsonType(Mockito.any(IParseLocation.class),elementName.capture(), expected.capture(), actual.capture());
+		
+		assertEquals("_id", elementName.getAllValues().get(0));
+		assertEquals(ValueType.OBJECT, expected.getAllValues().get(0));
+		assertEquals(ValueType.SCALAR, actual.getAllValues().get(0));
 	}
 	
 
@@ -241,9 +232,9 @@ public class JsonParserDstu3Test {
 
 		List<UriType> gotLabels = parsed.getMeta().getProfile();
 		assertEquals(2, gotLabels.size());
-		UriType label = (UriType) gotLabels.get(0);
+		UriType label = gotLabels.get(0);
 		assertEquals("http://foo/Profile1", label.getValue());
-		label = (UriType) gotLabels.get(1);
+		label = gotLabels.get(1);
 		assertEquals("http://foo/Profile2", label.getValue());
 
 		List<Coding> tagList = parsed.getMeta().getTag();
@@ -368,13 +359,13 @@ public class JsonParserDstu3Test {
 
 		assertEquals(2, gotLabels.size());
 
-		Coding label = (Coding) gotLabels.get(0);
+		Coding label = gotLabels.get(0);
 		assertEquals("SYSTEM1", label.getSystem());
 		assertEquals("CODE1", label.getCode());
 		assertEquals("DISPLAY1", label.getDisplay());
 		assertEquals("VERSION1", label.getVersion());
 
-		label = (Coding) gotLabels.get(1);
+		label = gotLabels.get(1);
 		assertEquals("SYSTEM2", label.getSystem());
 		assertEquals("CODE2", label.getCode());
 		assertEquals("DISPLAY2", label.getDisplay());
@@ -1108,7 +1099,7 @@ public class JsonParserDstu3Test {
 		ExplanationOfBenefit eob = ourCtx.newJsonParser().parseResource(ExplanationOfBenefit.class, input);
 		assertEquals(Reference.class, eob.getCoverage().getCoverage().getClass());
 
-		Reference coverage = (Reference) eob.getCoverage().getCoverage();
+		Reference coverage = eob.getCoverage().getCoverage();
 		assertEquals("Coverage/123", coverage.getReference());
 	}
 
@@ -1192,7 +1183,7 @@ public class JsonParserDstu3Test {
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
 		XhtmlNode div = parsed.getText().getDiv();
 
-		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", parsed.getText().getDiv().getValueAsString());
+		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", div.getValueAsString());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>", encoded);
@@ -1212,7 +1203,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Ignore
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example.json"));
+		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1261,7 +1252,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Ignore
 	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example2.xml"));
+		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example2.xml"), StandardCharsets.UTF_8);
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 
@@ -1286,7 +1277,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Ignore
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example.json"));
+		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 
 		Bundle parsed = ourCtx.newJsonParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1413,7 +1404,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
-	public void testParseAndEncodeComments() throws IOException {
+	public void testParseAndEncodeComments() {
 		//@formatter:off
 		String input = "{\n" + 
 				"  \"resourceType\": \"Patient\",\n" + 
@@ -1501,7 +1492,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testParseCommunicationWithThreeTypes() throws IOException {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/tara-test.json"));
+		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/tara-test.json"), StandardCharsets.UTF_8);
 		Communication comm = ourCtx.newJsonParser().parseResource(Communication.class, content);
 
 		assertEquals(3, comm.getPayload().size());
@@ -1553,7 +1544,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testParseExtensionWithId() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/json-edge-case-modified-335.json"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/json-edge-case-modified-335.json"), StandardCharsets.UTF_8);
 
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, input);
 		StringType family1 = p.getContact().get(0).getName().getFamily().get(1);

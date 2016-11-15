@@ -54,6 +54,7 @@ import ca.uhn.fhir.parser.json.JsonLikeObject;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
@@ -1277,6 +1278,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			JsonLikeValue alternateVal = theObject.get(alternateName);
 			if (alternateVal != null) {
 				handledUnderscoreNames++;
+			}
+			
+			if (alternateVal != null && alternateVal.isObject() == false) {
+				getErrorHandler().incorrectJsonType(null, alternateName, ValueType.OBJECT, alternateVal.getJsonType());
+				alternateVal = null;
 			}
 
 			parseChildren(theState, nextName, nextVal, alternateVal, alternateName);

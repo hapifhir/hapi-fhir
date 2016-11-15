@@ -32,6 +32,7 @@ public class ErrorHandlerTest {
 		new ErrorHandlerAdapter().containedResourceWithNoId(null);
 		new ErrorHandlerAdapter().unknownReference(null, null);
 		new ErrorHandlerAdapter().missingRequiredElement(null, null);
+		new ErrorHandlerAdapter().incorrectJsonType(null, null, null, null);
 	}
 
 	@Test
@@ -41,6 +42,7 @@ public class ErrorHandlerTest {
 		new LenientErrorHandler().unknownElement(null, null);
 		new LenientErrorHandler().containedResourceWithNoId(null);
 		new LenientErrorHandler().unknownReference(null, null);
+		new LenientErrorHandler().incorrectJsonType(null, null, null, null);
 	}
 
 	@Test(expected = DataFormatException.class)
@@ -66,6 +68,11 @@ public class ErrorHandlerTest {
 	@Test(expected = DataFormatException.class)
 	public void testStrictMethods5() {
 		new StrictErrorHandler().unknownReference(null, null);
+	}
+
+	@Test(expected = DataFormatException.class)
+	public void testStrictMethods6() {
+		new StrictErrorHandler().incorrectJsonType(null, null, null, null);
 	}
 
 }

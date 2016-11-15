@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
 /*
  * #%L
@@ -68,6 +69,11 @@ public class StrictErrorHandler implements IParserErrorHandler {
 			b.append("'");
 		}
 		throw new DataFormatException(b.toString());
+	}
+
+	@Override
+	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
+		throw new DataFormatException("Found incorrect type for element " + theElementName + " - Expected " + theExpected.name() + " and found " + theFound.name());
 	}
 
 

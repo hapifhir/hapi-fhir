@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -31,6 +33,16 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 	}
 
 	@Override
+	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
+		// NOP
+	}
+
+	@Override
+	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
+
+	@Override
 	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
 		// NOP
 	}
@@ -47,11 +59,6 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 
 	@Override
 	public void unknownReference(IParseLocation theLocation, String theReference) {
-		// NOP
-	}
-
-	@Override
-	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
 		// NOP
 	}
 

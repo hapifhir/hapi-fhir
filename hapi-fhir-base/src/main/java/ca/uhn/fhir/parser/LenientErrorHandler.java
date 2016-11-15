@@ -1,7 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
 /*
  * #%L
@@ -52,16 +52,23 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	}
 
 	@Override
-	public void unknownElement(IParseLocation theLocation, String theElementName) {
+	public void containedResourceWithNoId(IParseLocation theLocation) {
 		if (myLogErrors) {
-			ourLog.warn("Unknown element '{}' found while parsing", theElementName);
+			ourLog.warn("Resource has contained child resource with no ID");
 		}
 	}
 
 	@Override
-	public void unknownAttribute(IParseLocation theLocation, String theElementName) {
+	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
 		if (myLogErrors) {
-			ourLog.warn("Unknown attribute '{}' found while parsing", theElementName);
+			ourLog.warn("Found incorrect type for element {} - Expected {} and found {}", theElementName, theExpected.name(), theFound.name());
+		}
+	}
+
+	@Override
+	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
+		if (myLogErrors) {
+			ourLog.warn("Resource is missing required element: {}", theElementName);
 		}
 	}
 
@@ -73,9 +80,16 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	}
 
 	@Override
-	public void containedResourceWithNoId(IParseLocation theLocation) {
+	public void unknownAttribute(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
-			ourLog.warn("Resource has contained child resource with no ID");
+			ourLog.warn("Unknown attribute '{}' found while parsing", theElementName);
+		}
+	}
+
+	@Override
+	public void unknownElement(IParseLocation theLocation, String theElementName) {
+		if (myLogErrors) {
+			ourLog.warn("Unknown element '{}' found while parsing", theElementName);
 		}
 	}
 
@@ -83,13 +97,6 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	public void unknownReference(IParseLocation theLocation, String theReference) {
 		if (myLogErrors) {
 			ourLog.warn("Resource has invalid reference: {}", theReference);
-		}
-	}
-
-	@Override
-	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
-		if (myLogErrors) {
-			ourLog.warn("Resource is missing required element: {}", theElementName);
 		}
 	}
 
