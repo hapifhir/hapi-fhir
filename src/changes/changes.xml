@@ -19,6 +19,12 @@
 				(e.g. "StructureDefinition.url"). Thanks
 				to David Hay for reporting!
 			</action>
+			<action type="add">
+				Add ability to JPA server for disabling stale search
+				expiry. This is useful if you are deploying the server
+				to a cluster.
+			</action>
+		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
 				STU3 structure definitions have been updated to the 

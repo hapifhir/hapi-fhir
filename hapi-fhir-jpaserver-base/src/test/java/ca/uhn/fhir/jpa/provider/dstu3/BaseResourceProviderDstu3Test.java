@@ -3,13 +3,18 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.DispatcherType;
+
+import org.apache.catalina.filters.CorsFilter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
@@ -36,6 +41,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.CORSFilter_;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.TestUtil;
@@ -114,6 +120,15 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu3Config.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
+			FilterHolder corsFilterHolder = new FilterHolder();
+			corsFilterHolder.setHeldClass(CorsFilter.class);
+			corsFilterHolder.setInitParameter("cors.allowed.origins", "*");
+			corsFilterHolder.setInitParameter("cors.allowed.methods", "GET,POST,PUT,DELETE,OPTIONS");
+			corsFilterHolder.setInitParameter("cors.allowed.headers", "X-FHIR-Starter,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers");
+			corsFilterHolder.setInitParameter("cors.exposed.headers", "Location,Content-Location");
+			corsFilterHolder.setInitParameter("cors.support.credentials", "true");
+			corsFilterHolder.setInitParameter("cors.logging.enabled", "true");
+			proxyHandler.addFilter(corsFilterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 			
 			server.setHandler(proxyHandler);
 			server.start();

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
@@ -24,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.boot.model.source.spi.IdentifierSourceSimple;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
@@ -37,23 +35,24 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.*;
@@ -1502,6 +1501,80 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 		assertEquals(0, patients.size());
 
+	}
+
+	@After
+	public final void after() {
+		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
+		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
+	}
+	
+	@Autowired
+	protected StaleSearchDeletingSvc myStaleSearchDeletingSvc;
+	
+
+	@Test
+	public void testSearchPagesExpiryDisabled() throws Exception {
+		IIdType pid1;
+		IIdType pid2;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("EXPIRE");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		Date between = new Date();
+		Thread.sleep(10);
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("EXPIRE");
+			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		Thread.sleep(10);
+		
+		SearchParameterMap params;
+		params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
+		IBundleProvider bundleProvider = myPatientDao.search(params);
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+
+		myDaoConfig.setExpireSearchResults(false);
+		myStaleSearchDeletingSvc.pollForStaleSearches();
+		Thread.sleep(1500);
+		
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), (containsInAnyOrder(pid1, pid2)));
+	}
+
+	@Test
+	public void testSearchPagesExpiry() throws Exception {
+		IIdType pid1;
+		IIdType pid2;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("EXPIRE");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		Thread.sleep(10);
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily("EXPIRE");
+			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		Thread.sleep(10);
+
+		SearchParameterMap params;
+		params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
+		IBundleProvider bundleProvider = myPatientDao.search(params);
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+
+		Thread.sleep(1500);
+		
+		myDaoConfig.setExpireSearchResultsAfterMillis(500);
+		myStaleSearchDeletingSvc.pollForStaleSearches();
+		
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider), not(containsInAnyOrder(pid1, pid2)));
 	}
 
 	@Test

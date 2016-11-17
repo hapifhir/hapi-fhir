@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.search;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,46 +47,47 @@ public class StaleSearchDeletingSvc {
 
 	@Autowired
 	private ISearchDao mySearchDao;
-	
+
 	@Autowired
 	private DaoConfig myDaoConfig;
-	
+
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
-	
+
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
 
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-	
+
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public synchronized void pollForStaleSearches() {
-		Date cutoff = new Date(System.currentTimeMillis() - myDaoConfig.getExpireSearchResultsAfterMillis());
-		ourLog.debug("Searching for searches which are before {}", cutoff);
-		
-		Collection<Search> toDelete = mySearchDao.findWhereCreatedBefore(cutoff);
-		if (toDelete.isEmpty()) {
-			return;
+		if (myDaoConfig.isExpireSearchResults()) {
+			Date cutoff = new Date(System.currentTimeMillis() - myDaoConfig.getExpireSearchResultsAfterMillis());
+			ourLog.debug("Searching for searches which are before {}", cutoff);
+
+			Collection<Search> toDelete = mySearchDao.findWhereCreatedBefore(cutoff);
+			if (toDelete.isEmpty()) {
+				return;
+			}
+
+			TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
+			for (final Search next : toDelete) {
+				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+						Search searchToDelete = mySearchDao.findOne(next.getId());
+						ourLog.info("Expiring stale search {} / {}", searchToDelete.getId(), searchToDelete.getUuid());
+						mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
+						mySearchResultDao.deleteForSearch(searchToDelete.getId());
+						mySearchDao.delete(searchToDelete);
+					}
+				});
+			}
+
+			ourLog.info("Deleted {} searches, {} remaining", toDelete.size(), mySearchDao.count());
 		}
-		
-		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
-		for (final Search next : toDelete) {
-			tt.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-					Search searchToDelete = mySearchDao.findOne(next.getId());
-					ourLog.info("Expiring stale search {} / {}", searchToDelete.getId(), searchToDelete.getUuid());
-					mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-					mySearchResultDao.deleteForSearch(searchToDelete.getId());
-					mySearchDao.delete(searchToDelete);
-				}
-			});
-		}
-		
-		ourLog.info("Deleted {} searches, {} remaining", toDelete.size(), mySearchDao.count());
-		
 	}
-	
+
 }
