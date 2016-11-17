@@ -305,6 +305,7 @@
 		<phloc_commons_version>4.4.5</phloc_commons_version>
 		<spring_version>4.3.1.RELEASE</spring_version>
 		<thymeleaf-version>3.0.1.RELEASE</thymeleaf-version>
+		<tomcat_version>8.0.39</tomcat_version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
 
@@ -515,6 +516,12 @@
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-scm</artifactId>
 				<version>2.10</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-catalina</artifactId>
+				<!-- Use property for version because we should refer to this from docs -->
+				<version>${tomcat_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>

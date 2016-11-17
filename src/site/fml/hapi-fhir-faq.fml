@@ -41,6 +41,45 @@
 				</p>
 			</answer>
 		</faq>
+		<faq id="reporting_bugs">
+			<question>How do I report a bug?</question>
+			<answer>
+				<p>
+					We welcome bug reports, and do our best to address them quickly. Please do
+					keep in mind though that HAPI FHIR is a volunteer-run project, so we can't
+					always act immediately on every issue.
+				</p>
+				<p>
+					Before reporting a bug, please make sure what you have is actually a bug.
+					If you are unsure how to do something with HAPI, you are more likely to
+					get a helpful response on our Google Group (please see the 
+					<a href="#getting_help">"Where can I ask questions or get help"</a> above).
+				</p>
+				<p>
+					When reporting a bug, please be as descriptive as possible. It is important
+					to include details such as:
+				</p>
+				<ul>
+					<li>What you are trying to accomplish</li>
+					<li>What version of HAPI you are using (and if you are running a customized version, please mention that too)</li>
+					<li>What platform you are using (Windows/OSX/Linux Platform, OS Version, etc)</li>
+					<li>What version of Java you are using</li>
+				</ul>
+				<p>
+					Please also include any samples or other useful files that might help in
+					diagnosing the issue. This could include resources you are using 
+					for testing, build/server logs, etc. If you are concerned about privacy
+					you may also email <a href="mailto:jamesagnew@gmail.com">James</a> with 
+					these artifacts but please also file a bug and reference the ticket number.
+				</p>
+				<p>
+					Finally, if you are able to include a unit test, or even better a
+					GitHub Pull Request we will be appreciative. Actually, one more thing:
+					If you disciver that your bug was actually not a bug, please make sure
+					to put an update in the ticket and close it.
+				</p>
+			</answer>
+		</faq>
 	</part>
 	<part id="JPA Server">
 		<title>JPA Server</title>
@@ -82,7 +121,7 @@
 							<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-uhnfhirtest/src/main/java/ca/uhn/fhirtest/DerbyNetworkServer.java">here</a> 
 							and
 							an example of setting up a datasource 
-							<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-uhnfhirtest/src/main/java/ca/uhn/fhirtest/config/TestDstu21Config.java">here</a>.
+							<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-uhnfhirtest/src/main/java/ca/uhn/fhirtest/config/TestDstu3Config.java">here</a>.
 						</li>
 					</ul>
 				</p>
