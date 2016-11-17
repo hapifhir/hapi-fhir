@@ -464,16 +464,16 @@ public class GenericClientExample {
          IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
          
          // Perform a search
-         Bundle results = client.search()
+         Bundle resultBundle = client.search()
                .forResource(Patient.class)
                .where(Patient.NAME.matches().value("Smith"))
                .returnBundle(Bundle.class)
                .execute();
          
-         if (results.getLink(Bundle.LINK_NEXT) != null) {
+         if (resultBundle.getLink(Bundle.LINK_NEXT) != null) {
 
             // load next page
-            Bundle nextPage = client.loadPage().next(results).execute();
+            Bundle nextPage = client.loadPage().next(resultBundle).execute();
          }
          // END SNIPPET: searchPaging
       }
