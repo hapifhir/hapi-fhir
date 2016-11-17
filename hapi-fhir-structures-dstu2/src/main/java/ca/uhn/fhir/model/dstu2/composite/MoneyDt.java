@@ -26,4 +26,29 @@ import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 @DatatypeDef(name="Money", profileOf=QuantityDt.class) 
 public class MoneyDt extends QuantityDt {
 
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Constructor
+     */
+    public MoneyDt() {
+        // nothing
+    }
+
+    /**
+     * Constructor
+     */
+    @SimpleSetter
+    public MoneyDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
+        setValue(theValue);
+    }
+
+    /**
+     * Constructor
+     */
+    @SimpleSetter
+    public MoneyDt(@SimpleSetter.Parameter(name = "theValue") long theValue) {
+        setValue(theValue);
+    }
+
 }
