@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.8-uhn-branch</version>
+		<version>0.9-uhn-branch</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8-uhn-branch</version>
+			<version>0.9-uhn-branch</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>0.8-uhn-branch</version>
+			<version>0.9-uhn-branch</version>
 		</dependency>
 
 		<dependency>
