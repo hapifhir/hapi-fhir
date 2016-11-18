@@ -194,7 +194,7 @@
 		</resources>
 
         <!-- enable this plugin if you want to gen the source code -->
-        <!--
+        
         <plugins>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
@@ -212,7 +212,7 @@
                 </executions>
             </plugin>
         </plugins> 
-        -->
+        
                
 	</build>
 

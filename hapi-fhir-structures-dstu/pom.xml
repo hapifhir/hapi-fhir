@@ -274,7 +274,7 @@
 				</configuration>
 			</plugin>
             <!-- enable this plugin if you want to give the source code to anyone -->
-            <!-- 
+             
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
                 <configuration>
@@ -290,7 +290,7 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
+            
             
 		</plugins>
 		<pluginManagement>
