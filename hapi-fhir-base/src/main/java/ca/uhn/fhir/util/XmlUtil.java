@@ -214,8 +214,9 @@ public class XmlUtil {
 			if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
 				// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
 				inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
-				//TODO NEAL, disable this for the v0.8-uhn-branch but add it to the v0.9-uhn-branch
-				//inputFactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, "100000000");
+				//add this fix to solve Maximum attribute size limit (524288) exceeded exception which can 
+				//occur on both the client and the server
+				inputFactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, "100000000");
 				
 			}
 			ourInputFactory = inputFactory;
