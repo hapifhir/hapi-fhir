@@ -130,7 +130,7 @@ public class DaoConfig {
 	 */
 	public List<IServerInterceptor> getInterceptors() {
 		if (myInterceptors == null) {
-			return Collections.emptyList();
+			myInterceptors = new ArrayList<IServerInterceptor>();
 		}
 		return myInterceptors;
 	}
