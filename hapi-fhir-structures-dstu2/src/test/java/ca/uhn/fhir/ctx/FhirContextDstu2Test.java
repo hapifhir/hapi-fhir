@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
@@ -30,7 +31,14 @@ public class FhirContextDstu2Test {
 		ctx.getResourceDefinition("InvalidResource");
 	}
 
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testAutoDetectVersion() {
+		FhirContext ctx = new FhirContext();
+		assertEquals(FhirVersionEnum.DSTU2, ctx.getVersion().getVersion());
+	}
 
+	
 	@Test
 	public void testQueryBoundCode() {
 		RuntimeResourceDefinition patientType = ourCtx.getResourceDefinition(Patient.class);

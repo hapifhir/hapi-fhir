@@ -22,6 +22,13 @@ public class FhirContextDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 		
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testAutoDetectVersion() {
+		FhirContext ctx = new FhirContext();
+		assertEquals(FhirVersionEnum.DSTU3, ctx.getVersion().getVersion());
+	}
+
 	/**
 	 * See #344
 	 */
