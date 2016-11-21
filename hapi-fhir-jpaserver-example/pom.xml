@@ -93,18 +93,6 @@
 			<artifactId>thymeleaf</artifactId>
 		</dependency>
 
-		<!-- Used for CORS support -->
-		<dependency>
-			<groupId>org.ebaysf.web</groupId>
-			<artifactId>cors-filter</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<!-- Spring Web is used to deploy the server to a web container. -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -161,6 +149,17 @@
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
+		</dependency>
+
+		<!-- 
+		Used for CORS support 
+		If you are deploying your project to Apache Tomcat, you can 
+		comment this dependency out since the tomcat CORS filter will
+		already be available on the classpath
+		-->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-catalina</artifactId>
 		</dependency>
 
 	</dependencies>

@@ -83,16 +83,6 @@
 		</dependency>
 
 		<!-- Used for CORS support -->
-		<dependency>
-			<groupId>org.ebaysf.web</groupId>
-			<artifactId>cors-filter</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- Spring Web is used to deploy the server to a web container. -->
 		<dependency>
@@ -158,6 +148,10 @@
 			<artifactId>phloc-schematron</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-catalina</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

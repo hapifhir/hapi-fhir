@@ -161,7 +161,7 @@
 	<!-- This filters provide support for Cross Origin Resource Sharing (CORS) -->
 	<filter>
 		<filter-name>CORS Filter</filter-name>
-		<filter-class>ca.uhn.fhirtest.CORSFilter_</filter-class>
+		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
 		<init-param>
 			<description>A comma separated list of allowed origins. Note: An '*' cannot be used for an allowed origin when using credentials.</description>
 			<param-name>cors.allowed.origins</param-name>

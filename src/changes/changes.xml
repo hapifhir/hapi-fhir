@@ -29,6 +29,13 @@
 				fails to detect the presents of DSTU3 structures. Thanks
 				to GitHub user @vijayt27 for reporting!
 			</action>
+			<action type="add">
+				All server examples as well as the CLI have been
+				switched from using eBay's CORS filter to using
+				the Apache Tomcat CORS filter instead. The former
+				has become unmaintained and has unfixed bugs so
+				it is no longer recommended for use.
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
