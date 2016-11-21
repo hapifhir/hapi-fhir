@@ -147,11 +147,6 @@
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>

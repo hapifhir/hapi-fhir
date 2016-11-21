@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.demo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import javax.servlet.ServletException;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -30,6 +32,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class JpaServerDemo extends RestfulServer {
@@ -47,7 +50,7 @@ public class JpaServerDemo extends RestfulServer {
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-
+		
 		/* 
 		 * The hapi-fhir-server-resourceproviders-dev.xml file is a spring configuration
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
@@ -138,6 +141,22 @@ public class JpaServerDemo extends RestfulServer {
 		 * This is a simple paging strategy that keeps the last 10 searches in memory
 		 */
 		setPagingProvider(new FifoMemoryPagingProvider(10));
+
+		// Register a CORS filter
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("x-fhir-starter");
+		config.addAllowedHeader("Origin");
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		registerInterceptor(corsInterceptor);
 
 		/*
 		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)

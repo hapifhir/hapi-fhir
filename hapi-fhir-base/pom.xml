@@ -43,15 +43,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- Only required for CORS support -->
-		<dependency>
-			<groupId>org.ebaysf.web</groupId>
-			<artifactId>cors-filter</artifactId>
-			<optional>true</optional>
-			<!-- <exclusions> <exclusion> <artifactId>servlet-api</artifactId> <groupId>javax.servlet</groupId> 
-				</exclusion> </exclusions> -->
-		</dependency>
-
 		<!-- Only required for Schematron Validator Support -->
 		<dependency>
 			<groupId>com.phloc</groupId>
@@ -115,6 +106,17 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
 			<optional>true</optional>
 			<exclusions>
 				<exclusion>

@@ -30,11 +30,13 @@
 				to GitHub user @vijayt27 for reporting!
 			</action>
 			<action type="add">
-				All server examples as well as the CLI have been
-				switched from using eBay's CORS filter to using
-				the Apache Tomcat CORS filter instead. The former
-				has become unmaintained and has unfixed bugs so
-				it is no longer recommended for use.
+				As the eBay CORS interceptor has gone dormant, we have introduced a new
+				HAPI server interceptor which can be used to implement CORS support
+				instead of using the previously recommended Servlet Filter. All server
+				examples as well as the CLI have been switched to use this new interceptor.
+				See the
+				<![CDATA[<a href="./doc_cors.html">CORS Documentation</a>]]>
+				for more information.
 			</action>
 			<action type="fix" issue="480">
 				Make the parser configurable so that when

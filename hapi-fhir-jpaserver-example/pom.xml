@@ -151,17 +151,6 @@
 			<artifactId>phloc-schematron</artifactId>
 		</dependency>
 
-		<!-- 
-		Used for CORS support 
-		If you are deploying your project to Apache Tomcat, you can 
-		comment this dependency out since the tomcat CORS filter will
-		already be available on the classpath
-		-->
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina</artifactId>
-		</dependency>
-
 	</dependencies>
 
 	<build>

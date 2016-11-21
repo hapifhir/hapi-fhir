@@ -16,11 +16,7 @@ import static org.mockito.Mockito.when;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +29,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.ebaysf.web.cors.CORSFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -42,6 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.web.cors.CorsConfiguration;
 
 import com.phloc.commons.collections.iterate.ArrayEnumeration;
 
@@ -62,11 +58,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.server.BundleInclusionRule;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
@@ -708,13 +700,29 @@ public class ResponseHighlightingInterceptorTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
+		
+		/*
+		 * Enable CORS
+		 */
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Origin");
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		ourServlet.registerInterceptor(corsInterceptor);
+		
 		ourServlet.registerInterceptor(new ResponseHighlighterInterceptor());
 		ourServlet.setResourceProviders(patientProvider, new DummyBinaryResourceProvider());
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		
-		proxyHandler.addFilterWithMapping(CORSFilter.class, "/*", 1);
 		
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();

@@ -3,18 +3,14 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.DispatcherType;
-
-import org.apache.catalina.filters.CorsFilter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -28,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
@@ -40,6 +37,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
@@ -116,16 +114,22 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu3Config.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
-			FilterHolder corsFilterHolder = new FilterHolder();
-			corsFilterHolder.setHeldClass(CorsFilter.class);
-			corsFilterHolder.setInitParameter("cors.allowed.origins", "*");
-			corsFilterHolder.setInitParameter("cors.allowed.methods", "GET,POST,PUT,DELETE,OPTIONS");
-			corsFilterHolder.setInitParameter("cors.allowed.headers", "X-FHIR-Starter,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers");
-			corsFilterHolder.setInitParameter("cors.exposed.headers", "Location,Content-Location");
-			corsFilterHolder.setInitParameter("cors.support.credentials", "true");
-			corsFilterHolder.setInitParameter("cors.logging.enabled", "true");
-			proxyHandler.addFilter(corsFilterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
-			
+			// Register a CORS filter
+			CorsConfiguration config = new CorsConfiguration();
+			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+			config.addAllowedHeader("x-fhir-starter");
+			config.addAllowedHeader("Origin");
+			config.addAllowedHeader("Accept");
+			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedHeader("Content-Type");
+			config.addAllowedHeader("Access-Control-Request-Method");
+			config.addAllowedHeader("Access-Control-Request-Headers");
+			config.addAllowedOrigin("*");
+			config.addExposedHeader("Location");
+			config.addExposedHeader("Content-Location");
+			config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+			ourRestServer.registerInterceptor(corsInterceptor);
+
 			server.setHandler(proxyHandler);
 			server.start();
 			

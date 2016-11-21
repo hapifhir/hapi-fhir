@@ -96,11 +96,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ebaysf.web</groupId>
-			<artifactId>cors-filter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
@@ -153,6 +148,11 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<reporting>

@@ -172,10 +172,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.ebaysf.web</groupId>
-			<artifactId>cors-filter</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
 		</dependency>

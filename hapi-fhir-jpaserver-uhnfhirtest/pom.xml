@@ -159,17 +159,6 @@
 			<artifactId>commons-dbcp2</artifactId>
 		</dependency>
 
-		<!-- 
-		Only required for CORS support - Change the scope from
-		"provided" to "compile" if you are deploying to something
-		other than Tomcat 
-		-->
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 	</dependencies>
 
 
