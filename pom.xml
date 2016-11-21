@@ -49,6 +49,10 @@
 			<name>bintray</name>
 			<url>http://dl.bintray.com/dnault/maven</url>
 		</repository>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
 	</repositories>
 
 	<description>
@@ -326,6 +330,11 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>1.1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.bkiers</groupId>
+				<artifactId>Liqp</artifactId>
+				<version>0.6.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.dnault</groupId>
