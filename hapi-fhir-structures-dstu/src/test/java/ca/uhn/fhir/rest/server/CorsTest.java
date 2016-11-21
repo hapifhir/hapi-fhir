@@ -1,13 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.DispatcherType;
 
+import org.apache.catalina.filters.CorsFilter;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -19,7 +21,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.ebaysf.web.cors.CORSFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -51,7 +52,7 @@ public class CorsTest {
 			httpOpt.addHeader("Origin", "null");
 			httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
 			HttpResponse status = ourClient.execute(httpOpt);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals("GET", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
@@ -67,7 +68,7 @@ public class CorsTest {
 			httpOpt.addHeader("Origin", "http://www.fhir-starter.com");
 			httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
 			HttpResponse status = ourClient.execute(httpOpt);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals("POST", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
@@ -83,7 +84,7 @@ public class CorsTest {
 			Header origin = status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
 			assertEquals("http://www.fhir-starter.com", origin.getValue());
 
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
 
@@ -99,7 +100,7 @@ public class CorsTest {
 			httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
 			httpOpt.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(new Patient())));
 			HttpResponse status = ourClient.execute(httpOpt);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response: {}", status);
 			ourLog.info("Response was:\n{}", responseContent);
@@ -129,7 +130,7 @@ public class CorsTest {
 		ServletHolder servletHolder = new ServletHolder(restServer);
 
 		FilterHolder fh = new FilterHolder();
-		fh.setHeldClass(CORSFilter_.class);
+		fh.setHeldClass(CorsFilter.class);
 		fh.setInitParameter("cors.logging.enabled", "true");
 		fh.setInitParameter("cors.allowed.origins", "*");
 		fh.setInitParameter("cors.allowed.headers", "x-fhir-starter,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers");

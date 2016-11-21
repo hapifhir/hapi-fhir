@@ -25,9 +25,13 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -45,7 +49,13 @@ public class CreateDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
+	public static IBaseOperationOutcome ourReturnOo;
 
+	@Before
+	public void before() {
+		ourReturnOo = null;
+	}
+	
 	/**
 	 * #472
 	 */
@@ -67,6 +77,24 @@ public class CreateDstu3Test {
 		assertEquals(0, status.getHeaders("Content-Location").length);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
 
+	}
+
+	@Test
+	public void testCreateReturnsOperationOutcome() throws Exception {
+		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, containsString("DIAG"));
 	}
 
 	/**
@@ -209,7 +237,7 @@ public class CreateDstu3Test {
 
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theIdParam) {
-			return new MethodOutcome(new IdType("Patient", "1"), true);
+			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(ourReturnOo);
 		}
 
 		@Override

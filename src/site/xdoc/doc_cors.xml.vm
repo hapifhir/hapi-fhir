@@ -3,7 +3,7 @@
 
 	<properties>
 		<title>CORS</title>
-		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+		<author email="jamesagnew@gmail.com">James Agnew</author>
 	</properties>
 
 	<body>
@@ -15,37 +15,41 @@
 				you will need to enable Cross Origin Resource Sharing (CORS). There are 
 				a number of ways of supporting this, but the easiest is to use a servlet filter. 
 			</p>
-				
+			
 			<p>
-				The recommended filter for this purpose is the 
-				eBay Open Sourced 
-				<a href="https://github.com/ebay/cors-filter">CORS Filter</a> (Licensed under
-				the Apache Software License 2.0). 
+				Note that in previous revisions of this document we recommended using the
+				<a href="https://github.com/ebay/cors-filter">eBay CORS Filter</a>, but
+				as of 2016 the eBay filter is no longer being maintained and contains known bugs.
+				We now recommend against using this filter. 
 			</p>
 			
 			<p>
-				To add CORS support using this library, there are two simple steps:
+				The following examples show how to use the Apache Tomcat CorsFilter to enable
+				CORS support. The instructions below should work even on platforms other than
+				Tomcat (in other words, you can deploy the Tomcat CorsFilter to Jetty or JBoss if you like)
+				but if you run into conflicts it may be worth investigating if there is a dedicated
+				CORS filter for the platform you are using.
 			</p>
-			
-			<subsection name="Include cors-filter JAR">
-			
+
+			<subsection name="Add the Dependency">
+
 				<p>
-					In your server WAR file, you must include the <b>cors-filter-X.X.X.JAR</b>
-					dependency. This dependency is included in the HAPI distribution.
+					If you are deploying to a platform other than Tomcat, add the
+					following dependency to your Maven POM. If you are deploying
+					to Tomcat, the required classes are present on the classpath
+					so youdo not need to do this step. 
 				</p>
-			
+
 				<p>
-					If you are using Maven, you will need to
-					explicitly include it in your project pom.xml using the following dependency:
+					Add the following dependency to your POM:
 				</p>
 				<source><![CDATA[<dependency>
-	<groupId>org.ebaysf.web</groupId>
-	<artifactId>cors-filter</artifactId>
-	<version>1.0.1</version>
-	<optional>true</optional>
+	<groupId>org.apache.tomcat</groupId>
+	<artifactId>tomcat-catalina</artifactId>
+	<version>${tomcat_version}</version>
 </dependency>]]></source>
 			
-			</subsection>			
+			</subsection>
 
 			<subsection name="Add the filter to your web.xml">
 			
@@ -57,7 +61,7 @@
 			
 				<source><![CDATA[<filter>
 	<filter-name>CORS Filter</filter-name>
-	<filter-class>org.ebaysf.web.cors.CORSFilter</filter-class>
+	<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
 	<init-param>
 		<description>A comma separated list of allowed origins. Note: An '*' cannot be used for an allowed origin when using credentials.</description>
 		<param-name>cors.allowed.origins</param-name>
@@ -99,7 +103,7 @@
 	<url-pattern>/*</url-pattern>
 </filter-mapping>]]></source>
 	
-			</subsection>			
+			</subsection>
 			
 		</section>
 		
