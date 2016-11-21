@@ -23,34 +23,23 @@ import java.lang.reflect.Method;
  */
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.IParserErrorHandler;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.parser.*;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
@@ -106,6 +95,52 @@ public class FhirContext {
 	private final IFhirVersion myVersion;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 	private boolean myInitializing;
+	private IContextValidationSupport<?, ?, ?, ?, ?, ?> myValidationSupport;
+	
+	/**
+	 * Returns the validation support module configured for this context, creating a default
+	 * implementation if no module has been passed in via the {@link #setValidationSupport(IContextValidationSupport)}
+	 * method
+	 * @see #setValidationSupport(IContextValidationSupport)
+	 */
+	public IContextValidationSupport<?, ?, ?, ?, ?, ?> getValidationSupport() {
+		if (myValidationSupport == null) {
+			myValidationSupport = myVersion.createValidationSupport();
+		}
+		return myValidationSupport;
+	}
+
+	/**
+	 * Creates a new FluentPath engine which can be used to exvaluate
+	 * path expressions over FHIR resources. Note that this engine will use the
+	 * {@link IContextValidationSupport context validation support} module which is 
+	 * configured on the context at the time this method is called.
+	 * <p>
+	 * In other words, call {@link #setValidationSupport(IContextValidationSupport)} before
+	 * calling {@link #newFluentPath()}
+	 * </p>
+	 * <p>
+	 * Note that this feature was added for FHIR DSTU3 and is not available
+	 * for contexts configured to use an older version of FHIR. Calling this method
+	 * on a context for a previous version of fhir will result in an
+	 * {@link UnsupportedOperationException}
+	 * </p>
+	 * 
+	 * @since 2.2
+	 */
+	public IFluentPath newFluentPath() {
+		return myVersion.createFluentPathExecutor(this);
+	}
+	
+	/**
+	 * Sets the validation support module to use for this context. The validation support module
+	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
+	 * as well as to provide terminology services to modules such as the validator and FluentPath executor 
+	 */
+	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+	}
+
 	private ParserOptions myParserOptions = new ParserOptions();
 
 	/**

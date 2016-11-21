@@ -39,6 +39,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -128,5 +130,17 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
   public IIdType newIdType() {
     return new IdType();
   }
+
+  
+  @Override
+  public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+    throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
+  }
+
+  @Override
+  public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+    throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
+  }
+
 
 }

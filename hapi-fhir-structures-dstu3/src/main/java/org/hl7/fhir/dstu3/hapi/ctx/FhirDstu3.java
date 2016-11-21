@@ -25,9 +25,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.hapi.fluentpath.FluentPathDstu3;
 import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerProfileProvider;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -43,6 +45,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -129,6 +133,16 @@ public class FhirDstu3 implements IFhirVersion {
 	@Override
 	public IIdType newIdType() {
 		return new IdType();
+	}
+
+	@Override
+	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+		return new DefaultProfileValidationSupport();
+	}
+
+	@Override
+	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+		return new FluentPathDstu3(theFhirContext);
 	}
 
 }

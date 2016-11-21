@@ -141,7 +141,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 					retVal.setFound(true);
 					retVal.setSearchedForCode(code);
 					retVal.setSearchedForSystem(system);
-					retVal.setCodeDisplay(result.getDisplay());
+					retVal.setCodeDisplay(result.asConceptDefinition().getDisplay());
 					retVal.setCodeSystemDisplayName("Unknown");
 					retVal.setCodeSystemVersion("");
 					return retVal;
