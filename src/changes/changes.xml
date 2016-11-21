@@ -24,6 +24,11 @@
 				expiry. This is useful if you are deploying the server
 				to a cluster.
 			</action>
+			<action type="fix" issue="495">
+				RestfulServer with no explicitly set FhirContext
+				fails to detect the presents of DSTU3 structures. Thanks
+				to GitHub user @vijayt27 for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
