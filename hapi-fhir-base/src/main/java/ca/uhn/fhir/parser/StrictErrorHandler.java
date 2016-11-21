@@ -13,7 +13,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  */
 
 /**
- * Parser error handler which throws a {@link DataFormatException} any time an 
+ * Parser error handler which throws a {@link DataFormatException} any time an
  * issue is found while parsing.
  * 
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
@@ -33,28 +33,18 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 public class StrictErrorHandler implements IParserErrorHandler {
 
 	@Override
-	public void unknownElement(IParseLocation theLocation, String theElementName) {
-		throw new DataFormatException("Unknown element '" + theElementName + "' found during parse");
-	}
-
-	@Override
-	public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
-		throw new DataFormatException("Unknown attribute '" + theAttributeName + "' found during parse");
-	}
-
-	@Override
-	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
-		throw new DataFormatException("Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
-	}
-
-	@Override
 	public void containedResourceWithNoId(IParseLocation theLocation) {
 		throw new DataFormatException("Resource has contained child resource with no ID");
 	}
 
 	@Override
-	public void unknownReference(IParseLocation theLocation, String theReference) {
-		throw new DataFormatException("Resource has invalid reference: " + theReference);
+	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
+		throw new DataFormatException("Found incorrect type for element " + theElementName + " - Expected " + theExpected.name() + " and found " + theFound.name());
+	}
+
+	@Override
+	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
+		throw new DataFormatException("Invalid attribute value \"" + theValue + "\": " + theError);
 	}
 
 	@Override
@@ -72,9 +62,23 @@ public class StrictErrorHandler implements IParserErrorHandler {
 	}
 
 	@Override
-	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
-		throw new DataFormatException("Found incorrect type for element " + theElementName + " - Expected " + theExpected.name() + " and found " + theFound.name());
+	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+		throw new DataFormatException("Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
 	}
 
+	@Override
+	public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
+		throw new DataFormatException("Unknown attribute '" + theAttributeName + "' found during parse");
+	}
+
+	@Override
+	public void unknownElement(IParseLocation theLocation, String theElementName) {
+		throw new DataFormatException("Unknown element '" + theElementName + "' found during parse");
+	}
+
+	@Override
+	public void unknownReference(IParseLocation theLocation, String theReference) {
+		throw new DataFormatException("Resource has invalid reference: " + theReference);
+	}
 
 }

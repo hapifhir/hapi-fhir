@@ -1087,7 +1087,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 //		return object;
 //	}
 
-	private void parseAlternates(JsonLikeValue theAlternateVal, ParserState<?> theState, String theElementName) {
+	private void parseAlternates(JsonLikeValue theAlternateVal, ParserState<?> theState, String theElementName, String theAlternateName) {
 		if (theAlternateVal == null || theAlternateVal.isNull()) {
 			return;
 		}
@@ -1100,11 +1100,17 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			if (array.size() == 0) {
 				return;
 			}
-			parseAlternates(array.get(0), theState, theElementName);
+			parseAlternates(array.get(0), theState, theElementName, theAlternateName);
 			return;
 		}
 
-		JsonLikeObject alternate = theAlternateVal.getAsObject();
+		JsonLikeValue alternateVal = theAlternateVal;
+		if (alternateVal != null && alternateVal.isObject() == false) {
+			getErrorHandler().incorrectJsonType(null, theAlternateName, ValueType.OBJECT, alternateVal.getJsonType());
+			return;
+		}
+
+		JsonLikeObject alternate = alternateVal.getAsObject();
 		for (String nextKey : alternate.keySet()) {
 			JsonLikeValue nextVal = alternate.get(nextKey);
 			if ("extension".equals(nextKey)) {
@@ -1280,11 +1286,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				handledUnderscoreNames++;
 			}
 			
-			if (alternateVal != null && alternateVal.isObject() == false) {
-				getErrorHandler().incorrectJsonType(null, alternateName, ValueType.OBJECT, alternateVal.getJsonType());
-				alternateVal = null;
-			}
-
 			parseChildren(theState, nextName, nextVal, alternateVal, alternateName);
 
 		}
@@ -1313,7 +1314,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 							String nextName = alternateName.substring(1);
 							if (theObject.get(nextName) == null) {
 								theState.enteringNewElement(null, nextName);
-								parseAlternates(nextValue, theState, alternateName);
+								parseAlternates(nextValue, theState, alternateName, alternateName);
 								theState.endingElement();
 							}
 						} else {
@@ -1329,7 +1330,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	private void parseChildren(ParserState<?> theState, String theName, JsonLikeValue theJsonVal, JsonLikeValue theAlternateVal, String theAlternateName) {
 		if (theJsonVal.isArray()) {
 			JsonLikeArray nextArray = theJsonVal.getAsArray();
-			JsonLikeArray nextAlternateArray = JsonLikeValue.asArray(theAlternateVal); // could be null
+
+			JsonLikeValue alternateVal = theAlternateVal;
+			if (alternateVal != null && alternateVal.isArray() == false) {
+				getErrorHandler().incorrectJsonType(null, theAlternateName, ValueType.ARRAY, alternateVal.getJsonType());
+				alternateVal = null;
+			}
+
+			JsonLikeArray nextAlternateArray = JsonLikeValue.asArray(alternateVal); // could be null
 			for (int i = 0; i < nextArray.size(); i++) {
 				JsonLikeValue nextObject = nextArray.get(i);
 				JsonLikeValue nextAlternate = null;
@@ -1340,7 +1348,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 		} else if (theJsonVal.isObject()) {
 			theState.enteringNewElement(null, theName);
-			parseAlternates(theAlternateVal, theState, theAlternateName);
+			parseAlternates(theAlternateVal, theState, theAlternateName, theAlternateName);
 			JsonLikeObject nextObject = theJsonVal.getAsObject();
 			boolean preResource = false;
 			if (theState.isPreResource()) {
@@ -1358,13 +1366,13 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			theState.endingElement();
 		} else if (theJsonVal.isNull()) {
 			theState.enteringNewElement(null, theName);
-			parseAlternates(theAlternateVal, theState, theAlternateName);
+			parseAlternates(theAlternateVal, theState, theAlternateName, theAlternateName);
 			theState.endingElement();
 		} else {
 			// must be a SCALAR
 			theState.enteringNewElement(null, theName);
 			theState.attributeValue("value", theJsonVal.getAsString());
-			parseAlternates(theAlternateVal, theState, theAlternateName);
+			parseAlternates(theAlternateVal, theState, theAlternateName, theAlternateName);
 			theState.endingElement();
 		}
 	}

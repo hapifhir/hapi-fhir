@@ -51,6 +51,17 @@ public interface IParserErrorHandler {
 	void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound);
 
 	/**
+	 * The parser detected an atttribute value that was invalid (such as: empty "" values are not permitted)
+	 * 
+	 * @param theLocation
+	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
+	 * @param theValue The actual value
+	 * @param theError A description of why the value was invalid
+	 * @since 2.2
+	 */
+	void invalidValue(IParseLocation theLocation, String theValue, String theError);
+
+	/**
 	 * Resource was missing a required element
 	 * 
 	 * @param theLocation

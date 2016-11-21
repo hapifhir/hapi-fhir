@@ -36,6 +36,14 @@
 				has become unmaintained and has unfixed bugs so
 				it is no longer recommended for use.
 			</action>
+			<action type="fix" issue="480">
+				Make the parser configurable so that when
+				parsing an invalid empty value (e.g.
+				<![CDATA[<code>{"status":""}</code>]]>) the
+				parser will either throw a meaningful exception
+				or log a warning depending on the configured
+				error handler.
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

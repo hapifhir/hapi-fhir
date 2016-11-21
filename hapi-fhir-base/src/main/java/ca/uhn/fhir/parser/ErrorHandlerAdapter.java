@@ -62,4 +62,9 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 		// NOP
 	}
 
+	@Override
+	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
+		// NOP
+	}
+
 }

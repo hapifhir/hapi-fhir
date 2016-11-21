@@ -66,6 +66,13 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	}
 
 	@Override
+	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
+		if (myLogErrors) {
+			ourLog.warn("Invalid attribute value \"{}\": {}", theValue, theError);
+		}
+	}
+
+	@Override
 	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
 		if (myLogErrors) {
 			ourLog.warn("Resource is missing required element: {}", theElementName);

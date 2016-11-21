@@ -67,6 +67,42 @@ public class JsonParserDstu3Test {
 	}
 
 	/**
+	 * #480
+	 */
+	@Test
+	public void testEncodeEmptyValue() {
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setId("123");
+		qr.getAuthoredElement().setValueAsString("");
+		qr.getItemFirstRep().setLinkIdElement(new StringType());
+		qr.getItemFirstRep().addItem().setLinkIdElement(new StringType(""));
+		qr.getItemFirstRep().addItem().setLinkIdElement(new StringType("LINKID"));
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(qr);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, stringContainsInOrder("123"));
+		assertThat(encoded, not(stringContainsInOrder("\"\"")));
+		assertThat(encoded, not(stringContainsInOrder("null")));
+	}
+	
+	/**
+	 * #480
+	 */
+	@Test
+	public void testParseEmptyValue() {
+		String input = "{\"resourceType\":\"QuestionnaireResponse\",\"id\":\"123\",\"authored\":\"\",\"item\":[{\"item\":[{\"linkId\":\"\"}]}]}";
+		QuestionnaireResponse qr = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, input);
+	
+		assertEquals("QuestionnaireResponse/123", qr.getIdElement().getValue());
+		assertEquals(null, qr.getAuthored());
+		assertEquals(null, qr.getAuthoredElement().getValue());
+		assertEquals(null, qr.getAuthoredElement().getValueAsString());
+		assertEquals(null, qr.getItemFirstRep().getItemFirstRep().getLinkId());
+		assertEquals(null, qr.getItemFirstRep().getItemFirstRep().getLinkIdElement().getValue());
+	}
+
+	/**
 	 * See #477
 	 */
 	@Test
