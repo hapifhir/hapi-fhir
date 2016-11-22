@@ -61,27 +61,27 @@ public class OverlayTestApp {
 
 		if (true) {return;}
 		
-		ourAppCtx = new AnnotationConfigApplicationContext(FhirServerConfig.class);
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
+//		ourAppCtx = new AnnotationConfigApplicationContext(FhirServerConfig.class);
+//		ServletContextHandler proxyHandler = new ServletContextHandler();
+//		proxyHandler.setContextPath("/");
 
 		/*
 		 * DSTU2 resources
 		 */
 
-		RestfulServer restServerDstu2 = new RestfulServer();
-		restServerDstu2.setPagingProvider(new FifoMemoryPagingProvider(10));
-		restServerDstu2.setImplementationDescription("This is a great server!!!!");
-		restServerDstu2.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
-		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
-		restServerDstu2.setResourceProviders(rpsDev);
-
-		JpaSystemProviderDstu2 systemProvDev = (JpaSystemProviderDstu2) ourAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
-		restServerDstu2.setPlainProviders(systemProvDev);
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(restServerDstu2);
-		proxyHandler.addServlet(servletHolder, "/fhir/contextDstu2/*");
+//		RestfulServer restServerDstu2 = new RestfulServer();
+//		restServerDstu2.setPagingProvider(new FifoMemoryPagingProvider(10));
+//		restServerDstu2.setImplementationDescription("This is a great server!!!!");
+//		restServerDstu2.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
+//		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
+//		restServerDstu2.setResourceProviders(rpsDev);
+//
+//		JpaSystemProviderDstu2 systemProvDev = (JpaSystemProviderDstu2) ourAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+//		restServerDstu2.setPlainProviders(systemProvDev);
+//
+//		ServletHolder servletHolder = new ServletHolder();
+//		servletHolder.setServlet(restServerDstu2);
+//		proxyHandler.addServlet(servletHolder, "/fhir/contextDstu2/*");
 
 		/*
 		 * DSTU resources
@@ -101,54 +101,54 @@ public class OverlayTestApp {
 //		servletHolder.setServlet(restServerDstu1);
 //		proxyHandler.addServlet(servletHolder, "/fhir/contextDstu1/*");
 
-		int port = 8887;
-		Server server = new Server(port);
+//		int port = 8887;
+//		Server server = new Server(port);
 
 		// base = "http://fhir.healthintersections.com.au/open";
 		// base = "http://spark.furore.com/fhir";
 
-		server.setHandler(proxyHandler);
-		server.start();
-
-		if (true) {
-			String base = "http://localhost:" + port + "/fhir/contextDstu1";
-			IGenericClient client = restServerDstu2.getFhirContext().newRestfulGenericClient(base);
-			client.setLogRequestAndResponse(true);
-
-			Organization o1 = new Organization();
-			o1.getName().setValue("Some Org");
-			MethodOutcome create = client.create().resource(o1).execute();
-			IdDt orgId = (IdDt) create.getId();
-
-			Patient p1 = new Patient();
-			p1.getText().getDiv().setValueAsString("<div>HELP IM A BUG</div>");
-			p1.addIdentifier("foo:bar", "12345");
-			p1.addName().addFamily("Smith").addGiven("John");
-			p1.getManagingOrganization().setReference(orgId);
-
-			TagList list = new TagList();
-			list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
-			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-			client.create().resource(p1).execute();
-
-			client.setLogRequestAndResponse(true);
-			client.create().resource(p1).execute();
-
-		}
+//		server.setHandler(proxyHandler);
+//		server.start();
+//
+//		if (true) {
+//			String base = "http://localhost:" + port + "/fhir/contextDstu1";
+//			IGenericClient client = restServerDstu2.getFhirContext().newRestfulGenericClient(base);
+//			client.setLogRequestAndResponse(true);
+//
+//			Organization o1 = new Organization();
+//			o1.getName().setValue("Some Org");
+//			MethodOutcome create = client.create().resource(o1).execute();
+//			IdDt orgId = (IdDt) create.getId();
+//
+//			Patient p1 = new Patient();
+//			p1.getText().getDiv().setValueAsString("<div>HELP IM A BUG</div>");
+//			p1.addIdentifier("foo:bar", "12345");
+//			p1.addName().addFamily("Smith").addGiven("John");
+//			p1.getManagingOrganization().setReference(orgId);
+//
+//			TagList list = new TagList();
+//			list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
+//			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//			client.create().resource(p1).execute();
+//
+//			client.setLogRequestAndResponse(true);
+//			client.create().resource(p1).execute();
+//
+//		}
 
 	}
 
