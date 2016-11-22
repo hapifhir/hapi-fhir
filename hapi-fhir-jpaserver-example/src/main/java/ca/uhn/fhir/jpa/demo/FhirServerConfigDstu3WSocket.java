@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.interceptor.WebSocketSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu3;
+import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketReturnResourceHandlerDstu3;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -45,7 +46,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
-
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -69,7 +69,7 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {
-		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu3.class);
+		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketReturnResourceHandlerDstu3.class);
 		return retVal;
 	}
 

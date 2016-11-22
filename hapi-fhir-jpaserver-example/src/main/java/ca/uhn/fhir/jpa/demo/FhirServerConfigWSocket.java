@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.interceptor.WebSocketSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
+import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketReturnResourceHandlerDstu2;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -58,7 +59,8 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {
-		return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu2.class);
+		//return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu2.class);
+		return new PerConnectionWebSocketHandler(SubscriptionWebsocketReturnResourceHandlerDstu2.class);
 	}
 
 	@Bean
