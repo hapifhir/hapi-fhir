@@ -1,7 +1,10 @@
 package ca.uhn.example.servlet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.example.provider.OrganizationResourceProvider;
 import ca.uhn.example.provider.PatientResourceProvider;
@@ -10,6 +13,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 /**
@@ -48,6 +52,19 @@ public class ExampleRestfulServlet extends RestfulServer {
 		 */
 		INarrativeGenerator narrativeGen = new DefaultThymeleafNarrativeGenerator();
 		getFhirContext().setNarrativeGenerator(narrativeGen);
+
+		/*
+		 * Enable CORS
+		 */
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		registerInterceptor(corsInterceptor);
 
 		/*
 		 * This server interceptor causes the server to return nicely

@@ -2,6 +2,8 @@ package ca.uhn.fhir.parser;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -43,7 +45,7 @@ public class ErrorHandlerTest {
 		new LenientErrorHandler().unknownElement(null, null);
 		new LenientErrorHandler().containedResourceWithNoId(null);
 		new LenientErrorHandler().unknownReference(null, null);
-		new LenientErrorHandler().incorrectJsonType(null, null, null, null);
+		new LenientErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, ValueType.SCALAR);
 		new LenientErrorHandler().invalidValue(null, null, null);
 	}
 
@@ -74,7 +76,7 @@ public class ErrorHandlerTest {
 
 	@Test(expected = DataFormatException.class)
 	public void testStrictMethods6() {
-		new StrictErrorHandler().incorrectJsonType(null, null, null, null);
+		new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, ValueType.SCALAR);
 	}
 
 	@Test(expected = DataFormatException.class)
