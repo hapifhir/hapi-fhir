@@ -105,7 +105,7 @@ public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter im
 
         if (theRequestDetails.getRequestType().equals(RequestTypeEnum.POST) || theRequestDetails.getRequestType().equals(RequestTypeEnum.PUT)) {
             logger.info("Found POST or PUT for a non-subscription resource");
-            casted.pollForNewUndeliveredResources();
+            casted.pollForNewUndeliveredResources(theRequestDetails.getResourceName());
         }
 
         return super.outgoingResponse(theRequestDetails, theResponseObject);
