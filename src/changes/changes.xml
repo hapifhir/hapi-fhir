@@ -55,6 +55,12 @@
 				and Stefan Evinance for reporting and providing
 				a test case!
 			</action>
+			<action type="add" issue="518">
+				Allow client to gracefully handle running in DSTU3 mode
+				but with a structures JAR that does not contain a
+				CapabilityStatement resource. Thanks to Michael Lawley
+				for the pull request!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

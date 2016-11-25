@@ -274,6 +274,11 @@
 			<id>vadi2</id>
 			<name>Vadim Peretokin</name>
 		</developer>
+		<developer>
+			<id>lawley</id>
+			<name>Michael Lawley</name>
+			<organization>CSIRO</organization>
+		</developer>
 	</developers>
 
 	<licenses>
