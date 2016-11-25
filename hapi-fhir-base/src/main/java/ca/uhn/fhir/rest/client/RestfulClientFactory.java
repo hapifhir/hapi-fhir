@@ -291,7 +291,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			try {
 				implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
 			} catch (DataFormatException e) {
-				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) {
+				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 					capabilityStatementResourceName = "Conformance";
 					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
 				} else {
