@@ -46,6 +46,15 @@
 				or log a warning depending on the configured
 				error handler.
 			</action>
+			<action type="fix" issue="276">
+				Fix issue when serializing resources that have
+				contained resources which are referred to
+				from multiple places. Sometimes when serializing
+				these resources the contained resource section
+				would contain duplicates. Thanks to Hugo Soares
+				and Stefan Evinance for reporting and providing
+				a test case!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

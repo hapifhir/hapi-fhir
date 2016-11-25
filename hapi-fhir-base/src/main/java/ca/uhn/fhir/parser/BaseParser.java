@@ -244,6 +244,9 @@ public abstract class BaseParser implements IParser {
 							continue;
 						}
 						theContained.addContained(resource);
+						if (resource.getIdElement().isLocal() && existingIdToContainedResource != null) {
+							existingIdToContainedResource.remove(resource.getIdElement().getValue());
+						}
 					} else {
 						continue;
 					}
