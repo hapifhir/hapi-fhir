@@ -64,14 +64,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
-/**
- * Created by Jeff on 11/10/2016.
- */
 public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter implements IJpaServerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketSubscriptionDstu3Interceptor.class);
 
-    //todo sometimes throws an exception on startup
     @Autowired
     @Qualifier("mySubscriptionDaoDstu3")
     private IFhirResourceDao<Subscription> reference;

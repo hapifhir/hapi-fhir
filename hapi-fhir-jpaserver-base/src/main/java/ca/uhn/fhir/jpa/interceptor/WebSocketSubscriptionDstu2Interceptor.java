@@ -31,14 +31,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 
-/**
- * Created by Jeff on 11/10/2016.
- */
 public class WebSocketSubscriptionDstu2Interceptor extends InterceptorAdapter implements IJpaServerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketSubscriptionDstu2Interceptor.class);
 
-    //todo sometimes throws an exception on startup
     @Autowired
     @Qualifier("mySubscriptionDaoDstu2")
     private IFhirResourceDao<Subscription> reference;
