@@ -61,6 +61,11 @@
 				CapabilityStatement resource. Thanks to Michael Lawley
 				for the pull request!
 			</action>
+			<action type="fix">
+				Fix a crash in JPA server when searching using an _include if _include targets are
+				external references (and therefore can't be loaded
+				by the server). Thanks to Hannes Ulrich for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
