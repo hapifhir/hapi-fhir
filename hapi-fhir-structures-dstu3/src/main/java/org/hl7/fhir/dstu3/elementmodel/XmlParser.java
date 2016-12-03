@@ -3,6 +3,9 @@ package org.hl7.fhir.dstu3.elementmodel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -289,7 +292,16 @@ public class XmlParser extends ParserBase {
   }
 
   private Property getElementProp(List<Property> properties, String nodeName) {
-  	for (Property p : properties)
+		List<Property> propsSortedByLongestFirst = new ArrayList<Property>(properties);
+		// sort properties according to their name longest first, so .requestOrganizationReference comes first before .request[x]
+		// and therefore the longer property names get evaluated first
+		Collections.sort(propsSortedByLongestFirst, new Comparator<Property>() {
+			@Override
+			public int compare(Property o1, Property o2) {
+				return o2.getName().length() - o1.getName().length();
+			}
+		});
+  	for (Property p : propsSortedByLongestFirst)
   		if (!p.getDefinition().hasRepresentation(PropertyRepresentation.XMLATTR) && !p.getDefinition().hasRepresentation(PropertyRepresentation.XMLTEXT)) {
   		  if (p.getName().equals(nodeName)) 
 				  return p;

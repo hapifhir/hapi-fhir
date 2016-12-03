@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -200,4 +201,27 @@ public class ResourceValidatorDstu3Test {
 		assertThat(messageString, not(containsString("valueResource")));
 	}
 
+	@Test
+	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
+
+		EnrollmentResponse fhirObj = new EnrollmentResponse();
+		Organization org = new Organization();
+		org.setId("1");
+		fhirObj.setRequestOrganization(new Reference(org));
+		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
+
+		FhirValidator validator = ourCtx.newValidator();
+		validator.registerValidatorModule(new FhirInstanceValidator());
+
+		ValidationResult result = validator.validateWithResult(input);
+		assertEquals(3, result.getMessages().size());
+
+		fhirObj = new EnrollmentResponse();
+		Identifier ident = new Identifier().setSystem("a").setValue("b");
+		fhirObj.setRequest(ident);
+		input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
+
+		result = validator.validateWithResult(input);
+		assertEquals(2, result.getMessages().size());
+	}
 }
