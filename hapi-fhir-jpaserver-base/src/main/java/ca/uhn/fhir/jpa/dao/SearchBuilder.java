@@ -2209,10 +2209,14 @@ public class SearchBuilder {
 						for (ResourceLink resourceLink : results) {
 							if (theReverseMode) {
 								Long pid = resourceLink.getSourceResourcePid();
-								pidsToInclude.add(pid);
+								if (pid != null) {
+									pidsToInclude.add(pid);
+								}
 							} else {
 								Long pid = resourceLink.getTargetResourcePid();
-								pidsToInclude.add(pid);
+								if (pid != null) {
+									pidsToInclude.add(pid);
+								}
 							}
 						}
 					}
