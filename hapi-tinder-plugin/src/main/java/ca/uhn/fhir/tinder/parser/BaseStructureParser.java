@@ -68,6 +68,11 @@ public abstract class BaseStructureParser {
 	private String myVersion;
 	private boolean myIsRi;
 	private FhirContext myCtx;
+	private String myFilenamePrefix = "";
+	private String myFilenameSuffix = "";
+	private String myTemplate = null;
+	private File myTemplateFile = null;
+	private String myVelocityPath = null;
 
 	public BaseStructureParser(String theVersion, String theBaseDir) {
 		myVersion = theVersion;
@@ -174,7 +179,13 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	protected abstract String getFilenameSuffix();
+	protected String getFilenamePrefix() {
+		return myFilenamePrefix;
+	}
+
+	protected String getFilenameSuffix() {
+		return myFilenameSuffix;
+	}
 
 	public Map<String, String> getLocalImports() {
 		return myLocallyDefinedClassNames;
@@ -188,9 +199,17 @@ public abstract class BaseStructureParser {
 		return myResources;
 	}
 
-	protected abstract String getTemplate();
+	protected String getTemplate() {
+		return myTemplate;
+	}
 
-	protected abstract File getTemplateFile();
+	protected File getTemplateFile() {
+		return myTemplateFile;
+	}
+
+	protected String getVelocityPath() {
+		return myVelocityPath;
+	}
 
 	protected boolean isSpreadsheet(String theFileName) {
 		return true;
@@ -436,6 +455,26 @@ public abstract class BaseStructureParser {
 		myExtensions = theExts;
 	}
 
+	public void setFilenamePrefix(String theFilenamePrefix) {
+		myFilenamePrefix = theFilenamePrefix;
+	}
+
+	public void setFilenameSuffix(String theFilenameSuffix) {
+		myFilenameSuffix = theFilenameSuffix;
+	}
+
+	public void setTemplate(String theTemplate) {
+		myTemplate = theTemplate;
+	}
+
+	public void setTemplateFile (File theTemplateFile) {
+		myTemplateFile = theTemplateFile;
+	}
+
+	public void setVelocityPath(String theVelocityPath) {
+		myVelocityPath = theVelocityPath;
+	}
+
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileOutputStream fos = new FileOutputStream(theFile, false);
 		OutputStreamWriter w = new OutputStreamWriter(fos, "UTF-8");
@@ -499,13 +538,27 @@ public abstract class BaseStructureParser {
 		ctx.put("versionCapitalized", capitalize);
 
 		VelocityEngine v = new VelocityEngine();
-		v.setProperty("resource.loader", "cp");
-		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		InputStream templateIs = null;
+		if (getTemplateFile() != null) {
+			templateIs = new FileInputStream(getTemplateFile());
+			v.setProperty("resource.loader", "file");
+			v.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+			if (getVelocityPath() != null) {
+				v.setProperty("file.resource.loader.path", getVelocityPath());
+			} else {
+				String path = getTemplateFile().getCanonicalFile().getParent();
+				if (null == path) {
+					path = ".";
+				}
+				v.setProperty("file.resource.loader.path", path);
+			}
+		} else {
+			templateIs = this.getClass().getResourceAsStream(getTemplate());
+			v.setProperty("resource.loader", "cp");
+			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		}
 		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
-		InputStream templateIs = getTemplateFile() != null
-				? new FileInputStream(getTemplateFile())
-				: ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(getTemplate());
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
 		v.evaluate(ctx, w, "", templateReader);
 
@@ -514,6 +567,10 @@ public abstract class BaseStructureParser {
 	}
 
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
+		writeAll(TargetType.SOURCE, theOutputDirectory, theResourceOutputDirectory, thePackageBase);
+	}
+	
+	public void writeAll(TargetType theTarget, File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
 		myPackageBase = thePackageBase;
 
 		if (!theOutputDirectory.exists()) {
@@ -550,14 +607,17 @@ public abstract class BaseStructureParser {
 			// File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ +
 			// ".java");
 			String elementName = Resource.correctName(next.getElementName());
-			String fwork = getFilenameSuffix();
-			// TODO -- how to generate multiple non-Java files??
-			if (fwork.endsWith(".java")) {
-				fwork = elementName + fwork;
-			} else {
-				fwork = elementName + fwork + ".java";
+			String prefix = getFilenamePrefix();
+			String suffix = getFilenameSuffix();
+			if (theTarget == TargetType.SOURCE) {
+				if (!suffix.endsWith(".java")) {
+					suffix += ".java";
+				}
 			}
-			File f = new File(theOutputDirectory, fwork);
+			String fileName = prefix + elementName + suffix;
+			int ix = fileName.lastIndexOf('.');
+			String className = ix < 0 ? fileName : fileName.substring(0, ix); 
+			File f = new File(theOutputDirectory, fileName);
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
@@ -565,9 +625,9 @@ public abstract class BaseStructureParser {
 			}
 
 			if (next instanceof Resource) {
-				myNameToResourceClass.put(next.getElementName(), thePackageBase + ".resource." + elementName);
+				myNameToResourceClass.put(next.getElementName(), thePackageBase + ".resource." + className);
 			} else if (next instanceof Composite) {
-				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + ".composite." + elementName + "Dt");
+				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + ".composite." + className);
 			} else {
 				throw new IllegalStateException(next.getClass().toString());
 			}

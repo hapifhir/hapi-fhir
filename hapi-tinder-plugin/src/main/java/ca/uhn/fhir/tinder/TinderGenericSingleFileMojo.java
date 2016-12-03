@@ -7,15 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.TreeSet;
 
 import org.apache.commons.lang.WordUtils;
 import org.apache.http.ParseException;
-import org.apache.maven.model.FileSet;
-import org.apache.maven.model.PatternSet;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -29,114 +24,314 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.EscapeTool;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
+import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
+import ca.uhn.fhir.tinder.GeneratorContext.ProfileFileDefinition;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
+import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.TargetType;
 
+/**
+ * Generate a single file based on resource or composite type metadata.
+ * <p>
+ * Generates either a source or resource file containing all selected resources or
+ * composite data types. The file is
+ * generated using a Velocity template that can be taken from
+ * inside the hapi-timder-plugin project or can be located in other projects
+ * <p>
+ * The following Maven plug-in configuration properties are used with this plug-in 
+ * <p>
+ * <table border="1" cellpadding="2" cellspacing="0">
+ *   <tr>
+ *     <td valign="top"><b>Attribute</b></td>
+ *     <td valign="top"><b>Description</b></td>
+ *     <td align="center" valign="top"><b>Required</b></td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">version</td>
+ *     <td valign="top">The FHIR version whose resource metadata
+ *     is to be used to generate the files<br>
+ *     Valid values:&nbsp;<code><b>dstu</b></code>&nbsp;|&nbsp;<code><b>dstu2</b></code>&nbsp;|&nbsp;<code><b>dstu3</b></code></td>
+ *     <td valign="top" align="center">Yes</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">baseDir</td>
+ *     <td valign="top">The Maven project's base directory. This is used to 
+ *     possibly locate other assets within the project used in file generation.</td>
+ *     <td valign="top" align="center">No. Defaults to: <code>${project.build.directory}/..</code></td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">generateResources</td>
+ *     <td valign="top">Should files be generated from FHIR resource metadata?<br>
+ *     Valid values:&nbsp;<code><b>true</b></code>&nbsp;|&nbsp;<code><b>false</b></code></td> 
+ *     <td valign="top" align="center" rowspan="2">At least one of these two options must be specified</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">generateDataTypes</td>
+ *     <td valign="top">Should files be generated from FHIR composite data type metadata?<br>
+ *     Valid values:&nbsp;<code><b>true</b></code>&nbsp;|&nbsp;<code><b>false</b></code></td> 
+ *   </tr>
+ *   <tr>
+ *     <td colspan="3" />
+ *   </tr>
+ *   <tr>
+ *     <td valign="top" colspan="3">Java source files can be generated
+ *     for FHIR resources or composite data types. There is one file
+ *     generated for each selected entity. The following configuration
+ *     properties control the naming of the generated source files:<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetSourceDirectory&gt;/&lt;packageName&gt;/&lt;targetFile&gt;<br>
+ *     Note that all dots in the packageName will be replaced by the path separator character when building the
+ *     actual source file location. Also note that <code>.java</code> will be added to the targetFile if it is not already included.
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">targetSourceDirectory</td>
+ *     <td valign="top">The Maven source directory to contain the generated file.</td>
+ *     <td valign="top" align="center">Yes when a Java source file is to be generated</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">packageName</td>
+ *     <td valign="top">The Java package that will contain the generated classes.
+ *     This package is generated in the &lt;targetSourceDirectory&gt; if needed.</td>
+ *     <td valign="top" align="center">Yes when <i>targetSourceDirectory</i> is specified</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">targetFile</td>
+ *     <td valign="top">The name of the file to be generated</td>
+ *     <td valign="top" align="center">Yes</td>
+ *   </tr>
+ *   <tr>
+ *     <td colspan="3" />
+ *   </tr>
+ *   <tr>
+ *     <td valign="top" colspan="3">Maven resource files can also be generated
+ *     for FHIR resources or composite data types. The following configuration
+ *     properties control the naming of the generated resource files:<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetResourceDirectory&gt;/&lt;folderName&gt;/&lt;targetFile&gt;<br>
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">targetResourceDirectory</td>
+ *     <td valign="top">The Maven resource directory to contain the generated file.</td>
+ *     <td valign="top" align="center">Yes when a resource file is to be generated</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">folderName</td>
+ *     <td valign="top">The folder within the targetResourceDirectory where the generated file will be placed.
+ *     This folder is generated in the &lt;targetResourceDirectory&gt; if needed.</td>
+ *     <td valign="top" align="center">No</td>
+ *   </tr>
+ *   <tr>
+ *     <td colspan="3" />
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">template</td>
+ *     <td valign="top">The path of one of the <i>Velocity</i> templates
+ *     contained within the <code>hapi-tinder-plugin</code> Maven plug-in
+ *     classpath that will be used to generate the files.</td>
+ *     <td valign="top" align="center" rowspan="2">One of these two options must be configured</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">templateFile</td>
+ *     <td valign="top">The full path to the <i>Velocity</i> template that is
+ *     to be used to generate the files.</td> 
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">velocityPath</td>
+ *     <td valign="top">When using the <code>templateFile</code> option, this property
+ *     can be used to specify where Velocity macros and other resources are located.</td>
+ *     <td valign="top" align="center">No. Defaults to same directory as the template file.</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">includeResources</td>
+ *     <td valign="top">A list of the names of the resources or composite data types that should
+ *     be used in the file generation</td>
+ *     <td valign="top" align="center">No. Defaults to all defined resources except for DSTU2, 
+ *     the <code>Binary</code> resource is excluded and
+ *     for DSTU3, the <code>Conformance</code> resource is excluded.</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">excludeResources</td>
+ *     <td valign="top">A list of the names of the resources or composite data types that should
+ *     excluded from the file generation</td>
+ *     <td valign="top" align="center">No.</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">valueSetFiles</td>
+ *     <td valign="top">A list of files containing value-set resource definitions
+ *     to be used.</td>
+ *     <td valign="top" align="center">No. Defaults to all defined value-sets that 
+ *     are referenced from the selected resources.</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">profileFiles</td>
+ *     <td valign="top">A list of files containing profile definitions
+ *     to be used.</td>
+ *     <td valign="top" align="center">No. Defaults to the default profile
+ *     for each selected resource</td>
+ *   </tr>
+ * </table>
+ * 
+ * 
+ * 
+ * @author Bill.Denton
+ *
+ */
 @Mojo(name = "generate-single-file", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderGenericSingleFileMojo extends AbstractMojo {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderGenericSingleFileMojo.class);
 
+	@Parameter(required = true)
+	private String version;
+
+	@Parameter(required = true, defaultValue = "${project.build.directory}/..")
+	private String baseDir;
+
+	@Parameter(required = false, defaultValue="false")
+	private boolean generateResources;
+
+	@Parameter(required = false, defaultValue = "false")
+	private boolean generateDatatypes;
+	
+	@Parameter(required = false)
+	private File targetSourceDirectory;
+
+	@Parameter(required = false)
+	private String packageName;
+	
+	@Parameter(required = false)
+	private File targetResourceDirectory;
+
+	@Parameter(required = false)
+	private String folderName;
+
+	@Parameter(required = false)
+	private String targetFile;
+	
 	// one of these two is required
 	@Parameter(required = false)
 	private String template;
 	@Parameter(required = false)
 	private File templateFile;
-
-	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-sources/tinder")
-	private File targetDirectory;
+	@Parameter(required = false)
+	private String velocityPath;
 
 	@Parameter(required = false)
-	private String targetFolder;
+	private List<String> includeResources;
 
 	@Parameter(required = false)
-	private String targetPackage;
-
-	@Parameter(required = true)
-	private String targetFile;
-
-	@Parameter(required = true)
-	private String packageBase;
+	private List<String> excludeResources;
 
 	@Parameter(required = false)
-	private List<String> baseResourceNames;
+	private List<ValueSetFileDefinition> valueSetFiles;
 
 	@Parameter(required = false)
-	private List<String> excludeResourceNames;
-
-	@Parameter(required = true, defaultValue = "${project.build.directory}/..")
-	private String baseDir;
-
-	@Parameter(required = true)
-	private String version;
+	private List<ProfileFileDefinition> profileFiles;
 
 	@Component
 	private MavenProject myProject;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-
-		FhirContext fhirContext;
-		if ("dstu".equals(version)) {
-			fhirContext = FhirContext.forDstu1();
-		} else if ("dstu2".equals(version)) {
-			fhirContext = FhirContext.forDstu2();
-		} else if ("dstu3".equals(version)) {
-			fhirContext = FhirContext.forDstu3();
-		} else {
-			throw new MojoFailureException("Unknown version configured: " + version);
-		}
 		
-		if (baseResourceNames == null || baseResourceNames.isEmpty()) {
-			baseResourceNames = new ArrayList<String>();
-			
-			ourLog.info("No resource names supplied, going to use all resources from version: {}",fhirContext.getVersion().getVersion());
-			
-			Properties p = new Properties();
-			try {
-				p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
-			} catch (IOException e) {
-				throw new MojoFailureException("Failed to load version property file", e);
-			}
-
-			ourLog.debug("Property file contains: {}",p);
-
-			TreeSet<String> keys = new TreeSet<String>();
-			for(Object next : p.keySet()) {
-				keys.add((String) next);
-			}
-			for (String next : keys) {
-				if (next.startsWith("resource.")) {
-					baseResourceNames.add(next.substring("resource.".length()).toLowerCase());
-				}
-			}
-		}
-
-		for (int i = 0; i < baseResourceNames.size(); i++) {
-			baseResourceNames.set(i, baseResourceNames.get(i).toLowerCase());
-		}
-
-		if (excludeResourceNames != null) {
-			for (int i = 0; i < excludeResourceNames.size(); i++) {
-				excludeResourceNames.set(i, excludeResourceNames.get(i).toLowerCase());
-			}
-			baseResourceNames.removeAll(excludeResourceNames);
-		}
+		GeneratorContext context = new GeneratorContext();
+		context.setVersion(version);
+		context.setBaseDir(baseDir);
+		context.setIncludeResources(includeResources);
+		context.setExcludeResources(excludeResources);
+		context.setValueSetFiles(valueSetFiles);
+		context.setProfileFiles(profileFiles);
 		
-		ourLog.info("Including the following resources: {}", baseResourceNames);
-		
-		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet(version, baseDir);
-		gen.setBaseResourceNames(baseResourceNames);
-
+		Generator generator = new Generator();
 		try {
-			gen.parse();
-
+			generator.prepare(context);
+		} catch (ExecutionException e) {
+			throw new MojoExecutionException(e.getMessage(), e.getCause());
+		} catch (FailureException e) {
+			throw new MojoFailureException(e.getMessage(), e.getCause());
+		}
+		
+		try {
+			/*
+			 * Deal with the generation target
+			 */
+			TargetType targetType = null;
+			File targetDirectory = null;
+			if (null == targetFile) {
+				throw new MojoFailureException("The [targetFile] parameter is required.");
+			}
+			if (targetSourceDirectory != null) {
+				if (targetResourceDirectory != null) {
+					throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+				}
+				targetType = TargetType.SOURCE;
+				if (null == packageName) {
+					throw new MojoFailureException("The [targetPackage] property must be specified when generating Java source code.");
+				}
+				targetDirectory = new File(targetSourceDirectory, packageName.replace('.', File.separatorChar));
+				if (!targetFile.endsWith(".java")) {
+					targetFile += ".java";
+				}
+			} else
+			if (targetResourceDirectory != null) {
+				if (targetSourceDirectory != null) {
+					throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+				}
+				targetType = TargetType.RESOURCE;
+				if (folderName != null) {
+					folderName = folderName.replace('\\', '/');
+					folderName = folderName.replace('/', File.separatorChar);
+					targetDirectory = new File(targetResourceDirectory, folderName);
+				} else {
+					targetDirectory = targetResourceDirectory;
+				}
+			} else {
+				throw new MojoFailureException("Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
+			}
+			ourLog.info(" * Output ["+targetType.toString()+"] file ["+targetFile+"] in directory: " + targetDirectory.getAbsolutePath());
+			targetDirectory.mkdirs();
+			File target = new File(targetDirectory, targetFile);
+			OutputStreamWriter targetWriter = new OutputStreamWriter(new FileOutputStream(target, false), "UTF-8");
+	
+			/*
+			 * Next, deal with the template and initialize velocity
+			 */
+			VelocityEngine v = new VelocityEngine();
+			InputStream templateIs = null;
+			if (templateFile != null) {
+				templateIs = new FileInputStream(templateFile);
+				v.setProperty("resource.loader", "file");
+				v.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+				if (velocityPath != null) {
+					v.setProperty("file.resource.loader.path", velocityPath);
+				} else {
+					String path = templateFile.getCanonicalFile().getParent();
+					if (null == path) {
+						path = ".";
+					}
+					v.setProperty("file.resource.loader.path", path);
+				}
+			} else {
+				templateIs = this.getClass().getResourceAsStream(template);
+				v.setProperty("resource.loader", "cp");
+				v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			}
+			v.setProperty("runtime.references.strict", Boolean.TRUE);
+			InputStreamReader templateReader = new InputStreamReader(templateIs);
+	
+			/*
+			 * build new Velocity Context
+			 */
 			VelocityContext ctx = new VelocityContext();
-			ctx.put("resources", gen.getResources());
-			ctx.put("packageBase", packageBase);
-			ctx.put("targetPackage", targetPackage);
+			int ix = packageName.lastIndexOf('.');
+			ctx.put("packageBase", packageName.subSequence(0, ix));
+			ctx.put("targetPackage", packageName);
 			ctx.put("version", version);
+			ctx.put("isRi", BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi());
+			ctx.put("hash", "#");
 			ctx.put("esc", new EscapeTool());
 			if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
 				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
@@ -149,46 +344,43 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 				capitalize="Dstu1";
 			}
 			ctx.put("versionCapitalized", capitalize);
-
-			VelocityEngine v = new VelocityEngine();
-			v.setProperty("resource.loader", "cp");
-			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-			v.setProperty("runtime.references.strict", Boolean.TRUE);
-
-			InputStream templateIs = null;
-			if (templateFile != null) {
-				templateIs = new FileInputStream(templateFile);
-			} else {
-				templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(template);
-			}
-			InputStreamReader templateReader = new InputStreamReader(templateIs);
-
-			File target = targetDirectory;
-			if (targetFolder != null) {
-				targetFolder = targetFolder.replace('\\', '/');
-				targetFolder = targetFolder.replace('/', File.separatorChar);
-				target = new File(targetDirectory, targetFolder);
-			} else if (targetPackage != null) {
-				target = new File(targetDirectory, targetPackage.replace('.', File.separatorChar));
-			}
-			target.mkdirs();
-			File f = new File(target, targetFile);
-			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			
-			v.evaluate(ctx, w, "", templateReader);
-			w.close();
-			
-			if (targetFile.endsWith(".java")) {
-				myProject.addCompileSourceRoot(targetDirectory.getAbsolutePath());
+			/*
+			 * Write resources if selected
+			 */
+			ResourceGeneratorUsingSpreadsheet rp = context.getResourceGenerator();
+			if (generateResources && rp != null) {
+				ourLog.info("Writing Resources...");
+				ctx.put("resources", rp.getResources());
+				v.evaluate(ctx, targetWriter, "", templateReader);
+				targetWriter.close();
 			} else {
-				Resource resource = new Resource();
-				resource.setDirectory(targetDirectory.getAbsolutePath());
-				String resName = targetFile;
-				if (targetFolder != null) {
-					resName = targetFolder+File.separator+targetFile;
+				DatatypeGeneratorUsingSpreadsheet dtp = context.getDatatypeGenerator();
+				if (generateDatatypes && dtp != null) {
+					ourLog.info("Writing DataTypes...");
+					ctx.put("datatypes", dtp.getResources());
+					v.evaluate(ctx, targetWriter, "", templateReader);
+					targetWriter.close();
 				}
-				resource.addInclude(resName);
-				myProject.addResource(resource);
+			}
+			
+			switch (targetType) {
+				case SOURCE: {
+					myProject.addCompileSourceRoot(targetDirectory.getAbsolutePath());
+					break;
+				}
+				case RESOURCE: {
+					Resource resource = new Resource();
+					resource.setDirectory(targetDirectory.getAbsolutePath());
+					String resName = targetFile;
+					if (folderName != null) {
+						resName = folderName+File.separator+targetFile;
+					}
+					resource.addInclude(resName);
+					myProject.addResource(resource);
+					break;
+				}
+				default:
 			}
 
 		} catch (Exception e) {
@@ -217,10 +409,20 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 		mojo.myProject = new MavenProject();
 		mojo.template = "/vm/jpa_spring_beans.vm";
 		mojo.version = "dstu2";
-		mojo.packageBase = "ca.uhn.test";
-		mojo.targetDirectory = new File("target/generated/valuesets");
+		mojo.packageName = "ca.uhn.test";
+		mojo.targetSourceDirectory = new File("target/generated/valuesets");
 		mojo.targetFile = "tmp_beans.xml";
 		mojo.execute();
 	}
 
+	class Generator extends AbstractGenerator {
+		@Override
+		protected void logInfo(String message) {
+			ourLog.info(message);
+		}
+		@Override
+		protected void logDebug(String message) {
+			ourLog.debug(message);
+		}
+	}
 }

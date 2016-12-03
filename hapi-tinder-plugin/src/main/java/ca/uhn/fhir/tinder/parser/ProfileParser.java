@@ -40,6 +40,7 @@ public class ProfileParser extends BaseStructureParser {
 
 	public ProfileParser(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
+		super.setFilenameSuffix("");
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ProfileParser.class);
@@ -54,12 +55,11 @@ public class ProfileParser extends BaseStructureParser {
 	}
 
 	@Override
-	protected String getFilenameSuffix() {
-		return "";
-	}
-
-	@Override
 	protected String getTemplate() {
+		String template = super.getTemplate();
+		if (template != null) {
+			return template;
+		}
 		return "dstu".equals(getVersion()) ? "/vm/resource_dstu.vm" : "/vm/resource.vm";
 	}
 	

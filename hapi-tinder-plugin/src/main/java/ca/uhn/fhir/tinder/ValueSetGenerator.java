@@ -1,6 +1,7 @@
 package ca.uhn.fhir.tinder;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,8 +41,10 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
+import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.TargetType;
 
 public class ValueSetGenerator {
 
@@ -51,6 +55,11 @@ public class ValueSetGenerator {
 	private int myValueSetCount;
 	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
 	private String myVersion;
+	private String myFilenamePrefix = "";
+	private String myFilenameSuffix = "";
+	private String myTemplate = null;
+	private File myTemplateFile = null;
+	private String myVelocityPath = null;
 
 	public ValueSetGenerator(String theVersion) {
 		myVersion = theVersion;
@@ -293,9 +302,33 @@ public class ValueSetGenerator {
 		return b.toString();
 	}
 
+	public void setFilenamePrefix(String theFilenamePrefix) {
+		myFilenamePrefix = theFilenamePrefix;
+	}
+
+	public void setFilenameSuffix(String theFilenameSuffix) {
+		myFilenameSuffix = theFilenameSuffix;
+	}
+
+	public void setTemplate(String theTemplate) {
+		myTemplate = theTemplate;
+	}
+
+	public void setTemplateFile (File theTemplateFile) {
+		myTemplateFile = theTemplateFile;
+	}
+
+	public void setVelocityPath(String theVelocityPath) {
+		myVelocityPath = theVelocityPath;
+	}
+
 	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
+		write(TargetType.SOURCE, theValueSets, theOutputDirectory, thePackageBase);
+	}
+
+	public void write(TargetType theTarget, Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
 		for (ValueSetTm nextValueSetTm : theValueSets) {
-			write(nextValueSetTm, theOutputDirectory, thePackageBase);
+			write(theTarget, nextValueSetTm, theOutputDirectory, thePackageBase);
 		}
 	}
 
@@ -303,7 +336,7 @@ public class ValueSetGenerator {
 	// myValueSetName = theString;
 	// }
 
-	private void write(ValueSetTm theValueSetTm, File theOutputDirectory, String thePackageBase) throws IOException {
+	private void write(TargetType theTarget, ValueSetTm theValueSetTm, File theOutputDirectory, String thePackageBase) throws IOException {
 		if (!theOutputDirectory.exists()) {
 			theOutputDirectory.mkdirs();
 		}
@@ -311,22 +344,51 @@ public class ValueSetGenerator {
 			throw new IOException(theOutputDirectory + " is not a directory");
 		}
 
-		File f = new File(theOutputDirectory, theValueSetTm.getClassName() + ".java");
+		String valueSetName = theValueSetTm.getClassName();
+		String prefix = myFilenamePrefix;
+		String suffix = myFilenameSuffix;
+		if (theTarget == TargetType.SOURCE) {
+			if (!suffix.endsWith(".java")) {
+				suffix += ".java";
+			}
+		}
+		String fileName = prefix + valueSetName + suffix;
+		File f = new File(theOutputDirectory, fileName);
 		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 
 		ourLog.debug("Writing file: {}", f.getAbsolutePath());
 
 		VelocityContext ctx = new VelocityContext();
+		InputStream templateIs = null;
 		ctx.put("valueSet", theValueSetTm);
 		ctx.put("packageBase", thePackageBase);
 		ctx.put("esc", new EscapeTool());
 
 		VelocityEngine v = new VelocityEngine();
-		v.setProperty("resource.loader", "cp");
-		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		if (myTemplateFile != null) {
+			templateIs = new FileInputStream(myTemplateFile);
+			v.setProperty("resource.loader", "file");
+			v.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+			if (myVelocityPath != null) {
+				v.setProperty("file.resource.loader.path", myVelocityPath);
+			} else {
+				String path = myTemplateFile.getCanonicalFile().getParent();
+				if (null == path) {
+					path = ".";
+				}
+				v.setProperty("file.resource.loader.path", path);
+			}
+		} else {
+			String templateName = myTemplate;
+			if (null == templateName) {
+				templateName = "/vm/valueset.vm";
+			}
+			templateIs = this.getClass().getResourceAsStream(templateName);
+			v.setProperty("resource.loader", "cp");
+			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		}
 		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
-		InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/valueset.vm");
 		InputStreamReader templateReader = new InputStreamReader(templateIs, "UTF-8");
 		v.evaluate(ctx, w, "", templateReader);
 
@@ -334,8 +396,12 @@ public class ValueSetGenerator {
 	}
 
 	public void writeMarkedValueSets(File theOutputDirectory, String thePackageBase) throws MojoFailureException {
+		writeMarkedValueSets(TargetType.SOURCE, theOutputDirectory, thePackageBase);
+	}
+
+	public void writeMarkedValueSets(TargetType theTarget, File theOutputDirectory, String thePackageBase) throws MojoFailureException {
 		try {
-			write(myMarkedValueSets, theOutputDirectory, thePackageBase);
+			write(theTarget, myMarkedValueSets, theOutputDirectory, thePackageBase);
 		} catch (IOException e) {
 			throw new MojoFailureException("Failed to write valueset", e);
 		}

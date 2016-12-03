@@ -148,14 +148,21 @@ public abstract class Child extends BaseElement {
 		return false;
 	}
 
+	public boolean isPrimitive (String theType) {
+		return isPrimitiveInternal(theType);
+	}
+
 	public boolean isPrimitive() {
 		
 		if (IDatatype.class.getSimpleName().equals(getReferenceType())) {
 			return false;
 		}
-		
+		return isPrimitiveInternal(getSingleType());
+	}
+
+	protected boolean isPrimitiveInternal (String theType) {
 		try {
-			String name = "ca.uhn.fhir.model.primitive." + getSingleType();
+			String name = "ca.uhn.fhir.model.primitive." + theType;
 			Class.forName(name);
 			return true;
 		} catch (ClassNotFoundException e) {
@@ -163,8 +170,16 @@ public abstract class Child extends BaseElement {
 		}
 	}
 
+	public String getPrimitiveType (String theType) throws ClassNotFoundException {
+		return getPrimitiveTypeInternal(theType);
+	}
+
 	public String getPrimitiveType() throws ClassNotFoundException {
-		String name = "ca.uhn.fhir.model.primitive." + getSingleType();
+		return getPrimitiveTypeInternal(getSingleType());
+	}
+
+	protected String getPrimitiveTypeInternal (String theType) throws ClassNotFoundException {
+		String name = "ca.uhn.fhir.model.primitive." + theType;
 		Class<?> clazz = Class.forName(name);
 		if (clazz.equals(IdDt.class)) {
 			return String.class.getSimpleName();
