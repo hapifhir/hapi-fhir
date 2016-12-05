@@ -287,7 +287,17 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			}
 			
 			@SuppressWarnings("rawtypes")
-			Class implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+			Class implementingClass;
+			try {
+				implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+			} catch (DataFormatException e) {
+				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+					capabilityStatementResourceName = "Conformance";
+					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+				} else {
+					throw e;
+				}
+			}
 			try {
 				conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
 			} catch (FhirClientConnectionException e) {

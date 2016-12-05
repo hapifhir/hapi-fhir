@@ -7,7 +7,16 @@
 	</properties>
 	<body>
 		<release version="2.2" date="TBD">
-			<action type="fix">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>spring (JPA): 4.3.1 -&gt; 4.3.4</li>
+					</ul>
+				]]>
+			</action>
+		<action type="fix">
 				Fix issue in AuthorizationIntetceptor where
 				transactions are blocked even when they
 				should not be
@@ -45,6 +54,26 @@
 				parser will either throw a meaningful exception
 				or log a warning depending on the configured
 				error handler.
+			</action>
+			<action type="fix" issue="276">
+				Fix issue when serializing resources that have
+				contained resources which are referred to
+				from multiple places. Sometimes when serializing
+				these resources the contained resource section
+				would contain duplicates. Thanks to Hugo Soares
+				and Stefan Evinance for reporting and providing
+				a test case!
+			</action>
+			<action type="add" issue="518">
+				Allow client to gracefully handle running in DSTU3 mode
+				but with a structures JAR that does not contain a
+				CapabilityStatement resource. Thanks to Michael Lawley
+				for the pull request!
+			</action>
+			<action type="fix">
+				Fix a crash in JPA server when searching using an _include if _include targets are
+				external references (and therefore can't be loaded
+				by the server). Thanks to Hannes Ulrich for reporting!
 			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">

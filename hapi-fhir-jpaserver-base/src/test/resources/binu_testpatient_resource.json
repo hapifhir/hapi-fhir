@@ -1,0 +1,40 @@
+{
+	"resourceType": "Patient",
+	"id": "67.20068.14731",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2016-11-30T02:18:24.929-05:00",
+		"profile": [
+			"http://example.org/fhir/StructureDefinition/DutchPatient"
+		]
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> GHASIYA <b>AL WAHEIBI </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>14731</td></tr><tr><td>Address</td><td></td></tr><tr><td>Date of birth</td><td><span>01 January 1981</span></td></tr></tbody></table></div>"
+	},
+	"identifier": [{
+		"value": "14731",
+		"period": {
+			"start": "2005-03-15"
+		}
+	}],
+	"active": false,
+	"name": [{
+		"family": [
+			"AL WAHEIBI"
+		],
+		"given": [
+			"GHASIYA"
+		]
+	}],
+	"gender": "female",
+	"birthDate": "1981-01-01",
+	"deceasedBoolean": true,
+	"address": {
+		"use": "home"
+	},
+	"placeOfBirth": {
+		"url": "http://hl7.org/fhir/StructureDefinition/birthPlace",
+		"valueString": "Narakal"
+	}
+}
