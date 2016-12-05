@@ -66,6 +66,10 @@
 				external references (and therefore can't be loaded
 				by the server). Thanks to Hannes Ulrich for reporting!
 			</action>
+			<action type="fix">
+				HAPI FHIR CLI failed to delete a file when uploading
+				example resources while running under Windows.
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
