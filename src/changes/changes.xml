@@ -7,7 +7,16 @@
 	</properties>
 	<body>
 		<release version="2.2" date="TBD">
-			<action type="fix">
+			<!--<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>spring (JPA): 4.3.1 -&gt; 4.3.4</li>
+					</ul>
+				]]>
+			</action>-->
+		<action type="fix">
 				Fix issue in AuthorizationIntetceptor where
 				transactions are blocked even when they
 				should not be

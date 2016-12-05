@@ -61,7 +61,7 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	@Override
 	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
 		if (myLogErrors) {
-			ourLog.warn("Found incorrect type for element {} - Expected {} and found {}", theElementName, theExpected.name(), theFound.name());
+			ourLog.warn("Found incorrect type for element {} - Expected {} and found {}", new Object[]{theElementName, theExpected.name(), theFound.name()});
 		}
 	}
 
