@@ -180,11 +180,11 @@ public abstract class BaseStructureParser {
 	}
 
 	protected String getFilenamePrefix() {
-		return myFilenamePrefix;
+		return myFilenamePrefix != null ? myFilenamePrefix : "";
 	}
 
 	protected String getFilenameSuffix() {
-		return myFilenameSuffix;
+		return myFilenameSuffix != null ? myFilenameSuffix : "";
 	}
 
 	public Map<String, String> getLocalImports() {
@@ -536,6 +536,7 @@ public abstract class BaseStructureParser {
 			capitalize = "Dstu1";
 		}
 		ctx.put("versionCapitalized", capitalize);
+		ctx.put("this", theResource);
 
 		VelocityEngine v = new VelocityEngine();
 		InputStream templateIs = null;

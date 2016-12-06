@@ -113,12 +113,12 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     be generated containing all of the selected entity. The following configuration
  *     properties control the naming of the generated source files:
  *     <p>The following properties will be used when generating multiple source files:<br>
- *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetSourceDirectory&gt;/&lt;packageName&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetSourceDirectory&gt;/&lt;targetPackage&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
  * 	   &nbsp;&nbsp;&nbsp;&nbsp;where: <i>element-name</i> is the "title-case" name of the selected resource or composite data type.
  *     <p>The following properties will be used when generating a single source file:<br>
- *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetSourceDirectory&gt;/&lt;packageName&gt;/&lt;targetFile&gt;
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetSourceDirectory&gt;/&lt;targetPackage&gt;/&lt;targetFile&gt;
  *     <p>
- *     Note that all dots in the packageName will be replaced by the path separator character when building the
+ *     Note that all dots in the targetPackage will be replaced by the path separator character when building the
  *     actual source file location. Also note that <code>.java</code> will be added to the filenameSuffix or targetFile if it is not already included.
  *     </td>
  *   </tr>
@@ -128,10 +128,16 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top" align="center">Yes when Java source files are to be generated</td>
  *   </tr>
  *   <tr>
- *     <td valign="top">packageName</td>
+ *     <td valign="top">targetPackage</td>
  *     <td valign="top">The Java package that will contain the generated classes.
  *     This package is generated in the &lt;targetSourceDirectory&gt; if needed.</td>
  *     <td valign="top" align="center">Yes when <i>targetSourceDirectory</i> is specified</td>
+ *   </tr>
+ *   <tr>
+ *     <td valign="top">packageBase</td>
+ *     <td valign="top">The base Java package for related classes. This property
+ *     can be used to reference class in other places in a folder structure.</td>
+ *     <td valign="top" align="center">No</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">targetFile</td>
@@ -161,10 +167,10 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     be generated containing all of the selected entity. The following configuration
  *     properties control the naming of the generated files:
  *     <p>The following properties will be used when generating multiple files (one for each selected element):<br>
- *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetResourceDirectory&gt;/&lt;folderName&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetResourceDirectory&gt;/&lt;targetFolder&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
  * 	   &nbsp;&nbsp;&nbsp;&nbsp;where: <i>element-name</i> is the "title-case" name of the selected resource or composite data type.
  *     <p>The following properties will be used when generating a single file containing all selected elements:<br>
- *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetResourceDirectory&gt;/&lt;folderName&gt;/&lt;targetFile&gt;
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetResourceDirectory&gt;/&lt;targetFolder&gt;/&lt;targetFile&gt;
  *     </td>
  *   </tr>
  *   <tr>
@@ -173,7 +179,7 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top" align="center">Yes when resource files are to be generated</td>
  *   </tr>
  *   <tr>
- *     <td valign="top">folderName</td>
+ *     <td valign="top">targetFolder</td>
  *     <td valign="top">The folder within the targetResourceDirectory where the generated files will be placed.
  *     This folder is generated in the &lt;targetResourceDirectory&gt; if needed.</td>
  *     <td valign="top" align="center">No</td>
@@ -250,7 +256,9 @@ public class TinderGeneratorTask extends Task {
 	
 	private File targetSourceDirectory;
 
-	private String packageName;
+	private String targetPackage;
+
+	private String packageBase;
 
 	private String targetFile;
 
@@ -260,7 +268,7 @@ public class TinderGeneratorTask extends Task {
 	
 	private File targetResourceDirectory;
 
-	private String folderName;
+	private String targetFolder;
 	
 	// one of these two is required
 	private String template;
@@ -319,20 +327,23 @@ public class TinderGeneratorTask extends Task {
 				throw new BuildException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.SOURCE;
-			if (null == packageName) {
-				throw new BuildException("The [packageName] property must be specified when generating Java source code.");
+			if (null == targetPackage) {
+				throw new BuildException("The [targetPackage] property must be specified when generating Java source code.");
 			}
-			targetDirectory = new File(targetSourceDirectory, packageName.replace('.', File.separatorChar));
+			targetDirectory = new File(targetSourceDirectory, targetPackage.replace('.', File.separatorChar));
 		} else
 		if (targetResourceDirectory != null) {
 			if (targetSourceDirectory != null) {
 				throw new BuildException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.RESOURCE;
-			if (folderName != null) {
-				targetDirectory = new File(targetResourceDirectory, folderName);
+			if (targetFolder != null) {
+				targetDirectory = new File(targetResourceDirectory, targetFolder);
 			} else {
 				targetDirectory = targetResourceDirectory;
+			}
+			if (null == targetPackage) {
+				targetPackage = "";
 			}
 		} else {
 			throw new BuildException("Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
@@ -383,9 +394,19 @@ public class TinderGeneratorTask extends Task {
 				 * build new Velocity Context
 				 */
 				VelocityContext ctx = new VelocityContext();
-				int ix = packageName.lastIndexOf('.');
-				ctx.put("packageBase", packageName.subSequence(0, ix));
-				ctx.put("targetPackage", packageName);
+				if (packageBase != null) {
+					ctx.put("packageBase", packageBase);
+				} else
+				if (targetPackage != null) {
+					int ix = targetPackage.lastIndexOf('.');
+					if (ix > 0) {
+						ctx.put("packageBase", targetPackage.subSequence(0, ix));
+					} else {
+						ctx.put("packageBase", targetPackage);
+					}
+				}
+				ctx.put("targetPackage", targetPackage);
+				ctx.put("targetFolder", targetFolder);
 				ctx.put("version", version);
 				ctx.put("isRi", BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi());
 				ctx.put("hash", "#");
@@ -436,7 +457,7 @@ public class TinderGeneratorTask extends Task {
 					rp.setTemplate(template);
 					rp.setTemplateFile(templateFile);
 					rp.setVelocityPath(velocityPath);
-					rp.writeAll(targetType, targetDirectory, null, packageName);
+					rp.writeAll(targetType, targetDirectory, null, targetPackage);
 				}
 
 				/*
@@ -450,7 +471,7 @@ public class TinderGeneratorTask extends Task {
 					dtp.setTemplate(template);
 					dtp.setTemplateFile(templateFile);
 					dtp.setVelocityPath(velocityPath);
-					dtp.writeAll(targetType, targetDirectory, null, packageName);
+					dtp.writeAll(targetType, targetDirectory, null, targetPackage);
 				}
 
 				/*
@@ -464,7 +485,7 @@ public class TinderGeneratorTask extends Task {
 					vsp.setTemplate(template);
 					vsp.setTemplateFile(templateFile);
 					vsp.setVelocityPath(velocityPath);
-					vsp.writeMarkedValueSets(targetType, targetDirectory, packageName);
+					vsp.writeMarkedValueSets(targetType, targetDirectory, targetPackage);
 				}
 				
 				/*
@@ -478,7 +499,7 @@ public class TinderGeneratorTask extends Task {
 					pp.setTemplate(template);
 					pp.setTemplateFile(templateFile);
 					pp.setVelocityPath(velocityPath);
-					pp.writeAll(targetType, targetDirectory, null, packageName);
+					pp.writeAll(targetType, targetDirectory, null, targetPackage);
 				}
 			}
 
@@ -550,8 +571,12 @@ public class TinderGeneratorTask extends Task {
 		this.targetSourceDirectory = targetSourceDirectory;
 	}
 
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
+	public void setTargetPackage(String targetPackage) {
+		this.targetPackage = targetPackage;
+	}
+
+	public void setPackageBase(String packageBase) {
+		this.packageBase = packageBase;
 	}
 
 	public void setTargetFile(String targetFile) {
@@ -570,8 +595,8 @@ public class TinderGeneratorTask extends Task {
 		this.targetResourceDirectory = targetResourceDirectory;
 	}
 
-	public void setFolderName(String folderName) {
-		this.folderName = folderName;
+	public void setTaargetFolder(String targetFolder) {
+		this.targetFolder = targetFolder;
 	}
 
 	public void setTemplate(String template) {

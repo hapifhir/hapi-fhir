@@ -24,6 +24,11 @@
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>2.2-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2</artifactId>
+			<version>2.2-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -104,14 +109,34 @@
 						</goals>
 						<configuration>
 							<version>dstu</version>
+							<generateResources>true</generateResources>
 							<templateFile>${project.basedir}/src/test/resources/templates/resource_test.vm</templateFile>
-							<packageBase>ca.uhn.test.generic.multi</packageBase>
-							<targetDirectory>${project.build.directory}/generated-sources/tinder</targetDirectory>
+							<targetSourceDirectory>${project.build.directory}/generated-sources/tinder</targetSourceDirectory>
+							<targetPackage>ca.uhn.test.generic.multi</targetPackage>
 							<filenameSuffix>ResourceTest.java</filenameSuffix>
-							<baseResourceNames>
-								<baseResourceName>patient</baseResourceName>
-								<baseResourceName>organization</baseResourceName>
-							</baseResourceNames>
+							<includeResources>
+								<includeResource>patient</includeResource>
+								<includeResource>organization</includeResource>
+							</includeResources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generic_multi_json</id>
+						<goals>
+							<goal>generate-multi-files</goal>
+						</goals>
+						<configuration>
+							<version>dstu2</version>
+							<generateResources>true</generateResources>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_map.vm</templateFile>
+							<velocityPath>${project.basedir}/src/test/resources/macros</velocityPath>
+							<targetResourceDirectory>${project.build.directory}/generated-resources/tinder</targetResourceDirectory>
+							<targetFolder>maps</targetFolder>
+							<filenameSuffix>_Map.json</filenameSuffix>
+							<includeResources>
+								<includeResource>patient</includeResource>
+								<includeResource>organization</includeResource>
+							</includeResources>
 						</configuration>
 					</execution>
 					<execution>
@@ -121,15 +146,35 @@
 						</goals>
 						<configuration>
 							<version>dstu</version>
+							<generateResources>true</generateResources>
 							<templateFile>${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm</templateFile>
-							<packageBase>ca.uhn.test.generic.multi</packageBase>
-							<targetDirectory>${project.build.directory}/generated-sources/tinder</targetDirectory>
+							<targetSourceDirectory>${project.build.directory}/generated-sources/tinder</targetSourceDirectory>
 							<targetPackage>ca.uhn.test.generic.single</targetPackage>
+							<packageBase>ca.uhn.test.generic.multi</packageBase>
 							<targetFile>TestConfigDstu1.java</targetFile>
-							<baseResourceNames>
-								<baseResourceName>patient</baseResourceName>
-								<baseResourceName>organization</baseResourceName>
-							</baseResourceNames>
+							<includeResources>
+								<includeResource>patient</includeResource>
+								<includeResource>organization</includeResource>
+							</includeResources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generic_single_json</id>
+						<goals>
+							<goal>generate-single-file</goal>
+						</goals>
+						<configuration>
+							<version>dstu2</version>
+							<generateDatatypes>true</generateDatatypes>
+							<templateFile>${project.basedir}/src/test/resources/templates/composite_map.vm</templateFile>
+							<velocityPath>${project.basedir}/src/test/resources/macros</velocityPath>
+							<targetResourceDirectory>${project.build.directory}/generated-resources/tinder</targetResourceDirectory>
+							<targetFolder>maps</targetFolder>
+							<targetFile>Datatypes_Dstu2.json</targetFile>
+							<includeResources>
+								<includeResource>patient</includeResource>
+								<includeResource>organization</includeResource>
+							</includeResources>
 						</configuration>
 					</execution>
  					<!-- <execution> <id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
@@ -138,7 +183,17 @@
 				<dependencies>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-base</artifactId>
+						<version>2.2-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu</artifactId>
+						<version>2.2-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu2</artifactId>
 						<version>2.2-SNAPSHOT</version>
 					</dependency>
 				</dependencies>
@@ -157,22 +212,24 @@
 						<taskdef name="hapi-tinder" classname="ca.uhn.fhir.tinder.ant.TinderGeneratorTask" classpathref="maven.plugin.classpath"/>
 		
 						<hapi-tinder templateFile="${project.basedir}/src/test/resources/templates/resource_test.vm"
-						             targetDir="${project.build.directory}/generated-sources/tinder"
-									 packageBase="ca.uhn.test.ant.multi"
-						             targetclassSuffix="ResourceTest.java"
+						             generateResources="true"
+						             targetSourceDirectory="${project.build.directory}/generated-sources/tinder"
+									 targetPackage="ca.uhn.test.ant.multi"
+						             filenameSuffix="ResourceTest.java"
 				                     projectHome="${project.basedir}/.."
 						             version="dstu2"
-							         baseResourceNames="patient,organization"
+							         includeResources="patient,organization"
 						/>
 		
 						<hapi-tinder templateFile="${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm"
-						             targetDir="${project.build.directory}/generated-sources/tinder"
+						             generateResources="true"
+						             targetSourceDirectory="${project.build.directory}/generated-sources/tinder"
 						             targetFile="TestConfigDstu2.java"
 									 targetPackage="ca.uhn.test.ant.single"
 									 packageBase="ca.uhn.test.ant.multi"
 				                     projectHome="${project.basedir}/.."
 						             version="dstu2"
-							         baseResourceNames="patient,organization"
+							         includeResources="patient,organization"
 						/>
 		
 		              </target>

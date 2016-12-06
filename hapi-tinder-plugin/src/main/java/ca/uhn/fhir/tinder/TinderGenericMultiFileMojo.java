@@ -57,7 +57,7 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top">generateResources</td>
  *     <td valign="top">Should files be generated from FHIR resource metadata?<br>
  *     Valid values:&nbsp;<code><b>true</b></code>&nbsp;|&nbsp;<code><b>false</b></code></td> 
- *     <td valign="top" align="center" rowspan="4">At least one of these four options must be specified</td>
+ *     <td valign="top" align="center" rowspan="4">One of these four options must be specified</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">generateDataTypes</td>
@@ -82,9 +82,9 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     for FHIR resources or composite data types. There is one file
  *     generated for each selected entity. The following configuration
  *     properties control the naming of the generated source files:<br>
- *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetSourceDirectory&gt;/&lt;packageName&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetSourceDirectory&gt;/&lt;targetPackage&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
  *     where: <i>element-name</i> is the "title-case" name of the selected resource or composite data type.<br>
- *     Note that all dots in the packageName will be replaced by the path separator character when building the
+ *     Note that all dots in the targetPackage will be replaced by the path separator character when building the
  *     actual source file location. Also note that <code>.java</code> will be added to the filenameSuffix if it is not already included.
  *     </td>
  *   </tr>
@@ -94,7 +94,7 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top" align="center">Yes when Java source files are to be generated</td>
  *   </tr>
  *   <tr>
- *     <td valign="top">packageName</td>
+ *     <td valign="top">targetPackage</td>
  *     <td valign="top">The Java package that will contain the generated classes.
  *     This package is generated in the &lt;targetSourceDirectory&gt; if needed.</td>
  *     <td valign="top" align="center">Yes when <i>targetSourceDirectory</i> is specified</td>
@@ -119,7 +119,7 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top" colspan="3">Maven resource files can also be generated
  *     for FHIR resources or composite data types. The following configuration
  *     properties control the naming of the generated resource files:<br>
- *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetResourceDirectory&gt;/&lt;folderName&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;&lt;targetResourceDirectory&gt;/&lt;targetFolder&gt;/&lt;filenamePrefix&gt;<i>element-name</i>&lt;filenameSuffix&gt;<br>
  *     where: <i>element-name</i> is the "title-case" name of the selected resource or composite data type.
  *     </td>
  *   </tr>
@@ -129,7 +129,7 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top" align="center">Yes when resource files are to be generated</td>
  *   </tr>
  *   <tr>
- *     <td valign="top">folderName</td>
+ *     <td valign="top">targetFolder</td>
  *     <td valign="top">The folder within the targetResourceDirectory where the generated files will be placed.
  *     This folder is generated in the &lt;targetResourceDirectory&gt; if needed.</td>
  *     <td valign="top" align="center">No</td>
@@ -217,7 +217,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 	private File targetSourceDirectory;
 
 	@Parameter(required = false)
-	private String packageName;
+	private String targetPackage;
 
 	@Parameter(required = false)
 	private String filenamePrefix;
@@ -229,7 +229,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 	private File targetResourceDirectory;
 
 	@Parameter(required = false)
-	private String folderName;
+	private String targetFolder;
 	
 	// one of these two is required
 	@Parameter(required = false)
@@ -284,20 +284,23 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 				throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.SOURCE;
-			if (null == packageName) {
-				throw new MojoFailureException("The [packageName] property must be specified when generating Java source code.");
+			if (null == targetPackage) {
+				throw new MojoFailureException("The [targetPackage] property must be specified when generating Java source code.");
 			}
-			targetDirectory = new File(targetSourceDirectory, packageName.replace('.', File.separatorChar));
+			targetDirectory = new File(targetSourceDirectory, targetPackage.replace('.', File.separatorChar));
 		} else
 		if (targetResourceDirectory != null) {
 			if (targetSourceDirectory != null) {
 				throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.RESOURCE;
-			if (folderName != null) {
-				targetDirectory = new File(targetResourceDirectory, folderName);
+			if (targetFolder != null) {
+				targetDirectory = new File(targetResourceDirectory, targetFolder);
 			} else {
 				targetDirectory = targetResourceDirectory;
+			}
+			if (null == targetPackage) {
+				targetPackage = "";
 			}
 		} else {
 			throw new MojoFailureException("Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
@@ -316,7 +319,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			rp.setTemplate(template);
 			rp.setTemplateFile(templateFile);
 			rp.setVelocityPath(velocityPath);
-			rp.writeAll(targetType, targetDirectory, null, packageName);
+			rp.writeAll(targetType, targetDirectory, null, targetPackage);
 		}
 
 		/*
@@ -330,7 +333,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			dtp.setTemplate(template);
 			dtp.setTemplateFile(templateFile);
 			dtp.setVelocityPath(velocityPath);
-			dtp.writeAll(targetType, targetDirectory, null, packageName);
+			dtp.writeAll(targetType, targetDirectory, null, targetPackage);
 		}
 
 		/*
@@ -344,7 +347,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			vsp.setTemplate(template);
 			vsp.setTemplateFile(templateFile);
 			vsp.setVelocityPath(velocityPath);
-			vsp.writeMarkedValueSets(targetType, targetDirectory, packageName);
+			vsp.writeMarkedValueSets(targetType, targetDirectory, targetPackage);
 		}
 		
 		/*
@@ -358,18 +361,22 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			pp.setTemplate(template);
 			pp.setTemplateFile(templateFile);
 			pp.setVelocityPath(velocityPath);
-			pp.writeAll(targetType, targetDirectory, null, packageName);
+			pp.writeAll(targetType, targetDirectory, null, targetPackage);
 		}
 		
 		switch (targetType) {
 			case SOURCE: {
-				myProject.addCompileSourceRoot(targetDirectory.getAbsolutePath());
+				myProject.addCompileSourceRoot(targetSourceDirectory.getAbsolutePath());
 				break;
 			}
 			case RESOURCE: {
 				Resource resource = new Resource();
-				resource.setDirectory(targetDirectory.getAbsolutePath());
-				resource.addInclude("*");
+				resource.setDirectory(targetResourceDirectory.getAbsolutePath());
+				if (targetFolder != null) {
+					resource.addInclude(targetFolder+"/*");
+				} else {
+					resource.addInclude("*");
+				}
 				myProject.addResource(resource);
 				break;
 			}
@@ -398,7 +405,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 		TinderGenericMultiFileMojo mojo = new TinderGenericMultiFileMojo();
 		mojo.myProject = new MavenProject();
 		mojo.version = "dstu2";
-		mojo.packageName = "ca.uhn.test";
+		mojo.targetPackage = "ca.uhn.test";
 		mojo.template = "/vm/jpa_resource_provider.vm";
 		mojo.targetSourceDirectory = new File("target/generated/valuesets");
 		mojo.execute();
