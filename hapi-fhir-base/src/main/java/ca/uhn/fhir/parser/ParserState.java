@@ -2309,7 +2309,11 @@ class ParserState<T> {
 				if ("".equals(theValue)) {
 					myErrorHandler.invalidValue(null, theValue, "Attribute values must not be empty (\"\")");
 				} else {
-					myInstance.setValueAsString(theValue);
+					try {
+						myInstance.setValueAsString(theValue);
+					} catch (IllegalArgumentException e) {
+						myErrorHandler.invalidValue(null, theValue, e.getMessage());
+					}
 				}
 			} else if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
