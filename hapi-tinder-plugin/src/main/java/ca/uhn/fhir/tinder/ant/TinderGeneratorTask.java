@@ -595,7 +595,7 @@ public class TinderGeneratorTask extends Task {
 		this.targetResourceDirectory = targetResourceDirectory;
 	}
 
-	public void setTaargetFolder(String targetFolder) {
+	public void setTargetFolder(String targetFolder) {
 		this.targetFolder = targetFolder;
 	}
 

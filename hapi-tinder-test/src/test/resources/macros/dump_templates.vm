@@ -4,6 +4,7 @@
 #macro ( dumpBaseElement $lead, $elem )
 ${lead}BaseElement:
 ${lead}    binding: $!{elem.binding}
+${lead}    bindingUri: $!{elem.bindingUrl}
 ${lead}    bindingClass: $!{elem.bindingClass}
 ${lead}    cardMax: $!{elem.cardMax}
 ${lead}    cardMin: $!{elem.cardMin}
