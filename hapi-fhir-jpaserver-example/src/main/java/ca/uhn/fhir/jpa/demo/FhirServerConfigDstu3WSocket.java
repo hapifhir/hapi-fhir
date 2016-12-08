@@ -159,7 +159,7 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 		//retVal.setUrl("jdbc:derby:directory:target/jpaserver_derby_files;create=true");
 		retVal.setUrl("jdbc:mysql://localhost:3306/fhir?autoReconnect=true&useSSL=false");
 		retVal.setUsername("root");
-		retVal.setPassword("changeme");
+		retVal.setPassword("password");
 		return retVal;
 	}
 
