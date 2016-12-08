@@ -39,7 +39,10 @@
 				to GitHub user @vijayt27 for reporting!
 			</action>
 			<action type="add">
-				As the eBay CORS interceptor has gone dormant, we have introduced a new
+				As the 
+				<![CDATA[<a href="https://github.com/eBay/cors-filter">eBay CORS interceptor</a>]]>
+				project
+				has gone dormant, we have introduced a new
 				HAPI server interceptor which can be used to implement CORS support
 				instead of using the previously recommended Servlet Filter. All server
 				examples as well as the CLI have been switched to use this new interceptor.
