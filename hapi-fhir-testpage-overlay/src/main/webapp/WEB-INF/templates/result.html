@@ -150,7 +150,7 @@
 																$('#page-prev-btn').click(function() {
 																	var btn = $(this);
 																	handleActionButtonClick($(this));
-																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkPrevious}"/>' }));
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${bundle.linkPrevious.value}]] }));
 																	$("#outerForm").attr("action", "page").submit();
 	
 																});
@@ -167,7 +167,7 @@
 																$('#page-next-btn').click(function() {
 																	var btn = $(this);
 																	handleActionButtonClick($(this));
-																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:text="${bundle.linkNext}"/>' }));
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${bundle.linkNext.value}]] }));
 																	$("#outerForm").attr("action", "page").submit();
 																});
 															</script>

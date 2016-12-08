@@ -84,6 +84,12 @@
 				does not contain an ID, or the ID does not match
 				the request URL. Thanks to Jim Steel for reporting!
 			</action>
+			<action type="fix" issue="500">
+				Web Testing UI's next and previous buttons for paging
+				through paged results did not work after the migration
+				to using Thymeleaf 3. Thanks to GitHub user @gsureshkumar
+				for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
