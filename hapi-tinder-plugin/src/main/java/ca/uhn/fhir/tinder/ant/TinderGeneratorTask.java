@@ -44,6 +44,7 @@ import ca.uhn.fhir.tinder.GeneratorContext;
 import ca.uhn.fhir.tinder.GeneratorContext.ProfileFileDefinition;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
+import ca.uhn.fhir.tinder.VelocityHelper;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ProfileParser;
@@ -206,6 +207,12 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top" align="center">No. Defaults to same directory as the template file.</td>
  *   </tr>
  *   <tr>
+ *     <td valign="top">velocityProperties</td>
+ *     <td valign="top">Specifies the full path to a java properties file
+ *     containing Velocity configuration properties</td>
+ *     <td valign="top" align="center">No.</td>
+ *   </tr>
+ *   <tr>
  *     <td valign="top">includeResources</td>
  *     <td valign="top">A list of the names of the resources or composite data types that should
  *     be used in the file generation</td>
@@ -275,6 +282,8 @@ public class TinderGeneratorTask extends Task {
 	private File templateFile;
 
 	private String velocityPath;
+
+	private String velocityProperties;
 
 	private List<String> includeResources;
 
@@ -367,27 +376,13 @@ public class TinderGeneratorTask extends Task {
 				/*
 				 * Next, deal with the template and initialize velocity
 				 */
-				VelocityEngine v = new VelocityEngine();
+				VelocityEngine v = VelocityHelper.configureVelocityEngine(templateFile, velocityPath, velocityProperties);
 				InputStream templateIs = null;
 				if (templateFile != null) {
 					templateIs = new FileInputStream(templateFile);
-					v.setProperty("resource.loader", "file");
-					v.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
-					if (velocityPath != null) {
-						v.setProperty("file.resource.loader.path", velocityPath);
-					} else {
-						String path = templateFile.getCanonicalFile().getParent();
-						if (null == path) {
-							path = ".";
-						}
-						v.setProperty("file.resource.loader.path", path);
-					}
 				} else {
 					templateIs = this.getClass().getResourceAsStream(template);
-					v.setProperty("resource.loader", "cp");
-					v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 				}
-				v.setProperty("runtime.references.strict", Boolean.TRUE);
 				InputStreamReader templateReader = new InputStreamReader(templateIs);
 		
 				/*
@@ -457,6 +452,7 @@ public class TinderGeneratorTask extends Task {
 					rp.setTemplate(template);
 					rp.setTemplateFile(templateFile);
 					rp.setVelocityPath(velocityPath);
+					rp.setVelocityProperties(velocityProperties);
 					rp.writeAll(targetType, targetDirectory, null, targetPackage);
 				}
 
@@ -471,6 +467,7 @@ public class TinderGeneratorTask extends Task {
 					dtp.setTemplate(template);
 					dtp.setTemplateFile(templateFile);
 					dtp.setVelocityPath(velocityPath);
+					dtp.setVelocityProperties(velocityProperties);
 					dtp.writeAll(targetType, targetDirectory, null, targetPackage);
 				}
 
@@ -485,6 +482,7 @@ public class TinderGeneratorTask extends Task {
 					vsp.setTemplate(template);
 					vsp.setTemplateFile(templateFile);
 					vsp.setVelocityPath(velocityPath);
+					vsp.setVelocityProperties(velocityProperties);
 					vsp.writeMarkedValueSets(targetType, targetDirectory, targetPackage);
 				}
 				
@@ -499,6 +497,7 @@ public class TinderGeneratorTask extends Task {
 					pp.setTemplate(template);
 					pp.setTemplateFile(templateFile);
 					pp.setVelocityPath(velocityPath);
+					pp.setVelocityProperties(velocityProperties);
 					pp.writeAll(targetType, targetDirectory, null, targetPackage);
 				}
 			}
@@ -609,6 +608,10 @@ public class TinderGeneratorTask extends Task {
 
 	public void setVelocityPath(String velocityPath) {
 		this.velocityPath = velocityPath;
+	}
+
+	public void setVelocityProperties(String velocityProperties) {
+		this.velocityProperties = velocityProperties;
 	}
 
 	public void setIncludeResources(String names) {

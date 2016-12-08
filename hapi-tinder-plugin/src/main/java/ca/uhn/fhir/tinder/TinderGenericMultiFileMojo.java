@@ -156,6 +156,12 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top" align="center">No. Defaults to same directory as the template file.</td>
  *   </tr>
  *   <tr>
+ *     <td valign="top">velocityProperties</td>
+ *     <td valign="top">Specifies the full path to a java properties file
+ *     containing Velocity configuration properties</td>
+ *     <td valign="top" align="center">No.</td>
+ *   </tr>
+ *   <tr>
  *     <td valign="top">includeResources</td>
  *     <td valign="top">A list of the names of the resources or composite data types that should
  *     be used in the file generation</td>
@@ -238,6 +244,8 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 	private File templateFile;
 	@Parameter(required = false)
 	private String velocityPath;
+	@Parameter(required = false)
+	private String velocityProperties;
 
 	@Parameter(required = false)
 	private List<String> includeResources;
@@ -319,6 +327,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			rp.setTemplate(template);
 			rp.setTemplateFile(templateFile);
 			rp.setVelocityPath(velocityPath);
+			rp.setVelocityProperties(velocityProperties);
 			rp.writeAll(targetType, targetDirectory, null, targetPackage);
 		}
 
@@ -333,6 +342,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			dtp.setTemplate(template);
 			dtp.setTemplateFile(templateFile);
 			dtp.setVelocityPath(velocityPath);
+			dtp.setVelocityProperties(velocityProperties);
 			dtp.writeAll(targetType, targetDirectory, null, targetPackage);
 		}
 
@@ -347,6 +357,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			vsp.setTemplate(template);
 			vsp.setTemplateFile(templateFile);
 			vsp.setVelocityPath(velocityPath);
+			vsp.setVelocityProperties(velocityProperties);
 			vsp.writeMarkedValueSets(targetType, targetDirectory, targetPackage);
 		}
 		
@@ -361,6 +372,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			pp.setTemplate(template);
 			pp.setTemplateFile(templateFile);
 			pp.setVelocityPath(velocityPath);
+			pp.setVelocityProperties(velocityProperties);
 			pp.writeAll(targetType, targetDirectory, null, targetPackage);
 		}
 		

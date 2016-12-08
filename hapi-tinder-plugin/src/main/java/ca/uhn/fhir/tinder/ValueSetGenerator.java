@@ -60,6 +60,7 @@ public class ValueSetGenerator {
 	private String myTemplate = null;
 	private File myTemplateFile = null;
 	private String myVelocityPath = null;
+	private String myVelocityProperties = null;
 
 	public ValueSetGenerator(String theVersion) {
 		myVersion = theVersion;
@@ -322,6 +323,10 @@ public class ValueSetGenerator {
 		myVelocityPath = theVelocityPath;
 	}
 
+	public void setVelocityProperties(String theVelocityProperties) {
+		myVelocityProperties = theVelocityProperties;
+	}
+
 	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
 		write(TargetType.SOURCE, theValueSets, theOutputDirectory, thePackageBase);
 	}
@@ -364,30 +369,16 @@ public class ValueSetGenerator {
 		ctx.put("packageBase", thePackageBase);
 		ctx.put("esc", new EscapeTool());
 
-		VelocityEngine v = new VelocityEngine();
+		VelocityEngine v = VelocityHelper.configureVelocityEngine(myTemplateFile, myVelocityPath, myVelocityProperties);
 		if (myTemplateFile != null) {
 			templateIs = new FileInputStream(myTemplateFile);
-			v.setProperty("resource.loader", "file");
-			v.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
-			if (myVelocityPath != null) {
-				v.setProperty("file.resource.loader.path", myVelocityPath);
-			} else {
-				String path = myTemplateFile.getCanonicalFile().getParent();
-				if (null == path) {
-					path = ".";
-				}
-				v.setProperty("file.resource.loader.path", path);
-			}
 		} else {
 			String templateName = myTemplate;
 			if (null == templateName) {
 				templateName = "/vm/valueset.vm";
 			}
 			templateIs = this.getClass().getResourceAsStream(templateName);
-			v.setProperty("resource.loader", "cp");
-			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		}
-		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
 		InputStreamReader templateReader = new InputStreamReader(templateIs, "UTF-8");
 		v.evaluate(ctx, w, "", templateReader);

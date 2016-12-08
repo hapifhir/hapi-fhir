@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.tinder.TinderStructuresMojo;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
+import ca.uhn.fhir.tinder.VelocityHelper;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.Child;
@@ -73,6 +74,7 @@ public abstract class BaseStructureParser {
 	private String myTemplate = null;
 	private File myTemplateFile = null;
 	private String myVelocityPath = null;
+	private String myVelocityProperties = null;
 
 	public BaseStructureParser(String theVersion, String theBaseDir) {
 		myVersion = theVersion;
@@ -475,6 +477,10 @@ public abstract class BaseStructureParser {
 		myVelocityPath = theVelocityPath;
 	}
 
+	public void setVelocityProperties(String theVelocityProperties) {
+		myVelocityProperties = theVelocityProperties;
+	}
+
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileOutputStream fos = new FileOutputStream(theFile, false);
 		OutputStreamWriter w = new OutputStreamWriter(fos, "UTF-8");
@@ -538,27 +544,12 @@ public abstract class BaseStructureParser {
 		ctx.put("versionCapitalized", capitalize);
 		ctx.put("this", theResource);
 
-		VelocityEngine v = new VelocityEngine();
+		VelocityEngine v = VelocityHelper.configureVelocityEngine(getTemplateFile(), getVelocityPath(), myVelocityProperties);
 		InputStream templateIs = null;
 		if (getTemplateFile() != null) {
-			templateIs = new FileInputStream(getTemplateFile());
-			v.setProperty("resource.loader", "file");
-			v.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
-			if (getVelocityPath() != null) {
-				v.setProperty("file.resource.loader.path", getVelocityPath());
-			} else {
-				String path = getTemplateFile().getCanonicalFile().getParent();
-				if (null == path) {
-					path = ".";
-				}
-				v.setProperty("file.resource.loader.path", path);
-			}
 		} else {
 			templateIs = this.getClass().getResourceAsStream(getTemplate());
-			v.setProperty("resource.loader", "cp");
-			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		}
-		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
 		v.evaluate(ctx, w, "", templateReader);
