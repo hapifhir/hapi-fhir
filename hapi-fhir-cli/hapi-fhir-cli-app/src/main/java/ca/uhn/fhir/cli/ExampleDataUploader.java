@@ -245,7 +245,7 @@ public class ExampleDataUploader extends BaseCommand {
 				iter.remove();
 			}
 		}
-		
+
 		List<IBaseResource> subResourceList = new ArrayList<IBaseResource>();
 		while (resources.size() > 0) {
 
@@ -253,7 +253,7 @@ public class ExampleDataUploader extends BaseCommand {
 			subResourceList.add(nextAddedResource);
 
 			Set<String> checkedTargets = new HashSet<String>();
-			
+
 			for (int i = 0; i < subResourceList.size(); i++) {
 				IBaseResource nextCandidateSource = subResourceList.get(i);
 				for (ResourceReferenceInfo nextRef : ctx.newTerser().getAllResourceReferences(nextCandidateSource)) {
@@ -276,7 +276,7 @@ public class ExampleDataUploader extends BaseCommand {
 
 					boolean found = false;
 					for (int j = 0; j < resources.size(); j++) {
-						String candidateTarget = resources.get(j).getIdElement().getValue(); 
+						String candidateTarget = resources.get(j).getIdElement().getValue();
 						if (isNotBlank(nextTarget) && nextTarget.equals(candidateTarget)) {
 							ourLog.info("Reflexively adding resource {} to bundle as it is a reference target", nextTarget);
 							subResourceList.add(resources.remove(j));
@@ -286,7 +286,6 @@ public class ExampleDataUploader extends BaseCommand {
 					}
 				}
 			}
-
 
 			if (subResourceList.size() < 10 && resources.size() > 0) {
 				subResourceList.add(resources.remove(0));
@@ -357,8 +356,8 @@ public class ExampleDataUploader extends BaseCommand {
 			Entry next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("Subscription".equals(next.getResource().getResourceName()) || "DataElement".equals(next.getResource().getResourceName()) || "OperationOutcome".equals(next.getResource().getResourceName())
-					|| "OperationDefinition".equals(next.getResource().getResourceName())) {
+			if ("Subscription".equals(next.getResource().getResourceName()) || "DataElement".equals(next.getResource().getResourceName())
+					|| "OperationOutcome".equals(next.getResource().getResourceName()) || "OperationDefinition".equals(next.getResource().getResourceName())) {
 				ourLog.info("Skipping " + next.getResource().getResourceName() + " example");
 				iterator.remove();
 			} else {
@@ -399,7 +398,7 @@ public class ExampleDataUploader extends BaseCommand {
 				// }
 				nextRef.getResourceReference().setResource(null);
 				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
-				
+
 				if (isNotBlank(value)) {
 					if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
 						ourLog.info("Discarding unknown reference: {}", value);
@@ -437,8 +436,8 @@ public class ExampleDataUploader extends BaseCommand {
 			BundleEntryComponent next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("Subscription".equals(next.getResource().getResourceType()) || "DataElement".equals(next.getResource().getResourceType()) || "OperationOutcome".equals(next.getResource().getResourceType())
-					|| "OperationDefinition".equals(next.getResource().getResourceType())) {
+			if ("Subscription".equals(next.getResource().getResourceType()) || "DataElement".equals(next.getResource().getResourceType())
+					|| "OperationOutcome".equals(next.getResource().getResourceType()) || "OperationDefinition".equals(next.getResource().getResourceType())) {
 				ourLog.info("Skipping " + next.getResource().getResourceType() + " example");
 				iterator.remove();
 			} else {
@@ -479,7 +478,7 @@ public class ExampleDataUploader extends BaseCommand {
 				// }
 				nextRef.getResourceReference().setResource(null);
 				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
-				
+
 				if (isNotBlank(value)) {
 					if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
 						ourLog.info("Discarding unknown reference: {}", value);
@@ -659,37 +658,41 @@ public class ExampleDataUploader extends BaseCommand {
 
 	private void downloadFileFromInternet(CloseableHttpResponse result, File localFile) throws IOException {
 		FileOutputStream buffer = FileUtils.openOutputStream(localFile);
+		try {
 
-		long maxLength = result.getEntity().getContentLength();
-		long nextLog = -1;
-		// ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		int nRead;
-		byte[] data = new byte[16384];
-		while ((nRead = result.getEntity().getContent().read(data, 0, data.length)) != -1) {
-			buffer.write(data, 0, nRead);
-			long fileSize = FileUtils.sizeOf(localFile);
-			if (fileSize > nextLog) {
-				System.err.print("\r" + Ansi.ansi().eraseLine());
-				System.err.print(FileUtils.byteCountToDisplaySize(fileSize));
-				if (maxLength > 0) {
-					System.err.print(" [");
-					int stars = (int) (50.0f * ((float) fileSize / (float) maxLength));
-					for (int i = 0; i < stars; i++) {
-						System.err.print("*");
+			long maxLength = result.getEntity().getContentLength();
+			long nextLog = -1;
+			// ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			int nRead;
+			byte[] data = new byte[16384];
+			while ((nRead = result.getEntity().getContent().read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, nRead);
+				long fileSize = FileUtils.sizeOf(localFile);
+				if (fileSize > nextLog) {
+					System.err.print("\r" + Ansi.ansi().eraseLine());
+					System.err.print(FileUtils.byteCountToDisplaySize(fileSize));
+					if (maxLength > 0) {
+						System.err.print(" [");
+						int stars = (int) (50.0f * ((float) fileSize / (float) maxLength));
+						for (int i = 0; i < stars; i++) {
+							System.err.print("*");
+						}
+						for (int i = stars; i < 50; i++) {
+							System.err.print(" ");
+						}
+						System.err.print("]");
 					}
-					for (int i = stars; i < 50; i++) {
-						System.err.print(" ");
-					}
-					System.err.print("]");
+					System.err.flush();
+					nextLog += 100000;
 				}
-				System.err.flush();
-				nextLog += 100000;
 			}
-		}
-		buffer.flush();
+			buffer.flush();
 
-		System.err.println();
-		System.err.flush();
+			System.err.println();
+			System.err.flush();
+		} finally {
+			IOUtils.closeQuietly(buffer);
+		}
 	}
 
 }
