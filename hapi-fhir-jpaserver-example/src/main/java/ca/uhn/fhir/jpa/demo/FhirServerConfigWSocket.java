@@ -18,9 +18,10 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu2Interceptor;
 import ca.uhn.fhir.jpa.interceptor.WebSocketSubscriptionDstu2Interceptor;
-import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
 import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketReturnResourceHandlerDstu2;
+import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.scheduling.TaskScheduler;
@@ -45,8 +47,14 @@ import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Properties;
 
+/**
+ * This class isn't used by default by the example, but
+ * you can use it as a config if you want to support DSTU2 rest-hook subscriptions,
+ * event driven web-socket subscriptions, and a mysql database.
+ */
 @Configuration
 @EnableWebSocket()
 @EnableTransactionManagement()
@@ -74,17 +82,40 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@Bean()
-	@DependsOn("webSocketSubscriptionDstu2Interceptor")
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(-1);
+		retVal.setSubscriptionPollDelay(-1000);
 		retVal.setSchedulingDisabled(true);
 		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowExternalReferences(true);
-		retVal.getInterceptors().add(webSocketSubscriptionDstu2Interceptor());
 		return retVal;
+	}
+
+	/**
+	 * Loads the rest-hook and websocket interceptors after the DaoConfig bean has been
+	 * initialized to avoid cyclical dependency errors
+	 * @param daoConfig
+	 * @return
+	 */
+	@Bean(name = "subscriptionInterceptors")
+	@DependsOn("daoConfig")
+	public List<IServerInterceptor> afterDaoConfig(DaoConfig daoConfig){
+		IServerInterceptor webSocketInterceptor = webSocketSubscriptionDstu2Interceptor();
+		IServerInterceptor restHookInterceptor = restHookSubscriptionDstu2Interceptor();
+
+		try {
+			RestHookSubscriptionDstu2Interceptor restHook = SpringObjectCaster.getTargetObject(restHookInterceptor, RestHookSubscriptionDstu2Interceptor.class);
+			restHook.initSubscriptions();
+		}catch(Exception e){
+			throw new RuntimeException("Unable to cast from proxy");
+		}
+
+		daoConfig.getInterceptors().add(restHookInterceptor);
+		daoConfig.getInterceptors().add(webSocketInterceptor);
+
+		return daoConfig.getInterceptors();
 	}
 
 	/**
@@ -167,7 +198,14 @@ public class FhirServerConfigWSocket extends BaseJavaConfigDstu2 implements WebS
 	}
 
 	@Bean
+	@Lazy
 	public IServerInterceptor webSocketSubscriptionDstu2Interceptor(){
 		return new WebSocketSubscriptionDstu2Interceptor();
+	}
+
+	@Bean
+	@Lazy
+	public IServerInterceptor restHookSubscriptionDstu2Interceptor(){
+		return new RestHookSubscriptionDstu2Interceptor();
 	}
 }

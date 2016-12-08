@@ -91,6 +91,16 @@ public class WebSocketSubscriptionDstu3Interceptor extends InterceptorAdapter im
     public void resourceDeleted(ActionRequestDetails theDetails, ResourceTable theResourceTable) {
     }
 
+    /**
+     * Checks for websocket subscriptions
+     * @param theRequestDetails
+     *           A bean containing details about the request that is about to be processed, including details such as the
+     *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+     *           pulled out of the {@link HttpServletRequest servlet request}.
+     * @param theResponseObject
+     *           The actual object which is being streamed to the client as a response
+     * @return
+     */
     @Override
     public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
         if (theRequestDetails.getResourceName() == null ||

@@ -20,33 +20,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import javax.persistence.Query;
-
-import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.dstu3.model.Subscription;
-import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
-
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
@@ -69,7 +42,32 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Subscription;
+import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
@@ -158,25 +156,30 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
     }
 
     private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable, String resourceType) {
-
         Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
+        if (subscription.getChannel().getType() != Subscription.SubscriptionChannelType.WEBSOCKET){
+            ourLog.info("Skipping non web socket subscription");
+            return 0;
+        }
+
         ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
         if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
             ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
             return 0;
         }
+
         RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
         SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
 
-        criteriaUrl = new SearchParameterMap();
+        //criteriaUrl = new SearchParameterMap();
         long start = theSubscriptionTable.getMostRecentMatch().getTime();
         long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
         if (end <= start) {
-            ourLog.trace("Skipping search for subscription");
+            ourLog.info("Skipping search for subscription");
             return 0;
         }
 
-        ourLog.debug("Subscription {} search from {} to {}", new Object[]{subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end))});
+        ourLog.info("Subscription {} search from {} to {}", new Object[]{subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end))});
 
         DateRangeParam range = new DateRangeParam();
         range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
@@ -304,7 +307,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
         return retVal;
     }
 
-    private RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+    public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
         String query = theResource.getCriteria();
         if (isBlank(query)) {
             throw new UnprocessableEntityException("Subscription.criteria must be populated");
@@ -350,5 +353,4 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
         }
 
     }
-
 }

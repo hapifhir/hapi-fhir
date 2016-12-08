@@ -29,6 +29,7 @@ import java.util.List;
 
 import javax.persistence.Query;
 
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -153,6 +154,12 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable, String resourceType) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
 		ourLog.info("subscription for " + resourceType + " with criteria " + subscription.getCriteria());
+
+		if (!subscription.getChannel().getType().equals(SubscriptionChannelTypeEnum.WEBSOCKET.getCode())){
+			ourLog.info("Skipping non web socket subscription");
+			return 0;
+		}
+
 		if (resourceType != null && subscription.getCriteria() != null && !subscription.getCriteria().startsWith(resourceType)) {
 			ourLog.info("Skipping subscription search for " + resourceType + " because it does not match the criteria " + subscription.getCriteria());
 			return 0;
@@ -161,7 +168,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
 		SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
 
-		criteriaUrl = new SearchParameterMap();
+		//criteriaUrl = new SearchParameterMap();
 		long start = theSubscriptionTable.getMostRecentMatch().getTime();
 		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
 		if (end <= start) {
@@ -295,7 +302,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		return retVal;
 	}
 
-	private RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
 			throw new UnprocessableEntityException("Subscription.criteria must be populated");

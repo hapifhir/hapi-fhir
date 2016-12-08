@@ -18,11 +18,10 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.interceptor.RestHookSubscriptionDstu3Interceptor;
 import ca.uhn.fhir.jpa.interceptor.WebSocketSubscriptionDstu3Interceptor;
-import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu3;
 import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketReturnResourceHandlerDstu3;
+import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -30,12 +29,11 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.hl7.fhir.dstu3.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.scheduling.TaskScheduler;
@@ -46,14 +44,17 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
+
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Properties;
 
 /**
  * This class isn't used by default by the example, but 
  * you can use it as a config if you want to support DSTU3
- * instead of DSTU2 in your server.
+ * instead of DSTU2 in your server as well as rest-hook subscriptions,
+ * event driven web-socket subscriptions, and a mysql database.
  * 
  * See https://github.com/jamesagnew/hapi-fhir/issues/278
  */
@@ -92,21 +93,56 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 		return retVal;
 	}
 
+	@Bean
+	@Lazy
+	public IServerInterceptor webSocketSubscriptionDstu3Interceptor(){
+		return new WebSocketSubscriptionDstu3Interceptor();
+	}
+
+	@Bean
+	@Lazy
+	public IServerInterceptor restHookSubscriptionDstu3Interceptor(){
+		return new RestHookSubscriptionDstu3Interceptor();
+	}
+
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@Bean()
-	@DependsOn("webSocketSubscriptionDstu3Interceptor")
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(-1);
+		retVal.setSubscriptionPollDelay(-1000);
 		retVal.setSchedulingDisabled(true);
 		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowExternalReferences(true);
-		retVal.getInterceptors().add(webSocketSubscriptionDstu3Interceptor());
 		return retVal;
+	}
+
+	/**
+	 * Loads the rest-hook and websocket interceptors after the DaoConfig bean has been
+	 * initialized to avoid cyclical dependency errors
+	 * @param daoConfig
+	 * @return
+	 */
+	@Bean(name = "subscriptionInterceptors")
+	@DependsOn("daoConfig")
+	public List<IServerInterceptor> afterDaoConfig(DaoConfig daoConfig){
+		IServerInterceptor webSocketInterceptor = webSocketSubscriptionDstu3Interceptor();
+		IServerInterceptor restHookInterceptor = restHookSubscriptionDstu3Interceptor();
+
+		try {
+			RestHookSubscriptionDstu3Interceptor restHook = SpringObjectCaster.getTargetObject(restHookInterceptor, RestHookSubscriptionDstu3Interceptor.class);
+			restHook.initSubscriptions();
+		}catch(Exception e){
+			throw new RuntimeException("Unable to cast from proxy");
+		}
+
+		daoConfig.getInterceptors().add(restHookInterceptor);
+		daoConfig.getInterceptors().add(webSocketInterceptor);
+
+		return daoConfig.getInterceptors();
 	}
 
 	/**
@@ -118,10 +154,12 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:directory:target/jpaserver_derby_files;create=true");
-		retVal.setUsername("");
-		retVal.setPassword("");
+		//retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
+		retVal.setDriverClassName("com.mysql.jdbc.Driver");
+		//retVal.setUrl("jdbc:derby:directory:target/jpaserver_derby_files;create=true");
+		retVal.setUrl("jdbc:mysql://localhost:3306/fhir?autoReconnect=true&useSSL=false");
+		retVal.setUsername("root");
+		retVal.setPassword("changeme");
 		return retVal;
 	}
 
@@ -138,7 +176,8 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
+		//extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
+		extraProperties.put("hibernate.dialect", org.hibernate.dialect.MySQL5InnoDBDialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
@@ -147,9 +186,9 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
-		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
-		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
+		//extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
+		//extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
+		//extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 //		extraProperties.put("hibernate.search.default.worker.execution", "async");
 		return extraProperties;
 	}
@@ -189,8 +228,4 @@ public class FhirServerConfigDstu3WSocket extends BaseJavaConfigDstu3 implements
 		return retVal;
 	}
 
-	@Bean
-	public IServerInterceptor webSocketSubscriptionDstu3Interceptor(){
-		return new WebSocketSubscriptionDstu3Interceptor();
-	}
 }
