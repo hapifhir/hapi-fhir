@@ -29,7 +29,13 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,20 +43,72 @@ import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.*;
+import org.hl7.fhir.dstu3.model.AuditEvent;
+import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.dstu3.model.Basic;
+import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.Device;
+import org.hl7.fhir.dstu3.model.DiagnosticRequest;
+import org.hl7.fhir.dstu3.model.DocumentManifest;
+import org.hl7.fhir.dstu3.model.DocumentReference;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.ImagingStudy;
+import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationAdministration;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -70,7 +128,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -84,13 +146,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3Test.class);
 
 	@Override
-	public void before() throws Exception {
-		super.before();
-
-		myDaoConfig.setAllowMultipleDelete(true);
-	}
-
-	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
@@ -98,20 +153,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 	}
-	
-	
-	@Test
-	public void testIncludeWithExternalReferences() {
-		myDaoConfig.setAllowExternalReferences(true);
-		
-		Patient p = new Patient();
-		p.getManagingOrganization().setReference("http://example.com/Organization/123");
-		ourClient.create().resource(p).execute();
-		
-		
-		Bundle b = ourClient.search().forResource("Patient").include(Patient.INCLUDE_ORGANIZATION).returnBundle(Bundle.class).execute();
-		assertEquals(1, b.getEntry().size());
+
+	@Override
+	public void before() throws Exception {
+		super.before();
+
+		myDaoConfig.setAllowMultipleDelete(true);
 	}
+	
 	
 	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
@@ -119,7 +168,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IOUtils.closeQuietly(resp.getEntity().getContent());
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
-
+	
 	private ArrayList<IBaseResource> genResourcesOfType(Bundle theRes, Class<? extends IBaseResource> theClass) {
 		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (BundleEntryComponent next : theRes.getEntry()) {
@@ -130,16 +179,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 		return retVal;
-	}
-	
-	@Test
-	public void testResourceSorting() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/two_questionnaires.json"), StandardCharsets.UTF_8);
-		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
-		ourLog.info(respString);
-		
-		ourHttpClient.execute(new HttpGet("http://localhost:" + ourPort + "/QuestionnaireResponse?patient=QR3295&questionnaire=profile&_sort:desc=authored&_count=5&_include=QuestionnaireResponse:questionnaire&_include=QuestionnaireResponse:subject"));
-//		Bundle bundle = 
 	}
 
 	/**
@@ -158,7 +197,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		List<Extension> exts = basic.getExtensionsByUrl("http://localhost:1080/hapi-fhir-jpaserver-example/baseDstu2/StructureDefinition/DateID");
 		assertEquals(1, exts.size());
 	}
-
+	
 	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException, ClientProtocolException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
@@ -288,6 +327,69 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		//@formatter:on
 		assertEquals(100, found.getTotal());
 		assertEquals(50, found.getEntry().size());
+
+	}
+
+	/**
+	 * See #438
+	 */
+	@Test
+	public void testCreateAndUpdateBinary() throws ClientProtocolException, Exception {
+		byte[] arr = { 1, 21, 74, 123, -44 };
+		Binary binary = new Binary();
+		binary.setContent(arr);
+		binary.setContentType("dansk");
+		
+		IIdType resource = ourClient.create().resource(binary).execute().getId();
+		
+		Binary fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		assertEquals("1", fromDB.getIdElement().getVersionIdPart());
+
+		arr[0] = 2;
+		HttpPut putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest.setEntity(new ByteArrayEntity(arr, ContentType.parse("dansk")));
+		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Location").getValue());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		assertEquals("2", fromDB.getIdElement().getVersionIdPart());
+
+		arr[0] = 3;
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(fromDB);
+		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader("Location").getValue());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		assertEquals("3", fromDB.getIdElement().getVersionIdPart());
+
+		// Now an update with the wrong ID in the body
+		
+		arr[0] = 4;
+		binary.setId("");
+		encoded = myFhirCtx.newJsonParser().encodeResourceToString(binary);
+		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		assertEquals("3", fromDB.getIdElement().getVersionIdPart());
 
 	}
 
@@ -642,23 +744,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testMetadataSuperParamsAreIncluded() throws IOException {
-		StructureDefinition p = new StructureDefinition();
-		p.setAbstract(true);
-		p.setUrl("http://example.com/foo");
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
-
-		Bundle resp = ourClient
-			.search()
-			.forResource(StructureDefinition.class)
-			.where(StructureDefinition.URL.matches().value("http://example.com/foo"))
-			.returnBundle(Bundle.class)
-			.execute();
-		
-		assertEquals(1, resp.getTotal());
-	}
-
-	@Test
 	public void testDeleteResourceConditional1() throws IOException {
 		String methodName = "testDeleteResourceConditional1";
 
@@ -902,31 +987,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info(ids.toString());
 	}
 
-	// private void delete(String theResourceType, String theParamName, String theParamValue) {
-	// Bundle resources;
-	// do {
-	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
-	// if (theParamName != null) {
-	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-	// }
-	// resources = forResource.execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// } while (resources.size() > 0);
-	// }
-	//
-	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
-	// {
-	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
-	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// }
-
 	@Test
 	public void testEverythingEncounterType() throws Exception {
 		String methodName = "testEverythingEncounterInstance";
@@ -1046,6 +1106,31 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
 
 	}
+
+	// private void delete(String theResourceType, String theParamName, String theParamValue) {
+	// Bundle resources;
+	// do {
+	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
+	// if (theParamName != null) {
+	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+	// }
+	// resources = forResource.execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// } while (resources.size() > 0);
+	// }
+	//
+	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
+	// {
+	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
+	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// }
 
 	/**
 	 * See #147
@@ -1694,28 +1779,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", respString);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-			id = new IdType(newIdString);
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, respString);
+			assertEquals("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \"" + id.getIdPart() + "\"", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
 
-		assertEquals("2", id.getVersionIdPart());
-		assertNotEquals("AAA", id.getIdPart());
-
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
-		response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", respString);
-			assertThat(respString, containsString("<id value=\"" + id.getIdPart() + "\"/>"));
-			assertThat(respString, containsString("<versionId value=\"2\"/>"));
-		} finally {
-			response.close();
-		}
 	}
 
 	/**
@@ -1737,6 +1807,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testIncludeWithExternalReferences() {
+		myDaoConfig.setAllowExternalReferences(true);
+		
+		Patient p = new Patient();
+		p.getManagingOrganization().setReference("http://example.com/Organization/123");
+		ourClient.create().resource(p).execute();
+		
+		
+		Bundle b = ourClient.search().forResource("Patient").include(Patient.INCLUDE_ORGANIZATION).returnBundle(Bundle.class).execute();
+		assertEquals(1, b.getEntry().size());
+	}
+
+	@Test
 	public void testMetadata() throws Exception {
 		HttpGet get = new HttpGet(ourServerBase + "/metadata");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
@@ -1749,6 +1832,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
 		}
+	}
+
+	
+	@Test
+	public void testMetadataSuperParamsAreIncluded() throws IOException {
+		StructureDefinition p = new StructureDefinition();
+		p.setAbstract(true);
+		p.setUrl("http://example.com/foo");
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		Bundle resp = ourClient
+			.search()
+			.forResource(StructureDefinition.class)
+			.where(StructureDefinition.URL.matches().value("http://example.com/foo"))
+			.returnBundle(Bundle.class)
+			.execute();
+		
+		assertEquals(1, resp.getTotal());
 	}
 
 	@Test
@@ -1993,6 +2094,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Bundle returned = ourClient.search().forResource(Patient.class).encodedJson().returnBundle(Bundle.class).execute();
 			assertThat(returned.getEntry().size(), greaterThan(1));
 		}
+	}
+
+	@Test
+	public void testResourceSorting() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/two_questionnaires.json"), StandardCharsets.UTF_8);
+		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
+		ourLog.info(respString);
+		
+		ourHttpClient.execute(new HttpGet("http://localhost:" + ourPort + "/QuestionnaireResponse?patient=QR3295&questionnaire=profile&_sort:desc=authored&_count=5&_include=QuestionnaireResponse:questionnaire&_include=QuestionnaireResponse:subject"));
+//		Bundle bundle = 
 	}
 
 	@Test
@@ -3012,7 +3123,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		put.addHeader("Accept", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse response = ourHttpClient.execute(put);
 		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
+			assertEquals("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \"" + p1id.getIdPart() + "\"", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
@@ -3026,10 +3139,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		put.addHeader("Accept", Constants.CT_FHIR_JSON);
 		response = ourHttpClient.execute(put);
 		try {
-			// As of HAPI 1.6 this is accepted
-			assertEquals(200, response.getStatusLine().getStatusCode());
-//			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
-//			assertEquals("Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
+			assertEquals("Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
@@ -3239,6 +3351,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		pt.addName().addFamily("FAM2");
+		pt.setId(id.toUnqualifiedVersionless());
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
@@ -3285,9 +3398,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			assertThat(responseString, containsString("/A2/"));
-			assertThat(responseString, not(containsString("333")));
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertEquals("Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}

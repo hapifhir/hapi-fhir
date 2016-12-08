@@ -42,6 +42,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -139,8 +140,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * See #438
 	 */
 	@Test
-	public void testCreateAndUpdateBinary() {
-		byte[] arr = { 23, 21, 74, 123, -44 };
+	public void testCreateAndUpdateBinary() throws ClientProtocolException, Exception {
+		byte[] arr = { 1, 21, 74, 123, -44 };
 		Binary binary = new Binary();
 		binary.setContent(arr);
 		binary.setContentType("dansk");
@@ -148,10 +149,56 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		
 		IIdType resource = ourClient.create().resource(binary).execute().getId();
+		
 		Binary fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
-		fromDB.setContentType("test");
+		assertEquals("1", fromDB.getId().getVersionIdPart());
 
-		ourClient.update().resource(fromDB).execute();
+		arr[0] = 2;
+		HttpPut putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest.setEntity(new ByteArrayEntity(arr, ContentType.parse("dansk")));
+		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Location").getValue());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		assertEquals("2", fromDB.getId().getVersionIdPart());
+
+		arr[0] = 3;
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(fromDB);
+		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader("Location").getValue());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		assertEquals("3", fromDB.getId().getVersionIdPart());
+
+		// Now an update with the wrong ID in the body
+		
+		arr[0] = 4;
+		binary.setId("");
+		encoded = myFhirCtx.newJsonParser().encodeResourceToString(binary);
+		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+		
+		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		assertEquals("3", fromDB.getId().getVersionIdPart());
+
 	}
 
 	/**

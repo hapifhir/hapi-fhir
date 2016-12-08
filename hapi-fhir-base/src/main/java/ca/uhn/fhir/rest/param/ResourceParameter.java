@@ -210,11 +210,12 @@ public class ResourceParameter implements IParameter {
 		if (IBaseBinary.class.isAssignableFrom(theResourceType)) {
 			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (EncodingEnum.forContentTypeStrict(ct) == null) {
-			FhirContext ctx = theRequest.getServer().getFhirContext();
-			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
-			binary.setContentType(ct);
-			binary.setContent(theRequest.loadRequestContents());
-			retVal = binary;
+				FhirContext ctx = theRequest.getServer().getFhirContext();
+				IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
+				binary.setId(theRequest.getId());
+				binary.setContentType(ct);
+				binary.setContent(theRequest.loadRequestContents());
+				retVal = binary;
 			}
 		}
 		

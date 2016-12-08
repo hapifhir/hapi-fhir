@@ -147,15 +147,13 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
 				throw new InvalidRequestException(msg);
 			}
-			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-				if (isBlank(theResourceId)) {
-					ourLog.warn("No resource ID found in resource body for update");
-					theResource.setId(theUrlId);
-				} else {
-					if (!theResourceId.equals(theUrlId)) {
-						String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
-						throw new InvalidRequestException(msg);
-					}
+			if (isBlank(theResourceId)) {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
+				throw new InvalidRequestException(msg);
+			} else {
+				if (!theResourceId.equals(theUrlId)) {
+					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
+					throw new InvalidRequestException(msg);
 				}
 			}
 		} else {
