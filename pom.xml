@@ -757,8 +757,16 @@
 			<plugins>
 				<plugin>
 					<groupId>de.juplo</groupId>
-					<artifactId>hibernate4-maven-plugin</artifactId>
-					<version>1.1.0</version>
+					<artifactId>hibernate-maven-plugin</artifactId>
+					<version>2.0.0</version>
+					<configuration>
+						<export>false</export>
+						<skip>false</skip>
+						<scanDependencies>false</scanDependencies>
+						<scanTestClasses>false</scanTestClasses>
+						<scanClasses>true</scanClasses>
+						<force>true</force>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>

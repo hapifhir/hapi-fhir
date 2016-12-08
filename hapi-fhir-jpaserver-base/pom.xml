@@ -341,6 +341,56 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
+				<groupId>de.juplo</groupId>
+				<artifactId>hibernate-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>postgres94</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.PostgreSQL94Dialect</dialect>
+							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_postgres94.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>mysql57</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.MySQL57InnoDBDialect</dialect>
+							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mysql57.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>oracle12c</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.Oracle12cDialect</dialect>
+							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_oracle12c.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>sqlserver2012</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.SQLServer2012Dialect</dialect>
+							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_sqlserver2012.sql</outputFile>	
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
@@ -455,6 +505,10 @@
 			</resource>
 			<resource>
 				<directory>${basedir}/target/generated-resources/tinder</directory>
+			</resource>
+			<resource>
+				<directory>${project.build.directory}/generated-sql</directory>
+				<filtering>false</filtering> 
 			</resource>
 		</resources>
 	</build>
