@@ -547,6 +547,7 @@ public abstract class BaseStructureParser {
 		VelocityEngine v = VelocityHelper.configureVelocityEngine(getTemplateFile(), getVelocityPath(), myVelocityProperties);
 		InputStream templateIs = null;
 		if (getTemplateFile() != null) {
+			templateIs = new FileInputStream(getTemplateFile());
 		} else {
 			templateIs = this.getClass().getResourceAsStream(getTemplate());
 		}
