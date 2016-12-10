@@ -1,6 +1,5 @@
 package ca.uhn.fhir.tinder.parser;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,14 +12,12 @@ import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.Resource;
 
 public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
-	private String myFilenameSuffix = "";
 	private List<String> myInputStreamNames;
 	private ArrayList<InputStream> myInputStreams;
-	private String myTemplate = null;
-	private File myTemplateFile = null;
 
 	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
+		super.setFilenameSuffix("");
 	}
 
 	public List<String> getInputStreamNames() {
@@ -68,26 +65,9 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		}
 	}
 
-	public void setFilenameSuffix(String theFilenameSuffix) {
-		myFilenameSuffix = theFilenameSuffix;
-	}
-
-	public void setTemplate(String theTemplate) {
-		myTemplate = theTemplate;
-	}
-
-	public void setTemplateFile (File theTemplateFile) {
-		myTemplateFile = theTemplateFile;
-	}
-
 	@Override
 	protected BaseRootType createRootType() {
 		return new Resource();
-	}
-
-	@Override
-	protected String getFilenameSuffix() {
-		return myFilenameSuffix;
 	}
 
 	@Override
@@ -97,18 +77,14 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	@Override
 	protected String getTemplate() {
-		if (myTemplate != null) {
-			return myTemplate;
+		String template = super.getTemplate();
+		if (template != null) {
+			return template;
 		} else if ("dstu".equals(getVersion())) {
 			return "/vm/resource_dstu.vm";
 		} else {
 			return "/vm/resource.vm";
 		}
-	}
-
-	@Override
-	protected File getTemplateFile() {
-		return myTemplateFile;
 	}
 
 	@Override

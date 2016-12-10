@@ -1,0 +1,17 @@
+#parse ( "dump_templates.vm" )
+Resource: ${elementName}
+    Class: ${this.class.name}
+#dumpBaseElement ("    ", ${this} )
+ 	BaseRootType:
+		id: $!{this.id}
+		profile: $!{this.profile}
+	Resource:
+		searchParameterNames: #{foreach}(${n} in ${this.searchParameterNames})${n}#{if}($foreach.hasNext), #{end}#{end}
+
+        
+Children:        
+#childVars( "    ", $children )
+
+Blocks:
+#childResourceBlocks( "    ", $resourceBlockChildren)
+

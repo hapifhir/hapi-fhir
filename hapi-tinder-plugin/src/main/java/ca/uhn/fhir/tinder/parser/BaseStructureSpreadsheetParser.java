@@ -127,6 +127,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			// HashMap<String,String>();
 
 			Map<String, List<String>> pathToResourceTypes = new HashMap<String, List<String>>();
+			List<Child> blockCopies = new ArrayList<Child>();
 			for (int i = 2; i < rows.getLength(); i++) {
 				Element nextRow = (Element) rows.item(i);
 				String name = cellValue(nextRow, 0);
@@ -152,6 +153,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				} else if (type.startsWith("@")) {
 					// type = type.substring(type.lastIndexOf('.')+1);
 					elem = new ResourceBlockCopy();
+					blockCopies.add(elem);
 				} else if (type.equals("*")) {
 					elem = new AnyChild();
 				} else {
@@ -198,6 +200,26 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			//				}
 			//			}
 
+			// resolve BlockCopy elements so they can access
+			// the children of the referenced ResourceBlock
+			// from Velocity templates.
+			for (Child blockCopy : blockCopies) {
+				BaseElement element = blockCopy;
+				refLoop:
+				while (element.getElementParentName() != null) {
+					BaseElement parent = elements.get(element.getElementParentName());
+					List<BaseElement> children = parent.getChildren();
+					for (BaseElement child : children) {
+						if (!child.equals(blockCopy) && child instanceof ResourceBlock 
+						&& child.getElementName().equals(blockCopy.getElementName())) {
+							((ResourceBlockCopy)blockCopy).setReferencedBlock((ResourceBlock)child);
+							break refLoop;
+						}
+					}
+					element = parent;
+				}
+			}
+			
 			index++;
 		}
 
