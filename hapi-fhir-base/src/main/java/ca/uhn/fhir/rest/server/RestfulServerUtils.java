@@ -77,6 +77,15 @@ public class RestfulServerUtils {
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text", "*.(mandatory)"));
 
+	private static String actualDstu3FhirVersion = FhirVersionEnum.DSTU3.getFhirVersionString();
+	static {
+		try {
+			Class c = Class.forName("org.hl7.fhir.dstu3.model.Constants");
+			actualDstu3FhirVersion = (String) c.getDeclaredField("VERSION").get(null);
+		} catch (Exception e) {
+		}
+	}
+
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequestDetails.getServer(), theRequestDetails);
@@ -757,12 +766,16 @@ public class RestfulServerUtils {
 			myEncoding = theEncoding;
 			if (theContentType != null) {
 				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
-					myNonLegacy = !theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3);
+					FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU3)
+							|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && !"1.4.0".equals(actualDstu3FhirVersion));
 				} else {
 					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
 				}
 			} else {
-				if (theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
+				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)
+					|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && "1.4.0".equals(actualDstu3FhirVersion))) {
 					myNonLegacy = null;
 				} else {
 					myNonLegacy = Boolean.TRUE;
