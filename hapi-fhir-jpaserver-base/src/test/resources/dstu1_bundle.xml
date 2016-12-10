@@ -1019,14 +1019,12 @@
       <content type="text/xml">
          <Patient xmlns="http://hl7.org/fhir">
             <identifier>
-               <system value=""/>
                <value value="NEED"/>
                <assigner>
                   <display value="FHIR"/>
                </assigner>
             </identifier>
             <identifier>
-               <system value=""/>
                <value value="E3289"/>
                <assigner>
                   <display value="EPIC"/>

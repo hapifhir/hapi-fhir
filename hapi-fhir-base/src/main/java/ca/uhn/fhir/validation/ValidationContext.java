@@ -25,6 +25,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -146,7 +148,11 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 			@Override
 			public IBaseResource getResource() {
 				if (myParsed == null) {
-					myParsed = getResourceAsStringEncoding().newParser(getFhirContext()).parseResource(getResourceAsString());
+					IParser parser = getResourceAsStringEncoding().newParser(getFhirContext());
+					LenientErrorHandler errorHandler = new LenientErrorHandler();
+					errorHandler.setErrorOnInvalidValue(false);
+					parser.setParserErrorHandler(errorHandler);
+					myParsed = parser.parseResource(getResourceAsString());
 				}
 				return myParsed;
 			}

@@ -70,13 +70,13 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 	}
 
 	public void fromStringValue(String theValue) {
+		myStringValue = theValue;
 		if (theValue == null) {
 			myCoercedValue = null;
 		} else {
 			// NB this might be null
 			myCoercedValue = parse(theValue);
 		}
-		myStringValue = theValue;
 	}
 
 	public T getValue() {

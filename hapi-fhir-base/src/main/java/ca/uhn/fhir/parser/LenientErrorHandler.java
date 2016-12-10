@@ -1,5 +1,8 @@
 package ca.uhn.fhir.parser;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
@@ -24,7 +27,13 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  */
 
 /**
- * The default error handler, which logs issues but does not abort parsing
+ * The default error handler, which logs issues but does not abort parsing, with only one exception:
+ * <p>
+ * The {@link #invalidValue(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation, String, String)} 
+ * method will throw a {@link DataFormatException} by default since ignoring this type of error
+ * can lead to data loss (since invalid values are silently ignored). See
+ * {@link #setErrorOnInvalidValue(boolean)} for information on this.
+ * </p>
  * 
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
@@ -32,6 +41,8 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 public class LenientErrorHandler implements IParserErrorHandler {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LenientErrorHandler.class);
+	private static final StrictErrorHandler STRICT_ERROR_HANDLER = new StrictErrorHandler();
+	private boolean myErrorOnInvalidValue = true;
 	private boolean myLogErrors;
 
 	/**
@@ -67,9 +78,28 @@ public class LenientErrorHandler implements IParserErrorHandler {
 
 	@Override
 	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
-		if (myLogErrors) {
-			ourLog.warn("Invalid attribute value \"{}\": {}", theValue, theError);
+		if (isBlank(theValue) || myErrorOnInvalidValue == false) {
+			if (myLogErrors) {
+				ourLog.warn("Invalid attribute value \"{}\": {}", theValue, theError);
+			}
+		} else {
+			STRICT_ERROR_HANDLER.invalidValue(theLocation, theValue, theError);
 		}
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By 
+	 * default invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
+	 * other methods in this class which default to simply logging errors).
+	 * <p>
+	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to 
+	 * <code>true</code>, only invalid values (e.g. a gender code of <code>foo</code>)
+	 * </p>
+	 * 
+	 * @see #setErrorOnInvalidValue(boolean)
+	 */
+	public boolean isErrorOnInvalidValue() {
+		return myErrorOnInvalidValue;
 	}
 
 	@Override
@@ -77,6 +107,22 @@ public class LenientErrorHandler implements IParserErrorHandler {
 		if (myLogErrors) {
 			ourLog.warn("Resource is missing required element: {}", theElementName);
 		}
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By 
+	 * default invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
+	 * other methods in this class which default to simply logging errors).
+	 * <p>
+	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to 
+	 * <code>true</code>, only invalid values (e.g. a gender code of <code>foo</code>)
+	 * </p>
+	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 * @see #isErrorOnInvalidValue()
+	 */
+	public LenientErrorHandler setErrorOnInvalidValue(boolean theErrorOnInvalidValue) {
+		myErrorOnInvalidValue = theErrorOnInvalidValue;
+		return this;
 	}
 
 	@Override

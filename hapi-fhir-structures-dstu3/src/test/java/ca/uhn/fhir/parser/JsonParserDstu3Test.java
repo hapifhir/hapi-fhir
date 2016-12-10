@@ -13,35 +13,78 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.AuditEvent;
+import org.hl7.fhir.dstu3.model.Basic;
+import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Claim;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Communication;
+import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
+import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.EnumFactory;
 import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu3.model.Linkage;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedPerson;
+import org.hl7.fhir.dstu3.model.SampledData;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -92,7 +135,7 @@ public class JsonParserDstu3Test {
 		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = p.encodeResourceToString(resource);
 		ourLog.info(encoded);
-		
+
 		assertEquals(3, countMatches(encoded, "resourceType"));
 	}
 
@@ -121,15 +164,18 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testParseEmptyValue() {
-		String input = "{\"resourceType\":\"QuestionnaireResponse\",\"id\":\"123\",\"authored\":\"\",\"item\":[{\"item\":[{\"linkId\":\"\"}]}]}";
-		QuestionnaireResponse qr = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, input);
-
+		String input = "{\"resourceType\":\"QuestionnaireResponse\",\"id\":\"123\",\"authored\":\"\",\"group\":{\"linkId\":\"\"}}";
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setParserErrorHandler(new LenientErrorHandler().setErrorOnInvalidValue(false));
+		QuestionnaireResponse qr = parser.parseResource(QuestionnaireResponse.class, input);
+	
 		assertEquals("QuestionnaireResponse/123", qr.getIdElement().getValue());
 		assertEquals(null, qr.getAuthored());
 		assertEquals(null, qr.getAuthoredElement().getValue());
 		assertEquals(null, qr.getAuthoredElement().getValueAsString());
-		assertEquals(null, qr.getItemFirstRep().getItemFirstRep().getLinkId());
-		assertEquals(null, qr.getItemFirstRep().getItemFirstRep().getLinkIdElement().getValue());
+		assertEquals(null, qr.getItemFirstRep().getLinkId());
+		assertEquals(null, qr.getItemFirstRep().getLinkIdElement().getValue());
 	}
 
 	/**
@@ -1191,6 +1237,78 @@ public class JsonParserDstu3Test {
 		String str = ourCtx.newJsonParser().encodeResourceToString(obs);
 		ourLog.info(str);
 		assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.0000000000000001}}", str);
+	}
+
+	/**
+	 * #516
+	 */
+	@Test(expected = DataFormatException.class)
+	public void testInvalidEnumValue() {
+		String res = "{ \"resourceType\": \"ValueSet\", \"url\": \"http://sample/ValueSet/education-levels\", \"version\": \"1\", \"name\": \"Education Levels\", \"status\": \"draft\", \"compose\": { \"include\": [ { \"filter\": [ { \"property\": \"n\", \"op\": \"n\", \"value\": \"365460000\" } ], \"system\": \"http://snomed.info/sct\" } ], \"exclude\": [ { \"concept\": [ { \"code\": \"224298008\" }, { \"code\": \"365460000\" }, { \"code\": \"473462005\" }, { \"code\": \"424587006\" } ], \"system\": \"http://snomed.info/sct\" } ] }, \"description\": \"A selection of Education Levels\", \"text\": { \"status\": \"generated\", \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><h2>Education Levels</h2><tt>http://csiro.au/ValueSet/education-levels</tt><p>A selection of Education Levels</p></div>\" }, \"experimental\": true, \"date\": \"2016-07-26\" }";
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		ValueSet parsed = parser.parseResource(ValueSet.class, res);
+		fail("DataFormat Invalid attribute exception should be thrown");
+	}
+
+	@Test
+	public void testInvalidEnumValueBlank() {
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+		
+		String res = "{ \"resourceType\": \"Patient\", \"gender\": \"\" }";
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(errorHandler);
+		Patient parsed = parser.parseResource(Patient.class, res);
+		
+		assertEquals(null, parsed.getGenderElement().getValue());
+		assertEquals(null, parsed.getGenderElement().getValueAsString());
+		
+		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq(""), msgCaptor.capture());
+		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
+		assertEquals("{\"resourceType\":\"Patient\"}", encoded);
+	}
+
+	@Test
+	public void testInvalidEnumValueInvalid() {
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+		
+		String res = "{ \"resourceType\": \"Patient\", \"gender\": \"foo\" }";
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(errorHandler);
+		Patient parsed = parser.parseResource(Patient.class, res);
+		
+		assertEquals(null, parsed.getGenderElement().getValue());
+		assertEquals("foo", parsed.getGenderElement().getValueAsString());
+		
+		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
+		assertEquals("{\"resourceType\":\"Patient\",\"gender\":\"foo\"}", encoded);		
+	}
+
+	@Test
+	public void testInvalidDateTimeValueInvalid() throws Exception {
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+		
+		String res = "{ \"resourceType\": \"Observation\", \"valueDateTime\": \"foo\" }";
+		IParser parser = ourCtx.newJsonParser();
+		parser.setParserErrorHandler(errorHandler);
+		Observation parsed = parser.parseResource(Observation.class, res);
+		
+		assertEquals(null, parsed.getValueDateTimeType().getValue());
+		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
+		
+		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
+		assertEquals("{\"resourceType\":\"Observation\",\"valueDateTime\":\"foo\"}", encoded);		
 	}
 
 	/**

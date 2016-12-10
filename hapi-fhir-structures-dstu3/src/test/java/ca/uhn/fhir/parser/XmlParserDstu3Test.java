@@ -2855,7 +2855,7 @@ public class XmlParserDstu3Test {
 	/**
 	 * See #366
 	 */
-	@Test(expected = DataFormatException.class)
+	@Test()
 	public void testParseInvalidBoolean() {
 		//@formatter:off
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
@@ -2863,7 +2863,19 @@ public class XmlParserDstu3Test {
 			"</Patient>";
 		//@formatter:on
 
-		ourCtx.newXmlParser().parseResource(resource);
+		IParser p = ourCtx.newXmlParser();
+		
+		try {
+			p.parseResource(resource);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+		}
+		
+		LenientErrorHandler errorHandler = new LenientErrorHandler();
+		assertEquals(true, errorHandler.isErrorOnInvalidValue());
+		errorHandler.setErrorOnInvalidValue(false);
+		p.setParserErrorHandler(errorHandler);
 	}
 
 	@Test

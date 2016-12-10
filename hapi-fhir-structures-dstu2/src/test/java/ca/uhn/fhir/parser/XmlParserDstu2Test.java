@@ -2524,7 +2524,10 @@ public class XmlParserDstu2Test {
 			"</Patient>";
 		//@formatter:on
 		
-		ourCtx.newXmlParser().parseResource(resource);
+		
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		parser.parseResource(resource);
 	}
 
 	@Test
