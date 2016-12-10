@@ -79,11 +79,29 @@ public class TestUtil {
 
 		}
 
+		randomizeLocale();
+
 		/*
-		 * Set some system properties randomly after each test.. this is kind of hackish,
-		 * but it helps us make sure we don't have any tests that depend on a particular
-		 * environment
+		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage
+		 * on trace blocks
 		 */
+		try {
+			if ("true".equals(System.getProperty("ci"))) {
+				for (Logger next : ((LoggerContext) LoggerFactory.getILoggerFactory()).getLoggerList()) {
+					next.setLevel(Level.TRACE);
+				}
+			}
+		} catch (NoClassDefFoundError e) {
+			// ignore
+		}
+	}
+
+	/**
+	 * Set some system properties randomly after each test.. this is kind of hackish,
+	 * but it helps us make sure we don't have any tests that depend on a particular
+	 * environment
+	 */
+	public static void randomizeLocale() {
 		Locale[] availableLocales = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
@@ -100,20 +118,6 @@ public class TestUtil {
 		String timeZone = availableTimeZones[(int) (Math.random() * availableTimeZones.length)];
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
-
-		/*
-		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage
-		 * on trace blocks
-		 */
-		try {
-			if ("true".equals(System.getProperty("ci"))) {
-				for (Logger next : ((LoggerContext) LoggerFactory.getILoggerFactory()).getLoggerList()) {
-					next.setLevel(Level.TRACE);
-				}
-			}
-		} catch (NoClassDefFoundError e) {
-			// ignore
-		}
 	}
 
 }
