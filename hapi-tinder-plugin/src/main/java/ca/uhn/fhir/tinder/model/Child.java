@@ -148,6 +148,10 @@ public abstract class Child extends BaseElement {
 		return false;
 	}
 
+	public boolean isBlockRef() {
+		return false;
+	}
+
 	public boolean isPrimitive (String theType) {
 		return isPrimitiveInternal(theType);
 	}
