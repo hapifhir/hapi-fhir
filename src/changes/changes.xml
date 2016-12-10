@@ -93,6 +93,12 @@
 				to using Thymeleaf 3. Thanks to GitHub user @gsureshkumar
 				for reporting!
 			</action>
+			<action type="add" issue="525">
+				When parsing invalid enum values in STU3,
+				report errors through the parserErrorHandler,
+				not by throwing an exception. Thanks to 
+				Michael Lawley for the pull request!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
