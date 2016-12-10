@@ -93,6 +93,16 @@
 				to using Thymeleaf 3. Thanks to GitHub user @gsureshkumar
 				for reporting!
 			</action>
+			<action type="add">
+				Enhancements to the tinder-plugin's generic template features
+				of the "generate-multi-files" and "generate-single-file"
+				Maven goals as well as the Ant hapi-tinder task. Velocity
+				templates now have access to the full tinder data model
+				for resources and data types. These "generic" tasks can
+				now use Velocimacro library files outside the
+				tinder plugin JAR and can specify any of the Velocity
+				configuration properties such as 'macro.provide.scope.control'
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
