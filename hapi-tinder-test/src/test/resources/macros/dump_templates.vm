@@ -45,6 +45,7 @@ ${lead}    referenceTypesForMultiple: $!{child.referenceTypesForMultiple}
 ${lead}    singleType: $!{child.singleType}
 ${lead}    variableName: $!{child.variableName}
 ${lead}    isBlock: $!{child.block}
+${lead}    isBlockRef: $!{child.blockRef}
 ${lead}    isPrimitive: $!{child.primitive}
 ${lead}    primitiveType: #{if}(${child.primitive})$!{child.primitiveType}#{end} .
 ${lead}    isBoundCode: $!{child.boundCode}

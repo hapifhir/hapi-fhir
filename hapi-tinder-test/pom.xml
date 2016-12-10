@@ -136,6 +136,8 @@
 							<includeResources>
 								<includeResource>patient</includeResource>
 								<includeResource>organization</includeResource>
+								<includeResource>bundle</includeResource>
+								<includeResource>composition</includeResource>
 							</includeResources>
 						</configuration>
 					</execution>
