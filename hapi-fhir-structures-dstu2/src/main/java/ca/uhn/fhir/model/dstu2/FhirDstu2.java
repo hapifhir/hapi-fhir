@@ -57,6 +57,11 @@ public class FhirDstu2 implements IFhirVersion {
 	private String myId;
 
 	@Override
+	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
+	}
+
+	@Override
 	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
@@ -64,6 +69,11 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
 		return new ServerProfileProvider(theRestfulServer);
+	}
+
+	@Override
+	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+		throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
 	}
 
 	@Override
@@ -119,6 +129,11 @@ public class FhirDstu2 implements IFhirVersion {
 	}
 
 	@Override
+	public String getVersionString() {
+		return "1.0.2";
+	}
+
+	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		return new Dstu2BundleFactory(theContext);
 	}
@@ -131,16 +146,6 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public IIdType newIdType() {
 		return new IdDt();
-	}
-
-	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
-	}
-
-	@Override
-	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
 	}
 
 

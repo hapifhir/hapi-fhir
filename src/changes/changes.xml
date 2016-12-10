@@ -113,7 +113,11 @@
 				that servers which receive an invalid enum velue will return
 				an HTTP 400 instead of an HTTP 500. Thanks to Jim
 				Steel for reporting!
-			</action>   
+			</action>
+			<action type="add" issue="520">
+				DSTU3 context now pulls the FHIR version from the actual
+				model classes. Thanks to Michael Lawley for the pull request!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

@@ -158,7 +158,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		b.append("HAPI FHIR ");
 		b.append(VersionUtil.getVersion());
 		b.append(" REST Server (FHIR Server; FHIR ");
-		b.append(myFhirContext.getVersion().getVersion().getFhirVersionString());
+		b.append(myFhirContext.getVersion().getVersionString());
 		b.append('/');
 		b.append(myFhirContext.getVersion().getVersion().name());
 		b.append(")");

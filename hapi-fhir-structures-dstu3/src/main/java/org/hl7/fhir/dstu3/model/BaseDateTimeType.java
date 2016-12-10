@@ -1,7 +1,6 @@
 package org.hl7.fhir.dstu3.model;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hamcrest.Matchers.emptyOrNullString;
 
 import java.util.Calendar;
 import java.util.Date;

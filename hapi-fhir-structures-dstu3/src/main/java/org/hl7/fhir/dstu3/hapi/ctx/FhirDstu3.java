@@ -31,6 +31,7 @@ import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerProfileProvider;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Constants;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -58,6 +59,11 @@ public class FhirDstu3 implements IFhirVersion {
 	private String myId;
 
 	@Override
+	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+		return new FluentPathDstu3(theFhirContext);
+	}
+
+	@Override
 	public ServerCapabilityStatementProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerCapabilityStatementProvider(theServer);
 	}
@@ -65,6 +71,11 @@ public class FhirDstu3 implements IFhirVersion {
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
 		return new ServerProfileProvider(theRestfulServer);
+	}
+
+	@Override
+	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+		return new DefaultProfileValidationSupport();
 	}
 
 	@Override
@@ -104,7 +115,7 @@ public class FhirDstu3 implements IFhirVersion {
 	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
 		return ((Resource) theResource).getMeta().getLastUpdatedElement();
 	}
-
+	
 	@Override
 	public String getPathToSchemaDefinitions() {
 		return "/org/hl7/fhir/instance/model/dstu3/schema";
@@ -121,6 +132,11 @@ public class FhirDstu3 implements IFhirVersion {
 	}
 
 	@Override
+	public String getVersionString() {
+		return Constants.VERSION;
+	}
+
+	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		return new Dstu3BundleFactory(theContext);
 	}
@@ -133,16 +149,6 @@ public class FhirDstu3 implements IFhirVersion {
 	@Override
 	public IIdType newIdType() {
 		return new IdType();
-	}
-
-	@Override
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		return new DefaultProfileValidationSupport();
-	}
-
-	@Override
-	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-		return new FluentPathDstu3(theFhirContext);
 	}
 
 }

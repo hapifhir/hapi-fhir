@@ -213,7 +213,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		retVal.setPublisher(myPublisher);
 		retVal.setDateElement(conformanceDate());
-		retVal.setFhirVersion(FhirVersionEnum.DSTU3.getFhirVersionString());
+		retVal.setFhirVersion(FhirVersionEnum.DSTU3.getVersionImplementation().getVersionString());
 		retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big
 																					// effort since the parser
 		// needs to be modified to actually allow it

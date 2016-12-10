@@ -40,32 +40,34 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 
 public interface IFhirVersion {
 
-	FhirVersionEnum getVersion();
+	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
 	
-	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer); 
+	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer); 
 	
-	InputStream getFhirVersionPropertiesFile();
+	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
 	
+	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
+
 	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
-	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer);
+	Class<?> getContainedType();
+
+	InputStream getFhirVersionPropertiesFile();
+
+	IPrimitiveType<Date> getLastUpdated(IBaseResource theResource);
 
 	String getPathToSchemaDefinitions();
 
 	Class<? extends IBase> getResourceReferenceType();
 
-	Class<?> getContainedType();
+	FhirVersionEnum getVersion();
 
-	IBase newCodingDt();
+	String getVersionString();
 
 	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
 
-	IPrimitiveType<Date> getLastUpdated(IBaseResource theResource);
+	IBase newCodingDt();
 
 	IIdType newIdType();
-
-	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
-
-	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
 
 }
