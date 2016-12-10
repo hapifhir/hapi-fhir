@@ -99,6 +99,21 @@
 				not by throwing an exception. Thanks to 
 				Michael Lawley for the pull request!
 			</action>
+			<action type="add" issue="516">
+				When parsing DSTU3 resources with enumerated
+				types that contain invalid values, the parser will now
+				invoke the parserErrorHandler. For example, when parsing
+				<![CDATA[
+				<code>{"resourceType":"Patient", "gender":"foo"}</code>
+				]]>
+				the previous behaviour was to throw an InvalidArgumentException.
+				Now, the parserErrorHandler is invoked. In addition, thw
+				LenientErrorHandler has been modified so that this one case
+				will result in a DataFormatException. This has the effect
+				that servers which receive an invalid enum velue will return
+				an HTTP 400 instead of an HTTP 500. Thanks to Jim
+				Steel for reporting!
+			</action>   
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

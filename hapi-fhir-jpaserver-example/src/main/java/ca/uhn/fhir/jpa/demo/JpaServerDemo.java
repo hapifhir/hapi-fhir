@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -49,10 +50,13 @@ public class JpaServerDemo extends RestfulServer {
 		 * We want to support FHIR DSTU2 format. This means that the server
 		 * will use the DSTU2 bundle format and other DSTU2 encoding changes.
 		 *
-		 * If you want to use DSTU1 instead, change the following line, and change the 2 occurrences of dstu2 in web.xml to dstu1
+		 * If you want to use DSTU1 instead, change the following line, and 
+		 * change the 2 occurrences of dstu2 in web.xml to dstu1
 		 */
 		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2;
-		setFhirContext(new FhirContext(fhirVersion));
+		FhirContext context = new FhirContext(fhirVersion);
+		
+		setFhirContext(context);
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();

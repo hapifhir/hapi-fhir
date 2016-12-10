@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
@@ -46,7 +48,14 @@ public class ErrorHandlerTest {
 		new LenientErrorHandler().containedResourceWithNoId(null);
 		new LenientErrorHandler().unknownReference(null, null);
 		new LenientErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, ValueType.SCALAR);
-		new LenientErrorHandler().invalidValue(null, null, null);
+		new LenientErrorHandler().setErrorOnInvalidValue(false).invalidValue(null, "FOO", "");
+		new LenientErrorHandler().invalidValue(null, null, "");
+		try {
+			new LenientErrorHandler().invalidValue(null, "FOO", "");
+			fail();
+		} catch (DataFormatException e) {
+			// good, this one method defaults to causing an error
+		}
 	}
 
 	@Test(expected = DataFormatException.class)

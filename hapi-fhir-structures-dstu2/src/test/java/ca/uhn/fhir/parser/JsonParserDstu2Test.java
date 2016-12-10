@@ -170,7 +170,10 @@ public class JsonParserDstu2Test {
 	@Test
 	public void testParseEmptyValue() {
 		String input = "{\"resourceType\":\"QuestionnaireResponse\",\"id\":\"123\",\"authored\":\"\",\"group\":{\"linkId\":\"\"}}";
-		QuestionnaireResponse qr = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, input);
+		IParser parser = ourCtx.newJsonParser();
+		
+		parser.setParserErrorHandler(new LenientErrorHandler().setErrorOnInvalidValue(false));
+		QuestionnaireResponse qr = parser.parseResource(QuestionnaireResponse.class, input);
 	
 		assertEquals("QuestionnaireResponse/123", qr.getIdElement().getValue());
 		assertEquals(null, qr.getAuthored());

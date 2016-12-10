@@ -1,6 +1,7 @@
 package org.hl7.fhir.dstu3.model;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hamcrest.Matchers.emptyOrNullString;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -334,7 +335,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 			myFractionalSeconds = "";
 		}
 
-		setPrecision(precision);
+		myPrecision  = precision;
 		return cal.getTime();
 
 	}
@@ -372,8 +373,8 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 		if (isBlank(theValue)) {
 			throwBadDateFormat(theWholeValue);
 		} else if (theValue.charAt(0) == 'Z') {
-			clearTimeZone();
-			setTimeZoneZulu(true);
+			myTimeZone = null;
+			myTimeZoneZulu = true;
 		} else if (theValue.length() != 6) {
 			throwBadDateFormat(theWholeValue, "Timezone offset must be in the form \"Z\", \"-HH:mm\", or \"+HH:mm\"");
 		} else if (theValue.charAt(3) != ':' || !(theValue.charAt(0) == '+' || theValue.charAt(0) == '-')) {
@@ -381,8 +382,8 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 		} else {
 			parseInt(theWholeValue, theValue.substring(1, 3), 0, 23);
 			parseInt(theWholeValue, theValue.substring(4, 6), 0, 59);
-			clearTimeZone();
-			setTimeZone(TimeZone.getTimeZone("GMT" + theValue));
+			myTimeZoneZulu = false;
+			myTimeZone = TimeZone.getTimeZone("GMT" + theValue);
 		}
 
 		return this;
@@ -390,12 +391,14 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 
 	public BaseDateTimeType setTimeZone(TimeZone theTimeZone) {
 		myTimeZone = theTimeZone;
+		myTimeZoneZulu = false;
 		updateStringValue();
 		return this;
 	}
 
 	public BaseDateTimeType setTimeZoneZulu(boolean theTimeZoneZulu) {
 		myTimeZoneZulu = theTimeZoneZulu;
+		myTimeZone = null;
 		updateStringValue();
 		return this;
 	}

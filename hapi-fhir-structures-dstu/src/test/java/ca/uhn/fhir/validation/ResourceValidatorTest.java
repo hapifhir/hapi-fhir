@@ -20,6 +20,8 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceValidatorTest {
@@ -72,23 +74,34 @@ public class ResourceValidatorTest {
 	/**
 	 * See issue #50
 	 */
-	@Test(expected=DataFormatException.class)
+	@Test()
 	public void testOutOfBoundsDate() {
 		Patient p = new Patient();
 		p.setBirthDate(new DateTimeDt("2000-12-31"));
 
 		// Put in an invalid date
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		
+		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
 		assertThat(encoded, StringContains.containsString("2000-15-31"));
 
-		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
-		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		FhirValidator validator = ourCtx.newValidator();
+		ValidationResult result = validator.validateWithResult(encoded);
+		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
 		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("cvc-datatype-valid.1.2.3"));
+		
+		try {
+			parser.parseResource(encoded);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+		}
 	}
 
 	@Test

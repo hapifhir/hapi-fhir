@@ -3,8 +3,10 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,14 +14,24 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.*;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
+import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.parser.XmlParserDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -37,6 +49,39 @@ public class ResourceValidatorDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	/**
+	 * See issue #50
+	 */
+	@Test()
+	public void testOutOfBoundsDate() {
+		Patient p = new Patient();
+		p.setBirthDateElement(new DateType("2000-12-31"));
+
+		// Put in an invalid date
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		
+		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
+		ourLog.info(encoded);
+
+		assertThat(encoded, StringContains.containsString("2000-15-31"));
+
+		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
+		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info(resultString);
+
+		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
+		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		
+		try {
+			parser.parseResource(encoded);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+		}
+	}
+
+	
 	/**
 	 * Make sure that the elements that appear in all resources (meta, language, extension, etc) all appear in the correct order
 	 */

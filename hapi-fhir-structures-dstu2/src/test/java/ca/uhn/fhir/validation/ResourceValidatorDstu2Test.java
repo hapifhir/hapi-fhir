@@ -40,10 +40,12 @@ import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.parser.XmlParserDstu2Test.TestPatientFor327;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
@@ -71,26 +73,33 @@ public class ResourceValidatorDstu2Test {
 	/**
 	 * See issue #50
 	 */
-	@Test(expected=DataFormatException.class)
+	@Test()
 	public void testOutOfBoundsDate() {
 		Patient p = new Patient();
-		p.setBirthDate(new DateDt("2000-15-31"));
+		p.setBirthDate(new DateDt("2000-12-31"));
 
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		// Put in an invalid date
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		
+		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
 		assertThat(encoded, StringContains.containsString("2000-15-31"));
 
-		p = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
-		assertEquals("2000-15-31", p.getBirthDateElement().getValueAsString());
-		assertEquals("2001-03-31", new SimpleDateFormat("yyyy-MM-dd").format(p.getBirthDate()));
-
-		ValidationResult result = ourCtx.newValidator().validateWithResult(p);
-		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ValidationResult result = ourCtx.newValidator().validateWithResult(encoded);
+		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
-		assertThat(resultString, StringContains.containsString("2000-15-31"));
+		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
+		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
+		
+		try {
+			parser.parseResource(encoded);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
