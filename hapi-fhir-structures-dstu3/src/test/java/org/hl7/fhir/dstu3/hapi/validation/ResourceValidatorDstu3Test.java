@@ -249,27 +249,27 @@ public class ResourceValidatorDstu3Test {
 		assertThat(messageString, not(containsString("valueResource")));
 	}
 
-	@Test
-	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
-
-		EnrollmentResponse fhirObj = new EnrollmentResponse();
-		Organization org = new Organization();
-		org.setId("1");
-		fhirObj.setRequestOrganization(new Reference(org));
-		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
-
-		FhirValidator validator = ourCtx.newValidator();
-		validator.registerValidatorModule(new FhirInstanceValidator());
-
-		ValidationResult result = validator.validateWithResult(input);
-		assertEquals(3, result.getMessages().size());
-
-		fhirObj = new EnrollmentResponse();
-		Identifier ident = new Identifier().setSystem("a").setValue("b");
-		fhirObj.setRequest(ident);
-		input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
-
-		result = validator.validateWithResult(input);
-		assertEquals(2, result.getMessages().size());
-	}
+//	@Test
+//	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
+//
+//		EnrollmentResponse fhirObj = new EnrollmentResponse();
+//		Organization org = new Organization();
+//		org.setId("1");
+//		fhirObj.setRequestOrganization(new Reference(org));
+//		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
+//
+//		FhirValidator validator = ourCtx.newValidator();
+//		validator.registerValidatorModule(new FhirInstanceValidator());
+//
+//		ValidationResult result = validator.validateWithResult(input);
+//		assertEquals(3, result.getMessages().size());
+//
+//		fhirObj = new EnrollmentResponse();
+//		Identifier ident = new Identifier().setSystem("a").setValue("b");
+//		fhirObj.setRequest(ident);
+//		input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
+//
+//		result = validator.validateWithResult(input);
+//		assertEquals(2, result.getMessages().size());
+//	}
 }
