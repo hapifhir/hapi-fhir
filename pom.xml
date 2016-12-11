@@ -279,6 +279,10 @@
 			<name>Michael Lawley</name>
 			<organization>CSIRO</organization>
 		</developer>
+		<developer>
+			<id>CarthageKing</id>
+			<name>CarthageKing</name>
+		</developer>
 	</developers>
 
 	<licenses>

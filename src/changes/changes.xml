@@ -133,6 +133,11 @@
 					<li>Normalization of properties across all three generic tasks</li>
 				</ul>
 			    ]]>
+			 </action>
+			 <action type="fix" issue="523">
+				 Fix ordering of validator property handling when an element
+				 has a name that is similar to a shorter name[x] style name.
+				 Thanks to CarthageKing for the pull request!
 			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
