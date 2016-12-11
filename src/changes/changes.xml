@@ -113,10 +113,26 @@
 				that servers which receive an invalid enum velue will return
 				an HTTP 400 instead of an HTTP 500. Thanks to Jim
 				Steel for reporting!
-			</action>
+			</action>   
 			<action type="add" issue="520">
 				DSTU3 context now pulls the FHIR version from the actual
 				model classes. Thanks to Michael Lawley for the pull request!
+			</action>
+			<action type="add">
+				Enhancements to the tinder-plugin's generic template features
+				of the <![CDATA[<i>generate-multi-files</i> and <i>generate-single-file</i>
+				Maven goals as well as the Ant <i>hapi-tinder</i> task.
+				<ul>
+					<li>Provides the full Tinder data model by adding composites, valuesets, and profiles to resourcesw.</li>
+					<li>Supports generating files for resources, composites, valuesets, and profiles</li>
+					<li>Supports Velocimacro files outside the tinder-plugin JAR</li>
+					<li>Provides filename prefix as well as suffix properties</li>
+					<li>Can specify any of the Velocity configuration parameters such as
+					<i>macro.provide.scope.control</i> which allows safe macro recursion</li>
+					<li>Templates can now drill down into the referenced children for a ResourceBlockCopy</li>
+					<li>Normalization of properties across all three generic tasks</li>
+				</ul>
+			    ]]>
 			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
