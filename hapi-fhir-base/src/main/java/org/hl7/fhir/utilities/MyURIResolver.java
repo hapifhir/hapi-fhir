@@ -32,6 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -64,6 +65,8 @@ public class MyURIResolver implements URIResolver {
       } else
         return new StreamSource(new FileInputStream(href.contains(File.separator) ? href : Utilities.path(path, href)));
     } catch (FileNotFoundException e) {
+      throw new TransformerException(e);
+    } catch (IOException e) {
       throw new TransformerException(e);
     }
   }

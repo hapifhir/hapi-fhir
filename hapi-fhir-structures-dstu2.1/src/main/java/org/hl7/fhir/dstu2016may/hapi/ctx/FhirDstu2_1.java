@@ -116,7 +116,7 @@ public class FhirDstu2_1 implements IFhirVersion {
 	
 	@Override
 	public String getPathToSchemaDefinitions() {
-		return "/org/hl7/fhir/instance/model/dstu3/schema";
+		return "/org/hl7/fhir/dstu2016may/schema";
 	}
 
 	@Override
