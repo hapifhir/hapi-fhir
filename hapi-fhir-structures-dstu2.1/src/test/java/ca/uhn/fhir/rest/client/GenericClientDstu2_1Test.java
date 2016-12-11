@@ -102,7 +102,7 @@ public class GenericClientDstu2_1Test {
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU2_1.getVersionImplementation().getVersionString() + "/DSTU2_1; apache)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU2_1.getFhirVersionString() + "/DSTU2_1; apache)";
 	}
 
 	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {

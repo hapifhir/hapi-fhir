@@ -129,11 +129,6 @@ public class FhirDstu2 implements IFhirVersion {
 	}
 
 	@Override
-	public String getVersionString() {
-		return "1.0.2";
-	}
-
-	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		return new Dstu2BundleFactory(theContext);
 	}

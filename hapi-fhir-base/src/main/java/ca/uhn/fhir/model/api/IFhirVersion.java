@@ -62,8 +62,6 @@ public interface IFhirVersion {
 
 	FhirVersionEnum getVersion();
 
-	String getVersionString();
-
 	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
 
 	IBase newCodingDt();

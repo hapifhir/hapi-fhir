@@ -405,10 +405,4 @@ public class FhirDstu1 implements IFhirVersion {
 		throw new UnsupportedOperationException("FluentPath is not supported in DSTU1 contexts");
 	}
 
-	@Override
-	public String getVersionString() {
-		return "0.0.82";
-	}
-
-
 }

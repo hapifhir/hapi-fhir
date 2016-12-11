@@ -74,7 +74,7 @@ public class GenericClientDstu3IT {
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getVersionImplementation().getVersionString() + "/DSTU3; okhttp/3.4.1)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; okhttp/3.4.1)";
 	}
 
 

@@ -126,11 +126,6 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 		return FhirVersionEnum.DSTU2_HL7ORG;
 	}
 
-  @Override
-  public String getVersionString() {
-    return "1.0.2";
-  }
-
   
   @Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {

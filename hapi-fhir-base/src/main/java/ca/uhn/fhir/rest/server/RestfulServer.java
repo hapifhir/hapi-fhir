@@ -30,8 +30,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
@@ -42,7 +50,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -72,7 +79,11 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlPathTokenizer;
+import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
 
@@ -158,7 +169,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		b.append("HAPI FHIR ");
 		b.append(VersionUtil.getVersion());
 		b.append(" REST Server (FHIR Server; FHIR ");
-		b.append(myFhirContext.getVersion().getVersionString());
+		b.append(myFhirContext.getVersion().getVersion().getFhirVersionString());
 		b.append('/');
 		b.append(myFhirContext.getVersion().getVersion().name());
 		b.append(")");

@@ -30,7 +30,7 @@ public class HttpClientUtil {
 		b.append("HAPI-FHIR/");
 		b.append(VersionUtil.getVersion());
 		b.append(" (FHIR Client; FHIR ");
-		b.append(theContext.getVersion().getVersionString());
+		b.append(theContext.getVersion().getVersion().getFhirVersionString());
 		b.append('/');
 		b.append(theContext.getVersion().getVersion().name());
 		b.append("; ");

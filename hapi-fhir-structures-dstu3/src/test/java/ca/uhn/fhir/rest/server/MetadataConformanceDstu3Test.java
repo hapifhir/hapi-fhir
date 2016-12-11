@@ -110,7 +110,7 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output, containsString("<Conformance"));
-			assertEquals("HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + FhirVersionEnum.DSTU3.getVersionImplementation().getVersionString() + "/DSTU3)", status.getFirstHeader("X-Powered-By").getValue());
+			assertEquals("HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3)", status.getFirstHeader("X-Powered-By").getValue());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

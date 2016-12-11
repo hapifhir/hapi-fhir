@@ -132,11 +132,6 @@ public class FhirDstu3 implements IFhirVersion {
 	}
 
 	@Override
-	public String getVersionString() {
-		return Constants.VERSION;
-	}
-
-	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		return new Dstu3BundleFactory(theContext);
 	}

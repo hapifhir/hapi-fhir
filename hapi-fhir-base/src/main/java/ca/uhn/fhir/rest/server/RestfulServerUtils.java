@@ -759,14 +759,14 @@ public class RestfulServerUtils {
 				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
 					FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
 					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU3)
-							|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && !"1.4.0".equals(theCtx.getVersion().getVersionString()));
+							|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && !"1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()));
 				} else {
 					myNonLegacy = EncodingEnum.isNonLegacy(theContentType);
 				}
 			} else {
 				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
 				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)
-					|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && "1.4.0".equals(theCtx.getVersion().getVersionString()))) {
+					|| (ctxtEnum.isEquivalentTo(FhirVersionEnum.DSTU3) && "1.4.0".equals(theCtx.getVersion().getVersion().getFhirVersionString()))) {
 					myNonLegacy = null;
 				} else {
 					myNonLegacy = Boolean.TRUE;

@@ -337,7 +337,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public String getVersion() {
-		return myCtx.getVersion().getVersionString();
+		return myCtx.getVersion().getVersion().getFhirVersionString();
 	}
 
 	@Override
