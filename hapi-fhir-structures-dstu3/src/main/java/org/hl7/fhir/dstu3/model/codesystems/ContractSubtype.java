@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractSubtype {
 
         /**
-         * null
+         * Canadian health information displosure policy.
          */
         DISCLOSURECA, 
         /**
-         * null
+         * United States health information displosure policy.
          */
         DISCLOSUREUS, 
         /**
@@ -51,16 +51,16 @@ public enum ContractSubtype {
         public static ContractSubtype fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("disclosure-CA".equals(codeString))
+        if ("disclosure-ca".equals(codeString))
           return DISCLOSURECA;
-        if ("disclosure-US".equals(codeString))
+        if ("disclosure-us".equals(codeString))
           return DISCLOSUREUS;
         throw new FHIRException("Unknown ContractSubtype code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case DISCLOSURECA: return "disclosure-CA";
-            case DISCLOSUREUS: return "disclosure-US";
+            case DISCLOSURECA: return "disclosure-ca";
+            case DISCLOSUREUS: return "disclosure-us";
             default: return "?";
           }
         }
@@ -69,15 +69,15 @@ public enum ContractSubtype {
         }
         public String getDefinition() {
           switch (this) {
-            case DISCLOSURECA: return "";
-            case DISCLOSUREUS: return "";
+            case DISCLOSURECA: return "Canadian health information displosure policy.";
+            case DISCLOSUREUS: return "United States health information displosure policy.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case DISCLOSURECA: return "disclosure-CA";
-            case DISCLOSUREUS: return "disclosure-US";
+            case DISCLOSURECA: return "Disclosure-CA";
+            case DISCLOSUREUS: return "Disclosure-US";
             default: return "?";
           }
     }

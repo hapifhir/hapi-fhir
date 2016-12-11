@@ -150,7 +150,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		private Patient createPatient1() {
 			Patient patient = new Patient();
 			patient.addName();
-			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).setFamily("Test");
 			patient.getName().get(0).addGiven("PatientOne");
 			return patient;
 		}

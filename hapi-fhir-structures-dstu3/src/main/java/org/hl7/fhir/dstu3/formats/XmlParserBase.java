@@ -32,6 +32,9 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamException;
+
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -259,7 +262,7 @@ public abstract class XmlParserBase extends ParserBase implements IParser {
 			throw new FHIRFormatError("Unknown Content "+xpp.getName()+" @ "+pathForLocation(xpp));
 	}
 
-	protected XhtmlNode parseXhtml(XmlPullParser xpp) throws XmlPullParserException, IOException, FHIRFormatError {
+	protected XhtmlNode parseXhtml(XMLEventReader xpp) throws IOException, FHIRFormatError, XMLStreamException {
 		XhtmlParser prsr = new XhtmlParser();
 		try {
 			return prsr.parseHtmlNode(xpp);

@@ -20,7 +20,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class FhirPathEngineTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static FluentPathEngine ourEngine;
+	private static FHIRPathEngine ourEngine;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
 
 	@Test
@@ -58,7 +58,7 @@ public class FhirPathEngineTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourEngine = new FluentPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
+		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport()));
 	}
 
 }

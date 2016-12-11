@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -44,6 +44,10 @@ public enum FilterOperator {
          * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (i.e. include child codes)
          */
         ISA, 
+        /**
+         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself (i.e. include child codes)
+         */
+        DESCENDENTOF, 
         /**
          * The specified property of the code does not have an is-a relationship with the provided value.
          */
@@ -65,6 +69,10 @@ public enum FilterOperator {
          */
         GENERALIZES, 
         /**
+         * The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values)
+         */
+        EXISTS, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -75,6 +83,8 @@ public enum FilterOperator {
           return EQUAL;
         if ("is-a".equals(codeString))
           return ISA;
+        if ("descendent-of".equals(codeString))
+          return DESCENDENTOF;
         if ("is-not-a".equals(codeString))
           return ISNOTA;
         if ("regex".equals(codeString))
@@ -85,17 +95,21 @@ public enum FilterOperator {
           return NOTIN;
         if ("generalizes".equals(codeString))
           return GENERALIZES;
+        if ("exists".equals(codeString))
+          return EXISTS;
         throw new FHIRException("Unknown FilterOperator code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case EQUAL: return "=";
             case ISA: return "is-a";
+            case DESCENDENTOF: return "descendent-of";
             case ISNOTA: return "is-not-a";
             case REGEX: return "regex";
             case IN: return "in";
             case NOTIN: return "not-in";
             case GENERALIZES: return "generalizes";
+            case EXISTS: return "exists";
             default: return "?";
           }
         }
@@ -106,11 +120,13 @@ public enum FilterOperator {
           switch (this) {
             case EQUAL: return "The specified property of the code equals the provided value.";
             case ISA: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (i.e. include child codes)";
+            case DESCENDENTOF: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself (i.e. include child codes)";
             case ISNOTA: return "The specified property of the code does not have an is-a relationship with the provided value.";
             case REGEX: return "The specified property of the code  matches the regex specified in the provided value.";
             case IN: return "The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).";
             case NOTIN: return "The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).";
             case GENERALIZES: return "Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (e.g. include parent codes)";
+            case EXISTS: return "The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values)";
             default: return "?";
           }
         }
@@ -118,11 +134,13 @@ public enum FilterOperator {
           switch (this) {
             case EQUAL: return "Equals";
             case ISA: return "Is A (by subsumption)";
+            case DESCENDENTOF: return "Descendent Of (by subsumption)";
             case ISNOTA: return "Not (Is A) (by subsumption)";
             case REGEX: return "Regular Expression";
             case IN: return "In Set";
             case NOTIN: return "Not in Set";
             case GENERALIZES: return "Generalizes (by Subsumption)";
+            case EXISTS: return "Exists";
             default: return "?";
           }
     }

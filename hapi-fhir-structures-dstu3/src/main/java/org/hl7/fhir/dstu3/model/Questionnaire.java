@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -506,79 +506,95 @@ public class Questionnaire extends DomainResource {
         /**
          * An identifier that is unique within the Questionnaire allowing linkage to the equivalent item in a QuestionnaireResponse resource.
          */
-        @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="To link questionnaire with questionnaire response", formalDefinition="An identifier that is unique within the Questionnaire allowing linkage to the equivalent item in a QuestionnaireResponse resource." )
+        @Child(name = "linkId", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Unique id for item in questionnaire", formalDefinition="An identifier that is unique within the Questionnaire allowing linkage to the equivalent item in a QuestionnaireResponse resource." )
         protected StringType linkId;
 
         /**
-         * Identifies a how this group of questions is known in a particular terminology such as LOINC.
+         * A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
+
+* concept (ElementDefinition.code)
+* type (ElementDefinition.type)
+* required (ElementDefinition.min)
+* repeats (ElementDefinition.max)
+* maxLength (ElementDefinition.maxLength)
+* options (ElementDefinition.binding)
+
+Any information provided in these elements overrides the information from the definition.
          */
-        @Child(name = "concept", type = {Coding.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Concept that represents this item within in a questionnaire", formalDefinition="Identifies a how this group of questions is known in a particular terminology such as LOINC." )
+        @Child(name = "definition", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="ElementDefinition - details for the item", formalDefinition="A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: \n\n* concept (ElementDefinition.code)\n* type (ElementDefinition.type)\n* required (ElementDefinition.min)\n* repeats (ElementDefinition.max)\n* maxLength (ElementDefinition.maxLength)\n* options (ElementDefinition.binding)\n\nAny information provided in these elements overrides the information from the definition." )
+        protected UriType definition;
+
+        /**
+         * Terminology code that corresponds to this group or question (e.g. LOINC).
+         */
+        @Child(name = "concept", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Concept that represents this item within in a questionnaire", formalDefinition="Terminology code that corresponds to this group or question (e.g. LOINC)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
         protected List<Coding> concept;
 
         /**
          * A short label for a particular group, question or set of display text within the questionnaire.
          */
-        @Child(name = "prefix", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "prefix", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="E.g. \"1(a)\", \"2.5.3\"", formalDefinition="A short label for a particular group, question or set of display text within the questionnaire." )
         protected StringType prefix;
 
         /**
          * The name of a section, the text of a question or text content for a text item.
          */
-        @Child(name = "text", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "text", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Primary text for the item", formalDefinition="The name of a section, the text of a question or text content for a text item." )
         protected StringType text;
 
         /**
          * Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.).
          */
-        @Child(name = "type", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="group | display | question | boolean | decimal | integer | date | dateTime +", formalDefinition="Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.)." )
+        @Child(name = "type", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="group | display | boolean | decimal | integer | date | dateTime +", formalDefinition="Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/item-type")
         protected Enumeration<QuestionnaireItemType> type;
 
         /**
          * If present, indicates that this item should only be enabled (displayed/allow answers to be captured) when the specified condition is true.
          */
-        @Child(name = "enableWhen", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
+        @Child(name = "enableWhen", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
         @Description(shortDefinition="Only allow data when:", formalDefinition="If present, indicates that this item should only be enabled (displayed/allow answers to be captured) when the specified condition is true." )
         protected List<QuestionnaireItemEnableWhenComponent> enableWhen;
 
         /**
          * If true, indicates that the item must be present in a "completed" QuestionnaireResponse.  If false, the item may be skipped when answering the questionnaire.
          */
-        @Child(name = "required", type = {BooleanType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "required", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether the item must be included in data results", formalDefinition="If true, indicates that the item must be present in a \"completed\" QuestionnaireResponse.  If false, the item may be skipped when answering the questionnaire." )
         protected BooleanType required;
 
         /**
          * Whether the item may occur multiple times in the instance, containing multiple sets of answers.
          */
-        @Child(name = "repeats", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "repeats", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether the item may repeat", formalDefinition="Whether the item may occur multiple times in the instance, containing multiple sets of answers." )
         protected BooleanType repeats;
 
         /**
          * If true, the value cannot be changed by a human respondent to the Questionnaire.
          */
-        @Child(name = "readOnly", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "readOnly", type = {BooleanType.class}, order=10, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Don't allow human editing", formalDefinition="If true, the value cannot be changed by a human respondent to the Questionnaire." )
         protected BooleanType readOnly;
 
         /**
          * The maximum number of characters that are permitted in the answer to be considered a "valid" QuestionnaireResponse.
          */
-        @Child(name = "maxLength", type = {IntegerType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "maxLength", type = {IntegerType.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="No more than this many characters", formalDefinition="The maximum number of characters that are permitted in the answer to be considered a \"valid\" QuestionnaireResponse." )
         protected IntegerType maxLength;
 
         /**
          * Reference to a value set containing a list of codes representing permitted answers for the question.
          */
-        @Child(name = "options", type = {ValueSet.class}, order=11, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "options", type = {ValueSet.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Valueset containing permitted answers", formalDefinition="Reference to a value set containing a list of codes representing permitted answers for the question." )
         protected Reference options;
 
@@ -590,25 +606,25 @@ public class Questionnaire extends DomainResource {
         /**
          * For a "choice" question, identifies one of the permitted answers for the question.
          */
-        @Child(name = "option", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "option", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Permitted answer", formalDefinition="For a \"choice\" question, identifies one of the permitted answers for the question." )
         protected List<QuestionnaireItemOptionComponent> option;
 
         /**
-         * The value that should be pre-populated when rendering the questionnaire for user input.
+         * The value that should be defaulted when rendering the questionnaire for user input.
          */
-        @Child(name = "initial", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=13, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Initial presumed answer for question", formalDefinition="The value that should be pre-populated when rendering the questionnaire for user input." )
+        @Child(name = "initial", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class, Reference.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Default value when item is first rendered", formalDefinition="The value that should be defaulted when rendering the questionnaire for user input." )
         protected Type initial;
 
         /**
          * Allows text, questions and other groups to be nested beneath a question or group.
          */
-        @Child(name = "item", type = {QuestionnaireItemComponent.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "item", type = {QuestionnaireItemComponent.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested questionnaire items", formalDefinition="Allows text, questions and other groups to be nested beneath a question or group." )
         protected List<QuestionnaireItemComponent> item;
 
-        private static final long serialVersionUID = -1787693458L;
+        private static final long serialVersionUID = 1410801685L;
 
     /**
      * Constructor
@@ -620,9 +636,9 @@ public class Questionnaire extends DomainResource {
     /**
      * Constructor
      */
-      public QuestionnaireItemComponent(Enumeration<QuestionnaireItemType> type) {
+      public QuestionnaireItemComponent(StringType linkId) {
         super();
-        this.type = type;
+        this.linkId = linkId;
       }
 
         /**
@@ -664,18 +680,99 @@ public class Questionnaire extends DomainResource {
          * @param value An identifier that is unique within the Questionnaire allowing linkage to the equivalent item in a QuestionnaireResponse resource.
          */
         public QuestionnaireItemComponent setLinkId(String value) { 
-          if (Utilities.noString(value))
-            this.linkId = null;
-          else {
             if (this.linkId == null)
               this.linkId = new StringType();
             this.linkId.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #definition} (A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
+
+* concept (ElementDefinition.code)
+* type (ElementDefinition.type)
+* required (ElementDefinition.min)
+* repeats (ElementDefinition.max)
+* maxLength (ElementDefinition.maxLength)
+* options (ElementDefinition.binding)
+
+Any information provided in these elements overrides the information from the definition.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         */
+        public UriType getDefinitionElement() { 
+          if (this.definition == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create QuestionnaireItemComponent.definition");
+            else if (Configuration.doAutoCreate())
+              this.definition = new UriType(); // bb
+          return this.definition;
+        }
+
+        public boolean hasDefinitionElement() { 
+          return this.definition != null && !this.definition.isEmpty();
+        }
+
+        public boolean hasDefinition() { 
+          return this.definition != null && !this.definition.isEmpty();
+        }
+
+        /**
+         * @param value {@link #definition} (A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
+
+* concept (ElementDefinition.code)
+* type (ElementDefinition.type)
+* required (ElementDefinition.min)
+* repeats (ElementDefinition.max)
+* maxLength (ElementDefinition.maxLength)
+* options (ElementDefinition.binding)
+
+Any information provided in these elements overrides the information from the definition.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         */
+        public QuestionnaireItemComponent setDefinitionElement(UriType value) { 
+          this.definition = value;
+          return this;
+        }
+
+        /**
+         * @return A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
+
+* concept (ElementDefinition.code)
+* type (ElementDefinition.type)
+* required (ElementDefinition.min)
+* repeats (ElementDefinition.max)
+* maxLength (ElementDefinition.maxLength)
+* options (ElementDefinition.binding)
+
+Any information provided in these elements overrides the information from the definition.
+         */
+        public String getDefinition() { 
+          return this.definition == null ? null : this.definition.getValue();
+        }
+
+        /**
+         * @param value A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: 
+
+* concept (ElementDefinition.code)
+* type (ElementDefinition.type)
+* required (ElementDefinition.min)
+* repeats (ElementDefinition.max)
+* maxLength (ElementDefinition.maxLength)
+* options (ElementDefinition.binding)
+
+Any information provided in these elements overrides the information from the definition.
+         */
+        public QuestionnaireItemComponent setDefinition(String value) { 
+          if (Utilities.noString(value))
+            this.definition = null;
+          else {
+            if (this.definition == null)
+              this.definition = new UriType();
+            this.definition.setValue(value);
           }
           return this;
         }
 
         /**
-         * @return {@link #concept} (Identifies a how this group of questions is known in a particular terminology such as LOINC.)
+         * @return {@link #concept} (Terminology code that corresponds to this group or question (e.g. LOINC).)
          */
         public List<Coding> getConcept() { 
           if (this.concept == null)
@@ -864,9 +961,13 @@ public class Questionnaire extends DomainResource {
          * @param value Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.).
          */
         public QuestionnaireItemComponent setType(QuestionnaireItemType value) { 
+          if (value == null)
+            this.type = null;
+          else {
             if (this.type == null)
               this.type = new Enumeration<QuestionnaireItemType>(new QuestionnaireItemTypeEnumFactory());
             this.type.setValue(value);
+          }
           return this;
         }
 
@@ -1201,14 +1302,14 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public Type getInitial() { 
           return this.initial;
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public BooleanType getInitialBooleanType() throws FHIRException { 
           if (!(this.initial instanceof BooleanType))
@@ -1221,7 +1322,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public DecimalType getInitialDecimalType() throws FHIRException { 
           if (!(this.initial instanceof DecimalType))
@@ -1234,7 +1335,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public IntegerType getInitialIntegerType() throws FHIRException { 
           if (!(this.initial instanceof IntegerType))
@@ -1247,7 +1348,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public DateType getInitialDateType() throws FHIRException { 
           if (!(this.initial instanceof DateType))
@@ -1260,7 +1361,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public DateTimeType getInitialDateTimeType() throws FHIRException { 
           if (!(this.initial instanceof DateTimeType))
@@ -1273,7 +1374,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public InstantType getInitialInstantType() throws FHIRException { 
           if (!(this.initial instanceof InstantType))
@@ -1286,7 +1387,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public TimeType getInitialTimeType() throws FHIRException { 
           if (!(this.initial instanceof TimeType))
@@ -1299,7 +1400,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public StringType getInitialStringType() throws FHIRException { 
           if (!(this.initial instanceof StringType))
@@ -1312,7 +1413,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public UriType getInitialUriType() throws FHIRException { 
           if (!(this.initial instanceof UriType))
@@ -1325,7 +1426,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public Attachment getInitialAttachment() throws FHIRException { 
           if (!(this.initial instanceof Attachment))
@@ -1338,7 +1439,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public Coding getInitialCoding() throws FHIRException { 
           if (!(this.initial instanceof Coding))
@@ -1351,7 +1452,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public Quantity getInitialQuantity() throws FHIRException { 
           if (!(this.initial instanceof Quantity))
@@ -1364,7 +1465,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @return {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public Reference getInitialReference() throws FHIRException { 
           if (!(this.initial instanceof Reference))
@@ -1381,7 +1482,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @param value {@link #initial} (The value that should be pre-populated when rendering the questionnaire for user input.)
+         * @param value {@link #initial} (The value that should be defaulted when rendering the questionnaire for user input.)
          */
         public QuestionnaireItemComponent setInitial(Type value) { 
           this.initial = value;
@@ -1444,7 +1545,8 @@ public class Questionnaire extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("linkId", "string", "An identifier that is unique within the Questionnaire allowing linkage to the equivalent item in a QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
-          childrenList.add(new Property("concept", "Coding", "Identifies a how this group of questions is known in a particular terminology such as LOINC.", 0, java.lang.Integer.MAX_VALUE, concept));
+          childrenList.add(new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be inferred from the definition: \n\n* concept (ElementDefinition.code)\n* type (ElementDefinition.type)\n* required (ElementDefinition.min)\n* repeats (ElementDefinition.max)\n* maxLength (ElementDefinition.maxLength)\n* options (ElementDefinition.binding)\n\nAny information provided in these elements overrides the information from the definition.", 0, java.lang.Integer.MAX_VALUE, definition));
+          childrenList.add(new Property("concept", "Coding", "Terminology code that corresponds to this group or question (e.g. LOINC).", 0, java.lang.Integer.MAX_VALUE, concept));
           childrenList.add(new Property("prefix", "string", "A short label for a particular group, question or set of display text within the questionnaire.", 0, java.lang.Integer.MAX_VALUE, prefix));
           childrenList.add(new Property("text", "string", "The name of a section, the text of a question or text content for a text item.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("type", "code", "Identifies the type of questionnaire item this is - whether text for display, a grouping of other items or a particular type of data to be captured (string, integer, coded choice, etc.).", 0, java.lang.Integer.MAX_VALUE, type));
@@ -1455,7 +1557,7 @@ public class Questionnaire extends DomainResource {
           childrenList.add(new Property("maxLength", "integer", "The maximum number of characters that are permitted in the answer to be considered a \"valid\" QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, maxLength));
           childrenList.add(new Property("options", "Reference(ValueSet)", "Reference to a value set containing a list of codes representing permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, options));
           childrenList.add(new Property("option", "", "For a \"choice\" question, identifies one of the permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, option));
-          childrenList.add(new Property("initial[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The value that should be pre-populated when rendering the questionnaire for user input.", 0, java.lang.Integer.MAX_VALUE, initial));
+          childrenList.add(new Property("initial[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The value that should be defaulted when rendering the questionnaire for user input.", 0, java.lang.Integer.MAX_VALUE, initial));
           childrenList.add(new Property("item", "@Questionnaire.item", "Allows text, questions and other groups to be nested beneath a question or group.", 0, java.lang.Integer.MAX_VALUE, item));
         }
 
@@ -1463,6 +1565,7 @@ public class Questionnaire extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1102667083: /*linkId*/ return this.linkId == null ? new Base[0] : new Base[] {this.linkId}; // StringType
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
         case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // Coding
         case -980110702: /*prefix*/ return this.prefix == null ? new Base[0] : new Base[] {this.prefix}; // StringType
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
@@ -1486,6 +1589,9 @@ public class Questionnaire extends DomainResource {
         switch (hash) {
         case -1102667083: // linkId
           this.linkId = castToString(value); // StringType
+          break;
+        case -1014418093: // definition
+          this.definition = castToUri(value); // UriType
           break;
         case 951024232: // concept
           this.getConcept().add(castToCoding(value)); // Coding
@@ -1535,6 +1641,8 @@ public class Questionnaire extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("linkId"))
           this.linkId = castToString(value); // StringType
+        else if (name.equals("definition"))
+          this.definition = castToUri(value); // UriType
         else if (name.equals("concept"))
           this.getConcept().add(castToCoding(value));
         else if (name.equals("prefix"))
@@ -1569,6 +1677,7 @@ public class Questionnaire extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1102667083: throw new FHIRException("Cannot make property linkId as it is not a complex type"); // StringType
+        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // UriType
         case 951024232:  return addConcept(); // Coding
         case -980110702: throw new FHIRException("Cannot make property prefix as it is not a complex type"); // StringType
         case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
@@ -1591,6 +1700,9 @@ public class Questionnaire extends DomainResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("linkId")) {
           throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.linkId");
+        }
+        else if (name.equals("definition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.definition");
         }
         else if (name.equals("concept")) {
           return addConcept();
@@ -1689,6 +1801,7 @@ public class Questionnaire extends DomainResource {
         QuestionnaireItemComponent dst = new QuestionnaireItemComponent();
         copyValues(dst);
         dst.linkId = linkId == null ? null : linkId.copy();
+        dst.definition = definition == null ? null : definition.copy();
         if (concept != null) {
           dst.concept = new ArrayList<Coding>();
           for (Coding i : concept)
@@ -1728,11 +1841,12 @@ public class Questionnaire extends DomainResource {
         if (!(other instanceof QuestionnaireItemComponent))
           return false;
         QuestionnaireItemComponent o = (QuestionnaireItemComponent) other;
-        return compareDeep(linkId, o.linkId, true) && compareDeep(concept, o.concept, true) && compareDeep(prefix, o.prefix, true)
-           && compareDeep(text, o.text, true) && compareDeep(type, o.type, true) && compareDeep(enableWhen, o.enableWhen, true)
-           && compareDeep(required, o.required, true) && compareDeep(repeats, o.repeats, true) && compareDeep(readOnly, o.readOnly, true)
-           && compareDeep(maxLength, o.maxLength, true) && compareDeep(options, o.options, true) && compareDeep(option, o.option, true)
-           && compareDeep(initial, o.initial, true) && compareDeep(item, o.item, true);
+        return compareDeep(linkId, o.linkId, true) && compareDeep(definition, o.definition, true) && compareDeep(concept, o.concept, true)
+           && compareDeep(prefix, o.prefix, true) && compareDeep(text, o.text, true) && compareDeep(type, o.type, true)
+           && compareDeep(enableWhen, o.enableWhen, true) && compareDeep(required, o.required, true) && compareDeep(repeats, o.repeats, true)
+           && compareDeep(readOnly, o.readOnly, true) && compareDeep(maxLength, o.maxLength, true) && compareDeep(options, o.options, true)
+           && compareDeep(option, o.option, true) && compareDeep(initial, o.initial, true) && compareDeep(item, o.item, true)
+          ;
       }
 
       @Override
@@ -1742,15 +1856,16 @@ public class Questionnaire extends DomainResource {
         if (!(other instanceof QuestionnaireItemComponent))
           return false;
         QuestionnaireItemComponent o = (QuestionnaireItemComponent) other;
-        return compareValues(linkId, o.linkId, true) && compareValues(prefix, o.prefix, true) && compareValues(text, o.text, true)
-           && compareValues(type, o.type, true) && compareValues(required, o.required, true) && compareValues(repeats, o.repeats, true)
-           && compareValues(readOnly, o.readOnly, true) && compareValues(maxLength, o.maxLength, true);
+        return compareValues(linkId, o.linkId, true) && compareValues(definition, o.definition, true) && compareValues(prefix, o.prefix, true)
+           && compareValues(text, o.text, true) && compareValues(type, o.type, true) && compareValues(required, o.required, true)
+           && compareValues(repeats, o.repeats, true) && compareValues(readOnly, o.readOnly, true) && compareValues(maxLength, o.maxLength, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, concept, prefix
-          , text, type, enableWhen, required, repeats, readOnly, maxLength, options, option
-          , initial, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, definition, concept
+          , prefix, text, type, enableWhen, required, repeats, readOnly, maxLength, options
+          , option, initial, item);
       }
 
   public String fhirType() {
@@ -2525,10 +2640,10 @@ public class Questionnaire extends DomainResource {
     protected StringType title;
 
     /**
-     * Identifies a how this question or group of questions is known in a particular terminology such as LOINC.
+     * Identifies how this question or group of questions is known in a particular terminology such as LOINC.
      */
     @Child(name = "concept", type = {Coding.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Concept that represents the overall questionnaire", formalDefinition="Identifies a how this question or group of questions is known in a particular terminology such as LOINC." )
+    @Description(shortDefinition="Concept that represents the overall questionnaire", formalDefinition="Identifies how this question or group of questions is known in a particular terminology such as LOINC." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/questionnaire-questions")
     protected List<Coding> concept;
 
@@ -3014,7 +3129,7 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
-     * @return {@link #concept} (Identifies a how this question or group of questions is known in a particular terminology such as LOINC.)
+     * @return {@link #concept} (Identifies how this question or group of questions is known in a particular terminology such as LOINC.)
      */
     public List<Coding> getConcept() { 
       if (this.concept == null)
@@ -3191,7 +3306,7 @@ public class Questionnaire extends DomainResource {
         childrenList.add(new Property("telecom", "ContactPoint", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("useContext", "CodeableConcept", "A code that identifies the questionnaire as falling into a particular group of like questionnaires; e.g. \"Pediatric\", \"Admissions\", \"Research\", \"Demographic\", \"Opinion Survey\", etc.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("title", "string", "The name or label associated with this questionnaire.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("concept", "Coding", "Identifies a how this question or group of questions is known in a particular terminology such as LOINC.", 0, java.lang.Integer.MAX_VALUE, concept));
+        childrenList.add(new Property("concept", "Coding", "Identifies how this question or group of questions is known in a particular terminology such as LOINC.", 0, java.lang.Integer.MAX_VALUE, concept));
         childrenList.add(new Property("subjectType", "code", "Identifies the types of subjects that can be the subject of the questionnaire.", 0, java.lang.Integer.MAX_VALUE, subjectType));
         childrenList.add(new Property("item", "", "The questions and groupings of questions that make up the questionnaire.", 0, java.lang.Integer.MAX_VALUE, item));
       }

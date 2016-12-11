@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,6 +43,12 @@ public class MeasureTypeEnumFactory implements EnumFactory<MeasureType> {
       return MeasureType.PROCESS;
     if ("outcome".equals(codeString))
       return MeasureType.OUTCOME;
+    if ("structure".equals(codeString))
+      return MeasureType.STRUCTURE;
+    if ("patient-reported-outcome".equals(codeString))
+      return MeasureType.PATIENTREPORTEDOUTCOME;
+    if ("composite".equals(codeString))
+      return MeasureType.COMPOSITE;
     throw new IllegalArgumentException("Unknown MeasureType code '"+codeString+"'");
   }
 
@@ -51,6 +57,12 @@ public class MeasureTypeEnumFactory implements EnumFactory<MeasureType> {
       return "process";
     if (code == MeasureType.OUTCOME)
       return "outcome";
+    if (code == MeasureType.STRUCTURE)
+      return "structure";
+    if (code == MeasureType.PATIENTREPORTEDOUTCOME)
+      return "patient-reported-outcome";
+    if (code == MeasureType.COMPOSITE)
+      return "composite";
     return "?";
   }
 

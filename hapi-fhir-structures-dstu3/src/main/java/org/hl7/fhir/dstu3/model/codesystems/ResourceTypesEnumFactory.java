@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -179,6 +179,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.MEDICATIONREQUEST;
     if ("MedicationStatement".equals(codeString))
       return ResourceTypes.MEDICATIONSTATEMENT;
+    if ("MessageDefinition".equals(codeString))
+      return ResourceTypes.MESSAGEDEFINITION;
     if ("MessageHeader".equals(codeString))
       return ResourceTypes.MESSAGEHEADER;
     if ("NamingSystem".equals(codeString))
@@ -229,6 +231,10 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.RELATEDPERSON;
     if ("RequestGroup".equals(codeString))
       return ResourceTypes.REQUESTGROUP;
+    if ("ResearchStudy".equals(codeString))
+      return ResourceTypes.RESEARCHSTUDY;
+    if ("ResearchSubject".equals(codeString))
+      return ResourceTypes.RESEARCHSUBJECT;
     if ("Resource".equals(codeString))
       return ResourceTypes.RESOURCE;
     if ("RiskAssessment".equals(codeString))
@@ -411,6 +417,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "MedicationRequest";
     if (code == ResourceTypes.MEDICATIONSTATEMENT)
       return "MedicationStatement";
+    if (code == ResourceTypes.MESSAGEDEFINITION)
+      return "MessageDefinition";
     if (code == ResourceTypes.MESSAGEHEADER)
       return "MessageHeader";
     if (code == ResourceTypes.NAMINGSYSTEM)
@@ -461,6 +469,10 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "RelatedPerson";
     if (code == ResourceTypes.REQUESTGROUP)
       return "RequestGroup";
+    if (code == ResourceTypes.RESEARCHSTUDY)
+      return "ResearchStudy";
+    if (code == ResourceTypes.RESEARCHSUBJECT)
+      return "ResearchSubject";
     if (code == ResourceTypes.RESOURCE)
       return "Resource";
     if (code == ResourceTypes.RISKASSESSMENT)

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The Measure resource provides the definition of a quality measure.
  */
 @ResourceDef(name="Measure", profile="http://hl7.org/fhir/Profile/Measure")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
 public class Measure extends MetadataResource {
 
     public enum MeasureScoring {
@@ -172,15 +172,149 @@ public class Measure extends MetadataResource {
       }
     }
 
+    public enum CompositeMeasureScoring {
+        /**
+         * Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component
+         */
+        OPPORTUNITY, 
+        /**
+         * All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator
+         */
+        ALLORNOTHING, 
+        /**
+         * Linear scoring gives an individual a score based on the number of numerators in which they appear
+         */
+        LINEAR, 
+        /**
+         * Weighted scoring gives an individual a score based on a weigthed factor for each component numerator in which they appear
+         */
+        WEIGHTED, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static CompositeMeasureScoring fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("opportunity".equals(codeString))
+          return OPPORTUNITY;
+        if ("all-or-nothing".equals(codeString))
+          return ALLORNOTHING;
+        if ("linear".equals(codeString))
+          return LINEAR;
+        if ("weighted".equals(codeString))
+          return WEIGHTED;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown CompositeMeasureScoring code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case OPPORTUNITY: return "opportunity";
+            case ALLORNOTHING: return "all-or-nothing";
+            case LINEAR: return "linear";
+            case WEIGHTED: return "weighted";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case OPPORTUNITY: return "http://hl7.org/fhir/composite-measure-scoring";
+            case ALLORNOTHING: return "http://hl7.org/fhir/composite-measure-scoring";
+            case LINEAR: return "http://hl7.org/fhir/composite-measure-scoring";
+            case WEIGHTED: return "http://hl7.org/fhir/composite-measure-scoring";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case OPPORTUNITY: return "Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component";
+            case ALLORNOTHING: return "All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator";
+            case LINEAR: return "Linear scoring gives an individual a score based on the number of numerators in which they appear";
+            case WEIGHTED: return "Weighted scoring gives an individual a score based on a weigthed factor for each component numerator in which they appear";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case OPPORTUNITY: return "Opportunity";
+            case ALLORNOTHING: return "All-or-nothing";
+            case LINEAR: return "Linear";
+            case WEIGHTED: return "Weighted";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class CompositeMeasureScoringEnumFactory implements EnumFactory<CompositeMeasureScoring> {
+    public CompositeMeasureScoring fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("opportunity".equals(codeString))
+          return CompositeMeasureScoring.OPPORTUNITY;
+        if ("all-or-nothing".equals(codeString))
+          return CompositeMeasureScoring.ALLORNOTHING;
+        if ("linear".equals(codeString))
+          return CompositeMeasureScoring.LINEAR;
+        if ("weighted".equals(codeString))
+          return CompositeMeasureScoring.WEIGHTED;
+        throw new IllegalArgumentException("Unknown CompositeMeasureScoring code '"+codeString+"'");
+        }
+        public Enumeration<CompositeMeasureScoring> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("opportunity".equals(codeString))
+          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.OPPORTUNITY);
+        if ("all-or-nothing".equals(codeString))
+          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.ALLORNOTHING);
+        if ("linear".equals(codeString))
+          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.LINEAR);
+        if ("weighted".equals(codeString))
+          return new Enumeration<CompositeMeasureScoring>(this, CompositeMeasureScoring.WEIGHTED);
+        throw new FHIRException("Unknown CompositeMeasureScoring code '"+codeString+"'");
+        }
+    public String toCode(CompositeMeasureScoring code) {
+      if (code == CompositeMeasureScoring.OPPORTUNITY)
+        return "opportunity";
+      if (code == CompositeMeasureScoring.ALLORNOTHING)
+        return "all-or-nothing";
+      if (code == CompositeMeasureScoring.LINEAR)
+        return "linear";
+      if (code == CompositeMeasureScoring.WEIGHTED)
+        return "weighted";
+      return "?";
+      }
+    public String toSystem(CompositeMeasureScoring code) {
+      return code.getSystem();
+      }
+    }
+
     public enum MeasureType {
         /**
-         * The measure is a process measure
+         * A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome
          */
         PROCESS, 
         /**
-         * The measure is an outcome measure
+         * A measure that indicates the result of the performance (or non-performance) of a function or process
          */
         OUTCOME, 
+        /**
+         * A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care
+         */
+        STRUCTURE, 
+        /**
+         * A measure that focuses on patient-reported information
+         */
+        PATIENTREPORTEDOUTCOME, 
+        /**
+         * A measure that combines multiple component measures in to a single quality measure
+         */
+        COMPOSITE, 
         /**
          * added to help the parsers with the generic types
          */
@@ -192,6 +326,12 @@ public class Measure extends MetadataResource {
           return PROCESS;
         if ("outcome".equals(codeString))
           return OUTCOME;
+        if ("structure".equals(codeString))
+          return STRUCTURE;
+        if ("patient-reported-outcome".equals(codeString))
+          return PATIENTREPORTEDOUTCOME;
+        if ("composite".equals(codeString))
+          return COMPOSITE;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -201,6 +341,9 @@ public class Measure extends MetadataResource {
           switch (this) {
             case PROCESS: return "process";
             case OUTCOME: return "outcome";
+            case STRUCTURE: return "structure";
+            case PATIENTREPORTEDOUTCOME: return "patient-reported-outcome";
+            case COMPOSITE: return "composite";
             default: return "?";
           }
         }
@@ -208,13 +351,19 @@ public class Measure extends MetadataResource {
           switch (this) {
             case PROCESS: return "http://hl7.org/fhir/measure-type";
             case OUTCOME: return "http://hl7.org/fhir/measure-type";
+            case STRUCTURE: return "http://hl7.org/fhir/measure-type";
+            case PATIENTREPORTEDOUTCOME: return "http://hl7.org/fhir/measure-type";
+            case COMPOSITE: return "http://hl7.org/fhir/measure-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PROCESS: return "The measure is a process measure";
-            case OUTCOME: return "The measure is an outcome measure";
+            case PROCESS: return "A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome";
+            case OUTCOME: return "A measure that indicates the result of the performance (or non-performance) of a function or process";
+            case STRUCTURE: return "A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care";
+            case PATIENTREPORTEDOUTCOME: return "A measure that focuses on patient-reported information";
+            case COMPOSITE: return "A measure that combines multiple component measures in to a single quality measure";
             default: return "?";
           }
         }
@@ -222,6 +371,9 @@ public class Measure extends MetadataResource {
           switch (this) {
             case PROCESS: return "Process";
             case OUTCOME: return "Outcome";
+            case STRUCTURE: return "Structure";
+            case PATIENTREPORTEDOUTCOME: return "Patient Reported Outcome";
+            case COMPOSITE: return "Composite";
             default: return "?";
           }
         }
@@ -236,6 +388,12 @@ public class Measure extends MetadataResource {
           return MeasureType.PROCESS;
         if ("outcome".equals(codeString))
           return MeasureType.OUTCOME;
+        if ("structure".equals(codeString))
+          return MeasureType.STRUCTURE;
+        if ("patient-reported-outcome".equals(codeString))
+          return MeasureType.PATIENTREPORTEDOUTCOME;
+        if ("composite".equals(codeString))
+          return MeasureType.COMPOSITE;
         throw new IllegalArgumentException("Unknown MeasureType code '"+codeString+"'");
         }
         public Enumeration<MeasureType> fromType(Base code) throws FHIRException {
@@ -248,6 +406,12 @@ public class Measure extends MetadataResource {
           return new Enumeration<MeasureType>(this, MeasureType.PROCESS);
         if ("outcome".equals(codeString))
           return new Enumeration<MeasureType>(this, MeasureType.OUTCOME);
+        if ("structure".equals(codeString))
+          return new Enumeration<MeasureType>(this, MeasureType.STRUCTURE);
+        if ("patient-reported-outcome".equals(codeString))
+          return new Enumeration<MeasureType>(this, MeasureType.PATIENTREPORTEDOUTCOME);
+        if ("composite".equals(codeString))
+          return new Enumeration<MeasureType>(this, MeasureType.COMPOSITE);
         throw new FHIRException("Unknown MeasureType code '"+codeString+"'");
         }
     public String toCode(MeasureType code) {
@@ -255,6 +419,12 @@ public class Measure extends MetadataResource {
         return "process";
       if (code == MeasureType.OUTCOME)
         return "outcome";
+      if (code == MeasureType.STRUCTURE)
+        return "structure";
+      if (code == MeasureType.PATIENTREPORTEDOUTCOME)
+        return "patient-reported-outcome";
+      if (code == MeasureType.COMPOSITE)
+        return "composite";
       return "?";
       }
     public String toSystem(MeasureType code) {
@@ -2121,97 +2291,105 @@ public class Measure extends MetadataResource {
     /**
      * A disclaimer for the use of the measure.
      */
-    @Child(name = "disclaimer", type = {MarkdownType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "disclaimer", type = {MarkdownType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Disclaimer for the measure", formalDefinition="A disclaimer for the use of the measure." )
     protected MarkdownType disclaimer;
 
     /**
      * The measure scoring type, e.g. proportion, CV.
      */
-    @Child(name = "scoring", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "scoring", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="The measure scoring type, e.g. proportion, CV." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-scoring")
     protected Enumeration<MeasureScoring> scoring;
 
     /**
+     * If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
+     */
+    @Child(name = "compositeScoring", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="opportunity | all-or-nothing | linear | weighted", formalDefinition="If this is a composite measure, the scoring method used to combine the component measures to determine the composite score." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/composite-measure-scoring")
+    protected Enumeration<CompositeMeasureScoring> compositeScoring;
+
+    /**
      * The measure type, e.g. process, outcome.
      */
-    @Child(name = "type", type = {CodeType.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="process | outcome", formalDefinition="The measure type, e.g. process, outcome." )
+    @Child(name = "type", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="process | outcome | structure | patient-reported-outcome | composite", formalDefinition="The measure type, e.g. process, outcome." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-type")
     protected List<Enumeration<MeasureType>> type;
 
     /**
      * A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.
      */
-    @Child(name = "riskAdjustment", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "riskAdjustment", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How is risk adjustment applied for this measure", formalDefinition="A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results." )
     protected StringType riskAdjustment;
 
     /**
      * A description of the rate aggregation for the measure.
      */
-    @Child(name = "rateAggregation", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "rateAggregation", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How is rate aggregation performed for this measure", formalDefinition="A description of the rate aggregation for the measure." )
     protected StringType rateAggregation;
 
     /**
      * The rationale for the measure.
      */
-    @Child(name = "rationale", type = {MarkdownType.class}, order=16, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "rationale", type = {MarkdownType.class}, order=17, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Why does this measure exist", formalDefinition="The rationale for the measure." )
     protected MarkdownType rationale;
 
     /**
      * The clinical recommendation statement for the measure.
      */
-    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=18, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Clinical recommendation", formalDefinition="The clinical recommendation statement for the measure." )
     protected MarkdownType clinicalRecommendationStatement;
 
     /**
      * Improvement notation for the measure, e.g. higher score indicates better quality.
      */
-    @Child(name = "improvementNotation", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "improvementNotation", type = {StringType.class}, order=19, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Improvement notation for the measure, e.g. higher score indicates better quality", formalDefinition="Improvement notation for the measure, e.g. higher score indicates better quality." )
     protected StringType improvementNotation;
 
     /**
      * A narrative description of the complete measure calculation.
      */
-    @Child(name = "definition", type = {MarkdownType.class}, order=19, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "definition", type = {MarkdownType.class}, order=20, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A natural language definition of the measure", formalDefinition="A narrative description of the complete measure calculation." )
     protected MarkdownType definition;
 
     /**
      * Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.
      */
-    @Child(name = "guidance", type = {MarkdownType.class}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "guidance", type = {MarkdownType.class}, order=21, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The guidance for the measure", formalDefinition="Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure." )
     protected MarkdownType guidance;
 
     /**
      * The measure set, e.g. Preventive Care and Screening.
      */
-    @Child(name = "set", type = {StringType.class}, order=21, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "set", type = {StringType.class}, order=22, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The measure set, e.g. Preventive Care and Screening", formalDefinition="The measure set, e.g. Preventive Care and Screening." )
     protected StringType set;
 
     /**
      * A group of population criteria for the measure.
      */
-    @Child(name = "group", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "group", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Population criteria group", formalDefinition="A group of population criteria for the measure." )
     protected List<MeasureGroupComponent> group;
 
     /**
      * The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.
      */
-    @Child(name = "supplementalData", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supplementalData", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Supplemental data", formalDefinition="The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path." )
     protected List<MeasureSupplementalDataComponent> supplementalData;
 
-    private static final long serialVersionUID = -590779721L;
+    private static final long serialVersionUID = 2104944282L;
 
   /**
    * Constructor
@@ -3475,6 +3653,55 @@ public class Measure extends MetadataResource {
     }
 
     /**
+     * @return {@link #compositeScoring} (If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.). This is the underlying object with id, value and extensions. The accessor "getCompositeScoring" gives direct access to the value
+     */
+    public Enumeration<CompositeMeasureScoring> getCompositeScoringElement() { 
+      if (this.compositeScoring == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.compositeScoring");
+        else if (Configuration.doAutoCreate())
+          this.compositeScoring = new Enumeration<CompositeMeasureScoring>(new CompositeMeasureScoringEnumFactory()); // bb
+      return this.compositeScoring;
+    }
+
+    public boolean hasCompositeScoringElement() { 
+      return this.compositeScoring != null && !this.compositeScoring.isEmpty();
+    }
+
+    public boolean hasCompositeScoring() { 
+      return this.compositeScoring != null && !this.compositeScoring.isEmpty();
+    }
+
+    /**
+     * @param value {@link #compositeScoring} (If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.). This is the underlying object with id, value and extensions. The accessor "getCompositeScoring" gives direct access to the value
+     */
+    public Measure setCompositeScoringElement(Enumeration<CompositeMeasureScoring> value) { 
+      this.compositeScoring = value;
+      return this;
+    }
+
+    /**
+     * @return If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
+     */
+    public CompositeMeasureScoring getCompositeScoring() { 
+      return this.compositeScoring == null ? null : this.compositeScoring.getValue();
+    }
+
+    /**
+     * @param value If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
+     */
+    public Measure setCompositeScoring(CompositeMeasureScoring value) { 
+      if (value == null)
+        this.compositeScoring = null;
+      else {
+        if (this.compositeScoring == null)
+          this.compositeScoring = new Enumeration<CompositeMeasureScoring>(new CompositeMeasureScoringEnumFactory());
+        this.compositeScoring.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #type} (The measure type, e.g. process, outcome.)
      */
     public List<Enumeration<MeasureType>> getType() { 
@@ -4060,6 +4287,7 @@ public class Measure extends MetadataResource {
         childrenList.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library));
         childrenList.add(new Property("disclaimer", "markdown", "A disclaimer for the use of the measure.", 0, java.lang.Integer.MAX_VALUE, disclaimer));
         childrenList.add(new Property("scoring", "code", "The measure scoring type, e.g. proportion, CV.", 0, java.lang.Integer.MAX_VALUE, scoring));
+        childrenList.add(new Property("compositeScoring", "code", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, java.lang.Integer.MAX_VALUE, compositeScoring));
         childrenList.add(new Property("type", "code", "The measure type, e.g. process, outcome.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("riskAdjustment", "string", "A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.", 0, java.lang.Integer.MAX_VALUE, riskAdjustment));
         childrenList.add(new Property("rateAggregation", "string", "A description of the rate aggregation for the measure.", 0, java.lang.Integer.MAX_VALUE, rateAggregation));
@@ -4101,6 +4329,7 @@ public class Measure extends MetadataResource {
         case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
         case 432371099: /*disclaimer*/ return this.disclaimer == null ? new Base[0] : new Base[] {this.disclaimer}; // MarkdownType
         case 1924005583: /*scoring*/ return this.scoring == null ? new Base[0] : new Base[] {this.scoring}; // Enumeration<MeasureScoring>
+        case 569347656: /*compositeScoring*/ return this.compositeScoring == null ? new Base[0] : new Base[] {this.compositeScoring}; // Enumeration<CompositeMeasureScoring>
         case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // Enumeration<MeasureType>
         case 93273500: /*riskAdjustment*/ return this.riskAdjustment == null ? new Base[0] : new Base[] {this.riskAdjustment}; // StringType
         case 1254503906: /*rateAggregation*/ return this.rateAggregation == null ? new Base[0] : new Base[] {this.rateAggregation}; // StringType
@@ -4195,6 +4424,9 @@ public class Measure extends MetadataResource {
         case 1924005583: // scoring
           this.scoring = new MeasureScoringEnumFactory().fromType(value); // Enumeration<MeasureScoring>
           break;
+        case 569347656: // compositeScoring
+          this.compositeScoring = new CompositeMeasureScoringEnumFactory().fromType(value); // Enumeration<CompositeMeasureScoring>
+          break;
         case 3575610: // type
           this.getType().add(new MeasureTypeEnumFactory().fromType(value)); // Enumeration<MeasureType>
           break;
@@ -4285,6 +4517,8 @@ public class Measure extends MetadataResource {
           this.disclaimer = castToMarkdown(value); // MarkdownType
         else if (name.equals("scoring"))
           this.scoring = new MeasureScoringEnumFactory().fromType(value); // Enumeration<MeasureScoring>
+        else if (name.equals("compositeScoring"))
+          this.compositeScoring = new CompositeMeasureScoringEnumFactory().fromType(value); // Enumeration<CompositeMeasureScoring>
         else if (name.equals("type"))
           this.getType().add(new MeasureTypeEnumFactory().fromType(value));
         else if (name.equals("riskAdjustment"))
@@ -4339,6 +4573,7 @@ public class Measure extends MetadataResource {
         case 166208699:  return addLibrary(); // Reference
         case 432371099: throw new FHIRException("Cannot make property disclaimer as it is not a complex type"); // MarkdownType
         case 1924005583: throw new FHIRException("Cannot make property scoring as it is not a complex type"); // Enumeration<MeasureScoring>
+        case 569347656: throw new FHIRException("Cannot make property compositeScoring as it is not a complex type"); // Enumeration<CompositeMeasureScoring>
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<MeasureType>
         case 93273500: throw new FHIRException("Cannot make property riskAdjustment as it is not a complex type"); // StringType
         case 1254503906: throw new FHIRException("Cannot make property rateAggregation as it is not a complex type"); // StringType
@@ -4432,6 +4667,9 @@ public class Measure extends MetadataResource {
         }
         else if (name.equals("scoring")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.scoring");
+        }
+        else if (name.equals("compositeScoring")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.compositeScoring");
         }
         else if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.type");
@@ -4535,6 +4773,7 @@ public class Measure extends MetadataResource {
         };
         dst.disclaimer = disclaimer == null ? null : disclaimer.copy();
         dst.scoring = scoring == null ? null : scoring.copy();
+        dst.compositeScoring = compositeScoring == null ? null : compositeScoring.copy();
         if (type != null) {
           dst.type = new ArrayList<Enumeration<MeasureType>>();
           for (Enumeration<MeasureType> i : type)
@@ -4577,11 +4816,12 @@ public class Measure extends MetadataResource {
            && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
            && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
            && compareDeep(library, o.library, true) && compareDeep(disclaimer, o.disclaimer, true) && compareDeep(scoring, o.scoring, true)
-           && compareDeep(type, o.type, true) && compareDeep(riskAdjustment, o.riskAdjustment, true) && compareDeep(rateAggregation, o.rateAggregation, true)
-           && compareDeep(rationale, o.rationale, true) && compareDeep(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
-           && compareDeep(improvementNotation, o.improvementNotation, true) && compareDeep(definition, o.definition, true)
-           && compareDeep(guidance, o.guidance, true) && compareDeep(set, o.set, true) && compareDeep(group, o.group, true)
-           && compareDeep(supplementalData, o.supplementalData, true);
+           && compareDeep(compositeScoring, o.compositeScoring, true) && compareDeep(type, o.type, true) && compareDeep(riskAdjustment, o.riskAdjustment, true)
+           && compareDeep(rateAggregation, o.rateAggregation, true) && compareDeep(rationale, o.rationale, true)
+           && compareDeep(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true) && compareDeep(improvementNotation, o.improvementNotation, true)
+           && compareDeep(definition, o.definition, true) && compareDeep(guidance, o.guidance, true) && compareDeep(set, o.set, true)
+           && compareDeep(group, o.group, true) && compareDeep(supplementalData, o.supplementalData, true)
+          ;
       }
 
       @Override
@@ -4593,8 +4833,8 @@ public class Measure extends MetadataResource {
         Measure o = (Measure) other;
         return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
            && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
-           && compareValues(disclaimer, o.disclaimer, true) && compareValues(scoring, o.scoring, true) && compareValues(type, o.type, true)
-           && compareValues(riskAdjustment, o.riskAdjustment, true) && compareValues(rateAggregation, o.rateAggregation, true)
+           && compareValues(disclaimer, o.disclaimer, true) && compareValues(scoring, o.scoring, true) && compareValues(compositeScoring, o.compositeScoring, true)
+           && compareValues(type, o.type, true) && compareValues(riskAdjustment, o.riskAdjustment, true) && compareValues(rateAggregation, o.rateAggregation, true)
            && compareValues(rationale, o.rationale, true) && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
            && compareValues(improvementNotation, o.improvementNotation, true) && compareValues(definition, o.definition, true)
            && compareValues(guidance, o.guidance, true) && compareValues(set, o.set, true);
@@ -4603,9 +4843,9 @@ public class Measure extends MetadataResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, usage
           , approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright, relatedArtifact
-          , library, disclaimer, scoring, type, riskAdjustment, rateAggregation, rationale
-          , clinicalRecommendationStatement, improvementNotation, definition, guidance, set
-          , group, supplementalData);
+          , library, disclaimer, scoring, compositeScoring, type, riskAdjustment, rateAggregation
+          , rationale, clinicalRecommendationStatement, improvementNotation, definition, guidance
+          , set, group, supplementalData);
       }
 
   @Override

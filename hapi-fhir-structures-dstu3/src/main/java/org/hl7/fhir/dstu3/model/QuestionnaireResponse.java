@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -175,21 +175,28 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * Identifies the item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.
          */
-        @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Corresponding item within Questionnaire", formalDefinition="Identifies the item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource." )
+        @Child(name = "linkId", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Pointer to specific item from Questionnaire", formalDefinition="Identifies the item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource." )
         protected StringType linkId;
+
+        /**
+         * A reference to an [[[ElementDefinition]]] that provides the details for the item.
+         */
+        @Child(name = "definition", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="ElementDefinition - details for the item", formalDefinition="A reference to an [[[ElementDefinition]]] that provides the details for the item." )
+        protected UriType definition;
 
         /**
          * Text that is displayed above the contents of the group or as the text of the question being answered.
          */
-        @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "text", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Name for group or question text", formalDefinition="Text that is displayed above the contents of the group or as the text of the question being answered." )
         protected StringType text;
 
         /**
          * More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.
          */
-        @Child(name = "subject", type = {Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "subject", type = {Reference.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The subject this group's answers are about", formalDefinition="More specific subject this section's answers are about, details the subject given in QuestionnaireResponse." )
         protected Reference subject;
 
@@ -201,24 +208,32 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * The respondent's answer(s) to the question.
          */
-        @Child(name = "answer", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "answer", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="The response(s) to the question", formalDefinition="The respondent's answer(s) to the question." )
         protected List<QuestionnaireResponseItemAnswerComponent> answer;
 
         /**
          * Questions or sub-groups nested beneath a question or group.
          */
-        @Child(name = "item", type = {QuestionnaireResponseItemComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "item", type = {QuestionnaireResponseItemComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested questionnaire response items", formalDefinition="Questions or sub-groups nested beneath a question or group." )
         protected List<QuestionnaireResponseItemComponent> item;
 
-        private static final long serialVersionUID = 1059526517L;
+        private static final long serialVersionUID = -154786340L;
 
     /**
      * Constructor
      */
       public QuestionnaireResponseItemComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public QuestionnaireResponseItemComponent(StringType linkId) {
+        super();
+        this.linkId = linkId;
       }
 
         /**
@@ -260,12 +275,57 @@ public class QuestionnaireResponse extends DomainResource {
          * @param value Identifies the item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.
          */
         public QuestionnaireResponseItemComponent setLinkId(String value) { 
-          if (Utilities.noString(value))
-            this.linkId = null;
-          else {
             if (this.linkId == null)
               this.linkId = new StringType();
             this.linkId.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #definition} (A reference to an [[[ElementDefinition]]] that provides the details for the item.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         */
+        public UriType getDefinitionElement() { 
+          if (this.definition == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create QuestionnaireResponseItemComponent.definition");
+            else if (Configuration.doAutoCreate())
+              this.definition = new UriType(); // bb
+          return this.definition;
+        }
+
+        public boolean hasDefinitionElement() { 
+          return this.definition != null && !this.definition.isEmpty();
+        }
+
+        public boolean hasDefinition() { 
+          return this.definition != null && !this.definition.isEmpty();
+        }
+
+        /**
+         * @param value {@link #definition} (A reference to an [[[ElementDefinition]]] that provides the details for the item.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         */
+        public QuestionnaireResponseItemComponent setDefinitionElement(UriType value) { 
+          this.definition = value;
+          return this;
+        }
+
+        /**
+         * @return A reference to an [[[ElementDefinition]]] that provides the details for the item.
+         */
+        public String getDefinition() { 
+          return this.definition == null ? null : this.definition.getValue();
+        }
+
+        /**
+         * @param value A reference to an [[[ElementDefinition]]] that provides the details for the item.
+         */
+        public QuestionnaireResponseItemComponent setDefinition(String value) { 
+          if (Utilities.noString(value))
+            this.definition = null;
+          else {
+            if (this.definition == null)
+              this.definition = new UriType();
+            this.definition.setValue(value);
           }
           return this;
         }
@@ -467,6 +527,7 @@ public class QuestionnaireResponse extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("linkId", "string", "Identifies the item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
+          childrenList.add(new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item.", 0, java.lang.Integer.MAX_VALUE, definition));
           childrenList.add(new Property("text", "string", "Text that is displayed above the contents of the group or as the text of the question being answered.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, subject));
           childrenList.add(new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer));
@@ -477,6 +538,7 @@ public class QuestionnaireResponse extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1102667083: /*linkId*/ return this.linkId == null ? new Base[0] : new Base[] {this.linkId}; // StringType
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case -1412808770: /*answer*/ return this.answer == null ? new Base[0] : this.answer.toArray(new Base[this.answer.size()]); // QuestionnaireResponseItemAnswerComponent
@@ -491,6 +553,9 @@ public class QuestionnaireResponse extends DomainResource {
         switch (hash) {
         case -1102667083: // linkId
           this.linkId = castToString(value); // StringType
+          break;
+        case -1014418093: // definition
+          this.definition = castToUri(value); // UriType
           break;
         case 3556653: // text
           this.text = castToString(value); // StringType
@@ -513,6 +578,8 @@ public class QuestionnaireResponse extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("linkId"))
           this.linkId = castToString(value); // StringType
+        else if (name.equals("definition"))
+          this.definition = castToUri(value); // UriType
         else if (name.equals("text"))
           this.text = castToString(value); // StringType
         else if (name.equals("subject"))
@@ -529,6 +596,7 @@ public class QuestionnaireResponse extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1102667083: throw new FHIRException("Cannot make property linkId as it is not a complex type"); // StringType
+        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // UriType
         case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
         case -1867885268:  return getSubject(); // Reference
         case -1412808770:  return addAnswer(); // QuestionnaireResponseItemAnswerComponent
@@ -542,6 +610,9 @@ public class QuestionnaireResponse extends DomainResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("linkId")) {
           throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.linkId");
+        }
+        else if (name.equals("definition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.definition");
         }
         else if (name.equals("text")) {
           throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.text");
@@ -564,6 +635,7 @@ public class QuestionnaireResponse extends DomainResource {
         QuestionnaireResponseItemComponent dst = new QuestionnaireResponseItemComponent();
         copyValues(dst);
         dst.linkId = linkId == null ? null : linkId.copy();
+        dst.definition = definition == null ? null : definition.copy();
         dst.text = text == null ? null : text.copy();
         dst.subject = subject == null ? null : subject.copy();
         if (answer != null) {
@@ -586,8 +658,9 @@ public class QuestionnaireResponse extends DomainResource {
         if (!(other instanceof QuestionnaireResponseItemComponent))
           return false;
         QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other;
-        return compareDeep(linkId, o.linkId, true) && compareDeep(text, o.text, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(answer, o.answer, true) && compareDeep(item, o.item, true);
+        return compareDeep(linkId, o.linkId, true) && compareDeep(definition, o.definition, true) && compareDeep(text, o.text, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(answer, o.answer, true) && compareDeep(item, o.item, true)
+          ;
       }
 
       @Override
@@ -597,12 +670,13 @@ public class QuestionnaireResponse extends DomainResource {
         if (!(other instanceof QuestionnaireResponseItemComponent))
           return false;
         QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other;
-        return compareValues(linkId, o.linkId, true) && compareValues(text, o.text, true);
+        return compareValues(linkId, o.linkId, true) && compareValues(definition, o.definition, true) && compareValues(text, o.text, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, text, subject, answer
-          , item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, definition, text
+          , subject, answer, item);
       }
 
   public String fhirType() {
@@ -1040,13 +1114,13 @@ public class QuestionnaireResponse extends DomainResource {
     protected Identifier identifier;
 
     /**
-     * Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.
+     * Identifies the order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.
      */
     @Child(name = "basedOn", type = {DiagnosticRequest.class, ReferralRequest.class, CarePlan.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Request fulfilled by this Questionnaire", formalDefinition="Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire." )
+    @Description(shortDefinition="Request fulfilled by this QuestionnaireResponse", formalDefinition="Identifies the order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse." )
     protected List<Reference> basedOn;
     /**
-     * The actual objects that are the target of the reference (Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.)
+     * The actual objects that are the target of the reference (Identifies the order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.)
      */
     protected List<Resource> basedOnTarget;
 
@@ -1187,7 +1261,7 @@ public class QuestionnaireResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #basedOn} (Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.)
+     * @return {@link #basedOn} (Identifies the order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.)
      */
     public List<Reference> getBasedOn() { 
       if (this.basedOn == null)
@@ -1662,7 +1736,7 @@ public class QuestionnaireResponse extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("basedOn", "Reference(DiagnosticRequest|ReferralRequest|CarePlan)", "Identifies the order, proposal or plan that is fulfilled in whole or in part by this Questionnaire.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("basedOn", "Reference(DiagnosticRequest|ReferralRequest|CarePlan)", "Identifies the order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         childrenList.add(new Property("parent", "Reference(Observation|Procedure)", "Identifies a procedure or observation that this questionnaire was performed as part of the execution of.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("questionnaire", "Reference(Questionnaire)", "Indicates the Questionnaire resource that defines the form for which answers are being provided.", 0, java.lang.Integer.MAX_VALUE, questionnaire));
         childrenList.add(new Property("status", "code", "The lifecycle status of the questionnaire response as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
@@ -1900,17 +1974,17 @@ public class QuestionnaireResponse extends DomainResource {
  /**
    * Search parameter: <b>authored</b>
    * <p>
-   * Description: <b>When the questionnaire was authored</b><br>
+   * Description: <b>When the questionnaire response was authored</b><br>
    * Type: <b>date</b><br>
    * Path: <b>QuestionnaireResponse.authored</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date" )
+  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire response was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>authored</b>
    * <p>
-   * Description: <b>When the questionnaire was authored</b><br>
+   * Description: <b>When the questionnaire response was authored</b><br>
    * Type: <b>date</b><br>
    * Path: <b>QuestionnaireResponse.authored</b><br>
    * </p>
@@ -2018,17 +2092,17 @@ public class QuestionnaireResponse extends DomainResource {
  /**
    * Search parameter: <b>subject</b>
    * <p>
-   * Description: <b>The subject of the questionnaire</b><br>
+   * Description: <b>The subject of the questionnaire response</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
+  @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire response", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
    * <p>
-   * Description: <b>The subject of the questionnaire</b><br>
+   * Description: <b>The subject of the questionnaire response</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
@@ -2044,17 +2118,17 @@ public class QuestionnaireResponse extends DomainResource {
  /**
    * Search parameter: <b>author</b>
    * <p>
-   * Description: <b>The author of the questionnaire</b><br>
+   * Description: <b>The author of the questionnaire response</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire response", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
    * <p>
-   * Description: <b>The author of the questionnaire</b><br>
+   * Description: <b>The author of the questionnaire response</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.author</b><br>
    * </p>
@@ -2070,17 +2144,17 @@ public class QuestionnaireResponse extends DomainResource {
  /**
    * Search parameter: <b>patient</b>
    * <p>
-   * Description: <b>The patient that is the subject of the questionnaire</b><br>
+   * Description: <b>The patient that is the subject of the questionnaire response</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire response", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
-   * Description: <b>The patient that is the subject of the questionnaire</b><br>
+   * Description: <b>The patient that is the subject of the questionnaire response</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
@@ -2096,17 +2170,17 @@ public class QuestionnaireResponse extends DomainResource {
  /**
    * Search parameter: <b>context</b>
    * <p>
-   * Description: <b>Encounter or episode during which questionnaire was authored</b><br>
+   * Description: <b>Encounter or episode during which questionnaire response was authored</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="context", path="QuestionnaireResponse.context", description="Encounter or episode during which questionnaire was authored", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class, EpisodeOfCare.class } )
+  @SearchParamDefinition(name="context", path="QuestionnaireResponse.context", description="Encounter or episode during which questionnaire response was authored", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class, EpisodeOfCare.class } )
   public static final String SP_CONTEXT = "context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>context</b>
    * <p>
-   * Description: <b>Encounter or episode during which questionnaire was authored</b><br>
+   * Description: <b>Encounter or episode during which questionnaire response was authored</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>QuestionnaireResponse.context</b><br>
    * </p>

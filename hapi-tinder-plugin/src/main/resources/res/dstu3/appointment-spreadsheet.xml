@@ -7950,7 +7950,7 @@
     <Cell ss:StyleID="s155"><Data ss:Type="String">The participant is excluded from the appointment, and may not be informed of the appointment taking place. (Appointment is about them, not for them - such as 2 doctors discussing results about a patient's test).</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"><Data ss:Type="String">The code for this value could be better, see what we get out of DSTU comments.</Data></Cell>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">The code for this value could be better, see what we get out of STU comments.</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"/>

@@ -61,7 +61,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		final MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -79,14 +79,14 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		patient = new Patient();
 		patient.setId(output1.getId().toUnqualifiedVersionless());
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
 		
 		patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
 			ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
 			fail();
@@ -97,7 +97,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		patient = new Patient();
 		patient.setId("999");
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
 			ourClient.update().resource(patient).execute();
 			fail();
@@ -112,7 +112,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		String methodName = "testDeleteResourceConditional";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
@@ -129,7 +129,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		}
 
 		pt = new Patient();
-		pt.addName().addFamily("FOOFOOFOO");
+		pt.addName().setFamily("FOOFOOFOO");
 		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		post = new HttpPost(ourServerBase + "/Patient");

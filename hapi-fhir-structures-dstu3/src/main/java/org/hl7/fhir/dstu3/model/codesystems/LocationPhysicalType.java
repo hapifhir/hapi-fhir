@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -65,7 +65,7 @@ public enum LocationPhysicalType {
          */
         RO, 
         /**
-         * A space that is allocated for sleeping/laying on.
+         * A space that is allocated for sleeping/laying on. This is not the physical bed/trolley that may be moved about, but the space it may occupy.
          */
         BD, 
         /**
@@ -160,7 +160,7 @@ public enum LocationPhysicalType {
             case LVL: return "A Level in a multi-level Building/Structure.";
             case CO: return "Any corridor within a Building, that may connect rooms.";
             case RO: return "A space that is allocated as a room, it may have walls/roof etc., but does not require these.";
-            case BD: return "A space that is allocated for sleeping/laying on.";
+            case BD: return "A space that is allocated for sleeping/laying on. This is not the physical bed/trolley that may be moved about, but the space it may occupy.";
             case VE: return "A means of transportation.";
             case HO: return "A residential dwelling. Usually used to reference a location that a person/patient may reside.";
             case CA: return "A container that can store goods, equipment, medications or other items.";

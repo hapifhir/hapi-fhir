@@ -76,7 +76,7 @@ public class ClientWithCustomTypeDstu3Test {
 		IParser p = ourCtx.newXmlParser();
 
 		MyPatientWithExtensions response = new MyPatientWithExtensions();
-		response.addName().addFamily("FAMILY");
+		response.addName().setFamily("FAMILY");
 		response.getStringExt().setValue("STRINGVAL");
 		response.getDateExt().setValueAsString("2011-01-02");
 		final String respString = p.encodeResourceToString(response);
@@ -108,7 +108,7 @@ public class ClientWithCustomTypeDstu3Test {
 		assertEquals("GET", request.getMethod());
 
 		assertEquals(1, value.getName().size());
-		assertEquals("FAMILY", value.getName().get(0).getFamilyAsSingleString());
+		assertEquals("FAMILY", value.getName().get(0).getFamily());
 		assertEquals("STRINGVAL", value.getStringExt().getValue());
 		assertEquals("2011-01-02", value.getDateExt().getValueAsString());
 		

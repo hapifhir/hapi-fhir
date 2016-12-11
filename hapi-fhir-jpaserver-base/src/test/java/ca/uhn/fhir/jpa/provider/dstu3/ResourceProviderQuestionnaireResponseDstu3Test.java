@@ -68,7 +68,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	@Test
 	public void testCreateWithLocalReference() {
 		Patient pt1 = new Patient();
-		pt1.addName().addFamily("Everything").addGiven("Arthur");
+		pt1.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Questionnaire q1 = new Questionnaire();
@@ -91,7 +91,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	@Test
 	public void testCreateWithAbsoluteReference() {
 		Patient pt1 = new Patient();
-		pt1.addName().addFamily("Everything").addGiven("Arthur");
+		pt1.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Questionnaire q1 = new Questionnaire();

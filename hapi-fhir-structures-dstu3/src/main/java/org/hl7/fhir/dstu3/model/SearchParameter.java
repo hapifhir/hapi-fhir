@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
 @ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/Profile/SearchParameter")
-@ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "useContext", "jurisdiction", "purpose", "code", "base", "type", "description", "expression", "xpath", "xpathUsage", "target", "component"})
+@ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "useContext", "jurisdiction", "purpose", "code", "base", "type", "derivedFrom", "description", "expression", "xpath", "xpathUsage", "target", "comparator", "modifier", "chain", "component"})
 public class SearchParameter extends MetadataResource {
 
     public enum XPathUsageType {
@@ -188,6 +188,657 @@ public class SearchParameter extends MetadataResource {
       }
     }
 
+    public enum SearchComparator {
+        /**
+         * the value for the parameter in the resource is equal to the provided value
+         */
+        EQ, 
+        /**
+         * the value for the parameter in the resource is not equal to the provided value
+         */
+        NE, 
+        /**
+         * the value for the parameter in the resource is greater than the provided value
+         */
+        GT, 
+        /**
+         * the value for the parameter in the resource is less than the provided value
+         */
+        LT, 
+        /**
+         * the value for the parameter in the resource is greater or equal to the provided value
+         */
+        GE, 
+        /**
+         * the value for the parameter in the resource is less or equal to the provided value
+         */
+        LE, 
+        /**
+         * the value for the parameter in the resource starts after the provided value
+         */
+        SA, 
+        /**
+         * the value for the parameter in the resource ends before the provided value
+         */
+        EB, 
+        /**
+         * the value for the parameter in the resource is approximately the same to the provided value.
+         */
+        AP, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static SearchComparator fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("eq".equals(codeString))
+          return EQ;
+        if ("ne".equals(codeString))
+          return NE;
+        if ("gt".equals(codeString))
+          return GT;
+        if ("lt".equals(codeString))
+          return LT;
+        if ("ge".equals(codeString))
+          return GE;
+        if ("le".equals(codeString))
+          return LE;
+        if ("sa".equals(codeString))
+          return SA;
+        if ("eb".equals(codeString))
+          return EB;
+        if ("ap".equals(codeString))
+          return AP;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SearchComparator code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case EQ: return "eq";
+            case NE: return "ne";
+            case GT: return "gt";
+            case LT: return "lt";
+            case GE: return "ge";
+            case LE: return "le";
+            case SA: return "sa";
+            case EB: return "eb";
+            case AP: return "ap";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case EQ: return "http://hl7.org/fhir/search-comparator";
+            case NE: return "http://hl7.org/fhir/search-comparator";
+            case GT: return "http://hl7.org/fhir/search-comparator";
+            case LT: return "http://hl7.org/fhir/search-comparator";
+            case GE: return "http://hl7.org/fhir/search-comparator";
+            case LE: return "http://hl7.org/fhir/search-comparator";
+            case SA: return "http://hl7.org/fhir/search-comparator";
+            case EB: return "http://hl7.org/fhir/search-comparator";
+            case AP: return "http://hl7.org/fhir/search-comparator";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case EQ: return "the value for the parameter in the resource is equal to the provided value";
+            case NE: return "the value for the parameter in the resource is not equal to the provided value";
+            case GT: return "the value for the parameter in the resource is greater than the provided value";
+            case LT: return "the value for the parameter in the resource is less than the provided value";
+            case GE: return "the value for the parameter in the resource is greater or equal to the provided value";
+            case LE: return "the value for the parameter in the resource is less or equal to the provided value";
+            case SA: return "the value for the parameter in the resource starts after the provided value";
+            case EB: return "the value for the parameter in the resource ends before the provided value";
+            case AP: return "the value for the parameter in the resource is approximately the same to the provided value.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case EQ: return "Equals";
+            case NE: return "Not Equals";
+            case GT: return "Greater Than";
+            case LT: return "Less Then";
+            case GE: return "Greater or Equals";
+            case LE: return "Less of Equal";
+            case SA: return "Starts After";
+            case EB: return "Ends Before";
+            case AP: return "Approximately";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class SearchComparatorEnumFactory implements EnumFactory<SearchComparator> {
+    public SearchComparator fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("eq".equals(codeString))
+          return SearchComparator.EQ;
+        if ("ne".equals(codeString))
+          return SearchComparator.NE;
+        if ("gt".equals(codeString))
+          return SearchComparator.GT;
+        if ("lt".equals(codeString))
+          return SearchComparator.LT;
+        if ("ge".equals(codeString))
+          return SearchComparator.GE;
+        if ("le".equals(codeString))
+          return SearchComparator.LE;
+        if ("sa".equals(codeString))
+          return SearchComparator.SA;
+        if ("eb".equals(codeString))
+          return SearchComparator.EB;
+        if ("ap".equals(codeString))
+          return SearchComparator.AP;
+        throw new IllegalArgumentException("Unknown SearchComparator code '"+codeString+"'");
+        }
+        public Enumeration<SearchComparator> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("eq".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.EQ);
+        if ("ne".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.NE);
+        if ("gt".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.GT);
+        if ("lt".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.LT);
+        if ("ge".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.GE);
+        if ("le".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.LE);
+        if ("sa".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.SA);
+        if ("eb".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.EB);
+        if ("ap".equals(codeString))
+          return new Enumeration<SearchComparator>(this, SearchComparator.AP);
+        throw new FHIRException("Unknown SearchComparator code '"+codeString+"'");
+        }
+    public String toCode(SearchComparator code) {
+      if (code == SearchComparator.EQ)
+        return "eq";
+      if (code == SearchComparator.NE)
+        return "ne";
+      if (code == SearchComparator.GT)
+        return "gt";
+      if (code == SearchComparator.LT)
+        return "lt";
+      if (code == SearchComparator.GE)
+        return "ge";
+      if (code == SearchComparator.LE)
+        return "le";
+      if (code == SearchComparator.SA)
+        return "sa";
+      if (code == SearchComparator.EB)
+        return "eb";
+      if (code == SearchComparator.AP)
+        return "ap";
+      return "?";
+      }
+    public String toSystem(SearchComparator code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum SearchModifierCode {
+        /**
+         * The search parameter returns resources that have a value or not.
+         */
+        MISSING, 
+        /**
+         * The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents).
+         */
+        EXACT, 
+        /**
+         * The search parameter returns resources that include the supplied parameter value anywhere within the field being searched.
+         */
+        CONTAINS, 
+        /**
+         * The search parameter returns resources that do not contain a match .
+         */
+        NOT, 
+        /**
+         * The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text.
+         */
+        TEXT, 
+        /**
+         * The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set.
+         */
+        IN, 
+        /**
+         * The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.
+         */
+        NOTIN, 
+        /**
+         * The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships).
+         */
+        BELOW, 
+        /**
+         * The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).
+         */
+        ABOVE, 
+        /**
+         * The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).
+         */
+        TYPE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static SearchModifierCode fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("missing".equals(codeString))
+          return MISSING;
+        if ("exact".equals(codeString))
+          return EXACT;
+        if ("contains".equals(codeString))
+          return CONTAINS;
+        if ("not".equals(codeString))
+          return NOT;
+        if ("text".equals(codeString))
+          return TEXT;
+        if ("in".equals(codeString))
+          return IN;
+        if ("not-in".equals(codeString))
+          return NOTIN;
+        if ("below".equals(codeString))
+          return BELOW;
+        if ("above".equals(codeString))
+          return ABOVE;
+        if ("type".equals(codeString))
+          return TYPE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SearchModifierCode code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case MISSING: return "missing";
+            case EXACT: return "exact";
+            case CONTAINS: return "contains";
+            case NOT: return "not";
+            case TEXT: return "text";
+            case IN: return "in";
+            case NOTIN: return "not-in";
+            case BELOW: return "below";
+            case ABOVE: return "above";
+            case TYPE: return "type";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case MISSING: return "http://hl7.org/fhir/search-modifier-code";
+            case EXACT: return "http://hl7.org/fhir/search-modifier-code";
+            case CONTAINS: return "http://hl7.org/fhir/search-modifier-code";
+            case NOT: return "http://hl7.org/fhir/search-modifier-code";
+            case TEXT: return "http://hl7.org/fhir/search-modifier-code";
+            case IN: return "http://hl7.org/fhir/search-modifier-code";
+            case NOTIN: return "http://hl7.org/fhir/search-modifier-code";
+            case BELOW: return "http://hl7.org/fhir/search-modifier-code";
+            case ABOVE: return "http://hl7.org/fhir/search-modifier-code";
+            case TYPE: return "http://hl7.org/fhir/search-modifier-code";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case MISSING: return "The search parameter returns resources that have a value or not.";
+            case EXACT: return "The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents).";
+            case CONTAINS: return "The search parameter returns resources that include the supplied parameter value anywhere within the field being searched.";
+            case NOT: return "The search parameter returns resources that do not contain a match .";
+            case TEXT: return "The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text.";
+            case IN: return "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set.";
+            case NOTIN: return "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.";
+            case BELOW: return "The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships).";
+            case ABOVE: return "The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).";
+            case TYPE: return "The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case MISSING: return "Missing";
+            case EXACT: return "Exact";
+            case CONTAINS: return "Contains";
+            case NOT: return "Not";
+            case TEXT: return "Text";
+            case IN: return "In";
+            case NOTIN: return "Not In";
+            case BELOW: return "Below";
+            case ABOVE: return "Above";
+            case TYPE: return "Type";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class SearchModifierCodeEnumFactory implements EnumFactory<SearchModifierCode> {
+    public SearchModifierCode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("missing".equals(codeString))
+          return SearchModifierCode.MISSING;
+        if ("exact".equals(codeString))
+          return SearchModifierCode.EXACT;
+        if ("contains".equals(codeString))
+          return SearchModifierCode.CONTAINS;
+        if ("not".equals(codeString))
+          return SearchModifierCode.NOT;
+        if ("text".equals(codeString))
+          return SearchModifierCode.TEXT;
+        if ("in".equals(codeString))
+          return SearchModifierCode.IN;
+        if ("not-in".equals(codeString))
+          return SearchModifierCode.NOTIN;
+        if ("below".equals(codeString))
+          return SearchModifierCode.BELOW;
+        if ("above".equals(codeString))
+          return SearchModifierCode.ABOVE;
+        if ("type".equals(codeString))
+          return SearchModifierCode.TYPE;
+        throw new IllegalArgumentException("Unknown SearchModifierCode code '"+codeString+"'");
+        }
+        public Enumeration<SearchModifierCode> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("missing".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.MISSING);
+        if ("exact".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.EXACT);
+        if ("contains".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.CONTAINS);
+        if ("not".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.NOT);
+        if ("text".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.TEXT);
+        if ("in".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.IN);
+        if ("not-in".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.NOTIN);
+        if ("below".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.BELOW);
+        if ("above".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.ABOVE);
+        if ("type".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.TYPE);
+        throw new FHIRException("Unknown SearchModifierCode code '"+codeString+"'");
+        }
+    public String toCode(SearchModifierCode code) {
+      if (code == SearchModifierCode.MISSING)
+        return "missing";
+      if (code == SearchModifierCode.EXACT)
+        return "exact";
+      if (code == SearchModifierCode.CONTAINS)
+        return "contains";
+      if (code == SearchModifierCode.NOT)
+        return "not";
+      if (code == SearchModifierCode.TEXT)
+        return "text";
+      if (code == SearchModifierCode.IN)
+        return "in";
+      if (code == SearchModifierCode.NOTIN)
+        return "not-in";
+      if (code == SearchModifierCode.BELOW)
+        return "below";
+      if (code == SearchModifierCode.ABOVE)
+        return "above";
+      if (code == SearchModifierCode.TYPE)
+        return "type";
+      return "?";
+      }
+    public String toSystem(SearchModifierCode code) {
+      return code.getSystem();
+      }
+    }
+
+    @Block()
+    public static class SearchParameterComponentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The definition of the search parameter that describes this part.
+         */
+        @Child(name = "definition", type = {SearchParameter.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Defines how the part works", formalDefinition="The definition of the search parameter that describes this part." )
+        protected Reference definition;
+
+        /**
+         * The actual object that is the target of the reference (The definition of the search parameter that describes this part.)
+         */
+        protected SearchParameter definitionTarget;
+
+        /**
+         * A sub-expression that defines how to extract values for this component from the output of the main SearchParameter.expression.
+         */
+        @Child(name = "expression", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Subexpression relative to main expression", formalDefinition="A sub-expression that defines how to extract values for this component from the output of the main SearchParameter.expression." )
+        protected StringType expression;
+
+        private static final long serialVersionUID = -1105563614L;
+
+    /**
+     * Constructor
+     */
+      public SearchParameterComponentComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SearchParameterComponentComponent(Reference definition, StringType expression) {
+        super();
+        this.definition = definition;
+        this.expression = expression;
+      }
+
+        /**
+         * @return {@link #definition} (The definition of the search parameter that describes this part.)
+         */
+        public Reference getDefinition() { 
+          if (this.definition == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SearchParameterComponentComponent.definition");
+            else if (Configuration.doAutoCreate())
+              this.definition = new Reference(); // cc
+          return this.definition;
+        }
+
+        public boolean hasDefinition() { 
+          return this.definition != null && !this.definition.isEmpty();
+        }
+
+        /**
+         * @param value {@link #definition} (The definition of the search parameter that describes this part.)
+         */
+        public SearchParameterComponentComponent setDefinition(Reference value) { 
+          this.definition = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #definition} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The definition of the search parameter that describes this part.)
+         */
+        public SearchParameter getDefinitionTarget() { 
+          if (this.definitionTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SearchParameterComponentComponent.definition");
+            else if (Configuration.doAutoCreate())
+              this.definitionTarget = new SearchParameter(); // aa
+          return this.definitionTarget;
+        }
+
+        /**
+         * @param value {@link #definition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The definition of the search parameter that describes this part.)
+         */
+        public SearchParameterComponentComponent setDefinitionTarget(SearchParameter value) { 
+          this.definitionTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #expression} (A sub-expression that defines how to extract values for this component from the output of the main SearchParameter.expression.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public StringType getExpressionElement() { 
+          if (this.expression == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SearchParameterComponentComponent.expression");
+            else if (Configuration.doAutoCreate())
+              this.expression = new StringType(); // bb
+          return this.expression;
+        }
+
+        public boolean hasExpressionElement() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        public boolean hasExpression() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        /**
+         * @param value {@link #expression} (A sub-expression that defines how to extract values for this component from the output of the main SearchParameter.expression.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public SearchParameterComponentComponent setExpressionElement(StringType value) { 
+          this.expression = value;
+          return this;
+        }
+
+        /**
+         * @return A sub-expression that defines how to extract values for this component from the output of the main SearchParameter.expression.
+         */
+        public String getExpression() { 
+          return this.expression == null ? null : this.expression.getValue();
+        }
+
+        /**
+         * @param value A sub-expression that defines how to extract values for this component from the output of the main SearchParameter.expression.
+         */
+        public SearchParameterComponentComponent setExpression(String value) { 
+            if (this.expression == null)
+              this.expression = new StringType();
+            this.expression.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("definition", "Reference(SearchParameter)", "The definition of the search parameter that describes this part.", 0, java.lang.Integer.MAX_VALUE, definition));
+          childrenList.add(new Property("expression", "string", "A sub-expression that defines how to extract values for this component from the output of the main SearchParameter.expression.", 0, java.lang.Integer.MAX_VALUE, expression));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // Reference
+        case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1014418093: // definition
+          this.definition = castToReference(value); // Reference
+          break;
+        case -1795452264: // expression
+          this.expression = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("definition"))
+          this.definition = castToReference(value); // Reference
+        else if (name.equals("expression"))
+          this.expression = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1014418093:  return getDefinition(); // Reference
+        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("definition")) {
+          this.definition = new Reference();
+          return this.definition;
+        }
+        else if (name.equals("expression")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.expression");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SearchParameterComponentComponent copy() {
+        SearchParameterComponentComponent dst = new SearchParameterComponentComponent();
+        copyValues(dst);
+        dst.definition = definition == null ? null : definition.copy();
+        dst.expression = expression == null ? null : expression.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SearchParameterComponentComponent))
+          return false;
+        SearchParameterComponentComponent o = (SearchParameterComponentComponent) other;
+        return compareDeep(definition, o.definition, true) && compareDeep(expression, o.expression, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SearchParameterComponentComponent))
+          return false;
+        SearchParameterComponentComponent o = (SearchParameterComponentComponent) other;
+        return compareValues(expression, o.expression, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(definition, expression);
+      }
+
+  public String fhirType() {
+    return "SearchParameter.component";
+
+  }
+
+  }
+
     /**
      * Explains why this search parameter is needed and why it has been designed as it has.
      */
@@ -203,12 +854,12 @@ public class SearchParameter extends MetadataResource {
     protected CodeType code;
 
     /**
-     * The base resource type that this search parameter refers to.
+     * The base resource type(s) that this search parameter can be used against.
      */
-    @Child(name = "base", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The resource type this search parameter applies to", formalDefinition="The base resource type that this search parameter refers to." )
+    @Child(name = "base", type = {CodeType.class}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The resource type(s) this search parameter applies to", formalDefinition="The base resource type(s) that this search parameter can be used against." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
-    protected CodeType base;
+    protected List<CodeType> base;
 
     /**
      * The type of value a search parameter refers to, and how the content is interpreted.
@@ -219,23 +870,30 @@ public class SearchParameter extends MetadataResource {
     protected Enumeration<SearchParamType> type;
 
     /**
+     * Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
+     */
+    @Child(name = "derivedFrom", type = {UriType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Original Definition for the search parameter", formalDefinition="Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter." )
+    protected UriType derivedFrom;
+
+    /**
      * A FluentPath expression that returns a set of elements for the search parameter.
      */
-    @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "expression", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="FluentPath expression that extracts the values", formalDefinition="A FluentPath expression that returns a set of elements for the search parameter." )
     protected StringType expression;
 
     /**
      * An XPath expression that returns a set of elements for the search parameter.
      */
-    @Child(name = "xpath", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "xpath", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="XPath that extracts the values", formalDefinition="An XPath expression that returns a set of elements for the search parameter." )
     protected StringType xpath;
 
     /**
      * How the search parameter relates to the set of elements returned by evaluating the xpath query.
      */
-    @Child(name = "xpathUsage", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "xpathUsage", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="normal | phonetic | nearby | distance | other", formalDefinition="How the search parameter relates to the set of elements returned by evaluating the xpath query." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-xpath-usage")
     protected Enumeration<XPathUsageType> xpathUsage;
@@ -243,24 +901,42 @@ public class SearchParameter extends MetadataResource {
     /**
      * Types of resource (if a resource is referenced).
      */
-    @Child(name = "target", type = {CodeType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "target", type = {CodeType.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Types of resource (if a resource reference)", formalDefinition="Types of resource (if a resource is referenced)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> target;
 
     /**
+     * Comparators supported for the search parameter.
+     */
+    @Child(name = "comparator", type = {CodeType.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="eq | ne | gt | lt | ge | le | sa | eb | ap", formalDefinition="Comparators supported for the search parameter." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-comparator")
+    protected List<Enumeration<SearchComparator>> comparator;
+
+    /**
+     * A modifier supported for the search parameter.
+     */
+    @Child(name = "modifier", type = {CodeType.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="missing | exact | contains | not | text | in | not-in | below | above | type", formalDefinition="A modifier supported for the search parameter." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-modifier-code")
+    protected List<Enumeration<SearchModifierCode>> modifier;
+
+    /**
+     * Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.
+     */
+    @Child(name = "chain", type = {StringType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Chained names supported", formalDefinition="Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type." )
+    protected List<StringType> chain;
+
+    /**
      * Used to define the parts of a composite search parameter.
      */
-    @Child(name = "component", type = {SearchParameter.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "component", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="For Composite resources to define the parts", formalDefinition="Used to define the parts of a composite search parameter." )
-    protected List<Reference> component;
-    /**
-     * The actual objects that are the target of the reference (Used to define the parts of a composite search parameter.)
-     */
-    protected List<SearchParameter> componentTarget;
+    protected List<SearchParameterComponentComponent> component;
 
-
-    private static final long serialVersionUID = 295034946L;
+    private static final long serialVersionUID = -769368159L;
 
   /**
    * Constructor
@@ -272,13 +948,12 @@ public class SearchParameter extends MetadataResource {
   /**
    * Constructor
    */
-    public SearchParameter(UriType url, StringType name, Enumeration<PublicationStatus> status, CodeType code, CodeType base, Enumeration<SearchParamType> type, MarkdownType description) {
+    public SearchParameter(UriType url, StringType name, Enumeration<PublicationStatus> status, CodeType code, Enumeration<SearchParamType> type, MarkdownType description) {
       super();
       this.url = url;
       this.name = name;
       this.status = status;
       this.code = code;
-      this.base = base;
       this.type = type;
       this.description = description;
     }
@@ -864,48 +1539,64 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #base} (The base resource type that this search parameter refers to.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
+     * @return {@link #base} (The base resource type(s) that this search parameter can be used against.)
      */
-    public CodeType getBaseElement() { 
+    public List<CodeType> getBase() { 
       if (this.base == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SearchParameter.base");
-        else if (Configuration.doAutoCreate())
-          this.base = new CodeType(); // bb
+        this.base = new ArrayList<CodeType>();
       return this.base;
     }
 
-    public boolean hasBaseElement() { 
-      return this.base != null && !this.base.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setBase(List<CodeType> theBase) { 
+      this.base = theBase;
+      return this;
     }
 
     public boolean hasBase() { 
-      return this.base != null && !this.base.isEmpty();
+      if (this.base == null)
+        return false;
+      for (CodeType item : this.base)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #base} (The base resource type that this search parameter refers to.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
+     * @return {@link #base} (The base resource type(s) that this search parameter can be used against.)
      */
-    public SearchParameter setBaseElement(CodeType value) { 
-      this.base = value;
+    public CodeType addBaseElement() {//2 
+      CodeType t = new CodeType();
+      if (this.base == null)
+        this.base = new ArrayList<CodeType>();
+      this.base.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #base} (The base resource type(s) that this search parameter can be used against.)
+     */
+    public SearchParameter addBase(String value) { //1
+      CodeType t = new CodeType();
+      t.setValue(value);
+      if (this.base == null)
+        this.base = new ArrayList<CodeType>();
+      this.base.add(t);
       return this;
     }
 
     /**
-     * @return The base resource type that this search parameter refers to.
+     * @param value {@link #base} (The base resource type(s) that this search parameter can be used against.)
      */
-    public String getBase() { 
-      return this.base == null ? null : this.base.getValue();
-    }
-
-    /**
-     * @param value The base resource type that this search parameter refers to.
-     */
-    public SearchParameter setBase(String value) { 
-        if (this.base == null)
-          this.base = new CodeType();
-        this.base.setValue(value);
-      return this;
+    public boolean hasBase(String value) { 
+      if (this.base == null)
+        return false;
+      for (CodeType v : this.base)
+        if (v.equals(value)) // code
+          return true;
+      return false;
     }
 
     /**
@@ -950,6 +1641,55 @@ public class SearchParameter extends MetadataResource {
         if (this.type == null)
           this.type = new Enumeration<SearchParamType>(new SearchParamTypeEnumFactory());
         this.type.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #derivedFrom} (Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.). This is the underlying object with id, value and extensions. The accessor "getDerivedFrom" gives direct access to the value
+     */
+    public UriType getDerivedFromElement() { 
+      if (this.derivedFrom == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.derivedFrom");
+        else if (Configuration.doAutoCreate())
+          this.derivedFrom = new UriType(); // bb
+      return this.derivedFrom;
+    }
+
+    public boolean hasDerivedFromElement() { 
+      return this.derivedFrom != null && !this.derivedFrom.isEmpty();
+    }
+
+    public boolean hasDerivedFrom() { 
+      return this.derivedFrom != null && !this.derivedFrom.isEmpty();
+    }
+
+    /**
+     * @param value {@link #derivedFrom} (Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.). This is the underlying object with id, value and extensions. The accessor "getDerivedFrom" gives direct access to the value
+     */
+    public SearchParameter setDerivedFromElement(UriType value) { 
+      this.derivedFrom = value;
+      return this;
+    }
+
+    /**
+     * @return Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
+     */
+    public String getDerivedFrom() { 
+      return this.derivedFrom == null ? null : this.derivedFrom.getValue();
+    }
+
+    /**
+     * @param value Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
+     */
+    public SearchParameter setDerivedFrom(String value) { 
+      if (Utilities.noString(value))
+        this.derivedFrom = null;
+      else {
+        if (this.derivedFrom == null)
+          this.derivedFrom = new UriType();
+        this.derivedFrom.setValue(value);
+      }
       return this;
     }
 
@@ -1207,18 +1947,201 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
+     * @return {@link #comparator} (Comparators supported for the search parameter.)
+     */
+    public List<Enumeration<SearchComparator>> getComparator() { 
+      if (this.comparator == null)
+        this.comparator = new ArrayList<Enumeration<SearchComparator>>();
+      return this.comparator;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setComparator(List<Enumeration<SearchComparator>> theComparator) { 
+      this.comparator = theComparator;
+      return this;
+    }
+
+    public boolean hasComparator() { 
+      if (this.comparator == null)
+        return false;
+      for (Enumeration<SearchComparator> item : this.comparator)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #comparator} (Comparators supported for the search parameter.)
+     */
+    public Enumeration<SearchComparator> addComparatorElement() {//2 
+      Enumeration<SearchComparator> t = new Enumeration<SearchComparator>(new SearchComparatorEnumFactory());
+      if (this.comparator == null)
+        this.comparator = new ArrayList<Enumeration<SearchComparator>>();
+      this.comparator.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #comparator} (Comparators supported for the search parameter.)
+     */
+    public SearchParameter addComparator(SearchComparator value) { //1
+      Enumeration<SearchComparator> t = new Enumeration<SearchComparator>(new SearchComparatorEnumFactory());
+      t.setValue(value);
+      if (this.comparator == null)
+        this.comparator = new ArrayList<Enumeration<SearchComparator>>();
+      this.comparator.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #comparator} (Comparators supported for the search parameter.)
+     */
+    public boolean hasComparator(SearchComparator value) { 
+      if (this.comparator == null)
+        return false;
+      for (Enumeration<SearchComparator> v : this.comparator)
+        if (v.getValue().equals(value)) // code
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #modifier} (A modifier supported for the search parameter.)
+     */
+    public List<Enumeration<SearchModifierCode>> getModifier() { 
+      if (this.modifier == null)
+        this.modifier = new ArrayList<Enumeration<SearchModifierCode>>();
+      return this.modifier;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setModifier(List<Enumeration<SearchModifierCode>> theModifier) { 
+      this.modifier = theModifier;
+      return this;
+    }
+
+    public boolean hasModifier() { 
+      if (this.modifier == null)
+        return false;
+      for (Enumeration<SearchModifierCode> item : this.modifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #modifier} (A modifier supported for the search parameter.)
+     */
+    public Enumeration<SearchModifierCode> addModifierElement() {//2 
+      Enumeration<SearchModifierCode> t = new Enumeration<SearchModifierCode>(new SearchModifierCodeEnumFactory());
+      if (this.modifier == null)
+        this.modifier = new ArrayList<Enumeration<SearchModifierCode>>();
+      this.modifier.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #modifier} (A modifier supported for the search parameter.)
+     */
+    public SearchParameter addModifier(SearchModifierCode value) { //1
+      Enumeration<SearchModifierCode> t = new Enumeration<SearchModifierCode>(new SearchModifierCodeEnumFactory());
+      t.setValue(value);
+      if (this.modifier == null)
+        this.modifier = new ArrayList<Enumeration<SearchModifierCode>>();
+      this.modifier.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #modifier} (A modifier supported for the search parameter.)
+     */
+    public boolean hasModifier(SearchModifierCode value) { 
+      if (this.modifier == null)
+        return false;
+      for (Enumeration<SearchModifierCode> v : this.modifier)
+        if (v.getValue().equals(value)) // code
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     */
+    public List<StringType> getChain() { 
+      if (this.chain == null)
+        this.chain = new ArrayList<StringType>();
+      return this.chain;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SearchParameter setChain(List<StringType> theChain) { 
+      this.chain = theChain;
+      return this;
+    }
+
+    public boolean hasChain() { 
+      if (this.chain == null)
+        return false;
+      for (StringType item : this.chain)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     */
+    public StringType addChainElement() {//2 
+      StringType t = new StringType();
+      if (this.chain == null)
+        this.chain = new ArrayList<StringType>();
+      this.chain.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     */
+    public SearchParameter addChain(String value) { //1
+      StringType t = new StringType();
+      t.setValue(value);
+      if (this.chain == null)
+        this.chain = new ArrayList<StringType>();
+      this.chain.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     */
+    public boolean hasChain(String value) { 
+      if (this.chain == null)
+        return false;
+      for (StringType v : this.chain)
+        if (v.equals(value)) // string
+          return true;
+      return false;
+    }
+
+    /**
      * @return {@link #component} (Used to define the parts of a composite search parameter.)
      */
-    public List<Reference> getComponent() { 
+    public List<SearchParameterComponentComponent> getComponent() { 
       if (this.component == null)
-        this.component = new ArrayList<Reference>();
+        this.component = new ArrayList<SearchParameterComponentComponent>();
       return this.component;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public SearchParameter setComponent(List<Reference> theComponent) { 
+    public SearchParameter setComponent(List<SearchParameterComponentComponent> theComponent) { 
       this.component = theComponent;
       return this;
     }
@@ -1226,25 +2149,25 @@ public class SearchParameter extends MetadataResource {
     public boolean hasComponent() { 
       if (this.component == null)
         return false;
-      for (Reference item : this.component)
+      for (SearchParameterComponentComponent item : this.component)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addComponent() { //3
-      Reference t = new Reference();
+    public SearchParameterComponentComponent addComponent() { //3
+      SearchParameterComponentComponent t = new SearchParameterComponentComponent();
       if (this.component == null)
-        this.component = new ArrayList<Reference>();
+        this.component = new ArrayList<SearchParameterComponentComponent>();
       this.component.add(t);
       return t;
     }
 
-    public SearchParameter addComponent(Reference t) { //3
+    public SearchParameter addComponent(SearchParameterComponentComponent t) { //3
       if (t == null)
         return this;
       if (this.component == null)
-        this.component = new ArrayList<Reference>();
+        this.component = new ArrayList<SearchParameterComponentComponent>();
       this.component.add(t);
       return this;
     }
@@ -1252,33 +2175,11 @@ public class SearchParameter extends MetadataResource {
     /**
      * @return The first repetition of repeating field {@link #component}, creating it if it does not already exist
      */
-    public Reference getComponentFirstRep() { 
+    public SearchParameterComponentComponent getComponentFirstRep() { 
       if (getComponent().isEmpty()) {
         addComponent();
       }
       return getComponent().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<SearchParameter> getComponentTarget() { 
-      if (this.componentTarget == null)
-        this.componentTarget = new ArrayList<SearchParameter>();
-      return this.componentTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public SearchParameter addComponentTarget() { 
-      SearchParameter r = new SearchParameter();
-      if (this.componentTarget == null)
-        this.componentTarget = new ArrayList<SearchParameter>();
-      this.componentTarget.add(r);
-      return r;
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1295,14 +2196,18 @@ public class SearchParameter extends MetadataResource {
         childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the search parameter is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         childrenList.add(new Property("purpose", "markdown", "Explains why this search parameter is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("base", "code", "The base resource type that this search parameter refers to.", 0, java.lang.Integer.MAX_VALUE, base));
+        childrenList.add(new Property("base", "code", "The base resource type(s) that this search parameter can be used against.", 0, java.lang.Integer.MAX_VALUE, base));
         childrenList.add(new Property("type", "code", "The type of value a search parameter refers to, and how the content is interpreted.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("derivedFrom", "uri", "Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.", 0, java.lang.Integer.MAX_VALUE, derivedFrom));
         childrenList.add(new Property("description", "markdown", "A free text natural language description of the search parameter from the consumer's perspective. and how it used.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("expression", "string", "A FluentPath expression that returns a set of elements for the search parameter.", 0, java.lang.Integer.MAX_VALUE, expression));
         childrenList.add(new Property("xpath", "string", "An XPath expression that returns a set of elements for the search parameter.", 0, java.lang.Integer.MAX_VALUE, xpath));
         childrenList.add(new Property("xpathUsage", "code", "How the search parameter relates to the set of elements returned by evaluating the xpath query.", 0, java.lang.Integer.MAX_VALUE, xpathUsage));
         childrenList.add(new Property("target", "code", "Types of resource (if a resource is referenced).", 0, java.lang.Integer.MAX_VALUE, target));
-        childrenList.add(new Property("component", "Reference(SearchParameter)", "Used to define the parts of a composite search parameter.", 0, java.lang.Integer.MAX_VALUE, component));
+        childrenList.add(new Property("comparator", "code", "Comparators supported for the search parameter.", 0, java.lang.Integer.MAX_VALUE, comparator));
+        childrenList.add(new Property("modifier", "code", "A modifier supported for the search parameter.", 0, java.lang.Integer.MAX_VALUE, modifier));
+        childrenList.add(new Property("chain", "string", "Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.", 0, java.lang.Integer.MAX_VALUE, chain));
+        childrenList.add(new Property("component", "", "Used to define the parts of a composite search parameter.", 0, java.lang.Integer.MAX_VALUE, component));
       }
 
       @Override
@@ -1320,14 +2225,18 @@ public class SearchParameter extends MetadataResource {
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
-        case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // CodeType
+        case 3016401: /*base*/ return this.base == null ? new Base[0] : this.base.toArray(new Base[this.base.size()]); // CodeType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SearchParamType>
+        case 1077922663: /*derivedFrom*/ return this.derivedFrom == null ? new Base[0] : new Base[] {this.derivedFrom}; // UriType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
         case 114256029: /*xpath*/ return this.xpath == null ? new Base[0] : new Base[] {this.xpath}; // StringType
         case 1801322244: /*xpathUsage*/ return this.xpathUsage == null ? new Base[0] : new Base[] {this.xpathUsage}; // Enumeration<XPathUsageType>
         case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // CodeType
-        case -1399907075: /*component*/ return this.component == null ? new Base[0] : this.component.toArray(new Base[this.component.size()]); // Reference
+        case -844673834: /*comparator*/ return this.comparator == null ? new Base[0] : this.comparator.toArray(new Base[this.comparator.size()]); // Enumeration<SearchComparator>
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // Enumeration<SearchModifierCode>
+        case 94623425: /*chain*/ return this.chain == null ? new Base[0] : this.chain.toArray(new Base[this.chain.size()]); // StringType
+        case -1399907075: /*component*/ return this.component == null ? new Base[0] : this.component.toArray(new Base[this.component.size()]); // SearchParameterComponentComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1373,10 +2282,13 @@ public class SearchParameter extends MetadataResource {
           this.code = castToCode(value); // CodeType
           break;
         case 3016401: // base
-          this.base = castToCode(value); // CodeType
+          this.getBase().add(castToCode(value)); // CodeType
           break;
         case 3575610: // type
           this.type = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
+          break;
+        case 1077922663: // derivedFrom
+          this.derivedFrom = castToUri(value); // UriType
           break;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
@@ -1393,8 +2305,17 @@ public class SearchParameter extends MetadataResource {
         case -880905839: // target
           this.getTarget().add(castToCode(value)); // CodeType
           break;
+        case -844673834: // comparator
+          this.getComparator().add(new SearchComparatorEnumFactory().fromType(value)); // Enumeration<SearchComparator>
+          break;
+        case -615513385: // modifier
+          this.getModifier().add(new SearchModifierCodeEnumFactory().fromType(value)); // Enumeration<SearchModifierCode>
+          break;
+        case 94623425: // chain
+          this.getChain().add(castToString(value)); // StringType
+          break;
         case -1399907075: // component
-          this.getComponent().add(castToReference(value)); // Reference
+          this.getComponent().add((SearchParameterComponentComponent) value); // SearchParameterComponentComponent
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1428,9 +2349,11 @@ public class SearchParameter extends MetadataResource {
         else if (name.equals("code"))
           this.code = castToCode(value); // CodeType
         else if (name.equals("base"))
-          this.base = castToCode(value); // CodeType
+          this.getBase().add(castToCode(value));
         else if (name.equals("type"))
           this.type = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
+        else if (name.equals("derivedFrom"))
+          this.derivedFrom = castToUri(value); // UriType
         else if (name.equals("description"))
           this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("expression"))
@@ -1441,8 +2364,14 @@ public class SearchParameter extends MetadataResource {
           this.xpathUsage = new XPathUsageTypeEnumFactory().fromType(value); // Enumeration<XPathUsageType>
         else if (name.equals("target"))
           this.getTarget().add(castToCode(value));
+        else if (name.equals("comparator"))
+          this.getComparator().add(new SearchComparatorEnumFactory().fromType(value));
+        else if (name.equals("modifier"))
+          this.getModifier().add(new SearchModifierCodeEnumFactory().fromType(value));
+        else if (name.equals("chain"))
+          this.getChain().add(castToString(value));
         else if (name.equals("component"))
-          this.getComponent().add(castToReference(value));
+          this.getComponent().add((SearchParameterComponentComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -1464,12 +2393,16 @@ public class SearchParameter extends MetadataResource {
         case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
         case 3016401: throw new FHIRException("Cannot make property base as it is not a complex type"); // CodeType
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<SearchParamType>
+        case 1077922663: throw new FHIRException("Cannot make property derivedFrom as it is not a complex type"); // UriType
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
         case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
         case 114256029: throw new FHIRException("Cannot make property xpath as it is not a complex type"); // StringType
         case 1801322244: throw new FHIRException("Cannot make property xpathUsage as it is not a complex type"); // Enumeration<XPathUsageType>
         case -880905839: throw new FHIRException("Cannot make property target as it is not a complex type"); // CodeType
-        case -1399907075:  return addComponent(); // Reference
+        case -844673834: throw new FHIRException("Cannot make property comparator as it is not a complex type"); // Enumeration<SearchComparator>
+        case -615513385: throw new FHIRException("Cannot make property modifier as it is not a complex type"); // Enumeration<SearchModifierCode>
+        case 94623425: throw new FHIRException("Cannot make property chain as it is not a complex type"); // StringType
+        case -1399907075:  return addComponent(); // SearchParameterComponentComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -1519,6 +2452,9 @@ public class SearchParameter extends MetadataResource {
         else if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.type");
         }
+        else if (name.equals("derivedFrom")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.derivedFrom");
+        }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.description");
         }
@@ -1533,6 +2469,15 @@ public class SearchParameter extends MetadataResource {
         }
         else if (name.equals("target")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.target");
+        }
+        else if (name.equals("comparator")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.comparator");
+        }
+        else if (name.equals("modifier")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.modifier");
+        }
+        else if (name.equals("chain")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.chain");
         }
         else if (name.equals("component")) {
           return addComponent();
@@ -1573,8 +2518,13 @@ public class SearchParameter extends MetadataResource {
         };
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.code = code == null ? null : code.copy();
-        dst.base = base == null ? null : base.copy();
+        if (base != null) {
+          dst.base = new ArrayList<CodeType>();
+          for (CodeType i : base)
+            dst.base.add(i.copy());
+        };
         dst.type = type == null ? null : type.copy();
+        dst.derivedFrom = derivedFrom == null ? null : derivedFrom.copy();
         dst.description = description == null ? null : description.copy();
         dst.expression = expression == null ? null : expression.copy();
         dst.xpath = xpath == null ? null : xpath.copy();
@@ -1584,9 +2534,24 @@ public class SearchParameter extends MetadataResource {
           for (CodeType i : target)
             dst.target.add(i.copy());
         };
+        if (comparator != null) {
+          dst.comparator = new ArrayList<Enumeration<SearchComparator>>();
+          for (Enumeration<SearchComparator> i : comparator)
+            dst.comparator.add(i.copy());
+        };
+        if (modifier != null) {
+          dst.modifier = new ArrayList<Enumeration<SearchModifierCode>>();
+          for (Enumeration<SearchModifierCode> i : modifier)
+            dst.modifier.add(i.copy());
+        };
+        if (chain != null) {
+          dst.chain = new ArrayList<StringType>();
+          for (StringType i : chain)
+            dst.chain.add(i.copy());
+        };
         if (component != null) {
-          dst.component = new ArrayList<Reference>();
-          for (Reference i : component)
+          dst.component = new ArrayList<SearchParameterComponentComponent>();
+          for (SearchParameterComponentComponent i : component)
             dst.component.add(i.copy());
         };
         return dst;
@@ -1604,9 +2569,10 @@ public class SearchParameter extends MetadataResource {
           return false;
         SearchParameter o = (SearchParameter) other;
         return compareDeep(purpose, o.purpose, true) && compareDeep(code, o.code, true) && compareDeep(base, o.base, true)
-           && compareDeep(type, o.type, true) && compareDeep(expression, o.expression, true) && compareDeep(xpath, o.xpath, true)
-           && compareDeep(xpathUsage, o.xpathUsage, true) && compareDeep(target, o.target, true) && compareDeep(component, o.component, true)
-          ;
+           && compareDeep(type, o.type, true) && compareDeep(derivedFrom, o.derivedFrom, true) && compareDeep(expression, o.expression, true)
+           && compareDeep(xpath, o.xpath, true) && compareDeep(xpathUsage, o.xpathUsage, true) && compareDeep(target, o.target, true)
+           && compareDeep(comparator, o.comparator, true) && compareDeep(modifier, o.modifier, true) && compareDeep(chain, o.chain, true)
+           && compareDeep(component, o.component, true);
       }
 
       @Override
@@ -1617,13 +2583,16 @@ public class SearchParameter extends MetadataResource {
           return false;
         SearchParameter o = (SearchParameter) other;
         return compareValues(purpose, o.purpose, true) && compareValues(code, o.code, true) && compareValues(base, o.base, true)
-           && compareValues(type, o.type, true) && compareValues(expression, o.expression, true) && compareValues(xpath, o.xpath, true)
-           && compareValues(xpathUsage, o.xpathUsage, true) && compareValues(target, o.target, true);
+           && compareValues(type, o.type, true) && compareValues(derivedFrom, o.derivedFrom, true) && compareValues(expression, o.expression, true)
+           && compareValues(xpath, o.xpath, true) && compareValues(xpathUsage, o.xpathUsage, true) && compareValues(target, o.target, true)
+           && compareValues(comparator, o.comparator, true) && compareValues(modifier, o.modifier, true) && compareValues(chain, o.chain, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(purpose, code, base, type
-          , expression, xpath, xpathUsage, target, component);
+          , derivedFrom, expression, xpath, xpathUsage, target, comparator, modifier, chain
+          , component);
       }
 
   @Override
@@ -1712,6 +2681,26 @@ public class SearchParameter extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
+   * Search parameter: <b>derived-from</b>
+   * <p>
+   * Description: <b>Original Definition for the search parameter</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>SearchParameter.derivedFrom</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="derived-from", path="SearchParameter.derivedFrom", description="Original Definition for the search parameter", type="uri" )
+  public static final String SP_DERIVED_FROM = "derived-from";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>derived-from</b>
+   * <p>
+   * Description: <b>Original Definition for the search parameter</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>SearchParameter.derivedFrom</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam DERIVED_FROM = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_DERIVED_FROM);
+
+ /**
    * Search parameter: <b>type</b>
    * <p>
    * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
@@ -1794,19 +2783,19 @@ public class SearchParameter extends MetadataResource {
  /**
    * Search parameter: <b>component</b>
    * <p>
-   * Description: <b>For Composite resources to define the parts</b><br>
+   * Description: <b>Defines how the part works</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>SearchParameter.component</b><br>
+   * Path: <b>SearchParameter.component.definition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="component", path="SearchParameter.component", description="For Composite resources to define the parts", type="reference", target={SearchParameter.class } )
+  @SearchParamDefinition(name="component", path="SearchParameter.component.definition", description="Defines how the part works", type="reference", target={SearchParameter.class } )
   public static final String SP_COMPONENT = "component";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>component</b>
    * <p>
-   * Description: <b>For Composite resources to define the parts</b><br>
+   * Description: <b>Defines how the part works</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>SearchParameter.component</b><br>
+   * Path: <b>SearchParameter.component.definition</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam COMPONENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_COMPONENT);
@@ -1880,17 +2869,17 @@ public class SearchParameter extends MetadataResource {
  /**
    * Search parameter: <b>base</b>
    * <p>
-   * Description: <b>The resource type this search parameter applies to</b><br>
+   * Description: <b>The resource type(s) this search parameter applies to</b><br>
    * Type: <b>token</b><br>
    * Path: <b>SearchParameter.base</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token" )
+  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type(s) this search parameter applies to", type="token" )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>
    * <p>
-   * Description: <b>The resource type this search parameter applies to</b><br>
+   * Description: <b>The resource type(s) this search parameter applies to</b><br>
    * Type: <b>token</b><br>
    * Path: <b>SearchParameter.base</b><br>
    * </p>

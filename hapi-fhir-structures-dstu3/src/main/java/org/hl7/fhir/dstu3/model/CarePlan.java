@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -2374,7 +2374,7 @@ public class CarePlan extends DomainResource {
     /**
      * Identifies the patient or group whose intended care is described by the plan.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who care plan is for", formalDefinition="Identifies the patient or group whose intended care is described by the plan." )
     protected Reference subject;
 
@@ -2514,9 +2514,10 @@ public class CarePlan extends DomainResource {
   /**
    * Constructor
    */
-    public CarePlan(Enumeration<CarePlanStatus> status) {
+    public CarePlan(Enumeration<CarePlanStatus> status, Reference subject) {
       super();
       this.status = status;
+      this.subject = subject;
     }
 
     /**
@@ -4018,7 +4019,7 @@ public class CarePlan extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite", compositeOf={"relatedcode", "relatedplan"} )
+  @SearchParamDefinition(name="related", path="CarePlan.relatedPlan", description="A combination of the type of relationship and the related plan", type="composite", compositeOf={"relatedcode", "relatedplan"} )
   public static final String SP_RELATED = "related";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>related</b>

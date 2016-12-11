@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -304,14 +304,14 @@ public class GuidanceResponse extends DomainResource {
     /**
      * The actions, if any, produced by the evaluation of the artifact.
      */
-    @Child(name = "requestGroup", type = {RequestGroup.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "result", type = {CarePlan.class, RequestGroup.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Proposed actions, if any", formalDefinition="The actions, if any, produced by the evaluation of the artifact." )
-    protected Reference requestGroup;
+    protected Reference result;
 
     /**
      * The actual object that is the target of the reference (The actions, if any, produced by the evaluation of the artifact.)
      */
-    protected RequestGroup requestGroupTarget;
+    protected Resource resultTarget;
 
     /**
      * If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.
@@ -320,7 +320,7 @@ public class GuidanceResponse extends DomainResource {
     @Description(shortDefinition="Additional required data", formalDefinition="If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data." )
     protected List<DataRequirement> dataRequirement;
 
-    private static final long serialVersionUID = 1805393200L;
+    private static final long serialVersionUID = -2107029772L;
 
   /**
    * Constructor
@@ -889,46 +889,41 @@ public class GuidanceResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #requestGroup} (The actions, if any, produced by the evaluation of the artifact.)
+     * @return {@link #result} (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public Reference getRequestGroup() { 
-      if (this.requestGroup == null)
+    public Reference getResult() { 
+      if (this.result == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create GuidanceResponse.requestGroup");
+          throw new Error("Attempt to auto-create GuidanceResponse.result");
         else if (Configuration.doAutoCreate())
-          this.requestGroup = new Reference(); // cc
-      return this.requestGroup;
+          this.result = new Reference(); // cc
+      return this.result;
     }
 
-    public boolean hasRequestGroup() { 
-      return this.requestGroup != null && !this.requestGroup.isEmpty();
+    public boolean hasResult() { 
+      return this.result != null && !this.result.isEmpty();
     }
 
     /**
-     * @param value {@link #requestGroup} (The actions, if any, produced by the evaluation of the artifact.)
+     * @param value {@link #result} (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public GuidanceResponse setRequestGroup(Reference value) { 
-      this.requestGroup = value;
+    public GuidanceResponse setResult(Reference value) { 
+      this.result = value;
       return this;
     }
 
     /**
-     * @return {@link #requestGroup} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The actions, if any, produced by the evaluation of the artifact.)
+     * @return {@link #result} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public RequestGroup getRequestGroupTarget() { 
-      if (this.requestGroupTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create GuidanceResponse.requestGroup");
-        else if (Configuration.doAutoCreate())
-          this.requestGroupTarget = new RequestGroup(); // aa
-      return this.requestGroupTarget;
+    public Resource getResultTarget() { 
+      return this.resultTarget;
     }
 
     /**
-     * @param value {@link #requestGroup} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The actions, if any, produced by the evaluation of the artifact.)
+     * @param value {@link #result} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public GuidanceResponse setRequestGroupTarget(RequestGroup value) { 
-      this.requestGroupTarget = value;
+    public GuidanceResponse setResultTarget(Resource value) { 
+      this.resultTarget = value;
       return this;
     }
 
@@ -999,7 +994,7 @@ public class GuidanceResponse extends DomainResource {
         childrenList.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("evaluationMessage", "Reference(OperationOutcome)", "Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.", 0, java.lang.Integer.MAX_VALUE, evaluationMessage));
         childrenList.add(new Property("outputParameters", "Reference(Parameters)", "The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.", 0, java.lang.Integer.MAX_VALUE, outputParameters));
-        childrenList.add(new Property("requestGroup", "Reference(RequestGroup)", "The actions, if any, produced by the evaluation of the artifact.", 0, java.lang.Integer.MAX_VALUE, requestGroup));
+        childrenList.add(new Property("result", "Reference(CarePlan|RequestGroup)", "The actions, if any, produced by the evaluation of the artifact.", 0, java.lang.Integer.MAX_VALUE, result));
         childrenList.add(new Property("dataRequirement", "DataRequirement", "If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.", 0, java.lang.Integer.MAX_VALUE, dataRequirement));
       }
 
@@ -1018,7 +1013,7 @@ public class GuidanceResponse extends DomainResource {
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case 1081619755: /*evaluationMessage*/ return this.evaluationMessage == null ? new Base[0] : this.evaluationMessage.toArray(new Base[this.evaluationMessage.size()]); // Reference
         case 525609419: /*outputParameters*/ return this.outputParameters == null ? new Base[0] : new Base[] {this.outputParameters}; // Reference
-        case 1281054000: /*requestGroup*/ return this.requestGroup == null ? new Base[0] : new Base[] {this.requestGroup}; // Reference
+        case -934426595: /*result*/ return this.result == null ? new Base[0] : new Base[] {this.result}; // Reference
         case 629147193: /*dataRequirement*/ return this.dataRequirement == null ? new Base[0] : this.dataRequirement.toArray(new Base[this.dataRequirement.size()]); // DataRequirement
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1064,8 +1059,8 @@ public class GuidanceResponse extends DomainResource {
         case 525609419: // outputParameters
           this.outputParameters = castToReference(value); // Reference
           break;
-        case 1281054000: // requestGroup
-          this.requestGroup = castToReference(value); // Reference
+        case -934426595: // result
+          this.result = castToReference(value); // Reference
           break;
         case 629147193: // dataRequirement
           this.getDataRequirement().add(castToDataRequirement(value)); // DataRequirement
@@ -1101,8 +1096,8 @@ public class GuidanceResponse extends DomainResource {
           this.getEvaluationMessage().add(castToReference(value));
         else if (name.equals("outputParameters"))
           this.outputParameters = castToReference(value); // Reference
-        else if (name.equals("requestGroup"))
-          this.requestGroup = castToReference(value); // Reference
+        else if (name.equals("result"))
+          this.result = castToReference(value); // Reference
         else if (name.equals("dataRequirement"))
           this.getDataRequirement().add(castToDataRequirement(value));
         else
@@ -1124,7 +1119,7 @@ public class GuidanceResponse extends DomainResource {
         case 3387378:  return addNote(); // Annotation
         case 1081619755:  return addEvaluationMessage(); // Reference
         case 525609419:  return getOutputParameters(); // Reference
-        case 1281054000:  return getRequestGroup(); // Reference
+        case -934426595:  return getResult(); // Reference
         case 629147193:  return addDataRequirement(); // DataRequirement
         default: return super.makeProperty(hash, name);
         }
@@ -1180,9 +1175,9 @@ public class GuidanceResponse extends DomainResource {
           this.outputParameters = new Reference();
           return this.outputParameters;
         }
-        else if (name.equals("requestGroup")) {
-          this.requestGroup = new Reference();
-          return this.requestGroup;
+        else if (name.equals("result")) {
+          this.result = new Reference();
+          return this.result;
         }
         else if (name.equals("dataRequirement")) {
           return addDataRequirement();
@@ -1219,7 +1214,7 @@ public class GuidanceResponse extends DomainResource {
             dst.evaluationMessage.add(i.copy());
         };
         dst.outputParameters = outputParameters == null ? null : outputParameters.copy();
-        dst.requestGroup = requestGroup == null ? null : requestGroup.copy();
+        dst.result = result == null ? null : result.copy();
         if (dataRequirement != null) {
           dst.dataRequirement = new ArrayList<DataRequirement>();
           for (DataRequirement i : dataRequirement)
@@ -1244,7 +1239,7 @@ public class GuidanceResponse extends DomainResource {
            && compareDeep(context, o.context, true) && compareDeep(occurrenceDateTime, o.occurrenceDateTime, true)
            && compareDeep(performer, o.performer, true) && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true)
            && compareDeep(evaluationMessage, o.evaluationMessage, true) && compareDeep(outputParameters, o.outputParameters, true)
-           && compareDeep(requestGroup, o.requestGroup, true) && compareDeep(dataRequirement, o.dataRequirement, true)
+           && compareDeep(result, o.result, true) && compareDeep(dataRequirement, o.dataRequirement, true)
           ;
       }
 
@@ -1262,7 +1257,7 @@ public class GuidanceResponse extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(requestId, identifier, module
           , status, subject, context, occurrenceDateTime, performer, reason, note, evaluationMessage
-          , outputParameters, requestGroup, dataRequirement);
+          , outputParameters, result, dataRequirement);
       }
 
   @Override

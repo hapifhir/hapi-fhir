@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractTermType {
 
         /**
-         * null
+         * Oral Health insurance terms and conditions.
          */
         ORALHEALTH, 
         /**
-         * null
+         * Vision insuracne terms and conditions.
          */
         VISION, 
         /**
@@ -51,16 +51,16 @@ public enum ContractTermType {
         public static ContractTermType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("OralHealth".equals(codeString))
+        if ("oralhealth".equals(codeString))
           return ORALHEALTH;
-        if ("Vision".equals(codeString))
+        if ("vision".equals(codeString))
           return VISION;
         throw new FHIRException("Unknown ContractTermType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case ORALHEALTH: return "OralHealth";
-            case VISION: return "Vision";
+            case ORALHEALTH: return "oralhealth";
+            case VISION: return "vision";
             default: return "?";
           }
         }
@@ -69,8 +69,8 @@ public enum ContractTermType {
         }
         public String getDefinition() {
           switch (this) {
-            case ORALHEALTH: return "";
-            case VISION: return "";
+            case ORALHEALTH: return "Oral Health insurance terms and conditions.";
+            case VISION: return "Vision insuracne terms and conditions.";
             default: return "?";
           }
         }

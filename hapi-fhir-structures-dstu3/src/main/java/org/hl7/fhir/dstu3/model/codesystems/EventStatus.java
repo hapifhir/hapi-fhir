@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,6 +61,10 @@ public enum EventStatus {
          */
         ENTEREDINERROR, 
         /**
+         * The authoring system does not know which of the status values currently applies for this event
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -79,6 +83,8 @@ public enum EventStatus {
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown EventStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -89,6 +95,7 @@ public enum EventStatus {
             case ABORTED: return "aborted";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -103,6 +110,7 @@ public enum EventStatus {
             case ABORTED: return "The event was  prior to the full completion of the intended actions";
             case COMPLETED: return "The event has now concluded";
             case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this event";
             default: return "?";
           }
         }
@@ -114,6 +122,7 @@ public enum EventStatus {
             case ABORTED: return "Aborted";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

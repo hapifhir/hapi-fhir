@@ -114,7 +114,7 @@ public class SearchHasParamDstu3Test {
 			ourLastMethod = "search";
 			ourLastParam = theParam;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
 		//@formatter:on

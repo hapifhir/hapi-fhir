@@ -222,7 +222,7 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 
 		String methodName = "testDeleteSubscriptionWithFlaggedResources";
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		Subscription subs;
@@ -310,7 +310,7 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 
 		String methodName = "testSubscriptionResourcesAppear";
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
@@ -418,7 +418,7 @@ public class FhirResourceDaoDstu3SubscriptionTest extends BaseJpaDstu3Test {
 
 		String methodName = "testSubscriptionResourcesAppear2";
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();

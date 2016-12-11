@@ -10,8 +10,16 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Claim.CoverageComponent;
+import org.hl7.fhir.dstu3.model.Appointment;
+import org.hl7.fhir.dstu3.model.Claim;
+import org.hl7.fhir.dstu3.model.Claim.CareTeamComponent;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Element;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerRoleComponent;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.junit.AfterClass;
@@ -38,7 +46,7 @@ public class ModelDstu3Test {
 	@Test
 	public void testSetters() {
 		Claim claim = new Claim();
-		claim.setIdentifier(new ArrayList<Identifier>()).setCoverage(new ArrayList<CoverageComponent>());
+		claim.setIdentifier(new ArrayList<Identifier>()).setCareTeam(new ArrayList<CareTeamComponent>());
 	}
 
 	@Test
@@ -105,7 +113,7 @@ public class ModelDstu3Test {
 		Patient patient1 = new Patient();
 		patient1.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family");
+		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family");
 
 		Patient patient2 = context.newJsonParser().parseResource(Patient.class,
 		        context.newJsonParser().encodeResourceToString(patient1));
@@ -116,7 +124,7 @@ public class ModelDstu3Test {
 		Patient patient3 = new Patient();
 		patient3.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family");
+		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family");
 
 		assertTrue(patient1.equalsDeep(patient3));
 		assertTrue(patient1.equalsShallow(patient3));
@@ -124,7 +132,7 @@ public class ModelDstu3Test {
 		Patient patient4 = new Patient();
 		patient4.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family2");
+		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family2");
 
 		assertTrue(patient1.equalsShallow(patient4));
 		assertFalse(patient1.equalsDeep(patient4));
@@ -132,7 +140,7 @@ public class ModelDstu3Test {
 		Patient patient5 = new Patient();
 		patient5.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.FEMALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family2");
+		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family2");
 
 		assertFalse(patient1.equalsShallow(patient5));
 		assertFalse(patient1.equalsDeep(patient5));

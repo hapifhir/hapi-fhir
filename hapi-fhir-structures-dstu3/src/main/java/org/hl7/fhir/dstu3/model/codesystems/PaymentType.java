@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum PaymentType {
 
         /**
-         * null
+         * The amount is partial or complete settlement of the amounts due.
          */
         PAYMENT, 
         /**
-         * null
+         * The amount is an adjustment regarding claims already paid.
          */
         ADJUSTMENT, 
         /**
-         * null
+         * The amount is an advance against future claims.
          */
         ADVANCE, 
         /**
@@ -76,17 +76,17 @@ public enum PaymentType {
         }
         public String getDefinition() {
           switch (this) {
-            case PAYMENT: return "";
-            case ADJUSTMENT: return "";
-            case ADVANCE: return "";
+            case PAYMENT: return "The amount is partial or complete settlement of the amounts due.";
+            case ADJUSTMENT: return "The amount is an adjustment regarding claims already paid.";
+            case ADVANCE: return "The amount is an advance against future claims.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PAYMENT: return "payment";
-            case ADJUSTMENT: return "adjustment";
-            case ADVANCE: return "advance";
+            case PAYMENT: return "Payment";
+            case ADJUSTMENT: return "Adjustment";
+            case ADVANCE: return "Advance";
             default: return "?";
           }
     }

@@ -9,17 +9,17 @@
   <Author>Grahame</Author>
   <LastAuthor>Eric Haas</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-07-18T02:47:21Z</LastSaved>
+  <LastSaved>2016-12-04T18:01:47Z</LastSaved>
   <Version>12.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16095</WindowHeight>
-  <WindowWidth>28800</WindowWidth>
-  <WindowTopX>-6195</WindowTopX>
-  <WindowTopY>450</WindowTopY>
+  <WindowHeight>1845</WindowHeight>
+  <WindowWidth>19260</WindowWidth>
+  <WindowTopX>-15</WindowTopX>
+  <WindowTopY>3675</WindowTopY>
   <ActiveSheet>7</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
@@ -336,13 +336,6 @@
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
     ss:Bold="1"/>
    <Interior ss:Color="#FCF305" ss:Pattern="Solid"/>
-  </Style>
-  <Style ss:ID="s100">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
-    ss:WrapText="1"/>
-   <Borders/>
-   <Interior/>
-   <NumberFormat ss:Format="Scientific"/>
   </Style>
   <Style ss:ID="s101" ss:Parent="s64">
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
@@ -953,6 +946,29 @@
    <NumberFormat/>
    <Protection/>
   </Style>
+  <Style ss:ID="s178" ss:Parent="s64">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="2"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="2"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s179" ss:Parent="s64">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="2"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="2"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s182">
+   <Font ss:FontName="Verdana" x:Family="Swiss" ss:Size="9" ss:Color="#333333"/>
+  </Style>
  </Styles>
  <Names>
   <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R50C1"/>
@@ -1004,9 +1020,9 @@
  <Worksheet ss:Name="Data Elements">
   <Names>
    <NamedRange ss:Name="_FilterDatabase"
-    ss:RefersTo="='Data Elements'!R1C2:R118C26" ss:Hidden="1"/>
+    ss:RefersTo="='Data Elements'!R1C2:R120C26" ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="26" ss:ExpandedRowCount="118" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="26" ss:ExpandedRowCount="120" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s69" ss:DefaultColumnWidth="65.25"
    ss:DefaultRowHeight="18">
    <Column ss:Index="2" ss:StyleID="s70" ss:Width="227.25"/>
@@ -1318,8 +1334,9 @@
     <Cell ss:StyleID="s91" ss:Formula="=R2C2&amp;&quot;.&quot;&amp;RC[-1]"><Data
       ss:Type="String">DiagnosticRequest.requisition</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">0..1</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">grouperId;  groupIdentifier</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Identifier</Data><NamedCell
@@ -1333,12 +1350,14 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">Identifier of composite request</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Composite Request ID</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="Default"><Data ss:Type="String">Composite request this is part of</Data><NamedCell
+    <Cell ss:StyleID="Default"><Data ss:Type="String">A shared identifier common to all diagnostic requests that were authorized more or less simultaneously by a single author, representing the composite or group identifier.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><Data ss:Type="String">Some business processes need to know if multiple items were ordered as part of the same &quot;requisition&quot; for billing or other purposes.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Requests are linked either by a &quot;basedOn&quot; relationship (i.e. one request is fulfilling another) or by having a common requisition. Requests that are part of the same requisition are generally treated independently from the perspective of changing their state or maintaining them after initial creation.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1354,7 +1373,7 @@
     <Cell ss:StyleID="s91"><Data ss:Type="String">DiagnosticRequest.status</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">1..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">code</Data><NamedCell
@@ -1376,7 +1395,7 @@
     <Cell ss:StyleID="s93"><Data ss:Type="String">The status of the order</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Typically the system placing the order sets the status to &quot;requested&quot;. Thereafter, the order is maintained by the receiver that updates the status as the request is handled</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">The status is generally fully in the control of the requester - they determine whether the order is draft or active and, after it has been activated, competed, cancelled or suspended. States relating to the activities of the performer are reflected on either the corresponding event (see [Event Pattern](event.html) for general discussion) or using the [Task](task.html) resource</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><Data ss:Type="String">.statusCode also influenced by whether a ControlAct fulfillment requeste exists, whether a promise exists, status of the review component, whether a fulfilling observation exists, whether a refusal exists</Data><NamedCell
@@ -1390,21 +1409,21 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s101"><Data ss:Type="String">stage</Data></Cell>
+    <Cell ss:StyleID="s178"><Data ss:Type="String">intent</Data></Cell>
     <Cell ss:StyleID="s91" ss:Formula="=R2C2&amp;&quot;.&quot;&amp;RC[-1]"><Data
-      ss:Type="String">DiagnosticRequest.stage</Data><NamedCell
+      ss:Type="String">DiagnosticRequest.intent</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">1..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">code</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">DiagnosticRequestStage</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">DiagnosticRequestIntent</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">class</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1415,6 +1434,45 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">proposal | plan | original-order | reflex-order</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Whether the request is a proposal, plan, an original order or a reflex order.  </Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><Data ss:Type="String">[#3720][#10296]</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s178"><Data ss:Type="String">priority</Data></Cell>
+    <Cell ss:StyleID="s91" ss:Formula="=R2C2&amp;&quot;.&quot;&amp;RC[-1]"><Data
+      ss:Type="String">DiagnosticRequest.priority</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">code</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">DiagnosticRequestSPriority</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">class</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">If missing, this task should be performed with normal priority</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">routine | urgent | asap | stat</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Indicates how quickly the {{title}} should be addressed with respect to other requests.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1583,9 +1641,9 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s90"><Data ss:Type="String">authored</Data></Cell>
+    <Cell ss:StyleID="s179"><Data ss:Type="String">authoredOn</Data></Cell>
     <Cell ss:StyleID="s91" ss:Formula="=R2C2&amp;&quot;.&quot;&amp;RC[-1]"><Data
-      ss:Type="String">DiagnosticRequest.authored</Data><NamedCell
+      ss:Type="String">DiagnosticRequest.authoredOn</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1737,9 +1795,9 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s90"><Data ss:Type="String">reason</Data></Cell>
+    <Cell ss:StyleID="s179"><Data ss:Type="String">reasonCode</Data></Cell>
     <Cell ss:StyleID="s91" ss:Formula="=R2C2&amp;&quot;.&quot;&amp;RC[-1]"><Data
-      ss:Type="String">DiagnosticRequest.reason</Data><NamedCell
+      ss:Type="String">DiagnosticRequest.reasonCode</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell
@@ -1760,7 +1818,46 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Explanation/Justification for test</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">An explanation or justification for why this diagnostic investigation is being requested.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">An explanation or justification for why this diagnostic investigation is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">This may be used to decide how the diagnostic investigation will be performed, or even if it will be performed at all.   Use CodeableConcept text element if the data is free (uncoded) text as shown in the [CT Scan example](diagnosticrequest-example-di.html).</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><Data ss:Type="String">.reasonCode</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><Data ss:Type="String">7134. [#10296]  need to add reference as another inline element</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s179"><Data ss:Type="String">reasonReference</Data></Cell>
+    <Cell ss:StyleID="s91" ss:Formula="=R2C2&amp;&quot;.&quot;&amp;RC[-1]"><Data
+      ss:Type="String">DiagnosticRequest.reasonReference</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Reference(Condition | Observation)</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">why</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Explanation/Justification for test</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Indicates another resource that provides a justification for why this diagnostic investigation is being requested.   May relate to the resources referred to in supportingInformation.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">This may be used to decide how the diagnostic investigation will be performed, or even if it will be performed at all.   Use CodeableConcept text element if the data is free (uncoded) text as shown in the [CT Scan example](diagnosticrequest-example-di.html).</Data><NamedCell
@@ -4387,7 +4484,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
-   <LeftColumnRightPane>11</LeftColumnRightPane>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4402,15 +4499,14 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>16</ActiveRow>
-     <ActiveCol>13</ActiveCol>
+     <ActiveRow>8</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
-  <AutoFilter x:Range="R1C2:R118C26"
+  <AutoFilter x:Range="R1C2:R120C26"
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
  </Worksheet>
@@ -4981,7 +5077,7 @@
     <Cell ss:StyleID="s129"><Data ss:Type="String">author-date</Data></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s82"/>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">DiagnosticRequest.authored</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">DiagnosticRequest.authoredOn</Data></Cell>
     <Cell ss:StyleID="s131"><Data ss:Type="String">When the request transitioned to being actionable</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4992,9 +5088,9 @@
     <Cell ss:StyleID="s134"><Data ss:Type="String">Plan/proposal/order fulfilled by this request</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s132"><Data ss:Type="String">stage</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">intent</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">token</Data></Cell>
-    <Cell ss:Index="4" ss:StyleID="s92"><Data ss:Type="String">DiagnosticRequest.stage</Data></Cell>
+    <Cell ss:Index="4" ss:StyleID="s92"><Data ss:Type="String">DiagnosticRequest.intent</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="String">proposal | plan | original-order |reflex-order</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5083,11 +5179,11 @@
     <Cell ss:StyleID="Default"><Data ss:Type="String">Individual the service is ordered for</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s132"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">priority</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s138"/>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">DiagnosticRequest.priority</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">routine | urgent | asap | stat</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s132"/>
@@ -5192,8 +5288,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>10</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6176,7 +6272,7 @@
     <Cell><Data ss:Type="String">core</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s157"><Data ss:Type="String">Diagnostic Request for Genetics</Data></Cell>
+    <Cell ss:StyleID="s157"><Data ss:Type="String">Diagnostic Request-Genetics</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="String">diagnosticrequest-genetics-profile.xml</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="String">diagnosticrequest-genetics-profile-spreadsheet.xml</Data></Cell>
     <Cell ss:StyleID="s138"><Data ss:Type="String">spreadsheet</Data></Cell>
@@ -6409,6 +6505,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
+     <ActiveRow>2</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -6429,7 +6526,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Examples!R1C1:R2C7"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="39" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="40" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s158" ss:DefaultColumnWidth="260.25"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s158" ss:Width="89.25"/>
@@ -6501,12 +6598,21 @@
     <Cell ss:StyleID="s163"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s162"><Data ss:Type="String">PGx</Data></Cell>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">PGx Phenotype example</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">example-pgx</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">diagnosticrequest-example-pgx.xml</Data></Cell>
+    <Cell ss:StyleID="s164"><Data ss:Type="String">Diagnostic Request-Genetics</Data></Cell>
+    <Cell ss:StyleID="s163"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s162"><Data ss:Type="String">Order-genetics-1</Data></Cell>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Order for ABCB4 gene mutation analysis</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">og-example1</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">diagnosticrequest-genetics-example-1.xml</Data></Cell>
-    <Cell ss:StyleID="s164"><Data ss:Type="String">Diagnostic Request for Genetics</Data></Cell>
+    <Cell ss:StyleID="s164"><Data ss:Type="String">Diagnostic Request-Genetics</Data></Cell>
     <Cell ss:StyleID="s163"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6515,7 +6621,7 @@
     <Cell ss:StyleID="s93"><Data ss:Type="String">Order for a specific variant</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">og-example2</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">diagnosticrequest-genetics-example-2.xml</Data></Cell>
-    <Cell ss:StyleID="s164"><Data ss:Type="String">Diagnostic Request for Genetics</Data></Cell>
+    <Cell ss:StyleID="s164"><Data ss:Type="String">Diagnostic Request-Genetics</Data></Cell>
     <Cell ss:StyleID="s163"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6827,7 +6933,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>3</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -6835,14 +6941,15 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>9</ActiveRow>
      <ActiveCol>0</ActiveCol>
+     <RangeSelection>R2C1:R7C1</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6931,7 +7038,7 @@
     <Cell ss:StyleID="s82"><Data ss:Type="String">The status of a diagnostic order.</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">required</Data></Cell>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">valueset-request-status</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/request-status</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
@@ -6972,11 +7079,11 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"><Data ss:Type="String">DiagnosticRequestStage</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">DiagnosticRequestIntent</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">The kind of diagnostic request </Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">extensible</Data></Cell>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">valueset-diagnostic-request-stage</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">required</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String"> http://hl7.org/fhir/ValueSet/request-intent</Data></Cell>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7002,26 +7109,11 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">DiagnosticRequestSPriority</Data></Cell>
+    <Cell ss:StyleID="s182"><Data ss:Type="String">Identifies the level of importance to be assigned to actioning the request</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">required</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String"> http://hl7.org/fhir/ValueSet/request-priority</Data></Cell>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7062,7 +7154,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7077,7 +7169,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7092,7 +7184,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7107,7 +7199,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7122,7 +7214,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7137,7 +7229,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7152,7 +7244,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7167,7 +7259,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7182,7 +7274,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7197,7 +7289,7 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="Default"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7212,7 +7304,22 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s169"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s92"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s138"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s92"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -7297,8 +7404,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>13</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>16</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

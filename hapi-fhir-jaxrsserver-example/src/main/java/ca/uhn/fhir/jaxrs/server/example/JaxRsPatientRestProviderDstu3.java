@@ -200,7 +200,7 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 		for (final List<Patient> patientIterator : patients.values()) {
 			Patient single = null;
 			for (Patient patient : patientIterator) {
-				if (name == null || patient.getName().get(0).getFamily().get(0).getValueNotNull().equals(name.getValueNotNull())) {
+				if (name == null || patient.getName().get(0).getFamilyElement().getValueNotNull().equals(name.getValueNotNull())) {
 					single = patient;
 				}
 			}
@@ -251,7 +251,7 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 
 	private static List<Patient> createPatient(final String name) {
 		final Patient patient = new Patient();
-		patient.getName().add(new HumanName().addFamily(name));
+		patient.getName().add(new HumanName().setFamily(name));
 		return createPatient(patient);
 	}
 

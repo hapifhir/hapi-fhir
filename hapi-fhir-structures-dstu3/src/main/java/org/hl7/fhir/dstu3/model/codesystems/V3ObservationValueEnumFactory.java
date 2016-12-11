@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -179,6 +179,16 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return V3ObservationValue.A3;
     if ("A4".equals(codeString))
       return V3ObservationValue.A4;
+    if ("_CompositeMeasureScoring".equals(codeString))
+      return V3ObservationValue._COMPOSITEMEASURESCORING;
+    if ("ALLORNONESCR".equals(codeString))
+      return V3ObservationValue.ALLORNONESCR;
+    if ("LINEARSCR".equals(codeString))
+      return V3ObservationValue.LINEARSCR;
+    if ("OPPORSCR".equals(codeString))
+      return V3ObservationValue.OPPORSCR;
+    if ("WEIGHTSCR".equals(codeString))
+      return V3ObservationValue.WEIGHTSCR;
     if ("_CoverageLimitObservationValue".equals(codeString))
       return V3ObservationValue._COVERAGELIMITOBSERVATIONVALUE;
     if ("_CoverageLevelObservationValue".equals(codeString))
@@ -639,6 +649,16 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return "A3";
     if (code == V3ObservationValue.A4)
       return "A4";
+    if (code == V3ObservationValue._COMPOSITEMEASURESCORING)
+      return "_CompositeMeasureScoring";
+    if (code == V3ObservationValue.ALLORNONESCR)
+      return "ALLORNONESCR";
+    if (code == V3ObservationValue.LINEARSCR)
+      return "LINEARSCR";
+    if (code == V3ObservationValue.OPPORSCR)
+      return "OPPORSCR";
+    if (code == V3ObservationValue.WEIGHTSCR)
+      return "WEIGHTSCR";
     if (code == V3ObservationValue._COVERAGELIMITOBSERVATIONVALUE)
       return "_CoverageLimitObservationValue";
     if (code == V3ObservationValue._COVERAGELEVELOBSERVATIONVALUE)

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -2705,7 +2705,7 @@ public class DocumentReference extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite", compositeOf={"relatesto", "relation"} )
+  @SearchParamDefinition(name="relationship", path="DocumentReference.relatesTo", description="Combination of relation and relatesTo", type="composite", compositeOf={"relatesto", "relation"} )
   public static final String SP_RELATIONSHIP = "relationship";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>relationship</b>

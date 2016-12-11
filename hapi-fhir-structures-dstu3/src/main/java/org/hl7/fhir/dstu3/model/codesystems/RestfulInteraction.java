@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,6 +49,10 @@ public enum RestfulInteraction {
          */
         UPDATE, 
         /**
+         * Update an existing resource by posting a set of changes to it.
+         */
+        PATCH, 
+        /**
          * Delete a resource.
          */
         DELETE, 
@@ -61,7 +65,7 @@ public enum RestfulInteraction {
          */
         HISTORYINSTANCE, 
         /**
-         * Retrieve the change history for a all resources of a particular type.
+         * Retrieve the change history for all resources of a particular type.
          */
         HISTORYTYPE, 
         /**
@@ -113,6 +117,8 @@ public enum RestfulInteraction {
           return VREAD;
         if ("update".equals(codeString))
           return UPDATE;
+        if ("patch".equals(codeString))
+          return PATCH;
         if ("delete".equals(codeString))
           return DELETE;
         if ("history".equals(codeString))
@@ -146,6 +152,7 @@ public enum RestfulInteraction {
             case READ: return "read";
             case VREAD: return "vread";
             case UPDATE: return "update";
+            case PATCH: return "patch";
             case DELETE: return "delete";
             case HISTORY: return "history";
             case HISTORYINSTANCE: return "history-instance";
@@ -170,10 +177,11 @@ public enum RestfulInteraction {
             case READ: return "Read the current state of the resource.";
             case VREAD: return "Read the state of a specific version of the resource.";
             case UPDATE: return "Update an existing resource by its id (or create it if it is new).";
+            case PATCH: return "Update an existing resource by posting a set of changes to it.";
             case DELETE: return "Delete a resource.";
             case HISTORY: return "Retrieve the change history for a particular resource, type of resource, or the entire system.";
             case HISTORYINSTANCE: return "Retrieve the change history for a particular resource.";
-            case HISTORYTYPE: return "Retrieve the change history for a all resources of a particular type.";
+            case HISTORYTYPE: return "Retrieve the change history for all resources of a particular type.";
             case HISTORYSYSTEM: return "Retrieve the change history for all resources on a system.";
             case CREATE: return "Create a new resource with a server assigned id.";
             case SEARCH: return "Search a resource type or all resources based on some filter criteria.";
@@ -191,6 +199,7 @@ public enum RestfulInteraction {
             case READ: return "read";
             case VREAD: return "vread";
             case UPDATE: return "update";
+            case PATCH: return "patch";
             case DELETE: return "delete";
             case HISTORY: return "history";
             case HISTORYINSTANCE: return "history-instance";

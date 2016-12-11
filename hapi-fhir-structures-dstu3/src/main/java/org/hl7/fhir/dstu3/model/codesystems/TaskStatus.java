@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum TaskStatus {
          */
         DRAFT, 
         /**
-         * The task is ready to be acted upon
+         * The task is ready to be acted upon and action is sought
          */
         REQUESTED, 
         /**
@@ -61,6 +61,10 @@ public enum TaskStatus {
          */
         READY, 
         /**
+         * the task was not completed (more or less) as requested
+         */
+        CANCELLED, 
+        /**
          * Task has been started but is not yet complete.
          */
         INPROGRESS, 
@@ -76,6 +80,10 @@ public enum TaskStatus {
          * The task has been completed (more or less) as requested.
          */
         COMPLETED, 
+        /**
+         * The task should never have existed and is retained only because of the possibility it may have used
+         */
+        ENTEREDINERROR, 
         /**
          * added to help the parsers
          */
@@ -95,6 +103,8 @@ public enum TaskStatus {
           return REJECTED;
         if ("ready".equals(codeString))
           return READY;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
         if ("on-hold".equals(codeString))
@@ -103,6 +113,8 @@ public enum TaskStatus {
           return FAILED;
         if ("completed".equals(codeString))
           return COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown TaskStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -113,10 +125,12 @@ public enum TaskStatus {
             case ACCEPTED: return "accepted";
             case REJECTED: return "rejected";
             case READY: return "ready";
+            case CANCELLED: return "cancelled";
             case INPROGRESS: return "in-progress";
             case ONHOLD: return "on-hold";
             case FAILED: return "failed";
             case COMPLETED: return "completed";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -126,15 +140,17 @@ public enum TaskStatus {
         public String getDefinition() {
           switch (this) {
             case DRAFT: return "The task is not yet ready to be acted upon.";
-            case REQUESTED: return "The task is ready to be acted upon";
+            case REQUESTED: return "The task is ready to be acted upon and action is sought";
             case RECEIVED: return "A potential performer has claimed ownership of the task and is evaluating whether to perform it";
             case ACCEPTED: return "The potential performer has agreed to execute the task but has not yet started work";
             case REJECTED: return "The potential performer who claimed ownership of the task has decided not to execute it prior to performing any action.";
             case READY: return "Task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given.";
+            case CANCELLED: return "the task was not completed (more or less) as requested";
             case INPROGRESS: return "Task has been started but is not yet complete.";
             case ONHOLD: return "Task has been started but work has been paused";
             case FAILED: return "The task was attempted but could not be completed due to some error.";
             case COMPLETED: return "The task has been completed (more or less) as requested.";
+            case ENTEREDINERROR: return "The task should never have existed and is retained only because of the possibility it may have used";
             default: return "?";
           }
         }
@@ -146,10 +162,12 @@ public enum TaskStatus {
             case ACCEPTED: return "Accepted";
             case REJECTED: return "Rejected";
             case READY: return "Ready";
+            case CANCELLED: return "Cancelled";
             case INPROGRESS: return "In Progress";
             case ONHOLD: return "On Hold";
             case FAILED: return "Failed";
             case COMPLETED: return "Completed";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
     }

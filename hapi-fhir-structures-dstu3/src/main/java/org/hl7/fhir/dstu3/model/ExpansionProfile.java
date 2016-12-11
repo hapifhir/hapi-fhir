@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -1635,10 +1635,10 @@ public class ExpansionProfile extends MetadataResource {
     protected BooleanType activeOnly;
 
     /**
-     * Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).
+     * Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).
      */
     @Child(name = "excludeNested", type = {BooleanType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Include or exclude nested codes in the value set expansion", formalDefinition="Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains)." )
+    @Description(shortDefinition="Nested codes in the expansion or not", formalDefinition="Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains)." )
     protected BooleanType excludeNested;
 
     /**
@@ -2491,7 +2491,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return {@link #excludeNested} (Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).). This is the underlying object with id, value and extensions. The accessor "getExcludeNested" gives direct access to the value
+     * @return {@link #excludeNested} (Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).). This is the underlying object with id, value and extensions. The accessor "getExcludeNested" gives direct access to the value
      */
     public BooleanType getExcludeNestedElement() { 
       if (this.excludeNested == null)
@@ -2511,7 +2511,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @param value {@link #excludeNested} (Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).). This is the underlying object with id, value and extensions. The accessor "getExcludeNested" gives direct access to the value
+     * @param value {@link #excludeNested} (Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).). This is the underlying object with id, value and extensions. The accessor "getExcludeNested" gives direct access to the value
      */
     public ExpansionProfile setExcludeNestedElement(BooleanType value) { 
       this.excludeNested = value;
@@ -2519,14 +2519,14 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).
+     * @return Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).
      */
     public boolean getExcludeNested() { 
       return this.excludeNested == null || this.excludeNested.isEmpty() ? false : this.excludeNested.getValue();
     }
 
     /**
-     * @param value Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).
+     * @param value Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).
      */
     public ExpansionProfile setExcludeNested(boolean value) { 
         if (this.excludeNested == null)
@@ -2739,7 +2739,7 @@ public class ExpansionProfile extends MetadataResource {
         childrenList.add(new Property("designation", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.", 0, java.lang.Integer.MAX_VALUE, designation));
         childrenList.add(new Property("includeDefinition", "boolean", "Controls whether the value set definition is included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, includeDefinition));
         childrenList.add(new Property("activeOnly", "boolean", "Controls whether inactive concepts are included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, activeOnly));
-        childrenList.add(new Property("excludeNested", "boolean", "Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).", 0, java.lang.Integer.MAX_VALUE, excludeNested));
+        childrenList.add(new Property("excludeNested", "boolean", "Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).", 0, java.lang.Integer.MAX_VALUE, excludeNested));
         childrenList.add(new Property("excludeNotForUI", "boolean", "Controls whether or not the value set expansion includes codes which cannot be displayed in user interfaces.", 0, java.lang.Integer.MAX_VALUE, excludeNotForUI));
         childrenList.add(new Property("excludePostCoordinated", "boolean", "Controls whether or not the value set expansion includes post coordinated codes.", 0, java.lang.Integer.MAX_VALUE, excludePostCoordinated));
         childrenList.add(new Property("displayLanguage", "code", "Specifies the language to be used for description in the expansions i.e. the language to be used for ValueSet.expansion.contains.display.", 0, java.lang.Integer.MAX_VALUE, displayLanguage));

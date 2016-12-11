@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -1493,14 +1493,14 @@ public class ConceptMap extends MetadataResource {
     /**
      * The source value set that specifies the concepts that are being mapped.
      */
-    @Child(name = "source", type = {UriType.class, ValueSet.class, StructureDefinition.class}, order=3, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "source", type = {UriType.class, ValueSet.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifies the source of the concepts which are being mapped", formalDefinition="The source value set that specifies the concepts that are being mapped." )
     protected Type source;
 
     /**
      * The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.
      */
-    @Child(name = "target", type = {UriType.class, ValueSet.class, StructureDefinition.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "target", type = {UriType.class, ValueSet.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Provides context to the mappings", formalDefinition="The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made." )
     protected Type target;
 
@@ -1523,11 +1523,9 @@ public class ConceptMap extends MetadataResource {
   /**
    * Constructor
    */
-    public ConceptMap(Enumeration<PublicationStatus> status, Type source, Type target) {
+    public ConceptMap(Enumeration<PublicationStatus> status) {
       super();
       this.status = status;
-      this.source = source;
-      this.target = target;
     }
 
     /**
@@ -2404,8 +2402,8 @@ public class ConceptMap extends MetadataResource {
         childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the concept map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         childrenList.add(new Property("purpose", "markdown", "Explains why this concept map is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the concept map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the concept map.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("source[x]", "uri|Reference(ValueSet|StructureDefinition)", "The source value set that specifies the concepts that are being mapped.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("target[x]", "uri|Reference(ValueSet|StructureDefinition)", "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.", 0, java.lang.Integer.MAX_VALUE, target));
+        childrenList.add(new Property("source[x]", "uri|Reference(ValueSet)", "The source value set that specifies the concepts that are being mapped.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("target[x]", "uri|Reference(ValueSet)", "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("group", "", "A group of mappings that all have the same source and target system.", 0, java.lang.Integer.MAX_VALUE, group));
       }
 
@@ -2865,7 +2863,7 @@ public class ConceptMap extends MetadataResource {
    * Path: <b>ConceptMap.sourceReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="ConceptMap.source.as(Reference)", description="Identifies the source of the concepts which are being mapped", type="reference", target={StructureDefinition.class, ValueSet.class } )
+  @SearchParamDefinition(name="source", path="ConceptMap.source.as(Reference)", description="Identifies the source of the concepts which are being mapped", type="reference", target={ValueSet.class } )
   public static final String SP_SOURCE = "source";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source</b>
@@ -2951,7 +2949,7 @@ public class ConceptMap extends MetadataResource {
    * Path: <b>ConceptMap.targetReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target", path="ConceptMap.target.as(Reference)", description="Provides context to the mappings", type="reference", target={StructureDefinition.class, ValueSet.class } )
+  @SearchParamDefinition(name="target", path="ConceptMap.target.as(Reference)", description="Provides context to the mappings", type="reference", target={ValueSet.class } )
   public static final String SP_TARGET = "target";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target</b>
@@ -2997,7 +2995,7 @@ public class ConceptMap extends MetadataResource {
    * Path: <b>ConceptMap.sourceUri</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-uri", path="ConceptMap.source.as(Uri)", description="Identifies the source of the concepts which are being mapped", type="reference", target={StructureDefinition.class, ValueSet.class } )
+  @SearchParamDefinition(name="source-uri", path="ConceptMap.source.as(Uri)", description="Identifies the source of the concepts which are being mapped", type="reference", target={ValueSet.class } )
   public static final String SP_SOURCE_URI = "source-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-uri</b>
@@ -3123,7 +3121,7 @@ public class ConceptMap extends MetadataResource {
    * Path: <b>ConceptMap.targetUri</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-uri", path="ConceptMap.target.as(Uri)", description="Provides context to the mappings", type="reference", target={StructureDefinition.class, ValueSet.class } )
+  @SearchParamDefinition(name="target-uri", path="ConceptMap.target.as(Uri)", description="Provides context to the mappings", type="reference", target={ValueSet.class } )
   public static final String SP_TARGET_URI = "target-uri";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-uri</b>

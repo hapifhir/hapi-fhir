@@ -122,7 +122,7 @@ public class SearchSortDstu3Test {
 			ourLastSortSpec = theSortSpec;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
+				retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("" + i));
 			}
 			return retVal;
 		}

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,11 @@ public enum ContactPointSystem {
          */
         PAGER, 
         /**
-         * A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation.
+         * A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various personal contacts including blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.
+         */
+        URL, 
+        /**
+         * A contact that is not a phone, fax, page or email address and is not expressible as a URL.  E.g. Internal mail address.  This SHOULD NOT be used for contacts that are expressible as a URL (e.g. Skype, Twitter, Facebook, etc.)  Extensions may be used to distinguish "other" contact types.
          */
         OTHER, 
         /**
@@ -71,6 +75,8 @@ public enum ContactPointSystem {
           return EMAIL;
         if ("pager".equals(codeString))
           return PAGER;
+        if ("url".equals(codeString))
+          return URL;
         if ("other".equals(codeString))
           return OTHER;
         throw new FHIRException("Unknown ContactPointSystem code '"+codeString+"'");
@@ -81,6 +87,7 @@ public enum ContactPointSystem {
             case FAX: return "fax";
             case EMAIL: return "email";
             case PAGER: return "pager";
+            case URL: return "url";
             case OTHER: return "other";
             default: return "?";
           }
@@ -94,7 +101,8 @@ public enum ContactPointSystem {
             case FAX: return "The value is a fax machine. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
             case EMAIL: return "The value is an email address.";
             case PAGER: return "The value is a pager number. These may be local pager numbers that are only usable on a particular pager system.";
-            case OTHER: return "A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation.";
+            case URL: return "A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various personal contacts including blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.";
+            case OTHER: return "A contact that is not a phone, fax, page or email address and is not expressible as a URL.  E.g. Internal mail address.  This SHOULD NOT be used for contacts that are expressible as a URL (e.g. Skype, Twitter, Facebook, etc.)  Extensions may be used to distinguish \"other\" contact types.";
             default: return "?";
           }
         }
@@ -104,7 +112,8 @@ public enum ContactPointSystem {
             case FAX: return "Fax";
             case EMAIL: return "Email";
             case PAGER: return "Pager";
-            case OTHER: return "URL";
+            case URL: return "URL";
+            case OTHER: return "Other";
             default: return "?";
           }
     }

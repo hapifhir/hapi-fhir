@@ -1598,6 +1598,7 @@
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-validation-resources-dstu3</module>
+				<module>hapi-fhir-structures-dstu2.1</module>
 				<module>hapi-fhir-structures-dstu3</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>

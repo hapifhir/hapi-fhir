@@ -140,7 +140,7 @@ public class NonGenericClientDstu3Test {
 		IClient client = ourCtx.newRestfulClient(IClient.class, "http://example.com/fhir");
 
 		Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 		
 		int idx = 0;
 		MethodOutcome outcome = client.validate(patient, null, null);

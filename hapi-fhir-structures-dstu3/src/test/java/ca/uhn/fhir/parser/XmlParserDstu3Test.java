@@ -260,7 +260,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
+		p.addName().setFamily("PATIENT");
 
 		Organization o = new Organization();
 		o.setName("ORG");
@@ -270,7 +270,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(str);
 
 		p = ourCtx.newXmlParser().parseResource(Patient.class, str);
-		assertEquals("PATIENT", p.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("PATIENT", p.getName().get(0).getFamily());
 
 		List<Extension> exts = p.getExtensionsByUrl("urn:foo");
 		assertEquals(1, exts.size());
@@ -298,7 +298,7 @@ public class XmlParserDstu3Test {
 
 		Patient pt = new Patient();
 		pt.setId("patid");
-		pt.addName().addFamily("PATIENT");
+		pt.addName().setFamily("PATIENT");
 
 		Organization org = new Organization();
 		org.setId("orgid");
@@ -586,7 +586,7 @@ public class XmlParserDstu3Test {
 		patient.addModifierExtension(modExt);
 
 		HumanName name = patient.addName();
-		name.addFamily("Blah");
+		name.setFamily("Blah");
 		StringType given = name.addGivenElement();
 		given.setValue("Joe");
 		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
@@ -697,7 +697,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 
 		p.getMeta().addProfile("http://foo/Profile1");
 		p.getMeta().addProfile("http://foo/Profile2");
@@ -765,7 +765,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeAndParseMetaProfiles() {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 
 		p.getMeta().addTag().setSystem("scheme1").setCode("term1").setDisplay("label1");
 		p.getMeta().addTag().setSystem("scheme2").setCode("term2").setDisplay("label2");
@@ -817,17 +817,17 @@ public class XmlParserDstu3Test {
 		Patient p = new Patient();
 		p.setId("patid");
 		HumanName name = p.addName();
-		name.addFamilyElement().setValue(null).setId("f0").addExtension(new Extension("http://foo", new StringType("FOOEXT0")));
-		name.addFamilyElement().setValue("V1").setId("f1").addExtension((Extension) new Extension("http://foo", new StringType("FOOEXT1")).setId("ext1id"));
-		name.addFamilyElement(); // this one shouldn't get encoded
-		name.addFamilyElement().setValue(null).addExtension(new Extension("http://foo", new StringType("FOOEXT3")));
+		name.addGivenElement().setValue(null).setId("f0").addExtension(new Extension("http://foo", new StringType("FOOEXT0")));
+		name.addGivenElement().setValue("V1").setId("f1").addExtension((Extension) new Extension("http://foo", new StringType("FOOEXT1")).setId("ext1id"));
+		name.addGivenElement(); // this one shouldn't get encoded
+		name.addGivenElement().setValue(null).addExtension(new Extension("http://foo", new StringType("FOOEXT3")));
 		name.setId("nameid");
 
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
 
 		output = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(p);
-		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patid\"/><name id=\"nameid\"><family id=\"f0\"><extension url=\"http://foo\"><valueString value=\"FOOEXT0\"/></extension></family><family id=\"f1\" value=\"V1\"><extension id=\"ext1id\" url=\"http://foo\"><valueString value=\"FOOEXT1\"/></extension></family><family><extension url=\"http://foo\"><valueString value=\"FOOEXT3\"/></extension></family></name></Patient>";
+		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patid\"/><name id=\"nameid\"><given id=\"f0\"><extension url=\"http://foo\"><valueString value=\"FOOEXT0\"/></extension></given><given id=\"f1\" value=\"V1\"><extension id=\"ext1id\" url=\"http://foo\"><valueString value=\"FOOEXT1\"/></extension></given><given><extension url=\"http://foo\"><valueString value=\"FOOEXT3\"/></extension></given></name></Patient>";
 
 		ourLog.info("Expected: {}", expected);
 		ourLog.info("Actual  : {}", output);
@@ -839,30 +839,30 @@ public class XmlParserDstu3Test {
 
 		name = p.getName().get(0);
 		assertEquals("nameid", name.getId());
-		assertEquals(3, name.getFamily().size());
+		assertEquals(3, name.getGiven().size());
 
-		assertEquals(null, name.getFamily().get(0).getValue());
-		assertEquals("V1", name.getFamily().get(1).getValue());
-		assertEquals(null, name.getFamily().get(2).getValue());
+		assertEquals(null, name.getGiven().get(0).getValue());
+		assertEquals("V1", name.getGiven().get(1).getValue());
+		assertEquals(null, name.getGiven().get(2).getValue());
 
-		assertEquals("f0", name.getFamily().get(0).getId());
-		assertEquals("f1", name.getFamily().get(1).getId());
-		assertEquals(null, name.getFamily().get(2).getId());
+		assertEquals("f0", name.getGiven().get(0).getId());
+		assertEquals("f1", name.getGiven().get(1).getId());
+		assertEquals(null, name.getGiven().get(2).getId());
 
-		assertEquals(1, name.getFamily().get(0).getExtension().size());
-		assertEquals("http://foo", name.getFamily().get(0).getExtension().get(0).getUrl());
-		assertEquals("FOOEXT0", ((StringType) name.getFamily().get(0).getExtension().get(0).getValue()).getValue());
-		assertEquals(null, name.getFamily().get(0).getExtension().get(0).getId());
+		assertEquals(1, name.getGiven().get(0).getExtension().size());
+		assertEquals("http://foo", name.getGiven().get(0).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT0", ((StringType) name.getGiven().get(0).getExtension().get(0).getValue()).getValue());
+		assertEquals(null, name.getGiven().get(0).getExtension().get(0).getId());
 
-		assertEquals(1, name.getFamily().get(1).getExtension().size());
-		assertEquals("http://foo", name.getFamily().get(1).getExtension().get(0).getUrl());
-		assertEquals("FOOEXT1", ((StringType) name.getFamily().get(1).getExtension().get(0).getValue()).getValue());
-		assertEquals("ext1id", name.getFamily().get(1).getExtension().get(0).getId());
+		assertEquals(1, name.getGiven().get(1).getExtension().size());
+		assertEquals("http://foo", name.getGiven().get(1).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT1", ((StringType) name.getGiven().get(1).getExtension().get(0).getValue()).getValue());
+		assertEquals("ext1id", name.getGiven().get(1).getExtension().get(0).getId());
 
-		assertEquals(1, name.getFamily().get(2).getExtension().size());
-		assertEquals("http://foo", name.getFamily().get(2).getExtension().get(0).getUrl());
-		assertEquals("FOOEXT3", ((StringType) name.getFamily().get(2).getExtension().get(0).getValue()).getValue());
-		assertEquals(null, name.getFamily().get(2).getExtension().get(0).getId());
+		assertEquals(1, name.getGiven().get(2).getExtension().size());
+		assertEquals("http://foo", name.getGiven().get(2).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT3", ((StringType) name.getGiven().get(2).getExtension().get(0).getValue()).getValue());
+		assertEquals(null, name.getGiven().get(2).getExtension().get(0).getId());
 
 	}
 
@@ -896,7 +896,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 
 		List<Coding> labels = new ArrayList<Coding>();
 		labels.add(new Coding().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setVersion("VERSION1"));
@@ -1513,7 +1513,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 		patient.setMaritalStatus(new CodeableConcept().addCoding(new Coding().setCode("D")));
 		patient.setMaritalStatus(new CodeableConcept().addCoding(new Coding().setCode("D")));
 
@@ -1573,7 +1573,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeNullElement() {
 		Patient patient = new Patient();
-		patient.addName().getFamily().add(null);
+		patient.addName().getGiven().add(null);
 
 		IParser parser = ourCtx.newXmlParser();
 		String xml = parser.encodeResourceToString(patient);
@@ -1592,7 +1592,7 @@ public class XmlParserDstu3Test {
 		patient.getModifierExtension().add(null); // Purposely add null
 		patient.getExtension().add(new Extension("http://hello.world", new StringType("Hello World")));
 		patient.getName().add(null);
-		patient.addName().getFamily().add(null);
+		patient.addName().getGiven().add(null);
 
 		IParser parser = ourCtx.newXmlParser();
 		String xml = parser.encodeResourceToString(patient);
@@ -1643,7 +1643,7 @@ public class XmlParserDstu3Test {
 
 		Practitioner pract = new Practitioner();
 		pract.setId(IdType.newRandomUuid());
-		pract.addName().addFamily("PRACT FAMILY");
+		pract.addName().setFamily("PRACT FAMILY");
 
 		Patient patient = new Patient();
 		patient.addGeneralPractitioner().setResource(pract);
@@ -1660,7 +1660,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 		patient.setMaritalStatus(new CodeableConcept().addCoding(new Coding().setCode("D")));
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
@@ -1678,7 +1678,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 		patient.setMaritalStatus(new CodeableConcept().addCoding(new Coding().setCode("D")));
 
 		patient.getMeta().addTag().setSystem("foo").setCode("bar");
@@ -1804,7 +1804,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		patient.setId("123");
 		patient.getMeta().addProfile("http://profile");
-		patient.addName().addFamily("FAMILY").addGiven("GIVEN");
+		patient.addName().setFamily("FAMILY").addGiven("GIVEN");
 		patient.addAddress().addLine("LINE1");
 
 		{
@@ -1871,7 +1871,7 @@ public class XmlParserDstu3Test {
 	public void testEncodeWithEncodeElements() throws Exception {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile");
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 		patient.addAddress().addLine("LINE1");
 
 		Bundle bundle = new Bundle();
@@ -1919,7 +1919,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeWithNarrative() {
 		Patient p = new Patient();
-		p.addName().addFamily("Smith").addGiven("John");
+		p.addName().setFamily("Smith").addGiven("John");
 
 		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
@@ -1947,7 +1947,7 @@ public class XmlParserDstu3Test {
 
 		// START SNIPPET: resourceStringExtension
 		HumanName name = patient.addName();
-		name.addFamily("Shmoe");
+		name.setFamily("Shmoe");
 		StringType given = name.addGivenElement();
 		given.setValue("Joe");
 		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
@@ -1989,7 +1989,7 @@ public class XmlParserDstu3Test {
 	public void testOmitResourceId() {
 		Patient p = new Patient();
 		p.setId("123");
-		p.addName().addFamily("ABC");
+		p.addName().setFamily("ABC");
 
 		assertThat(ourCtx.newXmlParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
 		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
@@ -2730,7 +2730,7 @@ public class XmlParserDstu3Test {
 		o.getCode().setText("obs text");
 
 		Patient p = new Patient();
-		p.addName().addFamily("patient family");
+		p.addName().setFamily("patient family");
 		o.getSubject().setResource(p);
 
 		String enc = parser.encodeResourceToString(o);
@@ -2752,7 +2752,7 @@ public class XmlParserDstu3Test {
 
 		assertNotNull(o.getSubject().getResource());
 		p = (Patient) o.getSubject().getResource();
-		assertEquals("patient family", p.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("patient family", p.getName().get(0).getFamily());
 	}
 
 	/**
@@ -3052,7 +3052,7 @@ public class XmlParserDstu3Test {
 		Patient patient = new Patient();
 		String patientId = UUID.randomUUID().toString();
 		patient.setId(new IdType("Patient", patientId));
-		patient.addName().addGiven("John").addFamily("Smith");
+		patient.addName().addGiven("John").setFamily("Smith");
 		patient.setGender(AdministrativeGender.MALE);
 		patient.setBirthDateElement(new DateType("1987-04-16"));
 

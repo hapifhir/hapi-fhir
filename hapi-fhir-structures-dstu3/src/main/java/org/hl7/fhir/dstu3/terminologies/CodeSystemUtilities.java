@@ -2,11 +2,18 @@ package org.hl7.fhir.dstu3.terminologies;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptPropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.PropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.PropertyType;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.exceptions.FHIRException;
 
 public class CodeSystemUtilities {
 
@@ -18,9 +25,9 @@ public class CodeSystemUtilities {
     return false;
   }
 
-  public static boolean isAbstract(CodeSystem cs, ConceptDefinitionComponent def) {
+  public static boolean isNotSelectable(CodeSystem cs, ConceptDefinitionComponent def) {
     for (ConceptPropertyComponent p : def.getProperty()) {
-      if (p.getCode().equals("abstract") && p.hasValue() && p.getValue() instanceof BooleanType) 
+      if (p.getCode().equals("notSelectable") && p.hasValue() && p.getValue() instanceof BooleanType) 
         return ((BooleanType) p.getValue()).getValue();
     }
     return false;
@@ -33,7 +40,7 @@ public class CodeSystemUtilities {
 
   public static void setInactive(CodeSystem cs, ConceptDefinitionComponent concept) {
     defineInactiveProperty(cs);
-    concept.addProperty().setCode("notSelectable").setValue(new BooleanType(true));    
+    concept.addProperty().setCode("inactive").setValue(new BooleanType(true));    
   }
 
   public static void setDeprecated(CodeSystem cs, ConceptDefinitionComponent concept, DateTimeType date) {
@@ -76,7 +83,6 @@ public class CodeSystemUtilities {
     return null;
   }
 
-
   public static CodeSystem makeShareable(CodeSystem cs) {
     if (!cs.hasMeta())
       cs.setMeta(new Meta());
@@ -108,4 +114,31 @@ public class CodeSystemUtilities {
         return cs.getIdentifier().getValue().substring(8);
     return null;
   }
+
+  public static boolean isInactive(CodeSystem cs, ConceptDefinitionComponent def) throws FHIRException {
+    for (ConceptPropertyComponent p : def.getProperty()) {
+      if (p.getCode().equals("status") && p.hasValueStringType()) 
+        return "inactive".equals(p.getValueStringType());
+    }
+    return false;
+  }
+  
+  public static boolean isInactive(CodeSystem cs, String code) throws FHIRException {
+    ConceptDefinitionComponent def = findCode(cs.getConcept(), code);
+    if (def == null)
+      return true;
+    return isInactive(cs, def);
+  }
+
+  private static ConceptDefinitionComponent findCode(List<ConceptDefinitionComponent> list, String code) {
+    for (ConceptDefinitionComponent c : list) {
+      if (c.getCode().equals(code))
+        return c;
+      ConceptDefinitionComponent s = findCode(c.getConcept(), code);
+      if (s != null)
+        return s;
+    }
+    return null;
+  }
+
 }

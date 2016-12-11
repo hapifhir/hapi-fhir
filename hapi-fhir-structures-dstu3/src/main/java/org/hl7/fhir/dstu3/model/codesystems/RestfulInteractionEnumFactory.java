@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -45,6 +45,8 @@ public class RestfulInteractionEnumFactory implements EnumFactory<RestfulInterac
       return RestfulInteraction.VREAD;
     if ("update".equals(codeString))
       return RestfulInteraction.UPDATE;
+    if ("patch".equals(codeString))
+      return RestfulInteraction.PATCH;
     if ("delete".equals(codeString))
       return RestfulInteraction.DELETE;
     if ("history".equals(codeString))
@@ -81,6 +83,8 @@ public class RestfulInteractionEnumFactory implements EnumFactory<RestfulInterac
       return "vread";
     if (code == RestfulInteraction.UPDATE)
       return "update";
+    if (code == RestfulInteraction.PATCH)
+      return "patch";
     if (code == RestfulInteraction.DELETE)
       return "delete";
     if (code == RestfulInteraction.HISTORY)

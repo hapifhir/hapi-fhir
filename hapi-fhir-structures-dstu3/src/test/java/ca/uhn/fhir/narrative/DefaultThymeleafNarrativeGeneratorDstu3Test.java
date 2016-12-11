@@ -60,7 +60,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().addFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
+		value.addName().setFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
 		//@formatter:off
 		value.addAddress()
 			.addLine("123 Fake Street").addLine("Unit 1")

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -145,11 +145,11 @@ public class Library extends MetadataResource {
     /**
      * The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.
      */
-    @Child(name = "content", type = {Attachment.class}, order=13, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "content", type = {Attachment.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The content of the library", formalDefinition="The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content." )
-    protected Attachment content;
+    protected List<Attachment> content;
 
-    private static final long serialVersionUID = -1781432837L;
+    private static final long serialVersionUID = -39463327L;
 
   /**
    * Constructor
@@ -161,11 +161,10 @@ public class Library extends MetadataResource {
   /**
    * Constructor
    */
-    public Library(CodeableConcept type, Enumeration<PublicationStatus> status, Attachment content) {
+    public Library(CodeableConcept type, Enumeration<PublicationStatus> status) {
       super();
       this.type = type;
       this.status = status;
-      this.content = content;
     }
 
     /**
@@ -1374,25 +1373,54 @@ public class Library extends MetadataResource {
     /**
      * @return {@link #content} (The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.)
      */
-    public Attachment getContent() { 
+    public List<Attachment> getContent() { 
       if (this.content == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Library.content");
-        else if (Configuration.doAutoCreate())
-          this.content = new Attachment(); // cc
+        this.content = new ArrayList<Attachment>();
       return this.content;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setContent(List<Attachment> theContent) { 
+      this.content = theContent;
+      return this;
+    }
+
     public boolean hasContent() { 
-      return this.content != null && !this.content.isEmpty();
+      if (this.content == null)
+        return false;
+      for (Attachment item : this.content)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Attachment addContent() { //3
+      Attachment t = new Attachment();
+      if (this.content == null)
+        this.content = new ArrayList<Attachment>();
+      this.content.add(t);
+      return t;
+    }
+
+    public Library addContent(Attachment t) { //3
+      if (t == null)
+        return this;
+      if (this.content == null)
+        this.content = new ArrayList<Attachment>();
+      this.content.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #content} (The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.)
+     * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
      */
-    public Library setContent(Attachment value) { 
-      this.content = value;
-      return this;
+    public Attachment getContentFirstRep() { 
+      if (getContent().isEmpty()) {
+        addContent();
+      }
+      return getContent().get(0);
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1453,7 +1481,7 @@ public class Library extends MetadataResource {
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // ParameterDefinition
         case 629147193: /*dataRequirement*/ return this.dataRequirement == null ? new Base[0] : this.dataRequirement.toArray(new Base[this.dataRequirement.size()]); // DataRequirement
-        case 951530617: /*content*/ return this.content == null ? new Base[0] : new Base[] {this.content}; // Attachment
+        case 951530617: /*content*/ return this.content == null ? new Base[0] : this.content.toArray(new Base[this.content.size()]); // Attachment
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1538,7 +1566,7 @@ public class Library extends MetadataResource {
           this.getDataRequirement().add(castToDataRequirement(value)); // DataRequirement
           break;
         case 951530617: // content
-          this.content = castToAttachment(value); // Attachment
+          this.getContent().add(castToAttachment(value)); // Attachment
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1598,7 +1626,7 @@ public class Library extends MetadataResource {
         else if (name.equals("dataRequirement"))
           this.getDataRequirement().add(castToDataRequirement(value));
         else if (name.equals("content"))
-          this.content = castToAttachment(value); // Attachment
+          this.getContent().add(castToAttachment(value));
         else
           super.setProperty(name, value);
       }
@@ -1631,7 +1659,7 @@ public class Library extends MetadataResource {
         case 666807069:  return addRelatedArtifact(); // RelatedArtifact
         case 1954460585:  return addParameter(); // ParameterDefinition
         case 629147193:  return addDataRequirement(); // DataRequirement
-        case 951530617:  return getContent(); // Attachment
+        case 951530617:  return addContent(); // Attachment
         default: return super.makeProperty(hash, name);
         }
 
@@ -1717,8 +1745,7 @@ public class Library extends MetadataResource {
           return addDataRequirement();
         }
         else if (name.equals("content")) {
-          this.content = new Attachment();
-          return this.content;
+          return addContent();
         }
         else
           return super.addChild(name);
@@ -1793,7 +1820,11 @@ public class Library extends MetadataResource {
           for (DataRequirement i : dataRequirement)
             dst.dataRequirement.add(i.copy());
         };
-        dst.content = content == null ? null : content.copy();
+        if (content != null) {
+          dst.content = new ArrayList<Attachment>();
+          for (Attachment i : content)
+            dst.content.add(i.copy());
+        };
         return dst;
       }
 

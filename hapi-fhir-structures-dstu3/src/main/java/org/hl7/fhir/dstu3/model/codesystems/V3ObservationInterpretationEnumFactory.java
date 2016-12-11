@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -119,6 +119,8 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return V3ObservationInterpretation.HX;
     if ("LX".equals(codeString))
       return V3ObservationInterpretation.LX;
+    if ("HM".equals(codeString))
+      return V3ObservationInterpretation.HM;
     if ("ObservationInterpretationDetection".equals(codeString))
       return V3ObservationInterpretation.OBSERVATIONINTERPRETATIONDETECTION;
     if ("IND".equals(codeString))
@@ -139,6 +141,8 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return V3ObservationInterpretation.EXP;
     if ("UNE".equals(codeString))
       return V3ObservationInterpretation.UNE;
+    if ("OBX".equals(codeString))
+      return V3ObservationInterpretation.OBX;
     if ("ReactivityObservationInterpretation".equals(codeString))
       return V3ObservationInterpretation.REACTIVITYOBSERVATIONINTERPRETATION;
     if ("NR".equals(codeString))
@@ -231,6 +235,8 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return "HX";
     if (code == V3ObservationInterpretation.LX)
       return "LX";
+    if (code == V3ObservationInterpretation.HM)
+      return "HM";
     if (code == V3ObservationInterpretation.OBSERVATIONINTERPRETATIONDETECTION)
       return "ObservationInterpretationDetection";
     if (code == V3ObservationInterpretation.IND)
@@ -251,6 +257,8 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return "EXP";
     if (code == V3ObservationInterpretation.UNE)
       return "UNE";
+    if (code == V3ObservationInterpretation.OBX)
+      return "OBX";
     if (code == V3ObservationInterpretation.REACTIVITYOBSERVATIONINTERPRETATION)
       return "ReactivityObservationInterpretation";
     if (code == V3ObservationInterpretation.NR)

@@ -124,6 +124,9 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 		m.packageName = "org.hl7.fhir.dstu3.model";
 		m.targetFile = new File("../hapi-fhir-structures-dstu3/src/main/resources/org/hl7/fhir/dstu3/model/fhirversion.properties");
 
+//		m.packageName = "org.hl7.fhir.dstu2016may.model";
+//		m.targetFile = new File("../hapi-fhir-structures-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/model/fhirversion.properties");
+
 		m.execute();
 
 	}

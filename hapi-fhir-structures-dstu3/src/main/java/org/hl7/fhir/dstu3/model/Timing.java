@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -218,7 +218,193 @@ public class Timing extends Type implements ICompositeType {
       }
     }
 
+    public enum DayOfWeek {
+        /**
+         * Monday
+         */
+        MON, 
+        /**
+         * Tuesday
+         */
+        TUE, 
+        /**
+         * Wednesday
+         */
+        WED, 
+        /**
+         * Thursday
+         */
+        THU, 
+        /**
+         * Friday
+         */
+        FRI, 
+        /**
+         * Saturday
+         */
+        SAT, 
+        /**
+         * Sunday
+         */
+        SUN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static DayOfWeek fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("mon".equals(codeString))
+          return MON;
+        if ("tue".equals(codeString))
+          return TUE;
+        if ("wed".equals(codeString))
+          return WED;
+        if ("thu".equals(codeString))
+          return THU;
+        if ("fri".equals(codeString))
+          return FRI;
+        if ("sat".equals(codeString))
+          return SAT;
+        if ("sun".equals(codeString))
+          return SUN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown DayOfWeek code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case MON: return "mon";
+            case TUE: return "tue";
+            case WED: return "wed";
+            case THU: return "thu";
+            case FRI: return "fri";
+            case SAT: return "sat";
+            case SUN: return "sun";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case MON: return "http://hl7.org/fhir/days-of-week";
+            case TUE: return "http://hl7.org/fhir/days-of-week";
+            case WED: return "http://hl7.org/fhir/days-of-week";
+            case THU: return "http://hl7.org/fhir/days-of-week";
+            case FRI: return "http://hl7.org/fhir/days-of-week";
+            case SAT: return "http://hl7.org/fhir/days-of-week";
+            case SUN: return "http://hl7.org/fhir/days-of-week";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case MON: return "Monday";
+            case TUE: return "Tuesday";
+            case WED: return "Wednesday";
+            case THU: return "Thursday";
+            case FRI: return "Friday";
+            case SAT: return "Saturday";
+            case SUN: return "Sunday";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case MON: return "Monday";
+            case TUE: return "Tuesday";
+            case WED: return "Wednesday";
+            case THU: return "Thursday";
+            case FRI: return "Friday";
+            case SAT: return "Saturday";
+            case SUN: return "Sunday";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class DayOfWeekEnumFactory implements EnumFactory<DayOfWeek> {
+    public DayOfWeek fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("mon".equals(codeString))
+          return DayOfWeek.MON;
+        if ("tue".equals(codeString))
+          return DayOfWeek.TUE;
+        if ("wed".equals(codeString))
+          return DayOfWeek.WED;
+        if ("thu".equals(codeString))
+          return DayOfWeek.THU;
+        if ("fri".equals(codeString))
+          return DayOfWeek.FRI;
+        if ("sat".equals(codeString))
+          return DayOfWeek.SAT;
+        if ("sun".equals(codeString))
+          return DayOfWeek.SUN;
+        throw new IllegalArgumentException("Unknown DayOfWeek code '"+codeString+"'");
+        }
+        public Enumeration<DayOfWeek> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("mon".equals(codeString))
+          return new Enumeration<DayOfWeek>(this, DayOfWeek.MON);
+        if ("tue".equals(codeString))
+          return new Enumeration<DayOfWeek>(this, DayOfWeek.TUE);
+        if ("wed".equals(codeString))
+          return new Enumeration<DayOfWeek>(this, DayOfWeek.WED);
+        if ("thu".equals(codeString))
+          return new Enumeration<DayOfWeek>(this, DayOfWeek.THU);
+        if ("fri".equals(codeString))
+          return new Enumeration<DayOfWeek>(this, DayOfWeek.FRI);
+        if ("sat".equals(codeString))
+          return new Enumeration<DayOfWeek>(this, DayOfWeek.SAT);
+        if ("sun".equals(codeString))
+          return new Enumeration<DayOfWeek>(this, DayOfWeek.SUN);
+        throw new FHIRException("Unknown DayOfWeek code '"+codeString+"'");
+        }
+    public String toCode(DayOfWeek code) {
+      if (code == DayOfWeek.MON)
+        return "mon";
+      if (code == DayOfWeek.TUE)
+        return "tue";
+      if (code == DayOfWeek.WED)
+        return "wed";
+      if (code == DayOfWeek.THU)
+        return "thu";
+      if (code == DayOfWeek.FRI)
+        return "fri";
+      if (code == DayOfWeek.SAT)
+        return "sat";
+      if (code == DayOfWeek.SUN)
+        return "sun";
+      return "?";
+      }
+    public String toSystem(DayOfWeek code) {
+      return code.getSystem();
+      }
+    }
+
     public enum EventTiming {
+        /**
+         * event occurs during the morning
+         */
+        MORN, 
+        /**
+         * event occurs during the afternoon
+         */
+        AFT, 
+        /**
+         * event occurs during the evening
+         */
+        EVE, 
+        /**
+         * event occurs during the night
+         */
+        NIGHT, 
         /**
          * null
          */
@@ -282,6 +468,14 @@ public class Timing extends Type implements ICompositeType {
         public static EventTiming fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("MORN".equals(codeString))
+          return MORN;
+        if ("AFT".equals(codeString))
+          return AFT;
+        if ("EVE".equals(codeString))
+          return EVE;
+        if ("NIGHT".equals(codeString))
+          return NIGHT;
         if ("HS".equals(codeString))
           return HS;
         if ("WAKE".equals(codeString))
@@ -317,6 +511,10 @@ public class Timing extends Type implements ICompositeType {
         }
         public String toCode() {
           switch (this) {
+            case MORN: return "MORN";
+            case AFT: return "AFT";
+            case EVE: return "EVE";
+            case NIGHT: return "NIGHT";
             case HS: return "HS";
             case WAKE: return "WAKE";
             case C: return "C";
@@ -336,6 +534,10 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
+            case MORN: return "http://hl7.org/fhir/event-timing";
+            case AFT: return "http://hl7.org/fhir/event-timing";
+            case EVE: return "http://hl7.org/fhir/event-timing";
+            case NIGHT: return "http://hl7.org/fhir/event-timing";
             case HS: return "http://hl7.org/fhir/v3/TimingEvent";
             case WAKE: return "http://hl7.org/fhir/v3/TimingEvent";
             case C: return "http://hl7.org/fhir/v3/TimingEvent";
@@ -355,6 +557,10 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
+            case MORN: return "event occurs during the morning";
+            case AFT: return "event occurs during the afternoon";
+            case EVE: return "event occurs during the evening";
+            case NIGHT: return "event occurs during the night";
             case HS: return "";
             case WAKE: return "";
             case C: return "";
@@ -374,6 +580,10 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getDisplay() {
           switch (this) {
+            case MORN: return "Morning";
+            case AFT: return "Afternoon";
+            case EVE: return "Evening";
+            case NIGHT: return "Night";
             case HS: return "HS";
             case WAKE: return "WAKE";
             case C: return "C";
@@ -398,6 +608,14 @@ public class Timing extends Type implements ICompositeType {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("MORN".equals(codeString))
+          return EventTiming.MORN;
+        if ("AFT".equals(codeString))
+          return EventTiming.AFT;
+        if ("EVE".equals(codeString))
+          return EventTiming.EVE;
+        if ("NIGHT".equals(codeString))
+          return EventTiming.NIGHT;
         if ("HS".equals(codeString))
           return EventTiming.HS;
         if ("WAKE".equals(codeString))
@@ -434,6 +652,14 @@ public class Timing extends Type implements ICompositeType {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
+        if ("MORN".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.MORN);
+        if ("AFT".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.AFT);
+        if ("EVE".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.EVE);
+        if ("NIGHT".equals(codeString))
+          return new Enumeration<EventTiming>(this, EventTiming.NIGHT);
         if ("HS".equals(codeString))
           return new Enumeration<EventTiming>(this, EventTiming.HS);
         if ("WAKE".equals(codeString))
@@ -465,6 +691,14 @@ public class Timing extends Type implements ICompositeType {
         throw new FHIRException("Unknown EventTiming code '"+codeString+"'");
         }
     public String toCode(EventTiming code) {
+      if (code == EventTiming.MORN)
+        return "MORN";
+      if (code == EventTiming.AFT)
+        return "AFT";
+      if (code == EventTiming.EVE)
+        return "EVE";
+      if (code == EventTiming.NIGHT)
+        return "NIGHT";
       if (code == EventTiming.HS)
         return "HS";
       if (code == EventTiming.WAKE)
@@ -582,9 +816,24 @@ public class Timing extends Type implements ICompositeType {
         protected Enumeration<UnitsOfTime> periodUnit;
 
         /**
+         * If one or more days of week is provided, then the action happens only on the specified day(s).
+         */
+        @Child(name = "dayOfWeek", type = {CodeType.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="mon | tue | wed | thu | fri | sat | sun", formalDefinition="If one or more days of week is provided, then the action happens only on the specified day(s)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/days-of-week")
+        protected List<Enumeration<DayOfWeek>> dayOfWeek;
+
+        /**
+         * Specified time of day for action to take place.
+         */
+        @Child(name = "timeOfDay", type = {TimeType.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Time of day for action", formalDefinition="Specified time of day for action to take place." )
+        protected List<TimeType> timeOfDay;
+
+        /**
          * A real world event that the occurrence of the event should be tied to.
          */
-        @Child(name = "when", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "when", type = {CodeType.class}, order=14, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Regular life events the event is tied to", formalDefinition="A real world event that the occurrence of the event should be tied to." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/event-timing")
         protected Enumeration<EventTiming> when;
@@ -592,11 +841,11 @@ public class Timing extends Type implements ICompositeType {
         /**
          * The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.
          */
-        @Child(name = "offset", type = {UnsignedIntType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "offset", type = {UnsignedIntType.class}, order=15, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Minutes from event (before or after)", formalDefinition="The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event." )
         protected UnsignedIntType offset;
 
-        private static final long serialVersionUID = -1317919984L;
+        private static final long serialVersionUID = -1646532442L;
 
     /**
      * Constructor
@@ -1210,6 +1459,128 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
+         * @return {@link #dayOfWeek} (If one or more days of week is provided, then the action happens only on the specified day(s).)
+         */
+        public List<Enumeration<DayOfWeek>> getDayOfWeek() { 
+          if (this.dayOfWeek == null)
+            this.dayOfWeek = new ArrayList<Enumeration<DayOfWeek>>();
+          return this.dayOfWeek;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TimingRepeatComponent setDayOfWeek(List<Enumeration<DayOfWeek>> theDayOfWeek) { 
+          this.dayOfWeek = theDayOfWeek;
+          return this;
+        }
+
+        public boolean hasDayOfWeek() { 
+          if (this.dayOfWeek == null)
+            return false;
+          for (Enumeration<DayOfWeek> item : this.dayOfWeek)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #dayOfWeek} (If one or more days of week is provided, then the action happens only on the specified day(s).)
+         */
+        public Enumeration<DayOfWeek> addDayOfWeekElement() {//2 
+          Enumeration<DayOfWeek> t = new Enumeration<DayOfWeek>(new DayOfWeekEnumFactory());
+          if (this.dayOfWeek == null)
+            this.dayOfWeek = new ArrayList<Enumeration<DayOfWeek>>();
+          this.dayOfWeek.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #dayOfWeek} (If one or more days of week is provided, then the action happens only on the specified day(s).)
+         */
+        public TimingRepeatComponent addDayOfWeek(DayOfWeek value) { //1
+          Enumeration<DayOfWeek> t = new Enumeration<DayOfWeek>(new DayOfWeekEnumFactory());
+          t.setValue(value);
+          if (this.dayOfWeek == null)
+            this.dayOfWeek = new ArrayList<Enumeration<DayOfWeek>>();
+          this.dayOfWeek.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #dayOfWeek} (If one or more days of week is provided, then the action happens only on the specified day(s).)
+         */
+        public boolean hasDayOfWeek(DayOfWeek value) { 
+          if (this.dayOfWeek == null)
+            return false;
+          for (Enumeration<DayOfWeek> v : this.dayOfWeek)
+            if (v.getValue().equals(value)) // code
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #timeOfDay} (Specified time of day for action to take place.)
+         */
+        public List<TimeType> getTimeOfDay() { 
+          if (this.timeOfDay == null)
+            this.timeOfDay = new ArrayList<TimeType>();
+          return this.timeOfDay;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public TimingRepeatComponent setTimeOfDay(List<TimeType> theTimeOfDay) { 
+          this.timeOfDay = theTimeOfDay;
+          return this;
+        }
+
+        public boolean hasTimeOfDay() { 
+          if (this.timeOfDay == null)
+            return false;
+          for (TimeType item : this.timeOfDay)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #timeOfDay} (Specified time of day for action to take place.)
+         */
+        public TimeType addTimeOfDayElement() {//2 
+          TimeType t = new TimeType();
+          if (this.timeOfDay == null)
+            this.timeOfDay = new ArrayList<TimeType>();
+          this.timeOfDay.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #timeOfDay} (Specified time of day for action to take place.)
+         */
+        public TimingRepeatComponent addTimeOfDay(String value) { //1
+          TimeType t = new TimeType();
+          t.setValue(value);
+          if (this.timeOfDay == null)
+            this.timeOfDay = new ArrayList<TimeType>();
+          this.timeOfDay.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #timeOfDay} (Specified time of day for action to take place.)
+         */
+        public boolean hasTimeOfDay(String value) { 
+          if (this.timeOfDay == null)
+            return false;
+          for (TimeType v : this.timeOfDay)
+            if (v.equals(value)) // time
+              return true;
+          return false;
+        }
+
+        /**
          * @return {@link #when} (A real world event that the occurrence of the event should be tied to.). This is the underlying object with id, value and extensions. The accessor "getWhen" gives direct access to the value
          */
         public Enumeration<EventTiming> getWhenElement() { 
@@ -1316,6 +1687,8 @@ public class Timing extends Type implements ICompositeType {
           childrenList.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, java.lang.Integer.MAX_VALUE, period));
           childrenList.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, java.lang.Integer.MAX_VALUE, periodMax));
           childrenList.add(new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, java.lang.Integer.MAX_VALUE, periodUnit));
+          childrenList.add(new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek));
+          childrenList.add(new Property("timeOfDay", "time", "Specified time of day for action to take place.", 0, java.lang.Integer.MAX_VALUE, timeOfDay));
           childrenList.add(new Property("when", "code", "A real world event that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
           childrenList.add(new Property("offset", "unsignedInt", "The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.", 0, java.lang.Integer.MAX_VALUE, offset));
         }
@@ -1334,6 +1707,8 @@ public class Timing extends Type implements ICompositeType {
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // DecimalType
         case 566580195: /*periodMax*/ return this.periodMax == null ? new Base[0] : new Base[] {this.periodMax}; // DecimalType
         case 384367333: /*periodUnit*/ return this.periodUnit == null ? new Base[0] : new Base[] {this.periodUnit}; // Enumeration<UnitsOfTime>
+        case -730552025: /*dayOfWeek*/ return this.dayOfWeek == null ? new Base[0] : this.dayOfWeek.toArray(new Base[this.dayOfWeek.size()]); // Enumeration<DayOfWeek>
+        case 21434232: /*timeOfDay*/ return this.timeOfDay == null ? new Base[0] : this.timeOfDay.toArray(new Base[this.timeOfDay.size()]); // TimeType
         case 3648314: /*when*/ return this.when == null ? new Base[0] : new Base[] {this.when}; // Enumeration<EventTiming>
         case -1019779949: /*offset*/ return this.offset == null ? new Base[0] : new Base[] {this.offset}; // UnsignedIntType
         default: return super.getProperty(hash, name, checkValid);
@@ -1377,6 +1752,12 @@ public class Timing extends Type implements ICompositeType {
         case 384367333: // periodUnit
           this.periodUnit = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
           break;
+        case -730552025: // dayOfWeek
+          this.getDayOfWeek().add(new DayOfWeekEnumFactory().fromType(value)); // Enumeration<DayOfWeek>
+          break;
+        case 21434232: // timeOfDay
+          this.getTimeOfDay().add(castToTime(value)); // TimeType
+          break;
         case 3648314: // when
           this.when = new EventTimingEnumFactory().fromType(value); // Enumeration<EventTiming>
           break;
@@ -1412,6 +1793,10 @@ public class Timing extends Type implements ICompositeType {
           this.periodMax = castToDecimal(value); // DecimalType
         else if (name.equals("periodUnit"))
           this.periodUnit = new UnitsOfTimeEnumFactory().fromType(value); // Enumeration<UnitsOfTime>
+        else if (name.equals("dayOfWeek"))
+          this.getDayOfWeek().add(new DayOfWeekEnumFactory().fromType(value));
+        else if (name.equals("timeOfDay"))
+          this.getTimeOfDay().add(castToTime(value));
         else if (name.equals("when"))
           this.when = new EventTimingEnumFactory().fromType(value); // Enumeration<EventTiming>
         else if (name.equals("offset"))
@@ -1434,6 +1819,8 @@ public class Timing extends Type implements ICompositeType {
         case -991726143: throw new FHIRException("Cannot make property period as it is not a complex type"); // DecimalType
         case 566580195: throw new FHIRException("Cannot make property periodMax as it is not a complex type"); // DecimalType
         case 384367333: throw new FHIRException("Cannot make property periodUnit as it is not a complex type"); // Enumeration<UnitsOfTime>
+        case -730552025: throw new FHIRException("Cannot make property dayOfWeek as it is not a complex type"); // Enumeration<DayOfWeek>
+        case 21434232: throw new FHIRException("Cannot make property timeOfDay as it is not a complex type"); // TimeType
         case 3648314: throw new FHIRException("Cannot make property when as it is not a complex type"); // Enumeration<EventTiming>
         case -1019779949: throw new FHIRException("Cannot make property offset as it is not a complex type"); // UnsignedIntType
         default: return super.makeProperty(hash, name);
@@ -1485,6 +1872,12 @@ public class Timing extends Type implements ICompositeType {
         else if (name.equals("periodUnit")) {
           throw new FHIRException("Cannot call addChild on a primitive type Timing.periodUnit");
         }
+        else if (name.equals("dayOfWeek")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.dayOfWeek");
+        }
+        else if (name.equals("timeOfDay")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Timing.timeOfDay");
+        }
         else if (name.equals("when")) {
           throw new FHIRException("Cannot call addChild on a primitive type Timing.when");
         }
@@ -1509,6 +1902,16 @@ public class Timing extends Type implements ICompositeType {
         dst.period = period == null ? null : period.copy();
         dst.periodMax = periodMax == null ? null : periodMax.copy();
         dst.periodUnit = periodUnit == null ? null : periodUnit.copy();
+        if (dayOfWeek != null) {
+          dst.dayOfWeek = new ArrayList<Enumeration<DayOfWeek>>();
+          for (Enumeration<DayOfWeek> i : dayOfWeek)
+            dst.dayOfWeek.add(i.copy());
+        };
+        if (timeOfDay != null) {
+          dst.timeOfDay = new ArrayList<TimeType>();
+          for (TimeType i : timeOfDay)
+            dst.timeOfDay.add(i.copy());
+        };
         dst.when = when == null ? null : when.copy();
         dst.offset = offset == null ? null : offset.copy();
         return dst;
@@ -1525,7 +1928,8 @@ public class Timing extends Type implements ICompositeType {
            && compareDeep(duration, o.duration, true) && compareDeep(durationMax, o.durationMax, true) && compareDeep(durationUnit, o.durationUnit, true)
            && compareDeep(frequency, o.frequency, true) && compareDeep(frequencyMax, o.frequencyMax, true)
            && compareDeep(period, o.period, true) && compareDeep(periodMax, o.periodMax, true) && compareDeep(periodUnit, o.periodUnit, true)
-           && compareDeep(when, o.when, true) && compareDeep(offset, o.offset, true);
+           && compareDeep(dayOfWeek, o.dayOfWeek, true) && compareDeep(timeOfDay, o.timeOfDay, true) && compareDeep(when, o.when, true)
+           && compareDeep(offset, o.offset, true);
       }
 
       @Override
@@ -1539,13 +1943,14 @@ public class Timing extends Type implements ICompositeType {
            && compareValues(durationMax, o.durationMax, true) && compareValues(durationUnit, o.durationUnit, true)
            && compareValues(frequency, o.frequency, true) && compareValues(frequencyMax, o.frequencyMax, true)
            && compareValues(period, o.period, true) && compareValues(periodMax, o.periodMax, true) && compareValues(periodUnit, o.periodUnit, true)
-           && compareValues(when, o.when, true) && compareValues(offset, o.offset, true);
+           && compareValues(dayOfWeek, o.dayOfWeek, true) && compareValues(timeOfDay, o.timeOfDay, true) && compareValues(when, o.when, true)
+           && compareValues(offset, o.offset, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(bounds, count, countMax
           , duration, durationMax, durationUnit, frequency, frequencyMax, period, periodMax
-          , periodUnit, when, offset);
+          , periodUnit, dayOfWeek, timeOfDay, when, offset);
       }
 
   public String fhirType() {

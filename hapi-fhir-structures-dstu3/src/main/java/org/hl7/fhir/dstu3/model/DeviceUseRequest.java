@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -50,29 +50,33 @@ public class DeviceUseRequest extends DomainResource {
 
     public enum DeviceUseRequestStatus {
         /**
-         * The request is in preliminary form prior to being sent.
+         * The request has been created but is not yet complete or ready for action
          */
         DRAFT, 
         /**
-         * The request is complete and is ready for fulfillment.
+         * The request is ready to be acted upon
          */
         ACTIVE, 
         /**
-         * The request has been held by originating system/user request.
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future
          */
         SUSPENDED, 
         /**
-         * The work has been completed, the report(s) released, and no further work is planned.
+         * The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.
+         */
+        CANCELLED, 
+        /**
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester
          */
         COMPLETED, 
         /**
-         * The request was entered in error and voided.
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
          */
         ENTEREDINERROR, 
         /**
-         * The request has been withdrawn.
+         * The authoring system does not know which of the status values currently applies for this request
          */
-        CANCELLED, 
+        UNKNOWN, 
         /**
          * added to help the parsers with the generic types
          */
@@ -86,12 +90,14 @@ public class DeviceUseRequest extends DomainResource {
           return ACTIVE;
         if ("suspended".equals(codeString))
           return SUSPENDED;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        if ("cancelled".equals(codeString))
-          return CANCELLED;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -102,9 +108,10 @@ public class DeviceUseRequest extends DomainResource {
             case DRAFT: return "draft";
             case ACTIVE: return "active";
             case SUSPENDED: return "suspended";
+            case CANCELLED: return "cancelled";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
-            case CANCELLED: return "cancelled";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -113,20 +120,22 @@ public class DeviceUseRequest extends DomainResource {
             case DRAFT: return "http://hl7.org/fhir/request-status";
             case ACTIVE: return "http://hl7.org/fhir/request-status";
             case SUSPENDED: return "http://hl7.org/fhir/request-status";
+            case CANCELLED: return "http://hl7.org/fhir/request-status";
             case COMPLETED: return "http://hl7.org/fhir/request-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/request-status";
-            case CANCELLED: return "http://hl7.org/fhir/request-status";
+            case UNKNOWN: return "http://hl7.org/fhir/request-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The request is in preliminary form prior to being sent.";
-            case ACTIVE: return "The request is complete and is ready for fulfillment.";
-            case SUSPENDED: return "The request has been held by originating system/user request.";
-            case COMPLETED: return "The work has been completed, the report(s) released, and no further work is planned.";
-            case ENTEREDINERROR: return "The request was entered in error and voided.";
-            case CANCELLED: return "The request has been withdrawn.";
+            case DRAFT: return "The request has been created but is not yet complete or ready for action";
+            case ACTIVE: return "The request is ready to be acted upon";
+            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
+            case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request";
             default: return "?";
           }
         }
@@ -135,9 +144,10 @@ public class DeviceUseRequest extends DomainResource {
             case DRAFT: return "Draft";
             case ACTIVE: return "Active";
             case SUSPENDED: return "Suspended";
+            case CANCELLED: return "Cancelled";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
-            case CANCELLED: return "Cancelled";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -154,12 +164,14 @@ public class DeviceUseRequest extends DomainResource {
           return DeviceUseRequestStatus.ACTIVE;
         if ("suspended".equals(codeString))
           return DeviceUseRequestStatus.SUSPENDED;
+        if ("cancelled".equals(codeString))
+          return DeviceUseRequestStatus.CANCELLED;
         if ("completed".equals(codeString))
           return DeviceUseRequestStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
           return DeviceUseRequestStatus.ENTEREDINERROR;
-        if ("cancelled".equals(codeString))
-          return DeviceUseRequestStatus.CANCELLED;
+        if ("unknown".equals(codeString))
+          return DeviceUseRequestStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown DeviceUseRequestStatus code '"+codeString+"'");
         }
         public Enumeration<DeviceUseRequestStatus> fromType(Base code) throws FHIRException {
@@ -174,12 +186,14 @@ public class DeviceUseRequest extends DomainResource {
           return new Enumeration<DeviceUseRequestStatus>(this, DeviceUseRequestStatus.ACTIVE);
         if ("suspended".equals(codeString))
           return new Enumeration<DeviceUseRequestStatus>(this, DeviceUseRequestStatus.SUSPENDED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<DeviceUseRequestStatus>(this, DeviceUseRequestStatus.CANCELLED);
         if ("completed".equals(codeString))
           return new Enumeration<DeviceUseRequestStatus>(this, DeviceUseRequestStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<DeviceUseRequestStatus>(this, DeviceUseRequestStatus.ENTEREDINERROR);
-        if ("cancelled".equals(codeString))
-          return new Enumeration<DeviceUseRequestStatus>(this, DeviceUseRequestStatus.CANCELLED);
+        if ("unknown".equals(codeString))
+          return new Enumeration<DeviceUseRequestStatus>(this, DeviceUseRequestStatus.UNKNOWN);
         throw new FHIRException("Unknown DeviceUseRequestStatus code '"+codeString+"'");
         }
     public String toCode(DeviceUseRequestStatus code) {
@@ -189,12 +203,14 @@ public class DeviceUseRequest extends DomainResource {
         return "active";
       if (code == DeviceUseRequestStatus.SUSPENDED)
         return "suspended";
+      if (code == DeviceUseRequestStatus.CANCELLED)
+        return "cancelled";
       if (code == DeviceUseRequestStatus.COMPLETED)
         return "completed";
       if (code == DeviceUseRequestStatus.ENTEREDINERROR)
         return "entered-in-error";
-      if (code == DeviceUseRequestStatus.CANCELLED)
-        return "cancelled";
+      if (code == DeviceUseRequestStatus.UNKNOWN)
+        return "unknown";
       return "?";
       }
     public String toSystem(DeviceUseRequestStatus code) {

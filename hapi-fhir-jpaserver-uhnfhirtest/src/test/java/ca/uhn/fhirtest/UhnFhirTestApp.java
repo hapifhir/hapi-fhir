@@ -75,7 +75,7 @@ public class UhnFhirTestApp {
 			Patient p1 = new Patient();
 			p1.getMeta().addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
 			p1.addIdentifier().setSystem("foo:bar").setValue("12345");
-			p1.addName().addFamily("Smith").addGiven("John");
+			p1.addName().setFamily("Smith").addGiven("John");
 			p1.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
 
 			Subscription subs = new Subscription();

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,6 +43,8 @@ public class FilterOperatorEnumFactory implements EnumFactory<FilterOperator> {
       return FilterOperator.EQUAL;
     if ("is-a".equals(codeString))
       return FilterOperator.ISA;
+    if ("descendent-of".equals(codeString))
+      return FilterOperator.DESCENDENTOF;
     if ("is-not-a".equals(codeString))
       return FilterOperator.ISNOTA;
     if ("regex".equals(codeString))
@@ -53,6 +55,8 @@ public class FilterOperatorEnumFactory implements EnumFactory<FilterOperator> {
       return FilterOperator.NOTIN;
     if ("generalizes".equals(codeString))
       return FilterOperator.GENERALIZES;
+    if ("exists".equals(codeString))
+      return FilterOperator.EXISTS;
     throw new IllegalArgumentException("Unknown FilterOperator code '"+codeString+"'");
   }
 
@@ -61,6 +65,8 @@ public class FilterOperatorEnumFactory implements EnumFactory<FilterOperator> {
       return "=";
     if (code == FilterOperator.ISA)
       return "is-a";
+    if (code == FilterOperator.DESCENDENTOF)
+      return "descendent-of";
     if (code == FilterOperator.ISNOTA)
       return "is-not-a";
     if (code == FilterOperator.REGEX)
@@ -71,6 +77,8 @@ public class FilterOperatorEnumFactory implements EnumFactory<FilterOperator> {
       return "not-in";
     if (code == FilterOperator.GENERALIZES)
       return "generalizes";
+    if (code == FilterOperator.EXISTS)
+      return "exists";
     return "?";
   }
 

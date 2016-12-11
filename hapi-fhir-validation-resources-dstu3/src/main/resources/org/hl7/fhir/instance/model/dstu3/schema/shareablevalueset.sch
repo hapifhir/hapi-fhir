@@ -40,7 +40,7 @@
     <sch:title>ValueSet.compose.include</sch:title>
     <sch:rule context="f:ValueSet/f:compose/f:include">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
-      <sch:assert test="(not(exists(f:concept) or exists(f:filter)) or exists(f:system)">A value set with concepts or filters SHALL include a system (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:concept) or exists(f:filter)) or exists(f:system)">A value set with concepts or filters SHALL include a system (inherited)</sch:assert>
       <sch:assert test="not(exists(f:concept)) or not(exists(f:filter))">Cannot have both concept and filter (inherited)</sch:assert>
       <sch:assert test="exists(f:valueSet) or exists(f:system)">A value set include/exclude SHALL have a value set or a system (inherited)</sch:assert>
     </sch:rule>

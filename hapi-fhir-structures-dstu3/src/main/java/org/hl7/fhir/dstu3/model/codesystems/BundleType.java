@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,7 +69,7 @@ public enum BundleType {
          */
         SEARCHSET, 
         /**
-         * The bundle is a set of resources collected into a single document for ease of distribution.
+         * The bundle is a set of resources collected into a single package for ease of distribution.
          */
         COLLECTION, 
         /**
@@ -126,7 +126,7 @@ public enum BundleType {
             case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.";
             case HISTORY: return "The bundle is a list of resources from a history interaction on a server.";
             case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.";
-            case COLLECTION: return "The bundle is a set of resources collected into a single document for ease of distribution.";
+            case COLLECTION: return "The bundle is a set of resources collected into a single package for ease of distribution.";
             default: return "?";
           }
         }

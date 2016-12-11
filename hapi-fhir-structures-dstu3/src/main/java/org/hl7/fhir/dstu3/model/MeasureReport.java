@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -266,35 +266,35 @@ public class MeasureReport extends DomainResource {
         /**
          * The identifier of the population group as defined in the measure definition.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifier of the population group being reported", formalDefinition="The identifier of the population group as defined in the measure definition." )
         protected Identifier identifier;
 
         /**
          * The populations that make up the population group, one for each type of population appropriate for the measure.
          */
-        @Child(name = "population", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "population", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="The populations in the group", formalDefinition="The populations that make up the population group, one for each type of population appropriate for the measure." )
         protected List<MeasureReportGroupPopulationComponent> population;
 
         /**
          * The measure score.
          */
-        @Child(name = "measureScore", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "measureScore", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The measure score", formalDefinition="The measure score." )
         protected DecimalType measureScore;
 
         /**
          * When a measure includes multiple stratifiers, there will be a stratifier group for each stratifier defined by the measure.
          */
-        @Child(name = "stratifier", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "stratifier", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Stratification results", formalDefinition="When a measure includes multiple stratifiers, there will be a stratifier group for each stratifier defined by the measure." )
         protected List<MeasureReportGroupStratifierComponent> stratifier;
 
         /**
          * Supplemental data elements for the measure provide additional information requested by the measure for each patient involved in the populations.
          */
-        @Child(name = "supplementalData", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "supplementalData", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Supplemental data elements for the measure", formalDefinition="Supplemental data elements for the measure provide additional information requested by the measure for each patient involved in the populations." )
         protected List<MeasureReportGroupSupplementalDataComponent> supplementalData;
 
@@ -723,7 +723,7 @@ public class MeasureReport extends DomainResource {
         /**
          * The type of the population.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-score", formalDefinition="The type of the population." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-population")
         protected CodeType type;
@@ -731,14 +731,14 @@ public class MeasureReport extends DomainResource {
         /**
          * The number of members of the population.
          */
-        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Size of the population", formalDefinition="The number of members of the population." )
         protected IntegerType count;
 
         /**
          * This element refers to a List of patient level MeasureReport resources, one for each patient in this population.
          */
-        @Child(name = "patients", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "patients", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="For patient-list reports, the patients in this population", formalDefinition="This element refers to a List of patient level MeasureReport resources, one for each patient in this population." )
         protected Reference patients;
 
@@ -1018,14 +1018,14 @@ public class MeasureReport extends DomainResource {
         /**
          * The identifier of this stratifier, as defined in the measure definition.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifier of the stratifier", formalDefinition="The identifier of this stratifier, as defined in the measure definition." )
         protected Identifier identifier;
 
         /**
          * This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.
          */
-        @Child(name = "group", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "group", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Stratum results, one for each unique value in the stratifier", formalDefinition="This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value." )
         protected List<StratifierGroupComponent> group;
 
@@ -1234,21 +1234,21 @@ public class MeasureReport extends DomainResource {
         /**
          * The value for this stratum, expressed as a string. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique.
          */
-        @Child(name = "value", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "value", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The stratum value, e.g. male", formalDefinition="The value for this stratum, expressed as a string. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique." )
         protected StringType value;
 
         /**
          * The populations that make up the stratum, one for each type of population appropriate to the measure.
          */
-        @Child(name = "population", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "population", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Population results in this stratum", formalDefinition="The populations that make up the stratum, one for each type of population appropriate to the measure." )
         protected List<StratifierGroupPopulationComponent> population;
 
         /**
          * The measure score for this stratum.
          */
-        @Child(name = "measureScore", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "measureScore", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The measure score", formalDefinition="The measure score for this stratum." )
         protected DecimalType measureScore;
 
@@ -1558,7 +1558,7 @@ public class MeasureReport extends DomainResource {
         /**
          * The type of the population.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="initial-population | numerator | numerator-exclusion | denominator | denominator-exclusion | denominator-exception | measure-population | measure-population-exclusion | measure-score", formalDefinition="The type of the population." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-population")
         protected CodeType type;
@@ -1566,14 +1566,14 @@ public class MeasureReport extends DomainResource {
         /**
          * The number of members of the population in this stratum.
          */
-        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Size of the population", formalDefinition="The number of members of the population in this stratum." )
         protected IntegerType count;
 
         /**
          * This element refers to a List of patient level MeasureReport resources, one for each patient in this population in this stratum.
          */
-        @Child(name = "patients", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "patients", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="For patient-list reports, the patients in this population", formalDefinition="This element refers to a List of patient level MeasureReport resources, one for each patient in this population in this stratum." )
         protected Reference patients;
 
@@ -1853,14 +1853,14 @@ public class MeasureReport extends DomainResource {
         /**
          * The identifier of the supplemental data element as defined in the measure.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifier of the supplemental data element", formalDefinition="The identifier of the supplemental data element as defined in the measure." )
         protected Identifier identifier;
 
         /**
          * This element contains the results for a single value within the supplemental data. For example, when reporting supplemental data for administrative gender, there will be four groups, one for each possible gender value.
          */
-        @Child(name = "group", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "group", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Supplemental data results, one for each unique supplemental data value", formalDefinition="This element contains the results for a single value within the supplemental data. For example, when reporting supplemental data for administrative gender, there will be four groups, one for each possible gender value." )
         protected List<SupplementalDataGroupComponent> group;
 
@@ -2069,21 +2069,21 @@ public class MeasureReport extends DomainResource {
         /**
          * The value for this supplemental data element, expressed as a string.  When defining supplemental data  on complex values, the value must be rendered such that the value for each group within the supplemental data element is unique.
          */
-        @Child(name = "value", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "value", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The data value, e.g. male", formalDefinition="The value for this supplemental data element, expressed as a string.  When defining supplemental data  on complex values, the value must be rendered such that the value for each group within the supplemental data element is unique." )
         protected StringType value;
 
         /**
          * The number of members in the supplemental data group.
          */
-        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Number of members in the group", formalDefinition="The number of members in the supplemental data group." )
         protected IntegerType count;
 
         /**
          * This element refers to a List of patient level MeasureReport resources, one for each patient in this population.
          */
-        @Child(name = "patients", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "patients", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="For patient-list reports, the patients in this population", formalDefinition="This element refers to a List of patient level MeasureReport resources, one for each patient in this population." )
         protected Reference patients;
 
@@ -2427,14 +2427,14 @@ public class MeasureReport extends DomainResource {
     /**
      * The results of the calculation, one for each population group in the measure.
      */
-    @Child(name = "group", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "group", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Measure results for each group", formalDefinition="The results of the calculation, one for each population group in the measure." )
     protected List<MeasureReportGroupComponent> group;
 
     /**
      * A reference to a Bundle containing the Resources that were used in the evaluation of this report.
      */
-    @Child(name = "evaluatedResources", type = {Bundle.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "evaluatedResources", type = {Bundle.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Evaluated Resources", formalDefinition="A reference to a Bundle containing the Resources that were used in the evaluation of this report." )
     protected Reference evaluatedResources;
 

@@ -39,8 +39,8 @@ public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().addGiven("testSearchStringParamWithNonNormalized_h\u00F6ra");
-			patient.addName().addFamily("AAAS");
-			patient.addName().addFamily("CCC");
+			patient.addName().addGiven("AAAS");
+			patient.addName().addGiven("CCC");
 			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id2;
@@ -48,8 +48,8 @@ public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().addGiven("testSearchStringParamWithNonNormalized_HORA");
-			patient.addName().addFamily("AAAB");
-			patient.addName().addFamily("CCC");
+			patient.addName().addGiven("AAAB");
+			patient.addName().addGiven("CCC");
 			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id3;

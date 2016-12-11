@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -189,7 +189,7 @@ public enum ResourceTypes {
          */
         DOMAINRESOURCE, 
         /**
-         * This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.
+         * This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.
          */
         ELIGIBILITYREQUEST, 
         /**
@@ -317,6 +317,10 @@ public enum ResourceTypes {
          */
         MEDICATIONSTATEMENT, 
         /**
+         * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
+         */
+        MESSAGEDEFINITION, 
+        /**
          * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
          */
         MESSAGEHEADER, 
@@ -416,6 +420,14 @@ public enum ResourceTypes {
          * A group of related requests that can be used to capture intended activities that have inter-dependencies such as "give this medication after that one".
          */
         REQUESTGROUP, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSTUDY, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSUBJECT, 
         /**
          * This is the base resource type for everything.
          */
@@ -639,6 +651,8 @@ public enum ResourceTypes {
           return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return MEDICATIONSTATEMENT;
+        if ("MessageDefinition".equals(codeString))
+          return MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
           return MESSAGEHEADER;
         if ("NamingSystem".equals(codeString))
@@ -689,6 +703,10 @@ public enum ResourceTypes {
           return RELATEDPERSON;
         if ("RequestGroup".equals(codeString))
           return REQUESTGROUP;
+        if ("ResearchStudy".equals(codeString))
+          return RESEARCHSTUDY;
+        if ("ResearchSubject".equals(codeString))
+          return RESEARCHSUBJECT;
         if ("Resource".equals(codeString))
           return RESOURCE;
         if ("RiskAssessment".equals(codeString))
@@ -801,6 +819,7 @@ public enum ResourceTypes {
             case MEDICATIONDISPENSE: return "MedicationDispense";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
             case NAMINGSYSTEM: return "NamingSystem";
             case NUTRITIONREQUEST: return "NutritionRequest";
@@ -826,6 +845,8 @@ public enum ResourceTypes {
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
             case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
@@ -891,7 +912,7 @@ public enum ResourceTypes {
             case DOCUMENTMANIFEST: return "A manifest that defines a set of documents.";
             case DOCUMENTREFERENCE: return "A reference to a document .";
             case DOMAINRESOURCE: return "A resource that includes narrative, extensions, and contained resources.";
-            case ELIGIBILITYREQUEST: return "This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.";
+            case ELIGIBILITYREQUEST: return "This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.";
             case ELIGIBILITYRESPONSE: return "This resource provides eligibility and plan details from the processing of an Eligibility resource.";
             case ENCOUNTER: return "An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.";
             case ENDPOINT: return "The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.";
@@ -923,6 +944,7 @@ public enum ResourceTypes {
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
             case MEDICATIONREQUEST: return "An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
             case NUTRITIONREQUEST: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
@@ -948,6 +970,8 @@ public enum ResourceTypes {
             case REFERRALREQUEST: return "Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.";
             case RELATEDPERSON: return "Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.";
             case REQUESTGROUP: return "A group of related requests that can be used to capture intended activities that have inter-dependencies such as \"give this medication after that one\".";
+            case RESEARCHSTUDY: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
+            case RESEARCHSUBJECT: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
             case RESOURCE: return "This is the base resource type for everything.";
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slot(s) of time that may be available for booking appointments.";
@@ -1042,6 +1066,7 @@ public enum ResourceTypes {
             case MEDICATIONDISPENSE: return "MedicationDispense";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
             case NAMINGSYSTEM: return "NamingSystem";
             case NUTRITIONREQUEST: return "NutritionRequest";
@@ -1067,6 +1092,8 @@ public enum ResourceTypes {
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
             case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";

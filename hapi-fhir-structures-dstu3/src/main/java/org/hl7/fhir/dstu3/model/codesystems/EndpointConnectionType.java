@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -89,6 +89,10 @@ public enum EndpointConnectionType {
          */
         SECUREEMAIL, 
         /**
+         * Direct Project information - http://wiki.directproject.org/
+         */
+        DIRECTPROJECT, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -121,6 +125,8 @@ public enum EndpointConnectionType {
           return HL7V2MLLP;
         if ("secure-email".equals(codeString))
           return SECUREEMAIL;
+        if ("direct-project".equals(codeString))
+          return DIRECTPROJECT;
         throw new FHIRException("Unknown EndpointConnectionType code '"+codeString+"'");
         }
         public String toCode() {
@@ -138,6 +144,7 @@ public enum EndpointConnectionType {
             case HL7FHIRMSG: return "hl7-fhir-msg";
             case HL7V2MLLP: return "hl7v2-mllp";
             case SECUREEMAIL: return "secure-email";
+            case DIRECTPROJECT: return "direct-project";
             default: return "?";
           }
         }
@@ -159,6 +166,7 @@ public enum EndpointConnectionType {
             case HL7FHIRMSG: return "";
             case HL7V2MLLP: return "HL7v2 messages over an LLP TCP connection";
             case SECUREEMAIL: return "email delivery using a digital certificate to encrypt the content using the public key, receiver must have the private key to decrypt the content";
+            case DIRECTPROJECT: return "Direct Project information - http://wiki.directproject.org/";
             default: return "?";
           }
         }
@@ -177,6 +185,7 @@ public enum EndpointConnectionType {
             case HL7FHIRMSG: return "HL7 FHIR Messaging";
             case HL7V2MLLP: return "HL7 v2 MLLP";
             case SECUREEMAIL: return "Secure email";
+            case DIRECTPROJECT: return "Direct Project";
             default: return "?";
           }
     }

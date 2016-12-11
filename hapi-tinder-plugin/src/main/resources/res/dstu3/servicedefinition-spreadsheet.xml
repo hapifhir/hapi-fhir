@@ -20,11 +20,11 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>11145</WindowHeight>
-  <WindowWidth>24690</WindowWidth>
+  <WindowHeight>7230</WindowHeight>
+  <WindowWidth>22200</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
@@ -4045,7 +4045,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4930,7 +4929,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Request Id</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">An optional client-provided identifier to track the request</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">An optional client-provided identifier to track the request.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4942,7 +4941,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Evaluate At</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">An optional date and time specifying that the evaluation should be performed as though it was the given date and time. The most direct implication of this is that references to &quot;Now&quot; within the evaluation logic of the module should result in this value. In addition, wherever possible, the data accessed by the module should appear as though it was accessed at this time. The evaluateAtDateTime value may be any time in the past or future, enabling both retrospective and prospective scenarios. If no value is provided, the date and time of the request is assumed</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">An optional date and time specifying that the evaluation should be performed as though it was the given date and time. The most direct implication of this is that references to &quot;Now&quot; within the evaluation logic of the module should result in this value. In addition, wherever possible, the data accessed by the module should appear as though it was accessed at this time. The evaluateAtDateTime value may be any time in the past or future, enabling both retrospective and prospective scenarios. If no value is provided, the date and time of the request is assumed.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4954,7 +4953,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Input Parameters</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The input parameters for a request, if any. These parameters are defined by the module that is the target of the evaluation, and typically supply patient-independent information to the module</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The input parameters for a request, if any. These parameters are defined by the module that is the target of the evaluation, and typically supply patient-independent information to the module.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4966,7 +4965,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Input Data</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The input data for the request. These data are defined by the data requirements of the module and typically provide patient-dependent information</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The input data for the request. These data are defined by the data requirements of the module and typically provide patient-dependent information.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4978,7 +4977,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Patient</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The patient in context, if any</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The patient in context, if any.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4990,7 +4989,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Encounter</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The encounter in context, if any</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The encounter in context, if any.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5002,7 +5001,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Initiating Organization</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The organization initiating the request</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The organization initiating the request.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5014,7 +5013,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Initiating Person</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The person initiating the request</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The person initiating the request.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5026,7 +5025,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">User Type</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.)</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The type of user initiating the request, e.g. patient, healthcare provider, or specific type of healthcare provider (physician, nurse, etc.).</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5038,7 +5037,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">User Language</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Preferred language of the person using the system</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Preferred language of the person using the system.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5050,7 +5049,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">User Task Context</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The task the system user is performing, e.g. laboratory results review, medication list review, etc. This information can be used to tailor decision support outputs, such as recommended information resources.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5062,7 +5061,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Receiving Organization</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The organization that will receive the response</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The organization that will receive the response.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5074,7 +5073,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Receiving Person</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The person in the receiving organization that will receive the response</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The person in the receiving organization that will receive the response.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5086,7 +5085,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Recipient Type</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The type of individual that will consume the response content. This may be different from the requesting user type (e.g. if a clinician is getting disease management guidance for provision to a patient). E.g. patient, healthcare provider or specific type of healthcare provider (physician, nurse, etc.)</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The type of individual that will consume the response content. This may be different from the requesting user type (e.g. if a clinician is getting disease management guidance for provision to a patient). E.g. patient, healthcare provider or specific type of healthcare provider (physician, nurse, etc.).</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5098,7 +5097,7 @@
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Recipient Language</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Preferred language of the person that will consume the content</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Preferred language of the person that will consume the content.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5110,7 +5109,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Setting</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The current setting of the request (inpatient, outpatient, etc)</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The current setting of the request (inpatient, outpatient, etc).</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5122,7 +5121,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Setting Context</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Additional detail about the setting of the request, if any</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Additional detail about the setting of the request, if any.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5130,11 +5129,11 @@
     <Cell ss:StyleID="s115"><Data ss:Type="String">out</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s115"><Data ss:Type="String">CarePlan</Data></Cell>
+    <Cell ss:StyleID="s115"><Data ss:Type="String">GuidanceResponse</Data></Cell>
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Return</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">The result of the request as a CarePlan resource.</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">The result of the request as a GuidanceResponse resource.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5145,8 +5144,8 @@
     <Cell ss:StyleID="s115"><Data ss:Type="String">operation</Data></Cell>
     <Cell ss:StyleID="s115"/>
     <Cell ss:Index="8" ss:StyleID="s115"><Data ss:Type="String">Data Requirements</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">The data-requirements operation aggregates and returns the parameters and data requirements for the service module and all its dependencies as a single module definition library</Data></Cell>
-    <Cell ss:StyleID="s133"><Data ss:Type="String">The effect of invoking this operation is to determine the aggregate set of data requirements and dependencies for the service module. The result is a Library resource with a type of module-definition that contains all the parameter definitions and data requirements of the service module and any libraries referenced by it. Implementations SHOULD aggregate data requirements intelligently (i.e. by collapsing overlapping data requirements)</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">The data-requirements operation aggregates and returns the parameters and data requirements for the service module and all its dependencies as a single module definition library.</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">The effect of invoking this operation is to determine the aggregate set of data requirements and dependencies for the service module. The result is a Library resource with a type of module-definition that contains all the parameter definitions and data requirements of the service module and any libraries referenced by it. Implementations SHOULD aggregate data requirements intelligently (i.e. by collapsing overlapping data requirements).</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s114"><Data ss:Type="String">data-requirements.evaluateAtDateTime</Data></Cell>
@@ -5156,7 +5155,7 @@
     <Cell ss:StyleID="s115"><Data ss:Type="String">dateTime</Data></Cell>
     <Cell ss:StyleID="s115"/>
     <Cell ss:Index="8" ss:StyleID="s115"><Data ss:Type="String">Evaluate At</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">An optional date and time specifying that the evaluation should be performed as though it was the given date and time. Data requirements returned will use this as the &quot;Now&quot; point for the purposes of determining the data requirements</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">An optional date and time specifying that the evaluation should be performed as though it was the given date and time. Data requirements returned will use this as the &quot;Now&quot; point for the purposes of determining the data requirements.</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5168,7 +5167,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:Index="8" ss:StyleID="s115"><Data ss:Type="String">Return</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="String">The result of the requirements gathering</Data></Cell>
-    <Cell ss:StyleID="s133"><Data ss:Type="String">A module-definition Library that describes the aggregate parameters, data requirements, and dependencies of the target</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">A module-definition Library that describes the aggregate parameters, data requirements, and dependencies of the target.</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s114"/>
@@ -5647,12 +5646,13 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>7</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>7</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -5660,13 +5660,16 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>19</ActiveRow>
+     <ActiveCol>8</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

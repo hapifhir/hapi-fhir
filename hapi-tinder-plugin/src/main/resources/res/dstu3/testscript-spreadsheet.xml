@@ -2143,7 +2143,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Reference to the resource (containing the contents of the resource needed for operations)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types. </Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">See http://build.fhir.org/resourcelist.html for complete list of resource types. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2175,7 +2175,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Reference to the profile to be used for validation.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types. </Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">See http://build.fhir.org/resourcelist.html for complete list of resource types. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2968,7 +2968,7 @@
     <Cell><Data ss:Type="String">Server interaction or operation type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">See http://hl7-fhir.github.io/http.html for list of server interactions </Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">See http://build.fhir.org/http.html for list of server interactions </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2998,7 +2998,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Resource type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">The type of the resource.  See http://build.fhir.org/resourcelist.html.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">If &quot;url&quot; element is specified, then &quot;targetId&quot;, &quot;params&quot;, and &quot;resource&quot; elements will be ignored as &quot;url&quot; element will have everything needed for constructing the request url.  If &quot;params&quot; element is specified, then &quot;targetId&quot; element is ignored. For FHIR operations that require a resource (e.g. &quot;read&quot; and &quot;vread&quot; operations), the &quot;resource&quot; element must be specified when &quot;params&quot; element is specified.  If &quot;url&quot; and &quot;params&quot; elements are absent, then the request url will be constructed from &quot;targetId&quot; fixture if present. For &quot;read&quot; operation, the resource and id values will be extracted from &quot;targetId&quot; fixture and used to construct the url. For &quot;vread&quot; and &quot;history&quot; operations, the versionId value will also be used.</Data><NamedCell
@@ -3292,7 +3292,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Header elements would be used to set HTTP headers.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This gives control to test-script writers to set headers explicitly based on test requirements.  It will allow for testing using:  - &quot;If-Modified-Since&quot; and &quot;If-None-Match&quot; headers.  See http://hl7-fhir.github.io/http.html#2.1.0.5.1 - &quot;If-Match&quot; header.  See http://hl7-fhir.github.io/http.html#2.1.0.11 - Conditional Create using &quot;If-None-Exist&quot;.  See http://hl7-fhir.github.io/http.html#2.1.0.13.1 - Invalid &quot;Content-Type&quot; header for negative testing. - etc.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This gives control to test-script writers to set headers explicitly based on test requirements.  It will allow for testing using:  - &quot;If-Modified-Since&quot; and &quot;If-None-Match&quot; headers.  See http://build.fhir.org/http.html#2.1.0.5.1 - &quot;If-Match&quot; header.  See http://build.fhir.org/http.html#2.1.0.11 - Conditional Create using &quot;If-None-Exist&quot;.  See http://build.fhir.org/http.html#2.1.0.13.1 - Invalid &quot;Content-Type&quot; header for negative testing. - etc.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4028,10 +4028,10 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Resource type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">The type of the resource.  See http://build.fhir.org/resourcelist.html.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This will be expected resource type in response body e.g. in read, vread, search, etc.  See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types; e.g. &lt;assert &gt; &lt;resourceType value=&quot;Patient&quot; &lt;/assert&gt;</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This will be expected resource type in response body e.g. in read, vread, search, etc.  See http://build.fhir.org/resourcelist.html for complete list of resource types; e.g. &lt;assert &gt; &lt;resourceType value=&quot;Patient&quot; &lt;/assert&gt;</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -986,7 +986,19 @@ public class HealthcareService extends DomainResource {
     @Description(shortDefinition="Description of availability exceptions", formalDefinition="A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times." )
     protected StringType availabilityExceptions;
 
-    private static final long serialVersionUID = 250295170L;
+    /**
+     * Technical endpoints providing access to services operated for the specific healthcare services defined at this resource.
+     */
+    @Child(name = "endpoint", type = {Endpoint.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Technical endpoints providing access to services operated for the location", formalDefinition="Technical endpoints providing access to services operated for the specific healthcare services defined at this resource." )
+    protected List<Reference> endpoint;
+    /**
+     * The actual objects that are the target of the reference (Technical endpoints providing access to services operated for the specific healthcare services defined at this resource.)
+     */
+    protected List<Endpoint> endpointTarget;
+
+
+    private static final long serialVersionUID = -57560049L;
 
   /**
    * Constructor
@@ -2183,6 +2195,81 @@ public class HealthcareService extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #endpoint} (Technical endpoints providing access to services operated for the specific healthcare services defined at this resource.)
+     */
+    public List<Reference> getEndpoint() { 
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      return this.endpoint;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setEndpoint(List<Reference> theEndpoint) { 
+      this.endpoint = theEndpoint;
+      return this;
+    }
+
+    public boolean hasEndpoint() { 
+      if (this.endpoint == null)
+        return false;
+      for (Reference item : this.endpoint)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addEndpoint() { //3
+      Reference t = new Reference();
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      this.endpoint.add(t);
+      return t;
+    }
+
+    public HealthcareService addEndpoint(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      this.endpoint.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #endpoint}, creating it if it does not already exist
+     */
+    public Reference getEndpointFirstRep() { 
+      if (getEndpoint().isEmpty()) {
+        addEndpoint();
+      }
+      return getEndpoint().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Endpoint> getEndpointTarget() { 
+      if (this.endpointTarget == null)
+        this.endpointTarget = new ArrayList<Endpoint>();
+      return this.endpointTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Endpoint addEndpointTarget() { 
+      Endpoint r = new Endpoint();
+      if (this.endpointTarget == null)
+        this.endpointTarget = new ArrayList<Endpoint>();
+      this.endpointTarget.add(r);
+      return r;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "External identifiers for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -2209,6 +2296,7 @@ public class HealthcareService extends DomainResource {
         childrenList.add(new Property("availableTime", "", "A collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime));
         childrenList.add(new Property("notAvailable", "", "The HealthcareService is not available during this period of time due to the provided reason.", 0, java.lang.Integer.MAX_VALUE, notAvailable));
         childrenList.add(new Property("availabilityExceptions", "string", "A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.", 0, java.lang.Integer.MAX_VALUE, availabilityExceptions));
+        childrenList.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the specific healthcare services defined at this resource.", 0, java.lang.Integer.MAX_VALUE, endpoint));
       }
 
       @Override
@@ -2238,6 +2326,7 @@ public class HealthcareService extends DomainResource {
         case 1873069366: /*availableTime*/ return this.availableTime == null ? new Base[0] : this.availableTime.toArray(new Base[this.availableTime.size()]); // HealthcareServiceAvailableTimeComponent
         case -629572298: /*notAvailable*/ return this.notAvailable == null ? new Base[0] : this.notAvailable.toArray(new Base[this.notAvailable.size()]); // HealthcareServiceNotAvailableComponent
         case -1149143617: /*availabilityExceptions*/ return this.availabilityExceptions == null ? new Base[0] : new Base[] {this.availabilityExceptions}; // StringType
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2318,6 +2407,9 @@ public class HealthcareService extends DomainResource {
         case -1149143617: // availabilityExceptions
           this.availabilityExceptions = castToString(value); // StringType
           break;
+        case 1741102485: // endpoint
+          this.getEndpoint().add(castToReference(value)); // Reference
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -2373,6 +2465,8 @@ public class HealthcareService extends DomainResource {
           this.getNotAvailable().add((HealthcareServiceNotAvailableComponent) value);
         else if (name.equals("availabilityExceptions"))
           this.availabilityExceptions = castToString(value); // StringType
+        else if (name.equals("endpoint"))
+          this.getEndpoint().add(castToReference(value));
         else
           super.setProperty(name, value);
       }
@@ -2404,6 +2498,7 @@ public class HealthcareService extends DomainResource {
         case 1873069366:  return addAvailableTime(); // HealthcareServiceAvailableTimeComponent
         case -629572298:  return addNotAvailable(); // HealthcareServiceNotAvailableComponent
         case -1149143617: throw new FHIRException("Cannot make property availabilityExceptions as it is not a complex type"); // StringType
+        case 1741102485:  return addEndpoint(); // Reference
         default: return super.makeProperty(hash, name);
         }
 
@@ -2486,6 +2581,9 @@ public class HealthcareService extends DomainResource {
         }
         else if (name.equals("availabilityExceptions")) {
           throw new FHIRException("Cannot call addChild on a primitive type HealthcareService.availabilityExceptions");
+        }
+        else if (name.equals("endpoint")) {
+          return addEndpoint();
         }
         else
           return super.addChild(name);
@@ -2571,6 +2669,11 @@ public class HealthcareService extends DomainResource {
             dst.notAvailable.add(i.copy());
         };
         dst.availabilityExceptions = availabilityExceptions == null ? null : availabilityExceptions.copy();
+        if (endpoint != null) {
+          dst.endpoint = new ArrayList<Reference>();
+          for (Reference i : endpoint)
+            dst.endpoint.add(i.copy());
+        };
         return dst;
       }
 
@@ -2595,7 +2698,7 @@ public class HealthcareService extends DomainResource {
            && compareDeep(referralMethod, o.referralMethod, true) && compareDeep(publicKey, o.publicKey, true)
            && compareDeep(appointmentRequired, o.appointmentRequired, true) && compareDeep(availableTime, o.availableTime, true)
            && compareDeep(notAvailable, o.notAvailable, true) && compareDeep(availabilityExceptions, o.availabilityExceptions, true)
-          ;
+           && compareDeep(endpoint, o.endpoint, true);
       }
 
       @Override
@@ -2616,7 +2719,7 @@ public class HealthcareService extends DomainResource {
           , serviceCategory, serviceType, specialty, location, serviceName, comment, extraDetails
           , photo, telecom, coverageArea, serviceProvisionCode, eligibility, eligibilityNote
           , programName, characteristic, referralMethod, publicKey, appointmentRequired, availableTime
-          , notAvailable, availabilityExceptions);
+          , notAvailable, availabilityExceptions, endpoint);
       }
 
   @Override
@@ -2683,6 +2786,32 @@ public class HealthcareService extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICETYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICETYPE);
+
+ /**
+   * Search parameter: <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the location</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>HealthcareService.endpoint</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="endpoint", path="HealthcareService.endpoint", description="Technical endpoints providing access to services operated for the location", type="reference", target={Endpoint.class } )
+  public static final String SP_ENDPOINT = "endpoint";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the location</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>HealthcareService.endpoint</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENDPOINT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENDPOINT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>HealthcareService:endpoint</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENDPOINT = new ca.uhn.fhir.model.api.Include("HealthcareService:endpoint").toLocked();
 
  /**
    * Search parameter: <b>organization</b>

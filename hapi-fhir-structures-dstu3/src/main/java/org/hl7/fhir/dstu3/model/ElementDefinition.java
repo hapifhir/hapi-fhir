@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -1723,6 +1723,334 @@ public class ElementDefinition extends Type implements ICompositeType {
   }
 
     @Block()
+    public static class ElementDefinitionExampleComponent extends Element implements IBaseDatatypeElement {
+        /**
+         * Describes the purpose of this example amoung the set of examples.
+         */
+        @Child(name = "label", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Describes the purpose of this example", formalDefinition="Describes the purpose of this example amoung the set of examples." )
+        protected StringType label;
+
+        /**
+         * The actual value for the element, which must be one of the types allowed for this element.
+         */
+        @Child(name = "value", type = {}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Value of Example (one of allowed types)", formalDefinition="The actual value for the element, which must be one of the types allowed for this element." )
+        protected org.hl7.fhir.dstu3.model.Type value;
+
+        private static final long serialVersionUID = 1346348024L;
+
+    /**
+     * Constructor
+     */
+      public ElementDefinitionExampleComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ElementDefinitionExampleComponent(StringType label, org.hl7.fhir.dstu3.model.Type value) {
+        super();
+        this.label = label;
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #label} (Describes the purpose of this example amoung the set of examples.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+         */
+        public StringType getLabelElement() { 
+          if (this.label == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ElementDefinitionExampleComponent.label");
+            else if (Configuration.doAutoCreate())
+              this.label = new StringType(); // bb
+          return this.label;
+        }
+
+        public boolean hasLabelElement() { 
+          return this.label != null && !this.label.isEmpty();
+        }
+
+        public boolean hasLabel() { 
+          return this.label != null && !this.label.isEmpty();
+        }
+
+        /**
+         * @param value {@link #label} (Describes the purpose of this example amoung the set of examples.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+         */
+        public ElementDefinitionExampleComponent setLabelElement(StringType value) { 
+          this.label = value;
+          return this;
+        }
+
+        /**
+         * @return Describes the purpose of this example amoung the set of examples.
+         */
+        public String getLabel() { 
+          return this.label == null ? null : this.label.getValue();
+        }
+
+        /**
+         * @param value Describes the purpose of this example amoung the set of examples.
+         */
+        public ElementDefinitionExampleComponent setLabel(String value) { 
+            if (this.label == null)
+              this.label = new StringType();
+            this.label.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The actual value for the element, which must be one of the types allowed for this element.)
+         */
+        public org.hl7.fhir.dstu3.model.Type getValue() { 
+          return this.value;
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The actual value for the element, which must be one of the types allowed for this element.)
+         */
+        public ElementDefinitionExampleComponent setValue(org.hl7.fhir.dstu3.model.Type value) { 
+          this.value = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("label", "string", "Describes the purpose of this example amoung the set of examples.", 0, java.lang.Integer.MAX_VALUE, label));
+          childrenList.add(new Property("value[x]", "*", "The actual value for the element, which must be one of the types allowed for this element.", 0, java.lang.Integer.MAX_VALUE, value));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // org.hl7.fhir.dstu3.model.Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 102727412: // label
+          this.label = castToString(value); // StringType
+          break;
+        case 111972721: // value
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("label"))
+          this.label = castToString(value); // StringType
+        else if (name.equals("value[x]"))
+          this.value = castToType(value); // org.hl7.fhir.dstu3.model.Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 102727412: throw new FHIRException("Cannot make property label as it is not a complex type"); // StringType
+        case -1410166417:  return getValue(); // org.hl7.fhir.dstu3.model.Type
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("label")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ElementDefinition.label");
+        }
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
+          return this.value;
+        }
+        else if (name.equals("valueInteger")) {
+          this.value = new IntegerType();
+          return this.value;
+        }
+        else if (name.equals("valueDecimal")) {
+          this.value = new DecimalType();
+          return this.value;
+        }
+        else if (name.equals("valueBase64Binary")) {
+          this.value = new Base64BinaryType();
+          return this.value;
+        }
+        else if (name.equals("valueInstant")) {
+          this.value = new InstantType();
+          return this.value;
+        }
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueUri")) {
+          this.value = new UriType();
+          return this.value;
+        }
+        else if (name.equals("valueDate")) {
+          this.value = new DateType();
+          return this.value;
+        }
+        else if (name.equals("valueDateTime")) {
+          this.value = new DateTimeType();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueCode")) {
+          this.value = new CodeType();
+          return this.value;
+        }
+        else if (name.equals("valueOid")) {
+          this.value = new OidType();
+          return this.value;
+        }
+        else if (name.equals("valueId")) {
+          this.value = new IdType();
+          return this.value;
+        }
+        else if (name.equals("valueUnsignedInt")) {
+          this.value = new UnsignedIntType();
+          return this.value;
+        }
+        else if (name.equals("valuePositiveInt")) {
+          this.value = new PositiveIntType();
+          return this.value;
+        }
+        else if (name.equals("valueMarkdown")) {
+          this.value = new MarkdownType();
+          return this.value;
+        }
+        else if (name.equals("valueAnnotation")) {
+          this.value = new Annotation();
+          return this.value;
+        }
+        else if (name.equals("valueAttachment")) {
+          this.value = new Attachment();
+          return this.value;
+        }
+        else if (name.equals("valueIdentifier")) {
+          this.value = new Identifier();
+          return this.value;
+        }
+        else if (name.equals("valueCodeableConcept")) {
+          this.value = new CodeableConcept();
+          return this.value;
+        }
+        else if (name.equals("valueCoding")) {
+          this.value = new Coding();
+          return this.value;
+        }
+        else if (name.equals("valueQuantity")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("valueRange")) {
+          this.value = new Range();
+          return this.value;
+        }
+        else if (name.equals("valuePeriod")) {
+          this.value = new Period();
+          return this.value;
+        }
+        else if (name.equals("valueRatio")) {
+          this.value = new Ratio();
+          return this.value;
+        }
+        else if (name.equals("valueSampledData")) {
+          this.value = new SampledData();
+          return this.value;
+        }
+        else if (name.equals("valueSignature")) {
+          this.value = new Signature();
+          return this.value;
+        }
+        else if (name.equals("valueHumanName")) {
+          this.value = new HumanName();
+          return this.value;
+        }
+        else if (name.equals("valueAddress")) {
+          this.value = new Address();
+          return this.value;
+        }
+        else if (name.equals("valueContactPoint")) {
+          this.value = new ContactPoint();
+          return this.value;
+        }
+        else if (name.equals("valueTiming")) {
+          this.value = new Timing();
+          return this.value;
+        }
+        else if (name.equals("valueReference")) {
+          this.value = new Reference();
+          return this.value;
+        }
+        else if (name.equals("valueMeta")) {
+          this.value = new Meta();
+          return this.value;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ElementDefinitionExampleComponent copy() {
+        ElementDefinitionExampleComponent dst = new ElementDefinitionExampleComponent();
+        copyValues(dst);
+        dst.label = label == null ? null : label.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof ElementDefinitionExampleComponent))
+          return false;
+        ElementDefinitionExampleComponent o = (ElementDefinitionExampleComponent) other;
+        return compareDeep(label, o.label, true) && compareDeep(value, o.value, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof ElementDefinitionExampleComponent))
+          return false;
+        ElementDefinitionExampleComponent o = (ElementDefinitionExampleComponent) other;
+        return compareValues(label, o.label, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(label, value);
+      }
+
+  public String fhirType() {
+    return "ElementDefinition.example";
+
+  }
+
+  }
+
+    @Block()
     public static class ElementDefinitionConstraintComponent extends Element implements IBaseDatatypeElement {
         /**
          * Allows identification of which elements have their cardinalities impacted by the constraint.  Will not be referenced for constraints that do not affect cardinality.
@@ -3027,11 +3355,11 @@ public class ElementDefinition extends Type implements ICompositeType {
     protected org.hl7.fhir.dstu3.model.Type pattern;
 
     /**
-     * A sample value for this element demonstrating the type of information that would typically be captured.
+     * A sample value for this element demonstrating the type of information that would typically be found in the element.
      */
-    @Child(name = "example", type = {}, order=20, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Example value (as defined for type)", formalDefinition="A sample value for this element demonstrating the type of information that would typically be captured." )
-    protected org.hl7.fhir.dstu3.model.Type example;
+    @Child(name = "example", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Example value (as defined for type)", formalDefinition="A sample value for this element demonstrating the type of information that would typically be found in the element." )
+    protected List<ElementDefinitionExampleComponent> example;
 
     /**
      * The minimum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity.
@@ -3103,7 +3431,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     @Description(shortDefinition="Map element to another set of definitions", formalDefinition="Identifies a concept from an external specification that roughly corresponds to this element." )
     protected List<ElementDefinitionMappingComponent> mapping;
 
-    private static final long serialVersionUID = 1950918913L;
+    private static final long serialVersionUID = -976239057L;
 
   /**
    * Constructor
@@ -3985,22 +4313,56 @@ public class ElementDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #example} (A sample value for this element demonstrating the type of information that would typically be captured.)
+     * @return {@link #example} (A sample value for this element demonstrating the type of information that would typically be found in the element.)
      */
-    public org.hl7.fhir.dstu3.model.Type getExample() { 
+    public List<ElementDefinitionExampleComponent> getExample() { 
+      if (this.example == null)
+        this.example = new ArrayList<ElementDefinitionExampleComponent>();
       return this.example;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ElementDefinition setExample(List<ElementDefinitionExampleComponent> theExample) { 
+      this.example = theExample;
+      return this;
+    }
+
     public boolean hasExample() { 
-      return this.example != null && !this.example.isEmpty();
+      if (this.example == null)
+        return false;
+      for (ElementDefinitionExampleComponent item : this.example)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ElementDefinitionExampleComponent addExample() { //3
+      ElementDefinitionExampleComponent t = new ElementDefinitionExampleComponent();
+      if (this.example == null)
+        this.example = new ArrayList<ElementDefinitionExampleComponent>();
+      this.example.add(t);
+      return t;
+    }
+
+    public ElementDefinition addExample(ElementDefinitionExampleComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.example == null)
+        this.example = new ArrayList<ElementDefinitionExampleComponent>();
+      this.example.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #example} (A sample value for this element demonstrating the type of information that would typically be captured.)
+     * @return The first repetition of repeating field {@link #example}, creating it if it does not already exist
      */
-    public ElementDefinition setExample(org.hl7.fhir.dstu3.model.Type value) { 
-      this.example = value;
-      return this;
+    public ElementDefinitionExampleComponent getExampleFirstRep() { 
+      if (getExample().isEmpty()) {
+        addExample();
+      }
+      return getExample().get(0);
     }
 
     /**
@@ -4668,7 +5030,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         childrenList.add(new Property("meaningWhenMissing", "markdown", "The Implicit meaning that is to be understood when this element is missing (e.g. 'when this element is missing, the period is ongoing'.", 0, java.lang.Integer.MAX_VALUE, meaningWhenMissing));
         childrenList.add(new Property("fixed[x]", "*", "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.", 0, java.lang.Integer.MAX_VALUE, fixed));
         childrenList.add(new Property("pattern[x]", "*", "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.).", 0, java.lang.Integer.MAX_VALUE, pattern));
-        childrenList.add(new Property("example[x]", "*", "A sample value for this element demonstrating the type of information that would typically be captured.", 0, java.lang.Integer.MAX_VALUE, example));
+        childrenList.add(new Property("example", "", "A sample value for this element demonstrating the type of information that would typically be found in the element.", 0, java.lang.Integer.MAX_VALUE, example));
         childrenList.add(new Property("minValue[x]", "date|dateTime|instant|time|decimal|integer|positiveInt|unsignedInt|Quantity", "The minimum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity.", 0, java.lang.Integer.MAX_VALUE, minValue));
         childrenList.add(new Property("maxValue[x]", "date|dateTime|instant|time|decimal|integer|positiveInt|unsignedInt|Quantity", "The maximum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity.", 0, java.lang.Integer.MAX_VALUE, maxValue));
         childrenList.add(new Property("maxLength", "integer", "Indicates the maximum length in characters that is permitted to be present in conformant instances and which is expected to be supported by conformant consumers that support the element.", 0, java.lang.Integer.MAX_VALUE, maxLength));
@@ -4704,7 +5066,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         case 1857257103: /*meaningWhenMissing*/ return this.meaningWhenMissing == null ? new Base[0] : new Base[] {this.meaningWhenMissing}; // MarkdownType
         case 97445748: /*fixed*/ return this.fixed == null ? new Base[0] : new Base[] {this.fixed}; // org.hl7.fhir.dstu3.model.Type
         case -791090288: /*pattern*/ return this.pattern == null ? new Base[0] : new Base[] {this.pattern}; // org.hl7.fhir.dstu3.model.Type
-        case -1322970774: /*example*/ return this.example == null ? new Base[0] : new Base[] {this.example}; // org.hl7.fhir.dstu3.model.Type
+        case -1322970774: /*example*/ return this.example == null ? new Base[0] : this.example.toArray(new Base[this.example.size()]); // ElementDefinitionExampleComponent
         case -1376969153: /*minValue*/ return this.minValue == null ? new Base[0] : new Base[] {this.minValue}; // Type
         case 399227501: /*maxValue*/ return this.maxValue == null ? new Base[0] : new Base[] {this.maxValue}; // Type
         case -791400086: /*maxLength*/ return this.maxLength == null ? new Base[0] : new Base[] {this.maxLength}; // IntegerType
@@ -4784,7 +5146,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.pattern = castToType(value); // org.hl7.fhir.dstu3.model.Type
           break;
         case -1322970774: // example
-          this.example = castToType(value); // org.hl7.fhir.dstu3.model.Type
+          this.getExample().add((ElementDefinitionExampleComponent) value); // ElementDefinitionExampleComponent
           break;
         case -1376969153: // minValue
           this.minValue = castToType(value); // Type
@@ -4863,8 +5225,8 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.fixed = castToType(value); // org.hl7.fhir.dstu3.model.Type
         else if (name.equals("pattern[x]"))
           this.pattern = castToType(value); // org.hl7.fhir.dstu3.model.Type
-        else if (name.equals("example[x]"))
-          this.example = castToType(value); // org.hl7.fhir.dstu3.model.Type
+        else if (name.equals("example"))
+          this.getExample().add((ElementDefinitionExampleComponent) value);
         else if (name.equals("minValue[x]"))
           this.minValue = castToType(value); // Type
         else if (name.equals("maxValue[x]"))
@@ -4912,7 +5274,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         case 1857257103: throw new FHIRException("Cannot make property meaningWhenMissing as it is not a complex type"); // MarkdownType
         case -391522164:  return getFixed(); // org.hl7.fhir.dstu3.model.Type
         case -885125392:  return getPattern(); // org.hl7.fhir.dstu3.model.Type
-        case -2002328874:  return getExample(); // org.hl7.fhir.dstu3.model.Type
+        case -1322970774:  return addExample(); // ElementDefinitionExampleComponent
         case -55301663:  return getMinValue(); // Type
         case 622130931:  return getMaxValue(); // Type
         case -791400086: throw new FHIRException("Cannot make property maxLength as it is not a complex type"); // IntegerType
@@ -5379,137 +5741,8 @@ public class ElementDefinition extends Type implements ICompositeType {
           this.pattern = new Meta();
           return this.pattern;
         }
-        else if (name.equals("exampleBoolean")) {
-          this.example = new BooleanType();
-          return this.example;
-        }
-        else if (name.equals("exampleInteger")) {
-          this.example = new IntegerType();
-          return this.example;
-        }
-        else if (name.equals("exampleDecimal")) {
-          this.example = new DecimalType();
-          return this.example;
-        }
-        else if (name.equals("exampleBase64Binary")) {
-          this.example = new Base64BinaryType();
-          return this.example;
-        }
-        else if (name.equals("exampleInstant")) {
-          this.example = new InstantType();
-          return this.example;
-        }
-        else if (name.equals("exampleString")) {
-          this.example = new StringType();
-          return this.example;
-        }
-        else if (name.equals("exampleUri")) {
-          this.example = new UriType();
-          return this.example;
-        }
-        else if (name.equals("exampleDate")) {
-          this.example = new DateType();
-          return this.example;
-        }
-        else if (name.equals("exampleDateTime")) {
-          this.example = new DateTimeType();
-          return this.example;
-        }
-        else if (name.equals("exampleTime")) {
-          this.example = new TimeType();
-          return this.example;
-        }
-        else if (name.equals("exampleCode")) {
-          this.example = new CodeType();
-          return this.example;
-        }
-        else if (name.equals("exampleOid")) {
-          this.example = new OidType();
-          return this.example;
-        }
-        else if (name.equals("exampleId")) {
-          this.example = new IdType();
-          return this.example;
-        }
-        else if (name.equals("exampleUnsignedInt")) {
-          this.example = new UnsignedIntType();
-          return this.example;
-        }
-        else if (name.equals("examplePositiveInt")) {
-          this.example = new PositiveIntType();
-          return this.example;
-        }
-        else if (name.equals("exampleMarkdown")) {
-          this.example = new MarkdownType();
-          return this.example;
-        }
-        else if (name.equals("exampleAnnotation")) {
-          this.example = new Annotation();
-          return this.example;
-        }
-        else if (name.equals("exampleAttachment")) {
-          this.example = new Attachment();
-          return this.example;
-        }
-        else if (name.equals("exampleIdentifier")) {
-          this.example = new Identifier();
-          return this.example;
-        }
-        else if (name.equals("exampleCodeableConcept")) {
-          this.example = new CodeableConcept();
-          return this.example;
-        }
-        else if (name.equals("exampleCoding")) {
-          this.example = new Coding();
-          return this.example;
-        }
-        else if (name.equals("exampleQuantity")) {
-          this.example = new Quantity();
-          return this.example;
-        }
-        else if (name.equals("exampleRange")) {
-          this.example = new Range();
-          return this.example;
-        }
-        else if (name.equals("examplePeriod")) {
-          this.example = new Period();
-          return this.example;
-        }
-        else if (name.equals("exampleRatio")) {
-          this.example = new Ratio();
-          return this.example;
-        }
-        else if (name.equals("exampleSampledData")) {
-          this.example = new SampledData();
-          return this.example;
-        }
-        else if (name.equals("exampleSignature")) {
-          this.example = new Signature();
-          return this.example;
-        }
-        else if (name.equals("exampleHumanName")) {
-          this.example = new HumanName();
-          return this.example;
-        }
-        else if (name.equals("exampleAddress")) {
-          this.example = new Address();
-          return this.example;
-        }
-        else if (name.equals("exampleContactPoint")) {
-          this.example = new ContactPoint();
-          return this.example;
-        }
-        else if (name.equals("exampleTiming")) {
-          this.example = new Timing();
-          return this.example;
-        }
-        else if (name.equals("exampleReference")) {
-          this.example = new Reference();
-          return this.example;
-        }
-        else if (name.equals("exampleMeta")) {
-          this.example = new Meta();
-          return this.example;
+        else if (name.equals("example")) {
+          return addExample();
         }
         else if (name.equals("minValueDate")) {
           this.minValue = new DateType();
@@ -5656,7 +5889,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         dst.meaningWhenMissing = meaningWhenMissing == null ? null : meaningWhenMissing.copy();
         dst.fixed = fixed == null ? null : fixed.copy();
         dst.pattern = pattern == null ? null : pattern.copy();
-        dst.example = example == null ? null : example.copy();
+        if (example != null) {
+          dst.example = new ArrayList<ElementDefinitionExampleComponent>();
+          for (ElementDefinitionExampleComponent i : example)
+            dst.example.add(i.copy());
+        };
         dst.minValue = minValue == null ? null : minValue.copy();
         dst.maxValue = maxValue == null ? null : maxValue.copy();
         dst.maxLength = maxLength == null ? null : maxLength.copy();
@@ -5741,6 +5978,13 @@ public class ElementDefinition extends Type implements ICompositeType {
       return getPath();
   }
     
+  public void makeBase(String path, int min, String max) {
+    ElementDefinitionBaseComponent self = getBase();
+    self.setPath(path);
+    self.setMin(min);
+    self.setMax(max);
+  }
+  
 
 // end addition
 

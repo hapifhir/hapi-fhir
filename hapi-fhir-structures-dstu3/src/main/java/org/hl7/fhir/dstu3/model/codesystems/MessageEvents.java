@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,7 +61,7 @@ public enum MessageEvents {
          */
         ADMINNOTIFY, 
         /**
-         * null
+         * Notification to convey information.
          */
         COMMUNICATIONREQUEST, 
         /**
@@ -145,7 +145,7 @@ public enum MessageEvents {
             case MEDICATIONADMINISTRATIONRECORDING: return "Indicates that a medication has been recorded against the patient's record.";
             case MEDICATIONADMINISTRATIONUPDATE: return "Update a Medication Administration record.";
             case ADMINNOTIFY: return "Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use.";
-            case COMMUNICATIONREQUEST: return "";
+            case COMMUNICATIONREQUEST: return "Notification to convey information.";
             case DIAGNOSTICREPORTPROVIDE: return "Provide a diagnostic report, or update a previously provided diagnostic report.";
             case OBSERVATIONPROVIDE: return "Provide a simple observation or update a previously provided simple observation.";
             case PATIENTLINK: return "Notification that two patient records actually identify the same patient.";

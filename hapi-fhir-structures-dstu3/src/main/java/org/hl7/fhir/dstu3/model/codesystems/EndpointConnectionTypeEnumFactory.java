@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -65,6 +65,8 @@ public class EndpointConnectionTypeEnumFactory implements EnumFactory<EndpointCo
       return EndpointConnectionType.HL7V2MLLP;
     if ("secure-email".equals(codeString))
       return EndpointConnectionType.SECUREEMAIL;
+    if ("direct-project".equals(codeString))
+      return EndpointConnectionType.DIRECTPROJECT;
     throw new IllegalArgumentException("Unknown EndpointConnectionType code '"+codeString+"'");
   }
 
@@ -95,6 +97,8 @@ public class EndpointConnectionTypeEnumFactory implements EnumFactory<EndpointCo
       return "hl7v2-mllp";
     if (code == EndpointConnectionType.SECUREEMAIL)
       return "secure-email";
+    if (code == EndpointConnectionType.DIRECTPROJECT)
+      return "direct-project";
     return "?";
   }
 

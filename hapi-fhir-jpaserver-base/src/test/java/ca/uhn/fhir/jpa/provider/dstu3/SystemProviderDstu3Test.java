@@ -85,7 +85,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 		
 		Patient p = new Patient();
-		p.addName().addFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
+		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
 		myPatientDao.create(p, mySrd);
 		
 		Organization o = new Organization();
@@ -144,7 +144,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 		
 		Patient p = new Patient();
-		p.addName().addFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
+		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		ourClient.read().resource(Patient.class).withId(id);
@@ -304,7 +304,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("Name" + i);
+			p.addName().setFamily("Name" + i);
 			ourClient.create().resource(p).execute();
 		}
 
@@ -333,7 +333,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("Name" + i);
+			p.addName().setFamily("Name" + i);
 			ourClient.create().resource(p).execute();
 		}
 
@@ -385,7 +385,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testSuggestKeywords() throws Exception {
 
 		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
+		patient.addName().setFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
@@ -421,7 +421,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testSuggestKeywordsInvalid() throws Exception {
 		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
+		patient.addName().setFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
@@ -591,7 +591,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testTransactionSearch() throws Exception {
 		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("PATIENT_" + i);
+			p.addName().setFamily("PATIENT_" + i);
 			myPatientDao.create(p, mySrd);
 		}
 
@@ -615,7 +615,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testTransactionCount() throws Exception {
 		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("PATIENT_" + i);
+			p.addName().setFamily("PATIENT_" + i);
 			myPatientDao.create(p, mySrd);
 		}
 

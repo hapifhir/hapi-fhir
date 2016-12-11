@@ -146,7 +146,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 	@Test
 	public void testSuggestIgnoresBase64Content() {
 		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
+		patient.addName().setFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Media med = new Media();
@@ -186,7 +186,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 	@Test
 	public void testSuggest() {
 		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
+		patient.addName().setFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
@@ -209,7 +209,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		 * These shouldn't match since they're for another patient
 		 */
 		patient = new Patient();
-		patient.addName().addFamily("testSuggest2");
+		patient.addName().setFamily("testSuggest2");
 		IIdType ptId2 = myPatientDao.create(patient, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
@@ -301,11 +301,11 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
 		Patient pt1 = new Patient();
-		pt1.addName().addFamily("Everything").addGiven("Arthur");
+		pt1.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
-		pt2.addName().addFamily("Everything").addGiven("Arthur");
+		pt2.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId2 = myPatientDao.create(pt2, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Device dev1 = new Device();
@@ -394,11 +394,11 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 	@Test
 	public void testEverythingTypeWithContentFilter() {
 		Patient pt1 = new Patient();
-		pt1.addName().addFamily("Everything").addGiven("Arthur");
+		pt1.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
-		pt2.addName().addFamily("Everything").addGiven("Arthur");
+		pt2.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId2 = myPatientDao.create(pt2, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Device dev1 = new Device();

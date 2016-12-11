@@ -161,7 +161,7 @@ public class GenericJaxRsClientDstu3Test {
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
 		ourResponseBodies = new String[] { p.encodeResourceToString(conf), p.encodeResourceToString(conf), p.encodeResourceToString(patient) };
@@ -170,7 +170,7 @@ public class GenericJaxRsClientDstu3Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
 		Patient resp = client.read(Patient.class, new IdType("123").getValue());
-		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("FAMILY", resp.getName().get(0).getFamily());
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUriAll.get(0));
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
@@ -192,7 +192,7 @@ public class GenericJaxRsClientDstu3Test {
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
 		ourResponseBodies = new String[] { p.encodeResourceToString(conf), p.encodeResourceToString(conf), p.encodeResourceToString(patient) };
@@ -202,7 +202,7 @@ public class GenericJaxRsClientDstu3Test {
 		client.setEncoding(EncodingEnum.JSON);
 
 		Patient resp = client.read(Patient.class, new IdType("123").getValue());
-		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("FAMILY", resp.getName().get(0).getFamily());
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUriAll.get(0));
 		assertEquals("http://localhost:" + ourPort + "/fhir/metadata?_format=json", ourRequestUriAll.get(1));
 		assertEquals(1, ourRequestHeadersAll.get(0).get("Accept").size());
@@ -264,7 +264,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		Patient p = new Patient();
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		client.create().resource(p).execute();
 
@@ -300,7 +300,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		Patient p = new Patient();
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		client.create().resource(p).conditionalByUrl("Patient?name=foo").execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -341,7 +341,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		Patient p = new Patient();
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		client.create(p);
 
@@ -364,7 +364,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		Patient p = new Patient();
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
@@ -394,7 +394,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		p = new Patient();
 		p.setId(new IdType("1"));
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		MethodOutcome output = client.create().resource(p).execute();
 		assertNotNull(output.getResource());
@@ -1260,7 +1260,7 @@ public class GenericJaxRsClientDstu3Test {
 	public void testReadByUri() throws Exception {
 
 		Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 		final String respString = ourCtx.newXmlParser().encodeResourceToString(patient);
 
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
@@ -1273,14 +1273,14 @@ public class GenericJaxRsClientDstu3Test {
 		
 		response = (Patient) client.read(new UriDt("http://localhost:" + ourPort + "/fhir/Patient/123"));
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
-		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("FAM", response.getName().get(0).getFamily());
 	}
 
 	@Test
 	public void testReadFluentByUri() throws Exception {
 
 		Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 		final String respString = ourCtx.newXmlParser().encodeResourceToString(patient);
 
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
@@ -1292,7 +1292,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		response = (Patient) client.read().resource(Patient.class).withUrl(new IdType("http://localhost:" + ourPort + "/AAA/Patient/123")).execute();
 		assertEquals("http://localhost:" + ourPort + "/AAA/Patient/123", ourRequestUri);
-		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("FAM", response.getName().get(0).getFamily());
 	}
 
 	@Test
@@ -1779,11 +1779,11 @@ public class GenericJaxRsClientDstu3Test {
 		List<IBaseResource> input = new ArrayList<IBaseResource>();
 
 		Patient p1 = new Patient(); // No ID
-		p1.addName().addFamily("PATIENT1");
+		p1.addName().setFamily("PATIENT1");
 		input.add(p1);
 
 		Patient p2 = new Patient(); // Yes ID
-		p2.addName().addFamily("PATIENT2");
+		p2.addName().setFamily("PATIENT2");
 		p2.setId("Patient/2");
 		input.add(p2);
 
@@ -1818,7 +1818,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		org.hl7.fhir.dstu3.model.Bundle req = new org.hl7.fhir.dstu3.model.Bundle();
 		Patient patient = new Patient();
-		patient.addName().addFamily("PAT_FAMILY");
+		patient.addName().setFamily("PAT_FAMILY");
 		req.addEntry().setResource(patient);
 		Observation observation = new Observation();
 		observation.getCode().setText("OBS_TEXT");
@@ -1878,11 +1878,11 @@ public class GenericJaxRsClientDstu3Test {
 		org.hl7.fhir.dstu3.model.Bundle input = new org.hl7.fhir.dstu3.model.Bundle();
 
 		Patient p1 = new Patient(); // No ID
-		p1.addName().addFamily("PATIENT1");
+		p1.addName().setFamily("PATIENT1");
 		input.addEntry().setResource(p1);
 
 		Patient p2 = new Patient(); // Yes ID
-		p2.addName().addFamily("PATIENT2");
+		p2.addName().setFamily("PATIENT2");
 		p2.setId("Patient/2");
 		input.addEntry().setResource(p2);
 
@@ -1911,7 +1911,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		Patient p = new Patient();
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		client.update().resource(p).conditionalByUrl("Patient?name=foo").execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1966,7 +1966,7 @@ public class GenericJaxRsClientDstu3Test {
 		
 
 		Patient p = new Patient();
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		client.update(new IdType("Patient/123").getValue(), p);
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -1997,7 +1997,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		Patient p = new Patient();
 		p.setId(new IdType("1"));
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
@@ -2027,7 +2027,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		p = new Patient();
 		p.setId(new IdType("1"));
-		p.addName().addFamily("FOOFAMILY");
+		p.addName().setFamily("FOOFAMILY");
 
 		MethodOutcome output = client.update().resource(p).execute();
 		assertNotNull(output.getResource());

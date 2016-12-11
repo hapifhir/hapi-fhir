@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.
  */
 @ResourceDef(name="ActivityDefinition", profile="http://hl7.org/fhir/Profile/ActivityDefinition")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "category", "code", "timing[x]", "location", "participantType", "product[x]", "quantity", "dosageInstruction", "transform", "dynamicValue"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "category", "code", "timing[x]", "location", "participantType", "product[x]", "quantity", "dosageInstruction", "bodySite", "transform", "dynamicValue"})
 public class ActivityDefinition extends MetadataResource {
 
     public enum ActivityDefinitionCategory {
@@ -931,9 +931,17 @@ public class ActivityDefinition extends MetadataResource {
     protected List<DosageInstruction> dosageInstruction;
 
     /**
+     * Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites).
+     */
+    @Child(name = "bodySite", type = {CodeableConcept.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="What part of body to perform on", formalDefinition="Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
+    protected List<CodeableConcept> bodySite;
+
+    /**
      * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
      */
-    @Child(name = "transform", type = {StructureMap.class}, order=19, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "transform", type = {StructureMap.class}, order=20, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
     protected Reference transform;
 
@@ -945,11 +953,11 @@ public class ActivityDefinition extends MetadataResource {
     /**
      * Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.
      */
-    @Child(name = "dynamicValue", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dynamicValue", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result." )
     protected List<ActivityDefinitionDynamicValueComponent> dynamicValue;
 
-    private static final long serialVersionUID = -1095058297L;
+    private static final long serialVersionUID = -199666299L;
 
   /**
    * Constructor
@@ -2460,6 +2468,59 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
+     * @return {@link #bodySite} (Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites).)
+     */
+    public List<CodeableConcept> getBodySite() { 
+      if (this.bodySite == null)
+        this.bodySite = new ArrayList<CodeableConcept>();
+      return this.bodySite;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ActivityDefinition setBodySite(List<CodeableConcept> theBodySite) { 
+      this.bodySite = theBodySite;
+      return this;
+    }
+
+    public boolean hasBodySite() { 
+      if (this.bodySite == null)
+        return false;
+      for (CodeableConcept item : this.bodySite)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addBodySite() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.bodySite == null)
+        this.bodySite = new ArrayList<CodeableConcept>();
+      this.bodySite.add(t);
+      return t;
+    }
+
+    public ActivityDefinition addBodySite(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.bodySite == null)
+        this.bodySite = new ArrayList<CodeableConcept>();
+      this.bodySite.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #bodySite}, creating it if it does not already exist
+     */
+    public CodeableConcept getBodySiteFirstRep() { 
+      if (getBodySite().isEmpty()) {
+        addBodySite();
+      }
+      return getBodySite().get(0);
+    }
+
+    /**
      * @return {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
      */
     public Reference getTransform() { 
@@ -2589,6 +2650,7 @@ public class ActivityDefinition extends MetadataResource {
         childrenList.add(new Property("product[x]", "Reference(Medication|Substance)|CodeableConcept", "Identifies the food, drug or other product being consumed or supplied in the activity.", 0, java.lang.Integer.MAX_VALUE, product));
         childrenList.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be consumed at once (per dose, per meal, etc.).", 0, java.lang.Integer.MAX_VALUE, quantity));
         childrenList.add(new Property("dosageInstruction", "DosageInstruction", "Provides detailed dosage instructions in the same way that they are described for MedicationRequest resources.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
+        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the sites on the subject's body where the procedure should be performed (I.e. the target sites).", 0, java.lang.Integer.MAX_VALUE, bodySite));
         childrenList.add(new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, java.lang.Integer.MAX_VALUE, transform));
         childrenList.add(new Property("dynamicValue", "", "Dynamic values that will be evaluated to produce values for elements of the resulting resource. For example, if the dosage of a medication must be computed based on the patient's weight, a dynamic value would be used to specify an expression that calculated the weight, and the path on the intent resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
       }
@@ -2627,6 +2689,7 @@ public class ActivityDefinition extends MetadataResource {
         case -309474065: /*product*/ return this.product == null ? new Base[0] : new Base[] {this.product}; // Type
         case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
         case -1201373865: /*dosageInstruction*/ return this.dosageInstruction == null ? new Base[0] : this.dosageInstruction.toArray(new Base[this.dosageInstruction.size()]); // DosageInstruction
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : this.bodySite.toArray(new Base[this.bodySite.size()]); // CodeableConcept
         case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // Reference
         case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // ActivityDefinitionDynamicValueComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -2730,6 +2793,9 @@ public class ActivityDefinition extends MetadataResource {
         case -1201373865: // dosageInstruction
           this.getDosageInstruction().add(castToDosageInstruction(value)); // DosageInstruction
           break;
+        case 1702620169: // bodySite
+          this.getBodySite().add(castToCodeableConcept(value)); // CodeableConcept
+          break;
         case 1052666732: // transform
           this.transform = castToReference(value); // Reference
           break;
@@ -2805,6 +2871,8 @@ public class ActivityDefinition extends MetadataResource {
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
         else if (name.equals("dosageInstruction"))
           this.getDosageInstruction().add(castToDosageInstruction(value));
+        else if (name.equals("bodySite"))
+          this.getBodySite().add(castToCodeableConcept(value));
         else if (name.equals("transform"))
           this.transform = castToReference(value); // Reference
         else if (name.equals("dynamicValue"))
@@ -2847,6 +2915,7 @@ public class ActivityDefinition extends MetadataResource {
         case 1753005361:  return getProduct(); // Type
         case -1285004149:  return getQuantity(); // SimpleQuantity
         case -1201373865:  return addDosageInstruction(); // DosageInstruction
+        case 1702620169:  return addBodySite(); // CodeableConcept
         case 1052666732:  return getTransform(); // Reference
         case 572625010:  return addDynamicValue(); // ActivityDefinitionDynamicValueComponent
         default: return super.makeProperty(hash, name);
@@ -2963,6 +3032,9 @@ public class ActivityDefinition extends MetadataResource {
         else if (name.equals("dosageInstruction")) {
           return addDosageInstruction();
         }
+        else if (name.equals("bodySite")) {
+          return addBodySite();
+        }
         else if (name.equals("transform")) {
           this.transform = new Reference();
           return this.transform;
@@ -3053,6 +3125,11 @@ public class ActivityDefinition extends MetadataResource {
           for (DosageInstruction i : dosageInstruction)
             dst.dosageInstruction.add(i.copy());
         };
+        if (bodySite != null) {
+          dst.bodySite = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : bodySite)
+            dst.bodySite.add(i.copy());
+        };
         dst.transform = transform == null ? null : transform.copy();
         if (dynamicValue != null) {
           dst.dynamicValue = new ArrayList<ActivityDefinitionDynamicValueComponent>();
@@ -3080,7 +3157,7 @@ public class ActivityDefinition extends MetadataResource {
            && compareDeep(library, o.library, true) && compareDeep(category, o.category, true) && compareDeep(code, o.code, true)
            && compareDeep(timing, o.timing, true) && compareDeep(location, o.location, true) && compareDeep(participantType, o.participantType, true)
            && compareDeep(product, o.product, true) && compareDeep(quantity, o.quantity, true) && compareDeep(dosageInstruction, o.dosageInstruction, true)
-           && compareDeep(transform, o.transform, true) && compareDeep(dynamicValue, o.dynamicValue, true)
+           && compareDeep(bodySite, o.bodySite, true) && compareDeep(transform, o.transform, true) && compareDeep(dynamicValue, o.dynamicValue, true)
           ;
       }
 
@@ -3101,7 +3178,7 @@ public class ActivityDefinition extends MetadataResource {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, usage
           , approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright, relatedArtifact
           , library, category, code, timing, location, participantType, product, quantity
-          , dosageInstruction, transform, dynamicValue);
+          , dosageInstruction, bodySite, transform, dynamicValue);
       }
 
   @Override

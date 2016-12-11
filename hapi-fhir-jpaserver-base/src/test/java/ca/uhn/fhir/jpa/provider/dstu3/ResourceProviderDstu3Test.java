@@ -407,13 +407,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateConditional() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 
 		MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 
 		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
@@ -463,7 +463,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
@@ -584,7 +584,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testCreateWithForcedId";
 
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		p.setId(methodName);
 
 		IIdType optId = ourClient.update().resource(p).execute().getId();
@@ -635,12 +635,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("FAM1");
+		p.addName().setFamily("FAM1");
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("FAM2");
+		p.addName().setFamily("FAM2");
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		try {
@@ -728,7 +728,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testDeleteNormal() throws IOException {
 		Patient p = new Patient();
-		p.addName().addFamily("FAM");
+		p.addName().setFamily("FAM");
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		ourClient.read().resource(Patient.class).withId(id).execute();
@@ -748,7 +748,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testDeleteResourceConditional1";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
@@ -791,7 +791,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testDeleteResourceConditional2";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
@@ -938,7 +938,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(orgId1);
 		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
@@ -1002,7 +1002,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(orgId1);
 		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
@@ -1050,11 +1050,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
 		Patient pt1 = new Patient();
-		pt1.addName().addFamily("Everything").addGiven("Arthur");
+		pt1.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
-		pt2.addName().addFamily("Everything").addGiven("Arthur");
+		pt2.addName().setFamily("Everything").addGiven("Arthur");
 		IIdType ptId2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
 		Device dev1 = new Device();
@@ -1270,7 +1270,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(orgId1);
 		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
@@ -1312,11 +1312,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType o2Id = ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
 
 		Patient p1 = new Patient();
-		p1.addName().addFamily(methodName + "1");
+		p1.addName().setFamily(methodName + "1");
 		p1.getManagingOrganization().setReferenceElement(o1Id);
 		IIdType p1Id = ourClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
 		Patient p2 = new Patient();
-		p2.addName().addFamily(methodName + "2");
+		p2.addName().setFamily(methodName + "2");
 		p2.getManagingOrganization().setReferenceElement(o2Id);
 		IIdType p2Id = ourClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
 
@@ -1354,7 +1354,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Thread.sleep(10);
 
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(oId);
 		IIdType pId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
@@ -1559,7 +1559,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
@@ -1581,13 +1581,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
@@ -1632,7 +1632,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testHistoryWithFromAndTo";
 
 		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
+		patient.addName().setFamily(methodName);
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<Date> preDates = Lists.newArrayList();
@@ -1642,7 +1642,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			preDates.add(new Date());
 			Thread.sleep(100);
 			patient.setId(id);
-			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
 
@@ -1675,7 +1675,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testHistoryWithDeletedResource";
 
 		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
+		patient.addName().setFamily(methodName);
 		IIdType id = ourClient.create().resource(patient).execute().getId().toVersionless();
 		ourClient.delete().resourceById(id).execute();
 		patient.setId(id);
@@ -1708,7 +1708,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pt);
 
 		ourLog.info("Input: {}", resource);
@@ -1750,7 +1750,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pt);
 
 		ourLog.info("Input: {}", resource);
@@ -1857,7 +1857,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		Meta meta = ourClient.meta().get(Meta.class).fromResource(id).execute();
@@ -1878,7 +1878,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testMetaOperationWithNoMetaParameter() throws Exception {
 		Patient p = new Patient();
-		p.addName().addFamily("testMetaAddInvalid");
+		p.addName().setFamily("testMetaAddInvalid");
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		//@formatter:off
@@ -1927,7 +1927,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.setActive(true);
 			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().addFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily(methodName).addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
@@ -1957,7 +1957,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.setActive(true);
 			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().addFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily(methodName).addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
@@ -1988,7 +1988,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.setActive(true);
 			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().addFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily(methodName).addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
@@ -2019,7 +2019,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.setActive(true);
 			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().addFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily(methodName).addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
@@ -2190,7 +2190,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchByExtendedChars() throws Exception {
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("Jernelöv");
+			p.addName().setFamily("Jernelöv");
 			p.addIdentifier().setValue("ID" + i);
 			myPatientDao.create(p, mySrd);
 		}
@@ -2209,7 +2209,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient?_count=5&_pretty=true&name=Jernel%C3%B6v", b.getLink("self").getUrl());
 
 			Patient p = (Patient) b.getEntry().get(0).getResource();
-			assertEquals("Jernelöv", p.getName().get(0).getFamily().get(0).getValue());
+			assertEquals("Jernelöv", p.getName().get(0).getFamily());
 
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
@@ -2221,12 +2221,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchByIdentifier() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
-		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
+		p1.addName().setFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
 		IdType p1Id = (IdType) ourClient.create().resource(p1).execute().getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier02");
-		p2.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
+		p2.addName().setFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
 		ourClient.create().resource(p2).execute().getId();
 
 		//@formatter:off
@@ -2307,13 +2307,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds01");
-		p1.addName().addFamily("testSearchByReferenceIdsFamily01").addGiven("testSearchByReferenceIdsGiven01");
+		p1.addName().setFamily("testSearchByReferenceIdsFamily01").addGiven("testSearchByReferenceIdsGiven01");
 		p1.setManagingOrganization(new Reference(o1id.toUnqualifiedVersionless()));
 		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds02");
-		p2.addName().addFamily("testSearchByReferenceIdsFamily02").addGiven("testSearchByReferenceIdsGiven02");
+		p2.addName().setFamily("testSearchByReferenceIdsFamily02").addGiven("testSearchByReferenceIdsGiven02");
 		p2.setManagingOrganization(new Reference(o2id.toUnqualifiedVersionless()));
 		IIdType p2Id = ourClient.create().resource(p2).execute().getId();
 
@@ -2342,7 +2342,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
-		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
+		p1.addName().setFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 		p1.setManagingOrganization(new Reference(o1id.toUnqualifiedVersionless()));
 		IdType p1Id = (IdType) ourClient.create().resource(p1).execute().getId();
 
@@ -2378,14 +2378,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily(methodName).addGiven("Joe");
 			id1a = (IdType) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 		IIdType id1b;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily(methodName + "XXXX").addGiven("Joe");
+			patient.addName().setFamily(methodName + "XXXX").addGiven("Joe");
 			id1b = (IdType) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 
@@ -2397,7 +2397,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily(methodName).addGiven("John");
+			patient.addName().setFamily(methodName).addGiven("John");
 			id2 = (IdType) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 
@@ -2498,14 +2498,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().addFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily(methodName).addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
 		for (int i = 1; i <= 20; i++) {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(Integer.toString(i));
-			patient.addName().addFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily(methodName).addGiven("Joe");
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
@@ -2572,7 +2572,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchThenTagThenSearch() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
-		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		ourClient.create().resource(patient).execute();
 
 		//@formatter:off
@@ -2610,19 +2610,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchTokenParamNoValue() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
-		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam1");
 		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
 				.setDisplay("testSearchTokenParamDisplay");
 		myPatientDao.create(patient, mySrd);
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
-		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
-		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam2");
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
 		//@formatter:off
@@ -2809,7 +2809,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchWithMixedParams() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("0");
-		patient.addName().addFamily("testSearchWithMixedParams").addGiven("Joe");
+		patient.addName().setFamily("testSearchWithMixedParams").addGiven("Joe");
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpPost httpPost = new HttpPost(ourServerBase + "/Patient/_search?_format=application/xml");
@@ -2859,82 +2859,82 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Daniel").addFamily("Adams");
+		p.addName().addGiven("Daniel").setFamily("Adams");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Aaron").addFamily("Alexis");
+		p.addName().addGiven("Aaron").setFamily("Alexis");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Carol").addFamily("Allen");
+		p.addName().addGiven("Carol").setFamily("Allen");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Ruth").addFamily("Black");
+		p.addName().addGiven("Ruth").setFamily("Black");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Brian").addFamily("Brooks");
+		p.addName().addGiven("Brian").setFamily("Brooks");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Susan").addFamily("Clark");
+		p.addName().addGiven("Susan").setFamily("Clark");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Amy").addFamily("Clark");
+		p.addName().addGiven("Amy").setFamily("Clark");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Anthony").addFamily("Coleman");
+		p.addName().addGiven("Anthony").setFamily("Coleman");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Steven").addFamily("Coleman");
+		p.addName().addGiven("Steven").setFamily("Coleman");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Lisa").addFamily("Coleman");
+		p.addName().addGiven("Lisa").setFamily("Coleman");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Ruth").addFamily("Cook");
+		p.addName().addGiven("Ruth").setFamily("Cook");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Betty").addFamily("Davis");
+		p.addName().addGiven("Betty").setFamily("Davis");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Joshua").addFamily("Diaz");
+		p.addName().addGiven("Joshua").setFamily("Diaz");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Brian").addFamily("Gracia");
+		p.addName().addGiven("Brian").setFamily("Gracia");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Stephan").addFamily("Graham");
+		p.addName().addGiven("Stephan").setFamily("Graham");
 		ourClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Sarah").addFamily("Graham");
+		p.addName().addGiven("Sarah").setFamily("Graham");
 		ourClient.create().resource(p).execute();
 
 		//@formatter:off
@@ -3020,7 +3020,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testTryToCreateResourceWithReferenceThatDoesntExist() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testTryToCreateResourceWithReferenceThatDoesntExist01");
-		p1.addName().addFamily("testTryToCreateResourceWithReferenceThatDoesntExistFamily01").addGiven("testTryToCreateResourceWithReferenceThatDoesntExistGiven01");
+		p1.addName().setFamily("testTryToCreateResourceWithReferenceThatDoesntExistFamily01").addGiven("testTryToCreateResourceWithReferenceThatDoesntExistGiven01");
 		p1.setManagingOrganization(new Reference("Organization/99999999999"));
 
 		try {
@@ -3037,7 +3037,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut post = new HttpPut(ourServerBase + "/Patient");
@@ -3060,7 +3060,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient pt = new Patient();
 		pt.setId("2");
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut post = new HttpPut(ourServerBase + "/Patient");
@@ -3086,7 +3086,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testUpdateNoIdInBody";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut post = new HttpPut(ourServerBase + "/Patient/FOO");
@@ -3108,7 +3108,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
-		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
 		IdType p1id = (IdType) ourClient.create().resource(p1).execute().getId();
 
 		// Try to update with the wrong ID in the resource body
@@ -3167,7 +3167,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
-		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
 		IdType p1id = (IdType) ourClient.create().resource(p1).execute().getId();
 
 		Organization p2 = new Organization();
@@ -3194,7 +3194,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testUpdateResourceConditional";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient?name=" + methodName);
@@ -3245,7 +3245,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			response.close();
 		}
 
-		pt.addName().addFamily("FOO");
+		pt.addName().setFamily("FOO");
 		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 		HttpPut put = new HttpPut(ourServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escape("|"))));
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -3271,7 +3271,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testUpdateResourceWithPrefer";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
@@ -3347,10 +3347,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testUpdateWithETag";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
-		pt.addName().addFamily("FAM2");
+		pt.addName().setFamily("FAM2");
 		pt.setId(id.toUnqualifiedVersionless());
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
@@ -3389,7 +3389,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient pt = new Patient();
 		pt.setId("333");
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut post = new HttpPut(ourServerBase + "/Patient/A2");

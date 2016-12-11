@@ -225,7 +225,7 @@ public class CustomTypeDstu3Test {
 		MyCustomPatient patient = new MyCustomPatient();
 
 		patient.addIdentifier().setSystem("urn:system").setValue("1234");
-		patient.addName().addFamily("Rossi").addGiven("Mario");
+		patient.addName().setFamily("Rossi").addGiven("Mario");
 		patient.setInsulinLevel(new Quantity());
 		patient.setGlucoseLevel(new Quantity());
 		patient.setHbA1c(new Quantity());
@@ -267,7 +267,7 @@ public class CustomTypeDstu3Test {
 		patient.getMeta().addProfile("http://example.com/bar");
 		
 		patient.addIdentifier().setSystem("urn:system").setValue("1234");
-		patient.addName().addFamily("Rossi").addGiven("Mario");
+		patient.addName().setFamily("Rossi").addGiven("Mario");
 		patient.setInsulinLevel(new Quantity());
 		patient.setGlucoseLevel(new Quantity());
 		patient.setHbA1c(new Quantity());

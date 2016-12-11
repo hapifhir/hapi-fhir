@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -198,10 +198,10 @@ public class MedicationAdministration extends DomainResource {
         /**
          * A coded specification of the anatomic site where the medication first entered the body.  For example, "left arm".
          */
-        @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "site", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Body site administered to", formalDefinition="A coded specification of the anatomic site where the medication first entered the body.  For example, \"left arm\"." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/approach-site-codes")
-        protected Type site;
+        protected CodeableConcept site;
 
         /**
          * A code specifying the route or physiological path of administration of a therapeutic agent into or onto the patient.  For example, topical, intravenous, etc.
@@ -233,7 +233,7 @@ public class MedicationAdministration extends DomainResource {
         @Description(shortDefinition="Dose quantity per unit of time", formalDefinition="Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours." )
         protected Type rate;
 
-        private static final long serialVersionUID = -1359632689L;
+        private static final long serialVersionUID = 1316915516L;
 
     /**
      * Constructor
@@ -294,34 +294,13 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  For example, "left arm".)
          */
-        public Type getSite() { 
+        public CodeableConcept getSite() { 
+          if (this.site == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MedicationAdministrationDosageComponent.site");
+            else if (Configuration.doAutoCreate())
+              this.site = new CodeableConcept(); // cc
           return this.site;
-        }
-
-        /**
-         * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  For example, "left arm".)
-         */
-        public CodeableConcept getSiteCodeableConcept() throws FHIRException { 
-          if (!(this.site instanceof CodeableConcept))
-            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.site;
-        }
-
-        public boolean hasSiteCodeableConcept() { 
-          return this.site instanceof CodeableConcept;
-        }
-
-        /**
-         * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  For example, "left arm".)
-         */
-        public Reference getSiteReference() throws FHIRException { 
-          if (!(this.site instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
-          return (Reference) this.site;
-        }
-
-        public boolean hasSiteReference() { 
-          return this.site instanceof Reference;
         }
 
         public boolean hasSite() { 
@@ -331,7 +310,7 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @param value {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  For example, "left arm".)
          */
-        public MedicationAdministrationDosageComponent setSite(Type value) { 
+        public MedicationAdministrationDosageComponent setSite(CodeableConcept value) { 
           this.site = value;
           return this;
         }
@@ -456,7 +435,7 @@ public class MedicationAdministration extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("text", "string", "Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.\r\rThe dosage instructions should reflect the dosage of the medication that was administered.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("site[x]", "CodeableConcept|Reference(BodySite)", "A coded specification of the anatomic site where the medication first entered the body.  For example, \"left arm\".", 0, java.lang.Integer.MAX_VALUE, site));
+          childrenList.add(new Property("site", "CodeableConcept", "A coded specification of the anatomic site where the medication first entered the body.  For example, \"left arm\".", 0, java.lang.Integer.MAX_VALUE, site));
           childrenList.add(new Property("route", "CodeableConcept", "A code specifying the route or physiological path of administration of a therapeutic agent into or onto the patient.  For example, topical, intravenous, etc.", 0, java.lang.Integer.MAX_VALUE, route));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  For example, Slow Push, Deep IV.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("dose", "SimpleQuantity", "The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection.", 0, java.lang.Integer.MAX_VALUE, dose));
@@ -467,7 +446,7 @@ public class MedicationAdministration extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
-        case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // Type
+        case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // CodeableConcept
         case 108704329: /*route*/ return this.route == null ? new Base[0] : new Base[] {this.route}; // CodeableConcept
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
         case 3089437: /*dose*/ return this.dose == null ? new Base[0] : new Base[] {this.dose}; // SimpleQuantity
@@ -484,7 +463,7 @@ public class MedicationAdministration extends DomainResource {
           this.text = castToString(value); // StringType
           break;
         case 3530567: // site
-          this.site = castToType(value); // Type
+          this.site = castToCodeableConcept(value); // CodeableConcept
           break;
         case 108704329: // route
           this.route = castToCodeableConcept(value); // CodeableConcept
@@ -507,8 +486,8 @@ public class MedicationAdministration extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("text"))
           this.text = castToString(value); // StringType
-        else if (name.equals("site[x]"))
-          this.site = castToType(value); // Type
+        else if (name.equals("site"))
+          this.site = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("route"))
           this.route = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("method"))
@@ -525,7 +504,7 @@ public class MedicationAdministration extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
-        case 2099997657:  return getSite(); // Type
+        case 3530567:  return getSite(); // CodeableConcept
         case 108704329:  return getRoute(); // CodeableConcept
         case -1077554975:  return getMethod(); // CodeableConcept
         case 3089437:  return getDose(); // SimpleQuantity
@@ -540,12 +519,8 @@ public class MedicationAdministration extends DomainResource {
         if (name.equals("text")) {
           throw new FHIRException("Cannot call addChild on a primitive type MedicationAdministration.text");
         }
-        else if (name.equals("siteCodeableConcept")) {
+        else if (name.equals("site")) {
           this.site = new CodeableConcept();
-          return this.site;
-        }
-        else if (name.equals("siteReference")) {
-          this.site = new Reference();
           return this.site;
         }
         else if (name.equals("route")) {
@@ -680,9 +655,9 @@ public class MedicationAdministration extends DomainResource {
     /**
      * A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.
      */
-    @Child(name = "effectiveTime", type = {DateTimeType.class, Period.class}, order=6, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "effective", type = {DateTimeType.class, Period.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Start and end time of administration", formalDefinition="A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate." )
-    protected Type effectiveTime;
+    protected Type effective;
 
     /**
      * The individual who was responsible for giving the medication to the patient.
@@ -781,7 +756,7 @@ public class MedicationAdministration extends DomainResource {
     protected List<Provenance> eventHistoryTarget;
 
 
-    private static final long serialVersionUID = 195298312L;
+    private static final long serialVersionUID = -1414601061L;
 
   /**
    * Constructor
@@ -793,12 +768,12 @@ public class MedicationAdministration extends DomainResource {
   /**
    * Constructor
    */
-    public MedicationAdministration(Enumeration<MedicationAdministrationStatus> status, Type medication, Reference patient, Type effectiveTime) {
+    public MedicationAdministration(Enumeration<MedicationAdministrationStatus> status, Type medication, Reference patient, Type effective) {
       super();
       this.status = status;
       this.medication = medication;
       this.patient = patient;
-      this.effectiveTime = effectiveTime;
+      this.effective = effective;
     }
 
     /**
@@ -1096,47 +1071,47 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @return {@link #effective} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
-    public Type getEffectiveTime() { 
-      return this.effectiveTime;
+    public Type getEffective() { 
+      return this.effective;
     }
 
     /**
-     * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @return {@link #effective} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
-    public DateTimeType getEffectiveTimeDateTimeType() throws FHIRException { 
-      if (!(this.effectiveTime instanceof DateTimeType))
-        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effectiveTime.getClass().getName()+" was encountered");
-      return (DateTimeType) this.effectiveTime;
+    public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
+      if (!(this.effective instanceof DateTimeType))
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (DateTimeType) this.effective;
     }
 
-    public boolean hasEffectiveTimeDateTimeType() { 
-      return this.effectiveTime instanceof DateTimeType;
+    public boolean hasEffectiveDateTimeType() { 
+      return this.effective instanceof DateTimeType;
     }
 
     /**
-     * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @return {@link #effective} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
-    public Period getEffectiveTimePeriod() throws FHIRException { 
-      if (!(this.effectiveTime instanceof Period))
-        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effectiveTime.getClass().getName()+" was encountered");
-      return (Period) this.effectiveTime;
+    public Period getEffectivePeriod() throws FHIRException { 
+      if (!(this.effective instanceof Period))
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (Period) this.effective;
     }
 
-    public boolean hasEffectiveTimePeriod() { 
-      return this.effectiveTime instanceof Period;
+    public boolean hasEffectivePeriod() { 
+      return this.effective instanceof Period;
     }
 
-    public boolean hasEffectiveTime() { 
-      return this.effectiveTime != null && !this.effectiveTime.isEmpty();
+    public boolean hasEffective() { 
+      return this.effective != null && !this.effective.isEmpty();
     }
 
     /**
-     * @param value {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @param value {@link #effective} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
-    public MedicationAdministration setEffectiveTime(Type value) { 
-      this.effectiveTime = value;
+    public MedicationAdministration setEffective(Type value) { 
+      this.effective = value;
       return this;
     }
 
@@ -1672,7 +1647,7 @@ public class MedicationAdministration extends DomainResource {
         childrenList.add(new Property("patient", "Reference(Patient)", "The person or animal receiving the medication.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("supportingInformation", "Reference(Any)", "Additional information (for example, patient height and weight) that supports the administration of the medication.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
-        childrenList.add(new Property("effectiveTime[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, java.lang.Integer.MAX_VALUE, effectiveTime));
+        childrenList.add(new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, java.lang.Integer.MAX_VALUE, effective));
         childrenList.add(new Property("performer", "Reference(Practitioner|Patient|RelatedPerson)", "The individual who was responsible for giving the medication to the patient.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("reasonReference", "Reference(Condition|Observation)", "Condition or observation that supports why the medication was administered.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         childrenList.add(new Property("prescription", "Reference(MedicationRequest)", "The original request, instruction or authority to perform the administration.", 0, java.lang.Integer.MAX_VALUE, prescription));
@@ -1694,7 +1669,7 @@ public class MedicationAdministration extends DomainResource {
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case -1248768647: /*supportingInformation*/ return this.supportingInformation == null ? new Base[0] : this.supportingInformation.toArray(new Base[this.supportingInformation.size()]); // Reference
-        case -929905388: /*effectiveTime*/ return this.effectiveTime == null ? new Base[0] : new Base[] {this.effectiveTime}; // Type
+        case -1468651097: /*effective*/ return this.effective == null ? new Base[0] : new Base[] {this.effective}; // Type
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
         case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 460301338: /*prescription*/ return this.prescription == null ? new Base[0] : new Base[] {this.prescription}; // Reference
@@ -1731,8 +1706,8 @@ public class MedicationAdministration extends DomainResource {
         case -1248768647: // supportingInformation
           this.getSupportingInformation().add(castToReference(value)); // Reference
           break;
-        case -929905388: // effectiveTime
-          this.effectiveTime = castToType(value); // Type
+        case -1468651097: // effective
+          this.effective = castToType(value); // Type
           break;
         case 481140686: // performer
           this.performer = castToReference(value); // Reference
@@ -1783,8 +1758,8 @@ public class MedicationAdministration extends DomainResource {
           this.encounter = castToReference(value); // Reference
         else if (name.equals("supportingInformation"))
           this.getSupportingInformation().add(castToReference(value));
-        else if (name.equals("effectiveTime[x]"))
-          this.effectiveTime = castToType(value); // Type
+        else if (name.equals("effective[x]"))
+          this.effective = castToType(value); // Type
         else if (name.equals("performer"))
           this.performer = castToReference(value); // Reference
         else if (name.equals("reasonReference"))
@@ -1818,7 +1793,7 @@ public class MedicationAdministration extends DomainResource {
         case -791418107:  return getPatient(); // Reference
         case 1524132147:  return getEncounter(); // Reference
         case -1248768647:  return addSupportingInformation(); // Reference
-        case -272263444:  return getEffectiveTime(); // Type
+        case 247104889:  return getEffective(); // Type
         case 481140686:  return getPerformer(); // Reference
         case -1146218137:  return addReasonReference(); // Reference
         case 460301338:  return getPrescription(); // Reference
@@ -1861,13 +1836,13 @@ public class MedicationAdministration extends DomainResource {
         else if (name.equals("supportingInformation")) {
           return addSupportingInformation();
         }
-        else if (name.equals("effectiveTimeDateTime")) {
-          this.effectiveTime = new DateTimeType();
-          return this.effectiveTime;
+        else if (name.equals("effectiveDateTime")) {
+          this.effective = new DateTimeType();
+          return this.effective;
         }
-        else if (name.equals("effectiveTimePeriod")) {
-          this.effectiveTime = new Period();
-          return this.effectiveTime;
+        else if (name.equals("effectivePeriod")) {
+          this.effective = new Period();
+          return this.effective;
         }
         else if (name.equals("performer")) {
           this.performer = new Reference();
@@ -1928,7 +1903,7 @@ public class MedicationAdministration extends DomainResource {
           for (Reference i : supportingInformation)
             dst.supportingInformation.add(i.copy());
         };
-        dst.effectiveTime = effectiveTime == null ? null : effectiveTime.copy();
+        dst.effective = effective == null ? null : effective.copy();
         dst.performer = performer == null ? null : performer.copy();
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
@@ -1979,9 +1954,8 @@ public class MedicationAdministration extends DomainResource {
         MedicationAdministration o = (MedicationAdministration) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(medication, o.medication, true)
            && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true) && compareDeep(supportingInformation, o.supportingInformation, true)
-           && compareDeep(effectiveTime, o.effectiveTime, true) && compareDeep(performer, o.performer, true)
-           && compareDeep(reasonReference, o.reasonReference, true) && compareDeep(prescription, o.prescription, true)
-           && compareDeep(notGiven, o.notGiven, true) && compareDeep(reasonNotGiven, o.reasonNotGiven, true)
+           && compareDeep(effective, o.effective, true) && compareDeep(performer, o.performer, true) && compareDeep(reasonReference, o.reasonReference, true)
+           && compareDeep(prescription, o.prescription, true) && compareDeep(notGiven, o.notGiven, true) && compareDeep(reasonNotGiven, o.reasonNotGiven, true)
            && compareDeep(reasonGiven, o.reasonGiven, true) && compareDeep(device, o.device, true) && compareDeep(note, o.note, true)
            && compareDeep(dosage, o.dosage, true) && compareDeep(eventHistory, o.eventHistory, true);
       }
@@ -1998,7 +1972,7 @@ public class MedicationAdministration extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, medication
-          , patient, encounter, supportingInformation, effectiveTime, performer, reasonReference
+          , patient, encounter, supportingInformation, effective, performer, reasonReference
           , prescription, notGiven, reasonNotGiven, reasonGiven, device, note, dosage, eventHistory
           );
       }
@@ -2223,17 +2197,17 @@ public class MedicationAdministration extends DomainResource {
    * <p>
    * Description: <b>Date administration happened (or did not happen)</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>MedicationAdministration.effectiveTime[x]</b><br>
+   * Path: <b>MedicationAdministration.effective[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="effective-time", path="MedicationAdministration.effectiveTime", description="Date administration happened (or did not happen)", type="date" )
+  @SearchParamDefinition(name="effective-time", path="MedicationAdministration.effective", description="Date administration happened (or did not happen)", type="date" )
   public static final String SP_EFFECTIVE_TIME = "effective-time";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>effective-time</b>
    * <p>
    * Description: <b>Date administration happened (or did not happen)</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>MedicationAdministration.effectiveTime[x]</b><br>
+   * Path: <b>MedicationAdministration.effective[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam EFFECTIVE_TIME = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EFFECTIVE_TIME);

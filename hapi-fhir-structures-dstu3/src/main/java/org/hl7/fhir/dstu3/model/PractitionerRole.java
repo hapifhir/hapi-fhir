@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -2019,6 +2019,32 @@ public class PractitionerRole extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIALTY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIALTY);
+
+ /**
+   * Search parameter: <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the practitioner with this role</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PractitionerRole.endpoint</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="endpoint", path="PractitionerRole.endpoint", description="Technical endpoints providing access to services operated for the practitioner with this role", type="reference", target={Endpoint.class } )
+  public static final String SP_ENDPOINT = "endpoint";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the practitioner with this role</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PractitionerRole.endpoint</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENDPOINT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENDPOINT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PractitionerRole:endpoint</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENDPOINT = new ca.uhn.fhir.model.api.Include("PractitionerRole:endpoint").toLocked();
 
  /**
    * Search parameter: <b>role</b>

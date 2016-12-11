@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -45,6 +45,8 @@ public class DefinitionStatusEnumFactory implements EnumFactory<DefinitionStatus
       return DefinitionStatus.ACTIVE;
     if ("withdrawn".equals(codeString))
       return DefinitionStatus.WITHDRAWN;
+    if ("unknown".equals(codeString))
+      return DefinitionStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown DefinitionStatus code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class DefinitionStatusEnumFactory implements EnumFactory<DefinitionStatus
       return "active";
     if (code == DefinitionStatus.WITHDRAWN)
       return "withdrawn";
+    if (code == DefinitionStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

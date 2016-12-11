@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractAction {
 
         /**
-         * null
+         * Definition for Action A
          */
         ACTIONA, 
         /**
-         * null
+         * Definition for Action B
          */
         ACTIONB, 
         /**
@@ -69,15 +69,15 @@ public enum ContractAction {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIONA: return "";
-            case ACTIONB: return "";
+            case ACTIONA: return "Definition for Action A";
+            case ACTIONB: return "Definition for Action B";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case ACTIONA: return "action-a";
-            case ACTIONB: return "action-b";
+            case ACTIONA: return "Action A";
+            case ACTIONB: return "Action B";
             default: return "?";
           }
     }

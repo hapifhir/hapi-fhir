@@ -130,7 +130,7 @@ public class JsonParserDstu3Test {
 		resource.getContained().add(patient);
 		resource.getContained().add(coverage);
 		resource.getPatient().setReference("#patient-1");
-		resource.addCoverage().getCoverage().setReference("#coverage-1");
+		resource.addInsurance().getCoverage().setReference("#coverage-1");
 
 		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = p.encodeResourceToString(resource);
@@ -234,7 +234,7 @@ public class JsonParserDstu3Test {
 		patient.addModifierExtension(modExt);
 
 		HumanName name = patient.addName();
-		name.addFamily("Blah");
+		name.setFamily("Blah");
 		StringType given = name.addGivenElement();
 		given.setValue("Joe");
 		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
@@ -299,7 +299,7 @@ public class JsonParserDstu3Test {
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 
 		p.getMeta().addProfile("http://foo/Profile1");
 		p.getMeta().addProfile("http://foo/Profile2");
@@ -383,17 +383,17 @@ public class JsonParserDstu3Test {
 		Patient p = new Patient();
 		p.setId("patid");
 		HumanName name = p.addName();
-		name.addFamilyElement().setValue(null).setId("f0").addExtension(new Extension("http://foo", new StringType("FOOEXT0")));
-		name.addFamilyElement().setValue("V1").setId("f1").addExtension((Extension) new Extension("http://foo", new StringType("FOOEXT1")).setId("ext1id"));
-		name.addFamilyElement(); // this one shouldn't get encoded
-		name.addFamilyElement().setValue(null).addExtension(new Extension("http://foo", new StringType("FOOEXT3")));
+		name.addGivenElement().setValue(null).setId("f0").addExtension(new Extension("http://foo", new StringType("FOOEXT0")));
+		name.addGivenElement().setValue("V1").setId("f1").addExtension((Extension) new Extension("http://foo", new StringType("FOOEXT1")).setId("ext1id"));
+		name.addGivenElement(); // this one shouldn't get encoded
+		name.addGivenElement().setValue(null).addExtension(new Extension("http://foo", new StringType("FOOEXT3")));
 		name.setId("nameid");
 
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
 
 		output = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(p);
-		String expected = "{\"resourceType\":\"Patient\",\"id\":\"patid\",\"name\":[{\"id\":\"nameid\",\"family\":[null,\"V1\",null],\"_family\":[{\"id\":\"f0\",\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"FOOEXT0\"}]},{\"id\":\"f1\",\"extension\":[{\"id\":\"ext1id\",\"url\":\"http://foo\",\"valueString\":\"FOOEXT1\"}]},{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"FOOEXT3\"}]}]}]}";
+		String expected = "{\"resourceType\":\"Patient\",\"id\":\"patid\",\"name\":[{\"id\":\"nameid\",\"given\":[null,\"V1\",null],\"_given\":[{\"id\":\"f0\",\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"FOOEXT0\"}]},{\"id\":\"f1\",\"extension\":[{\"id\":\"ext1id\",\"url\":\"http://foo\",\"valueString\":\"FOOEXT1\"}]},{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"FOOEXT3\"}]}]}]}";
 		assertEquals(expected, output);
 
 		p = ourCtx.newJsonParser().parseResource(Patient.class, output);
@@ -401,37 +401,37 @@ public class JsonParserDstu3Test {
 
 		name = p.getName().get(0);
 		assertEquals("nameid", name.getId());
-		assertEquals(3, name.getFamily().size());
+		assertEquals(3, name.getGiven().size());
 
-		assertEquals(null, name.getFamily().get(0).getValue());
-		assertEquals("V1", name.getFamily().get(1).getValue());
-		assertEquals(null, name.getFamily().get(2).getValue());
+		assertEquals(null, name.getGiven().get(0).getValue());
+		assertEquals("V1", name.getGiven().get(1).getValue());
+		assertEquals(null, name.getGiven().get(2).getValue());
 
-		assertEquals("f0", name.getFamily().get(0).getId());
-		assertEquals("f1", name.getFamily().get(1).getId());
-		assertEquals(null, name.getFamily().get(2).getId());
+		assertEquals("f0", name.getGiven().get(0).getId());
+		assertEquals("f1", name.getGiven().get(1).getId());
+		assertEquals(null, name.getGiven().get(2).getId());
 
-		assertEquals(1, name.getFamily().get(0).getExtension().size());
-		assertEquals("http://foo", name.getFamily().get(0).getExtension().get(0).getUrl());
-		assertEquals("FOOEXT0", ((StringType) name.getFamily().get(0).getExtension().get(0).getValue()).getValue());
-		assertEquals(null, name.getFamily().get(0).getExtension().get(0).getId());
+		assertEquals(1, name.getGiven().get(0).getExtension().size());
+		assertEquals("http://foo", name.getGiven().get(0).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT0", ((StringType) name.getGiven().get(0).getExtension().get(0).getValue()).getValue());
+		assertEquals(null, name.getGiven().get(0).getExtension().get(0).getId());
 
-		assertEquals(1, name.getFamily().get(1).getExtension().size());
-		assertEquals("http://foo", name.getFamily().get(1).getExtension().get(0).getUrl());
-		assertEquals("FOOEXT1", ((StringType) name.getFamily().get(1).getExtension().get(0).getValue()).getValue());
-		assertEquals("ext1id", name.getFamily().get(1).getExtension().get(0).getId());
+		assertEquals(1, name.getGiven().get(1).getExtension().size());
+		assertEquals("http://foo", name.getGiven().get(1).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT1", ((StringType) name.getGiven().get(1).getExtension().get(0).getValue()).getValue());
+		assertEquals("ext1id", name.getGiven().get(1).getExtension().get(0).getId());
 
-		assertEquals(1, name.getFamily().get(2).getExtension().size());
-		assertEquals("http://foo", name.getFamily().get(2).getExtension().get(0).getUrl());
-		assertEquals("FOOEXT3", ((StringType) name.getFamily().get(2).getExtension().get(0).getValue()).getValue());
-		assertEquals(null, name.getFamily().get(2).getExtension().get(0).getId());
+		assertEquals(1, name.getGiven().get(2).getExtension().size());
+		assertEquals("http://foo", name.getGiven().get(2).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT3", ((StringType) name.getGiven().get(2).getExtension().get(0).getValue()).getValue());
+		assertEquals(null, name.getGiven().get(2).getExtension().get(0).getId());
 
 	}
 
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 
 		List<Coding> labels = new ArrayList<Coding>();
 		labels.add(new Coding().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setVersion("VERSION1"));
@@ -462,9 +462,7 @@ public class JsonParserDstu3Test {
 			"  },\n" + 
 			"  \"name\": [\n" + 
 			"    {\n" + 
-			"      \"family\": [\n" + 
-			"        \"FAMILY\"\n" + 
-			"      ]\n" + 
+			"      \"family\": \"FAMILY\"\n" + 
 			"    }\n" + 
 			"  ]\n" + 
 			"}", enc.trim());
@@ -601,14 +599,14 @@ public class JsonParserDstu3Test {
 
 		CustomContactComponent customContactComponent = new CustomContactComponent();
 		customContactComponent.getEyeColour().setValue("EYE");
-		customContactComponent.getName().addFamily("FAMILY");
+		customContactComponent.getName().setFamily("FAMILY");
 		patient.getCustomContact().add(customContactComponent);
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
 
 		assertEquals(
-				"{\"resourceType\":\"Patient\",\"id\":\"123\",\"contact\":[{\"extension\":[{\"url\":\"http://foo.com/contact-eyecolour\",\"valueIdentifier\":{\"value\":\"EYE\"}}],\"name\":{\"family\":[\"FAMILY\"]}}]}",
+				"{\"resourceType\":\"Patient\",\"id\":\"123\",\"contact\":[{\"extension\":[{\"url\":\"http://foo.com/contact-eyecolour\",\"valueIdentifier\":{\"value\":\"EYE\"}}],\"name\":{\"family\":\"FAMILY\"}}]}",
 				val);
 
 		FhirContext newCtx = FhirContext.forDstu3();
@@ -935,7 +933,7 @@ public class JsonParserDstu3Test {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 		patient.getMaritalStatus().addCoding().setCode("D");
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
@@ -966,7 +964,7 @@ public class JsonParserDstu3Test {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 		patient.addPhoto().setTitle("green");
 		patient.getMaritalStatus().addCoding().setCode("D");
 
@@ -987,7 +985,7 @@ public class JsonParserDstu3Test {
 		Patient patient = new Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
-		patient.addName().addFamily("FAMILY");
+		patient.addName().setFamily("FAMILY");
 		patient.getMaritalStatus().addCoding().setCode("D");
 
 		patient.getMeta().addTag().setSystem("foo").setCode("bar");
@@ -1091,7 +1089,7 @@ public class JsonParserDstu3Test {
 		patient.setId("123");
 
 		patient.getMeta().addProfile(("http://profile"));
-		patient.addName().addFamily("FAMILY").addGiven("GIVEN");
+		patient.addName().setFamily("FAMILY").addGiven("GIVEN");
 		patient.addAddress().addLine("LINE1");
 
 		{
@@ -1157,7 +1155,7 @@ public class JsonParserDstu3Test {
 	@Test
 	public void testEncodeWithNarrative() {
 		Patient p = new Patient();
-		p.addName().addFamily("Smith").addGiven("John");
+		p.addName().setFamily("Smith").addGiven("John");
 
 		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
@@ -1196,7 +1194,7 @@ public class JsonParserDstu3Test {
 		//@formatter:off
 		String input = "{" + 
 			 "  \"resourceType\": \"ExplanationOfBenefit\"," + 
-			 "  \"coverage\": {\n" + 
+			 "  \"insurance\": {\n" + 
 			 "    \"coverage\": {\n" + 
 			 "      \"reference\": \"Coverage/123\"\n" + 
 			 "    }\n" + 
@@ -1210,9 +1208,9 @@ public class JsonParserDstu3Test {
 		//@formatter:on
 
 		ExplanationOfBenefit eob = ourCtx.newJsonParser().parseResource(ExplanationOfBenefit.class, input);
-		assertEquals(Reference.class, eob.getCoverage().getCoverage().getClass());
+		assertEquals(Reference.class, eob.getInsurance().getCoverage().getClass());
 
-		Reference coverage = eob.getCoverage().getCoverage();
+		Reference coverage = eob.getInsurance().getCoverage();
 		assertEquals("Coverage/123", coverage.getReference());
 	}
 
@@ -1378,7 +1376,7 @@ public class JsonParserDstu3Test {
 	public void testOmitResourceId() {
 		Patient p = new Patient();
 		p.setId("123");
-		p.addName().addFamily("ABC");
+		p.addName().setFamily("ABC");
 
 		assertThat(ourCtx.newJsonParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
@@ -1700,7 +1698,7 @@ public class JsonParserDstu3Test {
 		o.getCode().setText("obs text");
 
 		Patient p = new Patient();
-		p.addName().addFamily("patient family");
+		p.addName().setFamily("patient family");
 		o.getSubject().setResource(p);
 
 		String enc = parser.encodeResourceToString(o);
@@ -1721,7 +1719,7 @@ public class JsonParserDstu3Test {
 
 		assertNotNull(o.getSubject().getResource());
 		p = (Patient) o.getSubject().getResource();
-		assertEquals("patient family", p.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("patient family", p.getName().get(0).getFamilyElement().getValue());
 	}
 
 	/**
@@ -1732,9 +1730,9 @@ public class JsonParserDstu3Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/json-edge-case-modified-335.json"), StandardCharsets.UTF_8);
 
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, input);
-		StringType family1 = p.getContact().get(0).getName().getFamily().get(1);
-		assertEquals("du", family1.getValue());
-		assertEquals("a2", family1.getId());
+		StringType family1 = p.getContact().get(0).getName().getGiven().get(1);
+		assertEquals("Denise", family1.getValue());
+		assertEquals("a3", family1.getId());
 	}
 
 	/**
@@ -1891,7 +1889,7 @@ public class JsonParserDstu3Test {
 		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/missing_array.json"), StandardCharsets.UTF_8);
 		RelatedPerson rp = ourCtx.newJsonParser().parseResource(RelatedPerson.class, input);
 		assertEquals(1, rp.getName().size());
-		assertEquals("Doe", rp.getName().get(0).getFamilyAsSingleString());
+		assertEquals("Doe", rp.getName().get(0).getFamily());
 
 	}
 
@@ -1925,7 +1923,7 @@ public class JsonParserDstu3Test {
 		Patient patient = new Patient();
 		String patientId = UUID.randomUUID().toString();
 		patient.setId(new IdType("Patient", patientId));
-		patient.addName().addGiven("John").addFamily("Smith");
+		patient.addName().addGiven("John").setFamily("Smith");
 		patient.setGender(AdministrativeGender.MALE);
 		patient.setBirthDateElement(new DateType("1987-04-16"));
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -41,8 +41,8 @@ public class CodesystemHierarchyMeaningEnumFactory implements EnumFactory<Codesy
       return null;
     if ("grouped-by".equals(codeString))
       return CodesystemHierarchyMeaning.GROUPEDBY;
-    if ("subsumes".equals(codeString))
-      return CodesystemHierarchyMeaning.SUBSUMES;
+    if ("is-a".equals(codeString))
+      return CodesystemHierarchyMeaning.ISA;
     if ("part-of".equals(codeString))
       return CodesystemHierarchyMeaning.PARTOF;
     if ("classified-with".equals(codeString))
@@ -53,8 +53,8 @@ public class CodesystemHierarchyMeaningEnumFactory implements EnumFactory<Codesy
   public String toCode(CodesystemHierarchyMeaning code) {
     if (code == CodesystemHierarchyMeaning.GROUPEDBY)
       return "grouped-by";
-    if (code == CodesystemHierarchyMeaning.SUBSUMES)
-      return "subsumes";
+    if (code == CodesystemHierarchyMeaning.ISA)
+      return "is-a";
     if (code == CodesystemHierarchyMeaning.PARTOF)
       return "part-of";
     if (code == CodesystemHierarchyMeaning.CLASSIFIEDWITH)

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum PaymentStatus {
 
         /**
-         * null
+         * The payment has been sent physically or electronically.
          */
         PAID, 
         /**
-         * null
+         * The payment has been received by the payee.
          */
         CLEARED, 
         /**
@@ -69,15 +69,15 @@ public enum PaymentStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case PAID: return "";
-            case CLEARED: return "";
+            case PAID: return "The payment has been sent physically or electronically.";
+            case CLEARED: return "The payment has been received by the payee.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PAID: return "paid";
-            case CLEARED: return "cleared";
+            case PAID: return "Paid";
+            case CLEARED: return "Cleared";
             default: return "?";
           }
     }

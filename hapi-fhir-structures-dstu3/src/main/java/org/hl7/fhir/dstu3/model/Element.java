@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -314,6 +314,16 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
   public void setIdBase(String value) {
     setId(value);
   }
+// added from java-adornments.txt:
+  public void addExtension(String url, Type value) {
+    Extension ex = new Extension();
+    ex.setUrl(url);
+    ex.setValue(value);
+    getExtension().add(ex);    
+  }
+
+
+// end addition
 
 }
 

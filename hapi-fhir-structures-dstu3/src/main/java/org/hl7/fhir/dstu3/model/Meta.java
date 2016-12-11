@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -63,10 +63,10 @@ public class Meta extends Type implements IBaseMetaType {
     protected InstantType lastUpdated;
 
     /**
-     * A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].
+     * A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].
      */
     @Child(name = "profile", type = {UriType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Profiles this resource claims to conform to", formalDefinition="A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]." )
+    @Description(shortDefinition="Profiles this resource claims to conform to", formalDefinition="A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]." )
     protected List<UriType> profile;
 
     /**
@@ -193,7 +193,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @return {@link #profile} (A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
+     * @return {@link #profile} (A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
      */
     public List<UriType> getProfile() { 
       if (this.profile == null)
@@ -219,7 +219,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @return {@link #profile} (A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
+     * @return {@link #profile} (A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
      */
     public UriType addProfileElement() {//2 
       UriType t = new UriType();
@@ -230,7 +230,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @param value {@link #profile} (A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
+     * @param value {@link #profile} (A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
      */
     public Meta addProfile(String value) { //1
       UriType t = new UriType();
@@ -242,7 +242,7 @@ public class Meta extends Type implements IBaseMetaType {
     }
 
     /**
-     * @param value {@link #profile} (A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
+     * @param value {@link #profile} (A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].)
      */
     public boolean hasProfile(String value) { 
       if (this.profile == null)
@@ -412,7 +412,7 @@ public class Meta extends Type implements IBaseMetaType {
         super.listChildren(childrenList);
         childrenList.add(new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.", 0, java.lang.Integer.MAX_VALUE, versionId));
         childrenList.add(new Property("lastUpdated", "instant", "When the resource last changed - e.g. when the version changed.", 0, java.lang.Integer.MAX_VALUE, lastUpdated));
-        childrenList.add(new Property("profile", "uri", "A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].", 0, java.lang.Integer.MAX_VALUE, profile));
+        childrenList.add(new Property("profile", "uri", "A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].", 0, java.lang.Integer.MAX_VALUE, profile));
         childrenList.add(new Property("security", "Coding", "Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.", 0, java.lang.Integer.MAX_VALUE, security));
         childrenList.add(new Property("tag", "Coding", "Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.", 0, java.lang.Integer.MAX_VALUE, tag));
       }

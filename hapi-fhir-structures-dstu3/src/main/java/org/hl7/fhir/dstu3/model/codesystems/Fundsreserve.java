@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum Fundsreserve {
 
         /**
-         * null
+         * The payor is requested to reserve funds for the provision of the named services by any provider for settlement of future claims related to this request.
          */
         PATIENT, 
         /**
-         * null
+         * The payor is requested to reserve funds solely for the named provider for settlement of future claims related to this request.
          */
         PROVIDER, 
         /**
-         * null
+         * The payor is not being requested to reserve any funds for the settlement of future claims.
          */
         NONE, 
         /**
@@ -76,17 +76,17 @@ public enum Fundsreserve {
         }
         public String getDefinition() {
           switch (this) {
-            case PATIENT: return "";
-            case PROVIDER: return "";
-            case NONE: return "";
+            case PATIENT: return "The payor is requested to reserve funds for the provision of the named services by any provider for settlement of future claims related to this request.";
+            case PROVIDER: return "The payor is requested to reserve funds solely for the named provider for settlement of future claims related to this request.";
+            case NONE: return "The payor is not being requested to reserve any funds for the settlement of future claims.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PATIENT: return "patient";
-            case PROVIDER: return "provider";
-            case NONE: return "none";
+            case PATIENT: return "Patient";
+            case PROVIDER: return "Provider";
+            case NONE: return "None";
             default: return "?";
           }
     }

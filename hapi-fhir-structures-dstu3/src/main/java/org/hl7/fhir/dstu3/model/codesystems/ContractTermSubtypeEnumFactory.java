@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,22 +39,22 @@ public class ContractTermSubtypeEnumFactory implements EnumFactory<ContractTermS
   public ContractTermSubtype fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("OralHealth-Basic".equals(codeString))
+    if ("oralhealth-basic".equals(codeString))
       return ContractTermSubtype.ORALHEALTHBASIC;
-    if ("OralHealth-Major".equals(codeString))
+    if ("oralhealth-major".equals(codeString))
       return ContractTermSubtype.ORALHEALTHMAJOR;
-    if ("OralHealth-Orthodontic".equals(codeString))
+    if ("oralhealth-orthodontic".equals(codeString))
       return ContractTermSubtype.ORALHEALTHORTHODONTIC;
     throw new IllegalArgumentException("Unknown ContractTermSubtype code '"+codeString+"'");
   }
 
   public String toCode(ContractTermSubtype code) {
     if (code == ContractTermSubtype.ORALHEALTHBASIC)
-      return "OralHealth-Basic";
+      return "oralhealth-basic";
     if (code == ContractTermSubtype.ORALHEALTHMAJOR)
-      return "OralHealth-Major";
+      return "oralhealth-major";
     if (code == ContractTermSubtype.ORALHEALTHORTHODONTIC)
-      return "OralHealth-Orthodontic";
+      return "oralhealth-orthodontic";
     return "?";
   }
 

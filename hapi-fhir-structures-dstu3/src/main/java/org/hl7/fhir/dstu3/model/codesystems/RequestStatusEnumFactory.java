@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -45,12 +45,14 @@ public class RequestStatusEnumFactory implements EnumFactory<RequestStatus> {
       return RequestStatus.ACTIVE;
     if ("suspended".equals(codeString))
       return RequestStatus.SUSPENDED;
+    if ("cancelled".equals(codeString))
+      return RequestStatus.CANCELLED;
     if ("completed".equals(codeString))
       return RequestStatus.COMPLETED;
     if ("entered-in-error".equals(codeString))
       return RequestStatus.ENTEREDINERROR;
-    if ("cancelled".equals(codeString))
-      return RequestStatus.CANCELLED;
+    if ("unknown".equals(codeString))
+      return RequestStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown RequestStatus code '"+codeString+"'");
   }
 
@@ -61,12 +63,14 @@ public class RequestStatusEnumFactory implements EnumFactory<RequestStatus> {
       return "active";
     if (code == RequestStatus.SUSPENDED)
       return "suspended";
+    if (code == RequestStatus.CANCELLED)
+      return "cancelled";
     if (code == RequestStatus.COMPLETED)
       return "completed";
     if (code == RequestStatus.ENTEREDINERROR)
       return "entered-in-error";
-    if (code == RequestStatus.CANCELLED)
-      return "cancelled";
+    if (code == RequestStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

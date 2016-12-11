@@ -229,7 +229,7 @@ public class CorsInterceptorDstu3Test {
 				patient.getIdentifier().get(0).setSystem(("urn:hapitest:mrns"));
 				patient.getIdentifier().get(0).setValue("00001");
 				patient.addName();
-				patient.getName().get(0).addFamily("Test");
+				patient.getName().get(0).setFamily("Test");
 				patient.getName().get(0).addGiven("PatientOne");
 				patient.setGender(AdministrativeGender.MALE);
 				idToPatient.put("1", patient);
@@ -242,7 +242,7 @@ public class CorsInterceptorDstu3Test {
 				patient.getIdentifier().get(0).setSystem(("urn:hapitest:mrns"));
 				patient.getIdentifier().get(0).setValue("00002");
 				patient.getName().add(new HumanName());
-				patient.getName().get(0).addFamily("Test");
+				patient.getName().get(0).setFamily("Test");
 				patient.getName().get(0).addGiven("PatientTwo");
 				patient.setGender(AdministrativeGender.FEMALE);
 				idToPatient.put("2", patient);

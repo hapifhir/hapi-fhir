@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -41,8 +41,10 @@ public class ConditionClinicalEnumFactory implements EnumFactory<ConditionClinic
       return null;
     if ("active".equals(codeString))
       return ConditionClinical.ACTIVE;
-    if ("relapse".equals(codeString))
-      return ConditionClinical.RELAPSE;
+    if ("recurrence".equals(codeString))
+      return ConditionClinical.RECURRENCE;
+    if ("inactive".equals(codeString))
+      return ConditionClinical.INACTIVE;
     if ("remission".equals(codeString))
       return ConditionClinical.REMISSION;
     if ("resolved".equals(codeString))
@@ -53,8 +55,10 @@ public class ConditionClinicalEnumFactory implements EnumFactory<ConditionClinic
   public String toCode(ConditionClinical code) {
     if (code == ConditionClinical.ACTIVE)
       return "active";
-    if (code == ConditionClinical.RELAPSE)
-      return "relapse";
+    if (code == ConditionClinical.RECURRENCE)
+      return "recurrence";
+    if (code == ConditionClinical.INACTIVE)
+      return "inactive";
     if (code == ConditionClinical.REMISSION)
       return "remission";
     if (code == ConditionClinical.RESOLVED)

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -44,6 +44,8 @@ public class ResourceFactory extends Factory {
             return new Account();
         if ("DocumentManifest".equals(name))
             return new DocumentManifest();
+        if ("MessageDefinition".equals(name))
+            return new MessageDefinition();
         if ("Goal".equals(name))
             return new Goal();
         if ("Endpoint".equals(name))
@@ -58,6 +60,8 @@ public class ResourceFactory extends Factory {
             return new Medication();
         if ("Measure".equals(name))
             return new Measure();
+        if ("ResearchSubject".equals(name))
+            return new ResearchSubject();
         if ("Subscription".equals(name))
             return new Subscription();
         if ("DocumentReference".equals(name))
@@ -134,6 +138,8 @@ public class ResourceFactory extends Factory {
             return new Questionnaire();
         if ("ExplanationOfBenefit".equals(name))
             return new ExplanationOfBenefit();
+        if ("ResearchStudy".equals(name))
+            return new ResearchStudy();
         if ("Specimen".equals(name))
             return new Specimen();
         if ("AllergyIntolerance".equals(name))
@@ -346,6 +352,8 @@ public class ResourceFactory extends Factory {
             return new Account();
         if ("DocumentManifest".equals(name))
             return new DocumentManifest();
+        if ("MessageDefinition".equals(name))
+            return new MessageDefinition();
         if ("Goal".equals(name))
             return new Goal();
         if ("Endpoint".equals(name))
@@ -360,6 +368,8 @@ public class ResourceFactory extends Factory {
             return new Medication();
         if ("Measure".equals(name))
             return new Measure();
+        if ("ResearchSubject".equals(name))
+            return new ResearchSubject();
         if ("Subscription".equals(name))
             return new Subscription();
         if ("DocumentReference".equals(name))
@@ -436,6 +446,8 @@ public class ResourceFactory extends Factory {
             return new Questionnaire();
         if ("ExplanationOfBenefit".equals(name))
             return new ExplanationOfBenefit();
+        if ("ResearchStudy".equals(name))
+            return new ResearchStudy();
         if ("Specimen".equals(name))
             return new Specimen();
         if ("AllergyIntolerance".equals(name))

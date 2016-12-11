@@ -81,7 +81,7 @@ public class ServerMimetypeDstu3Test {
 	@Test
 	public void testCreateWithXmlLegacyNoAcceptHeader() throws Exception {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
@@ -131,7 +131,7 @@ public class ServerMimetypeDstu3Test {
 	@Test
 	public void testCreateWithXmlNewNoAcceptHeader() throws Exception {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
@@ -151,7 +151,7 @@ public class ServerMimetypeDstu3Test {
 	@Test
 	public void testCreateWithXmlNewWithAcceptHeader() throws Exception {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
@@ -172,7 +172,7 @@ public class ServerMimetypeDstu3Test {
 	@Test
 	public void testCreateWithJsonLegacyNoAcceptHeader() throws Exception {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
@@ -192,7 +192,7 @@ public class ServerMimetypeDstu3Test {
 	@Test
 	public void testCreateWithJsonNewNoAcceptHeader() throws Exception {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
@@ -212,7 +212,7 @@ public class ServerMimetypeDstu3Test {
 	@Test
 	public void testCreateWithJsonNewWithAcceptHeader() throws Exception {
 		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
+		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
@@ -365,7 +365,7 @@ public class ServerMimetypeDstu3Test {
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theIdParam) {
 			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setDiagnostics(theIdParam.getNameFirstRep().getFamilyAsSingleString());
+			oo.addIssue().setDiagnostics(theIdParam.getNameFirstRep().getFamily());
 			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(oo);
 		}
 
@@ -393,7 +393,7 @@ public class ServerMimetypeDstu3Test {
 
 			Patient p1 = new Patient();
 			p1.setId(new IdType("Patient/1"));
-			p1.addName().addFamily("The Family");
+			p1.addName().setFamily("The Family");
 			retVal.add(p1);
 
 			return retVal;

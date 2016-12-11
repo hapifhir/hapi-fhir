@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -772,13 +772,13 @@ public class ClinicalImpression extends DomainResource {
 
 
     /**
-     * Actions taken during assessment.
+     * Action taken as part of assessment procedure.
      */
-    @Child(name = "action", type = {ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationRequest.class, DiagnosticRequest.class, NutritionRequest.class, DeviceUseRequest.class, Appointment.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Actions taken during assessment", formalDefinition="Actions taken during assessment." )
+    @Child(name = "action", type = {ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationRequest.class, DiagnosticRequest.class, Appointment.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Action taken as part of assessment procedure", formalDefinition="Action taken as part of assessment procedure." )
     protected List<Reference> action;
     /**
-     * The actual objects that are the target of the reference (Actions taken during assessment.)
+     * The actual objects that are the target of the reference (Action taken as part of assessment procedure.)
      */
     protected List<Resource> actionTarget;
 
@@ -1647,7 +1647,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #action} (Actions taken during assessment.)
+     * @return {@link #action} (Action taken as part of assessment procedure.)
      */
     public List<Reference> getAction() { 
       if (this.action == null)
@@ -1781,7 +1781,7 @@ public class ClinicalImpression extends DomainResource {
         childrenList.add(new Property("finding", "", "Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.", 0, java.lang.Integer.MAX_VALUE, finding));
         childrenList.add(new Property("prognosisCodeableConcept", "CodeableConcept", "Estimate of likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisCodeableConcept));
         childrenList.add(new Property("prognosisReference", "Reference(RiskAssessment)", "RiskAssessment expressing likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisReference));
-        childrenList.add(new Property("action", "Reference(ReferralRequest|ProcedureRequest|Procedure|MedicationRequest|DiagnosticRequest|NutritionRequest|DeviceUseRequest|Appointment)", "Actions taken during assessment.", 0, java.lang.Integer.MAX_VALUE, action));
+        childrenList.add(new Property("action", "Reference(ReferralRequest|ProcedureRequest|Procedure|MedicationRequest|DiagnosticRequest|Appointment)", "Action taken as part of assessment procedure.", 0, java.lang.Integer.MAX_VALUE, action));
         childrenList.add(new Property("note", "Annotation", "Commentary about the impression, typically recorded after the impression itself was made, though supplemental notes by the original author could also appear.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
@@ -2355,17 +2355,17 @@ public class ClinicalImpression extends DomainResource {
  /**
    * Search parameter: <b>action</b>
    * <p>
-   * Description: <b>Actions taken during assessment</b><br>
+   * Description: <b>Action taken as part of assessment procedure</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ClinicalImpression.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference", target={Appointment.class, DeviceUseRequest.class, DiagnosticRequest.class, MedicationRequest.class, NutritionRequest.class, Procedure.class, ProcedureRequest.class, ReferralRequest.class } )
+  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Action taken as part of assessment procedure", type="reference", target={Appointment.class, DiagnosticRequest.class, MedicationRequest.class, Procedure.class, ProcedureRequest.class, ReferralRequest.class } )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
    * <p>
-   * Description: <b>Actions taken during assessment</b><br>
+   * Description: <b>Action taken as part of assessment procedure</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ClinicalImpression.action</b><br>
    * </p>

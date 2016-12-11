@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ProcessOutcome {
 
         /**
-         * null
+         * The requested processing has completed.
          */
         COMPLETE, 
         /**
-         * null
+         * The requested processing has been suspended.
          */
         PENDED, 
         /**
-         * null
+         * The requested processing has terminated with some errors being found.
          */
         ERROR, 
         /**
@@ -76,17 +76,17 @@ public enum ProcessOutcome {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETE: return "";
-            case PENDED: return "";
-            case ERROR: return "";
+            case COMPLETE: return "The requested processing has completed.";
+            case PENDED: return "The requested processing has been suspended.";
+            case ERROR: return "The requested processing has terminated with some errors being found.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case COMPLETE: return "complete";
-            case PENDED: return "pended";
-            case ERROR: return "error";
+            case COMPLETE: return "Complete";
+            case PENDED: return "Pended";
+            case ERROR: return "Error";
             default: return "?";
           }
     }

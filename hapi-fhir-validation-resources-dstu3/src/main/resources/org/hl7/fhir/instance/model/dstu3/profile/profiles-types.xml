@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="types"/>
  <meta>
-  <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+  <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -10,7 +10,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="date"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/date"/>
     <name value="date"/>
@@ -18,13 +18,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for date Type: A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="date"/>
@@ -149,7 +149,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="dateTime"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/dateTime"/>
     <name value="dateTime"/>
@@ -157,13 +157,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for dateTime Type: A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="dateTime"/>
@@ -288,7 +288,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="code"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/code"/>
     <name value="code"/>
@@ -296,13 +296,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for code type: A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="code"/>
@@ -421,7 +421,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="string"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/string"/>
     <name value="string"/>
@@ -429,13 +429,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for string Type: A sequence of Unicode characters"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="string"/>
@@ -558,7 +558,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="integer"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/integer"/>
     <name value="integer"/>
@@ -566,13 +566,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for integer Type: A whole number"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="integer"/>
@@ -703,7 +703,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="oid"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/oid"/>
     <name value="oid"/>
@@ -711,13 +711,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for oid type: An oid represented as a URI"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="oid"/>
@@ -838,7 +838,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uri"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uri"/>
     <name value="uri"/>
@@ -846,13 +846,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for uri Type: String of characters used to identify a name or a resource"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="uri"/>
@@ -973,7 +973,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="uuid"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/uuid"/>
     <name value="uuid"/>
@@ -981,13 +981,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for uuid type: A UUID, represented as a URI"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="uuid"/>
@@ -1108,7 +1108,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="instant"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/instant"/>
     <name value="instant"/>
@@ -1116,13 +1116,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="instant"/>
@@ -1243,7 +1243,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="boolean"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/boolean"/>
     <name value="boolean"/>
@@ -1251,13 +1251,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for boolean Type: Value of &quot;true&quot; or &quot;false&quot;"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="boolean"/>
@@ -1376,7 +1376,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="base64Binary"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/base64Binary"/>
     <name value="base64Binary"/>
@@ -1384,13 +1384,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for base64Binary Type: A stream of bytes"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="base64Binary"/>
@@ -1511,7 +1511,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="unsignedInt"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/unsignedInt"/>
     <name value="unsignedInt"/>
@@ -1519,13 +1519,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for unsignedInt type: An integer with a value that is not negative (e.g. >= 0)"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="unsignedInt"/>
@@ -1644,7 +1644,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="markdown"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/markdown"/>
     <name value="markdown"/>
@@ -1652,13 +1652,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for markdown type: A string that may contain markdown syntax for optional processing by a mark down presentation engine"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="markdown"/>
@@ -1773,7 +1773,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="time"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/time"/>
     <name value="time"/>
@@ -1781,13 +1781,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for time Type: A time during the day, with no date specified"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="time"/>
@@ -1912,7 +1912,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="id"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/id"/>
     <name value="id"/>
@@ -1920,13 +1920,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for id type: Any combination of letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="id"/>
@@ -2047,7 +2047,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="positiveInt"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/positiveInt"/>
     <name value="positiveInt"/>
@@ -2055,13 +2055,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for positiveInt type: An integer with a value that is positive (e.g. >0)"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="positiveInt"/>
@@ -2180,7 +2180,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="decimal"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/decimal"/>
     <name value="decimal"/>
@@ -2188,13 +2188,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for decimal Type: A rational number with implicit precision"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="decimal"/>
@@ -2321,7 +2321,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="xhtml"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/xhtml"/>
     <name value="xhtml"/>
@@ -2329,13 +2329,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for xhtml Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <kind value="primitive-type"/>
     <abstract value="false"/>
     <type value="xhtml"/>
@@ -2450,7 +2450,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Reference"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Reference"/>
     <name value="Reference"/>
@@ -2458,13 +2458,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Reference Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -2480,6 +2480,7 @@
       <path value="Reference"/>
       <short value="A reference from one resource to another"/>
       <definition value="A reference from one resource to another."/>
+      <comments value="References SHALL be a reference to an actual FHIR resource, and SHALL be resolveable (allowing for access control, temporary unavailability, etc). Resolution can be either by retrieval from the URL, or, where applicable by resource type, by treating an absolute reference as a canonical URL and looking it up in a local registry/repository."/>
       <min value="0"/>
       <max value="*"/>
       <condition value="ele-1"/>
@@ -2600,6 +2601,7 @@
       <path value="Reference"/>
       <short value="A reference from one resource to another"/>
       <definition value="A reference from one resource to another."/>
+      <comments value="References SHALL be a reference to an actual FHIR resource, and SHALL be resolveable (allowing for access control, temporary unavailability, etc). Resolution can be either by retrieval from the URL, or, where applicable by resource type, by treating an absolute reference as a canonical URL and looking it up in a local registry/repository."/>
       <min value="0"/>
       <max value="*"/>
       <constraint>
@@ -2669,7 +2671,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Quantity"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Quantity"/>
     <name value="Quantity"/>
@@ -2677,14 +2679,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Quantity Type"/>
     <purpose value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -3040,7 +3042,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Period"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Period"/>
     <name value="Period"/>
@@ -3048,13 +3050,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Period Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -3270,7 +3272,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Attachment"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Attachment"/>
     <name value="Attachment"/>
@@ -3278,14 +3280,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Attachment Type"/>
     <purpose value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -3390,7 +3392,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="text/plain; charset=UTF-8, image/png"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="text/plain; charset=UTF-8, image/png"/>
+      </example>
       <isSummary value="true"/>
       <binding>
        <strength value="required"/>
@@ -3416,7 +3421,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="en-AU"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="en-AU"/>
+      </example>
       <isSummary value="true"/>
       <binding>
        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet">
@@ -3466,7 +3474,10 @@
       <type>
        <code value="uri"/>
       </type>
-      <exampleUri value="http://www.acme.com/logo-small.png"/>
+      <example>
+       <label value="General"/>
+       <valueUri value="http://www.acme.com/logo-small.png"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -3480,7 +3491,7 @@
      <element id="Attachment.size">
       <path value="Attachment.size"/>
       <short value="Number of bytes of content (if url provided)"/>
-      <definition value="The number of bytes of data that make up this attachment."/>
+      <definition value="The number of bytes of data that make up this attachment (before base64 encoding, if that is done)."/>
       <comments value="The number of bytes is redundant if the data is provided as a base64binary, but is useful if the data is provided as a url reference."/>
       <requirements value="Representing the size allows applications to determine whether they should fetch the content automatically in advance, or refuse to fetch it at all."/>
       <min value="0"/>
@@ -3498,6 +3509,7 @@
       <path value="Attachment.hash"/>
       <short value="Hash of the data (sha-1, base64ed)"/>
       <definition value="The calculated hash of the data using SHA-1. Represented using base64."/>
+      <comments value="The hash is calculated on the data prior to base64 encoding, if the data is based64 encoded."/>
       <requirements value="Included so that applications can verify that the contents of a location have not changed and so that a signature of the content can implicitly sign the content of an image without having to include the data in the instance or reference the url in the signature."/>
       <min value="0"/>
       <max value="1"/>
@@ -3520,7 +3532,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="Official Corporate Logo"/>
+      <example>
+       <label value="General"/>
+       <valueString value="Official Corporate Logo"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="rim"/>
@@ -3578,7 +3593,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="text/plain; charset=UTF-8, image/png"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="text/plain; charset=UTF-8, image/png"/>
+      </example>
       <isSummary value="true"/>
       <binding>
        <strength value="required"/>
@@ -3604,7 +3622,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="en-AU"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="en-AU"/>
+      </example>
       <isSummary value="true"/>
       <binding>
        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet">
@@ -3654,7 +3675,10 @@
       <type>
        <code value="uri"/>
       </type>
-      <exampleUri value="http://www.acme.com/logo-small.png"/>
+      <example>
+       <label value="General"/>
+       <valueUri value="http://www.acme.com/logo-small.png"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -3668,7 +3692,7 @@
      <element id="Attachment.size">
       <path value="Attachment.size"/>
       <short value="Number of bytes of content (if url provided)"/>
-      <definition value="The number of bytes of data that make up this attachment."/>
+      <definition value="The number of bytes of data that make up this attachment (before base64 encoding, if that is done)."/>
       <comments value="The number of bytes is redundant if the data is provided as a base64binary, but is useful if the data is provided as a url reference."/>
       <requirements value="Representing the size allows applications to determine whether they should fetch the content automatically in advance, or refuse to fetch it at all."/>
       <min value="0"/>
@@ -3686,6 +3710,7 @@
       <path value="Attachment.hash"/>
       <short value="Hash of the data (sha-1, base64ed)"/>
       <definition value="The calculated hash of the data using SHA-1. Represented using base64."/>
+      <comments value="The hash is calculated on the data prior to base64 encoding, if the data is based64 encoded."/>
       <requirements value="Included so that applications can verify that the contents of a location have not changed and so that a signature of the content can implicitly sign the content of an image without having to include the data in the instance or reference the url in the signature."/>
       <min value="0"/>
       <max value="1"/>
@@ -3708,7 +3733,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="Official Corporate Logo"/>
+      <example>
+       <label value="General"/>
+       <valueString value="Official Corporate Logo"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="rim"/>
@@ -3741,7 +3769,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Duration"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Duration"/>
     <name value="Duration"/>
@@ -3749,13 +3777,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Duration Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -4017,7 +4045,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Count"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Count"/>
     <name value="Count"/>
@@ -4025,14 +4053,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Count Type"/>
     <purpose value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -4295,7 +4323,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Range"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Range"/>
     <name value="Range"/>
@@ -4303,14 +4331,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Range Type"/>
     <purpose value="Need to be able to specify ranges of values."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -4528,7 +4556,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Annotation"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Annotation"/>
     <name value="Annotation"/>
@@ -4536,13 +4564,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Annotation Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -4794,7 +4822,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Money"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Money"/>
     <name value="Money"/>
@@ -4802,13 +4830,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Money Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -5070,7 +5098,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Identifier"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Identifier"/>
     <name value="Identifier"/>
@@ -5078,14 +5106,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Identifier Type"/>
     <purpose value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -5248,7 +5276,10 @@
       <type>
        <code value="uri"/>
       </type>
-      <exampleUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
+      <example>
+       <label value="General"/>
+       <valueUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -5273,7 +5304,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="123456"/>
+      <example>
+       <label value="General"/>
+       <valueString value="123456"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -5424,7 +5458,10 @@
       <type>
        <code value="uri"/>
       </type>
-      <exampleUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
+      <example>
+       <label value="General"/>
+       <valueUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -5449,7 +5486,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="123456"/>
+      <example>
+       <label value="General"/>
+       <valueString value="123456"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -5522,7 +5562,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Coding"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Coding"/>
     <name value="Coding"/>
@@ -5530,14 +5570,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Coding Type"/>
     <purpose value="References to codes are very common in healthcare models."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -5910,7 +5950,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Signature"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Signature"/>
     <name value="Signature"/>
@@ -5918,14 +5958,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Signature Type"/>
     <purpose value="There are a number of places where content must be signed in healthcare."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -6266,7 +6306,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SampledData"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SampledData"/>
     <name value="SampledData"/>
@@ -6274,14 +6314,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for SampledData Type"/>
     <purpose value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -6613,7 +6653,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Ratio"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Ratio"/>
     <name value="Ratio"/>
@@ -6621,14 +6661,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Ratio Type"/>
     <purpose value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -6816,7 +6856,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Distance"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Distance"/>
     <name value="Distance"/>
@@ -6824,13 +6864,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Distance Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -7092,7 +7132,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Age"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Age"/>
     <name value="Age"/>
@@ -7100,13 +7140,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Age Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -7368,7 +7408,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="CodeableConcept"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/CodeableConcept"/>
     <name value="CodeableConcept"/>
@@ -7376,14 +7416,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for CodeableConcept Type"/>
     <purpose value="This is a common pattern in healthcare - a concept that may be defined by one or more codes from formal definitions including LOINC and SNOMED CT, and/or defined by the provision of text that captures a human sense of the concept."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -7612,7 +7652,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Extension"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Extension"/>
     <name value="Extension"/>
@@ -7620,14 +7660,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Extension Type"/>
     <purpose value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -8024,7 +8064,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="BackboneElement"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/BackboneElement"/>
     <name value="BackboneElement"/>
@@ -8032,13 +8072,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for BackboneElement Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -8175,7 +8215,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Narrative"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Narrative"/>
     <name value="Narrative"/>
@@ -8183,13 +8223,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Narrative Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -8299,18 +8339,11 @@
        <code value="xhtml"/>
       </type>
       <constraint>
-       <key value="txt-3"/>
-       <severity value="error"/>
-       <human value="The narrative SHALL contain only the basic html formatting attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a> elements (either name or href), images and internally contained style attributes"/>
-       <expression value="htmlchecks()"/>
-       <xpath value="not(descendant-or-self::*/@*[not(name(.)=('abbr', 'accesskey', 'align', 'alt', 'axis', 'bgcolor', 'border', 'cellhalign', 'cellpadding', 'cellspacing', 'cellvalign', 'char', 'charoff', 'charset', 'cite', 'class', 'colspan', 'compact', 'coords', 'dir', 'frame', 'headers', 'height', 'href', 'hreflang', 'hspace', 'id', 'lang', 'longdesc', 'name', 'nowrap', 'rel', 'rev', 'rowspan', 'rules', 'scope', 'shape', 'span', 'src', 'start', 'style', 'summary', 'tabindex', 'title', 'type', 'valign', 'value', 'vspace', 'width'))])"/>
-      </constraint>
-      <constraint>
        <key value="txt-1"/>
        <severity value="error"/>
-       <human value="The narrative SHALL contain only the basic html formatting elements described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a> elements (either name or href), images and internally contained style attributes"/>
+       <human value="The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a> elements (either name or href), images and internally contained style attributes"/>
        <expression value="htmlchecks()"/>
-       <xpath value="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))])"/>
+       <xpath value="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))]) and not(descendant-or-self::*/@*[not(name(.)=('abbr', 'accesskey', 'align', 'alt', 'axis', 'bgcolor', 'border', 'cellhalign', 'cellpadding', 'cellspacing', 'cellvalign', 'char', 'charoff', 'charset', 'cite', 'class', 'colspan', 'compact', 'coords', 'dir', 'frame', 'headers', 'height', 'href', 'hreflang', 'hspace', 'id', 'lang', 'longdesc', 'name', 'nowrap', 'rel', 'rev', 'rowspan', 'rules', 'scope', 'shape', 'span', 'src', 'start', 'style', 'summary', 'tabindex', 'title', 'type', 'valign', 'value', 'vspace', 'width'))])"/>
       </constraint>
       <constraint>
        <key value="txt-2"/>
@@ -8369,18 +8402,11 @@
        <code value="xhtml"/>
       </type>
       <constraint>
-       <key value="txt-3"/>
-       <severity value="error"/>
-       <human value="The narrative SHALL contain only the basic html formatting attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a> elements (either name or href), images and internally contained style attributes"/>
-       <expression value="htmlchecks()"/>
-       <xpath value="not(descendant-or-self::*/@*[not(name(.)=('abbr', 'accesskey', 'align', 'alt', 'axis', 'bgcolor', 'border', 'cellhalign', 'cellpadding', 'cellspacing', 'cellvalign', 'char', 'charoff', 'charset', 'cite', 'class', 'colspan', 'compact', 'coords', 'dir', 'frame', 'headers', 'height', 'href', 'hreflang', 'hspace', 'id', 'lang', 'longdesc', 'name', 'nowrap', 'rel', 'rev', 'rowspan', 'rules', 'scope', 'shape', 'span', 'src', 'start', 'style', 'summary', 'tabindex', 'title', 'type', 'valign', 'value', 'vspace', 'width'))])"/>
-      </constraint>
-      <constraint>
        <key value="txt-1"/>
        <severity value="error"/>
-       <human value="The narrative SHALL contain only the basic html formatting elements described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a> elements (either name or href), images and internally contained style attributes"/>
+       <human value="The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a> elements (either name or href), images and internally contained style attributes"/>
        <expression value="htmlchecks()"/>
-       <xpath value="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))])"/>
+       <xpath value="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))]) and not(descendant-or-self::*/@*[not(name(.)=('abbr', 'accesskey', 'align', 'alt', 'axis', 'bgcolor', 'border', 'cellhalign', 'cellpadding', 'cellspacing', 'cellvalign', 'char', 'charoff', 'charset', 'cite', 'class', 'colspan', 'compact', 'coords', 'dir', 'frame', 'headers', 'height', 'href', 'hreflang', 'hspace', 'id', 'lang', 'longdesc', 'name', 'nowrap', 'rel', 'rev', 'rowspan', 'rules', 'scope', 'shape', 'span', 'src', 'start', 'style', 'summary', 'tabindex', 'title', 'type', 'valign', 'value', 'vspace', 'width'))])"/>
       </constraint>
       <constraint>
        <key value="txt-2"/>
@@ -8404,7 +8430,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Element"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Element"/>
     <name value="Element"/>
@@ -8412,13 +8438,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Element Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -8542,7 +8568,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Meta"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Meta"/>
     <name value="Meta"/>
@@ -8550,13 +8576,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Meta Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -8657,7 +8683,7 @@
      <element id="Meta.profile">
       <path value="Meta.profile"/>
       <short value="Profiles this resource claims to conform to"/>
-      <definition value="A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]."/>
+      <definition value="A list of profiles (references to [StructureDefinition](structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url]()."/>
       <comments value="It is up to the server and/or other infrastructure of policy to determine whether/how these claims are verified and/or updated over time.  The list of profile URLs is a set."/>
       <min value="0"/>
       <max value="*"/>
@@ -8740,7 +8766,7 @@
      <element id="Meta.profile">
       <path value="Meta.profile"/>
       <short value="Profiles this resource claims to conform to"/>
-      <definition value="A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]."/>
+      <definition value="A list of profiles (references to [StructureDefinition](structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url]()."/>
       <comments value="It is up to the server and/or other infrastructure of policy to determine whether/how these claims are verified and/or updated over time.  The list of profile URLs is a set."/>
       <min value="0"/>
       <max value="*"/>
@@ -8797,7 +8823,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Address"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Address"/>
     <name value="Address"/>
@@ -8805,14 +8831,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Address Type"/>
     <purpose value="Need to be able to record postal addresses, along with notes about their use."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -8925,7 +8951,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="home"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="home"/>
+      </example>
       <isModifier value="true"/>
       <isSummary value="true"/>
       <binding>
@@ -8957,7 +8986,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="both"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="both"/>
+      </example>
       <isSummary value="true"/>
       <binding>
        <strength value="required"/>
@@ -8990,7 +9022,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="137 Nowhere Street, Erewhon 9132"/>
+      <example>
+       <label value="General"/>
+       <valueString value="137 Nowhere Street, Erewhon 9132"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9015,7 +9050,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="137 Nowhere Street"/>
+      <example>
+       <label value="General"/>
+       <valueString value="137 Nowhere Street"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9044,7 +9082,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="Erewhon"/>
+      <example>
+       <label value="General"/>
+       <valueString value="Erewhon"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9074,7 +9115,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="Madison"/>
+      <example>
+       <label value="General"/>
+       <valueString value="Madison"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9124,7 +9168,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="9132"/>
+      <example>
+       <label value="General"/>
+       <valueString value="9132"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9145,7 +9192,7 @@
      </element>
      <element id="Address.country">
       <path value="Address.country"/>
-      <short value="Country (can be ISO 3166 3 letter code)"/>
+      <short value="Country (e.g. can be ISO 3166 2 or 3 letter code)"/>
       <definition value="Country - a nation as commonly understood or generally accepted."/>
       <comments value="ISO 3166 3 letter codes can be used in place of a full country name."/>
       <min value="0"/>
@@ -9181,10 +9228,13 @@
       <type>
        <code value="Period"/>
       </type>
-      <examplePeriod>
-       <start value="2010-03-23"/>
-       <end value="2010-07-01"/>
-      </examplePeriod>
+      <example>
+       <label value="General"/>
+       <valuePeriod>
+        <start value="2010-03-23"/>
+        <end value="2010-07-01"/>
+       </valuePeriod>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9232,7 +9282,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="home"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="home"/>
+      </example>
       <isModifier value="true"/>
       <isSummary value="true"/>
       <binding>
@@ -9264,7 +9317,10 @@
       <type>
        <code value="code"/>
       </type>
-      <exampleCode value="both"/>
+      <example>
+       <label value="General"/>
+       <valueCode value="both"/>
+      </example>
       <isSummary value="true"/>
       <binding>
        <strength value="required"/>
@@ -9297,7 +9353,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="137 Nowhere Street, Erewhon 9132"/>
+      <example>
+       <label value="General"/>
+       <valueString value="137 Nowhere Street, Erewhon 9132"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9322,7 +9381,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="137 Nowhere Street"/>
+      <example>
+       <label value="General"/>
+       <valueString value="137 Nowhere Street"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9351,7 +9413,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="Erewhon"/>
+      <example>
+       <label value="General"/>
+       <valueString value="Erewhon"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9381,7 +9446,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="Madison"/>
+      <example>
+       <label value="General"/>
+       <valueString value="Madison"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9431,7 +9499,10 @@
       <type>
        <code value="string"/>
       </type>
-      <exampleString value="9132"/>
+      <example>
+       <label value="General"/>
+       <valueString value="9132"/>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9452,7 +9523,7 @@
      </element>
      <element id="Address.country">
       <path value="Address.country"/>
-      <short value="Country (can be ISO 3166 3 letter code)"/>
+      <short value="Country (e.g. can be ISO 3166 2 or 3 letter code)"/>
       <definition value="Country - a nation as commonly understood or generally accepted."/>
       <comments value="ISO 3166 3 letter codes can be used in place of a full country name."/>
       <min value="0"/>
@@ -9488,10 +9559,13 @@
       <type>
        <code value="Period"/>
       </type>
-      <examplePeriod>
-       <start value="2010-03-23"/>
-       <end value="2010-07-01"/>
-      </examplePeriod>
+      <example>
+       <label value="General"/>
+       <valuePeriod>
+        <start value="2010-03-23"/>
+        <end value="2010-07-01"/>
+       </valuePeriod>
+      </example>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
@@ -9516,7 +9590,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="TriggerDefinition"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/TriggerDefinition"/>
     <name value="TriggerDefinition"/>
@@ -9524,13 +9598,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for TriggerDefinition Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -9745,7 +9819,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Contributor"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Contributor"/>
     <name value="Contributor"/>
@@ -9753,14 +9827,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Contributor Type"/>
     <purpose value="Need to track contributor information in the same way across multiple resources."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -9933,7 +10007,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="DataRequirement"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/DataRequirement"/>
     <name value="DataRequirement"/>
@@ -9941,13 +10015,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for DataRequirement Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -10046,8 +10120,7 @@
       <min value="0"/>
       <max value="*"/>
       <type>
-       <code value="Reference"/>
-       <targetProfile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+       <code value="uri"/>
       </type>
       <isSummary value="true"/>
      </element>
@@ -10305,8 +10378,7 @@
       <min value="0"/>
       <max value="*"/>
       <type>
-       <code value="Reference"/>
-       <targetProfile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+       <code value="uri"/>
       </type>
       <isSummary value="true"/>
      </element>
@@ -10440,7 +10512,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="RelatedArtifact"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/RelatedArtifact"/>
     <name value="RelatedArtifact"/>
@@ -10448,14 +10520,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for RelatedArtifact Type"/>
     <purpose value="Knowledge resources must be able to provide enough information for consumers of the content (and/or interventions or results produced by the content) to be able to determine and understand the justification for and evidence in support of the content."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -10704,7 +10776,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactDetail"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactDetail"/>
     <name value="ContactDetail"/>
@@ -10712,14 +10784,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for ContactDetail Type"/>
     <purpose value="Need to track contact information in the same way across multiple resources."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -10858,7 +10930,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="HumanName"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/HumanName"/>
     <name value="HumanName"/>
@@ -10866,14 +10938,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for HumanName Type"/>
     <purpose value="Need to be able to record names, along with notes about their use."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -11028,17 +11100,17 @@
       <path value="HumanName.family"/>
       <short value="Family name (often called 'Surname')"/>
       <definition value="The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father."/>
-      <comments value="For family name, hyphenated names such as &quot;Smith-Jones&quot; are a single name, but names with spaces such as &quot;Smith Jones&quot; are broken into multiple parts."/>
+      <comments value="Family Name may be decomposed into specific parts using extensions (de, nl, es related cultures)."/>
       <alias value="surname"/>
       <min value="0"/>
-      <max value="*"/>
+      <max value="1"/>
       <type>
        <code value="string"/>
       </type>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
-       <map value="XPN.1"/>
+       <map value="XPN.1/FN.1"/>
       </mapping>
       <mapping>
        <identity value="rim"/>
@@ -11221,17 +11293,17 @@
       <path value="HumanName.family"/>
       <short value="Family name (often called 'Surname')"/>
       <definition value="The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father."/>
-      <comments value="For family name, hyphenated names such as &quot;Smith-Jones&quot; are a single name, but names with spaces such as &quot;Smith Jones&quot; are broken into multiple parts."/>
+      <comments value="Family Name may be decomposed into specific parts using extensions (de, nl, es related cultures)."/>
       <alias value="surname"/>
       <min value="0"/>
-      <max value="*"/>
+      <max value="1"/>
       <type>
        <code value="string"/>
       </type>
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
-       <map value="XPN.1"/>
+       <map value="XPN.1/FN.1"/>
       </mapping>
       <mapping>
        <identity value="rim"/>
@@ -11344,7 +11416,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ContactPoint"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ContactPoint"/>
     <name value="ContactPoint"/>
@@ -11352,14 +11424,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for ContactPoint Type"/>
     <purpose value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -11464,7 +11536,7 @@
      </element>
      <element id="ContactPoint.system">
       <path value="ContactPoint.system"/>
-      <short value="phone | fax | email | pager | other"/>
+      <short value="phone | fax | email | pager | url | other"/>
       <definition value="Telecommunications form for contact point - what communications system is required to make use of the contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -11624,7 +11696,7 @@
      </element>
      <element id="ContactPoint.system">
       <path value="ContactPoint.system"/>
-      <short value="phone | fax | email | pager | other"/>
+      <short value="phone | fax | email | pager | url | other"/>
       <definition value="Telecommunications form for contact point - what communications system is required to make use of the contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -11764,7 +11836,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="UsageContext"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/UsageContext"/>
     <name value="UsageContext"/>
@@ -11772,14 +11844,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for UsageContext Type"/>
     <purpose value="Consumers of the resource must be able to determine the intended applicability for the resource. Ideally, this information would be used programmatically to determine when and how it should be incorporated or exposed."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -11942,7 +12014,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="Timing"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/Timing"/>
     <name value="Timing"/>
@@ -11950,14 +12022,14 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for Timing Type"/>
     <purpose value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -12120,6 +12192,20 @@
        <human value="if there's a duration, there needs to be duration units"/>
        <expression value="duration.empty() or durationUnit.exists()"/>
        <xpath value="not(exists(f:duration)) or exists(f:durationUnit)"/>
+      </constraint>
+      <constraint>
+       <key value="tim-10"/>
+       <severity value="error"/>
+       <human value="If there's a timeOfDay, there cannot be be a when, a frequency, or a period"/>
+       <expression value="timeOfDay.exists() implies (when.empty() and frequency.empty() and period.empty())"/>
+       <xpath value="not(exists(f:timeofDay)) or (not(exists(f:when)) and not(exists(f:frequency)) and not (exists(f:period)))"/>
+      </constraint>
+      <constraint>
+       <key value="tim-11"/>
+       <severity value="error"/>
+       <human value="If there's a dayOfWeek, there cannot be be a frequency, or a period"/>
+       <expression value="dayOfWeek.exists() implies (frequency.empty() and period.empty())"/>
+       <xpath value="not(exists(f:timeofDay)) or (not(exists(f:frequency)) and not (exists(f:period)))"/>
       </constraint>
       <constraint>
        <key value="tim-2"/>
@@ -12382,6 +12468,44 @@
        <map value="PIVL.phase.unit"/>
       </mapping>
      </element>
+     <element id="Timing.repeat.dayOfWeek">
+      <path value="Timing.repeat.dayOfWeek"/>
+      <short value="mon | tue | wed | thu | fri | sat | sun"/>
+      <definition value="If one or more days of week is provided, then the action happens only on the specified day(s)."/>
+      <comments value="If no days are specified, the action is assumed to happen every day as otherwise specified. The elements frequency and period cannot be used as well as dayOfWeek."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+       <strength value="required"/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/days-of-week"/>
+       </valueSetReference>
+      </binding>
+      <mapping>
+       <identity value="rim"/>
+       <map value="n/a"/>
+      </mapping>
+     </element>
+     <element id="Timing.repeat.timeOfDay">
+      <path value="Timing.repeat.timeOfDay"/>
+      <short value="Time of day for action"/>
+      <definition value="Specified time of day for action to take place."/>
+      <comments value="When time of day is speciifed, it is inferred that the action happens every day (as filtered by dayofWeek) on the specified times. The elements when, frequency and period cannot be used as well as timeOfDay."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="time"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="n/a"/>
+      </mapping>
+     </element>
      <element id="Timing.repeat.when">
       <path value="Timing.repeat.when"/>
       <short value="Regular life events the event is tied to"/>
@@ -12524,6 +12648,20 @@
        <human value="if there's a duration, there needs to be duration units"/>
        <expression value="duration.empty() or durationUnit.exists()"/>
        <xpath value="not(exists(f:duration)) or exists(f:durationUnit)"/>
+      </constraint>
+      <constraint>
+       <key value="tim-10"/>
+       <severity value="error"/>
+       <human value="If there's a timeOfDay, there cannot be be a when, a frequency, or a period"/>
+       <expression value="timeOfDay.exists() implies (when.empty() and frequency.empty() and period.empty())"/>
+       <xpath value="not(exists(f:timeofDay)) or (not(exists(f:when)) and not(exists(f:frequency)) and not (exists(f:period)))"/>
+      </constraint>
+      <constraint>
+       <key value="tim-11"/>
+       <severity value="error"/>
+       <human value="If there's a dayOfWeek, there cannot be be a frequency, or a period"/>
+       <expression value="dayOfWeek.exists() implies (frequency.empty() and period.empty())"/>
+       <xpath value="not(exists(f:timeofDay)) or (not(exists(f:frequency)) and not (exists(f:period)))"/>
       </constraint>
       <constraint>
        <key value="tim-2"/>
@@ -12744,6 +12882,44 @@
        <map value="PIVL.phase.unit"/>
       </mapping>
      </element>
+     <element id="Timing.repeat.dayOfWeek">
+      <path value="Timing.repeat.dayOfWeek"/>
+      <short value="mon | tue | wed | thu | fri | sat | sun"/>
+      <definition value="If one or more days of week is provided, then the action happens only on the specified day(s)."/>
+      <comments value="If no days are specified, the action is assumed to happen every day as otherwise specified. The elements frequency and period cannot be used as well as dayOfWeek."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+       <strength value="required"/>
+       <valueSetReference>
+        <reference value="http://hl7.org/fhir/ValueSet/days-of-week"/>
+       </valueSetReference>
+      </binding>
+      <mapping>
+       <identity value="rim"/>
+       <map value="n/a"/>
+      </mapping>
+     </element>
+     <element id="Timing.repeat.timeOfDay">
+      <path value="Timing.repeat.timeOfDay"/>
+      <short value="Time of day for action"/>
+      <definition value="Specified time of day for action to take place."/>
+      <comments value="When time of day is speciifed, it is inferred that the action happens every day (as filtered by dayofWeek) on the specified times. The elements when, frequency and period cannot be used as well as timeOfDay."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="time"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="n/a"/>
+      </mapping>
+     </element>
      <element id="Timing.repeat.when">
       <path value="Timing.repeat.when"/>
       <short value="Regular life events the event is tied to"/>
@@ -12811,7 +12987,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ElementDefinition"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ElementDefinition"/>
     <name value="ElementDefinition"/>
@@ -12819,13 +12995,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for ElementDefinition Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="dex"/>
      <uri value="http://wiki.ihe.net/index.php?title=Data_Element_Exchange"/>
@@ -13365,7 +13541,7 @@
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
-       <map value="NTE, OM.32, OM1.33, OM1.39"/>
+       <map value="NTE, OM1.32, OM1.33, OM1.39"/>
       </mapping>
       <mapping>
        <identity value="rim"/>
@@ -13559,7 +13735,7 @@
      <element id="ElementDefinition.base.path">
       <path value="ElementDefinition.base.path"/>
       <short value="Path that identifies the base element"/>
-      <definition value="The Path that identifies the base element - this matches the ElementDefinition.path for that element. Across FHIR, there is only one base definition of any element - that is, an element definition on a [[[StructureDefinition]]] without a StructureDefinition.base."/>
+      <definition value="The Path that identifies the base element - this matches the ElementDefinition.path for that element. Across FHIR, there is only one base definition of any element - that is, an element definition on a [StructureDefinition](structuredefinition.html#) without a StructureDefinition.base."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -14132,7 +14308,7 @@
       <path value="ElementDefinition.pattern[x]"/>
       <short value="Value must have at least these property values"/>
       <definition value="Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.)."/>
-      <comments value="Mostly used for fixing values of CodeableConcept. At present, pattern[x] is not recommended as a basis for slicing while issues related to this are investigated during the DSTU period."/>
+      <comments value="Mostly used for fixing values of CodeableConcept. At present, pattern[x] is not recommended as a basis for slicing while issues related to this are investigated during the STU period."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -14258,12 +14434,92 @@
        <map value="N/A (MIF territory)"/>
       </mapping>
      </element>
-     <element id="ElementDefinition.example[x]">
-      <path value="ElementDefinition.example[x]"/>
+     <element id="ElementDefinition.example">
+      <path value="ElementDefinition.example"/>
       <short value="Example value (as defined for type)"/>
-      <definition value="A sample value for this element demonstrating the type of information that would typically be captured."/>
-      <comments value="This will most commonly be present for data where it's not implicitly obvious from either the data type or value set what the values might be.  (I.e. Example values for dates or quantities would generally be unnecessary.)  If the example value is fully populated, the publication tool can generate an instance automatically."/>
+      <definition value="A sample value for this element demonstrating the type of information that would typically be found in the element."/>
+      <comments value="Examples will most commonly be present for data where it's not implicitly obvious from either the data type or value set what the values might be.  (I.e. Example values for dates or quantities would generally be unnecessary.)  If the example value is fully populated, the publication tool can generate an instance automatically."/>
       <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="Element"/>
+      </type>
+      <constraint>
+       <key value="ele-1"/>
+       <severity value="error"/>
+       <human value="All FHIR elements must have a @value or children"/>
+       <expression value="children().count() > id.count()"/>
+       <xpath value="@value|f:*|h:div"/>
+       <source value="Element"/>
+      </constraint>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="N/A (MIF territory)"/>
+      </mapping>
+     </element>
+     <element id="ElementDefinition.example.id">
+      <path value="ElementDefinition.example.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+       <path value="Element.id"/>
+       <min value="0"/>
+       <max value="1"/>
+      </base>
+      <type>
+       <code value="string"/>
+      </type>
+      <mapping>
+       <identity value="rim"/>
+       <map value="n/a"/>
+      </mapping>
+     </element>
+     <element id="ElementDefinition.example.extension">
+      <path value="ElementDefinition.example.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+       <path value="Element.extension"/>
+       <min value="0"/>
+       <max value="*"/>
+      </base>
+      <type>
+       <code value="Extension"/>
+      </type>
+      <mapping>
+       <identity value="rim"/>
+       <map value="n/a"/>
+      </mapping>
+     </element>
+     <element id="ElementDefinition.example.label">
+      <path value="ElementDefinition.example.label"/>
+      <short value="Describes the purpose of this example"/>
+      <definition value="Describes the purpose of this example amoung the set of examples."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+       <code value="string"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="N/A (MIF territory)"/>
+      </mapping>
+     </element>
+     <element id="ElementDefinition.example.value[x]">
+      <path value="ElementDefinition.example.value[x]"/>
+      <short value="Value of Example (one of allowed types)"/>
+      <definition value="The actual value for the element, which must be one of the types allowed for this element."/>
+      <min value="1"/>
       <max value="1"/>
       <type>
        <code value="base64Binary"/>
@@ -14749,7 +15005,7 @@
       <constraint>
        <key value="eld-12"/>
        <severity value="error"/>
-       <human value="ValueSet as a URI SHALL start with http:// or https:// urn:"/>
+       <human value="ValueSet as a URI SHALL start with http:// or https:// or urn:"/>
        <expression value="valueSet.is(uri).not() or valueSet.as(uri).startsWith('http:') or valueSet.as(uri).startsWith('https') or valueSet.as(uri).startsWith('urn:')"/>
        <xpath value="not(exists(f:valueSetUri)) or (starts-with(string(f:valueSetUri/@value), 'http:') or starts-with(string(f:valueSetUri/@value), 'https:') or starts-with(string(f:valueSetUri/@value), 'urn:'))"/>
       </constraint>
@@ -14817,7 +15073,7 @@
       <path value="ElementDefinition.binding.strength"/>
       <short value="required | extensible | preferred | example"/>
       <definition value="Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances."/>
-      <comments value="For further discussion, see [[[Using Terminologies]]]."/>
+      <comments value="For further discussion, see [Using Terminologies](terminologies.html)."/>
       <alias value="conformance"/>
       <alias value="extensibility"/>
       <min value="1"/>
@@ -15436,7 +15692,7 @@
       <isSummary value="true"/>
       <mapping>
        <identity value="v2"/>
-       <map value="NTE, OM.32, OM1.33, OM1.39"/>
+       <map value="NTE, OM1.32, OM1.33, OM1.39"/>
       </mapping>
       <mapping>
        <identity value="rim"/>
@@ -15580,7 +15836,7 @@
      <element id="ElementDefinition.base.path">
       <path value="ElementDefinition.base.path"/>
       <short value="Path that identifies the base element"/>
-      <definition value="The Path that identifies the base element - this matches the ElementDefinition.path for that element. Across FHIR, there is only one base definition of any element - that is, an element definition on a [[[StructureDefinition]]] without a StructureDefinition.base."/>
+      <definition value="The Path that identifies the base element - this matches the ElementDefinition.path for that element. Across FHIR, there is only one base definition of any element - that is, an element definition on a [StructureDefinition](structuredefinition.html#) without a StructureDefinition.base."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -16103,7 +16359,7 @@
       <path value="ElementDefinition.pattern[x]"/>
       <short value="Value must have at least these property values"/>
       <definition value="Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-sensitive, accent-sensitive, etc.)."/>
-      <comments value="Mostly used for fixing values of CodeableConcept. At present, pattern[x] is not recommended as a basis for slicing while issues related to this are investigated during the DSTU period."/>
+      <comments value="Mostly used for fixing values of CodeableConcept. At present, pattern[x] is not recommended as a basis for slicing while issues related to this are investigated during the STU period."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -16229,12 +16485,42 @@
        <map value="N/A (MIF territory)"/>
       </mapping>
      </element>
-     <element id="ElementDefinition.example[x]">
-      <path value="ElementDefinition.example[x]"/>
+     <element id="ElementDefinition.example">
+      <path value="ElementDefinition.example"/>
       <short value="Example value (as defined for type)"/>
-      <definition value="A sample value for this element demonstrating the type of information that would typically be captured."/>
-      <comments value="This will most commonly be present for data where it's not implicitly obvious from either the data type or value set what the values might be.  (I.e. Example values for dates or quantities would generally be unnecessary.)  If the example value is fully populated, the publication tool can generate an instance automatically."/>
+      <definition value="A sample value for this element demonstrating the type of information that would typically be found in the element."/>
+      <comments value="Examples will most commonly be present for data where it's not implicitly obvious from either the data type or value set what the values might be.  (I.e. Example values for dates or quantities would generally be unnecessary.)  If the example value is fully populated, the publication tool can generate an instance automatically."/>
       <min value="0"/>
+      <max value="*"/>
+      <type>
+       <code value="Element"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="N/A (MIF territory)"/>
+      </mapping>
+     </element>
+     <element id="ElementDefinition.example.label">
+      <path value="ElementDefinition.example.label"/>
+      <short value="Describes the purpose of this example"/>
+      <definition value="Describes the purpose of this example amoung the set of examples."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+       <code value="string"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+       <identity value="rim"/>
+       <map value="N/A (MIF territory)"/>
+      </mapping>
+     </element>
+     <element id="ElementDefinition.example.value[x]">
+      <path value="ElementDefinition.example.value[x]"/>
+      <short value="Value of Example (one of allowed types)"/>
+      <definition value="The actual value for the element, which must be one of the types allowed for this element."/>
+      <min value="1"/>
       <max value="1"/>
       <type>
        <code value="base64Binary"/>
@@ -16662,7 +16948,7 @@
       <constraint>
        <key value="eld-12"/>
        <severity value="error"/>
-       <human value="ValueSet as a URI SHALL start with http:// or https:// urn:"/>
+       <human value="ValueSet as a URI SHALL start with http:// or https:// or urn:"/>
        <expression value="valueSet.is(uri).not() or valueSet.as(uri).startsWith('http:') or valueSet.as(uri).startsWith('https') or valueSet.as(uri).startsWith('urn:')"/>
        <xpath value="not(exists(f:valueSetUri)) or (starts-with(string(f:valueSetUri/@value), 'http:') or starts-with(string(f:valueSetUri/@value), 'https:') or starts-with(string(f:valueSetUri/@value), 'urn:'))"/>
       </constraint>
@@ -16688,7 +16974,7 @@
       <path value="ElementDefinition.binding.strength"/>
       <short value="required | extensible | preferred | example"/>
       <definition value="Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances."/>
-      <comments value="For further discussion, see [[[Using Terminologies]]]."/>
+      <comments value="For further discussion, see [Using Terminologies](terminologies.html)."/>
       <alias value="conformance"/>
       <alias value="extensibility"/>
       <min value="1"/>
@@ -16862,7 +17148,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="DosageInstruction"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/DosageInstruction"/>
     <name value="DosageInstruction"/>
@@ -16870,13 +17156,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for DosageInstruction Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>
@@ -17048,19 +17334,16 @@
        <map value="boolean: precondition.negationInd (inversed - so negationInd = true means asNeeded=false  CodeableConcept: precondition.observationEventCriterion[code=&quot;Assertion&quot;].value"/>
       </mapping>
      </element>
-     <element id="DosageInstruction.site[x]">
-      <path value="DosageInstruction.site[x]"/>
+     <element id="DosageInstruction.site">
+      <path value="DosageInstruction.site"/>
       <short value="Body site to administer to"/>
       <definition value="Body site to administer to."/>
+      <comments value="If the use case requires attributes from the BodySite resource (e.g. to identify and track separately) then use the standard extension [body-site-instance](extension-body-site-instance.html).  May be a summary code, or a reference to a very precise definition of the location, or both."/>
       <requirements value="A coded specification of the anatomic site where the medication first enters the body."/>
       <min value="0"/>
       <max value="1"/>
       <type>
        <code value="CodeableConcept"/>
-      </type>
-      <type>
-       <code value="Reference"/>
-       <targetProfile value="http://hl7.org/fhir/StructureDefinition/BodySite"/>
       </type>
       <isSummary value="true"/>
       <binding>
@@ -17316,19 +17599,16 @@
        <map value="boolean: precondition.negationInd (inversed - so negationInd = true means asNeeded=false  CodeableConcept: precondition.observationEventCriterion[code=&quot;Assertion&quot;].value"/>
       </mapping>
      </element>
-     <element id="DosageInstruction.site[x]">
-      <path value="DosageInstruction.site[x]"/>
+     <element id="DosageInstruction.site">
+      <path value="DosageInstruction.site"/>
       <short value="Body site to administer to"/>
       <definition value="Body site to administer to."/>
+      <comments value="If the use case requires attributes from the BodySite resource (e.g. to identify and track separately) then use the standard extension [body-site-instance](extension-body-site-instance.html).  May be a summary code, or a reference to a very precise definition of the location, or both."/>
       <requirements value="A coded specification of the anatomic site where the medication first enters the body."/>
       <min value="0"/>
       <max value="1"/>
       <type>
        <code value="CodeableConcept"/>
-      </type>
-      <type>
-       <code value="Reference"/>
-       <targetProfile value="http://hl7.org/fhir/StructureDefinition/BodySite"/>
       </type>
       <isSummary value="true"/>
       <binding>
@@ -17492,7 +17772,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="ParameterDefinition"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/ParameterDefinition"/>
     <name value="ParameterDefinition"/>
@@ -17500,13 +17780,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="Base StructureDefinition for ParameterDefinition Type"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="rim"/>
      <uri value="http://hl7.org/v3"/>
@@ -17783,7 +18063,7 @@
    <StructureDefinition xmlns="http://hl7.org/fhir">
     <id value="SimpleQuantity"/>
     <meta>
-     <lastUpdated value="2016-11-05T08:41:27.630-04:00"/>
+     <lastUpdated value="2016-12-06T09:42:48.227-05:00"/>
     </meta>
     <url value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
     <name value="SimpleQuantity"/>
@@ -17791,13 +18071,13 @@
     <publisher value="HL7 FHIR Standard"/>
     <contact>
      <telecom>
-      <system value="other"/>
+      <system value="url"/>
       <value value="http://hl7.org/fhir"/>
      </telecom>
     </contact>
-    <date value="2016-11-05T08:41:27-04:00"/>
+    <date value="2016-12-06T09:42:48-05:00"/>
     <description value="A fixed quantity (no comparator)"/>
-    <fhirVersion value="1.7.0"/>
+    <fhirVersion value="1.8.0"/>
     <mapping>
      <identity value="v2"/>
      <uri value="http://hl7.org/v2"/>

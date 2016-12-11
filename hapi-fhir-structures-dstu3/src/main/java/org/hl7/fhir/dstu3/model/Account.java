@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -154,6 +154,275 @@ public class Account extends DomainResource {
       }
     }
 
+    @Block()
+    public static class GuarantorComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The entity who is responsible.
+         */
+        @Child(name = "party", type = {Patient.class, RelatedPerson.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Responsible entity", formalDefinition="The entity who is responsible." )
+        protected Reference party;
+
+        /**
+         * The actual object that is the target of the reference (The entity who is responsible.)
+         */
+        protected Resource partyTarget;
+
+        /**
+         * A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.
+         */
+        @Child(name = "onHold", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Credit or other hold applied", formalDefinition="A guarantor may be placed on credit hold or otherwise have their role temporarily suspended." )
+        protected BooleanType onHold;
+
+        /**
+         * The timeframe during which the guarantor accepts responsibility for the account.
+         */
+        @Child(name = "period", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Guarrantee account during", formalDefinition="The timeframe during which the guarantor accepts responsibility for the account." )
+        protected Period period;
+
+        private static final long serialVersionUID = -1012345396L;
+
+    /**
+     * Constructor
+     */
+      public GuarantorComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public GuarantorComponent(Reference party) {
+        super();
+        this.party = party;
+      }
+
+        /**
+         * @return {@link #party} (The entity who is responsible.)
+         */
+        public Reference getParty() { 
+          if (this.party == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GuarantorComponent.party");
+            else if (Configuration.doAutoCreate())
+              this.party = new Reference(); // cc
+          return this.party;
+        }
+
+        public boolean hasParty() { 
+          return this.party != null && !this.party.isEmpty();
+        }
+
+        /**
+         * @param value {@link #party} (The entity who is responsible.)
+         */
+        public GuarantorComponent setParty(Reference value) { 
+          this.party = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #party} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The entity who is responsible.)
+         */
+        public Resource getPartyTarget() { 
+          return this.partyTarget;
+        }
+
+        /**
+         * @param value {@link #party} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The entity who is responsible.)
+         */
+        public GuarantorComponent setPartyTarget(Resource value) { 
+          this.partyTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #onHold} (A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.). This is the underlying object with id, value and extensions. The accessor "getOnHold" gives direct access to the value
+         */
+        public BooleanType getOnHoldElement() { 
+          if (this.onHold == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GuarantorComponent.onHold");
+            else if (Configuration.doAutoCreate())
+              this.onHold = new BooleanType(); // bb
+          return this.onHold;
+        }
+
+        public boolean hasOnHoldElement() { 
+          return this.onHold != null && !this.onHold.isEmpty();
+        }
+
+        public boolean hasOnHold() { 
+          return this.onHold != null && !this.onHold.isEmpty();
+        }
+
+        /**
+         * @param value {@link #onHold} (A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.). This is the underlying object with id, value and extensions. The accessor "getOnHold" gives direct access to the value
+         */
+        public GuarantorComponent setOnHoldElement(BooleanType value) { 
+          this.onHold = value;
+          return this;
+        }
+
+        /**
+         * @return A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.
+         */
+        public boolean getOnHold() { 
+          return this.onHold == null || this.onHold.isEmpty() ? false : this.onHold.getValue();
+        }
+
+        /**
+         * @param value A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.
+         */
+        public GuarantorComponent setOnHold(boolean value) { 
+            if (this.onHold == null)
+              this.onHold = new BooleanType();
+            this.onHold.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #period} (The timeframe during which the guarantor accepts responsibility for the account.)
+         */
+        public Period getPeriod() { 
+          if (this.period == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GuarantorComponent.period");
+            else if (Configuration.doAutoCreate())
+              this.period = new Period(); // cc
+          return this.period;
+        }
+
+        public boolean hasPeriod() { 
+          return this.period != null && !this.period.isEmpty();
+        }
+
+        /**
+         * @param value {@link #period} (The timeframe during which the guarantor accepts responsibility for the account.)
+         */
+        public GuarantorComponent setPeriod(Period value) { 
+          this.period = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("party", "Reference(Patient|RelatedPerson|Organization)", "The entity who is responsible.", 0, java.lang.Integer.MAX_VALUE, party));
+          childrenList.add(new Property("onHold", "boolean", "A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.", 0, java.lang.Integer.MAX_VALUE, onHold));
+          childrenList.add(new Property("period", "Period", "The timeframe during which the guarantor accepts responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, period));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 106437350: /*party*/ return this.party == null ? new Base[0] : new Base[] {this.party}; // Reference
+        case -1013289154: /*onHold*/ return this.onHold == null ? new Base[0] : new Base[] {this.onHold}; // BooleanType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 106437350: // party
+          this.party = castToReference(value); // Reference
+          break;
+        case -1013289154: // onHold
+          this.onHold = castToBoolean(value); // BooleanType
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("party"))
+          this.party = castToReference(value); // Reference
+        else if (name.equals("onHold"))
+          this.onHold = castToBoolean(value); // BooleanType
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 106437350:  return getParty(); // Reference
+        case -1013289154: throw new FHIRException("Cannot make property onHold as it is not a complex type"); // BooleanType
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("party")) {
+          this.party = new Reference();
+          return this.party;
+        }
+        else if (name.equals("onHold")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.onHold");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public GuarantorComponent copy() {
+        GuarantorComponent dst = new GuarantorComponent();
+        copyValues(dst);
+        dst.party = party == null ? null : party.copy();
+        dst.onHold = onHold == null ? null : onHold.copy();
+        dst.period = period == null ? null : period.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof GuarantorComponent))
+          return false;
+        GuarantorComponent o = (GuarantorComponent) other;
+        return compareDeep(party, o.party, true) && compareDeep(onHold, o.onHold, true) && compareDeep(period, o.period, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof GuarantorComponent))
+          return false;
+        GuarantorComponent o = (GuarantorComponent) other;
+        return compareValues(onHold, o.onHold, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(party, onHold, period);
+      }
+
+  public String fhirType() {
+    return "Account.guarantor";
+
+  }
+
+  }
+
     /**
      * Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).
      */
@@ -259,7 +528,14 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     @Description(shortDefinition="Explanation of purpose/use", formalDefinition="Provides additional information about what the account tracks and how it is used." )
     protected StringType description;
 
-    private static final long serialVersionUID = -143220425L;
+    /**
+     * Parties financially responsible for the account.
+     */
+    @Child(name = "guarantor", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Responsible for the account", formalDefinition="Parties financially responsible for the account." )
+    protected List<GuarantorComponent> guarantor;
+
+    private static final long serialVersionUID = -124781610L;
 
   /**
    * Constructor
@@ -750,6 +1026,59 @@ A coverage may only be resposible for specific types of charges, and the sequenc
       return this;
     }
 
+    /**
+     * @return {@link #guarantor} (Parties financially responsible for the account.)
+     */
+    public List<GuarantorComponent> getGuarantor() { 
+      if (this.guarantor == null)
+        this.guarantor = new ArrayList<GuarantorComponent>();
+      return this.guarantor;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Account setGuarantor(List<GuarantorComponent> theGuarantor) { 
+      this.guarantor = theGuarantor;
+      return this;
+    }
+
+    public boolean hasGuarantor() { 
+      if (this.guarantor == null)
+        return false;
+      for (GuarantorComponent item : this.guarantor)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public GuarantorComponent addGuarantor() { //3
+      GuarantorComponent t = new GuarantorComponent();
+      if (this.guarantor == null)
+        this.guarantor = new ArrayList<GuarantorComponent>();
+      this.guarantor.add(t);
+      return t;
+    }
+
+    public Account addGuarantor(GuarantorComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.guarantor == null)
+        this.guarantor = new ArrayList<GuarantorComponent>();
+      this.guarantor.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #guarantor}, creating it if it does not already exist
+     */
+    public GuarantorComponent getGuarantorFirstRep() { 
+      if (getGuarantor().isEmpty()) {
+        addGuarantor();
+      }
+      return getGuarantor().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -764,6 +1093,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         childrenList.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, owner));
         childrenList.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("guarantor", "", "Parties financially responsible for the account.", 0, java.lang.Integer.MAX_VALUE, guarantor));
       }
 
       @Override
@@ -781,6 +1111,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -188629045: /*guarantor*/ return this.guarantor == null ? new Base[0] : this.guarantor.toArray(new Base[this.guarantor.size()]); // GuarantorComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -825,6 +1156,9 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         case -1724546052: // description
           this.description = castToString(value); // StringType
           break;
+        case -188629045: // guarantor
+          this.getGuarantor().add((GuarantorComponent) value); // GuarantorComponent
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -856,6 +1190,8 @@ A coverage may only be resposible for specific types of charges, and the sequenc
           this.owner = castToReference(value); // Reference
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
+        else if (name.equals("guarantor"))
+          this.getGuarantor().add((GuarantorComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -875,6 +1211,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         case -1867885268:  return getSubject(); // Reference
         case 106164915:  return getOwner(); // Reference
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -188629045:  return addGuarantor(); // GuarantorComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -925,6 +1262,9 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Account.description");
         }
+        else if (name.equals("guarantor")) {
+          return addGuarantor();
+        }
         else
           return super.addChild(name);
       }
@@ -957,6 +1297,11 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         dst.subject = subject == null ? null : subject.copy();
         dst.owner = owner == null ? null : owner.copy();
         dst.description = description == null ? null : description.copy();
+        if (guarantor != null) {
+          dst.guarantor = new ArrayList<GuarantorComponent>();
+          for (GuarantorComponent i : guarantor)
+            dst.guarantor.add(i.copy());
+        };
         return dst;
       }
 
@@ -975,7 +1320,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
            && compareDeep(status, o.status, true) && compareDeep(active, o.active, true) && compareDeep(currency, o.currency, true)
            && compareDeep(balance, o.balance, true) && compareDeep(coverage, o.coverage, true) && compareDeep(coveragePeriod, o.coveragePeriod, true)
            && compareDeep(subject, o.subject, true) && compareDeep(owner, o.owner, true) && compareDeep(description, o.description, true)
-          ;
+           && compareDeep(guarantor, o.guarantor, true);
       }
 
       @Override
@@ -992,7 +1337,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, type, status
           , active, currency, balance, coverage, coveragePeriod, subject, owner, description
-          );
+          , guarantor);
       }
 
   @Override

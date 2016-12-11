@@ -738,7 +738,7 @@ public class OperationServerDstu3Test {
 			for (int i =0; i < 100;i++) {
 				Patient p = new Patient();
 				p.setId("Patient/" + i);
-				p.addName().addFamily("Patient " + i);
+				p.addName().setFamily("Patient " + i);
 				resources.add(p);
 			}
 			

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -51,9 +51,10 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * Indicates the site on the subject's body where the device was used ( i.e. the target site).
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "bodySite", type = {CodeableConcept.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Target body site", formalDefinition="Indicates the site on the subject's body where the device was used ( i.e. the target site)." )
-    protected Type bodySite;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
+    protected CodeableConcept bodySite;
 
     /**
      * The time period over which the device was used.
@@ -121,7 +122,7 @@ public class DeviceUseStatement extends DomainResource {
     @Description(shortDefinition="How often  the device was used", formalDefinition="How often the device was used." )
     protected Type timing;
 
-    private static final long serialVersionUID = -1668571635L;
+    private static final long serialVersionUID = -456851478L;
 
   /**
    * Constructor
@@ -142,34 +143,13 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
      */
-    public Type getBodySite() { 
+    public CodeableConcept getBodySite() { 
+      if (this.bodySite == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DeviceUseStatement.bodySite");
+        else if (Configuration.doAutoCreate())
+          this.bodySite = new CodeableConcept(); // cc
       return this.bodySite;
-    }
-
-    /**
-     * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
-     */
-    public CodeableConcept getBodySiteCodeableConcept() throws FHIRException { 
-      if (!(this.bodySite instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.bodySite.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.bodySite;
-    }
-
-    public boolean hasBodySiteCodeableConcept() { 
-      return this.bodySite instanceof CodeableConcept;
-    }
-
-    /**
-     * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
-     */
-    public Reference getBodySiteReference() throws FHIRException { 
-      if (!(this.bodySite instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
-      return (Reference) this.bodySite;
-    }
-
-    public boolean hasBodySiteReference() { 
-      return this.bodySite instanceof Reference;
     }
 
     public boolean hasBodySite() { 
@@ -179,7 +159,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @param value {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
      */
-    public DeviceUseStatement setBodySite(Type value) { 
+    public DeviceUseStatement setBodySite(CodeableConcept value) { 
       this.bodySite = value;
       return this;
     }
@@ -572,7 +552,7 @@ public class DeviceUseStatement extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("bodySite[x]", "CodeableConcept|Reference(BodySite)", "Indicates the site on the subject's body where the device was used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
+        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the device was used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
         childrenList.add(new Property("whenUsed", "Period", "The time period over which the device was used.", 0, java.lang.Integer.MAX_VALUE, whenUsed));
         childrenList.add(new Property("device", "Reference(Device)", "The details of the device used.", 0, java.lang.Integer.MAX_VALUE, device));
         childrenList.add(new Property("identifier", "Identifier", "An external identifier for this statement such as an IRI.", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -586,7 +566,7 @@ public class DeviceUseStatement extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // Type
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // CodeableConcept
         case 2042879511: /*whenUsed*/ return this.whenUsed == null ? new Base[0] : new Base[] {this.whenUsed}; // Period
         case -1335157162: /*device*/ return this.device == null ? new Base[0] : new Base[] {this.device}; // Reference
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
@@ -604,7 +584,7 @@ public class DeviceUseStatement extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1702620169: // bodySite
-          this.bodySite = castToType(value); // Type
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
           break;
         case 2042879511: // whenUsed
           this.whenUsed = castToPeriod(value); // Period
@@ -637,8 +617,8 @@ public class DeviceUseStatement extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("bodySite[x]"))
-          this.bodySite = castToType(value); // Type
+        if (name.equals("bodySite"))
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("whenUsed"))
           this.whenUsed = castToPeriod(value); // Period
         else if (name.equals("device"))
@@ -662,7 +642,7 @@ public class DeviceUseStatement extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -806219817:  return getBodySite(); // Type
+        case 1702620169:  return getBodySite(); // CodeableConcept
         case 2042879511:  return getWhenUsed(); // Period
         case -1335157162:  return getDevice(); // Reference
         case -1618432855:  return addIdentifier(); // Identifier
@@ -678,12 +658,8 @@ public class DeviceUseStatement extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("bodySiteCodeableConcept")) {
+        if (name.equals("bodySite")) {
           this.bodySite = new CodeableConcept();
-          return this.bodySite;
-        }
-        else if (name.equals("bodySiteReference")) {
-          this.bodySite = new Reference();
           return this.bodySite;
         }
         else if (name.equals("whenUsed")) {

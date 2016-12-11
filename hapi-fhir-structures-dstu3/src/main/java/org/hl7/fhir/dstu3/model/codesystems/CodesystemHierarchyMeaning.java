@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,9 +41,9 @@ public enum CodesystemHierarchyMeaning {
          */
         GROUPEDBY, 
         /**
-         * A hierarchy where the child concepts are "a kind of" the parent (typically an IS-A relationship.)
+         * A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for it's child concepts
          */
-        SUBSUMES, 
+        ISA, 
         /**
          * Child elements list the individual parts of a composite whole (e.g. bodysite)
          */
@@ -61,8 +61,8 @@ public enum CodesystemHierarchyMeaning {
                 return null;
         if ("grouped-by".equals(codeString))
           return GROUPEDBY;
-        if ("subsumes".equals(codeString))
-          return SUBSUMES;
+        if ("is-a".equals(codeString))
+          return ISA;
         if ("part-of".equals(codeString))
           return PARTOF;
         if ("classified-with".equals(codeString))
@@ -72,7 +72,7 @@ public enum CodesystemHierarchyMeaning {
         public String toCode() {
           switch (this) {
             case GROUPEDBY: return "grouped-by";
-            case SUBSUMES: return "subsumes";
+            case ISA: return "is-a";
             case PARTOF: return "part-of";
             case CLASSIFIEDWITH: return "classified-with";
             default: return "?";
@@ -84,7 +84,7 @@ public enum CodesystemHierarchyMeaning {
         public String getDefinition() {
           switch (this) {
             case GROUPEDBY: return "No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the heirarchy have different meanings)";
-            case SUBSUMES: return "A hierarchy where the child concepts are \"a kind of\" the parent (typically an IS-A relationship.)";
+            case ISA: return "A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for it's child concepts";
             case PARTOF: return "Child elements list the individual parts of a composite whole (e.g. bodysite)";
             case CLASSIFIEDWITH: return "Child concepts in the hierarchy may have only one parent and there is a presumption that the code system is a \"closed world\" meaning all things must be in the hierarchy. This results in concepts such as \"not otherwise clasified.\"";
             default: return "?";
@@ -93,7 +93,7 @@ public enum CodesystemHierarchyMeaning {
         public String getDisplay() {
           switch (this) {
             case GROUPEDBY: return "Grouped By";
-            case SUBSUMES: return "Subsumes";
+            case ISA: return "Is-A";
             case PARTOF: return "Part Of";
             case CLASSIFIEDWITH: return "Classified With";
             default: return "?";

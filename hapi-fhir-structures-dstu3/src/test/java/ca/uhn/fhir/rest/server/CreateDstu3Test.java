@@ -264,7 +264,7 @@ public class CreateDstu3Test {
 
 			Patient p1 = new Patient();
 			p1.setId(new IdType("Patient/1"));
-			p1.addName().addFamily("The Family");
+			p1.addName().setFamily("The Family");
 			retVal.add(p1);
 
 			return retVal;

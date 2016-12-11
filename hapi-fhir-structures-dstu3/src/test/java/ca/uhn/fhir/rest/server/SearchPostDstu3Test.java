@@ -264,7 +264,7 @@ public class SearchPostDstu3Test {
 			ourLastSortSpec = theSortSpec;
 			ourLastName = theName;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("foo"));
+			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("foo"));
 			return retVal;
 		}
 		//@formatter:on

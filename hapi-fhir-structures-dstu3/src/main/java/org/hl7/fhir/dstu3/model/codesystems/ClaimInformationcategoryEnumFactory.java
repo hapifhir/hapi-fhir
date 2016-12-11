@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -47,10 +47,14 @@ public class ClaimInformationcategoryEnumFactory implements EnumFactory<ClaimInf
       return ClaimInformationcategory.ONSET;
     if ("related".equals(codeString))
       return ClaimInformationcategory.RELATED;
-    if ("exceptions".equals(codeString))
-      return ClaimInformationcategory.EXCEPTIONS;
+    if ("exception".equals(codeString))
+      return ClaimInformationcategory.EXCEPTION;
     if ("material".equals(codeString))
       return ClaimInformationcategory.MATERIAL;
+    if ("attachment".equals(codeString))
+      return ClaimInformationcategory.ATTACHMENT;
+    if ("missingtooth".equals(codeString))
+      return ClaimInformationcategory.MISSINGTOOTH;
     if ("other".equals(codeString))
       return ClaimInformationcategory.OTHER;
     throw new IllegalArgumentException("Unknown ClaimInformationcategory code '"+codeString+"'");
@@ -65,10 +69,14 @@ public class ClaimInformationcategoryEnumFactory implements EnumFactory<ClaimInf
       return "onset";
     if (code == ClaimInformationcategory.RELATED)
       return "related";
-    if (code == ClaimInformationcategory.EXCEPTIONS)
-      return "exceptions";
+    if (code == ClaimInformationcategory.EXCEPTION)
+      return "exception";
     if (code == ClaimInformationcategory.MATERIAL)
       return "material";
+    if (code == ClaimInformationcategory.ATTACHMENT)
+      return "attachment";
+    if (code == ClaimInformationcategory.MISSINGTOOTH)
+      return "missingtooth";
     if (code == ClaimInformationcategory.OTHER)
       return "other";
     return "?";

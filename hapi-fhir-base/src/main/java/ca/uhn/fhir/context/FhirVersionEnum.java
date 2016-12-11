@@ -40,7 +40,7 @@ public enum FhirVersionEnum {
 	
 	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2, true), 
 	
-	DSTU2_1("NONE", null, true), 
+	DSTU2_1("org.hl7.fhir.dstu2016may.hapi.ctx.FhirDstu2_1", null, true), 
 
 	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true);
 

@@ -9,18 +9,19 @@
   <Author>Grahame</Author>
   <LastAuthor>Eric Haas</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-08-01T17:31:47Z</LastSaved>
+  <LastSaved>2016-12-04T21:34:32Z</LastSaved>
   <Version>12.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16440</WindowHeight>
-  <WindowWidth>25605</WindowWidth>
-  <WindowTopX>28800</WindowTopX>
-  <WindowTopY>-8415</WindowTopY>
+  <WindowHeight>5520</WindowHeight>
+  <WindowWidth>19215</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
   <ActiveSheet>7</ActiveSheet>
+  <FirstVisibleSheet>7</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1194,7 +1195,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Patient</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Patient|Group|Device|Location)</Data><NamedCell
@@ -1273,7 +1274,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Observation time, Effective Time</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">dateTime|Period</Data><NamedCell
@@ -1314,7 +1315,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Date Created, Date published, Date Issued</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">instant</Data><NamedCell
@@ -1357,7 +1358,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Laboratory, Service, Practitioner, Department, Company</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">1..*</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Practitioner|Organization)</Data><NamedCell
@@ -3943,7 +3944,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>4</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>9</LeftColumnRightPane>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3951,7 +3952,6 @@
     </Pane>
     <Pane>
      <Number>1</Number>
-     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
@@ -3959,8 +3959,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>14</ActiveRow>
-     <ActiveCol>12</ActiveCol>
+     <ActiveRow>10</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5760,7 +5760,7 @@
     <Cell><Data ss:Type="String">core</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s137"><Data ss:Type="String">Diagnostic Report for Genetics</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">diagnosticreport-genetics-profile-spreadsheet.xml</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">diagnosticreport-genetics-profile-spreadsheet.xml</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">spreadsheet</Data></Cell>
@@ -5987,8 +5987,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>9</ActiveRow>
-     <ActiveCol>7</ActiveCol>
+     <ActiveRow>11</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6155,7 +6154,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a genetics test report with Family member history</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">dg2</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">diagnosticreport-genetics-example-2-familyhistory.xml</Data></Cell>
-    <Cell ss:StyleID="s137"><Data ss:Type="String">Diagnostic Report for Genetics</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
     <Cell ss:StyleID="s143"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6173,7 +6172,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a comprehensive bone marrow report</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">report</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">diagnosticreport-genetics-comprehensive-bone-marrow-report.xml</Data></Cell>
-    <Cell ss:StyleID="s137"><Data ss:Type="String">Diagnostic Report for Genetics</Data></Cell>
+    <Cell ss:StyleID="s137"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
     <Cell ss:StyleID="s143"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6186,13 +6185,13 @@
     <Cell ss:StyleID="s143"><Data ss:Type="String">y</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s142"><Data ss:Type="String">PGx Example </Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s143"/>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a PGx haplotype report</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">example-pgx</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">diagnosticreport-example-pgx.xml</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
+    <Cell ss:StyleID="s143"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s142"/>
@@ -6383,14 +6382,14 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Zoom>125</Zoom>
+   <Zoom>110</Zoom>
    <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -6398,13 +6397,14 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
+     <ActiveRow>6</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>

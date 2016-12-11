@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,7 +61,7 @@ public enum NameUse {
          */
         OLD, 
         /**
-         * A name used prior to marriage. Marriage naming customs vary greatly around the world. This name use is for use by applications that collect and store "maiden" names. Though the concept of maiden name is often gender specific, the use of this term is not gender specific. The use of this term does not imply any particular history for a person's name, nor should the maiden name be determined algorithmically.
+         * A name used prior to changing name because of marriage. This name use is for use by applications that collect and store names that were used prior to a marriage. Marriage naming customs vary greatly around the world, and are constantly changing. This term is not gender specific. The use of this term does not imply any particular history for a person's name
          */
         MAIDEN, 
         /**
@@ -110,7 +110,7 @@ public enum NameUse {
             case NICKNAME: return "A name that is used to address the person in an informal manner, but is not part of their formal or usual name";
             case ANONYMOUS: return "Anonymous assigned name, alias, or pseudonym (used to protect a person's identity for privacy reasons)";
             case OLD: return "This name is no longer in use (or was never correct, but retained for records)";
-            case MAIDEN: return "A name used prior to marriage. Marriage naming customs vary greatly around the world. This name use is for use by applications that collect and store \"maiden\" names. Though the concept of maiden name is often gender specific, the use of this term is not gender specific. The use of this term does not imply any particular history for a person's name, nor should the maiden name be determined algorithmically.";
+            case MAIDEN: return "A name used prior to changing name because of marriage. This name use is for use by applications that collect and store names that were used prior to a marriage. Marriage naming customs vary greatly around the world, and are constantly changing. This term is not gender specific. The use of this term does not imply any particular history for a person's name";
             default: return "?";
           }
         }
@@ -122,7 +122,7 @@ public enum NameUse {
             case NICKNAME: return "Nickname";
             case ANONYMOUS: return "Anonymous";
             case OLD: return "Old";
-            case MAIDEN: return "Maiden";
+            case MAIDEN: return "Name changed for Marriage";
             default: return "?";
           }
     }

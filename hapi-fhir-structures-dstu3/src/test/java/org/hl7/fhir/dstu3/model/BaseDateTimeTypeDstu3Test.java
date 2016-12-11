@@ -112,17 +112,17 @@ public class BaseDateTimeTypeDstu3Test {
 	@Test
 	public void testDateParsesWithInvalidPrecision() {
 		Condition c = new Condition();
-		c.setDateRecordedElement(new DateType());
-		c.getDateRecordedElement().setValueAsString("2001-01-02T11:13:33");
-		assertEquals(TemporalPrecisionEnum.SECOND, c.getDateRecordedElement().getPrecision());
+		c.setAssertedDateElement(new DateType());
+		c.getAssertedDateElement().setValueAsString("2001-01-02T11:13:33");
+		assertEquals(TemporalPrecisionEnum.SECOND, c.getAssertedDateElement().getPrecision());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
 		Assert.assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
 
 		c = ourCtx.newXmlParser().parseResource(Condition.class, encoded);
 
-		assertEquals("2001-01-02T11:13:33", c.getDateRecordedElement().getValueAsString());
-		assertEquals(TemporalPrecisionEnum.SECOND, c.getDateRecordedElement().getPrecision());
+		assertEquals("2001-01-02T11:13:33", c.getAssertedDateElement().getValueAsString());
+		assertEquals(TemporalPrecisionEnum.SECOND, c.getAssertedDateElement().getPrecision());
 
 		ValidationResult outcome = ourCtx.newValidator().validateWithResult(c);
 		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());

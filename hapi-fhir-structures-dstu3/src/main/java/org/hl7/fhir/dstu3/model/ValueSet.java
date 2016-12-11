@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -60,6 +60,10 @@ public class ValueSet extends MetadataResource {
          */
         ISA, 
         /**
+         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself (i.e. include child codes)
+         */
+        DESCENDENTOF, 
+        /**
          * The specified property of the code does not have an is-a relationship with the provided value.
          */
         ISNOTA, 
@@ -80,6 +84,10 @@ public class ValueSet extends MetadataResource {
          */
         GENERALIZES, 
         /**
+         * The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values)
+         */
+        EXISTS, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -90,6 +98,8 @@ public class ValueSet extends MetadataResource {
           return EQUAL;
         if ("is-a".equals(codeString))
           return ISA;
+        if ("descendent-of".equals(codeString))
+          return DESCENDENTOF;
         if ("is-not-a".equals(codeString))
           return ISNOTA;
         if ("regex".equals(codeString))
@@ -100,6 +110,8 @@ public class ValueSet extends MetadataResource {
           return NOTIN;
         if ("generalizes".equals(codeString))
           return GENERALIZES;
+        if ("exists".equals(codeString))
+          return EXISTS;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -109,11 +121,13 @@ public class ValueSet extends MetadataResource {
           switch (this) {
             case EQUAL: return "=";
             case ISA: return "is-a";
+            case DESCENDENTOF: return "descendent-of";
             case ISNOTA: return "is-not-a";
             case REGEX: return "regex";
             case IN: return "in";
             case NOTIN: return "not-in";
             case GENERALIZES: return "generalizes";
+            case EXISTS: return "exists";
             default: return "?";
           }
         }
@@ -121,11 +135,13 @@ public class ValueSet extends MetadataResource {
           switch (this) {
             case EQUAL: return "http://hl7.org/fhir/filter-operator";
             case ISA: return "http://hl7.org/fhir/filter-operator";
+            case DESCENDENTOF: return "http://hl7.org/fhir/filter-operator";
             case ISNOTA: return "http://hl7.org/fhir/filter-operator";
             case REGEX: return "http://hl7.org/fhir/filter-operator";
             case IN: return "http://hl7.org/fhir/filter-operator";
             case NOTIN: return "http://hl7.org/fhir/filter-operator";
             case GENERALIZES: return "http://hl7.org/fhir/filter-operator";
+            case EXISTS: return "http://hl7.org/fhir/filter-operator";
             default: return "?";
           }
         }
@@ -133,11 +149,13 @@ public class ValueSet extends MetadataResource {
           switch (this) {
             case EQUAL: return "The specified property of the code equals the provided value.";
             case ISA: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (i.e. include child codes)";
+            case DESCENDENTOF: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself (i.e. include child codes)";
             case ISNOTA: return "The specified property of the code does not have an is-a relationship with the provided value.";
             case REGEX: return "The specified property of the code  matches the regex specified in the provided value.";
             case IN: return "The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).";
             case NOTIN: return "The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).";
             case GENERALIZES: return "Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (e.g. include parent codes)";
+            case EXISTS: return "The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values)";
             default: return "?";
           }
         }
@@ -145,11 +163,13 @@ public class ValueSet extends MetadataResource {
           switch (this) {
             case EQUAL: return "Equals";
             case ISA: return "Is A (by subsumption)";
+            case DESCENDENTOF: return "Descendent Of (by subsumption)";
             case ISNOTA: return "Not (Is A) (by subsumption)";
             case REGEX: return "Regular Expression";
             case IN: return "In Set";
             case NOTIN: return "Not in Set";
             case GENERALIZES: return "Generalizes (by Subsumption)";
+            case EXISTS: return "Exists";
             default: return "?";
           }
         }
@@ -164,6 +184,8 @@ public class ValueSet extends MetadataResource {
           return FilterOperator.EQUAL;
         if ("is-a".equals(codeString))
           return FilterOperator.ISA;
+        if ("descendent-of".equals(codeString))
+          return FilterOperator.DESCENDENTOF;
         if ("is-not-a".equals(codeString))
           return FilterOperator.ISNOTA;
         if ("regex".equals(codeString))
@@ -174,6 +196,8 @@ public class ValueSet extends MetadataResource {
           return FilterOperator.NOTIN;
         if ("generalizes".equals(codeString))
           return FilterOperator.GENERALIZES;
+        if ("exists".equals(codeString))
+          return FilterOperator.EXISTS;
         throw new IllegalArgumentException("Unknown FilterOperator code '"+codeString+"'");
         }
         public Enumeration<FilterOperator> fromType(Base code) throws FHIRException {
@@ -186,6 +210,8 @@ public class ValueSet extends MetadataResource {
           return new Enumeration<FilterOperator>(this, FilterOperator.EQUAL);
         if ("is-a".equals(codeString))
           return new Enumeration<FilterOperator>(this, FilterOperator.ISA);
+        if ("descendent-of".equals(codeString))
+          return new Enumeration<FilterOperator>(this, FilterOperator.DESCENDENTOF);
         if ("is-not-a".equals(codeString))
           return new Enumeration<FilterOperator>(this, FilterOperator.ISNOTA);
         if ("regex".equals(codeString))
@@ -196,6 +222,8 @@ public class ValueSet extends MetadataResource {
           return new Enumeration<FilterOperator>(this, FilterOperator.NOTIN);
         if ("generalizes".equals(codeString))
           return new Enumeration<FilterOperator>(this, FilterOperator.GENERALIZES);
+        if ("exists".equals(codeString))
+          return new Enumeration<FilterOperator>(this, FilterOperator.EXISTS);
         throw new FHIRException("Unknown FilterOperator code '"+codeString+"'");
         }
     public String toCode(FilterOperator code) {
@@ -203,6 +231,8 @@ public class ValueSet extends MetadataResource {
         return "=";
       if (code == FilterOperator.ISA)
         return "is-a";
+      if (code == FilterOperator.DESCENDENTOF)
+        return "descendent-of";
       if (code == FilterOperator.ISNOTA)
         return "is-not-a";
       if (code == FilterOperator.REGEX)
@@ -213,6 +243,8 @@ public class ValueSet extends MetadataResource {
         return "not-in";
       if (code == FilterOperator.GENERALIZES)
         return "generalizes";
+      if (code == FilterOperator.EXISTS)
+        return "exists";
       return "?";
       }
     public String toSystem(FilterOperator code) {
@@ -223,27 +255,34 @@ public class ValueSet extends MetadataResource {
     @Block()
     public static class ValueSetComposeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.
+         * If a locked date is defined, then the Content Logical Definition must be evaluated using the current version as of the locked date for referenced code system(s) and value set instances where ValueSet.compose.include.version is not defined.
          */
         @Child(name = "lockedDate", type = {DateType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Fixed date for all referenced code systems and value sets", formalDefinition="If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date." )
+        @Description(shortDefinition="Fixed date for version-less references (transitive)", formalDefinition="If a locked date is defined, then the Content Logical Definition must be evaluated using the current version as of the locked date for referenced code system(s) and value set instances where ValueSet.compose.include.version is not defined." )
         protected DateType lockedDate;
+
+        /**
+         * Whether inactive codes - codes that are not approved for current use - are in the value set. If inactive = true, inactive codes are to be included in the expansion, if inactive = false, the inactive codes will not be included in the expansion. If absent, the behavior is determined by the implementation, or by the applicable ExpansionProfile (but generally, inactive codes would be expected to be included).
+         */
+        @Child(name = "inactive", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Whether inactive codes are in the value set", formalDefinition="Whether inactive codes - codes that are not approved for current use - are in the value set. If inactive = true, inactive codes are to be included in the expansion, if inactive = false, the inactive codes will not be included in the expansion. If absent, the behavior is determined by the implementation, or by the applicable ExpansionProfile (but generally, inactive codes would be expected to be included)." )
+        protected BooleanType inactive;
 
         /**
          * Include one or more codes from a code system or other value set(s).
          */
-        @Child(name = "include", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "include", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Include one or more codes from a code system or other value set(s)", formalDefinition="Include one or more codes from a code system or other value set(s)." )
         protected List<ConceptSetComponent> include;
 
         /**
          * Exclude one or more codes from the value set based on code system filters and/or other value sets.
          */
-        @Child(name = "exclude", type = {ConceptSetComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "exclude", type = {ConceptSetComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Explicitly exclude codes from a code system or other value sets", formalDefinition="Exclude one or more codes from the value set based on code system filters and/or other value sets." )
         protected List<ConceptSetComponent> exclude;
 
-        private static final long serialVersionUID = -337636966L;
+        private static final long serialVersionUID = -765941757L;
 
     /**
      * Constructor
@@ -253,7 +292,7 @@ public class ValueSet extends MetadataResource {
       }
 
         /**
-         * @return {@link #lockedDate} (If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.). This is the underlying object with id, value and extensions. The accessor "getLockedDate" gives direct access to the value
+         * @return {@link #lockedDate} (If a locked date is defined, then the Content Logical Definition must be evaluated using the current version as of the locked date for referenced code system(s) and value set instances where ValueSet.compose.include.version is not defined.). This is the underlying object with id, value and extensions. The accessor "getLockedDate" gives direct access to the value
          */
         public DateType getLockedDateElement() { 
           if (this.lockedDate == null)
@@ -273,7 +312,7 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @param value {@link #lockedDate} (If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.). This is the underlying object with id, value and extensions. The accessor "getLockedDate" gives direct access to the value
+         * @param value {@link #lockedDate} (If a locked date is defined, then the Content Logical Definition must be evaluated using the current version as of the locked date for referenced code system(s) and value set instances where ValueSet.compose.include.version is not defined.). This is the underlying object with id, value and extensions. The accessor "getLockedDate" gives direct access to the value
          */
         public ValueSetComposeComponent setLockedDateElement(DateType value) { 
           this.lockedDate = value;
@@ -281,14 +320,14 @@ public class ValueSet extends MetadataResource {
         }
 
         /**
-         * @return If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.
+         * @return If a locked date is defined, then the Content Logical Definition must be evaluated using the current version as of the locked date for referenced code system(s) and value set instances where ValueSet.compose.include.version is not defined.
          */
         public Date getLockedDate() { 
           return this.lockedDate == null ? null : this.lockedDate.getValue();
         }
 
         /**
-         * @param value If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.
+         * @param value If a locked date is defined, then the Content Logical Definition must be evaluated using the current version as of the locked date for referenced code system(s) and value set instances where ValueSet.compose.include.version is not defined.
          */
         public ValueSetComposeComponent setLockedDate(Date value) { 
           if (value == null)
@@ -298,6 +337,51 @@ public class ValueSet extends MetadataResource {
               this.lockedDate = new DateType();
             this.lockedDate.setValue(value);
           }
+          return this;
+        }
+
+        /**
+         * @return {@link #inactive} (Whether inactive codes - codes that are not approved for current use - are in the value set. If inactive = true, inactive codes are to be included in the expansion, if inactive = false, the inactive codes will not be included in the expansion. If absent, the behavior is determined by the implementation, or by the applicable ExpansionProfile (but generally, inactive codes would be expected to be included).). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         */
+        public BooleanType getInactiveElement() { 
+          if (this.inactive == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ValueSetComposeComponent.inactive");
+            else if (Configuration.doAutoCreate())
+              this.inactive = new BooleanType(); // bb
+          return this.inactive;
+        }
+
+        public boolean hasInactiveElement() { 
+          return this.inactive != null && !this.inactive.isEmpty();
+        }
+
+        public boolean hasInactive() { 
+          return this.inactive != null && !this.inactive.isEmpty();
+        }
+
+        /**
+         * @param value {@link #inactive} (Whether inactive codes - codes that are not approved for current use - are in the value set. If inactive = true, inactive codes are to be included in the expansion, if inactive = false, the inactive codes will not be included in the expansion. If absent, the behavior is determined by the implementation, or by the applicable ExpansionProfile (but generally, inactive codes would be expected to be included).). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         */
+        public ValueSetComposeComponent setInactiveElement(BooleanType value) { 
+          this.inactive = value;
+          return this;
+        }
+
+        /**
+         * @return Whether inactive codes - codes that are not approved for current use - are in the value set. If inactive = true, inactive codes are to be included in the expansion, if inactive = false, the inactive codes will not be included in the expansion. If absent, the behavior is determined by the implementation, or by the applicable ExpansionProfile (but generally, inactive codes would be expected to be included).
+         */
+        public boolean getInactive() { 
+          return this.inactive == null || this.inactive.isEmpty() ? false : this.inactive.getValue();
+        }
+
+        /**
+         * @param value Whether inactive codes - codes that are not approved for current use - are in the value set. If inactive = true, inactive codes are to be included in the expansion, if inactive = false, the inactive codes will not be included in the expansion. If absent, the behavior is determined by the implementation, or by the applicable ExpansionProfile (but generally, inactive codes would be expected to be included).
+         */
+        public ValueSetComposeComponent setInactive(boolean value) { 
+            if (this.inactive == null)
+              this.inactive = new BooleanType();
+            this.inactive.setValue(value);
           return this;
         }
 
@@ -409,7 +493,8 @@ public class ValueSet extends MetadataResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("lockedDate", "date", "If a locked date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value set instances as of the locked date.", 0, java.lang.Integer.MAX_VALUE, lockedDate));
+          childrenList.add(new Property("lockedDate", "date", "If a locked date is defined, then the Content Logical Definition must be evaluated using the current version as of the locked date for referenced code system(s) and value set instances where ValueSet.compose.include.version is not defined.", 0, java.lang.Integer.MAX_VALUE, lockedDate));
+          childrenList.add(new Property("inactive", "boolean", "Whether inactive codes - codes that are not approved for current use - are in the value set. If inactive = true, inactive codes are to be included in the expansion, if inactive = false, the inactive codes will not be included in the expansion. If absent, the behavior is determined by the implementation, or by the applicable ExpansionProfile (but generally, inactive codes would be expected to be included).", 0, java.lang.Integer.MAX_VALUE, inactive));
           childrenList.add(new Property("include", "", "Include one or more codes from a code system or other value set(s).", 0, java.lang.Integer.MAX_VALUE, include));
           childrenList.add(new Property("exclude", "@ValueSet.compose.include", "Exclude one or more codes from the value set based on code system filters and/or other value sets.", 0, java.lang.Integer.MAX_VALUE, exclude));
         }
@@ -418,6 +503,7 @@ public class ValueSet extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 1391591896: /*lockedDate*/ return this.lockedDate == null ? new Base[0] : new Base[] {this.lockedDate}; // DateType
+        case 24665195: /*inactive*/ return this.inactive == null ? new Base[0] : new Base[] {this.inactive}; // BooleanType
         case 1942574248: /*include*/ return this.include == null ? new Base[0] : this.include.toArray(new Base[this.include.size()]); // ConceptSetComponent
         case -1321148966: /*exclude*/ return this.exclude == null ? new Base[0] : this.exclude.toArray(new Base[this.exclude.size()]); // ConceptSetComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -430,6 +516,9 @@ public class ValueSet extends MetadataResource {
         switch (hash) {
         case 1391591896: // lockedDate
           this.lockedDate = castToDate(value); // DateType
+          break;
+        case 24665195: // inactive
+          this.inactive = castToBoolean(value); // BooleanType
           break;
         case 1942574248: // include
           this.getInclude().add((ConceptSetComponent) value); // ConceptSetComponent
@@ -446,6 +535,8 @@ public class ValueSet extends MetadataResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("lockedDate"))
           this.lockedDate = castToDate(value); // DateType
+        else if (name.equals("inactive"))
+          this.inactive = castToBoolean(value); // BooleanType
         else if (name.equals("include"))
           this.getInclude().add((ConceptSetComponent) value);
         else if (name.equals("exclude"))
@@ -458,6 +549,7 @@ public class ValueSet extends MetadataResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 1391591896: throw new FHIRException("Cannot make property lockedDate as it is not a complex type"); // DateType
+        case 24665195: throw new FHIRException("Cannot make property inactive as it is not a complex type"); // BooleanType
         case 1942574248:  return addInclude(); // ConceptSetComponent
         case -1321148966:  return addExclude(); // ConceptSetComponent
         default: return super.makeProperty(hash, name);
@@ -469,6 +561,9 @@ public class ValueSet extends MetadataResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("lockedDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.lockedDate");
+        }
+        else if (name.equals("inactive")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.inactive");
         }
         else if (name.equals("include")) {
           return addInclude();
@@ -484,6 +579,7 @@ public class ValueSet extends MetadataResource {
         ValueSetComposeComponent dst = new ValueSetComposeComponent();
         copyValues(dst);
         dst.lockedDate = lockedDate == null ? null : lockedDate.copy();
+        dst.inactive = inactive == null ? null : inactive.copy();
         if (include != null) {
           dst.include = new ArrayList<ConceptSetComponent>();
           for (ConceptSetComponent i : include)
@@ -504,8 +600,8 @@ public class ValueSet extends MetadataResource {
         if (!(other instanceof ValueSetComposeComponent))
           return false;
         ValueSetComposeComponent o = (ValueSetComposeComponent) other;
-        return compareDeep(lockedDate, o.lockedDate, true) && compareDeep(include, o.include, true) && compareDeep(exclude, o.exclude, true)
-          ;
+        return compareDeep(lockedDate, o.lockedDate, true) && compareDeep(inactive, o.inactive, true) && compareDeep(include, o.include, true)
+           && compareDeep(exclude, o.exclude, true);
       }
 
       @Override
@@ -515,12 +611,12 @@ public class ValueSet extends MetadataResource {
         if (!(other instanceof ValueSetComposeComponent))
           return false;
         ValueSetComposeComponent o = (ValueSetComposeComponent) other;
-        return compareValues(lockedDate, o.lockedDate, true);
+        return compareValues(lockedDate, o.lockedDate, true) && compareValues(inactive, o.inactive, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(lockedDate, include, exclude
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(lockedDate, inactive, include
+          , exclude);
       }
 
   public String fhirType() {
@@ -1586,8 +1682,8 @@ public class ValueSet extends MetadataResource {
         /**
          * The kind of operation to perform as a part of the filter criteria.
          */
-        @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="= | is-a | is-not-a | regex | in | not-in | generalizes", formalDefinition="The kind of operation to perform as a part of the filter criteria." )
+        @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=false)
+        @Description(shortDefinition="= | is-a | descendent-of | is-not-a | regex | in | not-in | generalizes | exists", formalDefinition="The kind of operation to perform as a part of the filter criteria." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/filter-operator")
         protected Enumeration<FilterOperator> op;
 
@@ -2690,41 +2786,48 @@ public class ValueSet extends MetadataResource {
         protected BooleanType abstract_;
 
         /**
+         * If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.
+         */
+        @Child(name = "inactive", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="If concept is inactive in the code system", formalDefinition="If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data." )
+        protected BooleanType inactive;
+
+        /**
          * The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence.
          */
-        @Child(name = "version", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "version", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Version in which this code/display is defined", formalDefinition="The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence." )
         protected StringType version;
 
         /**
          * The code for this item in the expansion hierarchy. If this code is missing the entry in the hierarchy is a place holder (abstract) and does not represent a valid code in the value set.
          */
-        @Child(name = "code", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "code", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code - if blank, this is not a selectable code", formalDefinition="The code for this item in the expansion hierarchy. If this code is missing the entry in the hierarchy is a place holder (abstract) and does not represent a valid code in the value set." )
         protected CodeType code;
 
         /**
          * The recommended display for this item in the expansion.
          */
-        @Child(name = "display", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "display", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="User display for the concept", formalDefinition="The recommended display for this item in the expansion." )
         protected StringType display;
 
         /**
          * Additional representations for this item - other languages, aliases, specialized purposes, used for particular purposes, etc. These are relevant when the conditions of the expansion do not fix to a single correct representation.
          */
-        @Child(name = "designation", type = {ConceptReferenceDesignationComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "designation", type = {ConceptReferenceDesignationComponent.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Additional representations for this item", formalDefinition="Additional representations for this item - other languages, aliases, specialized purposes, used for particular purposes, etc. These are relevant when the conditions of the expansion do not fix to a single correct representation." )
         protected List<ConceptReferenceDesignationComponent> designation;
 
         /**
          * Other codes and entries contained under this entry in the hierarchy.
          */
-        @Child(name = "contains", type = {ValueSetExpansionContainsComponent.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "contains", type = {ValueSetExpansionContainsComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Codes contained under this entry", formalDefinition="Other codes and entries contained under this entry in the hierarchy." )
         protected List<ValueSetExpansionContainsComponent> contains;
 
-        private static final long serialVersionUID = -1566559207L;
+        private static final long serialVersionUID = 719458860L;
 
     /**
      * Constructor
@@ -2824,6 +2927,51 @@ public class ValueSet extends MetadataResource {
             if (this.abstract_ == null)
               this.abstract_ = new BooleanType();
             this.abstract_.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         */
+        public BooleanType getInactiveElement() { 
+          if (this.inactive == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ValueSetExpansionContainsComponent.inactive");
+            else if (Configuration.doAutoCreate())
+              this.inactive = new BooleanType(); // bb
+          return this.inactive;
+        }
+
+        public boolean hasInactiveElement() { 
+          return this.inactive != null && !this.inactive.isEmpty();
+        }
+
+        public boolean hasInactive() { 
+          return this.inactive != null && !this.inactive.isEmpty();
+        }
+
+        /**
+         * @param value {@link #inactive} (If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.). This is the underlying object with id, value and extensions. The accessor "getInactive" gives direct access to the value
+         */
+        public ValueSetExpansionContainsComponent setInactiveElement(BooleanType value) { 
+          this.inactive = value;
+          return this;
+        }
+
+        /**
+         * @return If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.
+         */
+        public boolean getInactive() { 
+          return this.inactive == null || this.inactive.isEmpty() ? false : this.inactive.getValue();
+        }
+
+        /**
+         * @param value If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.
+         */
+        public ValueSetExpansionContainsComponent setInactive(boolean value) { 
+            if (this.inactive == null)
+              this.inactive = new BooleanType();
+            this.inactive.setValue(value);
           return this;
         }
 
@@ -3084,6 +3232,7 @@ public class ValueSet extends MetadataResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("system", "uri", "An absolute URI which is the code system in which the code for this item in the expansion is defined.", 0, java.lang.Integer.MAX_VALUE, system));
           childrenList.add(new Property("abstract", "boolean", "If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value.", 0, java.lang.Integer.MAX_VALUE, abstract_));
+          childrenList.add(new Property("inactive", "boolean", "If the concept is inactive in the code system that defines it. Inactive codes are those that are no longer to be used, but are maintained by the code system for understnading legacy data.", 0, java.lang.Integer.MAX_VALUE, inactive));
           childrenList.add(new Property("version", "string", "The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence.", 0, java.lang.Integer.MAX_VALUE, version));
           childrenList.add(new Property("code", "code", "The code for this item in the expansion hierarchy. If this code is missing the entry in the hierarchy is a place holder (abstract) and does not represent a valid code in the value set.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("display", "string", "The recommended display for this item in the expansion.", 0, java.lang.Integer.MAX_VALUE, display));
@@ -3096,6 +3245,7 @@ public class ValueSet extends MetadataResource {
         switch (hash) {
         case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // UriType
         case 1732898850: /*abstract*/ return this.abstract_ == null ? new Base[0] : new Base[] {this.abstract_}; // BooleanType
+        case 24665195: /*inactive*/ return this.inactive == null ? new Base[0] : new Base[] {this.inactive}; // BooleanType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
         case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
@@ -3114,6 +3264,9 @@ public class ValueSet extends MetadataResource {
           break;
         case 1732898850: // abstract
           this.abstract_ = castToBoolean(value); // BooleanType
+          break;
+        case 24665195: // inactive
+          this.inactive = castToBoolean(value); // BooleanType
           break;
         case 351608024: // version
           this.version = castToString(value); // StringType
@@ -3141,6 +3294,8 @@ public class ValueSet extends MetadataResource {
           this.system = castToUri(value); // UriType
         else if (name.equals("abstract"))
           this.abstract_ = castToBoolean(value); // BooleanType
+        else if (name.equals("inactive"))
+          this.inactive = castToBoolean(value); // BooleanType
         else if (name.equals("version"))
           this.version = castToString(value); // StringType
         else if (name.equals("code"))
@@ -3160,6 +3315,7 @@ public class ValueSet extends MetadataResource {
         switch (hash) {
         case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
         case 1732898850: throw new FHIRException("Cannot make property abstract as it is not a complex type"); // BooleanType
+        case 24665195: throw new FHIRException("Cannot make property inactive as it is not a complex type"); // BooleanType
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
         case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
@@ -3177,6 +3333,9 @@ public class ValueSet extends MetadataResource {
         }
         else if (name.equals("abstract")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.abstract");
+        }
+        else if (name.equals("inactive")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ValueSet.inactive");
         }
         else if (name.equals("version")) {
           throw new FHIRException("Cannot call addChild on a primitive type ValueSet.version");
@@ -3202,6 +3361,7 @@ public class ValueSet extends MetadataResource {
         copyValues(dst);
         dst.system = system == null ? null : system.copy();
         dst.abstract_ = abstract_ == null ? null : abstract_.copy();
+        dst.inactive = inactive == null ? null : inactive.copy();
         dst.version = version == null ? null : version.copy();
         dst.code = code == null ? null : code.copy();
         dst.display = display == null ? null : display.copy();
@@ -3225,9 +3385,9 @@ public class ValueSet extends MetadataResource {
         if (!(other instanceof ValueSetExpansionContainsComponent))
           return false;
         ValueSetExpansionContainsComponent o = (ValueSetExpansionContainsComponent) other;
-        return compareDeep(system, o.system, true) && compareDeep(abstract_, o.abstract_, true) && compareDeep(version, o.version, true)
-           && compareDeep(code, o.code, true) && compareDeep(display, o.display, true) && compareDeep(designation, o.designation, true)
-           && compareDeep(contains, o.contains, true);
+        return compareDeep(system, o.system, true) && compareDeep(abstract_, o.abstract_, true) && compareDeep(inactive, o.inactive, true)
+           && compareDeep(version, o.version, true) && compareDeep(code, o.code, true) && compareDeep(display, o.display, true)
+           && compareDeep(designation, o.designation, true) && compareDeep(contains, o.contains, true);
       }
 
       @Override
@@ -3237,13 +3397,14 @@ public class ValueSet extends MetadataResource {
         if (!(other instanceof ValueSetExpansionContainsComponent))
           return false;
         ValueSetExpansionContainsComponent o = (ValueSetExpansionContainsComponent) other;
-        return compareValues(system, o.system, true) && compareValues(abstract_, o.abstract_, true) && compareValues(version, o.version, true)
-           && compareValues(code, o.code, true) && compareValues(display, o.display, true);
+        return compareValues(system, o.system, true) && compareValues(abstract_, o.abstract_, true) && compareValues(inactive, o.inactive, true)
+           && compareValues(version, o.version, true) && compareValues(code, o.code, true) && compareValues(display, o.display, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, abstract_, version
-          , code, display, designation, contains);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(system, abstract_, inactive
+          , version, code, display, designation, contains);
       }
 
   public String fhirType() {

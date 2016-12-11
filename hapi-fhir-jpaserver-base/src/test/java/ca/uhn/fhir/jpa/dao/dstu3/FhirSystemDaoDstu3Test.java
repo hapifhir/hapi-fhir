@@ -168,7 +168,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@Test
 	public void testReindexing() {
 		Patient p = new Patient();
-		p.addName().addFamily("family");
+		p.addName().setFamily("family");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		ValueSet vs = new ValueSet();
@@ -250,7 +250,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 			
 			patient.getMeta().addTag(null, "Dog", "Puppies");
 			patient.getMeta().getSecurity().add(new Coding().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1"));
@@ -261,7 +261,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 			
 			patient.getMeta().addTag("http://foo", "Cat", "Kittens");
 			patient.getMeta().getSecurity().add(new Coding().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
@@ -320,7 +320,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		request.setType(BundleType.BATCH);
 
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
 		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/THIS_ID_DOESNT_EXIST");
@@ -525,7 +525,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
@@ -571,7 +571,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle request = new Bundle();
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
@@ -595,7 +595,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
@@ -636,7 +636,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
@@ -775,7 +775,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.getManagingOrganization().setReference("Organization/9999999999999999");
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
@@ -794,7 +794,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.getManagingOrganization().setReference("Organization/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
@@ -1070,7 +1070,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 
 		Bundle request = new Bundle();
@@ -1295,7 +1295,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		
 		Patient pat = new Patient();
 		pat.addIdentifier().setValue(methodName);
-		pat.addName().addFamily(methodName + pass);
+		pat.addName().setFamily(methodName + pass);
 		req.addEntry().setResource(pat).setFullUrl(patientPlaceholderId.getValue()).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		
 		req.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Patient?identifier=" + methodName);
@@ -1326,7 +1326,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		
 		Bundle respGetBundle = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, respGetBundle.getEntry().size());
-		assertEquals("testTransactionOrdering" + pass, ((Patient)respGetBundle.getEntry().get(0).getResource()).getName().get(0).getFamily().get(0).getValue());
+		assertEquals("testTransactionOrdering" + pass, ((Patient)respGetBundle.getEntry().get(0).getResource()).getName().get(0).getFamily());
 		assertThat(respGetBundle.getLink("self").getUrl(), endsWith("/Patient?identifier=testTransactionOrdering"));
 	}
 
@@ -1342,7 +1342,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Family Name");
+		p.addName().setFamily("Family Name");
 		p.setId("Patient/" + methodName);
 		IIdType idv2 = myPatientDao.update(p, mySrd).getId();
 		ourLog.info("Updated patient, got id: {}", idv2);
@@ -1412,7 +1412,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Family Name");
+		p.addName().setFamily("Family Name");
 		p.setId("Patient/" + methodName);
 		IIdType idv2 = myPatientDao.update(p, mySrd).getId();
 		ourLog.info("Updated patient, got id: {}", idv2);
@@ -1457,7 +1457,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Family Name");
+		p.addName().setFamily("Family Name");
 		p.setId("Patient/" + methodName);
 		IIdType idv2 = myPatientDao.update(p, mySrd).getId();
 		ourLog.info("Updated patient, got id: {}", idv2);
@@ -1520,7 +1520,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
@@ -1566,7 +1566,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
@@ -1589,12 +1589,12 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		IIdType id = myPatientDao.create(p, mySrd).getId();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
@@ -1634,7 +1634,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/" + id.getIdPart());
 
@@ -1778,14 +1778,14 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@Test
 	public void testTransactionWithNullReference() {
 		Patient p = new Patient();
-		p.addName().addFamily("family");
+		p.addName().setFamily("family");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		
 		Bundle inputBundle = new Bundle();
 
 		//@formatter:off
 		Patient app0 = new Patient();
-		app0.addName().addFamily("NEW PATIENT");
+		app0.addName().setFamily("NEW PATIENT");
 		String placeholderId0 = IdDt.newRandomUuid().getValue();
 		inputBundle
 			.addEntry()

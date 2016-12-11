@@ -449,17 +449,18 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 				CapabilityStatementRestResourceSearchParamComponent param = resource.addSearchParam();
 				param.setName(nextParamUnchainedName);
-				if (StringUtils.isNotBlank(chain)) {
-					param.addChain(chain);
-				}
-
-				if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
-						if (nextWhitelist.startsWith(".")) {
-							param.addChain(nextWhitelist.substring(1));
-						}
-					}
-				}
+				
+//				if (StringUtils.isNotBlank(chain)) {
+//					param.addChain(chain);
+//				}
+//
+//				if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+//					for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
+//						if (nextWhitelist.startsWith(".")) {
+//							param.addChain(nextWhitelist.substring(1));
+//						}
+//					}
+//				}
 
 				param.setDocumentation(nextParamDescription);
 				if (nextParameter.getParamType() != null) {
@@ -474,9 +475,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 						} catch (FHIRException e) {
 							code = null;
 						}
-						if (code != null) {
-							param.addTarget(targetDef.getName());
-						}
+//						if (code != null) {
+//							param.addTarget(targetDef.getName());
+//						}
 					}
 				}
 			}

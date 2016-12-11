@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,18 +39,18 @@ public class ContractSubtypeEnumFactory implements EnumFactory<ContractSubtype> 
   public ContractSubtype fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("disclosure-CA".equals(codeString))
+    if ("disclosure-ca".equals(codeString))
       return ContractSubtype.DISCLOSURECA;
-    if ("disclosure-US".equals(codeString))
+    if ("disclosure-us".equals(codeString))
       return ContractSubtype.DISCLOSUREUS;
     throw new IllegalArgumentException("Unknown ContractSubtype code '"+codeString+"'");
   }
 
   public String toCode(ContractSubtype code) {
     if (code == ContractSubtype.DISCLOSURECA)
-      return "disclosure-CA";
+      return "disclosure-ca";
     if (code == ContractSubtype.DISCLOSUREUS)
-      return "disclosure-US";
+      return "disclosure-us";
     return "?";
   }
 

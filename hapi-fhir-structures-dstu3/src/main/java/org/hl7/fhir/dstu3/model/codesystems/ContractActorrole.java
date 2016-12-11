@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractActorrole {
 
         /**
-         * null
+         * Someone who provides health care related services to people or animals including both clinical and support services.
          */
         PRACTITIONER, 
         /**
-         * null
+         * A receiver, human or animal, of health care related goods and services.
          */
         PATIENT, 
         /**
@@ -69,8 +69,8 @@ public enum ContractActorrole {
         }
         public String getDefinition() {
           switch (this) {
-            case PRACTITIONER: return "";
-            case PATIENT: return "";
+            case PRACTITIONER: return "Someone who provides health care related services to people or animals including both clinical and support services.";
+            case PATIENT: return "A receiver, human or animal, of health care related goods and services.";
             default: return "?";
           }
         }

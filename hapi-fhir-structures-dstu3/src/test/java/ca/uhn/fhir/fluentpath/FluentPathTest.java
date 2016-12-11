@@ -18,23 +18,23 @@ public class FluentPathTest {
 	@Test
 	public void testEvaluateNormal() {
 		Patient p = new Patient();
-		p.addName().addFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
-		p.addName().addFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
+		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
+		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
 		IFluentPath fp = ourCtx.newFluentPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.name", HumanName.class);
 		assertEquals(2, names.size());
-		assertEquals("N1F1", names.get(0).getFamilyAsSingleString());
+		assertEquals("N1F1", names.get(0).getFamily());
 		assertEquals("N1G1 N1G2", names.get(0).getGivenAsSingleString());
-		assertEquals("N2F1", names.get(1).getFamilyAsSingleString());
+		assertEquals("N2F1", names.get(1).getFamily());
 		assertEquals("N2G1 N2G2", names.get(1).getGivenAsSingleString());
 	}
 	
 	@Test
 	public void testEvaluateUnknownPath() {
 		Patient p = new Patient();
-		p.addName().addFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
-		p.addName().addFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
+		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
+		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
 		IFluentPath fp = ourCtx.newFluentPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.nameFOO", HumanName.class);
@@ -44,8 +44,8 @@ public class FluentPathTest {
 	@Test
 	public void testEvaluateInvalidPath() {
 		Patient p = new Patient();
-		p.addName().addFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
-		p.addName().addFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
+		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
+		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
 		IFluentPath fp = ourCtx.newFluentPath();
 		try {
@@ -58,8 +58,8 @@ public class FluentPathTest {
 	@Test
 	public void testEvaluateWrongType() {
 		Patient p = new Patient();
-		p.addName().addFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
-		p.addName().addFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
+		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
+		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
 		
 		IFluentPath fp = ourCtx.newFluentPath();
 		try {

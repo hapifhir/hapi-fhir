@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -51,6 +51,8 @@ public class EventStatusEnumFactory implements EnumFactory<EventStatus> {
       return EventStatus.COMPLETED;
     if ("entered-in-error".equals(codeString))
       return EventStatus.ENTEREDINERROR;
+    if ("unknown".equals(codeString))
+      return EventStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown EventStatus code '"+codeString+"'");
   }
 
@@ -67,6 +69,8 @@ public class EventStatusEnumFactory implements EnumFactory<EventStatus> {
       return "completed";
     if (code == EventStatus.ENTEREDINERROR)
       return "entered-in-error";
+    if (code == EventStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

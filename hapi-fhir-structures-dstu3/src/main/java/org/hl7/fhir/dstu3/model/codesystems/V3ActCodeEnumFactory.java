@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -421,8 +421,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.NELG;
     if ("_ActCoverageLimitCode".equals(codeString))
       return V3ActCode._ACTCOVERAGELIMITCODE;
-    if ("_ActCoverageAgeLimitCode".equals(codeString))
-      return V3ActCode._ACTCOVERAGEAGELIMITCODE;
+    if ("_ActCoverageQuantityLimitCode".equals(codeString))
+      return V3ActCode._ACTCOVERAGEQUANTITYLIMITCODE;
     if ("COVPRD".equals(codeString))
       return V3ActCode.COVPRD;
     if ("LFEMX".equals(codeString))
@@ -1249,10 +1249,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.HIV;
     if ("PSY".equals(codeString))
       return V3ActCode.PSY;
-    if ("SOC".equals(codeString))
-      return V3ActCode.SOC;
     if ("SCA".equals(codeString))
       return V3ActCode.SCA;
+    if ("SOC".equals(codeString))
+      return V3ActCode.SOC;
     if ("SDV".equals(codeString))
       return V3ActCode.SDV;
     if ("SEX".equals(codeString))
@@ -1715,6 +1715,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode._OBSERVATIONQUALITYMEASUREATTRIBUTE;
     if ("AGGREGATE".equals(codeString))
       return V3ActCode.AGGREGATE;
+    if ("CMPMSRMTH".equals(codeString))
+      return V3ActCode.CMPMSRMTH;
+    if ("CMPMSRSCRWGHT".equals(codeString))
+      return V3ActCode.CMPMSRSCRWGHT;
     if ("COPY".equals(codeString))
       return V3ActCode.COPY;
     if ("CRS".equals(codeString))
@@ -2609,8 +2613,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "NELG";
     if (code == V3ActCode._ACTCOVERAGELIMITCODE)
       return "_ActCoverageLimitCode";
-    if (code == V3ActCode._ACTCOVERAGEAGELIMITCODE)
-      return "_ActCoverageAgeLimitCode";
+    if (code == V3ActCode._ACTCOVERAGEQUANTITYLIMITCODE)
+      return "_ActCoverageQuantityLimitCode";
     if (code == V3ActCode.COVPRD)
       return "COVPRD";
     if (code == V3ActCode.LFEMX)
@@ -3437,10 +3441,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "HIV";
     if (code == V3ActCode.PSY)
       return "PSY";
-    if (code == V3ActCode.SOC)
-      return "SOC";
     if (code == V3ActCode.SCA)
       return "SCA";
+    if (code == V3ActCode.SOC)
+      return "SOC";
     if (code == V3ActCode.SDV)
       return "SDV";
     if (code == V3ActCode.SEX)
@@ -3903,6 +3907,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "_ObservationQualityMeasureAttribute";
     if (code == V3ActCode.AGGREGATE)
       return "AGGREGATE";
+    if (code == V3ActCode.CMPMSRMTH)
+      return "CMPMSRMTH";
+    if (code == V3ActCode.CMPMSRSCRWGHT)
+      return "CMPMSRSCRWGHT";
     if (code == V3ActCode.COPY)
       return "COPY";
     if (code == V3ActCode.CRS)

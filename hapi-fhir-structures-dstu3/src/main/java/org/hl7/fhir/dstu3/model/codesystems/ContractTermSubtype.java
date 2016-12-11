@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractTermSubtype {
 
         /**
-         * null
+         * Oral Health: examinations, diagnositics, cleaning and basic restorative services.
          */
         ORALHEALTHBASIC, 
         /**
-         * null
+         * Oral Health: major treatment and restorative services.
          */
         ORALHEALTHMAJOR, 
         /**
-         * null
+         * Oral Health: orthodontic services, eg. braces.
          */
         ORALHEALTHORTHODONTIC, 
         /**
@@ -55,19 +55,19 @@ public enum ContractTermSubtype {
         public static ContractTermSubtype fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("OralHealth-Basic".equals(codeString))
+        if ("oralhealth-basic".equals(codeString))
           return ORALHEALTHBASIC;
-        if ("OralHealth-Major".equals(codeString))
+        if ("oralhealth-major".equals(codeString))
           return ORALHEALTHMAJOR;
-        if ("OralHealth-Orthodontic".equals(codeString))
+        if ("oralhealth-orthodontic".equals(codeString))
           return ORALHEALTHORTHODONTIC;
         throw new FHIRException("Unknown ContractTermSubtype code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case ORALHEALTHBASIC: return "OralHealth-Basic";
-            case ORALHEALTHMAJOR: return "OralHealth-Major";
-            case ORALHEALTHORTHODONTIC: return "OralHealth-Orthodontic";
+            case ORALHEALTHBASIC: return "oralhealth-basic";
+            case ORALHEALTHMAJOR: return "oralhealth-major";
+            case ORALHEALTHORTHODONTIC: return "oralhealth-orthodontic";
             default: return "?";
           }
         }
@@ -76,9 +76,9 @@ public enum ContractTermSubtype {
         }
         public String getDefinition() {
           switch (this) {
-            case ORALHEALTHBASIC: return "";
-            case ORALHEALTHMAJOR: return "";
-            case ORALHEALTHORTHODONTIC: return "";
+            case ORALHEALTHBASIC: return "Oral Health: examinations, diagnositics, cleaning and basic restorative services.";
+            case ORALHEALTHMAJOR: return "Oral Health: major treatment and restorative services.";
+            case ORALHEALTHORTHODONTIC: return "Oral Health: orthodontic services, eg. braces.";
             default: return "?";
           }
         }

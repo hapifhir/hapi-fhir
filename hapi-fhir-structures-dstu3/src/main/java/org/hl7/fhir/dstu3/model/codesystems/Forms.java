@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum Forms {
 
         /**
-         * null
+         * Example: The #1 form to be used when printing this information.
          */
         _1, 
         /**
-         * null
+         * Example: The #2 form to be used when printing this information.
          */
         _2, 
         /**
@@ -69,15 +69,15 @@ public enum Forms {
         }
         public String getDefinition() {
           switch (this) {
-            case _1: return "";
-            case _2: return "";
+            case _1: return "Example: The #1 form to be used when printing this information.";
+            case _2: return "Example: The #2 form to be used when printing this information.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case _1: return "1";
-            case _2: return "2";
+            case _1: return "Form #1";
+            case _2: return "Form #1";
             default: return "?";
           }
     }

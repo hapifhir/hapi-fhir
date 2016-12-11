@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConditionClinical {
 
         /**
-         * The subject is currently experiencing the symptoms of the condition.
+         * The subject is currently experiencing the symptoms of the condition or there is evidence of the condition.
          */
         ACTIVE, 
         /**
-         * The subject is re-experiencing the symptoms of the condition after a period of remission or presumed resolution.
+         * The subject is having a relapse or re-experiencing the condition after a period of remission or presumed resolution.
          */
-        RELAPSE, 
+        RECURRENCE, 
+        /**
+         * The subject is no longer experiencing the symptoms of the condition or there is no longer evidence of the condition.
+         */
+        INACTIVE, 
         /**
          * The subject is no longer experiencing the symptoms of the condition, but there is a risk of the symptoms returning.
          */
         REMISSION, 
         /**
-         * The subject is no longer experiencing the symptoms of the condition and there is no perceived risk of the symptoms returning.
+         * The subject is no longer experiencing the symptoms of the condition and there is a negligible perceived risk of the symptoms returning.
          */
         RESOLVED, 
         /**
@@ -61,8 +65,10 @@ public enum ConditionClinical {
                 return null;
         if ("active".equals(codeString))
           return ACTIVE;
-        if ("relapse".equals(codeString))
-          return RELAPSE;
+        if ("recurrence".equals(codeString))
+          return RECURRENCE;
+        if ("inactive".equals(codeString))
+          return INACTIVE;
         if ("remission".equals(codeString))
           return REMISSION;
         if ("resolved".equals(codeString))
@@ -72,7 +78,8 @@ public enum ConditionClinical {
         public String toCode() {
           switch (this) {
             case ACTIVE: return "active";
-            case RELAPSE: return "relapse";
+            case RECURRENCE: return "recurrence";
+            case INACTIVE: return "inactive";
             case REMISSION: return "remission";
             case RESOLVED: return "resolved";
             default: return "?";
@@ -83,17 +90,19 @@ public enum ConditionClinical {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The subject is currently experiencing the symptoms of the condition.";
-            case RELAPSE: return "The subject is re-experiencing the symptoms of the condition after a period of remission or presumed resolution.";
+            case ACTIVE: return "The subject is currently experiencing the symptoms of the condition or there is evidence of the condition.";
+            case RECURRENCE: return "The subject is having a relapse or re-experiencing the condition after a period of remission or presumed resolution.";
+            case INACTIVE: return "The subject is no longer experiencing the symptoms of the condition or there is no longer evidence of the condition.";
             case REMISSION: return "The subject is no longer experiencing the symptoms of the condition, but there is a risk of the symptoms returning.";
-            case RESOLVED: return "The subject is no longer experiencing the symptoms of the condition and there is no perceived risk of the symptoms returning.";
+            case RESOLVED: return "The subject is no longer experiencing the symptoms of the condition and there is a negligible perceived risk of the symptoms returning.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case ACTIVE: return "Active";
-            case RELAPSE: return "Relapse";
+            case RECURRENCE: return "Recurrence";
+            case INACTIVE: return "Inactive";
             case REMISSION: return "Remission";
             case RESOLVED: return "Resolved";
             default: return "?";

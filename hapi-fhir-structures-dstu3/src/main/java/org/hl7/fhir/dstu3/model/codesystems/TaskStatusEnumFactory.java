@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -51,6 +51,8 @@ public class TaskStatusEnumFactory implements EnumFactory<TaskStatus> {
       return TaskStatus.REJECTED;
     if ("ready".equals(codeString))
       return TaskStatus.READY;
+    if ("cancelled".equals(codeString))
+      return TaskStatus.CANCELLED;
     if ("in-progress".equals(codeString))
       return TaskStatus.INPROGRESS;
     if ("on-hold".equals(codeString))
@@ -59,6 +61,8 @@ public class TaskStatusEnumFactory implements EnumFactory<TaskStatus> {
       return TaskStatus.FAILED;
     if ("completed".equals(codeString))
       return TaskStatus.COMPLETED;
+    if ("entered-in-error".equals(codeString))
+      return TaskStatus.ENTEREDINERROR;
     throw new IllegalArgumentException("Unknown TaskStatus code '"+codeString+"'");
   }
 
@@ -75,6 +79,8 @@ public class TaskStatusEnumFactory implements EnumFactory<TaskStatus> {
       return "rejected";
     if (code == TaskStatus.READY)
       return "ready";
+    if (code == TaskStatus.CANCELLED)
+      return "cancelled";
     if (code == TaskStatus.INPROGRESS)
       return "in-progress";
     if (code == TaskStatus.ONHOLD)
@@ -83,6 +89,8 @@ public class TaskStatusEnumFactory implements EnumFactory<TaskStatus> {
       return "failed";
     if (code == TaskStatus.COMPLETED)
       return "completed";
+    if (code == TaskStatus.ENTEREDINERROR)
+      return "entered-in-error";
     return "?";
   }
 

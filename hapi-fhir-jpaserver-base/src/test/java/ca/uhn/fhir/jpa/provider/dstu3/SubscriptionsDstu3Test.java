@@ -168,7 +168,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String methodName = "testSubscriptionDynamic";
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		String criteria = "Observation?subject=Patient/" + pId.getIdPart();
@@ -233,7 +233,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String methodName = "testSubscriptionDynamic";
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		String criteria = "Observation?subject=Patient/" + pId.getIdPart() + "&_format=xml";
@@ -298,7 +298,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String methodName = "testSubscriptionResourcesAppear";
 		Patient p = new Patient();
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType pId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		Subscription subs = new Subscription();

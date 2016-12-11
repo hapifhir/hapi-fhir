@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,17 +37,21 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum DefinitionStatus {
 
         /**
-         * null
+         * The definition is in the design stage and is not yet considered to be "ready for use"
          */
         DRAFT, 
         /**
-         * null
+         * The definition is considered ready for use
          */
         ACTIVE, 
         /**
-         * null
+         * The definition should no longer be used
          */
         WITHDRAWN, 
+        /**
+         * The authoring system does not know which of the status values currently applies for this definition.
+         */
+        UNKNOWN, 
         /**
          * added to help the parsers
          */
@@ -61,6 +65,8 @@ public enum DefinitionStatus {
           return ACTIVE;
         if ("withdrawn".equals(codeString))
           return WITHDRAWN;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown DefinitionStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum DefinitionStatus {
             case DRAFT: return "draft";
             case ACTIVE: return "active";
             case WITHDRAWN: return "withdrawn";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -76,9 +83,10 @@ public enum DefinitionStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "";
-            case ACTIVE: return "";
-            case WITHDRAWN: return "";
+            case DRAFT: return "The definition is in the design stage and is not yet considered to be \"ready for use\"";
+            case ACTIVE: return "The definition is considered ready for use";
+            case WITHDRAWN: return "The definition should no longer be used";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this definition.";
             default: return "?";
           }
         }
@@ -86,7 +94,8 @@ public enum DefinitionStatus {
           switch (this) {
             case DRAFT: return "Draft";
             case ACTIVE: return "Active";
-            case WITHDRAWN: return "Suspended";
+            case WITHDRAWN: return "Withdrawn";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

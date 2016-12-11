@@ -168,7 +168,7 @@ public class JaxRsPatientProviderDstu3Test {
     public void testCreatePatient() {
         final Patient existing = new Patient();
         existing.setId((IdType) null);
-        existing.getName().add(new HumanName().addFamily("Created Patient 54"));
+        existing.getName().add(new HumanName().setFamily("Created Patient 54"));
         client.setEncoding(EncodingEnum.JSON);
         final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
@@ -184,7 +184,7 @@ public class JaxRsPatientProviderDstu3Test {
     public void testConditionalCreate() {
         final Patient existing = new Patient();
         existing.setId((IdType) null);
-        existing.getName().add(new HumanName().addFamily("Created Patient 54"));
+        existing.getName().add(new HumanName().setFamily("Created Patient 54"));
         client.setEncoding(EncodingEnum.XML);
         final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
@@ -218,7 +218,7 @@ public class JaxRsPatientProviderDstu3Test {
     @Test
     public void testDeletePatient() {
         final Patient existing = new Patient();
-        existing.getName().add(new HumanName().addFamily("Created Patient XYZ"));
+        existing.getName().add(new HumanName().setFamily("Created Patient XYZ"));
         final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
         final Patient patient = (Patient) results.getResource();
@@ -239,7 +239,7 @@ public class JaxRsPatientProviderDstu3Test {
         Bundle bundle = new Bundle();
         BundleEntryComponent entry = bundle.addEntry();
         final Patient existing = new Patient();
-        existing.getName().get(0).addFamily("Created with bundle");
+        existing.getName().get(0).setFamily("Created with bundle");
         entry.setResource(existing);
 
         // FIXME ?

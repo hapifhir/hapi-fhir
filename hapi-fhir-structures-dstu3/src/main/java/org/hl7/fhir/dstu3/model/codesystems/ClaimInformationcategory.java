@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,13 +53,21 @@ public enum ClaimInformationcategory {
          */
         RELATED, 
         /**
-         * Insurance policy exceptions..
+         * Insurance policy exceptions.
          */
-        EXCEPTIONS, 
+        EXCEPTION, 
         /**
          * Materials being forwarded, eg. Models, molds, images, documents.
          */
         MATERIAL, 
+        /**
+         * Materials attached such as images, documents and resources.
+         */
+        ATTACHMENT, 
+        /**
+         * Teeth which are missing for any reason, for example: prior extraction, never developed.
+         */
+        MISSINGTOOTH, 
         /**
          * Other information identified by the type.system.
          */
@@ -79,10 +87,14 @@ public enum ClaimInformationcategory {
           return ONSET;
         if ("related".equals(codeString))
           return RELATED;
-        if ("exceptions".equals(codeString))
-          return EXCEPTIONS;
+        if ("exception".equals(codeString))
+          return EXCEPTION;
         if ("material".equals(codeString))
           return MATERIAL;
+        if ("attachment".equals(codeString))
+          return ATTACHMENT;
+        if ("missingtooth".equals(codeString))
+          return MISSINGTOOTH;
         if ("other".equals(codeString))
           return OTHER;
         throw new FHIRException("Unknown ClaimInformationcategory code '"+codeString+"'");
@@ -93,8 +105,10 @@ public enum ClaimInformationcategory {
             case DISCHARGE: return "discharge";
             case ONSET: return "onset";
             case RELATED: return "related";
-            case EXCEPTIONS: return "exceptions";
+            case EXCEPTION: return "exception";
             case MATERIAL: return "material";
+            case ATTACHMENT: return "attachment";
+            case MISSINGTOOTH: return "missingtooth";
             case OTHER: return "other";
             default: return "?";
           }
@@ -108,8 +122,10 @@ public enum ClaimInformationcategory {
             case DISCHARGE: return "Discharge status and discharge to locations.";
             case ONSET: return "Period, start or end dates of aspects of the Condition.";
             case RELATED: return "Nature and date of the related event eg. Last exam, service, Xray etc.";
-            case EXCEPTIONS: return "Insurance policy exceptions..";
+            case EXCEPTION: return "Insurance policy exceptions.";
             case MATERIAL: return "Materials being forwarded, eg. Models, molds, images, documents.";
+            case ATTACHMENT: return "Materials attached such as images, documents and resources.";
+            case MISSINGTOOTH: return "Teeth which are missing for any reason, for example: prior extraction, never developed.";
             case OTHER: return "Other information identified by the type.system.";
             default: return "?";
           }
@@ -120,8 +136,10 @@ public enum ClaimInformationcategory {
             case DISCHARGE: return "Discharge";
             case ONSET: return "Onset";
             case RELATED: return "Related Services";
-            case EXCEPTIONS: return "Exceptions";
+            case EXCEPTION: return "Exception";
             case MATERIAL: return "Materials Forwarded";
+            case ATTACHMENT: return "Attachment";
+            case MISSINGTOOTH: return "Missing Tooth";
             case OTHER: return "Other";
             default: return "?";
           }

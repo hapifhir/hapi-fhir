@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -49,6 +49,112 @@ import org.hl7.fhir.exceptions.FHIRException;
 @ResourceDef(name="PlanDefinition", profile="http://hl7.org/fhir/Profile/PlanDefinition")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "type", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "actionDefinition"})
 public class PlanDefinition extends MetadataResource {
+
+    public enum PlanActionConditionKind {
+        /**
+         * The condition describes whether or not a given action is applicable
+         */
+        APPLICABILITY, 
+        /**
+         * The condition is a starting condition for the action
+         */
+        START, 
+        /**
+         * The condition is a stop, or exit condition for the action
+         */
+        STOP, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static PlanActionConditionKind fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("applicability".equals(codeString))
+          return APPLICABILITY;
+        if ("start".equals(codeString))
+          return START;
+        if ("stop".equals(codeString))
+          return STOP;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown PlanActionConditionKind code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case APPLICABILITY: return "applicability";
+            case START: return "start";
+            case STOP: return "stop";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case APPLICABILITY: return "http://hl7.org/fhir/action-condition-kind";
+            case START: return "http://hl7.org/fhir/action-condition-kind";
+            case STOP: return "http://hl7.org/fhir/action-condition-kind";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case APPLICABILITY: return "The condition describes whether or not a given action is applicable";
+            case START: return "The condition is a starting condition for the action";
+            case STOP: return "The condition is a stop, or exit condition for the action";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case APPLICABILITY: return "Applicability";
+            case START: return "Start";
+            case STOP: return "Stop";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PlanActionConditionKindEnumFactory implements EnumFactory<PlanActionConditionKind> {
+    public PlanActionConditionKind fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("applicability".equals(codeString))
+          return PlanActionConditionKind.APPLICABILITY;
+        if ("start".equals(codeString))
+          return PlanActionConditionKind.START;
+        if ("stop".equals(codeString))
+          return PlanActionConditionKind.STOP;
+        throw new IllegalArgumentException("Unknown PlanActionConditionKind code '"+codeString+"'");
+        }
+        public Enumeration<PlanActionConditionKind> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("applicability".equals(codeString))
+          return new Enumeration<PlanActionConditionKind>(this, PlanActionConditionKind.APPLICABILITY);
+        if ("start".equals(codeString))
+          return new Enumeration<PlanActionConditionKind>(this, PlanActionConditionKind.START);
+        if ("stop".equals(codeString))
+          return new Enumeration<PlanActionConditionKind>(this, PlanActionConditionKind.STOP);
+        throw new FHIRException("Unknown PlanActionConditionKind code '"+codeString+"'");
+        }
+    public String toCode(PlanActionConditionKind code) {
+      if (code == PlanActionConditionKind.APPLICABILITY)
+        return "applicability";
+      if (code == PlanActionConditionKind.START)
+        return "start";
+      if (code == PlanActionConditionKind.STOP)
+        return "stop";
+      return "?";
+      }
+    public String toSystem(PlanActionConditionKind code) {
+      return code.getSystem();
+      }
+    }
 
     public enum PlanActionRelationshipType {
         /**
@@ -963,30 +1069,44 @@ public class PlanDefinition extends MetadataResource {
         protected List<TriggerDefinition> triggerDefinition;
 
         /**
-         * An expression specifying whether or not the action is applicable in a given context.
+         * An expression that describes applicability criteria, or start/stop conditions for the action.
          */
-        @Child(name = "condition", type = {}, order=9, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression specifying whether or not the action is applicable in a given context." )
-        protected PlanDefinitionActionDefinitionConditionComponent condition;
+        @Child(name = "condition", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression that describes applicability criteria, or start/stop conditions for the action." )
+        protected List<PlanDefinitionActionDefinitionConditionComponent> condition;
+
+        /**
+         * Defines input data requirements for the action.
+         */
+        @Child(name = "input", type = {DataRequirement.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Input data requirements", formalDefinition="Defines input data requirements for the action." )
+        protected List<DataRequirement> input;
+
+        /**
+         * Defines the outputs of the action, if any.
+         */
+        @Child(name = "output", type = {DataRequirement.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Output data definition", formalDefinition="Defines the outputs of the action, if any." )
+        protected List<DataRequirement> output;
 
         /**
          * A relationship to another action such as "before" or "30-60 minutes after start of".
          */
-        @Child(name = "relatedAction", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "relatedAction", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Relationship to another action", formalDefinition="A relationship to another action such as \"before\" or \"30-60 minutes after start of\"." )
         protected List<PlanDefinitionActionDefinitionRelatedActionComponent> relatedAction;
 
         /**
          * An optional value describing when the action should be performed.
          */
-        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=11, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
         protected Type timing;
 
         /**
          * The type of participant in the action.
          */
-        @Child(name = "participantType", type = {CodeType.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "participantType", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="patient | practitioner | related-person", formalDefinition="The type of participant in the action." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-participant-type")
         protected List<Enumeration<PlanActionParticipantType>> participantType;
@@ -994,7 +1114,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * The type of action to perform (create, update, remove).
          */
-        @Child(name = "type", type = {Coding.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {Coding.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="create | update | remove | fire-event", formalDefinition="The type of action to perform (create, update, remove)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-type")
         protected Coding type;
@@ -1002,7 +1122,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines the grouping behavior for the action and its children.
          */
-        @Child(name = "groupingBehavior", type = {CodeType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "groupingBehavior", type = {CodeType.class}, order=16, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="visual-group | logical-group | sentence-group", formalDefinition="Defines the grouping behavior for the action and its children." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-grouping-behavior")
         protected Enumeration<PlanActionGroupingBehavior> groupingBehavior;
@@ -1010,7 +1130,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines the selection behavior for the action and its children.
          */
-        @Child(name = "selectionBehavior", type = {CodeType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "selectionBehavior", type = {CodeType.class}, order=17, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="any | all | all-or-none | exactly-one | at-most-one | one-or-more", formalDefinition="Defines the selection behavior for the action and its children." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-selection-behavior")
         protected Enumeration<PlanActionSelectionBehavior> selectionBehavior;
@@ -1018,7 +1138,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines the requiredness behavior for the action.
          */
-        @Child(name = "requiredBehavior", type = {CodeType.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "requiredBehavior", type = {CodeType.class}, order=18, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="must | could | must-unless-documented", formalDefinition="Defines the requiredness behavior for the action." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-required-behavior")
         protected Enumeration<PlanActionRequiredBehavior> requiredBehavior;
@@ -1026,7 +1146,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines whether the action should usually be preselected.
          */
-        @Child(name = "precheckBehavior", type = {CodeType.class}, order=17, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "precheckBehavior", type = {CodeType.class}, order=19, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="yes | no", formalDefinition="Defines whether the action should usually be preselected." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-precheck-behavior")
         protected Enumeration<PlanActionPrecheckBehavior> precheckBehavior;
@@ -1034,7 +1154,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines whether the action can be selected multiple times.
          */
-        @Child(name = "cardinalityBehavior", type = {CodeType.class}, order=18, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "cardinalityBehavior", type = {CodeType.class}, order=20, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="single | multiple", formalDefinition="Defines whether the action can be selected multiple times." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-cardinality-behavior")
         protected Enumeration<PlanActionCardinalityBehavior> cardinalityBehavior;
@@ -1042,7 +1162,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * A reference to an ActivityDefinition that describes the action to be taken in detail.
          */
-        @Child(name = "activityDefinition", type = {ActivityDefinition.class}, order=19, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "activityDefinition", type = {ActivityDefinition.class}, order=21, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of the activity to be performed", formalDefinition="A reference to an ActivityDefinition that describes the action to be taken in detail." )
         protected Reference activityDefinition;
 
@@ -1054,7 +1174,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
          */
-        @Child(name = "transform", type = {StructureMap.class}, order=20, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "transform", type = {StructureMap.class}, order=22, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
         protected Reference transform;
 
@@ -1066,18 +1186,18 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.
          */
-        @Child(name = "dynamicValue", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "dynamicValue", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result." )
         protected List<PlanDefinitionActionDefinitionDynamicValueComponent> dynamicValue;
 
         /**
          * Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.
          */
-        @Child(name = "actionDefinition", type = {PlanDefinitionActionDefinitionComponent.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "actionDefinition", type = {PlanDefinitionActionDefinitionComponent.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A sub-action", formalDefinition="Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition." )
         protected List<PlanDefinitionActionDefinitionComponent> actionDefinition;
 
-        private static final long serialVersionUID = -1445789672L;
+        private static final long serialVersionUID = 2070255895L;
 
     /**
      * Constructor
@@ -1466,27 +1586,162 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #condition} (An expression specifying whether or not the action is applicable in a given context.)
+         * @return {@link #condition} (An expression that describes applicability criteria, or start/stop conditions for the action.)
          */
-        public PlanDefinitionActionDefinitionConditionComponent getCondition() { 
+        public List<PlanDefinitionActionDefinitionConditionComponent> getCondition() { 
           if (this.condition == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.condition");
-            else if (Configuration.doAutoCreate())
-              this.condition = new PlanDefinitionActionDefinitionConditionComponent(); // cc
+            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
           return this.condition;
         }
 
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setCondition(List<PlanDefinitionActionDefinitionConditionComponent> theCondition) { 
+          this.condition = theCondition;
+          return this;
+        }
+
         public boolean hasCondition() { 
-          return this.condition != null && !this.condition.isEmpty();
+          if (this.condition == null)
+            return false;
+          for (PlanDefinitionActionDefinitionConditionComponent item : this.condition)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public PlanDefinitionActionDefinitionConditionComponent addCondition() { //3
+          PlanDefinitionActionDefinitionConditionComponent t = new PlanDefinitionActionDefinitionConditionComponent();
+          if (this.condition == null)
+            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+          this.condition.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addCondition(PlanDefinitionActionDefinitionConditionComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.condition == null)
+            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+          this.condition.add(t);
+          return this;
         }
 
         /**
-         * @param value {@link #condition} (An expression specifying whether or not the action is applicable in a given context.)
+         * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionComponent setCondition(PlanDefinitionActionDefinitionConditionComponent value) { 
-          this.condition = value;
+        public PlanDefinitionActionDefinitionConditionComponent getConditionFirstRep() { 
+          if (getCondition().isEmpty()) {
+            addCondition();
+          }
+          return getCondition().get(0);
+        }
+
+        /**
+         * @return {@link #input} (Defines input data requirements for the action.)
+         */
+        public List<DataRequirement> getInput() { 
+          if (this.input == null)
+            this.input = new ArrayList<DataRequirement>();
+          return this.input;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setInput(List<DataRequirement> theInput) { 
+          this.input = theInput;
           return this;
+        }
+
+        public boolean hasInput() { 
+          if (this.input == null)
+            return false;
+          for (DataRequirement item : this.input)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public DataRequirement addInput() { //3
+          DataRequirement t = new DataRequirement();
+          if (this.input == null)
+            this.input = new ArrayList<DataRequirement>();
+          this.input.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addInput(DataRequirement t) { //3
+          if (t == null)
+            return this;
+          if (this.input == null)
+            this.input = new ArrayList<DataRequirement>();
+          this.input.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #input}, creating it if it does not already exist
+         */
+        public DataRequirement getInputFirstRep() { 
+          if (getInput().isEmpty()) {
+            addInput();
+          }
+          return getInput().get(0);
+        }
+
+        /**
+         * @return {@link #output} (Defines the outputs of the action, if any.)
+         */
+        public List<DataRequirement> getOutput() { 
+          if (this.output == null)
+            this.output = new ArrayList<DataRequirement>();
+          return this.output;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setOutput(List<DataRequirement> theOutput) { 
+          this.output = theOutput;
+          return this;
+        }
+
+        public boolean hasOutput() { 
+          if (this.output == null)
+            return false;
+          for (DataRequirement item : this.output)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public DataRequirement addOutput() { //3
+          DataRequirement t = new DataRequirement();
+          if (this.output == null)
+            this.output = new ArrayList<DataRequirement>();
+          this.output.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addOutput(DataRequirement t) { //3
+          if (t == null)
+            return this;
+          if (this.output == null)
+            this.output = new ArrayList<DataRequirement>();
+          this.output.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #output}, creating it if it does not already exist
+         */
+        public DataRequirement getOutputFirstRep() { 
+          if (getOutput().isEmpty()) {
+            addOutput();
+          }
+          return getOutput().get(0);
         }
 
         /**
@@ -2160,7 +2415,9 @@ public class PlanDefinition extends MetadataResource {
           childrenList.add(new Property("code", "CodeableConcept", "The concept represented by this action or its sub-actions.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
           childrenList.add(new Property("triggerDefinition", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, triggerDefinition));
-          childrenList.add(new Property("condition", "", "An expression specifying whether or not the action is applicable in a given context.", 0, java.lang.Integer.MAX_VALUE, condition));
+          childrenList.add(new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
+          childrenList.add(new Property("input", "DataRequirement", "Defines input data requirements for the action.", 0, java.lang.Integer.MAX_VALUE, input));
+          childrenList.add(new Property("output", "DataRequirement", "Defines the outputs of the action, if any.", 0, java.lang.Integer.MAX_VALUE, output));
           childrenList.add(new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction));
           childrenList.add(new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, java.lang.Integer.MAX_VALUE, timing));
           childrenList.add(new Property("participantType", "code", "The type of participant in the action.", 0, java.lang.Integer.MAX_VALUE, participantType));
@@ -2187,7 +2444,9 @@ public class PlanDefinition extends MetadataResource {
         case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // CodeableConcept
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // RelatedArtifact
         case 1126736171: /*triggerDefinition*/ return this.triggerDefinition == null ? new Base[0] : this.triggerDefinition.toArray(new Base[this.triggerDefinition.size()]); // TriggerDefinition
-        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // PlanDefinitionActionDefinitionConditionComponent
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // PlanDefinitionActionDefinitionConditionComponent
+        case 100358090: /*input*/ return this.input == null ? new Base[0] : this.input.toArray(new Base[this.input.size()]); // DataRequirement
+        case -1005512447: /*output*/ return this.output == null ? new Base[0] : this.output.toArray(new Base[this.output.size()]); // DataRequirement
         case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : this.relatedAction.toArray(new Base[this.relatedAction.size()]); // PlanDefinitionActionDefinitionRelatedActionComponent
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
         case 841294093: /*participantType*/ return this.participantType == null ? new Base[0] : this.participantType.toArray(new Base[this.participantType.size()]); // Enumeration<PlanActionParticipantType>
@@ -2234,7 +2493,13 @@ public class PlanDefinition extends MetadataResource {
           this.getTriggerDefinition().add(castToTriggerDefinition(value)); // TriggerDefinition
           break;
         case -861311717: // condition
-          this.condition = (PlanDefinitionActionDefinitionConditionComponent) value; // PlanDefinitionActionDefinitionConditionComponent
+          this.getCondition().add((PlanDefinitionActionDefinitionConditionComponent) value); // PlanDefinitionActionDefinitionConditionComponent
+          break;
+        case 100358090: // input
+          this.getInput().add(castToDataRequirement(value)); // DataRequirement
+          break;
+        case -1005512447: // output
+          this.getOutput().add(castToDataRequirement(value)); // DataRequirement
           break;
         case -384107967: // relatedAction
           this.getRelatedAction().add((PlanDefinitionActionDefinitionRelatedActionComponent) value); // PlanDefinitionActionDefinitionRelatedActionComponent
@@ -2299,7 +2564,11 @@ public class PlanDefinition extends MetadataResource {
         else if (name.equals("triggerDefinition"))
           this.getTriggerDefinition().add(castToTriggerDefinition(value));
         else if (name.equals("condition"))
-          this.condition = (PlanDefinitionActionDefinitionConditionComponent) value; // PlanDefinitionActionDefinitionConditionComponent
+          this.getCondition().add((PlanDefinitionActionDefinitionConditionComponent) value);
+        else if (name.equals("input"))
+          this.getInput().add(castToDataRequirement(value));
+        else if (name.equals("output"))
+          this.getOutput().add(castToDataRequirement(value));
         else if (name.equals("relatedAction"))
           this.getRelatedAction().add((PlanDefinitionActionDefinitionRelatedActionComponent) value);
         else if (name.equals("timing[x]"))
@@ -2341,7 +2610,9 @@ public class PlanDefinition extends MetadataResource {
         case 3059181:  return addCode(); // CodeableConcept
         case 1587405498:  return addDocumentation(); // RelatedArtifact
         case 1126736171:  return addTriggerDefinition(); // TriggerDefinition
-        case -861311717:  return getCondition(); // PlanDefinitionActionDefinitionConditionComponent
+        case -861311717:  return addCondition(); // PlanDefinitionActionDefinitionConditionComponent
+        case 100358090:  return addInput(); // DataRequirement
+        case -1005512447:  return addOutput(); // DataRequirement
         case -384107967:  return addRelatedAction(); // PlanDefinitionActionDefinitionRelatedActionComponent
         case 164632566:  return getTiming(); // Type
         case 841294093: throw new FHIRException("Cannot make property participantType as it is not a complex type"); // Enumeration<PlanActionParticipantType>
@@ -2388,8 +2659,13 @@ public class PlanDefinition extends MetadataResource {
           return addTriggerDefinition();
         }
         else if (name.equals("condition")) {
-          this.condition = new PlanDefinitionActionDefinitionConditionComponent();
-          return this.condition;
+          return addCondition();
+        }
+        else if (name.equals("input")) {
+          return addInput();
+        }
+        else if (name.equals("output")) {
+          return addOutput();
         }
         else if (name.equals("relatedAction")) {
           return addRelatedAction();
@@ -2477,7 +2753,21 @@ public class PlanDefinition extends MetadataResource {
           for (TriggerDefinition i : triggerDefinition)
             dst.triggerDefinition.add(i.copy());
         };
-        dst.condition = condition == null ? null : condition.copy();
+        if (condition != null) {
+          dst.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+          for (PlanDefinitionActionDefinitionConditionComponent i : condition)
+            dst.condition.add(i.copy());
+        };
+        if (input != null) {
+          dst.input = new ArrayList<DataRequirement>();
+          for (DataRequirement i : input)
+            dst.input.add(i.copy());
+        };
+        if (output != null) {
+          dst.output = new ArrayList<DataRequirement>();
+          for (DataRequirement i : output)
+            dst.output.add(i.copy());
+        };
         if (relatedAction != null) {
           dst.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
           for (PlanDefinitionActionDefinitionRelatedActionComponent i : relatedAction)
@@ -2520,8 +2810,8 @@ public class PlanDefinition extends MetadataResource {
         return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(label, o.label, true)
            && compareDeep(title, o.title, true) && compareDeep(description, o.description, true) && compareDeep(textEquivalent, o.textEquivalent, true)
            && compareDeep(code, o.code, true) && compareDeep(documentation, o.documentation, true) && compareDeep(triggerDefinition, o.triggerDefinition, true)
-           && compareDeep(condition, o.condition, true) && compareDeep(relatedAction, o.relatedAction, true)
-           && compareDeep(timing, o.timing, true) && compareDeep(participantType, o.participantType, true)
+           && compareDeep(condition, o.condition, true) && compareDeep(input, o.input, true) && compareDeep(output, o.output, true)
+           && compareDeep(relatedAction, o.relatedAction, true) && compareDeep(timing, o.timing, true) && compareDeep(participantType, o.participantType, true)
            && compareDeep(type, o.type, true) && compareDeep(groupingBehavior, o.groupingBehavior, true) && compareDeep(selectionBehavior, o.selectionBehavior, true)
            && compareDeep(requiredBehavior, o.requiredBehavior, true) && compareDeep(precheckBehavior, o.precheckBehavior, true)
            && compareDeep(cardinalityBehavior, o.cardinalityBehavior, true) && compareDeep(activityDefinition, o.activityDefinition, true)
@@ -2546,9 +2836,9 @@ public class PlanDefinition extends MetadataResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, label, title
           , description, textEquivalent, code, documentation, triggerDefinition, condition
-          , relatedAction, timing, participantType, type, groupingBehavior, selectionBehavior
-          , requiredBehavior, precheckBehavior, cardinalityBehavior, activityDefinition, transform
-          , dynamicValue, actionDefinition);
+          , input, output, relatedAction, timing, participantType, type, groupingBehavior
+          , selectionBehavior, requiredBehavior, precheckBehavior, cardinalityBehavior, activityDefinition
+          , transform, dynamicValue, actionDefinition);
       }
 
   public String fhirType() {
@@ -2561,27 +2851,35 @@ public class PlanDefinition extends MetadataResource {
     @Block()
     public static class PlanDefinitionActionDefinitionConditionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * The kind of condition.
+         */
+        @Child(name = "kind", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="applicability | start | stop", formalDefinition="The kind of condition." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-condition-kind")
+        protected Enumeration<PlanActionConditionKind> kind;
+
+        /**
          * A brief, natural language description of the condition that effectively communicates the intended semantics.
          */
-        @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Natural language description of the condition", formalDefinition="A brief, natural language description of the condition that effectively communicates the intended semantics." )
         protected StringType description;
 
         /**
          * The media type of the language for the expression.
          */
-        @Child(name = "language", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "language", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Language of the expression", formalDefinition="The media type of the language for the expression." )
         protected StringType language;
 
         /**
          * An expression that returns true or false, indicating whether or not the condition is satisfied.
          */
-        @Child(name = "expression", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Boolean-valued expression", formalDefinition="An expression that returns true or false, indicating whether or not the condition is satisfied." )
         protected StringType expression;
 
-        private static final long serialVersionUID = 1354288281L;
+        private static final long serialVersionUID = 1111982240L;
 
     /**
      * Constructor
@@ -2589,6 +2887,59 @@ public class PlanDefinition extends MetadataResource {
       public PlanDefinitionActionDefinitionConditionComponent() {
         super();
       }
+
+    /**
+     * Constructor
+     */
+      public PlanDefinitionActionDefinitionConditionComponent(Enumeration<PlanActionConditionKind> kind) {
+        super();
+        this.kind = kind;
+      }
+
+        /**
+         * @return {@link #kind} (The kind of condition.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+         */
+        public Enumeration<PlanActionConditionKind> getKindElement() { 
+          if (this.kind == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.kind");
+            else if (Configuration.doAutoCreate())
+              this.kind = new Enumeration<PlanActionConditionKind>(new PlanActionConditionKindEnumFactory()); // bb
+          return this.kind;
+        }
+
+        public boolean hasKindElement() { 
+          return this.kind != null && !this.kind.isEmpty();
+        }
+
+        public boolean hasKind() { 
+          return this.kind != null && !this.kind.isEmpty();
+        }
+
+        /**
+         * @param value {@link #kind} (The kind of condition.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setKindElement(Enumeration<PlanActionConditionKind> value) { 
+          this.kind = value;
+          return this;
+        }
+
+        /**
+         * @return The kind of condition.
+         */
+        public PlanActionConditionKind getKind() { 
+          return this.kind == null ? null : this.kind.getValue();
+        }
+
+        /**
+         * @param value The kind of condition.
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setKind(PlanActionConditionKind value) { 
+            if (this.kind == null)
+              this.kind = new Enumeration<PlanActionConditionKind>(new PlanActionConditionKindEnumFactory());
+            this.kind.setValue(value);
+          return this;
+        }
 
         /**
          * @return {@link #description} (A brief, natural language description of the condition that effectively communicates the intended semantics.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
@@ -2739,6 +3090,7 @@ public class PlanDefinition extends MetadataResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
+          childrenList.add(new Property("kind", "code", "The kind of condition.", 0, java.lang.Integer.MAX_VALUE, kind));
           childrenList.add(new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("language", "string", "The media type of the language for the expression.", 0, java.lang.Integer.MAX_VALUE, language));
           childrenList.add(new Property("expression", "string", "An expression that returns true or false, indicating whether or not the condition is satisfied.", 0, java.lang.Integer.MAX_VALUE, expression));
@@ -2747,6 +3099,7 @@ public class PlanDefinition extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<PlanActionConditionKind>
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // StringType
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
@@ -2758,6 +3111,9 @@ public class PlanDefinition extends MetadataResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case 3292052: // kind
+          this.kind = new PlanActionConditionKindEnumFactory().fromType(value); // Enumeration<PlanActionConditionKind>
+          break;
         case -1724546052: // description
           this.description = castToString(value); // StringType
           break;
@@ -2774,7 +3130,9 @@ public class PlanDefinition extends MetadataResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("description"))
+        if (name.equals("kind"))
+          this.kind = new PlanActionConditionKindEnumFactory().fromType(value); // Enumeration<PlanActionConditionKind>
+        else if (name.equals("description"))
           this.description = castToString(value); // StringType
         else if (name.equals("language"))
           this.language = castToString(value); // StringType
@@ -2787,6 +3145,7 @@ public class PlanDefinition extends MetadataResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<PlanActionConditionKind>
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
         case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // StringType
         case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
@@ -2797,7 +3156,10 @@ public class PlanDefinition extends MetadataResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("description")) {
+        if (name.equals("kind")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.kind");
+        }
+        else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.description");
         }
         else if (name.equals("language")) {
@@ -2813,6 +3175,7 @@ public class PlanDefinition extends MetadataResource {
       public PlanDefinitionActionDefinitionConditionComponent copy() {
         PlanDefinitionActionDefinitionConditionComponent dst = new PlanDefinitionActionDefinitionConditionComponent();
         copyValues(dst);
+        dst.kind = kind == null ? null : kind.copy();
         dst.description = description == null ? null : description.copy();
         dst.language = language == null ? null : language.copy();
         dst.expression = expression == null ? null : expression.copy();
@@ -2826,7 +3189,7 @@ public class PlanDefinition extends MetadataResource {
         if (!(other instanceof PlanDefinitionActionDefinitionConditionComponent))
           return false;
         PlanDefinitionActionDefinitionConditionComponent o = (PlanDefinitionActionDefinitionConditionComponent) other;
-        return compareDeep(description, o.description, true) && compareDeep(language, o.language, true)
+        return compareDeep(kind, o.kind, true) && compareDeep(description, o.description, true) && compareDeep(language, o.language, true)
            && compareDeep(expression, o.expression, true);
       }
 
@@ -2837,13 +3200,13 @@ public class PlanDefinition extends MetadataResource {
         if (!(other instanceof PlanDefinitionActionDefinitionConditionComponent))
           return false;
         PlanDefinitionActionDefinitionConditionComponent o = (PlanDefinitionActionDefinitionConditionComponent) other;
-        return compareValues(description, o.description, true) && compareValues(language, o.language, true)
+        return compareValues(kind, o.kind, true) && compareValues(description, o.description, true) && compareValues(language, o.language, true)
            && compareValues(expression, o.expression, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, language, expression
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, description, language
+          , expression);
       }
 
   public String fhirType() {

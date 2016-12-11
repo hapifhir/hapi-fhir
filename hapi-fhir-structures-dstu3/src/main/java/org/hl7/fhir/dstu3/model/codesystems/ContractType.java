@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,13 +37,25 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractType {
 
         /**
-         * null
+         * Privacy policy.
          */
         PRIVACY, 
         /**
-         * null
+         * Information disclosure policy.
          */
         DISCLOSURE, 
+        /**
+         * Health Insurance policy.
+         */
+        HEALTHINSURANCE, 
+        /**
+         * Contract to supply goods or services.
+         */
+        SUPPLY, 
+        /**
+         * Consent Directive.
+         */
+        CONSENT, 
         /**
          * added to help the parsers
          */
@@ -55,12 +67,21 @@ public enum ContractType {
           return PRIVACY;
         if ("disclosure".equals(codeString))
           return DISCLOSURE;
+        if ("healthinsurance".equals(codeString))
+          return HEALTHINSURANCE;
+        if ("supply".equals(codeString))
+          return SUPPLY;
+        if ("consent".equals(codeString))
+          return CONSENT;
         throw new FHIRException("Unknown ContractType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case PRIVACY: return "privacy";
             case DISCLOSURE: return "disclosure";
+            case HEALTHINSURANCE: return "healthinsurance";
+            case SUPPLY: return "supply";
+            case CONSENT: return "consent";
             default: return "?";
           }
         }
@@ -69,15 +90,21 @@ public enum ContractType {
         }
         public String getDefinition() {
           switch (this) {
-            case PRIVACY: return "";
-            case DISCLOSURE: return "";
+            case PRIVACY: return "Privacy policy.";
+            case DISCLOSURE: return "Information disclosure policy.";
+            case HEALTHINSURANCE: return "Health Insurance policy.";
+            case SUPPLY: return "Contract to supply goods or services.";
+            case CONSENT: return "Consent Directive.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PRIVACY: return "privacy";
-            case DISCLOSURE: return "disclosure";
+            case PRIVACY: return "Privacy";
+            case DISCLOSURE: return "Disclosure";
+            case HEALTHINSURANCE: return "Health Insurance";
+            case SUPPLY: return "Supply Contract";
+            case CONSENT: return "Consent";
             default: return "?";
           }
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,13 +37,25 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasureType {
 
         /**
-         * The measure is a process measure
+         * A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome
          */
         PROCESS, 
         /**
-         * The measure is an outcome measure
+         * A measure that indicates the result of the performance (or non-performance) of a function or process
          */
         OUTCOME, 
+        /**
+         * A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care
+         */
+        STRUCTURE, 
+        /**
+         * A measure that focuses on patient-reported information
+         */
+        PATIENTREPORTEDOUTCOME, 
+        /**
+         * A measure that combines multiple component measures in to a single quality measure
+         */
+        COMPOSITE, 
         /**
          * added to help the parsers
          */
@@ -55,12 +67,21 @@ public enum MeasureType {
           return PROCESS;
         if ("outcome".equals(codeString))
           return OUTCOME;
+        if ("structure".equals(codeString))
+          return STRUCTURE;
+        if ("patient-reported-outcome".equals(codeString))
+          return PATIENTREPORTEDOUTCOME;
+        if ("composite".equals(codeString))
+          return COMPOSITE;
         throw new FHIRException("Unknown MeasureType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case PROCESS: return "process";
             case OUTCOME: return "outcome";
+            case STRUCTURE: return "structure";
+            case PATIENTREPORTEDOUTCOME: return "patient-reported-outcome";
+            case COMPOSITE: return "composite";
             default: return "?";
           }
         }
@@ -69,8 +90,11 @@ public enum MeasureType {
         }
         public String getDefinition() {
           switch (this) {
-            case PROCESS: return "The measure is a process measure";
-            case OUTCOME: return "The measure is an outcome measure";
+            case PROCESS: return "A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome";
+            case OUTCOME: return "A measure that indicates the result of the performance (or non-performance) of a function or process";
+            case STRUCTURE: return "A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care";
+            case PATIENTREPORTEDOUTCOME: return "A measure that focuses on patient-reported information";
+            case COMPOSITE: return "A measure that combines multiple component measures in to a single quality measure";
             default: return "?";
           }
         }
@@ -78,6 +102,9 @@ public enum MeasureType {
           switch (this) {
             case PROCESS: return "Process";
             case OUTCOME: return "Outcome";
+            case STRUCTURE: return "Structure";
+            case PATIENTREPORTEDOUTCOME: return "Patient Reported Outcome";
+            case COMPOSITE: return "Composite";
             default: return "?";
           }
     }

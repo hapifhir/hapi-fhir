@@ -181,7 +181,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
-		pat.addName().addFamily(methodName);
+		pat.addName().setFamily(methodName);
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
@@ -201,7 +201,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
-		pat.addName().addFamily(methodName);
+		pat.addName().setFamily(methodName);
 		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 
 		pat.setId("");
@@ -224,7 +224,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
-		pat.addName().addFamily(methodName);
+		pat.addName().setFamily(methodName);
 		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 
 		pat.setId("");
@@ -247,7 +247,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pat = new Patient();
-		pat.addName().addFamily(methodName);
+		pat.addName().setFamily(methodName);
 		pat.getManagingOrganization().setReference(orgId.getValue());
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 

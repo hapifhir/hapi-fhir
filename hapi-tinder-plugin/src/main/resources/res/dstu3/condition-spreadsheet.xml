@@ -9,15 +9,15 @@
   <Author>Grahame</Author>
   <LastAuthor>Miller,Michelle M</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-09-23T16:53:23Z</LastSaved>
-  <Version>16.00</Version>
+  <LastSaved>2016-11-16T21:20:42Z</LastSaved>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>17520</WindowHeight>
-  <WindowWidth>-27136</WindowWidth>
+  <WindowHeight>13740</WindowHeight>
+  <WindowWidth>10005</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>763</TabRatio>
@@ -830,10 +830,9 @@
  </Names>
  <Worksheet ss:Name="Instructions">
   <Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="5" x:FullColumns="1"
-   x:FullRows="1" ss:DefaultColumnWidth="64.714285714285722"
-   ss:DefaultRowHeight="15">
+   x:FullRows="1" ss:DefaultColumnWidth="64.5" ss:DefaultRowHeight="15">
    <Column ss:AutoFitWidth="0" ss:Width="411"/>
-   <Column ss:Width="125.14285714285714"/>
+   <Column ss:Width="125.25"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s64"><Data ss:Type="String">FHIR Resource-authoring Spreadsheet</Data></Cell>
    </Row>
@@ -885,33 +884,30 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="93" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s69" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s69" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s70" ss:Width="226.71428571428572"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="76.714285714285708"/>
-   <Column ss:StyleID="s69" ss:Width="28.714285714285715"/>
-   <Column ss:StyleID="s69" ss:Width="34.714285714285715"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="118.71428571428571"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="28.714285714285715"/>
+   <Column ss:StyleID="s70" ss:Width="226.5"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="76.5"/>
+   <Column ss:StyleID="s69" ss:Width="28.5"/>
+   <Column ss:StyleID="s69" ss:Width="34.5"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="118.5"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="28.5"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="27"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="106.71428571428572"
-    ss:Span="1"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="106.5" ss:Span="1"/>
    <Column ss:Index="10" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="81"/>
-   <Column ss:StyleID="s69" ss:Width="52.714285714285708" ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s69" ss:AutoFitWidth="0"
-    ss:Width="79.714285714285722"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="121.71428571428571"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="160.71428571428572"/>
+   <Column ss:StyleID="s69" ss:Width="52.5" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="79.5"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="121.5"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="160.5"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="135"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="120"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="135"/>
-   <Column ss:Index="21" ss:StyleID="s69" ss:AutoFitWidth="0"
-    ss:Width="103.71428571428571" ss:Span="1"/>
-   <Column ss:Index="23" ss:StyleID="s69" ss:AutoFitWidth="0"
-    ss:Width="49.714285714285715"/>
+   <Column ss:Index="21" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="103.5"
+    ss:Span="1"/>
+   <Column ss:Index="23" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="49.5"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="66"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="118.71428571428571"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="118.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="45" ss:StyleID="s71">
     <Cell ss:StyleID="s72"><Data ss:Type="String">Element</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -1106,7 +1102,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">active | relapse | remission | resolved</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">active | recurrence | inactive | remission | resolved</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">The clinical status of the condition.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1126,7 +1122,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Condition.verificationStatus</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">1..1</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">code</Data><NamedCell
@@ -1140,7 +1136,8 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">status</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">unknown</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">provisional | differential | confirmed | refuted | entered-in-error | unknown</Data><NamedCell
@@ -1148,7 +1145,8 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The verification status to support the clinical status of the condition.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">verificationStatus is not required.  For example, when a patient has abdominal pain in the ED, there is not likely going to be a verification status.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.code (pre or post-coordinated in)  Can use valueNegationInd for refuted</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1160,7 +1158,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">GF#11281</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Condition.category</Data><NamedCell
@@ -1340,7 +1339,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The anatomical location where this condition manifests itself</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">May be a summary code, or a reference to a very precise definition of the location, or both</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Only used if not implicit in code found in Condition.code. If the use case requires attributes from the BodySite resource (e.g. to identify and track separately) then use the standard extension [body-site-instance](extension-body-site-instance.html).  May be a summary code, or a reference to a very precise definition of the location, or both</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.targetBodySiteCode</Data><NamedCell
@@ -1489,7 +1488,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The date or estimated date that the condition resolved or went into remission. This is called &quot;abatement&quot; because of the many overloaded connotations associated with &quot;remission&quot; or &quot;resolution&quot; - Conditions are never really resolved, but they can abate.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">There is no explicit distinction between resolution and remission because in many cases the distinction is not clear. Age is generally used when the patient reports an age at which the Condition abated.  If there is no abatement element, it is unknown whether the condition has resolved or entered remission; applications and users should generally assume that the condition is still valid</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">There is no explicit distinction between resolution and remission because in many cases the distinction is not clear. Age is generally used when the patient reports an age at which the Condition abated.  If there is no abatement element, it is unknown whether the condition has resolved or entered remission; applications and users should generally assume that the condition is still valid.  When abatementString exists, it implies the condition is abated.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.effectiveTime.high or .inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;age at remission&quot;].value or .inboundRelationship[typeCode=SUBJ]source[classCode=CONC, moodCode=EVN].status=completed</Data><NamedCell
@@ -1502,7 +1501,7 @@
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Condition.dateRecorded</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Condition.assertedDate</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1519,12 +1518,12 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">When first entered</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Date record was believed accurate&#10;</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">A date, when  the Condition statement was documented</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The date on which the existance of the Condition was first asserted or acknowledged.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">The Date Recorded represents the date when this particular Condition record was created in the EHR, not the date of the most recent update in terms of when severity, abatement, etc. were specified. &#160;The date of the last record modification can be retrieved from the resource metadata.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The assertedDate represents the date when this particular Condition record was created in the EHR, not the date of the most recent update in terms of when severity, abatement, etc. were specified. &#160;The date of the last record modification can be retrieved from the resource metadata.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.participation[typeCode=AUT].time</Data><NamedCell
@@ -1535,7 +1534,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">GF#11089</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Condition.asserter</Data><NamedCell
@@ -1544,7 +1544,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Reference(Practitioner|Patient)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Reference(Practitioner|Patient | RelatedPerson)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Y</Data><NamedCell
@@ -1571,7 +1571,8 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">GF#11089</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
     <Cell ss:StyleID="s87"><Data ss:Type="String">Condition.stage</Data><NamedCell
@@ -3724,9 +3725,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>3</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>5</LeftColumnRightPane>
+   <LeftColumnRightPane>9</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3738,10 +3739,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>20</ActiveCol>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>16</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3758,15 +3761,14 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="48" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s102" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s102" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:Index="2" ss:StyleID="s102" ss:AutoFitWidth="0"
-    ss:Width="115.71428571428572"/>
-   <Column ss:StyleID="s102" ss:Width="55.714285714285715"/>
+   <Column ss:Index="2" ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="115.5"/>
+   <Column ss:StyleID="s102" ss:Width="55.5"/>
    <Column ss:StyleID="s102" ss:Width="165"/>
-   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="205.71428571428572"/>
-   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="199.71428571428572"/>
-   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="187.71428571428572"/>
+   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="205.5"/>
+   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="199.5"/>
+   <Column ss:StyleID="s102" ss:AutoFitWidth="0" ss:Width="187.5"/>
    <Row ss:AutoFitHeight="0" ss:StyleID="s71">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -3822,23 +3824,25 @@
     <Cell ss:StyleID="s91"><Data ss:Type="String">code.exists() or detail.exists()</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">exists(f:code) or exists(f:detail)</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">3</Data><NamedCell
+      ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Require clinicalStatus when not entered in error</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Condition</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Condition.clinicalStatus SHALL be present if verificationStatus is not entered-in-error</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">verificationStatus='entered-in-error' or clinicalStatus.exists()</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">f:verificationStatus/@value='entered-in-error' or exists(f:clinicalStatus)</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
+   <Row ss:AutoFitHeight="0" ss:Height="120">
+    <Cell ss:StyleID="s108"><Data ss:Type="Number">4</Data><NamedCell
+      ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Abated conditions have inactive clinicalStatus</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s109"/>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Condition</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">If condition is abated, then clinicalStatus must be either inactive, resolved, or remission </Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">abatement.empty() or (abatement as boolean).not()  or clinicalStatus='resolved' or clinicalStatus='remission' or clinicalStatus='inactive'</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">xpath: not(f:abatementBoolean='true' or (not(exists(f:abatementBoolean)) and exists(*[starts-with(local-name(.), 'abatement')])) or f:clinicalStatus/@value=('resolved', 'remission', 'inactive')</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4251,7 +4255,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>9</ActiveRow>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4267,14 +4272,13 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="33" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="70.714285714285708"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="57"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="109.71428571428571"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="109.5"/>
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="210" ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s113" ss:AutoFitWidth="0"
-    ss:Width="382.71428571428572"/>
+   <Column ss:Index="6" ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="382.5"/>
    <Row ss:AutoFitHeight="0" ss:StyleID="s114">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">Unique name for search parameter - required, lower-case, dash-delimited string    </ss:Data></Comment><NamedCell
@@ -4338,7 +4342,7 @@
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">The category of the condition</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.714285714285715">
+   <Row ss:AutoFitHeight="0" ss:Height="28.6875">
     <Cell ss:StyleID="s119"><Data ss:Type="String">onset-age</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">quantity</Data></Cell>
     <Cell ss:StyleID="s88"/>
@@ -4346,7 +4350,7 @@
     <Cell ss:StyleID="s120"><Data ss:Type="String">Condition.onset.as(Quantity) | Condition.onset.as(Range)</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Onsets as age or age range</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.714285714285715">
+   <Row ss:AutoFitHeight="0" ss:Height="28.6875">
     <Cell ss:StyleID="s119"><Data ss:Type="String">onset-date</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s88"/>
@@ -4354,7 +4358,7 @@
     <Cell ss:StyleID="s120"><Data ss:Type="String">Condition.onset.as(dateTime) | Condition.onset.as(Period)</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Date related onsets (dateTime and Period)</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="14.464285714285715">
+   <Row ss:AutoFitHeight="0" ss:Height="14.4375">
     <Cell ss:StyleID="s119"><Data ss:Type="String">onset-info</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s88"/>
@@ -4362,7 +4366,7 @@
     <Cell ss:StyleID="s120"><Data ss:Type="String">Condition.onset.as(string)</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Onsets as a string</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.714285714285715">
+   <Row ss:AutoFitHeight="0" ss:Height="28.6875">
     <Cell ss:StyleID="s119"><Data ss:Type="String">abatement-age</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">quantity</Data></Cell>
     <Cell ss:StyleID="s88"/>
@@ -4370,7 +4374,7 @@
     <Cell ss:StyleID="s120"><Data ss:Type="String">Condition.abatement.as(Quantity) | Condition.abatement.as(Range)</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Abatement as age or age range</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="86.464285714285722">
+   <Row ss:AutoFitHeight="0" ss:Height="86.4375">
     <Cell ss:StyleID="s119"><Data ss:Type="String">abatement-boolean</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s88"/>
@@ -4378,7 +4382,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Condition.abatement.as(boolean) | Condition.abatement.is(dateTime) | Condition.abatement.is(Age) | Condition.abatement.is(Period) | Condition.abatement.is(Range) | Condition.abatement.is(string)</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Abatement boolean (boolean is true or non-boolean values are present)</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.714285714285715">
+   <Row ss:AutoFitHeight="0" ss:Height="28.6875">
     <Cell ss:StyleID="s119"><Data ss:Type="String">abatement-date</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s88"/>
@@ -4386,7 +4390,7 @@
     <Cell ss:StyleID="s120"><Data ss:Type="String">Condition.abatement.as(dateTime) | Condition.abatement.as(Period)</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">Date-related abatements (dateTime and period)</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28.714285714285715">
+   <Row ss:AutoFitHeight="0" ss:Height="28.6875">
     <Cell ss:StyleID="s119"><Data ss:Type="String">abatement-string</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s88"/>
@@ -4411,12 +4415,12 @@
     <Cell ss:StyleID="s121"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s119"><Data ss:Type="String">date-recorded</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">asserted-date</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Condition.dateRecorded</Data></Cell>
+    <Cell ss:StyleID="s120"><Data ss:Type="String">Condition.assertedDate</Data></Cell>
     <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">A date, when the Condition statement was documented</Data></Cell>
+    <Cell ss:StyleID="s121"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"><Data ss:Type="String">evidence</Data></Cell>
@@ -4563,7 +4567,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>6</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4576,11 +4580,10 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>13</ActiveRow>
+     <ActiveRow>15</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -4597,18 +4600,15 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="130.71428571428572"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="124.71428571428572"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="130.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="124.5"/>
    <Column ss:StyleID="s113" ss:Width="24"/>
-   <Column ss:StyleID="s113" ss:Width="25.714285714285715"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="106.71428571428572"
-    ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s113" ss:AutoFitWidth="0"
-    ss:Width="223.71428571428572"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="253.71428571428572"
-    ss:Span="1"/>
+   <Column ss:StyleID="s113" ss:Width="25.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="106.5" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="223.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="253.5" ss:Span="1"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s126"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -5231,18 +5231,16 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="21" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="82.714285714285708"
-    ss:Span="1"/>
-   <Column ss:Index="3" ss:StyleID="s113" ss:AutoFitWidth="0"
-    ss:Width="199.71428571428572"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="157.71428571428572"/>
-   <Column ss:StyleID="s113" ss:Width="106.71428571428572"/>
-   <Column ss:StyleID="s113" ss:Width="112.71428571428571"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="82.5" ss:Span="1"/>
+   <Column ss:Index="3" ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="199.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="157.5"/>
+   <Column ss:StyleID="s113" ss:Width="106.5"/>
+   <Column ss:StyleID="s113" ss:Width="112.5"/>
    <Column ss:StyleID="s113" ss:Width="120"/>
-   <Column ss:StyleID="s113" ss:Width="127.71428571428571"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="73.714285714285708"/>
+   <Column ss:StyleID="s113" ss:Width="127.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="73.5"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5532,10 +5530,10 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R1C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="36" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="280.71428571428572"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="280.5"/>
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="252"/>
    <Column ss:StyleID="s113" ss:Width="63"/>
    <Row ss:AutoFitHeight="0">
@@ -5809,14 +5807,14 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="38" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s139" ss:DefaultColumnWidth="259.71428571428572"
+   x:FullRows="1" ss:StyleID="s139" ss:DefaultColumnWidth="259.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s139" ss:Width="88.714285714285722"/>
-   <Column ss:StyleID="s139" ss:Width="28.714285714285715"/>
-   <Column ss:StyleID="s139" ss:Width="328.71428571428572"/>
+   <Column ss:StyleID="s139" ss:Width="88.5"/>
+   <Column ss:StyleID="s139" ss:Width="28.5"/>
+   <Column ss:StyleID="s139" ss:Width="328.5"/>
    <Column ss:StyleID="s139" ss:Width="57"/>
-   <Column ss:StyleID="s139" ss:Width="205.71428571428572" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s139" ss:Width="40.714285714285715"/>
+   <Column ss:StyleID="s139" ss:Width="205.5" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s139" ss:Width="40.5"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -6223,22 +6221,20 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="30" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s113" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s113" ss:Width="115.71428571428572"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="274.71428571428572"/>
+   <Column ss:StyleID="s113" ss:Width="115.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="274.5"/>
    <Column ss:StyleID="s113" ss:Width="51"/>
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="69"/>
-   <Column ss:StyleID="s113" ss:Width="145.71428571428572"/>
-   <Column ss:StyleID="s113" ss:Width="172.71428571428572"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="97.714285714285722"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="88.714285714285722"/>
+   <Column ss:StyleID="s113" ss:Width="145.5"/>
+   <Column ss:StyleID="s113" ss:Width="172.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="97.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="88.5"/>
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="172.71428571428572"/>
-   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="166.71428571428572"
-    ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s113" ss:AutoFitWidth="0"
-    ss:Width="106.71428571428572"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="172.5"/>
+   <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="166.5" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="106.5"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Binding Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6748,7 +6744,6 @@
     <Pane>
      <Number>0</Number>
      <ActiveRow>3</ActiveRow>
-     <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6765,18 +6760,15 @@
     ss:RefersTo="='condition-ver-status'!R1C1:R1C9" ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s139" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s139" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s139" ss:Width="79.714285714285722"/>
-   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="34.714285714285715"/>
-   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="154.71428571428572"/>
-   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="79.714285714285722"
-    ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s139" ss:AutoFitWidth="0"
-    ss:Width="244.71428571428572"/>
+   <Column ss:StyleID="s139" ss:Width="79.5"/>
+   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="154.5"/>
+   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="79.5" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s139" ss:AutoFitWidth="0"
-    ss:Width="241.71428571428572"/>
+   <Column ss:Index="9" ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="241.5"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
@@ -7403,18 +7395,15 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s139" ss:DefaultColumnWidth="64.714285714285722"
+   x:FullRows="1" ss:StyleID="s139" ss:DefaultColumnWidth="64.5"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s139" ss:Width="79.714285714285722"/>
-   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="34.714285714285715"/>
-   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="154.71428571428572"/>
-   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="79.714285714285722"
-    ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s139" ss:AutoFitWidth="0"
-    ss:Width="244.71428571428572"/>
+   <Column ss:StyleID="s139" ss:Width="79.5"/>
+   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="34.5"/>
+   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="154.5"/>
+   <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="79.5" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s139" ss:AutoFitWidth="0"
-    ss:Width="241.71428571428572"/>
+   <Column ss:Index="9" ss:StyleID="s139" ss:AutoFitWidth="0" ss:Width="241.5"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"

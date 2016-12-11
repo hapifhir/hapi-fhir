@@ -136,7 +136,7 @@ public class FhirTerserDstu3Test {
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDescendsIntoContained() {
 		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
+		p.addName().setFamily("PATIENT");
 
 		Organization o = new Organization();
 		o.getNameElement().setValue("ORGANIZATION");
@@ -152,7 +152,7 @@ public class FhirTerserDstu3Test {
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDoesntDescendIntoEmbedded() {
 		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
+		p.addName().setFamily("PATIENT");
 
 		Bundle b = new Bundle();
 		b.addEntry().setResource(p);
@@ -169,7 +169,7 @@ public class FhirTerserDstu3Test {
 	@Test
 	public void testGetResourceReferenceInExtension() {
 		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
+		p.addName().setFamily("PATIENT");
 
 		Organization o = new Organization();
 		o.setName("ORG");

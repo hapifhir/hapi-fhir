@@ -715,7 +715,7 @@ public class GenericClientDstu3Test {
 
 		Parameters param = new Parameters();
 		Patient patient = new Patient();
-		patient.addName().addFamily("FOO");
+		patient.addName().setFamily("FOO");
 		param.addParameter().setName("foo").setResource(patient);
 		final String respString = ourCtx.newXmlParser().encodeResourceToString(param);
 
@@ -797,7 +797,7 @@ public class GenericClientDstu3Test {
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -847,7 +847,7 @@ public class GenericClientDstu3Test {
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -899,7 +899,7 @@ public class GenericClientDstu3Test {
 		conf.setCopyright("COPY");
 
 		final Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1060,14 +1060,14 @@ public class GenericClientDstu3Test {
 		
 		Patient patient = new Patient();
 		patient.setId("PATIENT1");
-		patient.addName().addFamily("PATIENT1");
+		patient.addName().setFamily("PATIENT1");
 		
 		Bundle bundle = new Bundle();
 		bundle.setId("BUNDLE1");
 		bundle.addEntry().setResource(patient);
 		
 		final String encoded = p.encodeResourceToString(bundle);
-		assertEquals("{\"resourceType\":\"Bundle\",\"id\":\"BUNDLE1\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"PATIENT1\",\"name\":[{\"family\":[\"PATIENT1\"]}]}}]}", encoded);
+		assertEquals("{\"resourceType\":\"Bundle\",\"id\":\"BUNDLE1\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"PATIENT1\",\"name\":[{\"family\":\"PATIENT1\"}]}}]}", encoded);
 		
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1104,7 +1104,7 @@ public class GenericClientDstu3Test {
 		
 		Patient patient = new Patient();
 		patient.setId("PATIENT1");
-		patient.addName().addFamily("PATIENT1");
+		patient.addName().setFamily("PATIENT1");
 		
 		Bundle bundle = new Bundle();
 		bundle.setId("BUNDLE1");
@@ -1165,7 +1165,7 @@ public class GenericClientDstu3Test {
 	public void testResponseHasContentTypeMissing() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 		Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 		final String respString = p.encodeResourceToString(patient);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -1196,7 +1196,7 @@ public class GenericClientDstu3Test {
 	public void testResponseHasContentTypeNonFhir() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 		Patient patient = new Patient();
-		patient.addName().addFamily("FAM");
+		patient.addName().setFamily("FAM");
 		final String respString = p.encodeResourceToString(patient);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);

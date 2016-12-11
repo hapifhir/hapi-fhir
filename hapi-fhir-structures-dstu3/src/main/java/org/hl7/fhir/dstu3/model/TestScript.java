@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -4665,10 +4665,10 @@ public class TestScript extends MetadataResource {
         protected Coding type;
 
         /**
-         * The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
+         * The type of the resource.  See http://build.fhir.org/resourcelist.html.
          */
         @Child(name = "resource", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Resource type", formalDefinition="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html." )
+        @Description(shortDefinition="Resource type", formalDefinition="The type of the resource.  See http://build.fhir.org/resourcelist.html." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/defined-types")
         protected CodeType resource;
 
@@ -4806,7 +4806,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #resource} (The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
+         * @return {@link #resource} (The type of the resource.  See http://build.fhir.org/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
          */
         public CodeType getResourceElement() { 
           if (this.resource == null)
@@ -4826,7 +4826,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #resource} (The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
+         * @param value {@link #resource} (The type of the resource.  See http://build.fhir.org/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
          */
         public SetupActionOperationComponent setResourceElement(CodeType value) { 
           this.resource = value;
@@ -4834,14 +4834,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
+         * @return The type of the resource.  See http://build.fhir.org/resourcelist.html.
          */
         public String getResource() { 
           return this.resource == null ? null : this.resource.getValue();
         }
 
         /**
-         * @param value The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
+         * @param value The type of the resource.  See http://build.fhir.org/resourcelist.html.
          */
         public SetupActionOperationComponent setResource(String value) { 
           if (Utilities.noString(value))
@@ -5535,7 +5535,7 @@ public class TestScript extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "Coding", "Server interaction or operation type.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("resource", "code", "The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
+          childrenList.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, label));
           childrenList.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("accept", "code", "The content-type or mime-type to use for RESTful operation in the 'Accept' header.", 0, java.lang.Integer.MAX_VALUE, accept));
@@ -6147,10 +6147,10 @@ public class TestScript extends MetadataResource {
         protected StringType requestURL;
 
         /**
-         * The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
+         * The type of the resource.  See http://build.fhir.org/resourcelist.html.
          */
         @Child(name = "resource", type = {CodeType.class}, order=15, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Resource type", formalDefinition="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html." )
+        @Description(shortDefinition="Resource type", formalDefinition="The type of the resource.  See http://build.fhir.org/resourcelist.html." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/defined-types")
         protected CodeType resource;
 
@@ -6903,7 +6903,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #resource} (The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
+         * @return {@link #resource} (The type of the resource.  See http://build.fhir.org/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
          */
         public CodeType getResourceElement() { 
           if (this.resource == null)
@@ -6923,7 +6923,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #resource} (The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
+         * @param value {@link #resource} (The type of the resource.  See http://build.fhir.org/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
          */
         public SetupActionAssertComponent setResourceElement(CodeType value) { 
           this.resource = value;
@@ -6931,14 +6931,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
+         * @return The type of the resource.  See http://build.fhir.org/resourcelist.html.
          */
         public String getResource() { 
           return this.resource == null ? null : this.resource.getValue();
         }
 
         /**
-         * @param value The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
+         * @param value The type of the resource.  See http://build.fhir.org/resourcelist.html.
          */
         public SetupActionAssertComponent setResource(String value) { 
           if (Utilities.noString(value))
@@ -7305,7 +7305,7 @@ public class TestScript extends MetadataResource {
           childrenList.add(new Property("operator", "code", "The operator type defines the conditional behavior of the assert. If not defined, the default is equals.", 0, java.lang.Integer.MAX_VALUE, operator));
           childrenList.add(new Property("path", "string", "The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.", 0, java.lang.Integer.MAX_VALUE, path));
           childrenList.add(new Property("requestURL", "string", "The value to use in a comparison against the request URL path string.", 0, java.lang.Integer.MAX_VALUE, requestURL));
-          childrenList.add(new Property("resource", "code", "The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
+          childrenList.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, java.lang.Integer.MAX_VALUE, response));
           childrenList.add(new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, java.lang.Integer.MAX_VALUE, responseCode));
           childrenList.add(new Property("rule", "", "The TestScript.rule this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, rule));

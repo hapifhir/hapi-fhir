@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -3881,6 +3881,32 @@ public class Encounter extends DomainResource {
    * the path value of "<b>Encounter:location</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Encounter:location").toLocked();
+
+ /**
+   * Search parameter: <b>service-provider</b>
+   * <p>
+   * Description: <b>The custodian organization of this Encounter record</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.serviceProvider</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-provider", path="Encounter.serviceProvider", description="The custodian organization of this Encounter record", type="reference", target={Organization.class } )
+  public static final String SP_SERVICE_PROVIDER = "service-provider";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-provider</b>
+   * <p>
+   * Description: <b>The custodian organization of this Encounter record</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.serviceProvider</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SERVICE_PROVIDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SERVICE_PROVIDER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:service-provider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SERVICE_PROVIDER = new ca.uhn.fhir.model.api.Include("Encounter:service-provider").toLocked();
 
  /**
    * Search parameter: <b>indication</b>

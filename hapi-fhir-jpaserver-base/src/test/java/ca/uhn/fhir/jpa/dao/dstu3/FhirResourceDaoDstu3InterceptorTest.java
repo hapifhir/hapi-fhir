@@ -57,7 +57,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	@Test
 	public void testJpaCreate() {
 		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
+		p.addName().setFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 		
 		ArgumentCaptor<ActionRequestDetails> detailsCapt;
@@ -77,7 +77,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		 * Not do a conditional create
 		 */
 		p = new Patient();
-		p.addName().addFamily("PATIENT1");
+		p.addName().setFamily("PATIENT1");
 		Long id2 = myPatientDao.create(p, "Patient?family=PATIENT", mySrd).getId().getIdPartAsLong();
 		assertEquals(id, id2);
 
@@ -91,7 +91,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	@Test
 	public void testJpaDelete() {
 		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
+		p.addName().setFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 
 		myPatientDao.delete(new IdType("Patient", id), mySrd);
@@ -111,12 +111,12 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 	@Test
 	public void testJpaUpdate() {
 		Patient p = new Patient();
-		p.addName().addFamily("PATIENT");
+		p.addName().setFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 
 		p = new Patient();
 		p.setId(new IdType(id));
-		p.addName().addFamily("PATIENT1");
+		p.addName().setFamily("PATIENT1");
 		Long id2 = myPatientDao.update(p, mySrd).getId().getIdPartAsLong();
 		assertEquals(id, id2);
 
@@ -135,7 +135,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.setId(new IdType(id));
-		p.addName().addFamily("PATIENT2");
+		p.addName().setFamily("PATIENT2");
 		id2 = myPatientDao.update(p, "Patient?family=PATIENT1", mySrd).getId().getIdPartAsLong();
 		assertEquals(id, id2);
 
@@ -150,7 +150,7 @@ public class FhirResourceDaoDstu3InterceptorTest extends BaseJpaDstu3Test {
 		 */
 
 		p = new Patient();
-		p.addName().addFamily("PATIENT3");
+		p.addName().setFamily("PATIENT3");
 		id2 = myPatientDao.update(p, "Patient?family=ZZZ", mySrd).getId().getIdPartAsLong();
 		assertNotEquals(id, id2);
 

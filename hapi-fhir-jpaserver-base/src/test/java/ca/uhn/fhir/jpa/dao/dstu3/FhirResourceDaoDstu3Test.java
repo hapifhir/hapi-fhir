@@ -551,7 +551,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		Patient pat = new Patient();
 		pat.setId(idName);
-		pat.addName().addFamily("FAM");
+		pat.addName().setFamily("FAM");
 		IIdType patId = myPatientDao.update(pat, mySrd).getId();
 		assertEquals("Patient/" + idName, patId.toUnqualifiedVersionless().getValue());
 
@@ -632,7 +632,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testCreateSummaryFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateTextIdFails");
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 
 		p.getMeta().addTag().setSystem(Constants.TAG_SUBSETTED_SYSTEM).setCode(Constants.TAG_SUBSETTED_CODE);
 
@@ -648,7 +648,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testCreateTextIdDoesntFail() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateTextIdFails");
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/ABC");
 		String id = myPatientDao.create(p, mySrd).getId().getIdPart();
 		assertNotEquals("ABC", id);
@@ -676,7 +676,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		results = myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
 		assertEquals(id.getIdPart(), results.getId().getIdPart());
 		assertFalse(results.getCreated().booleanValue());
@@ -687,7 +687,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		results = myPatientDao.create(p, mySrd);
 		assertNotEquals(id.getIdPart(), results.getId().getIdPart());
 		assertTrue(results.getCreated().booleanValue());
@@ -696,7 +696,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		try {
 			myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
 			fail();
@@ -718,7 +718,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		results = myPatientDao.create(p, "Patient?_id=" + id.toVersionless().getValue(), mySrd);
 		assertEquals(id.getIdPart(), results.getId().getIdPart());
 		assertEquals(id.getVersionIdPart(), results.getId().getVersionIdPart());
@@ -794,7 +794,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testCreateWithInvalidReferenceFailsGracefully() {
 		Patient patient = new Patient();
-		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
+		patient.addName().setFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
 		patient.setManagingOrganization(new Reference("Organization/99999999"));
 		try {
 			myPatientDao.create(patient, mySrd);
@@ -808,7 +808,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testCreateWithInvalidReferenceNoId() {
 		Patient p = new Patient();
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.getManagingOrganization().setReference("Organization/");
 
 		try {
@@ -822,7 +822,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testCreateWithReferenceBadType() {
 		Patient p = new Patient();
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.getManagingOrganization().setReference("Blah/123");
 
 		try {
@@ -836,7 +836,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testCreateWithReferenceNoType() {
 		Patient p = new Patient();
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.getManagingOrganization().setReference("123");
 
 		try {
@@ -855,7 +855,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IFhirResourceDao dao = myNamingSystemDao;
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("My Name");
+		resource.addName().setFamily("My Name");
 		try {
 			dao.create(resource, mySrd);
 			fail();
@@ -1010,7 +1010,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
+		patient.addName().setFamily(methodName);
 		patient.getManagingOrganization().setReferenceElement(orgId);
 		IIdType patId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1055,13 +1055,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily("Tester_testDeleteResource").addGiven("Joe");
+			patient.addName().setFamily("Tester_testDeleteResource").addGiven("Joe");
 			id1 = myPatientDao.create(patient, mySrd).getId();
 		}
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("Tester_testDeleteResource").addGiven("John");
+			patient.addName().setFamily("Tester_testDeleteResource").addGiven("John");
 			id2 = myPatientDao.create(patient, mySrd).getId();
 		}
 		{
@@ -1112,7 +1112,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testDeleteThenUndelete() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().addFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
+		patient.addName().setFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
 		IIdType id = myPatientDao.create(patient, mySrd).getId();
 		assertThat(id.getValue(), Matchers.endsWith("/_history/1"));
 
@@ -1131,7 +1131,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().addFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
+		patient.addName().setFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
 		patient.setId(id.toUnqualifiedVersionless());
 		IIdType id2 = myPatientDao.update(patient, mySrd).getId();
 
@@ -1411,11 +1411,11 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("testHistoryByForcedId");
-			patient.addName().addFamily("Tester").addGiven("testHistoryByForcedId");
+			patient.addName().setFamily("Tester").addGiven("testHistoryByForcedId");
 			patient.setId("Patient/testHistoryByForcedId");
 			idv1 = myPatientDao.update(patient, mySrd).getId();
 
-			patient.addName().addFamily("Tester").addGiven("testHistoryByForcedIdName2");
+			patient.addName().setFamily("Tester").addGiven("testHistoryByForcedIdName2");
 			patient.setId(patient.getIdElement().toUnqualifiedVersionless());
 			idv2 = myPatientDao.update(patient, mySrd).getId();
 		}
@@ -1433,7 +1433,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		String methodName = "testHistoryOverMultiplePages";
 
 		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
+		patient.addName().setFamily(methodName);
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Date middleDate = null;
@@ -1447,7 +1447,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				Thread.sleep(fullSize);
 			}
 			patient.setId(id);
-			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
 			myPatientDao.update(patient, mySrd);
 		}
 
@@ -1581,14 +1581,14 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testHistoryReflectsMetaOperations() throws Exception {
 		Patient inPatient = new Patient();
-		inPatient.addName().addFamily("version1");
+		inPatient.addName().setFamily("version1");
 		inPatient.getMeta().addProfile("http://example.com/1");
 		IIdType id = myPatientDao.create(inPatient, mySrd).getId().toUnqualifiedVersionless();
 
 		IBundleProvider history = myPatientDao.history((Date)null, null, mySrd);
 		assertEquals(1, history.size());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
-		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
+		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, contains("http://example.com/1"));
 
@@ -1602,7 +1602,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		history = myPatientDao.history((Date)null, null, mySrd);
 		assertEquals(1, history.size());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
-		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
+		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, containsInAnyOrder("http://example.com/1", "http://example.com/2"));
 
@@ -1612,19 +1612,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		inPatient.setId(id);
 		inPatient.getMeta().addProfile("http://example.com/3");
-		inPatient.getName().get(0).addFamily("version2");
+		inPatient.getName().get(0).setFamily("version2");
 		myPatientDao.update(inPatient, mySrd);
 
 		history = myPatientDao.history((Date)null, null, mySrd);
 		assertEquals(2, history.size());
 		outPatient = (Patient) history.getResources(0, 2).get(0);
-		assertEquals("version1 version2", outPatient.getName().get(0).getFamilyAsSingleString());
+		assertEquals("version2", outPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
 		ourLog.info(profiles.toString());
 		assertThat(profiles, containsInAnyOrder("http://example.com/1", "http://example.com/2", "http://example.com/3"));
 
 		outPatient = (Patient) history.getResources(0, 2).get(1);
-		assertEquals("version1", outPatient.getName().get(0).getFamilyAsSingleString());
+		assertEquals("version1", outPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, containsInAnyOrder("http://example.com/1", "http://example.com/2"));
 	}
@@ -1634,7 +1634,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		String methodName = "testHistoryWithDeletedResource";
 
 		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
+		patient.addName().setFamily(methodName);
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		myPatientDao.delete(id, mySrd);
@@ -1667,7 +1667,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		String methodName = "testHistoryWithFromAndTo";
 
 		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
+		patient.addName().setFamily(methodName);
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<Date> preDates = Lists.newArrayList();
@@ -1677,7 +1677,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			preDates.add(new Date());
 			Thread.sleep(100);
 			patient.setId(id);
-			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i");
+			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i");
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
 
@@ -1700,7 +1700,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Thread.sleep(10);
 
 		Patient inPatient = new Patient();
-		inPatient.addName().addFamily("version1");
+		inPatient.addName().setFamily("version1");
 		inPatient.getMeta().addProfile("http://example.com/1");
 		myPatientDao.create(inPatient, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1712,7 +1712,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IBundleProvider history = myPatientDao.history((Date)null, null, mySrd);
 		assertEquals(1, history.size());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
-		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
+		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, contains("http://example.com/1"));
 
@@ -1721,7 +1721,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		history = myPatientDao.history(before, null, mySrd);
 		assertEquals(1, history.size());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
-		assertEquals("version1", inPatient.getName().get(0).getFamilyAsSingleString());
+		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles, contains("http://example.com/1"));
 
@@ -1746,7 +1746,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testIdParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().addFamily("Tester").addGiven("Joe");
+		patient.addName().setFamily("Tester").addGiven("Joe");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
 		assertNotNull(outcome.getId());
@@ -1783,7 +1783,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			List<Patient> ret = toList(myPatientDao.search(paramMap));
 			assertEquals(1, ret.size());
 			Patient p = ret.get(0);
-			assertEquals("Tester", p.getName().get(0).getFamilyAsSingleString());
+			assertEquals("Tester", p.getName().get(0).getFamily());
 		}
 		{
 			SearchParameterMap paramMap = new SearchParameterMap();
@@ -1792,7 +1792,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			List<Patient> ret = toList(myPatientDao.search(paramMap));
 			assertEquals(1, ret.size());
 			Patient p = ret.get(0);
-			assertEquals("Tester", p.getName().get(0).getFamilyAsSingleString());
+			assertEquals("Tester", p.getName().get(0).getFamily());
 		}
 		{
 			SearchParameterMap paramMap = new SearchParameterMap();
@@ -1801,7 +1801,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			List<Patient> ret = toList(myPatientDao.search(paramMap));
 			assertEquals(1, ret.size());
 			Patient p = ret.get(0);
-			assertEquals("Tester", p.getName().get(0).getFamilyAsSingleString());
+			assertEquals("Tester", p.getName().get(0).getFamily());
 		}
 		{
 			SearchParameterMap paramMap = new SearchParameterMap();
@@ -1863,7 +1863,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		 */
 
 		Patient pt = myPatientDao.read(id, mySrd);
-		pt.addName().addFamily("anotherName");
+		pt.addName().setFamily("anotherName");
 		myPatientDao.update(pt, mySrd);
 
 		/*
@@ -2172,7 +2172,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001testPersistSearchParams");
 		patient.getGenderElement().setValue(AdministrativeGender.MALE);
-		patient.addName().addFamily("Tester").addGiven("JoetestPersistSearchParams");
+		patient.addName().setFamily("Tester").addGiven("JoetestPersistSearchParams");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
 		assertNotNull(outcome.getId());
@@ -2337,7 +2337,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		String methodName = "testReadWithDeletedResource";
 
 		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
+		patient.addName().setFamily(methodName);
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toVersionless();
 		myPatientDao.delete(id, mySrd);
 
@@ -2374,7 +2374,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 			id1 = myPatientDao.create(patient, mySrd).getId();
 
 			Meta metaAdd = new Meta();
@@ -2386,7 +2386,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 			patient.getMeta().addTag("http://foo", "Cat", "Kittens");
 
 			patient.getMeta().addSecurity().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2");
@@ -2479,7 +2479,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 			patient.getMeta().addTag(null, "Dog", "Puppies");
 
 			patient.getMeta().addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
@@ -2491,7 +2491,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
+			patient.addName().setFamily("Tester").addGiven("Joe");
 
 			patient.getMeta().addTag("http://foo", "Cat", "Kittens");
 			patient.getMeta().addSecurity().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2");
@@ -2576,7 +2576,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId();
 
 		Patient pat = new Patient();
-		pat.addName().addFamily("X" + methodName + "X");
+		pat.addName().setFamily("X" + methodName + "X");
 		pat.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
 		myPatientDao.create(pat, mySrd);
 
@@ -2614,20 +2614,20 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testSortByDate() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
-		p.addName().addFamily("testSortF1").addGiven("testSortG1");
+		p.addName().setFamily("testSortF1").addGiven("testSortG1");
 		p.setBirthDateElement(new DateType("2001-01-01"));
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create out of order
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
-		p.addName().addFamily("testSortF2").addGiven("testSortG2");
+		p.addName().setFamily("testSortF2").addGiven("testSortG2");
 		p.setBirthDateElement(new DateType("2001-01-03"));
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
-		p.addName().addFamily("testSortF3").addGiven("testSortG3");
+		p.addName().setFamily("testSortF3").addGiven("testSortG3");
 		p.setBirthDateElement(new DateType("2001-01-02"));
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
@@ -2718,22 +2718,22 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system1").setValue(methodName);
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system2").setValue(methodName);
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system3").setValue(methodName);
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system4").setValue(methodName);
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
@@ -2845,19 +2845,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("testSortF1").addGiven("testSortG1");
+		p.addName().setFamily("testSortF1").addGiven("testSortG1");
 		p.getManagingOrganization().setReferenceElement(oid1);
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("testSortF2").addGiven("testSortG2");
+		p.addName().setFamily("testSortF2").addGiven("testSortG2");
 		p.getManagingOrganization().setReferenceElement(oid2);
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("testSortF3").addGiven("testSortG3");
+		p.addName().setFamily("testSortF3").addGiven("testSortG3");
 		p.getManagingOrganization().setReferenceElement(oid1);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
@@ -2899,18 +2899,18 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Patient p = new Patient();
 		String string = "testSortByString01";
 		p.addIdentifier().setSystem("urn:system").setValue(string);
-		p.addName().addFamily("testSortF1").addGiven("testSortG1");
+		p.addName().setFamily("testSortF1").addGiven("testSortG1");
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create out of order
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(string);
-		p.addName().addFamily("testSortF3").addGiven("testSortG3");
+		p.addName().setFamily("testSortF3").addGiven("testSortG3");
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(string);
-		p.addName().addFamily("testSortF2").addGiven("testSortG2");
+		p.addName().setFamily("testSortF2").addGiven("testSortG2");
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
@@ -2952,22 +2952,22 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(string);
-		p.addName().addFamily("Fam1").addGiven("Giv1");
+		p.addName().setFamily("Fam1").addGiven("Giv1");
 		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(string);
-		p.addName().addFamily("Fam2").addGiven("Giv1");
+		p.addName().setFamily("Fam2").addGiven("Giv1");
 		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(string);
-		p.addName().addFamily("Fam2").addGiven("Giv2");
+		p.addName().setFamily("Fam2").addGiven("Giv2");
 		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(string);
-		p.addName().addFamily("Fam1").addGiven("Giv2");
+		p.addName().setFamily("Fam1").addGiven("Giv2");
 		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
@@ -3120,7 +3120,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertTrue(o1id.hasVersionIdPart());
 
 		Patient p1 = new Patient();
-		p1.addName().addFamily("AAAA");
+		p1.addName().setFamily("AAAA");
 		p1.getManagingOrganization().setReferenceElement(o1id);
 		IIdType p1id = myPatientDao.create(p1, mySrd).getId();
 
@@ -3180,7 +3180,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testTagsAndProfilesAndSecurityLabelsWithCreateAndReadAndSearch() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testTagsWithCreateAndReadAndSearch");
-		patient.addName().addFamily("Tester").addGiven("Joe");
+		patient.addName().setFamily("Tester").addGiven("Joe");
 		List<Coding> tagList = new ArrayList<Coding>();
 		tagList.add(new Coding().setSystem(null).setCode("Dog").setDisplay("Puppies"));
 		// Add this twice

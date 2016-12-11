@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -87,10 +87,10 @@ public class DosageInstruction extends Type implements ICompositeType {
     /**
      * Body site to administer to.
      */
-    @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "site", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Body site to administer to", formalDefinition="Body site to administer to." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/approach-site-codes")
-    protected Type site;
+    protected CodeableConcept site;
 
     /**
      * How drug should enter body.
@@ -143,7 +143,7 @@ public class DosageInstruction extends Type implements ICompositeType {
     @Description(shortDefinition="Amount of medication per unit of time", formalDefinition="Amount of medication per unit of time." )
     protected Type rate;
 
-    private static final long serialVersionUID = -1392288530L;
+    private static final long serialVersionUID = 1097478883L;
 
   /**
    * Constructor
@@ -371,34 +371,13 @@ public class DosageInstruction extends Type implements ICompositeType {
     /**
      * @return {@link #site} (Body site to administer to.)
      */
-    public Type getSite() { 
+    public CodeableConcept getSite() { 
+      if (this.site == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DosageInstruction.site");
+        else if (Configuration.doAutoCreate())
+          this.site = new CodeableConcept(); // cc
       return this.site;
-    }
-
-    /**
-     * @return {@link #site} (Body site to administer to.)
-     */
-    public CodeableConcept getSiteCodeableConcept() throws FHIRException { 
-      if (!(this.site instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.site;
-    }
-
-    public boolean hasSiteCodeableConcept() { 
-      return this.site instanceof CodeableConcept;
-    }
-
-    /**
-     * @return {@link #site} (Body site to administer to.)
-     */
-    public Reference getSiteReference() throws FHIRException { 
-      if (!(this.site instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
-      return (Reference) this.site;
-    }
-
-    public boolean hasSiteReference() { 
-      return this.site instanceof Reference;
     }
 
     public boolean hasSite() { 
@@ -408,7 +387,7 @@ public class DosageInstruction extends Type implements ICompositeType {
     /**
      * @param value {@link #site} (Body site to administer to.)
      */
-    public DosageInstruction setSite(Type value) { 
+    public DosageInstruction setSite(CodeableConcept value) { 
       this.site = value;
       return this;
     }
@@ -643,7 +622,7 @@ public class DosageInstruction extends Type implements ICompositeType {
         childrenList.add(new Property("additionalInstructions", "CodeableConcept", "Supplemental instructions - e.g. \"with meals\".", 0, java.lang.Integer.MAX_VALUE, additionalInstructions));
         childrenList.add(new Property("timing", "Timing", "When medication should be administered.", 0, java.lang.Integer.MAX_VALUE, timing));
         childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "Take \"as needed\" (for x).", 0, java.lang.Integer.MAX_VALUE, asNeeded));
-        childrenList.add(new Property("site[x]", "CodeableConcept|Reference(BodySite)", "Body site to administer to.", 0, java.lang.Integer.MAX_VALUE, site));
+        childrenList.add(new Property("site", "CodeableConcept", "Body site to administer to.", 0, java.lang.Integer.MAX_VALUE, site));
         childrenList.add(new Property("route", "CodeableConcept", "How drug should enter body.", 0, java.lang.Integer.MAX_VALUE, route));
         childrenList.add(new Property("method", "CodeableConcept", "Technique for administering medication.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("dose[x]", "Range|SimpleQuantity", "Amount of medication per dose.", 0, java.lang.Integer.MAX_VALUE, dose));
@@ -661,7 +640,7 @@ public class DosageInstruction extends Type implements ICompositeType {
         case -1206718612: /*additionalInstructions*/ return this.additionalInstructions == null ? new Base[0] : this.additionalInstructions.toArray(new Base[this.additionalInstructions.size()]); // CodeableConcept
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Timing
         case -1432923513: /*asNeeded*/ return this.asNeeded == null ? new Base[0] : new Base[] {this.asNeeded}; // Type
-        case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // Type
+        case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // CodeableConcept
         case 108704329: /*route*/ return this.route == null ? new Base[0] : new Base[] {this.route}; // CodeableConcept
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
         case 3089437: /*dose*/ return this.dose == null ? new Base[0] : new Base[] {this.dose}; // Type
@@ -693,7 +672,7 @@ public class DosageInstruction extends Type implements ICompositeType {
           this.asNeeded = castToType(value); // Type
           break;
         case 3530567: // site
-          this.site = castToType(value); // Type
+          this.site = castToCodeableConcept(value); // CodeableConcept
           break;
         case 108704329: // route
           this.route = castToCodeableConcept(value); // CodeableConcept
@@ -733,8 +712,8 @@ public class DosageInstruction extends Type implements ICompositeType {
           this.timing = castToTiming(value); // Timing
         else if (name.equals("asNeeded[x]"))
           this.asNeeded = castToType(value); // Type
-        else if (name.equals("site[x]"))
-          this.site = castToType(value); // Type
+        else if (name.equals("site"))
+          this.site = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("route"))
           this.route = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("method"))
@@ -761,7 +740,7 @@ public class DosageInstruction extends Type implements ICompositeType {
         case -1206718612:  return addAdditionalInstructions(); // CodeableConcept
         case -873664438:  return getTiming(); // Timing
         case -544329575:  return getAsNeeded(); // Type
-        case 2099997657:  return getSite(); // Type
+        case 3530567:  return getSite(); // CodeableConcept
         case 108704329:  return getRoute(); // CodeableConcept
         case -1077554975:  return getMethod(); // CodeableConcept
         case 1843195715:  return getDose(); // Type
@@ -797,12 +776,8 @@ public class DosageInstruction extends Type implements ICompositeType {
           this.asNeeded = new CodeableConcept();
           return this.asNeeded;
         }
-        else if (name.equals("siteCodeableConcept")) {
+        else if (name.equals("site")) {
           this.site = new CodeableConcept();
-          return this.site;
-        }
-        else if (name.equals("siteReference")) {
-          this.site = new Reference();
           return this.site;
         }
         else if (name.equals("route")) {

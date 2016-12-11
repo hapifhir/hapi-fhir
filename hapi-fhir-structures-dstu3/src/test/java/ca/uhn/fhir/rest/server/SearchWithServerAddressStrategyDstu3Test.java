@@ -48,7 +48,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
 	}
 
@@ -62,7 +62,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
 		
 		ourServlet.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
@@ -73,7 +73,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"http://foo.com/Patient/1\"/>"));
 
 		ourServlet.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttps());
@@ -84,7 +84,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"https://foo.com/Patient/1\"/>"));
 
 		ourServlet.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
@@ -96,7 +96,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"https://foo.com/Patient/1\"/>"));
 
 	}
@@ -111,7 +111,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"http://example.com/fhir/base/Patient/1\"/>"));
 	}
 
@@ -159,8 +159,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		@Search()
 		public List<Patient> searchByIdentifier() {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
-			retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("2"));
+			retVal.add((Patient) new Patient().addName(new HumanName().addGiven("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().addGiven("FAMILY")).setId("2"));
 			return retVal;
 		}
 		//@formatter:on

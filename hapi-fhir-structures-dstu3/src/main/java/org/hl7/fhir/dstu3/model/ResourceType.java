@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu3.model;
 
 import org.hl7.fhir.exceptions.FHIRException;
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 public enum ResourceType {
     Account,
@@ -74,6 +74,7 @@ public enum ResourceType {
     MedicationDispense,
     MedicationRequest,
     MedicationStatement,
+    MessageDefinition,
     MessageHeader,
     NamingSystem,
     NutritionRequest,
@@ -99,6 +100,8 @@ public enum ResourceType {
     ReferralRequest,
     RelatedPerson,
     RequestGroup,
+    ResearchStudy,
+    ResearchSubject,
     RiskAssessment,
     Schedule,
     SearchParameter,
@@ -259,6 +262,8 @@ public enum ResourceType {
       return "medicationrequest";
     case MedicationStatement:
       return "medicationstatement";
+    case MessageDefinition:
+      return "messagedefinition";
     case MessageHeader:
       return "messageheader";
     case NamingSystem:
@@ -309,6 +314,10 @@ public enum ResourceType {
       return "relatedperson";
     case RequestGroup:
       return "requestgroup";
+    case ResearchStudy:
+      return "researchstudy";
+    case ResearchSubject:
+      return "researchsubject";
     case RiskAssessment:
       return "riskassessment";
     case Schedule:
@@ -489,6 +498,8 @@ public enum ResourceType {
       return MedicationRequest;
     if ("MedicationStatement".equals(code))
       return MedicationStatement;
+    if ("MessageDefinition".equals(code))
+      return MessageDefinition;
     if ("MessageHeader".equals(code))
       return MessageHeader;
     if ("NamingSystem".equals(code))
@@ -539,6 +550,10 @@ public enum ResourceType {
       return RelatedPerson;
     if ("RequestGroup".equals(code))
       return RequestGroup;
+    if ("ResearchStudy".equals(code))
+      return ResearchStudy;
+    if ("ResearchSubject".equals(code))
+      return ResearchSubject;
     if ("RiskAssessment".equals(code))
       return RiskAssessment;
     if ("Schedule".equals(code))

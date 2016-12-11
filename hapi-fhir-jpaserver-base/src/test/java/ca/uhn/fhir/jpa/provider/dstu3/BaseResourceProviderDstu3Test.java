@@ -152,7 +152,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		List<String> names = new ArrayList<String>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
-			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamilyAsSingleString() : "";
+			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamily() : "";
 			if (isNotBlank(nextStr)) {
 				names.add(nextStr);
 			}

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -849,7 +849,7 @@ public enum V3ActCode {
         /**
          * Maximum amount paid or maximum number of services/products covered; or maximum amount or number covered during a specified time period under the policy or program.
          */
-        _ACTCOVERAGEAGELIMITCODE, 
+        _ACTCOVERAGEQUANTITYLIMITCODE, 
         /**
          * Codes representing the time period during which coverage is available; or financial participation requirements are in effect.
          */
@@ -2884,19 +2884,19 @@ public enum V3ActCode {
          */
         PSY, 
         /**
-         * Information about provision of social services.
-
-                        
-                           Usage Note: This is a temporary addition to FHIR to be proposed in harmonization.
-         */
-        SOC, 
-        /**
          * Policy for handling sickle cell disease information, which is afforded heightened confidentiality.  Information handling protocols are based on organizational policies related to sickle cell disease information, which is deemed sensitive.
 
                         
                            Usage Note: If there is a jurisdictional mandate, then the Act valued with this ActCode should be associated with an Act valued with any applicable laws from the ActPrivacyLaw code system.
          */
         SCA, 
+        /**
+         * Information about provision of social services.
+
+                        
+                           Usage Note: This is a temporary addition to FHIR to be proposed in harmonization.
+         */
+        SOC, 
         /**
          * Policy for handling sexual assault, abuse, or domestic violence information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to sexual assault, abuse, or domestic violence information that is deemed sensitive.
 
@@ -4002,6 +4002,14 @@ public enum V3ActCode {
          * Indicates that the observation is carrying out an aggregation calculation, contained in the value element.
          */
         AGGREGATE, 
+        /**
+         * Indicates what method is used in a quality measure to combine the component measure results included in an composite measure.
+         */
+        CMPMSRMTH, 
+        /**
+         * An attribute of a quality measure describing the weight this component measure score is to carry in determining the overall composite measure final score. The value is real value greater than 0 and less than 1.0. Each component measure score will be multiplied by its CMPMSRSCRWGHT and then summed with the other component measures to determine the final overall composite measure score. The sum across all CMPMSRSCRWGHT values within a single composite measure SHALL be 1.0. The value assigned is scoped to the composite measure referencing this component measure only.
+         */
+        CMPMSRSCRWGHT, 
         /**
          * Identifies the organization(s) who own the intellectual property represented by the eMeasure.
          */
@@ -5560,8 +5568,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return NELG;
         if ("_ActCoverageLimitCode".equals(codeString))
           return _ACTCOVERAGELIMITCODE;
-        if ("_ActCoverageAgeLimitCode".equals(codeString))
-          return _ACTCOVERAGEAGELIMITCODE;
+        if ("_ActCoverageQuantityLimitCode".equals(codeString))
+          return _ACTCOVERAGEQUANTITYLIMITCODE;
         if ("COVPRD".equals(codeString))
           return COVPRD;
         if ("LFEMX".equals(codeString))
@@ -6388,10 +6396,10 @@ the measure population as a narrative description (e.g., all patients seen in th
           return HIV;
         if ("PSY".equals(codeString))
           return PSY;
-        if ("SOC".equals(codeString))
-          return SOC;
         if ("SCA".equals(codeString))
           return SCA;
+        if ("SOC".equals(codeString))
+          return SOC;
         if ("SDV".equals(codeString))
           return SDV;
         if ("SEX".equals(codeString))
@@ -6854,6 +6862,10 @@ the measure population as a narrative description (e.g., all patients seen in th
           return _OBSERVATIONQUALITYMEASUREATTRIBUTE;
         if ("AGGREGATE".equals(codeString))
           return AGGREGATE;
+        if ("CMPMSRMTH".equals(codeString))
+          return CMPMSRMTH;
+        if ("CMPMSRSCRWGHT".equals(codeString))
+          return CMPMSRSCRWGHT;
         if ("COPY".equals(codeString))
           return COPY;
         if ("CRS".equals(codeString))
@@ -7557,7 +7569,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case ELG: return "ELG";
             case NELG: return "NELG";
             case _ACTCOVERAGELIMITCODE: return "_ActCoverageLimitCode";
-            case _ACTCOVERAGEAGELIMITCODE: return "_ActCoverageAgeLimitCode";
+            case _ACTCOVERAGEQUANTITYLIMITCODE: return "_ActCoverageQuantityLimitCode";
             case COVPRD: return "COVPRD";
             case LFEMX: return "LFEMX";
             case NETAMT: return "NETAMT";
@@ -7971,8 +7983,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case GDIS: return "GDIS";
             case HIV: return "HIV";
             case PSY: return "PSY";
-            case SOC: return "SOC";
             case SCA: return "SCA";
+            case SOC: return "SOC";
             case SDV: return "SDV";
             case SEX: return "SEX";
             case STD: return "STD";
@@ -8204,6 +8216,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case WATTRNS: return "WATTRNS";
             case _OBSERVATIONQUALITYMEASUREATTRIBUTE: return "_ObservationQualityMeasureAttribute";
             case AGGREGATE: return "AGGREGATE";
+            case CMPMSRMTH: return "CMPMSRMTH";
+            case CMPMSRSCRWGHT: return "CMPMSRSCRWGHT";
             case COPY: return "COPY";
             case CRS: return "CRS";
             case DEF: return "DEF";
@@ -8657,7 +8671,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case ELG: return "Insurance coverage is in effect for healthcare service(s) and/or product(s).";
             case NELG: return "Insurance coverage is not in effect for healthcare service(s) and/or product(s). May optionally include reasons for the ineligibility.";
             case _ACTCOVERAGELIMITCODE: return "Criteria that are applicable to the authorized coverage.";
-            case _ACTCOVERAGEAGELIMITCODE: return "Maximum amount paid or maximum number of services/products covered; or maximum amount or number covered during a specified time period under the policy or program.";
+            case _ACTCOVERAGEQUANTITYLIMITCODE: return "Maximum amount paid or maximum number of services/products covered; or maximum amount or number covered during a specified time period under the policy or program.";
             case COVPRD: return "Codes representing the time period during which coverage is available; or financial participation requirements are in effect.";
             case LFEMX: return "Definition: Maximum amount paid by payer or covered party; or maximum number of services or products covered under the policy or program during a covered party's lifetime.";
             case NETAMT: return "Maximum net amount that will be covered for the product or service specified.";
@@ -9071,8 +9085,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case GDIS: return "Policy for handling genetic disease information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to genetic disease information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case HIV: return "Policy for handling HIV or AIDS information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to HIV or AIDS information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case PSY: return "Policy for handling psychiatry information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to psychiatry information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
-            case SOC: return "Information about provision of social services.\r\n\n                        \n                           Usage Note: This is a temporary addition to FHIR to be proposed in harmonization.";
             case SCA: return "Policy for handling sickle cell disease information, which is afforded heightened confidentiality.  Information handling protocols are based on organizational policies related to sickle cell disease information, which is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then the Act valued with this ActCode should be associated with an Act valued with any applicable laws from the ActPrivacyLaw code system.";
+            case SOC: return "Information about provision of social services.\r\n\n                        \n                           Usage Note: This is a temporary addition to FHIR to be proposed in harmonization.";
             case SDV: return "Policy for handling sexual assault, abuse, or domestic violence information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to sexual assault, abuse, or domestic violence information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case SEX: return "Policy for handling sexuality and reproductive health information, which will be afforded heightened confidentiality.  Information handling protocols based on organizational policies related to sexuality and reproductive health information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case STD: return "Policy for handling sexually transmitted disease information, which will be afforded heightened confidentiality.\n Information handling protocols based on organizational policies related to sexually transmitted disease information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
@@ -9304,6 +9318,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case WATTRNS: return "Communication of an agent from a contaminated water source to a living subject whether the water is ingested as a food or not. The route of entry of the water may be through any bodily orifice.";
             case _OBSERVATIONQUALITYMEASUREATTRIBUTE: return "Codes used to define various metadata aspects of a health quality measure.";
             case AGGREGATE: return "Indicates that the observation is carrying out an aggregation calculation, contained in the value element.";
+            case CMPMSRMTH: return "Indicates what method is used in a quality measure to combine the component measure results included in an composite measure.";
+            case CMPMSRSCRWGHT: return "An attribute of a quality measure describing the weight this component measure score is to carry in determining the overall composite measure final score. The value is real value greater than 0 and less than 1.0. Each component measure score will be multiplied by its CMPMSRSCRWGHT and then summed with the other component measures to determine the final overall composite measure score. The sum across all CMPMSRSCRWGHT values within a single composite measure SHALL be 1.0. The value assigned is scoped to the composite measure referencing this component measure only.";
             case COPY: return "Identifies the organization(s) who own the intellectual property represented by the eMeasure.";
             case CRS: return "Summary of relevant clinical guidelines or other clinical recommendations supporting this eMeasure.";
             case DEF: return "Description of individual terms, provided as needed.";
@@ -9754,7 +9770,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case ELG: return "Eligible";
             case NELG: return "Not Eligible";
             case _ACTCOVERAGELIMITCODE: return "ActCoverageLimitCode";
-            case _ACTCOVERAGEAGELIMITCODE: return "ActCoverageAgeLimitCode";
+            case _ACTCOVERAGEQUANTITYLIMITCODE: return "ActCoverageQuantityLimitCode";
             case COVPRD: return "coverage period";
             case LFEMX: return "life time maximum";
             case NETAMT: return "Net Amount";
@@ -10168,8 +10184,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case GDIS: return "genetic disease information sensitivity";
             case HIV: return "HIV/AIDS information sensitivity";
             case PSY: return "psychiatry information sensitivity";
-            case SOC: return "social services sensitivity";
             case SCA: return "sickle cell anemia";
+            case SOC: return "social services sensitivity";
             case SDV: return "sexual assault, abuse, or domestic violence information sensitivity";
             case SEX: return "sexuality and reproductive health information sensitivity";
             case STD: return "sexually transmitted disease information sensitivity";
@@ -10401,6 +10417,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case WATTRNS: return "water-borne transmission";
             case _OBSERVATIONQUALITYMEASUREATTRIBUTE: return "ObservationQualityMeasureAttribute";
             case AGGREGATE: return "aggregate measure observation";
+            case CMPMSRMTH: return "composite measure method";
+            case CMPMSRSCRWGHT: return "component measure scoring weight";
             case COPY: return "copyright";
             case CRS: return "clinical recommendation statement";
             case DEF: return "definition";

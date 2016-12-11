@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -337,7 +337,7 @@ public class Address extends Type implements ICompositeType {
      * Country - a nation as commonly understood or generally accepted.
      */
     @Child(name = "country", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Country (can be ISO 3166 3 letter code)", formalDefinition="Country - a nation as commonly understood or generally accepted." )
+    @Description(shortDefinition="Country (e.g. can be ISO 3166 2 or 3 letter code)", formalDefinition="Country - a nation as commonly understood or generally accepted." )
     protected StringType country;
 
     /**

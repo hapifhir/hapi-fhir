@@ -5,7 +5,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.utils.FluentPathEngine;
+import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -15,14 +15,14 @@ import ca.uhn.fhir.fluentpath.IFluentPath;
 
 public class FluentPathDstu3 implements IFluentPath {
 
-	private FluentPathEngine myEngine;
+	private FHIRPathEngine myEngine;
 
 	public FluentPathDstu3(FhirContext theCtx) {
 		if (!(theCtx.getValidationSupport() instanceof IValidationSupport)) {
 			throw new IllegalStateException("Validation support module configured on context appears to be for the wrong FHIR version- Does not extend " + IValidationSupport.class.getName());
 		}
 		IValidationSupport validationSupport = (IValidationSupport) theCtx.getValidationSupport();
-		myEngine = new FluentPathEngine(new HapiWorkerContext(theCtx, validationSupport));
+		myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -82,6 +82,12 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
+    <sch:title>ElementDefinition.example</sch:title>
+    <sch:rule context="f:ElementDefinition/f:example">
+      <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  <sch:pattern>
     <sch:title>ElementDefinition.constraint</sch:title>
     <sch:rule context="f:ElementDefinition/f:constraint">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
@@ -92,7 +98,7 @@
     <sch:rule context="f:ElementDefinition/f:binding">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="(exists(f:valueSetUri) or exists(f:valueSetReference)) or exists(f:description)">provide either a reference or a description (or both) (inherited)</sch:assert>
-      <sch:assert test="not(exists(f:valueSetUri)) or (starts-with(string(f:valueSetUri/@value), 'http:') or starts-with(string(f:valueSetUri/@value), 'https:') or starts-with(string(f:valueSetUri/@value), 'urn:'))">ValueSet as a URI SHALL start with http:// or https:// urn: (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:valueSetUri)) or (starts-with(string(f:valueSetUri/@value), 'http:') or starts-with(string(f:valueSetUri/@value), 'https:') or starts-with(string(f:valueSetUri/@value), 'urn:'))">ValueSet as a URI SHALL start with http:// or https:// or urn: (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>

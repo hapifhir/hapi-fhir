@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -444,54 +444,54 @@ public enum ContractSignerType {
         }
         public String getDisplay() {
           switch (this) {
-            case AMENDER: return "amender";
-            case AUTHN: return "authenticator";
-            case AUT: return "author";
-            case AFFL: return "affiliate";
-            case AGNT: return "agent";
-            case ASSIGNED: return "assigned entity";
-            case CIT: return "citizen";
-            case CLAIMANT: return "claimant";
-            case COAUTH: return "co-author";
-            case CONSENTER: return "consenter";
-            case CONSWIT: return "consent witness";
-            case CONT: return "contact";
-            case COPART: return "co-participant";
-            case COVPTY: return "covered party";
-            case DELEGATEE: return "delegatee";
-            case DELEGATOR: return "delegator";
-            case DEPEND: return "dependent";
-            case DPOWATT: return "durable power of attorney";
-            case EMGCON: return "emergency contact";
-            case EVTWIT: return "event witness";
-            case EXCEST: return "executor of estate";
-            case GRANTEE: return "grantee";
-            case GRANTOR: return "grantor";
-            case GUAR: return "guarantor";
-            case GUARD: return "guardian";
-            case GUADLTM: return "guardian ad lidem";
-            case INF: return "informant";
-            case INTPRT: return "interpreter";
-            case INSBJ: return "investigation subject";
-            case HPOWATT: return "healthcare power of attorney";
-            case HPROV: return "healthcare provider";
-            case LEGAUTHN: return "legal authenticator";
-            case NMDINS: return "named insured";
-            case NOK: return "next of kin";
-            case NOTARY: return "notary";
-            case PAT: return "patient";
-            case POWATT: return "power of attorney";
-            case PRIMAUTH: return "primary author";
-            case PRIRECIP: return "responsible party ";
-            case RECIP: return "recipient";
-            case RESPRSN: return "responsible party";
-            case REVIEWER: return "reviewer";
-            case TRANS: return "transcriber";
-            case SOURCE: return "source";
-            case SPOWATT: return "special power of attorney";
-            case VALID: return "validator";
-            case VERF: return "verifier";
-            case WIT: return "witness";
+            case AMENDER: return "Amender";
+            case AUTHN: return "Authenticator";
+            case AUT: return "Author";
+            case AFFL: return "Affiliate";
+            case AGNT: return "Agent";
+            case ASSIGNED: return "Assigned Entity";
+            case CIT: return "Citizen";
+            case CLAIMANT: return "Claimant";
+            case COAUTH: return "Co-Author";
+            case CONSENTER: return "Consenter";
+            case CONSWIT: return "Consent Witness";
+            case CONT: return "Contact";
+            case COPART: return "Co-Participant";
+            case COVPTY: return "Covered Party";
+            case DELEGATEE: return "Delegatee";
+            case DELEGATOR: return "Delegator";
+            case DEPEND: return "Dependent";
+            case DPOWATT: return "Durable Power of Attorney";
+            case EMGCON: return "Emergency Contact";
+            case EVTWIT: return "Event Witness";
+            case EXCEST: return "Executor of Estate";
+            case GRANTEE: return "Grantee";
+            case GRANTOR: return "Grantor";
+            case GUAR: return "Guarantor";
+            case GUARD: return "Guardian";
+            case GUADLTM: return "Guardian ad lidem";
+            case INF: return "Informant";
+            case INTPRT: return "Interpreter";
+            case INSBJ: return "Investigation Subject";
+            case HPOWATT: return "Healthcare Power of Attorney";
+            case HPROV: return "Healthcare Provider";
+            case LEGAUTHN: return "Legal Authenticator";
+            case NMDINS: return "Named Insured";
+            case NOK: return "Next of Kin";
+            case NOTARY: return "Notary";
+            case PAT: return "Patient";
+            case POWATT: return "Power of Attorney";
+            case PRIMAUTH: return "Primary Author";
+            case PRIRECIP: return "Primary Responsible Party ";
+            case RECIP: return "Recipient";
+            case RESPRSN: return "Responsible Party";
+            case REVIEWER: return "Reviewer";
+            case TRANS: return "Transcriber";
+            case SOURCE: return "Source";
+            case SPOWATT: return "Apecial Power of Attorney";
+            case VALID: return "Validator";
+            case VERF: return "Verifier";
+            case WIT: return "Witness";
             default: return "?";
           }
     }

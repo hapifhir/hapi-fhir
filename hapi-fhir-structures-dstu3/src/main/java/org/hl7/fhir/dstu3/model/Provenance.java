@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Sat, Nov 5, 2016 10:42-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -199,30 +199,26 @@ public class Provenance extends DomainResource {
         /**
          * The individual, device or organization that participated in the event.
          */
-        @Child(name = "actor", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Individual, device or organization playing role", formalDefinition="The individual, device or organization that participated in the event." )
-        protected Reference actor;
+        @Child(name = "who", type = {UriType.class, Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Who participated", formalDefinition="The individual, device or organization that participated in the event." )
+        protected Type who;
 
         /**
-         * The actual object that is the target of the reference (The individual, device or organization that participated in the event.)
+         * A reference to an application-usable description of the identity that is represented by the signature.
          */
-        protected Resource actorTarget;
+        @Child(name = "onBehalfOf", type = {UriType.class, Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="On behalf of", formalDefinition="A reference to an application-usable description of the identity that is represented by the signature." )
+        protected Type onBehalfOf;
 
         /**
-         * The identity of the agent as known by the authorization system.
+         * The type of relationship between agents.
          */
-        @Child(name = "userId", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Authorization-system identifier for the agent", formalDefinition="The identity of the agent as known by the authorization system." )
-        protected Identifier userId;
+        @Child(name = "relatedAgentType", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Type of relationship between agents", formalDefinition="The type of relationship between agents." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-RoleLinkType")
+        protected CodeableConcept relatedAgentType;
 
-        /**
-         * A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.
-         */
-        @Child(name = "relatedAgent", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Track delegation between agents", formalDefinition="A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest." )
-        protected List<ProvenanceAgentRelatedAgentComponent> relatedAgent;
-
-        private static final long serialVersionUID = 1792758952L;
+        private static final long serialVersionUID = 1272491531L;
 
     /**
      * Constructor
@@ -234,9 +230,10 @@ public class Provenance extends DomainResource {
     /**
      * Constructor
      */
-      public ProvenanceAgentComponent(Coding role) {
+      public ProvenanceAgentComponent(Coding role, Type who) {
         super();
         this.role = role;
+        this.who = who;
       }
 
         /**
@@ -264,136 +261,134 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} (The individual, device or organization that participated in the event.)
+         * @return {@link #who} (The individual, device or organization that participated in the event.)
          */
-        public Reference getActor() { 
-          if (this.actor == null)
+        public Type getWho() { 
+          return this.who;
+        }
+
+        /**
+         * @return {@link #who} (The individual, device or organization that participated in the event.)
+         */
+        public UriType getWhoUriType() throws FHIRException { 
+          if (!(this.who instanceof UriType))
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.who.getClass().getName()+" was encountered");
+          return (UriType) this.who;
+        }
+
+        public boolean hasWhoUriType() { 
+          return this.who instanceof UriType;
+        }
+
+        /**
+         * @return {@link #who} (The individual, device or organization that participated in the event.)
+         */
+        public Reference getWhoReference() throws FHIRException { 
+          if (!(this.who instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.who.getClass().getName()+" was encountered");
+          return (Reference) this.who;
+        }
+
+        public boolean hasWhoReference() { 
+          return this.who instanceof Reference;
+        }
+
+        public boolean hasWho() { 
+          return this.who != null && !this.who.isEmpty();
+        }
+
+        /**
+         * @param value {@link #who} (The individual, device or organization that participated in the event.)
+         */
+        public ProvenanceAgentComponent setWho(Type value) { 
+          this.who = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
+         */
+        public Type getOnBehalfOf() { 
+          return this.onBehalfOf;
+        }
+
+        /**
+         * @return {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
+         */
+        public UriType getOnBehalfOfUriType() throws FHIRException { 
+          if (!(this.onBehalfOf instanceof UriType))
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
+          return (UriType) this.onBehalfOf;
+        }
+
+        public boolean hasOnBehalfOfUriType() { 
+          return this.onBehalfOf instanceof UriType;
+        }
+
+        /**
+         * @return {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
+         */
+        public Reference getOnBehalfOfReference() throws FHIRException { 
+          if (!(this.onBehalfOf instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
+          return (Reference) this.onBehalfOf;
+        }
+
+        public boolean hasOnBehalfOfReference() { 
+          return this.onBehalfOf instanceof Reference;
+        }
+
+        public boolean hasOnBehalfOf() { 
+          return this.onBehalfOf != null && !this.onBehalfOf.isEmpty();
+        }
+
+        /**
+         * @param value {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
+         */
+        public ProvenanceAgentComponent setOnBehalfOf(Type value) { 
+          this.onBehalfOf = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #relatedAgentType} (The type of relationship between agents.)
+         */
+        public CodeableConcept getRelatedAgentType() { 
+          if (this.relatedAgentType == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceAgentComponent.actor");
+              throw new Error("Attempt to auto-create ProvenanceAgentComponent.relatedAgentType");
             else if (Configuration.doAutoCreate())
-              this.actor = new Reference(); // cc
-          return this.actor;
+              this.relatedAgentType = new CodeableConcept(); // cc
+          return this.relatedAgentType;
         }
 
-        public boolean hasActor() { 
-          return this.actor != null && !this.actor.isEmpty();
+        public boolean hasRelatedAgentType() { 
+          return this.relatedAgentType != null && !this.relatedAgentType.isEmpty();
         }
 
         /**
-         * @param value {@link #actor} (The individual, device or organization that participated in the event.)
+         * @param value {@link #relatedAgentType} (The type of relationship between agents.)
          */
-        public ProvenanceAgentComponent setActor(Reference value) { 
-          this.actor = value;
+        public ProvenanceAgentComponent setRelatedAgentType(CodeableConcept value) { 
+          this.relatedAgentType = value;
           return this;
-        }
-
-        /**
-         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The individual, device or organization that participated in the event.)
-         */
-        public Resource getActorTarget() { 
-          return this.actorTarget;
-        }
-
-        /**
-         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The individual, device or organization that participated in the event.)
-         */
-        public ProvenanceAgentComponent setActorTarget(Resource value) { 
-          this.actorTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #userId} (The identity of the agent as known by the authorization system.)
-         */
-        public Identifier getUserId() { 
-          if (this.userId == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceAgentComponent.userId");
-            else if (Configuration.doAutoCreate())
-              this.userId = new Identifier(); // cc
-          return this.userId;
-        }
-
-        public boolean hasUserId() { 
-          return this.userId != null && !this.userId.isEmpty();
-        }
-
-        /**
-         * @param value {@link #userId} (The identity of the agent as known by the authorization system.)
-         */
-        public ProvenanceAgentComponent setUserId(Identifier value) { 
-          this.userId = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.)
-         */
-        public List<ProvenanceAgentRelatedAgentComponent> getRelatedAgent() { 
-          if (this.relatedAgent == null)
-            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
-          return this.relatedAgent;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ProvenanceAgentComponent setRelatedAgent(List<ProvenanceAgentRelatedAgentComponent> theRelatedAgent) { 
-          this.relatedAgent = theRelatedAgent;
-          return this;
-        }
-
-        public boolean hasRelatedAgent() { 
-          if (this.relatedAgent == null)
-            return false;
-          for (ProvenanceAgentRelatedAgentComponent item : this.relatedAgent)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ProvenanceAgentRelatedAgentComponent addRelatedAgent() { //3
-          ProvenanceAgentRelatedAgentComponent t = new ProvenanceAgentRelatedAgentComponent();
-          if (this.relatedAgent == null)
-            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
-          this.relatedAgent.add(t);
-          return t;
-        }
-
-        public ProvenanceAgentComponent addRelatedAgent(ProvenanceAgentRelatedAgentComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.relatedAgent == null)
-            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
-          this.relatedAgent.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #relatedAgent}, creating it if it does not already exist
-         */
-        public ProvenanceAgentRelatedAgentComponent getRelatedAgentFirstRep() { 
-          if (getRelatedAgent().isEmpty()) {
-            addRelatedAgent();
-          }
-          return getRelatedAgent().get(0);
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "Coding", "The function of the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("actor", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, actor));
-          childrenList.add(new Property("userId", "Identifier", "The identity of the agent as known by the authorization system.", 0, java.lang.Integer.MAX_VALUE, userId));
-          childrenList.add(new Property("relatedAgent", "", "A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.", 0, java.lang.Integer.MAX_VALUE, relatedAgent));
+          childrenList.add(new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, who));
+          childrenList.add(new Property("onBehalfOf[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
+          childrenList.add(new Property("relatedAgentType", "CodeableConcept", "The type of relationship between agents.", 0, java.lang.Integer.MAX_VALUE, relatedAgentType));
         }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // Coding
-        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
-        case -836030906: /*userId*/ return this.userId == null ? new Base[0] : new Base[] {this.userId}; // Identifier
-        case 126261658: /*relatedAgent*/ return this.relatedAgent == null ? new Base[0] : this.relatedAgent.toArray(new Base[this.relatedAgent.size()]); // ProvenanceAgentRelatedAgentComponent
+        case 117694: /*who*/ return this.who == null ? new Base[0] : new Base[] {this.who}; // Type
+        case -14402964: /*onBehalfOf*/ return this.onBehalfOf == null ? new Base[0] : new Base[] {this.onBehalfOf}; // Type
+        case 1228161012: /*relatedAgentType*/ return this.relatedAgentType == null ? new Base[0] : new Base[] {this.relatedAgentType}; // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -405,14 +400,14 @@ public class Provenance extends DomainResource {
         case 3506294: // role
           this.role = castToCoding(value); // Coding
           break;
-        case 92645877: // actor
-          this.actor = castToReference(value); // Reference
+        case 117694: // who
+          this.who = castToType(value); // Type
           break;
-        case -836030906: // userId
-          this.userId = castToIdentifier(value); // Identifier
+        case -14402964: // onBehalfOf
+          this.onBehalfOf = castToType(value); // Type
           break;
-        case 126261658: // relatedAgent
-          this.getRelatedAgent().add((ProvenanceAgentRelatedAgentComponent) value); // ProvenanceAgentRelatedAgentComponent
+        case 1228161012: // relatedAgentType
+          this.relatedAgentType = castToCodeableConcept(value); // CodeableConcept
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -423,12 +418,12 @@ public class Provenance extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("role"))
           this.role = castToCoding(value); // Coding
-        else if (name.equals("actor"))
-          this.actor = castToReference(value); // Reference
-        else if (name.equals("userId"))
-          this.userId = castToIdentifier(value); // Identifier
-        else if (name.equals("relatedAgent"))
-          this.getRelatedAgent().add((ProvenanceAgentRelatedAgentComponent) value);
+        else if (name.equals("who[x]"))
+          this.who = castToType(value); // Type
+        else if (name.equals("onBehalfOf[x]"))
+          this.onBehalfOf = castToType(value); // Type
+        else if (name.equals("relatedAgentType"))
+          this.relatedAgentType = castToCodeableConcept(value); // CodeableConcept
         else
           super.setProperty(name, value);
       }
@@ -437,9 +432,9 @@ public class Provenance extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3506294:  return getRole(); // Coding
-        case 92645877:  return getActor(); // Reference
-        case -836030906:  return getUserId(); // Identifier
-        case 126261658:  return addRelatedAgent(); // ProvenanceAgentRelatedAgentComponent
+        case -788654078:  return getWho(); // Type
+        case 418120340:  return getOnBehalfOf(); // Type
+        case 1228161012:  return getRelatedAgentType(); // CodeableConcept
         default: return super.makeProperty(hash, name);
         }
 
@@ -451,16 +446,25 @@ public class Provenance extends DomainResource {
           this.role = new Coding();
           return this.role;
         }
-        else if (name.equals("actor")) {
-          this.actor = new Reference();
-          return this.actor;
+        else if (name.equals("whoUri")) {
+          this.who = new UriType();
+          return this.who;
         }
-        else if (name.equals("userId")) {
-          this.userId = new Identifier();
-          return this.userId;
+        else if (name.equals("whoReference")) {
+          this.who = new Reference();
+          return this.who;
         }
-        else if (name.equals("relatedAgent")) {
-          return addRelatedAgent();
+        else if (name.equals("onBehalfOfUri")) {
+          this.onBehalfOf = new UriType();
+          return this.onBehalfOf;
+        }
+        else if (name.equals("onBehalfOfReference")) {
+          this.onBehalfOf = new Reference();
+          return this.onBehalfOf;
+        }
+        else if (name.equals("relatedAgentType")) {
+          this.relatedAgentType = new CodeableConcept();
+          return this.relatedAgentType;
         }
         else
           return super.addChild(name);
@@ -470,13 +474,9 @@ public class Provenance extends DomainResource {
         ProvenanceAgentComponent dst = new ProvenanceAgentComponent();
         copyValues(dst);
         dst.role = role == null ? null : role.copy();
-        dst.actor = actor == null ? null : actor.copy();
-        dst.userId = userId == null ? null : userId.copy();
-        if (relatedAgent != null) {
-          dst.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
-          for (ProvenanceAgentRelatedAgentComponent i : relatedAgent)
-            dst.relatedAgent.add(i.copy());
-        };
+        dst.who = who == null ? null : who.copy();
+        dst.onBehalfOf = onBehalfOf == null ? null : onBehalfOf.copy();
+        dst.relatedAgentType = relatedAgentType == null ? null : relatedAgentType.copy();
         return dst;
       }
 
@@ -487,8 +487,8 @@ public class Provenance extends DomainResource {
         if (!(other instanceof ProvenanceAgentComponent))
           return false;
         ProvenanceAgentComponent o = (ProvenanceAgentComponent) other;
-        return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true) && compareDeep(userId, o.userId, true)
-           && compareDeep(relatedAgent, o.relatedAgent, true);
+        return compareDeep(role, o.role, true) && compareDeep(who, o.who, true) && compareDeep(onBehalfOf, o.onBehalfOf, true)
+           && compareDeep(relatedAgentType, o.relatedAgentType, true);
       }
 
       @Override
@@ -502,218 +502,12 @@ public class Provenance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(role, actor, userId, relatedAgent
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(role, who, onBehalfOf, relatedAgentType
           );
       }
 
   public String fhirType() {
     return "Provenance.agent";
-
-  }
-
-  }
-
-    @Block()
-    public static class ProvenanceAgentRelatedAgentComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The type of relationship between agents.
-         */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Type of relationship between agents", formalDefinition="The type of relationship between agents." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-RoleLinkType")
-        protected CodeableConcept type;
-
-        /**
-         * An internal reference to another agent listed in this provenance by its identifier.
-         */
-        @Child(name = "target", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Reference to other agent in this resource by identifier", formalDefinition="An internal reference to another agent listed in this provenance by its identifier." )
-        protected UriType target;
-
-        private static final long serialVersionUID = 794181198L;
-
-    /**
-     * Constructor
-     */
-      public ProvenanceAgentRelatedAgentComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ProvenanceAgentRelatedAgentComponent(CodeableConcept type, UriType target) {
-        super();
-        this.type = type;
-        this.target = target;
-      }
-
-        /**
-         * @return {@link #type} (The type of relationship between agents.)
-         */
-        public CodeableConcept getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceAgentRelatedAgentComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of relationship between agents.)
-         */
-        public ProvenanceAgentRelatedAgentComponent setType(CodeableConcept value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #target} (An internal reference to another agent listed in this provenance by its identifier.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
-         */
-        public UriType getTargetElement() { 
-          if (this.target == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceAgentRelatedAgentComponent.target");
-            else if (Configuration.doAutoCreate())
-              this.target = new UriType(); // bb
-          return this.target;
-        }
-
-        public boolean hasTargetElement() { 
-          return this.target != null && !this.target.isEmpty();
-        }
-
-        public boolean hasTarget() { 
-          return this.target != null && !this.target.isEmpty();
-        }
-
-        /**
-         * @param value {@link #target} (An internal reference to another agent listed in this provenance by its identifier.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
-         */
-        public ProvenanceAgentRelatedAgentComponent setTargetElement(UriType value) { 
-          this.target = value;
-          return this;
-        }
-
-        /**
-         * @return An internal reference to another agent listed in this provenance by its identifier.
-         */
-        public String getTarget() { 
-          return this.target == null ? null : this.target.getValue();
-        }
-
-        /**
-         * @param value An internal reference to another agent listed in this provenance by its identifier.
-         */
-        public ProvenanceAgentRelatedAgentComponent setTarget(String value) { 
-            if (this.target == null)
-              this.target = new UriType();
-            this.target.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "The type of relationship between agents.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("target", "uri", "An internal reference to another agent listed in this provenance by its identifier.", 0, java.lang.Integer.MAX_VALUE, target));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // UriType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case -880905839: // target
-          this.target = castToUri(value); // UriType
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("target"))
-          this.target = castToUri(value); // UriType
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case -880905839: throw new FHIRException("Cannot make property target as it is not a complex type"); // UriType
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
-        }
-        else if (name.equals("target")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Provenance.target");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ProvenanceAgentRelatedAgentComponent copy() {
-        ProvenanceAgentRelatedAgentComponent dst = new ProvenanceAgentRelatedAgentComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.target = target == null ? null : target.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ProvenanceAgentRelatedAgentComponent))
-          return false;
-        ProvenanceAgentRelatedAgentComponent o = (ProvenanceAgentRelatedAgentComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(target, o.target, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ProvenanceAgentRelatedAgentComponent))
-          return false;
-        ProvenanceAgentRelatedAgentComponent o = (ProvenanceAgentRelatedAgentComponent) other;
-        return compareValues(target, o.target, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, target);
-      }
-
-  public String fhirType() {
-    return "Provenance.agent.relatedAgent";
 
   }
 
@@ -730,35 +524,25 @@ public class Provenance extends DomainResource {
         protected Enumeration<ProvenanceEntityRole> role;
 
         /**
-         * The type of the entity. If the entity is a resource, then this is a resource type.
-         */
-        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The type of resource in this entity", formalDefinition="The type of the entity. If the entity is a resource, then this is a resource type." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
-        protected Coding type;
-
-        /**
          * Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.
          */
-        @Child(name = "reference", type = {UriType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "reference", type = {Reference.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Identity of entity", formalDefinition="Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative." )
-        protected UriType reference;
+        protected Reference reference;
 
         /**
-         * Human-readable description of the entity.
+         * The actual object that is the target of the reference (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
-        @Child(name = "display", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Human description of entity", formalDefinition="Human-readable description of the entity." )
-        protected StringType display;
+        protected Resource referenceTarget;
 
         /**
          * The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity.
          */
-        @Child(name = "agent", type = {ProvenanceAgentComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "agent", type = {ProvenanceAgentComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Entity is attributed to this agent", formalDefinition="The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity." )
         protected List<ProvenanceAgentComponent> agent;
 
-        private static final long serialVersionUID = 1066624051L;
+        private static final long serialVersionUID = 519286833L;
 
     /**
      * Constructor
@@ -770,10 +554,9 @@ public class Provenance extends DomainResource {
     /**
      * Constructor
      */
-      public ProvenanceEntityComponent(Enumeration<ProvenanceEntityRole> role, Coding type, UriType reference) {
+      public ProvenanceEntityComponent(Enumeration<ProvenanceEntityRole> role, Reference reference) {
         super();
         this.role = role;
-        this.type = type;
         this.reference = reference;
       }
 
@@ -823,43 +606,15 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return {@link #type} (The type of the entity. If the entity is a resource, then this is a resource type.)
+         * @return {@link #reference} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
-        public Coding getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceEntityComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of the entity. If the entity is a resource, then this is a resource type.)
-         */
-        public ProvenanceEntityComponent setType(Coding value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #reference} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
-         */
-        public UriType getReferenceElement() { 
+        public Reference getReference() { 
           if (this.reference == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ProvenanceEntityComponent.reference");
             else if (Configuration.doAutoCreate())
-              this.reference = new UriType(); // bb
+              this.reference = new Reference(); // cc
           return this.reference;
-        }
-
-        public boolean hasReferenceElement() { 
-          return this.reference != null && !this.reference.isEmpty();
         }
 
         public boolean hasReference() { 
@@ -867,76 +622,25 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @param value {@link #reference} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
+         * @param value {@link #reference} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
-        public ProvenanceEntityComponent setReferenceElement(UriType value) { 
+        public ProvenanceEntityComponent setReference(Reference value) { 
           this.reference = value;
           return this;
         }
 
         /**
-         * @return Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.
+         * @return {@link #reference} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
-        public String getReference() { 
-          return this.reference == null ? null : this.reference.getValue();
+        public Resource getReferenceTarget() { 
+          return this.referenceTarget;
         }
 
         /**
-         * @param value Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.
+         * @param value {@link #reference} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
-        public ProvenanceEntityComponent setReference(String value) { 
-            if (this.reference == null)
-              this.reference = new UriType();
-            this.reference.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #display} (Human-readable description of the entity.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
-         */
-        public StringType getDisplayElement() { 
-          if (this.display == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceEntityComponent.display");
-            else if (Configuration.doAutoCreate())
-              this.display = new StringType(); // bb
-          return this.display;
-        }
-
-        public boolean hasDisplayElement() { 
-          return this.display != null && !this.display.isEmpty();
-        }
-
-        public boolean hasDisplay() { 
-          return this.display != null && !this.display.isEmpty();
-        }
-
-        /**
-         * @param value {@link #display} (Human-readable description of the entity.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
-         */
-        public ProvenanceEntityComponent setDisplayElement(StringType value) { 
-          this.display = value;
-          return this;
-        }
-
-        /**
-         * @return Human-readable description of the entity.
-         */
-        public String getDisplay() { 
-          return this.display == null ? null : this.display.getValue();
-        }
-
-        /**
-         * @param value Human-readable description of the entity.
-         */
-        public ProvenanceEntityComponent setDisplay(String value) { 
-          if (Utilities.noString(value))
-            this.display = null;
-          else {
-            if (this.display == null)
-              this.display = new StringType();
-            this.display.setValue(value);
-          }
+        public ProvenanceEntityComponent setReferenceTarget(Resource value) { 
+          this.referenceTarget = value;
           return this;
         }
 
@@ -996,9 +700,7 @@ public class Provenance extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "code", "How the entity was used during the activity.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("type", "Coding", "The type of the entity. If the entity is a resource, then this is a resource type.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("reference", "uri", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, java.lang.Integer.MAX_VALUE, reference));
-          childrenList.add(new Property("display", "string", "Human-readable description of the entity.", 0, java.lang.Integer.MAX_VALUE, display));
+          childrenList.add(new Property("reference", "Reference(Any)", "Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.", 0, java.lang.Integer.MAX_VALUE, reference));
           childrenList.add(new Property("agent", "@Provenance.agent", "The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity.", 0, java.lang.Integer.MAX_VALUE, agent));
         }
 
@@ -1006,9 +708,7 @@ public class Provenance extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // Enumeration<ProvenanceEntityRole>
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
-        case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // UriType
-        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
+        case -925155509: /*reference*/ return this.reference == null ? new Base[0] : new Base[] {this.reference}; // Reference
         case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // ProvenanceAgentComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1021,14 +721,8 @@ public class Provenance extends DomainResource {
         case 3506294: // role
           this.role = new ProvenanceEntityRoleEnumFactory().fromType(value); // Enumeration<ProvenanceEntityRole>
           break;
-        case 3575610: // type
-          this.type = castToCoding(value); // Coding
-          break;
         case -925155509: // reference
-          this.reference = castToUri(value); // UriType
-          break;
-        case 1671764162: // display
-          this.display = castToString(value); // StringType
+          this.reference = castToReference(value); // Reference
           break;
         case 92750597: // agent
           this.getAgent().add((ProvenanceAgentComponent) value); // ProvenanceAgentComponent
@@ -1042,12 +736,8 @@ public class Provenance extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("role"))
           this.role = new ProvenanceEntityRoleEnumFactory().fromType(value); // Enumeration<ProvenanceEntityRole>
-        else if (name.equals("type"))
-          this.type = castToCoding(value); // Coding
         else if (name.equals("reference"))
-          this.reference = castToUri(value); // UriType
-        else if (name.equals("display"))
-          this.display = castToString(value); // StringType
+          this.reference = castToReference(value); // Reference
         else if (name.equals("agent"))
           this.getAgent().add((ProvenanceAgentComponent) value);
         else
@@ -1058,9 +748,7 @@ public class Provenance extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3506294: throw new FHIRException("Cannot make property role as it is not a complex type"); // Enumeration<ProvenanceEntityRole>
-        case 3575610:  return getType(); // Coding
-        case -925155509: throw new FHIRException("Cannot make property reference as it is not a complex type"); // UriType
-        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
+        case -925155509:  return getReference(); // Reference
         case 92750597:  return addAgent(); // ProvenanceAgentComponent
         default: return super.makeProperty(hash, name);
         }
@@ -1072,15 +760,9 @@ public class Provenance extends DomainResource {
         if (name.equals("role")) {
           throw new FHIRException("Cannot call addChild on a primitive type Provenance.role");
         }
-        else if (name.equals("type")) {
-          this.type = new Coding();
-          return this.type;
-        }
         else if (name.equals("reference")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Provenance.reference");
-        }
-        else if (name.equals("display")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Provenance.display");
+          this.reference = new Reference();
+          return this.reference;
         }
         else if (name.equals("agent")) {
           return addAgent();
@@ -1093,9 +775,7 @@ public class Provenance extends DomainResource {
         ProvenanceEntityComponent dst = new ProvenanceEntityComponent();
         copyValues(dst);
         dst.role = role == null ? null : role.copy();
-        dst.type = type == null ? null : type.copy();
         dst.reference = reference == null ? null : reference.copy();
-        dst.display = display == null ? null : display.copy();
         if (agent != null) {
           dst.agent = new ArrayList<ProvenanceAgentComponent>();
           for (ProvenanceAgentComponent i : agent)
@@ -1111,8 +791,8 @@ public class Provenance extends DomainResource {
         if (!(other instanceof ProvenanceEntityComponent))
           return false;
         ProvenanceEntityComponent o = (ProvenanceEntityComponent) other;
-        return compareDeep(role, o.role, true) && compareDeep(type, o.type, true) && compareDeep(reference, o.reference, true)
-           && compareDeep(display, o.display, true) && compareDeep(agent, o.agent, true);
+        return compareDeep(role, o.role, true) && compareDeep(reference, o.reference, true) && compareDeep(agent, o.agent, true)
+          ;
       }
 
       @Override
@@ -1122,13 +802,11 @@ public class Provenance extends DomainResource {
         if (!(other instanceof ProvenanceEntityComponent))
           return false;
         ProvenanceEntityComponent o = (ProvenanceEntityComponent) other;
-        return compareValues(role, o.role, true) && compareValues(reference, o.reference, true) && compareValues(display, o.display, true)
-          ;
+        return compareValues(role, o.role, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(role, type, reference, display
-          , agent);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(role, reference, agent);
       }
 
   public String fhirType() {
@@ -1153,7 +831,7 @@ public class Provenance extends DomainResource {
     /**
      * The period during which the activity occurred.
      */
-    @Child(name = "period", type = {Period.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "period", type = {Period.class}, order=1, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the activity occurred", formalDefinition="The period during which the activity occurred." )
     protected Period period;
 
@@ -1167,7 +845,7 @@ public class Provenance extends DomainResource {
     /**
      * The reason that the activity was taking place.
      */
-    @Child(name = "reason", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "reason", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reason the activity is occurring", formalDefinition="The reason that the activity was taking place." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
     protected List<Coding> reason;
@@ -1175,7 +853,7 @@ public class Provenance extends DomainResource {
     /**
      * An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.
      */
-    @Child(name = "activity", type = {Coding.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "activity", type = {Coding.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Activity that occurred", formalDefinition="An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ProvenanceEventCurrentState")
     protected Coding activity;
@@ -1183,7 +861,7 @@ public class Provenance extends DomainResource {
     /**
      * Where the activity occurred, if relevant.
      */
-    @Child(name = "location", type = {Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "location", type = {Location.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Where the activity occurred, if relevant", formalDefinition="Where the activity occurred, if relevant." )
     protected Reference location;
 
@@ -1195,28 +873,28 @@ public class Provenance extends DomainResource {
     /**
      * Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.
      */
-    @Child(name = "policy", type = {UriType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "policy", type = {UriType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Policy or plan the activity was defined by", formalDefinition="Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc." )
     protected List<UriType> policy;
 
     /**
      * An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place.
      */
-    @Child(name = "agent", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "agent", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Actor involved", formalDefinition="An actor taking a role in an activity  for which it can be assigned some degree of responsibility for the activity taking place." )
     protected List<ProvenanceAgentComponent> agent;
 
     /**
      * An entity used in this activity.
      */
-    @Child(name = "entity", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "entity", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="An entity used in this activity", formalDefinition="An entity used in this activity." )
     protected List<ProvenanceEntityComponent> entity;
 
     /**
      * A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated.
      */
-    @Child(name = "signature", type = {Signature.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "signature", type = {Signature.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Signature on target", formalDefinition="A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated." )
     protected List<Signature> signature;
 
@@ -1966,41 +1644,21 @@ public class Provenance extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SIG = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SIG);
 
  /**
-   * Search parameter: <b>entity-type</b>
-   * <p>
-   * Description: <b>The type of resource in this entity</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Provenance.entity.type</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="entity-type", path="Provenance.entity.type", description="The type of resource in this entity", type="token" )
-  public static final String SP_ENTITY_TYPE = "entity-type";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>entity-type</b>
-   * <p>
-   * Description: <b>The type of resource in this entity</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Provenance.entity.type</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ENTITY_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ENTITY_TYPE);
-
- /**
    * Search parameter: <b>agent</b>
    * <p>
-   * Description: <b>Individual, device or organization playing role</b><br>
+   * Description: <b>Who participated</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Provenance.agent.actor</b><br>
+   * Path: <b>Provenance.agent.who[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="agent", path="Provenance.agent.who", description="Who participated", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
   public static final String SP_AGENT = "agent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>agent</b>
    * <p>
-   * Description: <b>Individual, device or organization playing role</b><br>
+   * Description: <b>Who participated</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Provenance.agent.actor</b><br>
+   * Path: <b>Provenance.agent.who[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AGENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AGENT);
@@ -2104,44 +1762,30 @@ public class Provenance extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Provenance:location").toLocked();
 
  /**
-   * Search parameter: <b>userid</b>
-   * <p>
-   * Description: <b>Authorization-system identifier for the agent</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Provenance.agent.userId</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="userid", path="Provenance.agent.userId", description="Authorization-system identifier for the agent", type="token" )
-  public static final String SP_USERID = "userid";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>userid</b>
-   * <p>
-   * Description: <b>Authorization-system identifier for the agent</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Provenance.agent.userId</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam USERID = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_USERID);
-
- /**
    * Search parameter: <b>entity</b>
    * <p>
    * Description: <b>Identity of entity</b><br>
-   * Type: <b>uri</b><br>
+   * Type: <b>reference</b><br>
    * Path: <b>Provenance.entity.reference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="entity", path="Provenance.entity.reference", description="Identity of entity", type="uri" )
+  @SearchParamDefinition(name="entity", path="Provenance.entity.reference", description="Identity of entity", type="reference" )
   public static final String SP_ENTITY = "entity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>entity</b>
    * <p>
    * Description: <b>Identity of entity</b><br>
-   * Type: <b>uri</b><br>
+   * Type: <b>reference</b><br>
    * Path: <b>Provenance.entity.reference</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam ENTITY = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_ENTITY);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENTITY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENTITY);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Provenance:entity</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENTITY = new ca.uhn.fhir.model.api.Include("Provenance:entity").toLocked();
 
  /**
    * Search parameter: <b>target</b>

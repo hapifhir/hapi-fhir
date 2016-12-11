@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Sat, Nov 5, 2016 08:41-0400 for FHIR v1.7.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -95,6 +95,11 @@ public enum V3ObservationInterpretation {
         GREATER_THAN, 
         /**
          * A valid result cannot be obtained for the specified component / analyte due to the presence of anti-complementary substances in the sample.
+
+                        
+                           
+                              Deprecation Comment: 
+                           This code is being deprecated to match the status in V2 Table 0078 "Interpretation Codes.
          */
         AC, 
         /**
@@ -105,10 +110,20 @@ public enum V3ObservationInterpretation {
         IE, 
         /**
          * A result cannot be considered valid for the specified component / analyte or organism due to failure in the quality control testing component.
+
+                        
+                           
+                              Deprecation Comment: 
+                           This code is being deprecated to match the status in V2 Table 0078 "Interpretation Codes.
          */
         QCF, 
         /**
          * A valid result cannot be obtained for the specified organism or cell line due to the presence of cytotoxic substances in the sample or culture.
+
+                        
+                           
+                              Deprecation Comment: 
+                           This code is being deprecated to match the status in V2 Table 0078 "Interpretation Codes.
          */
         TOX, 
         /**
@@ -300,6 +315,13 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
          */
         LX, 
         /**
+         * Hold for Medical Review
+
+                        
+                           Usage Note: This code is not intended for use in V3 artifacts.  It is included in the code system to maintain alignment with the V2 Table 0078 "Interpretation Codes."
+         */
+        HM, 
+        /**
          * Interpretations of the presence or absence of a component / analyte or organism in a test or of a sign in a clinical observation. In keeping with laboratory data processing practice, these concepts provide a categorical interpretation of the "meaning" of the quantitative value for the same observation.
          */
         OBSERVATIONINTERPRETATIONDETECTION, 
@@ -344,6 +366,13 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
          * This result has been evaluated in light of known contraindicators.  Once those contraindicators have been taken into account the result is determined to be "Unexpected" (e.g., presence of non-prescribed drugs in a patient that is taking prescription medication for pain management).
          */
         UNE, 
+        /**
+         * Interpretation qualifiers in separate OBX segments
+
+                        
+                           Usage Note: This code is not intended for use in V3 artifacts.  It is included in the code system to maintain alignment with the V2 Table 0078 "Interpretation Codes."
+         */
+        OBX, 
         /**
          * Interpretations of the presence and level of reactivity of the specified component / analyte with the reagent in the performed laboratory test.
          */
@@ -447,6 +476,8 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
           return HX;
         if ("LX".equals(codeString))
           return LX;
+        if ("HM".equals(codeString))
+          return HM;
         if ("ObservationInterpretationDetection".equals(codeString))
           return OBSERVATIONINTERPRETATIONDETECTION;
         if ("IND".equals(codeString))
@@ -467,6 +498,8 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
           return EXP;
         if ("UNE".equals(codeString))
           return UNE;
+        if ("OBX".equals(codeString))
+          return OBX;
         if ("ReactivityObservationInterpretation".equals(codeString))
           return REACTIVITYOBSERVATIONINTERPRETATION;
         if ("NR".equals(codeString))
@@ -519,6 +552,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case EX: return "EX";
             case HX: return "HX";
             case LX: return "LX";
+            case HM: return "HM";
             case OBSERVATIONINTERPRETATIONDETECTION: return "ObservationInterpretationDetection";
             case IND: return "IND";
             case E: return "E";
@@ -529,6 +563,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case OBSERVATIONINTERPRETATIONEXPECTATION: return "ObservationInterpretationExpectation";
             case EXP: return "EXP";
             case UNE: return "UNE";
+            case OBX: return "OBX";
             case REACTIVITYOBSERVATIONINTERPRETATION: return "ReactivityObservationInterpretation";
             case NR: return "NR";
             case RR: return "RR";
@@ -552,10 +587,10 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case _OBSERVATIONINTERPRETATIONEXCEPTIONS: return "Technical exceptions resulting in the inability to provide an interpretation. At most one allowed. Does not imply normality or severity.";
             case LESS_THAN: return "The result is below the minimum detection limit (the test procedure or equipment is the limiting factor).\r\n\n                        Synonyms: Below analytical limit, low off scale.";
             case GREATER_THAN: return "The result is above the maximum quantifiable limit (the test procedure or equipment is the limiting factor).\r\n\n                        Synonyms: Above analytical limit, high off scale.";
-            case AC: return "A valid result cannot be obtained for the specified component / analyte due to the presence of anti-complementary substances in the sample.";
+            case AC: return "A valid result cannot be obtained for the specified component / analyte due to the presence of anti-complementary substances in the sample.\r\n\n                        \n                           \n                              Deprecation Comment: \n                           This code is being deprecated to match the status in V2 Table 0078 \"Interpretation Codes.";
             case IE: return "There is insufficient evidence that the species in question is a good target for therapy with the drug.  A categorical interpretation is not possible.\r\n\n                        [Note: A MIC with \"IE\" and/or a comment may be reported (without an accompanying S, I or R-categorization).]";
-            case QCF: return "A result cannot be considered valid for the specified component / analyte or organism due to failure in the quality control testing component.";
-            case TOX: return "A valid result cannot be obtained for the specified organism or cell line due to the presence of cytotoxic substances in the sample or culture.";
+            case QCF: return "A result cannot be considered valid for the specified component / analyte or organism due to failure in the quality control testing component.\r\n\n                        \n                           \n                              Deprecation Comment: \n                           This code is being deprecated to match the status in V2 Table 0078 \"Interpretation Codes.";
+            case TOX: return "A valid result cannot be obtained for the specified organism or cell line due to the presence of cytotoxic substances in the sample or culture.\r\n\n                        \n                           \n                              Deprecation Comment: \n                           This code is being deprecated to match the status in V2 Table 0078 \"Interpretation Codes.";
             case _OBSERVATIONINTERPRETATIONNORMALITY: return "Interpretation of normality or degree of abnormality (including critical or \"alert\" level). Concepts in this category are mutually exclusive, i.e., at most one is allowed.";
             case A: return "The result or observation value is outside the reference range or expected norm (as defined for the respective test procedure).\r\n\n                        [Note: Typically applies to non-numeric results.]";
             case AA: return "The result or observation value is outside a reference range or expected norm at a level at which immediate action should be considered for patient safety (as defined for the respective test procedure).\r\n\n                        [Note: Typically applies to non-numeric results.  Analogous to critical/panic limits for numeric results.]";
@@ -581,6 +616,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case EX: return "The observation/test result is interpreted as being outside the inclusion range for a particular protocol within which the result is being reported.\n\r\n\n                        Example: A positive result on a Hepatitis screening test.\n                           Open Issue: EX, HX, LX: These three concepts do not seem to meet a clear need in the vocabulary, and their use in observation interpretation appears likely to be covered by other existing concepts (e.g., A, H, L).  The only apparent significant difference is their reference to use in protocols for exclusion of study subjects.\nThese concepts/codes were proposed by RCRIM for use in the CTLaboratory message.  They were submitted and approved in the November 2005 Harmonization cycle in proposal \"030103C_VOCAB_RCRIM_l_quade_RCRIM Obs Interp_20051028154455\".  However, this proposal was not fully implemented in the vocabulary.  The proposal recommended creation of the x_ClinicalResearchExclusion domain in ObservationInterpretation with a value set including those three concepts/codes, but there is no subdomain of that name or equivalent with a binding to either of the value sets that contain these concepts/codes.\nMembers of the OO WG have recently attempted to contact members of RCRIM regarding these concepts, both by email and at the recent WGM in Atlanta, without response.  It is felt by OO that the best course of action to take at this time is to add this comprehensive Open Issue rather than deprecate these three concepts at this time, until further discussion is held.";
             case HX: return "The observation/test result is interpreted as being outside the inclusion range for a particular protocol within which the result is being reported.\n\r\n\n                        Example: A positive result on a Hepatitis screening test.\n                           Open Issue: EX, HX, LX: These three concepts do not seem to meet a clear need in the vocabulary, and their use in observation interpretation appears likely to be covered by other existing concepts (e.g., A, H, L).  The only apparent significant difference is their reference to use in protocols for exclusion of study subjects.  These concepts/codes were proposed by RCRIM for use in the CTLaboratory message.  They were submitted and approved in the November 2005 Harmonization cycle in proposal \"030103C_VOCAB_RCRIM_l_quade_RCRIM Obs Interp_20051028154455\". However, this proposal was not fully implemented in the vocabulary.  The proposal recommended creation of the x_ClinicalResearchExclusion domain in ObservationInterpretation with a value set including those three concepts/codes, but there is no subdomain of that name or equivalent with a binding to either of the value sets that contain these concepts/codes.  Members of the OO WG have recently attempted to contact members of RCRIM regarding these concepts, both by email and at the recent WGM in Atlanta, without response.  It is felt by OO that the best course of action to take at this time is to add this comprehensive Open Issue rather than deprecate these three concepts at this time, until further discussion is held.";
             case LX: return "The numeric observation/test result is interpreted as being below the low threshold value for a particular protocol within which the result is being reported.\r\n\n                        Example: A Total White Blood Cell Count falling below a protocol-defined threshold value of 3000/mm^3\n                           Open Issue: EX, HX, LX: These three concepts do not seem to meet a clear need in the vocabulary, and their use in observation interpretation appears likely to be covered by other existing concepts (e.g., A, H, L).  The only apparent significant difference is their reference to use in protocols for exclusion of study subjects.  These concepts/codes were proposed by RCRIM for use in the CTLaboratory message.  They were submitted and approved in the November 2005 Harmonization cycle in proposal \"030103C_VOCAB_RCRIM_l_quade_RCRIM Obs Interp_20051028154455\".  However, this proposal was not fully implemented in the vocabulary.  The proposal recommended creation of the x_ClinicalResearchExclusion domain in ObservationInterpretation with a value set including those three concepts/codes, but there is no subdomain of that name or equivalent with a binding to either of the value sets that contain these concepts/codes.  Members of the OO WG have recently attempted to contact members of RCRIM regarding these concepts, both by email and at the recent WGM in Atlanta, without response.  It is felt by OO that the best course of action to take at this time is to add this comprehensive Open Issue rather than deprecate these three concepts at this time, until further discussion is held.";
+            case HM: return "Hold for Medical Review\r\n\n                        \n                           Usage Note: This code is not intended for use in V3 artifacts.  It is included in the code system to maintain alignment with the V2 Table 0078 \"Interpretation Codes.\"";
             case OBSERVATIONINTERPRETATIONDETECTION: return "Interpretations of the presence or absence of a component / analyte or organism in a test or of a sign in a clinical observation. In keeping with laboratory data processing practice, these concepts provide a categorical interpretation of the \"meaning\" of the quantitative value for the same observation.";
             case IND: return "The specified component / analyte, organism or clinical sign could neither be declared positive / negative nor detected / not detected by the performed test or procedure.\r\n\n                        \n                           Usage Note: For example, if the specimen was degraded, poorly processed, or was missing the required anatomic structures, then \"indeterminate\" (i.e. \"cannot be determined\") is the appropriate response, not \"equivocal\".";
             case E: return "The test or procedure was successfully performed, but the results are borderline and can neither be declared positive / negative nor detected / not detected according to the current established criteria.";
@@ -591,6 +627,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case OBSERVATIONINTERPRETATIONEXPECTATION: return "Interpretation of the observed result taking into account additional information (contraindicators) about the patient's situation. Concepts in this category are mutually exclusive, i.e., at most one is allowed.";
             case EXP: return "This result has been evaluated in light of known contraindicators.  Once those contraindicators have been taken into account the result is determined to be \"Expected\"  (e.g., presence of drugs in a patient that is taking prescription medication for pain management).";
             case UNE: return "This result has been evaluated in light of known contraindicators.  Once those contraindicators have been taken into account the result is determined to be \"Unexpected\" (e.g., presence of non-prescribed drugs in a patient that is taking prescription medication for pain management).";
+            case OBX: return "Interpretation qualifiers in separate OBX segments\r\n\n                        \n                           Usage Note: This code is not intended for use in V3 artifacts.  It is included in the code system to maintain alignment with the V2 Table 0078 \"Interpretation Codes.\"";
             case REACTIVITYOBSERVATIONINTERPRETATION: return "Interpretations of the presence and level of reactivity of the specified component / analyte with the reagent in the performed laboratory test.";
             case NR: return "An absence finding used to indicate that the specified component / analyte did not react measurably with the reagent.";
             case RR: return "A presence finding used to indicate that the specified component / analyte reacted with the reagent above the reliably measurable limit of the performed test.";
@@ -640,6 +677,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case EX: return "outside threshold";
             case HX: return "above high threshold";
             case LX: return "below low threshold";
+            case HM: return "Hold for Medical Review";
             case OBSERVATIONINTERPRETATIONDETECTION: return "ObservationInterpretationDetection";
             case IND: return "Indeterminate";
             case E: return "Equivocal";
@@ -650,6 +688,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case OBSERVATIONINTERPRETATIONEXPECTATION: return "ObservationInterpretationExpectation";
             case EXP: return "Expected";
             case UNE: return "Unexpected";
+            case OBX: return "Interpretation qualifiers in separate OBX segments";
             case REACTIVITYOBSERVATIONINTERPRETATION: return "ReactivityObservationInterpretation";
             case NR: return "Non-reactive";
             case RR: return "Reactive";

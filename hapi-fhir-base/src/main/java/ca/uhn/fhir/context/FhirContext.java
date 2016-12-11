@@ -885,4 +885,11 @@ public class FhirContext {
 		return retVal;
 	}
 
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2 DSTU2} (2016 May DSTU3 Snapshot)
+	 */
+	public static FhirContext forDstu2_1() {
+		return new FhirContext(FhirVersionEnum.DSTU2_1);
+	}
+
 }

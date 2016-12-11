@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities.ProfileKnowledgeProvider.BindingResolution;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.elementmodel.ObjectConverter;
@@ -23,8 +24,10 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Element;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.AggregationMode;
+import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBaseComponent;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionConstraintComponent;
+import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionExampleComponent;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionMappingComponent;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionSlicingComponent;
 import org.hl7.fhir.dstu3.model.ElementDefinition.SlicingRules;
@@ -51,6 +54,7 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.dstu3.utils.NarrativeGenerator;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
 import org.hl7.fhir.dstu3.validation.ValidationMessage;
 import org.hl7.fhir.dstu3.validation.ValidationMessage.Source;
@@ -502,10 +506,10 @@ public class ProfileUtilities {
           boolean isExtension = cpath.endsWith(".extension") || cpath.endsWith(".modifierExtension");
           if (diffMatches.get(0).hasSlicing()) { // it might be null if the differential doesn't want to say anything about slicing
             if (!isExtension)
-            diffpos++; // if there's a slice on the first, we'll ignore any content it has
+              diffpos++; // if there's a slice on the first, we'll ignore any content it has
             ElementDefinitionSlicingComponent dSlice = diffMatches.get(0).getSlicing();
             ElementDefinitionSlicingComponent bSlice = currentBase.getSlicing();
-            if (!orderMatches(dSlice.getOrderedElement(), bSlice.getOrderedElement()))
+            if (dSlice.hasOrderedElement() && bSlice.hasOrderedElement() && !orderMatches(dSlice.getOrderedElement(), bSlice.getOrderedElement()))
               throw new DefinitionException("Slicing rules on differential ("+summariseSlicing(dSlice)+") do not match those on base ("+summariseSlicing(bSlice)+") - order @ "+path+" ("+contextName+")");
             if (!discriminatorMatches(dSlice.getDiscriminator(), bSlice.getDiscriminator()))
              throw new DefinitionException("Slicing rules on differential ("+summariseSlicing(dSlice)+") do not match those on base ("+summariseSlicing(bSlice)+") - disciminator @ "+path+" ("+contextName+")");
@@ -519,8 +523,11 @@ public class ProfileUtilities {
             updateFromSlicing(outcome.getSlicing(), diffMatches.get(0).getSlicing());
             updateFromDefinition(outcome, diffMatches.get(0), profileName, closed, url); // if there's no slice, we don't want to update the unsliced description
           }
-          if (diffMatches.get(0).hasSlicing() && !diffMatches.get(0).hasSliceName())
-            diffpos++;
+          if (diffMatches.get(0).hasSlicing() && !diffMatches.get(0).hasSliceName()) {
+            if (isExtension)
+              diffpos++;
+//            throw new Error("fhir diffpos++ at "+diffpos);
+          }
             
           result.getElement().add(outcome);
 
@@ -569,7 +576,7 @@ public class ProfileUtilities {
             for (ElementDefinition baseItem : baseMatches)
               if (baseItem.getSliceName().equals(diffItem.getSliceName()))
                 throw new DefinitionException("Named items are out of order in the slice");
-            outcome = updateURLs(url, original.copy());
+            outcome = updateURLs(url, diffItem.copy());
             outcome.setPath(fixedPath(contextPathDst, outcome.getPath()));
             updateFromBase(outcome, currentBase);
             outcome.setSlicing(null);
@@ -579,7 +586,7 @@ public class ProfileUtilities {
             updateFromDefinition(outcome, diffItem, profileName, trimDifferential, url);
             // --- LM Added this
             diffCursor = differential.getElement().indexOf(diffItem)+1;
-            if ((outcome.getType().get(0).getCode().equals("Extension") || differential.getElement().size() > diffCursor) && outcome.getPath().contains(".") && isDataType(outcome.getType())) {  // don't want to do this for the root, since that's base, and we're already processing it
+            if (!outcome.getType().isEmpty() && (outcome.getType().get(0).getCode().equals("Extension") || differential.getElement().size() > diffCursor) && outcome.getPath().contains(".") && isDataType(outcome.getType())) {  // don't want to do this for the root, since that's base, and we're already processing it
               if (!baseWalksInto(base.getElement(), baseCursor)) {
                 if (differential.getElement().size() > diffCursor && pathStartsWith(differential.getElement().get(diffCursor).getPath(), diffMatches.get(0).getPath()+".")) {
                 if (outcome.getType().size() > 1)
@@ -599,11 +606,10 @@ public class ProfileUtilities {
                   for (ElementDefinition extEd : dt.getSnapshot().getElement()) {
                     ElementDefinition extUrlEd = updateURLs(url, extEd.copy());
                     extUrlEd.setPath(fixedPath(contextPathDst, extUrlEd.getPath()));
-                    updateFromBase(extUrlEd, currentBase);
+//                    updateFromBase(extUrlEd, currentBase);
                     markDerived(extUrlEd);
                     result.getElement().add(extUrlEd);
-                  }
-                  
+                  }                  
                 }
               }
             }
@@ -612,6 +618,13 @@ public class ProfileUtilities {
           }
         }
       }
+    }
+
+    int i = 0;
+    for (ElementDefinition e : result.getElement()) {
+      i++;
+      if (e.hasMinElement() && e.getMinElement().getValue()==null)
+        throw new Error("null min");
     }
   }
 
@@ -729,10 +742,14 @@ public class ProfileUtilities {
 
   private void updateFromBase(ElementDefinition derived, ElementDefinition base) {
     if (base.hasBase()) {
+      if (!derived.hasBase())
+        derived.setBase(new ElementDefinitionBaseComponent());
       derived.getBase().setPath(base.getBase().getPath());
       derived.getBase().setMin(base.getBase().getMin());
       derived.getBase().setMax(base.getBase().getMax());
     } else {
+      if (!derived.hasBase())
+        derived.setBase(new ElementDefinitionBaseComponent());
       derived.getBase().setPath(base.getPath());
       derived.getBase().setMin(base.getMin());
       derived.getBase().setMax(base.getMax());
@@ -952,8 +969,10 @@ public class ProfileUtilities {
       ElementDefinition e = profile.getSnapshot().getElement().get(0);
       base.setDefinition(e.getDefinition());
       base.setShort(e.getShort());
-      base.setCommentsElement(e.getCommentsElement());
-      base.setRequirementsElement(e.getRequirementsElement());
+      if (e.hasCommentsElement())
+        base.setCommentsElement(e.getCommentsElement());
+      if (e.hasRequirementsElement())
+        base.setRequirementsElement(e.getRequirementsElement());
       base.getAlias().clear();
       base.getAlias().addAll(e.getAlias());
       base.getMapping().clear();
@@ -990,7 +1009,7 @@ public class ProfileUtilities {
       if (derived.hasCommentsElement()) {
         if (derived.getComments().startsWith("..."))
           base.setComments(base.getComments()+"\r\n"+derived.getComments().substring(3));
-        else if (!Base.compareDeep(derived.getCommentsElement(), base.getCommentsElement(), false))
+        else if (derived.hasCommentsElement()!= base.hasCommentsElement() || !Base.compareDeep(derived.getCommentsElement(), base.getCommentsElement(), false))
           base.setCommentsElement(derived.getCommentsElement().copy());
         else if (trimDifferential)
           base.setCommentsElement(derived.getCommentsElement().copy());
@@ -1001,7 +1020,7 @@ public class ProfileUtilities {
       if (derived.hasLabelElement()) {
         if (derived.getLabel().startsWith("..."))
           base.setLabel(base.getLabel()+"\r\n"+derived.getLabel().substring(3));
-        else if (!Base.compareDeep(derived.getLabelElement(), base.getLabelElement(), false))
+        else if (!base.hasLabelElement() || !Base.compareDeep(derived.getLabelElement(), base.getLabelElement(), false))
           base.setLabelElement(derived.getLabelElement().copy());
         else if (trimDifferential)
           base.setLabelElement(derived.getLabelElement().copy());
@@ -1012,7 +1031,7 @@ public class ProfileUtilities {
       if (derived.hasRequirementsElement()) {
         if (derived.getRequirements().startsWith("..."))
           base.setRequirements(base.getRequirements()+"\r\n"+derived.getRequirements().substring(3));
-        else if (!Base.compareDeep(derived.getRequirementsElement(), base.getRequirementsElement(), false))
+        else if (!base.hasRequirementsElement() || !Base.compareDeep(derived.getRequirementsElement(), base.getRequirementsElement(), false))
           base.setRequirementsElement(derived.getRequirementsElement().copy());
         else if (trimDifferential)
           base.setRequirementsElement(derived.getRequirementsElement().copy());
@@ -1079,13 +1098,17 @@ public class ProfileUtilities {
             derived.getPattern().setUserData(DERIVATION_EQUALS, true);
       }
 
-      if (derived.hasExample()) {
-        if (!Base.compareDeep(derived.getExample(), base.getExample(), false))
-          base.setExample(derived.getExample().copy());
+      for (ElementDefinitionExampleComponent ex : derived.getExample()) {
+        boolean found = false;
+        for (ElementDefinitionExampleComponent exS : base.getExample())
+          if (Base.compareDeep(ex, exS, false))
+            found = true;
+        if (!found)
+          base.addExample(ex.copy());
         else if (trimDifferential)
-          derived.setExample(null);
+          derived.getExample().remove(ex);
         else
-          derived.getExample().setUserData(DERIVATION_EQUALS, true);
+          ex.setUserData(DERIVATION_EQUALS, true);
       }
 
       if (derived.hasMaxLengthElement()) {
@@ -1101,7 +1124,7 @@ public class ProfileUtilities {
       // condition : id 0..*
 
       if (derived.hasMustSupportElement()) {
-        if (!Base.compareDeep(derived.getMustSupportElement(), base.getMustSupportElement(), false))
+        if (!(base.hasMustSupportElement() && Base.compareDeep(derived.getMustSupportElement(), base.getMustSupportElement(), false)))
           base.setMustSupportElement(derived.getMustSupportElement().copy());
         else if (trimDifferential)
           derived.setMustSupportElement(null);
@@ -1113,16 +1136,16 @@ public class ProfileUtilities {
       // profiles cannot change : isModifier, defaultValue, meaningWhenMissing
       // but extensions can change isModifier
       if (isExtension) {
-        if (!Base.compareDeep(derived.getIsModifierElement(), base.getIsModifierElement(), false))
+        if (derived.hasIsModifierElement() && !(base.hasIsModifierElement() && Base.compareDeep(derived.getIsModifierElement(), base.getIsModifierElement(), false)))
           base.setIsModifierElement(derived.getIsModifierElement().copy());
         else if (trimDifferential)
           derived.setIsModifierElement(null);
-        else
+        else if (derived.hasIsModifierElement())
           derived.getIsModifierElement().setUserData(DERIVATION_EQUALS, true);
       }
 
       if (derived.hasBinding()) {
-        if (!Base.compareDeep(derived.getBinding(), base.getBinding(), false)) {
+        if (!base.hasBinding() || !Base.compareDeep(derived.getBinding(), base.getBinding(), false)) {
           if (base.hasBinding() && base.getBinding().getStrength() == BindingStrength.REQUIRED && derived.getBinding().getStrength() != BindingStrength.REQUIRED)
             messages.add(new ValidationMessage(Source.ProfileValidator, IssueType.BUSINESSRULE, pn+"."+derived.getPath(), "illegal attempt to change the binding on "+derived.getPath()+" from "+base.getBinding().getStrength().toCode()+" to "+derived.getBinding().getStrength().toCode(), IssueSeverity.ERROR));
 //            throw new DefinitionException("StructureDefinition "+pn+" at "+derived.getPath()+": illegal attempt to change a binding from "+base.getBinding().getStrength().toCode()+" to "+derived.getBinding().getStrength().toCode());
@@ -1159,7 +1182,7 @@ public class ProfileUtilities {
             for (TypeRefComponent ts : derived.getType()) {
               boolean ok = false;
               CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
-              for (TypeRefComponent td : base.getType()) {
+              for (TypeRefComponent td : base.getType()) {;
                 b.append(td.getCode());
                 if (td.hasCode() && (td.getCode().equals(ts.getCode()) || td.getCode().equals("Extension") ||
                     td.getCode().equals("Element") || td.getCode().equals("*") ||
@@ -1216,6 +1239,10 @@ public class ProfileUtilities {
       	}
       }
       
+      // now, check that we still have a bindable type; if not, delete the binding - see task 8477
+      if (dest.hasBinding() && !hasBindableType(dest))
+        dest.setBinding(null);
+        
       // finally, we copy any extensions from source to dest
       for (Extension ex : base.getExtension()) {
         StructureDefinition sd  = context.fetchResource(StructureDefinition.class, ex.getUrl());
@@ -1225,6 +1252,15 @@ public class ProfileUtilities {
       }
     }
   }
+
+  private boolean hasBindableType(ElementDefinition ed) {
+    for (TypeRefComponent tr : ed.getType()) {
+      if (Utilities.existsInList(tr.getCode(), "Coding", "CodeableConcept", "Quantity", "url", "string", "code"))
+        return true;
+    }
+    return false;
+  }
+
 
   private boolean isLargerMax(String derived, String base) {
     if ("*".equals(base))
@@ -1414,7 +1450,7 @@ public class ProfileUtilities {
 
 
     try {
-		return gen.generate(model, corePath);
+		return gen.generate(model, corePath, 0);
 	} catch (org.hl7.fhir.exceptions.FHIRException e) {
 		throw new FHIRException(e.getMessage(), e);
 	}
@@ -1651,13 +1687,17 @@ public class ProfileUtilities {
     StringType max = !hasDef ? new StringType() : definition.hasMaxElement() ? definition.getMaxElement() : new StringType();
     if (min.isEmpty() && definition.getUserData(DERIVATION_POINTER) != null) {
       ElementDefinition base = (ElementDefinition) definition.getUserData(DERIVATION_POINTER);
-      min = base.getMinElement().copy();
-      min.setUserData(DERIVATION_EQUALS, true);
+      if (base.hasMinElement()) {
+        min = base.getMinElement().copy();
+        min.setUserData(DERIVATION_EQUALS, true);
+      }
     }
     if (max.isEmpty() && definition.getUserData(DERIVATION_POINTER) != null) {
       ElementDefinition base = (ElementDefinition) definition.getUserData(DERIVATION_POINTER);
-      max = base.getMaxElement().copy();
-      max.setUserData(DERIVATION_EQUALS, true);
+      if (base.hasMaxElement()) {
+        max = base.getMaxElement().copy();
+        max.setUserData(DERIVATION_EQUALS, true);
+      }
     }
     if (min.isEmpty() && fallback != null)
       min = fallback.getMinElement();
@@ -1700,11 +1740,27 @@ public class ProfileUtilities {
     profiles.add(profile);
     genElement(defFile == null ? null : defFile+"#", gen, model.getRows(), list.get(0), list, profiles, diff, profileBaseFileName, null, snapshot, corePath, imagePath, true, logicalModel, profile.getDerivation() == TypeDerivationRule.CONSTRAINT && usesMustSupport(list), allInvariants);
     try {
-      return gen.generate(model, imagePath);
+      return gen.generate(model, imagePath, 0);
 	} catch (org.hl7.fhir.exceptions.FHIRException e) {
 		throw new FHIRException(e.getMessage(), e);
 	}
   }
+
+
+  public XhtmlNode generateGrid(String defFile, StructureDefinition profile, String imageFolder, boolean inlineGraphics, String profileBaseFileName, String corePath, String imagePath) throws IOException, FHIRException {
+    HierarchicalTableGenerator gen = new HierarchicalTableGenerator(imageFolder, inlineGraphics);
+    TableModel model = gen.initGridTable(corePath);
+    List<ElementDefinition> list = profile.getSnapshot().getElement();
+    List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
+    profiles.add(profile);
+    genGridElement(defFile == null ? null : defFile+"#", gen, model.getRows(), list.get(0), list, profiles, true, profileBaseFileName, null, corePath, imagePath, true, profile.getDerivation() == TypeDerivationRule.CONSTRAINT && usesMustSupport(list));
+    try {
+      return gen.generate(model, imagePath, 1);
+    } catch (org.hl7.fhir.exceptions.FHIRException e) {
+      throw new FHIRException(e.getMessage(), e);
+    }
+  }
+
 
   private boolean usesMustSupport(List<ElementDefinition> list) {
     for (ElementDefinition ed : list)
@@ -1840,6 +1896,59 @@ public class ProfileUtilities {
             if (child.getPath().endsWith(".extension"))
               genElement(defPath, gen, row.getSubRows(), child, all, profiles, showMissing, profileBaseFileName, true, false, corePath, imagePath, false, logicalModel, isConstraintMode, allInvariants);
       }
+    }
+  }
+
+  private void genGridElement(String defPath, HierarchicalTableGenerator gen, List<Row> rows, ElementDefinition element, List<ElementDefinition> all, List<StructureDefinition> profiles, boolean showMissing, String profileBaseFileName, Boolean extensions, String corePath, String imagePath, boolean root, boolean isConstraintMode) throws IOException {
+    StructureDefinition profile = profiles == null ? null : profiles.get(profiles.size()-1);
+    String s = tail(element.getPath());
+    List<ElementDefinition> children = getChildren(all, element);
+    boolean isExtension = (s.equals("extension") || s.equals("modifierExtension"));
+
+    if (!onlyInformationIsMapping(all, element)) {
+      Row row = gen.new Row();
+      row.setAnchor(element.getPath());
+      row.setColor(getRowColor(element, isConstraintMode));
+      boolean hasDef = element != null;
+      String ref = defPath == null ? null : defPath + element.getId();
+      UnusedTracker used = new UnusedTracker();
+      used.used = true;
+      Cell left = gen.new Cell();
+      if (element.getType().size() == 1 && element.getType().get(0).isPrimitive())
+        left.getPieces().add(gen.new Piece(ref, "\u00A0\u00A0" + s, !hasDef ? null : element.getDefinition()).addStyle("font-weight:bold"));
+      else
+        left.getPieces().add(gen.new Piece(ref, "\u00A0\u00A0" + s, !hasDef ? null : element.getDefinition()));
+      if (element.hasSliceName()) {
+        left.getPieces().add(gen.new Piece("br"));
+        String indent = StringUtils.repeat('\u00A0', 1+2*(element.getPath().split("\\.").length));
+        left.getPieces().add(gen.new Piece(null, indent + "("+element.getSliceName() + ")", null));
+      }
+      row.getCells().add(left);
+
+      ExtensionContext extDefn = null;
+      genCardinality(gen, element, row, hasDef, used, null);
+      if (hasDef && !"0".equals(element.getMax()))
+        genTypes(gen, row, element, profileBaseFileName, profile, corePath, imagePath);
+      else
+        row.getCells().add(gen.new Cell());
+      generateGridDescription(gen, row, element, null, used.used, null, null, profile, corePath, imagePath, root, null);
+/*      if (element.hasSlicing()) {
+        if (standardExtensionSlicing(element)) {
+          used.used = element.hasType() && element.getType().get(0).hasProfile();
+          showMissing = false;
+        } else {
+          row.setIcon("icon_slice.png", HierarchicalTableGenerator.TEXT_ICON_SLICE);
+          row.getCells().get(2).getPieces().clear();
+          for (Cell cell : row.getCells())
+            for (Piece p : cell.getPieces()) {
+              p.addStyle("font-style: italic");
+            }
+        }
+      }*/
+      rows.add(row);
+      for (ElementDefinition child : children)
+        if (child.getMustSupport())
+          genGridElement(defPath, gen, row.getSubRows(), child, all, profiles, showMissing, profileBaseFileName, isExtension, corePath, imagePath, false, isConstraintMode);
     }
   }
 
@@ -1986,7 +2095,7 @@ public class ProfileUtilities {
           ElementDefinitionBindingComponent binding = null;
           if (valueDefn != null && valueDefn.hasBinding() && !valueDefn.getBinding().isEmpty())
             binding = valueDefn.getBinding();
-          else
+          else if (definition.hasBinding())
             binding = definition.getBinding();
           if (binding!=null && !binding.isEmpty()) {
             if (!c.getPieces().isEmpty()) 
@@ -2016,9 +2125,11 @@ public class ProfileUtilities {
             c.getPieces().add(checkForNoChange(definition.getPattern(), gen.new Piece(null, "Required Pattern: ", null).addStyle("font-weight:bold")));
             c.getPieces().add(checkForNoChange(definition.getPattern(), gen.new Piece(null, buildJson(definition.getPattern()), null).addStyle("color: darkgreen")));
           } else if (definition.hasExample()) {
-            if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
-            c.getPieces().add(checkForNoChange(definition.getExample(), gen.new Piece(null, "Example: ", null).addStyle("font-weight:bold")));
-            c.getPieces().add(checkForNoChange(definition.getExample(), gen.new Piece(null, buildJson(definition.getExample()), null).addStyle("color: darkgreen")));
+            for (ElementDefinitionExampleComponent ex : definition.getExample()) {
+              if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+              c.getPieces().add(checkForNoChange(ex, gen.new Piece(null, "Example'"+("".equals("General")? "" : " "+ex.getLabel()+"'")+": ", null).addStyle("font-weight:bold")));
+              c.getPieces().add(checkForNoChange(ex, gen.new Piece(null, buildJson(ex.getValue()), null).addStyle("color: darkgreen")));
+            }
           }
           if (profile != null) {
             for (StructureDefinitionMappingComponent md : profile.getMapping()) {
@@ -2041,6 +2152,122 @@ public class ProfileUtilities {
     }
     return c;
   }
+
+  private Cell generateGridDescription(HierarchicalTableGenerator gen, Row row, ElementDefinition definition, ElementDefinition fallback, boolean used, String baseURL, String url, StructureDefinition profile, String corePath, String imagePath, boolean root, ElementDefinition valueDefn) throws IOException {
+    Cell c = gen.new Cell();
+    row.getCells().add(c);
+
+    if (used) {
+      if (definition.hasContentReference()) {
+        ElementDefinition ed = getElementByName(profile.getSnapshot().getElement(), definition.getContentReference());
+        if (ed == null)
+          c.getPieces().add(gen.new Piece(null, "Unknown reference to "+definition.getContentReference(), null));
+        else
+          c.getPieces().add(gen.new Piece("#"+ed.getPath(), "See "+ed.getPath(), null));
+      }
+      if (definition.getPath().endsWith("url") && definition.hasFixed()) {
+        c.getPieces().add(checkForNoChange(definition.getFixed(), gen.new Piece(null, "\""+buildJson(definition.getFixed())+"\"", null).addStyle("color: darkgreen")));
+      } else {
+        if (url != null) {
+          if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+          String fullUrl = url.startsWith("#") ? baseURL+url : url;
+          StructureDefinition ed = context.fetchResource(StructureDefinition.class, url);
+          String ref = null;
+          if (ed != null) {
+            String p = ed.getUserString("path");
+            if (p != null) {
+              ref = p.startsWith("http:") || igmode ? p : Utilities.pathReverse(corePath, p);
+            }
+          }
+          c.getPieces().add(gen.new Piece(null, "URL: ", null).addStyle("font-weight:bold"));
+          c.getPieces().add(gen.new Piece(ref, fullUrl, null));
+        }
+
+        if (definition.hasSlicing()) {
+          if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+          c.getPieces().add(gen.new Piece(null, "Slice: ", null).addStyle("font-weight:bold"));
+          c.getPieces().add(gen.new Piece(null, describeSlice(definition.getSlicing()), null));
+        }
+        if (definition != null) {
+          ElementDefinitionBindingComponent binding = null;
+          if (valueDefn != null && valueDefn.hasBinding() && !valueDefn.getBinding().isEmpty())
+            binding = valueDefn.getBinding();
+          else if (definition.hasBinding())
+            binding = definition.getBinding();
+          if (binding!=null && !binding.isEmpty()) {
+            if (!c.getPieces().isEmpty()) 
+              c.addPiece(gen.new Piece("br"));
+            BindingResolution br = pkp.resolveBinding(profile, binding, definition.getPath());
+            c.getPieces().add(checkForNoChange(binding, gen.new Piece(null, "Binding: ", null).addStyle("font-weight:bold")));
+            c.getPieces().add(checkForNoChange(binding, gen.new Piece(br.url == null ? null : Utilities.isAbsoluteUrl(br.url) || !pkp.prependLinks() ? br.url : corePath+br.url, br.display, null)));
+            if (binding.hasStrength()) {
+              c.getPieces().add(checkForNoChange(binding, gen.new Piece(null, " (", null)));
+              c.getPieces().add(checkForNoChange(binding, gen.new Piece(corePath+"terminologies.html#"+binding.getStrength().toCode(), binding.getStrength().toCode(), binding.getStrength().getDefinition())));              c.getPieces().add(gen.new Piece(null, ")", null));
+            }
+          }
+          for (ElementDefinitionConstraintComponent inv : definition.getConstraint()) {
+            if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+            c.getPieces().add(checkForNoChange(inv, gen.new Piece(null, inv.getKey()+": ", null).addStyle("font-weight:bold")));
+            c.getPieces().add(checkForNoChange(inv, gen.new Piece(null, inv.getHuman(), null)));
+          }
+          if (definition.hasFixed()) {
+            if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+            c.getPieces().add(checkForNoChange(definition.getFixed(), gen.new Piece(null, "Fixed Value: ", null).addStyle("font-weight:bold")));
+            c.getPieces().add(checkForNoChange(definition.getFixed(), gen.new Piece(null, buildJson(definition.getFixed()), null).addStyle("color: darkgreen")));
+          } else if (definition.hasPattern()) {
+            if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+            c.getPieces().add(checkForNoChange(definition.getPattern(), gen.new Piece(null, "Required Pattern: ", null).addStyle("font-weight:bold")));
+            c.getPieces().add(checkForNoChange(definition.getPattern(), gen.new Piece(null, buildJson(definition.getPattern()), null).addStyle("color: darkgreen")));
+          } else if (definition.hasExample()) {
+            for (ElementDefinitionExampleComponent ex : definition.getExample()) {
+              if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+              c.getPieces().add(checkForNoChange(ex, gen.new Piece(null, "Example'"+("".equals("General")? "" : " "+ex.getLabel()+"'")+": ", null).addStyle("font-weight:bold")));
+              c.getPieces().add(checkForNoChange(ex, gen.new Piece(null, buildJson(ex.getValue()), null).addStyle("color: darkgreen")));
+            }
+          }
+          if (profile != null) {
+            for (StructureDefinitionMappingComponent md : profile.getMapping()) {
+              if (md.hasExtension(ToolingExtensions.EXT_TABLE_NAME)) {
+                ElementDefinitionMappingComponent map = null;
+                for (ElementDefinitionMappingComponent m : definition.getMapping()) 
+                  if (m.getIdentity().equals(md.getIdentity()))
+                    map = m;
+                if (map != null) {
+                  for (int i = 0; i<definition.getMapping().size(); i++){
+                    c.addPiece(gen.new Piece("br"));
+                    c.getPieces().add(gen.new Piece(null, ToolingExtensions.readStringExtension(md, ToolingExtensions.EXT_TABLE_NAME)+": " + map.getMap(), null));
+                  }
+                }
+              }
+            }
+          }
+          if (definition.getComments()!=null) {
+            if (!c.getPieces().isEmpty()) c.addPiece(gen.new Piece("br"));
+            c.getPieces().add(gen.new Piece(null, "Comments: ", null).addStyle("font-weight:bold"));
+            c.addPiece(gen.new Piece("br"));
+//            c.addMarkdown(definition.getComments());
+//            c.getPieces().add(checkForNoChange(definition.getCommentsElement(), gen.new Piece(null, definition.getComments(), null)));
+          }
+        }
+      }
+    }
+    return c;
+  }
+  /*
+  private List<Piece> markdownToPieces(String markdown) throws FHIRException {
+    String htmlString = Processor.process(markdown);
+    XhtmlParser parser = new XhtmlParser();
+    try {
+      XhtmlNode node = parser.parseFragment(htmlString);
+      return htmlToPieces(node);
+    } catch (IOException e) {
+    }
+    return null;
+  }
+
+  private List<Piece> htmlToPieces(XhtmlNode n) {
+    
+  }*/
 
   private String buildJson(Type value) throws IOException {
     if (value instanceof PrimitiveType)
@@ -2145,16 +2372,16 @@ public class ProfileUtilities {
 
 
   public StructureDefinition getProfile(StructureDefinition source, String url) {
-  	StructureDefinition profile;
-  	String code;
+  	StructureDefinition profile = null;
+  	String code = null;
   	if (url.startsWith("#")) {
   		profile = source;
   		code = url.substring(1);
-  	} else {
+  	} else if (context != null) {
   		String[] parts = url.split("\\#");
   		profile = context.fetchResource(StructureDefinition.class, parts[0]);
       code = parts.length == 1 ? null : parts[1];
-  	}
+  	}  	  
   	if (profile == null)
   		return null;
   	if (code == null)
@@ -2270,6 +2497,8 @@ public class ProfileUtilities {
 
     final List<ElementDefinition> diffList = diff.getDifferential().getElement();
     // first, we move the differential elements into a tree
+    if (diffList.isEmpty())
+      return;
     ElementDefinitionHolder edh = new ElementDefinitionHolder(diffList.get(0));
 
     boolean hasSlicing = false;
@@ -2419,6 +2648,7 @@ public class ProfileUtilities {
   }
 
   
+  
   private class Slicer extends ElementDefinitionSlicingComponent {
     String criteria = "";
     String name = "";   
@@ -2433,7 +2663,7 @@ public class ProfileUtilities {
     // given a child in a structure, it's sliced. figure out the slicing xpath
     if (child.getPath().endsWith(".extension")) {
       ElementDefinition ued = getUrlFor(structure, child);
-      if ((ued == null || !ued.hasFixed()) && !(child.getType().get(0).hasProfile()))
+      if ((ued == null || !ued.hasFixed()) && !(child.hasType() && (child.getType().get(0).hasProfile())))
         return new Slicer(false);
       else {
       Slicer s = new Slicer(true);
@@ -2461,7 +2691,7 @@ public class ProfileUtilities {
       
       ElementDefinition based = getByPath(base, child.getPath());
       boolean doMin = (child.getMin() > 0) && (based == null || (child.getMin() != based.getMin()));
-      boolean doMax =  !child.getMax().equals("*") && (based == null || (!child.getMax().equals(based.getMax())));
+      boolean doMax = child.hasMax() && !child.getMax().equals("*") && (based == null || (!child.getMax().equals(based.getMax())));
       Slicer slicer = slicing == null ? new Slicer(true) : generateSlicer(child, slicing, structure);
       if (slicer.check) {
         if (doMin || doMax) {
@@ -2502,10 +2732,16 @@ public class ProfileUtilities {
 
 
   public void setIds(StructureDefinition sd, boolean checkFirst) throws DefinitionException  {
-    if (!checkFirst || hasMissingIds(sd.getDifferential().getElement()))
+    if (!checkFirst || !sd.hasDifferential() || hasMissingIds(sd.getDifferential().getElement())) {
+      if (!sd.hasDifferential())
+        sd.setDifferential(new StructureDefinitionDifferentialComponent());
       generateIds(sd.getDifferential().getElement(), sd.getName());
-    if (!checkFirst || hasMissingIds(sd.getSnapshot().getElement()))
-      generateIds(sd.getSnapshot().getElement(), sd.getName());    
+    }
+    if (!checkFirst || !sd.hasSnapshot() || hasMissingIds(sd.getSnapshot().getElement())) {
+      if (!sd.hasSnapshot())
+        sd.setSnapshot(new StructureDefinitionSnapshotComponent());
+      generateIds(sd.getSnapshot().getElement(), sd.getName());
+    }
   }
 
 
@@ -2613,8 +2849,10 @@ public class ProfileUtilities {
     public Type getExampleValue(ElementDefinition ed) {
       if (ed.hasFixed())
         return ed.getFixed();
+      if (ed.hasExample())
+        return ed.getExample().get(0).getValue();
       else
-        return ed.getExample();
+        return null;
     }
 
     @Override
@@ -2905,7 +3143,7 @@ public class ProfileUtilities {
     SpanEntry span = buildSpanningTable("(focus)", "", profile, processed, onlyConstraints, constraintPrefix);
     
     genSpanEntry(gen, model.getRows(), span);
-    return gen.generate(model, "");
+    return gen.generate(model, "", 0);
   }
 
   private SpanEntry buildSpanningTable(String name, String cardinality, StructureDefinition profile, Set<String> processed, boolean onlyConstraints, String constraintPrefix) throws IOException {
@@ -2937,7 +3175,7 @@ public class ProfileUtilities {
 
   private String getCardinality(ElementDefinition ed, List<ElementDefinition> list) {
     int min = ed.getMin();
-    int max = ed.getMax().equals("*") ? Integer.MAX_VALUE : Integer.parseInt(ed.getMax());
+    int max = !ed.hasMax() || ed.getMax().equals("*") ? Integer.MAX_VALUE : Integer.parseInt(ed.getMax());
     while (ed != null && ed.getPath().contains(".")) {
       ed = findParent(ed, list);
       if (ed.getMax().equals("0"))
@@ -3030,7 +3268,7 @@ public class ProfileUtilities {
 
   private String summariseCoding(Coding value) {
     String uri = value.getSystem();
-    String system = (uri);
+    String system = NarrativeGenerator.describeSystem(uri);
     if (Utilities.isURL(system)) {
       if (system.equals("http://cap.org/protocols"))
         system = "CAP Code";
