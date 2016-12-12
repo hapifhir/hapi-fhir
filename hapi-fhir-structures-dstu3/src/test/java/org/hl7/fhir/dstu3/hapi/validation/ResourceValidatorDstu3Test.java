@@ -21,11 +21,14 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.EligibilityResponse;
+import org.hl7.fhir.dstu3.model.EligibilityResponse.BenefitComponent;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -249,27 +252,23 @@ public class ResourceValidatorDstu3Test {
 		assertThat(messageString, not(containsString("valueResource")));
 	}
 
-//	@Test
-//	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
-//
-//		EnrollmentResponse fhirObj = new EnrollmentResponse();
-//		Organization org = new Organization();
-//		org.setId("1");
-//		fhirObj.setRequestOrganization(new Reference(org));
-//		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
-//
-//		FhirValidator validator = ourCtx.newValidator();
-//		validator.registerValidatorModule(new FhirInstanceValidator());
-//
-//		ValidationResult result = validator.validateWithResult(input);
-//		assertEquals(3, result.getMessages().size());
-//
-//		fhirObj = new EnrollmentResponse();
-//		Identifier ident = new Identifier().setSystem("a").setValue("b");
-//		fhirObj.setRequest(ident);
-//		input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
-//
-//		result = validator.validateWithResult(input);
-//		assertEquals(2, result.getMessages().size());
-//	}
+	@Test
+	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
+
+		EligibilityResponse fhirObj = new EligibilityResponse();
+		BenefitComponent benComp = fhirObj.addInsurance().addBenefitBalance().addFinancial();
+		// Test between .benefit[x] and benefitUsed[x]
+		benComp.setBenefitUsed(new UnsignedIntType(2));
+		
+		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
+		
+		FhirValidator validator = ourCtx.newValidator();
+		validator.registerValidatorModule(new FhirInstanceValidator());
+
+		ValidationResult result = validator.validateWithResult(input);
+		// we should get some results, not an exception
+		assertEquals(4, result.getMessages().size());
+	}
+	
+
 }
