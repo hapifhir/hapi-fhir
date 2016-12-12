@@ -139,6 +139,10 @@
 				 has a name that is similar to a shorter name[x] style name.
 				 Thanks to CarthageKing for the pull request!
 			</action>
+			<action type="add" issue="510">
+				Add a docker configuration to the hapi-fhir-jpaservr-example
+				module. Thanks to Gijsbert van den Brink for the pull request!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

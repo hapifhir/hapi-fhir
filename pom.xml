@@ -283,6 +283,10 @@
 			<id>CarthageKing</id>
 			<name>CarthageKing</name>
 		</developer>
+		<developer>
+			<id>gijsbert802</id>
+			<name>Gijsbert van den Brink</name>
+		</developer>
 	</developers>
 
 	<licenses>
