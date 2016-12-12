@@ -352,7 +352,7 @@
 						</goals>
 						<configuration>
 							<dialect>org.hibernate.dialect.PostgreSQL94Dialect</dialect>
-							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_postgres94.sql</outputFile>	
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_postgres94.sql</outputFile>	
 						</configuration>
 					</execution>
 					<execution>
@@ -363,7 +363,7 @@
 						</goals>
 						<configuration>
 							<dialect>org.hibernate.dialect.MySQL57InnoDBDialect</dialect>
-							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mysql57.sql</outputFile>	
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mysql57.sql</outputFile>	
 						</configuration>
 					</execution>
 					<execution>
@@ -374,7 +374,7 @@
 						</goals>
 						<configuration>
 							<dialect>org.hibernate.dialect.Oracle12cDialect</dialect>
-							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_oracle12c.sql</outputFile>	
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_oracle12c.sql</outputFile>	
 						</configuration>
 					</execution>
 					<execution>
@@ -385,7 +385,7 @@
 						</goals>
 						<configuration>
 							<dialect>org.hibernate.dialect.SQLServer2012Dialect</dialect>
-							<outputFile>${project.build.directory}/generated-sql/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_sqlserver2012.sql</outputFile>	
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_sqlserver2012.sql</outputFile>	
 						</configuration>
 					</execution>
 				</executions>
@@ -505,10 +505,6 @@
 			</resource>
 			<resource>
 				<directory>${basedir}/target/generated-resources/tinder</directory>
-			</resource>
-			<resource>
-				<directory>${project.build.directory}/generated-sql</directory>
-				<filtering>false</filtering> 
 			</resource>
 		</resources>
 	</build>
