@@ -3,12 +3,7 @@ package org.hl7.fhir.dstu3.model;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -55,6 +50,65 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals("1995-11-15T04:58:08Z", dt.getValueAsString());
 	}
 
+	
+	@Test
+	public void testAfter() {
+		assertTrue(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:11Z")));
+		assertFalse(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType("2011-01-01T12:12:12Z")));
+		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:12Z")));
+	}
+	
+	@Test
+	public void testBefore() {
+		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:11Z")));
+		assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType("2011-01-01T12:12:12Z")));
+		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:12Z")));
+	}
+
+	@Test()
+	public void testAfterNull() {
+		try {
+			assertTrue(new DateTimeType().after(new DateTimeType("2011-01-01T12:12:11Z")));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("This BaseDateTimeType does not contain a value (getValue() returns null)", e.getMessage());
+		}
+		try {
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType()));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)", e.getMessage());
+		}
+		try {
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(null));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theDateTimeType must not be null", e.getMessage());
+		}
+	}
+
+	@Test()
+	public void testBeforeNull1() {
+		try {
+			assertTrue(new DateTimeType().before(new DateTimeType("2011-01-01T12:12:11Z")));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("This BaseDateTimeType does not contain a value (getValue() returns null)", e.getMessage());
+		}
+		try {
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType()));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)", e.getMessage());
+		}
+		try {
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(null));
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("theDateTimeType must not be null", e.getMessage());
+		}
+	}
+
 	/**
 	 * Test for #57
 	 */
@@ -64,13 +118,13 @@ public class BaseDateTimeTypeDstu3Test {
 		try {
 			new DateType("2001-01-02T11:13:33");
 			fail();
-		} catch (DataFormatException e) {
+		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), containsString("precision"));
 		}
 		try {
 			new InstantType("2001-01-02");
 			fail();
-		} catch (DataFormatException e) {
+		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), containsString("precision"));
 		}
 	}
