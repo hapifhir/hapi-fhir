@@ -60,6 +60,7 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 
 		IBaseResource appliesToResource;
 		IIdType appliesToResourceId = null;
+		String appliesToResourceType = null;
 		switch (myOp) {
 		case READ:
 			if (theOutputResource == null) {
@@ -67,7 +68,9 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 				case READ:
 				case VREAD:
 					appliesToResourceId = theInputResourceId;
+					appliesToResourceType = theInputResourceId.getResourceType();
 					break;
+//					return new Verdict(PolicyEnum.ALLOW, this);
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
 				case HISTORY_INSTANCE:
@@ -193,6 +196,9 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 
 		switch (myAppliesTo) {
 		case ALL_RESOURCES:
+			if (appliesToResourceType != null) {
+				return new Verdict(PolicyEnum.ALLOW, this);
+			}
 			break;
 		case TYPES:
 			if (appliesToResource != null) {
@@ -204,6 +210,12 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 				Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceId.getResourceType()).getImplementingClass();
 				if (myAppliesToTypes.contains(type) == false) {
 					return null;
+				}
+			}
+			if (appliesToResourceType != null) {
+				Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceType).getImplementingClass();
+				if (myAppliesToTypes.contains(type)) {
+					return new Verdict(PolicyEnum.ALLOW, this);
 				}
 			}
 			break;

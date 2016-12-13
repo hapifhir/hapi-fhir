@@ -147,6 +147,12 @@
 				Add utility constructors to MoneyDt. Thanks to James Ren for the
 				contribution!
 			</action>
+			<action type="fix" issue="528">
+				AuthorizationInterceptor was failing to allow read requests to pass
+				when a rule authorized those resources by compartment. Thanks to
+				GitHub user @mattiuusitalo for reporting and supplying
+				a test case!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
