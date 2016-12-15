@@ -43,10 +43,10 @@ import java.net.URI;
  */
 public class FhirSubscriptionWithWebsocketCriteriaDstu3IT {
 
-        public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
-        public static final String LPI_CODE = "LPI-FHIR";
-        public static final String FHIR_URL = "http://localhost:8080/baseDstu3";
-        public final static String PORT = "8080";
+    public static final String LPI_CODESYSTEM = "http://cognitivemedicine.com/lpi";
+    public static final String LPI_CODE = "LPI-FHIR";
+    public static final String FHIR_URL = "http://localhost:8080/baseDstu3";
+    public final static String PORT = "8080";
     public final static String WEBSOCKET_PATH = "/websocket/dstu3";
 
     /**
@@ -99,19 +99,11 @@ public class FhirSubscriptionWithWebsocketCriteriaDstu3IT {
      */
     @Test
     public void createObservation(){
-        String patientId = "1";
-
         FhirContext ctx = FhirContext.forDstu3();
         IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
 
-        IQuery iquery = client.search().forResource(Patient.class);
-        iquery.where(new StringClientParam("_id").matches().value(patientId));
-
-        Bundle bundle = (Bundle)iquery.returnBundle(Bundle.class).execute();
-        Patient patientRef = (Patient)bundle.getEntry().get(0).getResource();
-
         Observation observation = new Observation();
-        observation.getSubject().setReferenceElement(patientRef.getIdElement());
+        //observation.getSubject().setReferenceElement(patientRef.getIdElement());
         observation.setStatus(Observation.ObservationStatus.FINAL);
         CodeableConcept codeableConcept = new CodeableConcept();
         observation.setCode(codeableConcept);
