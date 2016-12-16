@@ -47,7 +47,7 @@ public class RestHookTestDstu2IT {
         IGenericClient client = ctx.newRestfulGenericClient(FHIR_URL);
 
         String payload = "application/json";
-        String endpoint = "http://localhost:2016/mockNifiPoint";
+        String endpoint = "http://localhost:10080/rest-hook";
 
         String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
         String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
