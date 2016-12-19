@@ -163,7 +163,13 @@
 			</action>
 			<action type="add">
 				ErrorHandler is now called (resulting in a warning by default, but can also be an exception) when arsing JSON if
-				the resource ID is not a JSON string, or an object is found where an array is expected (e.g. repeating field) 
+				the resource ID is not a JSON string, or an object is found where an array is expected (e.g. repeating field). Thanks
+				to Jenni Syed of Cerner for providing a test case!
+			</action>
+			<action type="fix">
+				Fix Web Testing UI to be able to handle STU3 servers which
+				return CapabilityStatement instead of the previously used
+				"Conformance" resource
 			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
