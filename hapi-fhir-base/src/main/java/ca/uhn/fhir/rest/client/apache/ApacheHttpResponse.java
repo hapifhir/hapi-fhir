@@ -54,50 +54,43 @@ public class ApacheHttpResponse implements IHttpResponse {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ApacheHttpResponse.class);
 
 	private boolean myEntityBuffered = false;
-	private final HttpResponse myResponse;
 	private byte[] myEntityBytes;
+	private final HttpResponse myResponse;
 
 	public ApacheHttpResponse(HttpResponse theResponse) {
 		this.myResponse = theResponse;
 	}
 
 	@Override
-	public HttpResponse getResponse() {
-		return myResponse;
+	public void bufferEntitity() throws IOException {
+		bufferEntity();
 	}
 
 	@Override
-	public int getStatus() {
-		return myResponse.getStatusLine().getStatusCode();
-	}
-
-	@Override
-	public String getMimeType() {
-		ContentType ct = ContentType.get(myResponse.getEntity());
-		return ct != null ? ct.getMimeType() : null;
-	}
-
-	@Override
-	public Map<String, List<String>> getAllHeaders() {
-		Map<String, List<String>> headers = new HashMap<String, List<String>>();
-		if (myResponse.getAllHeaders() != null) {
-			for (Header next : myResponse.getAllHeaders()) {
-				String name = next.getName().toLowerCase();
-				List<String> list = headers.get(name);
-				if (list == null) {
-					list = new ArrayList<String>();
-					headers.put(name, list);
-				}
-				list.add(next.getValue());
-			}
-
+	public void bufferEntity() throws IOException {
+		if (myEntityBuffered) {
+			return;
 		}
-		return headers;
+		InputStream respEntity = readEntity();
+		if (respEntity != null) {
+			this.myEntityBuffered = true;
+			try {
+				this.myEntityBytes = IOUtils.toByteArray(respEntity);
+			} catch (IllegalStateException e) {
+				throw new InternalErrorException(e);
+			}
+		}
 	}
 
 	@Override
-	public String getStatusInfo() {
-		return myResponse.getStatusLine().getReasonPhrase();
+	public void close() {
+		if (myResponse instanceof CloseableHttpResponse) {
+			try {
+				((CloseableHttpResponse) myResponse).close();
+			} catch (IOException e) {
+				ourLog.debug("Failed to close response", e);
+			}
+		}
 	}
 
 	@Override
@@ -124,6 +117,45 @@ public class ApacheHttpResponse implements IHttpResponse {
 	}
 
 	@Override
+	public Map<String, List<String>> getAllHeaders() {
+		Map<String, List<String>> headers = new HashMap<String, List<String>>();
+		if (myResponse.getAllHeaders() != null) {
+			for (Header next : myResponse.getAllHeaders()) {
+				String name = next.getName().toLowerCase();
+				List<String> list = headers.get(name);
+				if (list == null) {
+					list = new ArrayList<String>();
+					headers.put(name, list);
+				}
+				list.add(next.getValue());
+			}
+
+		}
+		return headers;
+	}
+
+	@Override
+	public String getMimeType() {
+		ContentType ct = ContentType.get(myResponse.getEntity());
+		return ct != null ? ct.getMimeType() : null;
+	}
+
+	@Override
+	public HttpResponse getResponse() {
+		return myResponse;
+	}
+
+	@Override
+	public int getStatus() {
+		return myResponse.getStatusLine().getStatusCode();
+	}
+
+	@Override
+	public String getStatusInfo() {
+		return myResponse.getStatusLine().getReasonPhrase();
+	}
+
+	@Override
 	public InputStream readEntity() throws IOException {
 		if (this.myEntityBuffered) {
 			return new ByteArrayInputStream(myEntityBytes);
@@ -131,33 +163,6 @@ public class ApacheHttpResponse implements IHttpResponse {
 			return myResponse.getEntity().getContent();
 		} else {
 			return null;
-		}
-	}
-
-	@Override
-	public void close() {
-		if (myResponse instanceof CloseableHttpResponse) {
-			try {
-				((CloseableHttpResponse) myResponse).close();
-			} catch (IOException e) {
-				ourLog.debug("Failed to close response", e);
-			}
-		}
-	}
-
-	@Override
-	public void bufferEntitity() throws IOException {
-		if (myEntityBuffered) {
-			return;
-		}
-		InputStream respEntity = readEntity();
-		if (respEntity != null) {
-			this.myEntityBuffered = true;
-			try {
-				this.myEntityBytes = IOUtils.toByteArray(respEntity);
-			} catch (IllegalStateException e) {
-				throw new InternalErrorException(e);
-			}
 		}
 	}
 }

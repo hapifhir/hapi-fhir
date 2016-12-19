@@ -157,6 +157,10 @@
 				GitHub user @mattiuusitalo for reporting and supplying
 				a test case!
 			</action>
+			<action type="fix">
+				Correct a typo in client 
+				<![CDATA[<code>IHttpRequest</code>]]> class: "bufferEntitity" should be "bufferEntity".
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

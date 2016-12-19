@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.client;
 
+import java.io.IOException;
+
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -39,31 +41,40 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
  */
 public class JaxRsHttpResponse implements IHttpResponse {
 	
-	private final Response myResponse;
 	private boolean myBufferedEntity = false;
+	private final Response myResponse;
 	
 	public JaxRsHttpResponse(Response theResponse) {
 		this.myResponse = theResponse;
 	}
 
 	@Override
-	public Response getResponse() {
-		return myResponse;
+	public void bufferEntitity() throws IOException {
+		bufferEntity();
 	}
 
 	@Override
-	public int getStatus() {
-		return myResponse.getStatus();
-	}
-
-	@Override
-	public String getMimeType() {
-		MediaType mediaType = myResponse.getMediaType();
-		if (mediaType == null) {
-			return null;
+	public void bufferEntity() throws IOException {
+		if(!myBufferedEntity && myResponse.hasEntity()) {
+			myBufferedEntity = true;
+			myResponse.bufferEntity();
+		} else {
+			myResponse.bufferEntity();
 		}
-		//Keep only type and subtype and do not include the parameters such as charset
-		return new MediaType(mediaType.getType(), mediaType.getSubtype()).toString();
+	}
+
+	@Override
+	public void close() {
+		// automatically done by jax-rs
+	}
+
+	@Override
+	public Reader createReader() {
+		if (!myBufferedEntity && !myResponse.hasEntity()) {
+			return new StringReader("");
+		} else {
+			return new StringReader(myResponse.readEntity(String.class));
+		}
 	}
 
 	@Override
@@ -76,38 +87,34 @@ public class JaxRsHttpResponse implements IHttpResponse {
 	}
 
 	@Override
+	public String getMimeType() {
+		MediaType mediaType = myResponse.getMediaType();
+		if (mediaType == null) {
+			return null;
+		}
+		//Keep only type and subtype and do not include the parameters such as charset
+		return new MediaType(mediaType.getType(), mediaType.getSubtype()).toString();
+	}
+	
+	@Override
+	public Response getResponse() {
+		return myResponse;
+	}
+	
+	@Override
+	public int getStatus() {
+		return myResponse.getStatus();
+	}
+	
+
+	@Override
 	public String getStatusInfo() {
 		return myResponse.getStatusInfo().getReasonPhrase();
 	}
 
 	@Override
-	public Reader createReader() {
-		if (!myBufferedEntity && !myResponse.hasEntity()) {
-			return new StringReader("");
-		} else {
-			return new StringReader(myResponse.readEntity(String.class));
-		}
-	}
-	
-	@Override
 	public InputStream readEntity() {
 		return myResponse.readEntity(java.io.InputStream.class);
-	}
-	
-	@Override
-	public void bufferEntitity() {
-		if(!myBufferedEntity && myResponse.hasEntity()) {
-			myBufferedEntity = true;
-			myResponse.bufferEntity();
-		} else {
-			myResponse.bufferEntity();
-		}
-	}
-	
-
-	@Override
-	public void close() {
-		// automatically done by jax-rs
 	}	
 	
 

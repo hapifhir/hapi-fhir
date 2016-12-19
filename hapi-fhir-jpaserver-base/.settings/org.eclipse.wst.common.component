@@ -6,6 +6,5 @@
         <wb-resource deploy-path="/" source-path="/target/generated-sources/tinder"/>
         <wb-resource deploy-path="/" source-path="/src/test/java"/>
         <wb-resource deploy-path="/" source-path="/src/test/resources"/>
-        <wb-resource deploy-path="/" source-path="/target/generated-sql"/>
     </wb-module>
 </project-modules>
