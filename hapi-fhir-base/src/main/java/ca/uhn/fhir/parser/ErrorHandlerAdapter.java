@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
 /*
@@ -33,7 +34,7 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 	}
 
 	@Override
-	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
+	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
 		// NOP
 	}
 

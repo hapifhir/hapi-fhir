@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.*;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator;
 import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -83,6 +84,10 @@ class ParserState<T> {
 			IBase element = myState.getCurrentElement();
 			element.getFormatCommentsPre().add(theCommentText);
 		}
+	}
+
+	public boolean elementIsRepeating(String theChildName) {
+		return myState.elementIsRepeating(theChildName);
 	}
 
 	public void endingElement() throws DataFormatException {
@@ -747,7 +752,8 @@ class ParserState<T> {
 		}
 
 	}
-
+	
+	
 	private abstract class BaseState {
 
 		private PreResourceState myPreResourceState;
@@ -764,6 +770,10 @@ class ParserState<T> {
 		 */
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			myErrorHandler.unknownAttribute(null, theName);
+		}
+
+		public boolean elementIsRepeating(@SuppressWarnings("unused") String theChildName) {
+			return false;
 		}
 
 		public void endingElement() throws DataFormatException {
@@ -1525,10 +1535,20 @@ class ParserState<T> {
 		}
 
 		@Override
+		public boolean elementIsRepeating(String theChildName) {
+			try {
+				BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
+				return child.getMax() > 1 || child.getMax() == Child.MAX_UNLIMITED;
+			} catch (DataFormatException e) {
+				return false;
+			}
+		}
+
+		@Override
 		public void endingElement() {
 			pop();
 		}
-
+		
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
 			BaseRuntimeChildDefinition child;
@@ -1951,45 +1971,6 @@ class ParserState<T> {
 			pop();
 		}
 
-		protected void weaveContainedResources() {
-			FhirTerser terser = myContext.newTerser();
-			terser.visit(myInstance, new IModelVisitor() {
-
-				@Override
-				public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
-					if (theElement instanceof BaseResourceReferenceDt) {
-						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
-						String ref = nextRef.getReference().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IResource target = (IResource) myContainedResources.get(ref);
-								if (target != null) {
-									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
-									nextRef.setResource(target);
-								} else {
-									myErrorHandler.unknownReference(null, ref);
-								}
-							}
-						}
-					} else if (theElement instanceof IBaseReference) {
-						IBaseReference nextRef = (IBaseReference) theElement;
-						String ref = nextRef.getReferenceElement().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IBaseResource target = myContainedResources.get(ref);
-								if (target != null) {
-									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
-									nextRef.setResource(target);
-								} else {
-									myErrorHandler.unknownReference(null, ref);
-								}
-							}
-						}
-					}
-				}
-			});
-		}
-		
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition;
@@ -2037,7 +2018,7 @@ class ParserState<T> {
 				push(new ResourceStateHl7Org(getRootPreResourceState(), def, myInstance));
 			}
 		}
-
+		
 		public Map<String, IBaseResource> getContainedResources() {
 			return myContainedResources;
 		}
@@ -2061,16 +2042,6 @@ class ParserState<T> {
 		}
 
 		protected abstract void populateTarget();
-
-		public ParserState<T>.PreResourceState setRequireResourceType(boolean theRequireResourceType) {
-			myRequireResourceType = theRequireResourceType;
-			return this;
-		}
-
-		@Override
-		public void wereBack() {
-			postProcess();
-		}
 
 		private void postProcess() {
 			if (myContext.hasDefaultTypeForProfile()) {
@@ -2108,6 +2079,11 @@ class ParserState<T> {
 			}
 			
 			populateTarget();
+		}
+
+		public ParserState<T>.PreResourceState setRequireResourceType(boolean theRequireResourceType) {
+			myRequireResourceType = theRequireResourceType;
+			return this;
 		}
 
 		private void stitchBundleCrossReferences() {
@@ -2153,6 +2129,50 @@ class ParserState<T> {
 				}
 
 			}
+		}
+
+		protected void weaveContainedResources() {
+			FhirTerser terser = myContext.newTerser();
+			terser.visit(myInstance, new IModelVisitor() {
+
+				@Override
+				public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+					if (theElement instanceof BaseResourceReferenceDt) {
+						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
+						String ref = nextRef.getReference().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IResource target = (IResource) myContainedResources.get(ref);
+								if (target != null) {
+									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
+									nextRef.setResource(target);
+								} else {
+									myErrorHandler.unknownReference(null, ref);
+								}
+							}
+						}
+					} else if (theElement instanceof IBaseReference) {
+						IBaseReference nextRef = (IBaseReference) theElement;
+						String ref = nextRef.getReferenceElement().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IBaseResource target = myContainedResources.get(ref);
+								if (target != null) {
+									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
+									nextRef.setResource(target);
+								} else {
+									myErrorHandler.unknownReference(null, ref);
+								}
+							}
+						}
+					}
+				}
+			});
+		}
+
+		@Override
+		public void wereBack() {
+			postProcess();
 		}
 
 	}

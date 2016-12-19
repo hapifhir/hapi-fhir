@@ -11,8 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.TimingDt;
-import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
@@ -40,7 +38,6 @@ import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -68,7 +65,6 @@ public class ResourceValidatorDstu2Test {
 		ourLog.info(encoded);
 		return encoded;
 	}
-
 
 	/**
 	 * See issue #50
@@ -130,7 +126,7 @@ public class ResourceValidatorDstu2Test {
 
 	@Test
 	public void testSchemaBundleValidatorFails() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"), StandardCharsets.UTF_8);
 		Bundle b = ourCtx.newJsonParser().parseBundle(res);
 
 		FhirValidator val = createFhirValidator();
@@ -153,7 +149,7 @@ public class ResourceValidatorDstu2Test {
 
 	@Test
 	public void testSchemaBundleValidatorIsSuccessful() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"), StandardCharsets.UTF_8);
 		Bundle b = ourCtx.newJsonParser().parseBundle(res);
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b));
@@ -221,7 +217,7 @@ public class ResourceValidatorDstu2Test {
 
 	@Test
 	public void testSchematronResourceValidator() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.json"));
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.json"), StandardCharsets.UTF_8);
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
 
 		FhirValidator val = ourCtx.newValidator();

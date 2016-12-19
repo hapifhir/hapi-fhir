@@ -54,6 +54,7 @@ import ca.uhn.fhir.parser.json.JsonLikeObject;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
@@ -1106,7 +1107,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 		JsonLikeValue alternateVal = theAlternateVal;
 		if (alternateVal != null && alternateVal.isObject() == false) {
-			getErrorHandler().incorrectJsonType(null, theAlternateName, ValueType.OBJECT, alternateVal.getJsonType());
+			getErrorHandler().incorrectJsonType(null, theAlternateName, ValueType.OBJECT, null, alternateVal.getJsonType(), null);
 			return;
 		}
 
@@ -1122,8 +1123,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				JsonLikeArray array = nextVal.getAsArray();
 				parseExtension(theState, array, isModifier);
 			} else if ("id".equals(nextKey)) {
-				if (nextVal.isString() || nextVal.isNumber()) {
+				if (nextVal.isString()) {
 					theState.attributeValue("id", nextVal.getAsString());
+				} else {
+					getErrorHandler().incorrectJsonType(null, "id", ValueType.SCALAR, ScalarType.STRING, nextVal.getJsonType(), nextVal.getDataType());
 				}
 			} else if ("fhir_comments".equals(nextKey)) {
 				parseFhirComments(nextVal, theState);
@@ -1249,7 +1252,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 
 			JsonLikeValue nextVal = theObject.get(nextName);
-			parseChildren(theState, nextName, nextVal, null, null);
+			parseChildren(theState, nextName, nextVal, null, null, false);
 
 		}
 	}
@@ -1286,7 +1289,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				handledUnderscoreNames++;
 			}
 			
-			parseChildren(theState, nextName, nextVal, alternateVal, alternateName);
+			parseChildren(theState, nextName, nextVal, alternateVal, alternateName, false);
 
 		}
 
@@ -1318,7 +1321,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 								theState.endingElement();
 							}
 						} else {
-							getErrorHandler().incorrectJsonType(null, alternateName, ValueType.OBJECT, nextValue.getJsonType());
+							getErrorHandler().incorrectJsonType(null, alternateName, ValueType.OBJECT, null, nextValue.getJsonType(), null);
 						}
 					}
 				}
@@ -1327,13 +1330,19 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	}
 
-	private void parseChildren(ParserState<?> theState, String theName, JsonLikeValue theJsonVal, JsonLikeValue theAlternateVal, String theAlternateName) {
+	private void parseChildren(ParserState<?> theState, String theName, JsonLikeValue theJsonVal, JsonLikeValue theAlternateVal, String theAlternateName, boolean theInArray) {
+		if (theName.equals("id")) {
+			if (!theJsonVal.isString()) {
+				getErrorHandler().incorrectJsonType(null, "id", ValueType.SCALAR, ScalarType.STRING, theJsonVal.getJsonType(), theJsonVal.getDataType());
+			}
+		}
+
 		if (theJsonVal.isArray()) {
 			JsonLikeArray nextArray = theJsonVal.getAsArray();
 
 			JsonLikeValue alternateVal = theAlternateVal;
 			if (alternateVal != null && alternateVal.isArray() == false) {
-				getErrorHandler().incorrectJsonType(null, theAlternateName, ValueType.ARRAY, alternateVal.getJsonType());
+				getErrorHandler().incorrectJsonType(null, theAlternateName, ValueType.ARRAY, null, alternateVal.getJsonType(), null);
 				alternateVal = null;
 			}
 
@@ -1344,9 +1353,13 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				if (nextAlternateArray != null) {
 					nextAlternate = nextAlternateArray.get(i);
 				}
-				parseChildren(theState, theName, nextObject, nextAlternate, theAlternateName);
+				parseChildren(theState, theName, nextObject, nextAlternate, theAlternateName, true);
 			}
 		} else if (theJsonVal.isObject()) {
+			if (!theInArray && theState.elementIsRepeating(theName)) {
+				getErrorHandler().incorrectJsonType(null, theName, ValueType.ARRAY, null, ValueType.OBJECT, null);
+			}
+			
 			theState.enteringNewElement(null, theName);
 			parseAlternates(theAlternateVal, theState, theAlternateName, theAlternateName);
 			JsonLikeObject nextObject = theJsonVal.getAsObject();
@@ -1406,7 +1419,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					parseExtension(theState, jsonVal, true);
 				} else {
 					JsonLikeValue jsonVal = nextExtObj.get(next);
-					parseChildren(theState, next, jsonVal, null, null);
+					parseChildren(theState, next, jsonVal, null, null, false);
 				}
 			}
 			theState.endingElement();

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
 /*
@@ -44,11 +45,14 @@ public interface IParserErrorHandler {
 	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
 	 * @param theElementName
 	 *           The name of the element that was found.
-	 * @param theFound The datatype that was found at this location
-	 * @param theExpected The datatype that was expected at this location
+	 * @param theExpectedValueType The datatype that was expected at this location
+	 * @param theExpectedScalarType If theExpectedValueType is {@link ValueType#SCALAR}, this is the specific scalar type expected. Otherwise this parameter will be null.
+	 * @param theFoundValueType The datatype that was found at this location
+	 * @param theFoundScalarType If theFoundValueType is {@link ValueType#SCALAR}, this is the specific scalar type found. Otherwise this parameter will be null.
+	 * 
 	 * @since 2.2
 	 */
-	void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound);
+	void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpectedValueType, ScalarType theExpectedScalarType, ValueType theFoundValueType, ScalarType theFoundScalarType);
 
 	/**
 	 * The parser detected an atttribute value that was invalid (such as: empty "" values are not permitted)

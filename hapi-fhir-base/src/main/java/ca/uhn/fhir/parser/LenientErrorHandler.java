@@ -1,9 +1,9 @@
 package ca.uhn.fhir.parser;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
 /*
@@ -16,7 +16,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 /**
  * The default error handler, which logs issues but does not abort parsing, with only one exception:
  * <p>
- * The {@link #invalidValue(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation, String, String)} 
+ * The {@link #invalidValue(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation, String, String)}
  * method will throw a {@link DataFormatException} by default since ignoring this type of error
  * can lead to data loss (since invalid values are silently ignored). See
  * {@link #setErrorOnInvalidValue(boolean)} for information on this.
@@ -55,7 +55,8 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	/**
 	 * Constructor
 	 * 
-	 * @param theLogErrors Should errors be logged?
+	 * @param theLogErrors
+	 *           Should errors be logged?
 	 * @since 1.2
 	 */
 	public LenientErrorHandler(boolean theLogErrors) {
@@ -70,9 +71,12 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	}
 
 	@Override
-	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ValueType theFound) {
+	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
 		if (myLogErrors) {
-			ourLog.warn("Found incorrect type for element {} - Expected {} and found {}", new Object[]{theElementName, theExpected.name(), theFound.name()});
+			if (ourLog.isWarnEnabled()) {
+				String message = createIncorrectJsonTypeMessage(theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
+				ourLog.warn(message);
+			}
 		}
 	}
 
@@ -88,11 +92,11 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	}
 
 	/**
-	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By 
+	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By
 	 * default invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
 	 * other methods in this class which default to simply logging errors).
 	 * <p>
-	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to 
+	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to
 	 * <code>true</code>, only invalid values (e.g. a gender code of <code>foo</code>)
 	 * </p>
 	 * 
@@ -110,13 +114,14 @@ public class LenientErrorHandler implements IParserErrorHandler {
 	}
 
 	/**
-	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By 
+	 * If set to <code>false</code> (default is <code>true</code>) invalid values will be logged. By
 	 * default invalid attribute values cause this error handler to throw a {@link DataFormatException} (unlike
 	 * other methods in this class which default to simply logging errors).
 	 * <p>
-	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to 
+	 * Note that empty values (e.g. <code>""</code>) will not lead to an error when this is set to
 	 * <code>true</code>, only invalid values (e.g. a gender code of <code>foo</code>)
 	 * </p>
+	 * 
 	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 * @see #isErrorOnInvalidValue()
 	 */
@@ -151,6 +156,28 @@ public class LenientErrorHandler implements IParserErrorHandler {
 		if (myLogErrors) {
 			ourLog.warn("Resource has invalid reference: {}", theReference);
 		}
+	}
+
+	public static String createIncorrectJsonTypeMessage(String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
+		StringBuilder b = new StringBuilder();
+		b.append("Found incorrect type for element ");
+		b.append(theElementName);
+		b.append(" - Expected ");
+		b.append(theExpected.name());
+		if (theExpectedScalarType != null) {
+			b.append(" (");
+			b.append(theExpectedScalarType.name());
+			b.append(")");
+		}
+		b.append(" and found ");
+		b.append(theFound.name());
+		if (theFoundScalarType != null) {
+			b.append(" (");
+			b.append(theFoundScalarType.name());
+			b.append(")");
+		}
+		String message = b.toString();
+		return message;
 	}
 
 }

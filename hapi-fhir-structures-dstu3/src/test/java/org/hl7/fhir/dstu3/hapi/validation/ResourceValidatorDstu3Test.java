@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.parser.XmlParserDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 
@@ -65,7 +67,7 @@ public class ResourceValidatorDstu3Test {
 		// Put in an invalid date
 		IParser parser = ourCtx.newXmlParser();
 		parser.setParserErrorHandler(new StrictErrorHandler());
-		
+
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
@@ -75,9 +77,9 @@ public class ResourceValidatorDstu3Test {
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
+		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
-		
+
 		try {
 			parser.parseResource(encoded);
 			fail();
@@ -86,7 +88,6 @@ public class ResourceValidatorDstu3Test {
 		}
 	}
 
-	
 	/**
 	 * Make sure that the elements that appear in all resources (meta, language, extension, etc) all appear in the correct order
 	 */
@@ -189,7 +190,7 @@ public class ResourceValidatorDstu3Test {
 	@Test
 	@Ignore
 	public void testValidateQuestionnaire() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/questionnaire_jon_z_20160506.xml"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/questionnaire_jon_z_20160506.xml"), StandardCharsets.UTF_8);
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator());
@@ -201,6 +202,41 @@ public class ResourceValidatorDstu3Test {
 		ourLog.info(ooencoded);
 
 		assertTrue(result.isSuccessful());
+	}
+
+	@Test
+	public void testValidateJsonNumericId() {
+		String input = "{\"resourceType\": \"Patient\",\n" +
+				"  \"id\": 123,\n" +
+				"  \"meta\": {\n" +
+				"    \"versionId\": \"29\",\n" +
+				"    \"lastUpdated\": \"2015-12-22T19:53:11.000Z\"\n" +
+				"  },\n" +
+				"  \"communication\": {\n" +
+				"    \"language\": {\n" +
+				"      \"coding\": [\n" +
+				"        {\n" +
+				"          \"system\": \"urn:ietf:bcp:47\",\n" +
+				"          \"code\": \"hi\",\n" +
+				"          \"display\": \"Hindi\",\n" +
+				"          \"userSelected\": false\n" +
+				"        }],\n" +
+				"      \"text\": \"Hindi\"\n" +
+				"    },\n" +
+				"    \"preferred\": true\n" +
+				"  }\n" +
+				"}";
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator());
+		ValidationResult output = val.validateWithResult(input);
+
+		OperationOutcome operationOutcome = (OperationOutcome) output.toOperationOutcome();
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("Error parsing JSON: the primitive value must be a string"));
+
 	}
 
 	/**
@@ -259,9 +295,9 @@ public class ResourceValidatorDstu3Test {
 		BenefitComponent benComp = fhirObj.addInsurance().addBenefitBalance().addFinancial();
 		// Test between .benefit[x] and benefitUsed[x]
 		benComp.setBenefitUsed(new UnsignedIntType(2));
-		
+
 		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
-		
+
 		FhirValidator validator = ourCtx.newValidator();
 		validator.registerValidatorModule(new FhirInstanceValidator());
 
@@ -269,6 +305,5 @@ public class ResourceValidatorDstu3Test {
 		// we should get some results, not an exception
 		assertEquals(4, result.getMessages().size());
 	}
-	
 
 }

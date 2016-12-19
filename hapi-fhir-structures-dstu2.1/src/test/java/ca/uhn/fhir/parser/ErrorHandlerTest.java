@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 
 /*
@@ -36,7 +37,7 @@ public class ErrorHandlerTest {
 		new ErrorHandlerAdapter().containedResourceWithNoId(null);
 		new ErrorHandlerAdapter().unknownReference(null, null);
 		new ErrorHandlerAdapter().missingRequiredElement(null, null);
-		new ErrorHandlerAdapter().incorrectJsonType(null, null, null, null);
+		new ErrorHandlerAdapter().incorrectJsonType(null, null, null, null, null, null);
 		new ErrorHandlerAdapter().invalidValue(null, null, null);
 	}
 
@@ -47,7 +48,7 @@ public class ErrorHandlerTest {
 		new LenientErrorHandler().unknownElement(null, null);
 		new LenientErrorHandler().containedResourceWithNoId(null);
 		new LenientErrorHandler().unknownReference(null, null);
-		new LenientErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, ValueType.SCALAR);
+		new LenientErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
 		new LenientErrorHandler().setErrorOnInvalidValue(false).invalidValue(null, "FOO", "");
 		new LenientErrorHandler().invalidValue(null, null, "");
 		try {
@@ -85,12 +86,23 @@ public class ErrorHandlerTest {
 
 	@Test(expected = DataFormatException.class)
 	public void testStrictMethods6() {
-		new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, ValueType.SCALAR);
+		new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
+	}
+
+	@Test(expected = DataFormatException.class)
+	public void testStrictMethods8() {
+		new StrictErrorHandler().incorrectJsonType(null, null, ValueType.SCALAR, ScalarType.BOOLEAN, ValueType.SCALAR, ScalarType.STRING);
 	}
 
 	@Test(expected = DataFormatException.class)
 	public void testStrictMethods7() {
 		new StrictErrorHandler().invalidValue(null, null, null);
+	}
+
+	
+	@Test()
+	public void testLenientMethods8() {
+		new LenientErrorHandler().incorrectJsonType(null, null, ValueType.SCALAR, ScalarType.BOOLEAN, ValueType.SCALAR, ScalarType.STRING);
 	}
 
 }

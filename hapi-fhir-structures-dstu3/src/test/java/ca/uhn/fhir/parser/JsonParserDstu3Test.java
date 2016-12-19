@@ -13,6 +13,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
@@ -95,6 +96,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
 import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
@@ -113,6 +115,79 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	@Test
+	public void testIncorrectJsonTypesIdAndArray() {
+		
+		// ID should be a String and communication should be an Array
+		String input = "{\"resourceType\": \"Patient\",\n" +
+				"  \"id\": 123,\n" +
+				"  \"communication\": {\n" +
+				"    \"language\": {\n" +
+				"      \"text\": \"Hindi\"\n" +
+				"    },\n" +
+				"    \"preferred\": true\n" +
+				"  }\n" +
+				"}";
+
+		IParser p = ourCtx.newJsonParser();
+		
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+		p.setParserErrorHandler(errorHandler);
+		Patient patient = (Patient) p.parseResource(input);
+		
+		ArgumentCaptor<String> elementName = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<ValueType> found = ArgumentCaptor.forClass(ValueType.class);
+		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
+		ArgumentCaptor<ScalarType> expectedScalarType = ArgumentCaptor.forClass(ScalarType.class);
+		ArgumentCaptor<ScalarType> foundScalarType = ArgumentCaptor.forClass(ScalarType.class);
+		verify(errorHandler, times(2)).incorrectJsonType(any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalarType.capture(), found.capture(), foundScalarType.capture());
+		
+		assertEquals(ValueType.SCALAR, found.getAllValues().get(0));
+		assertEquals(ValueType.SCALAR, expected.getAllValues().get(0));
+		assertEquals(ScalarType.NUMBER, foundScalarType.getAllValues().get(0));
+		assertEquals(ScalarType.STRING, expectedScalarType.getAllValues().get(0));
+	
+		assertEquals(ValueType.OBJECT, found.getAllValues().get(1));
+		assertEquals(ValueType.ARRAY, expected.getAllValues().get(1));
+		assertEquals(null, foundScalarType.getAllValues().get(1));
+		assertEquals(null, expectedScalarType.getAllValues().get(1));
+		
+		assertEquals("123", patient.getIdElement().getIdPart());
+		assertEquals("Hindi", patient.getCommunicationFirstRep().getLanguage().getText());
+	}
+	
+	@Test
+	public void testIncorrectJsonTypesNone() {
+		
+		// ID should be a String and communication should be an Array
+		String input = "{\"resourceType\": \"Patient\",\n" +
+				"  \"id\": \"123\",\n" +
+				"  \"communication\": [{\n" +
+				"    \"language\": {\n" +
+				"      \"text\": \"Hindi\"\n" +
+				"    },\n" +
+				"    \"preferred\": true\n" +
+				"  }]\n" +
+				"}";
+
+		IParser p = ourCtx.newJsonParser();
+		
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+		p.setParserErrorHandler(errorHandler);
+		Patient patient = (Patient) p.parseResource(input);
+		
+		ArgumentCaptor<String> elementName = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<ValueType> found = ArgumentCaptor.forClass(ValueType.class);
+		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
+		ArgumentCaptor<ScalarType> expectedScalarType = ArgumentCaptor.forClass(ScalarType.class);
+		ArgumentCaptor<ScalarType> foundScalarType = ArgumentCaptor.forClass(ScalarType.class);
+		verify(errorHandler, times(0)).incorrectJsonType(any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalarType.capture(), found.capture(), foundScalarType.capture());
+		
+		assertEquals("123", patient.getIdElement().getIdPart());
+		assertEquals("Hindi", patient.getCommunicationFirstRep().getLanguage().getText());
+	}
+
+	
 	/**
 	 * See #276
 	 */
@@ -200,14 +275,18 @@ public class JsonParserDstu3Test {
 		ArgumentCaptor<String> elementName = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ValueType> actual = ArgumentCaptor.forClass(ValueType.class);
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), elementName.capture(), expected.capture(), actual.capture());
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_id"), Mockito.eq(ValueType.OBJECT), Mockito.eq(ValueType.SCALAR));
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("__v"), Mockito.eq(ValueType.OBJECT), Mockito.eq(ValueType.SCALAR));
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_status"), Mockito.eq(ValueType.OBJECT), Mockito.eq(ValueType.SCALAR));
+		ArgumentCaptor<ScalarType> expectedScalar = ArgumentCaptor.forClass(ScalarType.class);
+		ArgumentCaptor<ScalarType> actualScalar = ArgumentCaptor.forClass(ScalarType.class);
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalar.capture(), actual.capture(), actualScalar.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_id"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR), actualScalar.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("__v"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR), actualScalar.capture());
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_status"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR), actualScalar.capture());
 
 		assertEquals("_id", elementName.getAllValues().get(0));
 		assertEquals(ValueType.OBJECT, expected.getAllValues().get(0));
 		assertEquals(ValueType.SCALAR, actual.getAllValues().get(0));
+		assertEquals(null, expectedScalar.getAllValues().get(0));
+		assertEquals(null, actualScalar.getAllValues().get(0));
 	}
 
 	@Test
