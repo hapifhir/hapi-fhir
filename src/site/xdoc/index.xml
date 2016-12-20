@@ -61,6 +61,33 @@
 
 		<section name="Announcements">
 			<p>
+				<b>December 20, 2016 - HAPI FHIR 2.2 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release is mainly to bring the STU3 definitions up to the  
+				latest definitions (FHIR 1.8.0 - SVN 10528) and is the version that
+				should be used for the upcoming San Antonio Connectathon.
+			</p>
+			<p>
+				This release also introduces a new JAR (and associated Maven dependency library)
+				called <![CDATA[<code>hapi-fhir-structures-dstu2.1</code>]]>. This module
+				provides the structure classes for FHIR 1.4.0 (Montreal spanshot, sometimes
+				referred to as DSTU2.1)
+				which is used by a number of projects.
+			</p>
+			<p>
+				This release also brings a few miscellaneous bug fixes, and a few
+				validation enhancements. 
+				As always, the <a href="./changes-report.html">changelog</a> has the full list.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+	
+			<p>
 				<b>November 11, 2016 - HAPI FHIR 2.1 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
 				GitHub's releases section.
@@ -108,7 +135,7 @@
 
 
 
-
+			<!--
 			<p>
 				<b>August 30, 2016 - HAPI FHIR 2.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
@@ -153,7 +180,7 @@
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
-
+-->
 			<!--
 			<br/><br/>
 			<p>
