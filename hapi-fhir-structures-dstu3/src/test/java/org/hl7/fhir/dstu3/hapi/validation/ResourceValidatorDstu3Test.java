@@ -41,6 +41,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.parser.XmlParserDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -87,6 +88,58 @@ public class ResourceValidatorDstu3Test {
 			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testValidateCodeableConceptContainingOnlyGoodCode() {
+		Patient p = new Patient();
+		p.getMaritalStatus().addCoding().setSystem("http://hl7.org/fhir/v3/MaritalStatus").setCode("M");
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
+		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		val.registerValidatorModule(new FhirInstanceValidator());
+
+		ValidationResult output = val.validateWithResult(p);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(0, all.size());
+		assertEquals(0, output.getMessages().size());
+	}
+
+	@Test
+	public void testValidateCodeableConceptContainingOnlyBadCode() {
+		Patient p = new Patient();
+		p.getMaritalStatus().addCoding().setSystem("http://hl7.org/fhir/v3/MaritalStatus").setCode("FOO");
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
+		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		val.registerValidatorModule(new FhirInstanceValidator());
+
+		ValidationResult output = val.validateWithResult(p);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/marital-status (http://hl7.org/fhir/ValueSet/marital-status, and a code should come from this value set unless it has no suitable code) (codes = http://hl7.org/fhir/v3/MaritalStatus#FOO)", output.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
+	}
+
+	
+
+	  private List<SingleValidationMessage> logResultsAndReturnNonInformationalOnes(ValidationResult theOutput) {
+	    List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+
+	    int index = 0;
+	    for (SingleValidationMessage next : theOutput.getMessages()) {
+	      ourLog.info("Result {}: {} - {} - {}",
+	          new Object[] { index, next.getSeverity(), next.getLocationString(), next.getMessage() });
+	      index++;
+
+	      if (next.getSeverity() != ResultSeverityEnum.INFORMATION) {
+	        retVal.add(next);
+	      }
+	    }
+
+	    return retVal;
+	  }
 
 	/**
 	 * Make sure that the elements that appear in all resources (meta, language, extension, etc) all appear in the correct order

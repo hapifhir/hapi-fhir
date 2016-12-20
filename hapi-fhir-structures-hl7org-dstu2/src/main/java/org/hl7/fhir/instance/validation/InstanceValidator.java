@@ -1814,8 +1814,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           else {
             if (type.equals("Identifier"))
               checkIdentifier(errors, ei.path, ei.element, ei.definition);
-            else if (type.equals("Coding"))
-              checkCoding(errors, ei.path, ei.element, profile, ei.definition);
+            else if (type.equals("Coding")) {
+                checkCoding(errors, ei.path, ei.element, profile, ei.definition);
+            }
             else if (type.equals("CodeableConcept"))
               checkCodeableConcept(errors, ei.path, ei.element, profile, ei.definition);
             else if (type.equals("Reference"))
