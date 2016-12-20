@@ -16,20 +16,11 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.EligibilityResponse;
 import org.hl7.fhir.dstu3.model.EligibilityResponse.BenefitComponent;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,11 +31,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.parser.XmlParserDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SchemaBaseValidator;
-import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.fhir.validation.*;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 
 public class ResourceValidatorDstu3Test {
@@ -357,6 +344,47 @@ public class ResourceValidatorDstu3Test {
 		ValidationResult result = validator.validateWithResult(input);
 		// we should get some results, not an exception
 		assertEquals(4, result.getMessages().size());
+	}
+	
+	/**
+	 * TODO: re-enable this
+	 */
+	@Test
+	@Ignore
+	public void testValidateQuestionnaireWithCanonicalUrl() {
+		String input = "{\n" + 
+				"  \"resourceType\": \"Questionnaire\",\n" + 
+				"  \"url\": \"http://some.example.url\",\n" + 
+				"  \"status\": \"published\",\n" + 
+				"  \"subjectType\": [\n" + 
+				"    \"Patient\"\n" + 
+				"  ],\n" + 
+				"  \"item\": [\n" + 
+				"    {\n" + 
+				"      \"linkId\": \"example-question\",\n" + 
+				"      \"text\": \"Is the sky blue?\",\n" + 
+				"      \"type\": \"choice\",\n" + 
+				"      \"options\": {\n" + 
+				"        \"reference\": \"http://loinc.org/vs/LL3044-6\"\n" + 
+				"      }\n" + 
+				"    }\n" + 
+				"  ]\n" + 
+				"}";
+		
+		Questionnaire q = new Questionnaire();
+		q = ourCtx.newJsonParser().parseResource(Questionnaire.class, input);
+		
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
+		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		val.registerValidatorModule(new FhirInstanceValidator());
+
+		ValidationResult result = val.validateWithResult(q);
+
+		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
+		ourLog.info(encoded);
+		
 	}
 
 }

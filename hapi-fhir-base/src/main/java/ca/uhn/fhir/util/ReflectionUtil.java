@@ -29,6 +29,8 @@ import java.lang.reflect.WildcardType;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import javassist.Modifier;
 
@@ -131,6 +133,7 @@ public class ReflectionUtil {
 	 */
 	@CoverageIgnore
 	public static <T> T newInstance(Class<T> theType) {
+		Validate.notNull(theType, "theType must not be null");
 		try {
 			return theType.newInstance();
 		} catch (Exception e) {
