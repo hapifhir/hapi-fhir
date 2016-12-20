@@ -2217,97 +2217,101 @@
 <a class="jxr_linenumber" name="L2209" href="#L2209">2209</a> 						<strong class="jxr_keyword">for</strong> (ResourceLink resourceLink : results) {
 <a class="jxr_linenumber" name="L2210" href="#L2210">2210</a> 							<strong class="jxr_keyword">if</strong> (theReverseMode) {
 <a class="jxr_linenumber" name="L2211" href="#L2211">2211</a> 								Long pid = resourceLink.getSourceResourcePid();
-<a class="jxr_linenumber" name="L2212" href="#L2212">2212</a> 								pidsToInclude.add(pid);
-<a class="jxr_linenumber" name="L2213" href="#L2213">2213</a> 							} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L2214" href="#L2214">2214</a> 								Long pid = resourceLink.getTargetResourcePid();
-<a class="jxr_linenumber" name="L2215" href="#L2215">2215</a> 								pidsToInclude.add(pid);
-<a class="jxr_linenumber" name="L2216" href="#L2216">2216</a> 							}
-<a class="jxr_linenumber" name="L2217" href="#L2217">2217</a> 						}
-<a class="jxr_linenumber" name="L2218" href="#L2218">2218</a> 					}
-<a class="jxr_linenumber" name="L2219" href="#L2219">2219</a> 				}
-<a class="jxr_linenumber" name="L2220" href="#L2220">2220</a> 			}
-<a class="jxr_linenumber" name="L2221" href="#L2221">2221</a> 
-<a class="jxr_linenumber" name="L2222" href="#L2222">2222</a> 			<strong class="jxr_keyword">if</strong> (theLastUpdated != <strong class="jxr_keyword">null</strong> &amp;&amp; (theLastUpdated.getLowerBoundAsInstant() != <strong class="jxr_keyword">null</strong> || theLastUpdated.getUpperBoundAsInstant() != <strong class="jxr_keyword">null</strong>)) {
-<a class="jxr_linenumber" name="L2223" href="#L2223">2223</a> 				pidsToInclude = <strong class="jxr_keyword">new</strong> HashSet&lt;Long&gt;(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+<a class="jxr_linenumber" name="L2212" href="#L2212">2212</a> 								<strong class="jxr_keyword">if</strong> (pid != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2213" href="#L2213">2213</a> 									pidsToInclude.add(pid);
+<a class="jxr_linenumber" name="L2214" href="#L2214">2214</a> 								}
+<a class="jxr_linenumber" name="L2215" href="#L2215">2215</a> 							} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L2216" href="#L2216">2216</a> 								Long pid = resourceLink.getTargetResourcePid();
+<a class="jxr_linenumber" name="L2217" href="#L2217">2217</a> 								<strong class="jxr_keyword">if</strong> (pid != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2218" href="#L2218">2218</a> 									pidsToInclude.add(pid);
+<a class="jxr_linenumber" name="L2219" href="#L2219">2219</a> 								}
+<a class="jxr_linenumber" name="L2220" href="#L2220">2220</a> 							}
+<a class="jxr_linenumber" name="L2221" href="#L2221">2221</a> 						}
+<a class="jxr_linenumber" name="L2222" href="#L2222">2222</a> 					}
+<a class="jxr_linenumber" name="L2223" href="#L2223">2223</a> 				}
 <a class="jxr_linenumber" name="L2224" href="#L2224">2224</a> 			}
-<a class="jxr_linenumber" name="L2225" href="#L2225">2225</a> 			<strong class="jxr_keyword">for</strong> (Long next : pidsToInclude) {
-<a class="jxr_linenumber" name="L2226" href="#L2226">2226</a> 				<strong class="jxr_keyword">if</strong> (original.contains(next) == false &amp;&amp; allAdded.contains(next) == false) {
-<a class="jxr_linenumber" name="L2227" href="#L2227">2227</a> 					theMatches.add(next);
-<a class="jxr_linenumber" name="L2228" href="#L2228">2228</a> 				}
-<a class="jxr_linenumber" name="L2229" href="#L2229">2229</a> 			}
-<a class="jxr_linenumber" name="L2230" href="#L2230">2230</a> 
-<a class="jxr_linenumber" name="L2231" href="#L2231">2231</a> 			pidsToInclude.removeAll(nextRoundOmit);
-<a class="jxr_linenumber" name="L2232" href="#L2232">2232</a> 
-<a class="jxr_linenumber" name="L2233" href="#L2233">2233</a> 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
-<a class="jxr_linenumber" name="L2234" href="#L2234">2234</a> 			nextRoundMatches = pidsToInclude;
-<a class="jxr_linenumber" name="L2235" href="#L2235">2235</a> 		} <strong class="jxr_keyword">while</strong> (includes.size() &gt; 0 &amp;&amp; nextRoundMatches.size() &gt; 0 &amp;&amp; addedSomeThisRound);
+<a class="jxr_linenumber" name="L2225" href="#L2225">2225</a> 
+<a class="jxr_linenumber" name="L2226" href="#L2226">2226</a> 			<strong class="jxr_keyword">if</strong> (theLastUpdated != <strong class="jxr_keyword">null</strong> &amp;&amp; (theLastUpdated.getLowerBoundAsInstant() != <strong class="jxr_keyword">null</strong> || theLastUpdated.getUpperBoundAsInstant() != <strong class="jxr_keyword">null</strong>)) {
+<a class="jxr_linenumber" name="L2227" href="#L2227">2227</a> 				pidsToInclude = <strong class="jxr_keyword">new</strong> HashSet&lt;Long&gt;(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+<a class="jxr_linenumber" name="L2228" href="#L2228">2228</a> 			}
+<a class="jxr_linenumber" name="L2229" href="#L2229">2229</a> 			<strong class="jxr_keyword">for</strong> (Long next : pidsToInclude) {
+<a class="jxr_linenumber" name="L2230" href="#L2230">2230</a> 				<strong class="jxr_keyword">if</strong> (original.contains(next) == false &amp;&amp; allAdded.contains(next) == false) {
+<a class="jxr_linenumber" name="L2231" href="#L2231">2231</a> 					theMatches.add(next);
+<a class="jxr_linenumber" name="L2232" href="#L2232">2232</a> 				}
+<a class="jxr_linenumber" name="L2233" href="#L2233">2233</a> 			}
+<a class="jxr_linenumber" name="L2234" href="#L2234">2234</a> 
+<a class="jxr_linenumber" name="L2235" href="#L2235">2235</a> 			pidsToInclude.removeAll(nextRoundOmit);
 <a class="jxr_linenumber" name="L2236" href="#L2236">2236</a> 
-<a class="jxr_linenumber" name="L2237" href="#L2237">2237</a> 		ourLog.info(<span class="jxr_string">"Loaded {} {} in {} rounds and {} ms"</span>, <strong class="jxr_keyword">new</strong> Object[] { allAdded.size(), theReverseMode ? <span class="jxr_string">"_revincludes"</span> : <span class="jxr_string">"_includes"</span>, roundCounts, w.getMillisAndRestart() });
-<a class="jxr_linenumber" name="L2238" href="#L2238">2238</a> 
-<a class="jxr_linenumber" name="L2239" href="#L2239">2239</a> 		<strong class="jxr_keyword">return</strong> allAdded;
-<a class="jxr_linenumber" name="L2240" href="#L2240">2240</a> 	}
-<a class="jxr_linenumber" name="L2241" href="#L2241">2241</a> 
-<a class="jxr_linenumber" name="L2242" href="#L2242">2242</a> 	<strong class="jxr_keyword">static</strong> Predicate[] toArray(List&lt;Predicate&gt; thePredicates) {
-<a class="jxr_linenumber" name="L2243" href="#L2243">2243</a> 		<strong class="jxr_keyword">return</strong> thePredicates.toArray(<strong class="jxr_keyword">new</strong> Predicate[thePredicates.size()]);
+<a class="jxr_linenumber" name="L2237" href="#L2237">2237</a> 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
+<a class="jxr_linenumber" name="L2238" href="#L2238">2238</a> 			nextRoundMatches = pidsToInclude;
+<a class="jxr_linenumber" name="L2239" href="#L2239">2239</a> 		} <strong class="jxr_keyword">while</strong> (includes.size() &gt; 0 &amp;&amp; nextRoundMatches.size() &gt; 0 &amp;&amp; addedSomeThisRound);
+<a class="jxr_linenumber" name="L2240" href="#L2240">2240</a> 
+<a class="jxr_linenumber" name="L2241" href="#L2241">2241</a> 		ourLog.info(<span class="jxr_string">"Loaded {} {} in {} rounds and {} ms"</span>, <strong class="jxr_keyword">new</strong> Object[] { allAdded.size(), theReverseMode ? <span class="jxr_string">"_revincludes"</span> : <span class="jxr_string">"_includes"</span>, roundCounts, w.getMillisAndRestart() });
+<a class="jxr_linenumber" name="L2242" href="#L2242">2242</a> 
+<a class="jxr_linenumber" name="L2243" href="#L2243">2243</a> 		<strong class="jxr_keyword">return</strong> allAdded;
 <a class="jxr_linenumber" name="L2244" href="#L2244">2244</a> 	}
 <a class="jxr_linenumber" name="L2245" href="#L2245">2245</a> 
-<a class="jxr_linenumber" name="L2246" href="#L2246">2246</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/jpa/dao/SearchBuilder.html">BundleProviderInMemory</a> <strong class="jxr_keyword">implements</strong> IBundleProvider {
-<a class="jxr_linenumber" name="L2247" href="#L2247">2247</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ArrayList&lt;Long&gt; myPids;
-<a class="jxr_linenumber" name="L2248" href="#L2248">2248</a> 
-<a class="jxr_linenumber" name="L2249" href="#L2249">2249</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/jpa/dao/SearchBuilder.html">BundleProviderInMemory</a>(Collection&lt;Long&gt; thePids) {
-<a class="jxr_linenumber" name="L2250" href="#L2250">2250</a> 			<strong class="jxr_keyword">final</strong> ArrayList&lt;Long&gt; pids;
-<a class="jxr_linenumber" name="L2251" href="#L2251">2251</a> 			<strong class="jxr_keyword">if</strong> (!(thePids instanceof List)) {
-<a class="jxr_linenumber" name="L2252" href="#L2252">2252</a> 				pids = <strong class="jxr_keyword">new</strong> ArrayList&lt;Long&gt;(thePids);
-<a class="jxr_linenumber" name="L2253" href="#L2253">2253</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L2254" href="#L2254">2254</a> 				pids = (ArrayList&lt;Long&gt;) thePids;
-<a class="jxr_linenumber" name="L2255" href="#L2255">2255</a> 			}
-<a class="jxr_linenumber" name="L2256" href="#L2256">2256</a> 			myPids = pids;
-<a class="jxr_linenumber" name="L2257" href="#L2257">2257</a> 		}
-<a class="jxr_linenumber" name="L2258" href="#L2258">2258</a> 
-<a class="jxr_linenumber" name="L2259" href="#L2259">2259</a> 		@Override
-<a class="jxr_linenumber" name="L2260" href="#L2260">2260</a> 		<strong class="jxr_keyword">public</strong> InstantDt getPublished() {
-<a class="jxr_linenumber" name="L2261" href="#L2261">2261</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> InstantDt(mySearchEntity.getCreated());
-<a class="jxr_linenumber" name="L2262" href="#L2262">2262</a> 		}
-<a class="jxr_linenumber" name="L2263" href="#L2263">2263</a> 
-<a class="jxr_linenumber" name="L2264" href="#L2264">2264</a> 		@Override
-<a class="jxr_linenumber" name="L2265" href="#L2265">2265</a> 		<strong class="jxr_keyword">public</strong> List&lt;IBaseResource&gt; getResources(<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> theFromIndex, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> theToIndex) {
-<a class="jxr_linenumber" name="L2266" href="#L2266">2266</a> 			TransactionTemplate template = <strong class="jxr_keyword">new</strong> TransactionTemplate(myPlatformTransactionManager);
-<a class="jxr_linenumber" name="L2267" href="#L2267">2267</a> 			<strong class="jxr_keyword">return</strong> template.execute(<strong class="jxr_keyword">new</strong> TransactionCallback&lt;List&lt;IBaseResource&gt;&gt;() {
-<a class="jxr_linenumber" name="L2268" href="#L2268">2268</a> 				@Override
-<a class="jxr_linenumber" name="L2269" href="#L2269">2269</a> 				<strong class="jxr_keyword">public</strong> List&lt;IBaseResource&gt; doInTransaction(TransactionStatus theStatus) {
-<a class="jxr_linenumber" name="L2270" href="#L2270">2270</a> 					List&lt;Long&gt; pidsSubList = myPids.subList(theFromIndex, theToIndex);
-<a class="jxr_linenumber" name="L2271" href="#L2271">2271</a> 
-<a class="jxr_linenumber" name="L2272" href="#L2272">2272</a> 					<em class="jxr_comment">// Load includes</em>
-<a class="jxr_linenumber" name="L2273" href="#L2273">2273</a> 					pidsSubList = <strong class="jxr_keyword">new</strong> ArrayList&lt;Long&gt;(pidsSubList);
-<a class="jxr_linenumber" name="L2274" href="#L2274">2274</a> 
-<a class="jxr_linenumber" name="L2275" href="#L2275">2275</a> 					Set&lt;Long&gt; revIncludedPids = <strong class="jxr_keyword">new</strong> HashSet&lt;Long&gt;();
-<a class="jxr_linenumber" name="L2276" href="#L2276">2276</a> 					<strong class="jxr_keyword">if</strong> (myParams.getEverythingMode() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L2277" href="#L2277">2277</a> 						revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, myParams.getRevIncludes(), <strong class="jxr_keyword">true</strong>, myParams.getLastUpdated()));
-<a class="jxr_linenumber" name="L2278" href="#L2278">2278</a> 					}
-<a class="jxr_linenumber" name="L2279" href="#L2279">2279</a> 					revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, myParams.getIncludes(), false, myParams.getLastUpdated()));
-<a class="jxr_linenumber" name="L2280" href="#L2280">2280</a> 
-<a class="jxr_linenumber" name="L2281" href="#L2281">2281</a> 					<em class="jxr_comment">// Execute the query and make sure we return distinct results</em>
-<a class="jxr_linenumber" name="L2282" href="#L2282">2282</a> 					List&lt;IBaseResource&gt; resources = <strong class="jxr_keyword">new</strong> ArrayList&lt;IBaseResource&gt;();
-<a class="jxr_linenumber" name="L2283" href="#L2283">2283</a> 					loadResourcesByPid(pidsSubList, resources, revIncludedPids, false);
+<a class="jxr_linenumber" name="L2246" href="#L2246">2246</a> 	<strong class="jxr_keyword">static</strong> Predicate[] toArray(List&lt;Predicate&gt; thePredicates) {
+<a class="jxr_linenumber" name="L2247" href="#L2247">2247</a> 		<strong class="jxr_keyword">return</strong> thePredicates.toArray(<strong class="jxr_keyword">new</strong> Predicate[thePredicates.size()]);
+<a class="jxr_linenumber" name="L2248" href="#L2248">2248</a> 	}
+<a class="jxr_linenumber" name="L2249" href="#L2249">2249</a> 
+<a class="jxr_linenumber" name="L2250" href="#L2250">2250</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/jpa/dao/SearchBuilder.html">BundleProviderInMemory</a> <strong class="jxr_keyword">implements</strong> IBundleProvider {
+<a class="jxr_linenumber" name="L2251" href="#L2251">2251</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ArrayList&lt;Long&gt; myPids;
+<a class="jxr_linenumber" name="L2252" href="#L2252">2252</a> 
+<a class="jxr_linenumber" name="L2253" href="#L2253">2253</a> 		<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/jpa/dao/SearchBuilder.html">BundleProviderInMemory</a>(Collection&lt;Long&gt; thePids) {
+<a class="jxr_linenumber" name="L2254" href="#L2254">2254</a> 			<strong class="jxr_keyword">final</strong> ArrayList&lt;Long&gt; pids;
+<a class="jxr_linenumber" name="L2255" href="#L2255">2255</a> 			<strong class="jxr_keyword">if</strong> (!(thePids instanceof List)) {
+<a class="jxr_linenumber" name="L2256" href="#L2256">2256</a> 				pids = <strong class="jxr_keyword">new</strong> ArrayList&lt;Long&gt;(thePids);
+<a class="jxr_linenumber" name="L2257" href="#L2257">2257</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L2258" href="#L2258">2258</a> 				pids = (ArrayList&lt;Long&gt;) thePids;
+<a class="jxr_linenumber" name="L2259" href="#L2259">2259</a> 			}
+<a class="jxr_linenumber" name="L2260" href="#L2260">2260</a> 			myPids = pids;
+<a class="jxr_linenumber" name="L2261" href="#L2261">2261</a> 		}
+<a class="jxr_linenumber" name="L2262" href="#L2262">2262</a> 
+<a class="jxr_linenumber" name="L2263" href="#L2263">2263</a> 		@Override
+<a class="jxr_linenumber" name="L2264" href="#L2264">2264</a> 		<strong class="jxr_keyword">public</strong> InstantDt getPublished() {
+<a class="jxr_linenumber" name="L2265" href="#L2265">2265</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> InstantDt(mySearchEntity.getCreated());
+<a class="jxr_linenumber" name="L2266" href="#L2266">2266</a> 		}
+<a class="jxr_linenumber" name="L2267" href="#L2267">2267</a> 
+<a class="jxr_linenumber" name="L2268" href="#L2268">2268</a> 		@Override
+<a class="jxr_linenumber" name="L2269" href="#L2269">2269</a> 		<strong class="jxr_keyword">public</strong> List&lt;IBaseResource&gt; getResources(<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> theFromIndex, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> theToIndex) {
+<a class="jxr_linenumber" name="L2270" href="#L2270">2270</a> 			TransactionTemplate template = <strong class="jxr_keyword">new</strong> TransactionTemplate(myPlatformTransactionManager);
+<a class="jxr_linenumber" name="L2271" href="#L2271">2271</a> 			<strong class="jxr_keyword">return</strong> template.execute(<strong class="jxr_keyword">new</strong> TransactionCallback&lt;List&lt;IBaseResource&gt;&gt;() {
+<a class="jxr_linenumber" name="L2272" href="#L2272">2272</a> 				@Override
+<a class="jxr_linenumber" name="L2273" href="#L2273">2273</a> 				<strong class="jxr_keyword">public</strong> List&lt;IBaseResource&gt; doInTransaction(TransactionStatus theStatus) {
+<a class="jxr_linenumber" name="L2274" href="#L2274">2274</a> 					List&lt;Long&gt; pidsSubList = myPids.subList(theFromIndex, theToIndex);
+<a class="jxr_linenumber" name="L2275" href="#L2275">2275</a> 
+<a class="jxr_linenumber" name="L2276" href="#L2276">2276</a> 					<em class="jxr_comment">// Load includes</em>
+<a class="jxr_linenumber" name="L2277" href="#L2277">2277</a> 					pidsSubList = <strong class="jxr_keyword">new</strong> ArrayList&lt;Long&gt;(pidsSubList);
+<a class="jxr_linenumber" name="L2278" href="#L2278">2278</a> 
+<a class="jxr_linenumber" name="L2279" href="#L2279">2279</a> 					Set&lt;Long&gt; revIncludedPids = <strong class="jxr_keyword">new</strong> HashSet&lt;Long&gt;();
+<a class="jxr_linenumber" name="L2280" href="#L2280">2280</a> 					<strong class="jxr_keyword">if</strong> (myParams.getEverythingMode() == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L2281" href="#L2281">2281</a> 						revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, myParams.getRevIncludes(), <strong class="jxr_keyword">true</strong>, myParams.getLastUpdated()));
+<a class="jxr_linenumber" name="L2282" href="#L2282">2282</a> 					}
+<a class="jxr_linenumber" name="L2283" href="#L2283">2283</a> 					revIncludedPids.addAll(loadReverseIncludes(myContext, myEntityManager, pidsSubList, myParams.getIncludes(), false, myParams.getLastUpdated()));
 <a class="jxr_linenumber" name="L2284" href="#L2284">2284</a> 
-<a class="jxr_linenumber" name="L2285" href="#L2285">2285</a> 					<strong class="jxr_keyword">return</strong> resources;
-<a class="jxr_linenumber" name="L2286" href="#L2286">2286</a> 				}
-<a class="jxr_linenumber" name="L2287" href="#L2287">2287</a> 
-<a class="jxr_linenumber" name="L2288" href="#L2288">2288</a> 			});
-<a class="jxr_linenumber" name="L2289" href="#L2289">2289</a> 		}
-<a class="jxr_linenumber" name="L2290" href="#L2290">2290</a> 
-<a class="jxr_linenumber" name="L2291" href="#L2291">2291</a> 		@Override
-<a class="jxr_linenumber" name="L2292" href="#L2292">2292</a> 		<strong class="jxr_keyword">public</strong> Integer preferredPageSize() {
-<a class="jxr_linenumber" name="L2293" href="#L2293">2293</a> 			<strong class="jxr_keyword">return</strong> myParams.getCount();
-<a class="jxr_linenumber" name="L2294" href="#L2294">2294</a> 		}
-<a class="jxr_linenumber" name="L2295" href="#L2295">2295</a> 
-<a class="jxr_linenumber" name="L2296" href="#L2296">2296</a> 		@Override
-<a class="jxr_linenumber" name="L2297" href="#L2297">2297</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> size() {
-<a class="jxr_linenumber" name="L2298" href="#L2298">2298</a> 			<strong class="jxr_keyword">return</strong> myPids.size();
-<a class="jxr_linenumber" name="L2299" href="#L2299">2299</a> 		}
-<a class="jxr_linenumber" name="L2300" href="#L2300">2300</a> 	}
-<a class="jxr_linenumber" name="L2301" href="#L2301">2301</a> 
-<a class="jxr_linenumber" name="L2302" href="#L2302">2302</a> }
+<a class="jxr_linenumber" name="L2285" href="#L2285">2285</a> 					<em class="jxr_comment">// Execute the query and make sure we return distinct results</em>
+<a class="jxr_linenumber" name="L2286" href="#L2286">2286</a> 					List&lt;IBaseResource&gt; resources = <strong class="jxr_keyword">new</strong> ArrayList&lt;IBaseResource&gt;();
+<a class="jxr_linenumber" name="L2287" href="#L2287">2287</a> 					loadResourcesByPid(pidsSubList, resources, revIncludedPids, false);
+<a class="jxr_linenumber" name="L2288" href="#L2288">2288</a> 
+<a class="jxr_linenumber" name="L2289" href="#L2289">2289</a> 					<strong class="jxr_keyword">return</strong> resources;
+<a class="jxr_linenumber" name="L2290" href="#L2290">2290</a> 				}
+<a class="jxr_linenumber" name="L2291" href="#L2291">2291</a> 
+<a class="jxr_linenumber" name="L2292" href="#L2292">2292</a> 			});
+<a class="jxr_linenumber" name="L2293" href="#L2293">2293</a> 		}
+<a class="jxr_linenumber" name="L2294" href="#L2294">2294</a> 
+<a class="jxr_linenumber" name="L2295" href="#L2295">2295</a> 		@Override
+<a class="jxr_linenumber" name="L2296" href="#L2296">2296</a> 		<strong class="jxr_keyword">public</strong> Integer preferredPageSize() {
+<a class="jxr_linenumber" name="L2297" href="#L2297">2297</a> 			<strong class="jxr_keyword">return</strong> myParams.getCount();
+<a class="jxr_linenumber" name="L2298" href="#L2298">2298</a> 		}
+<a class="jxr_linenumber" name="L2299" href="#L2299">2299</a> 
+<a class="jxr_linenumber" name="L2300" href="#L2300">2300</a> 		@Override
+<a class="jxr_linenumber" name="L2301" href="#L2301">2301</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> size() {
+<a class="jxr_linenumber" name="L2302" href="#L2302">2302</a> 			<strong class="jxr_keyword">return</strong> myPids.size();
+<a class="jxr_linenumber" name="L2303" href="#L2303">2303</a> 		}
+<a class="jxr_linenumber" name="L2304" href="#L2304">2304</a> 	}
+<a class="jxr_linenumber" name="L2305" href="#L2305">2305</a> 
+<a class="jxr_linenumber" name="L2306" href="#L2306">2306</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

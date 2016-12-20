@@ -79,23 +79,15 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  	@Override
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<em class="jxr_comment">// Notify interceptors</em>
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(theRequestDetails, getResourceName(), <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE, requestDetails);
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative);
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	}
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	@Override
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<em class="jxr_comment">// Notify interceptors</em>
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		ActionRequestDetails requestDetails = <strong class="jxr_keyword">new</strong> ActionRequestDetails(theRequestDetails, getResourceName(), <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, requestDetails);
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(<strong class="jxr_keyword">null</strong>, theCount, theLastUpdated, theSort, theContent, theNarrative);
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	}
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  }
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	}
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	@Override
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType&lt;Integer&gt; theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">return</strong> doEverythingOperation(<strong class="jxr_keyword">null</strong>, theCount, theLastUpdated, theSort, theContent, theNarrative);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

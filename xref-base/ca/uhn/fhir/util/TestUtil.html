@@ -87,44 +87,48 @@
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		}
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_comment">		 * Set some system properties randomly after each test.. this is kind of hackish,</em>
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_comment">		 * but it helps us make sure we don't have any tests that depend on a particular</em>
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_comment">		 * environment</em>
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		Locale[] availableLocales = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		Locale.setDefault(availableLocales[(<strong class="jxr_keyword">int</strong>) (Math.random() * availableLocales.length)]);
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		ourLog.info(<span class="jxr_string">"Tests are running in locale: "</span> + Locale.getDefault().getDisplayName());
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  		<strong class="jxr_keyword">if</strong> (Math.random() &lt; 0.5) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			ourLog.info(<span class="jxr_string">"Tests are using WINDOWS line endings and ISO-8851-1"</span>);
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			System.setProperty(<span class="jxr_string">"file.encoding"</span>, <span class="jxr_string">"ISO-8859-1"</span>);
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			System.setProperty(<span class="jxr_string">"line.separator"</span>, <span class="jxr_string">"\r\n"</span>);
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			ourLog.info(<span class="jxr_string">"Tests are using UNIX line endings and UTF-8"</span>);
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			System.setProperty(<span class="jxr_string">"file.encoding"</span>, <span class="jxr_string">"UTF-8"</span>);
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			System.setProperty(<span class="jxr_string">"line.separator"</span>, <span class="jxr_string">"\n"</span>);
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		}
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		String availableTimeZones[] = { <span class="jxr_string">"GMT+08:00"</span>, <span class="jxr_string">"GMT-05:00"</span>, <span class="jxr_string">"GMT+00:00"</span>, <span class="jxr_string">"GMT+03:30"</span> };
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		String timeZone = availableTimeZones[(<strong class="jxr_keyword">int</strong>) (Math.random() * availableTimeZones.length)];
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		ourLog.info(<span class="jxr_string">"Tests are using time zone: {}"</span>, TimeZone.getDefault().getID());
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_comment">		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage</em>
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_comment">		 * on trace blocks</em>
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"true"</span>.equals(System.getProperty(<span class="jxr_string">"ci"</span>))) {
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 				<strong class="jxr_keyword">for</strong> (Logger next : ((LoggerContext) LoggerFactory.getILoggerFactory()).getLoggerList()) {
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 					next.setLevel(Level.TRACE);
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 				}
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			}
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 		} <strong class="jxr_keyword">catch</strong> (NoClassDefFoundError e) {
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			<em class="jxr_comment">// ignore</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		randomizeLocale();
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_comment">		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_comment">		 * on trace blocks</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			<strong class="jxr_keyword">if</strong> (<span class="jxr_string">"true"</span>.equals(System.getProperty(<span class="jxr_string">"ci"</span>))) {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  				<strong class="jxr_keyword">for</strong> (Logger next : ((LoggerContext) LoggerFactory.getILoggerFactory()).getLoggerList()) {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  					next.setLevel(Level.TRACE);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  				}
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			}
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		} <strong class="jxr_keyword">catch</strong> (NoClassDefFoundError e) {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			<em class="jxr_comment">// ignore</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		}
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	}
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">	 * Set some system properties randomly after each test.. this is kind of hackish,</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">	 * but it helps us make sure we don't have any tests that depend on a particular</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">	 * environment</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> randomizeLocale() {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		Locale[] availableLocales = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		Locale.setDefault(availableLocales[(<strong class="jxr_keyword">int</strong>) (Math.random() * availableLocales.length)]);
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		ourLog.info(<span class="jxr_string">"Tests are running in locale: "</span> + Locale.getDefault().getDisplayName());
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">if</strong> (Math.random() &lt; 0.5) {
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			ourLog.info(<span class="jxr_string">"Tests are using WINDOWS line endings and ISO-8851-1"</span>);
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			System.setProperty(<span class="jxr_string">"file.encoding"</span>, <span class="jxr_string">"ISO-8859-1"</span>);
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			System.setProperty(<span class="jxr_string">"line.separator"</span>, <span class="jxr_string">"\r\n"</span>);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			ourLog.info(<span class="jxr_string">"Tests are using UNIX line endings and UTF-8"</span>);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			System.setProperty(<span class="jxr_string">"file.encoding"</span>, <span class="jxr_string">"UTF-8"</span>);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			System.setProperty(<span class="jxr_string">"line.separator"</span>, <span class="jxr_string">"\n"</span>);
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 		}
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	}
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> }
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		String availableTimeZones[] = { <span class="jxr_string">"GMT+08:00"</span>, <span class="jxr_string">"GMT-05:00"</span>, <span class="jxr_string">"GMT+00:00"</span>, <span class="jxr_string">"GMT+03:30"</span> };
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		String timeZone = availableTimeZones[(<strong class="jxr_keyword">int</strong>) (Math.random() * availableTimeZones.length)];
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		ourLog.info(<span class="jxr_string">"Tests are using time zone: {}"</span>, TimeZone.getDefault().getID());
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	}
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
