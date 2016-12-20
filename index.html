@@ -178,6 +178,13 @@
 </div> 
 <div class="section"> 
  <h2 id="Announcements">Announcements</h2> 
+ <p> <b>December 20, 2016 - HAPI FHIR 2.2 Released</b> - The next release of HAPI has now been uploaded to the Maven repos and GitHub's releases section. </p> 
+ <p> This release is mainly to bring the STU3 definitions up to the latest definitions (FHIR 1.8.0 - SVN 10528) and is the version that should be used for the upcoming San Antonio Connectathon. </p> 
+ <p> This release also introduces a new JAR (and associated Maven dependency library) called &lt;code&gt;hapi-fhir-structures-dstu2.1&lt;/code&gt;. This module provides the structure classes for FHIR 1.4.0 (Montreal spanshot, sometimes referred to as DSTU2.1) which is used by a number of projects. </p> 
+ <p> This release also brings a few miscellaneous bug fixes, and a few validation enhancements. As always, the <a href="./changes-report.html">changelog</a> has the full list. </p> 
+ <p> - <a class="externalLink" href="https://github.com/jamesagnew/">James Agnew</a> </p> 
+ <br /> 
+ <br /> 
  <p> <b>November 11, 2016 - HAPI FHIR 2.1 Released</b> - The next release of HAPI has now been uploaded to the Maven repos and GitHub's releases section. </p> 
  <p> This release brings several primary changes: </p> 
  <ul> 
@@ -191,16 +198,50 @@
  <p> - <a class="externalLink" href="https://github.com/jamesagnew/">James Agnew</a> </p> 
  <br /> 
  <br /> 
- <p> <b>August 30, 2016 - HAPI FHIR 2.0 Released</b> - The next release of HAPI has now been uploaded to the Maven repos and GitHub's releases section. </p> 
- <p> This release brings several primary changes: </p> 
- <ul> 
-  <li> The JSON parser used by HAPI's parser module has been switched from <a class="externalLink" href="https://jsonp.java.net/">JSR353/JSONP</a> to <a class="externalLink" href="https://github.com/google/gson">Google GSON</a>. This should be an invisible change for most users (the only thing that broke for us was that a few extra spaces are inserted in pretty-printed encoding and this broke some overly sensitive unit tests). Gson is a much more active project than JSONP and should be better supported in the future. </li> 
-  <li> STU3 definitions have been updated to the FHIR 1.6.0 2016 September Ballot Candidate definitions (aka the 2016 Baltimore Connectathon version). </li> 
-  <li> Content-Types emitted by the library have been updated to use the new content type strings proposed for use as of STU3 (when using HAPI in STU3 mode). E.g. <tt>application/fhir+xml</tt> insead of the previous <tt>application/xml+fhir</tt> </li> 
- </ul> 
- <p> This release also brings a number of bugfixes and also quite a few enhancements. As always, the <a href="./changes-report.html">changelog</a> has the full list of changes in this version. Among the enhancements in this release are: </p> 
- <p> As always, we welcome new contributions and contributors! Please feel free to get in touch if you are interested in getting involved with HAPI but don't know where to start. </p> 
- <p> - <a class="externalLink" href="https://github.com/jamesagnew/">James Agnew</a> </p> 
+ <!-- <p>
+				<b>August 30, 2016 - HAPI FHIR 2.0 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings several primary changes:
+				<ul>
+					<li>
+						The JSON parser used by HAPI's parser module has been switched
+						from <a href="https://jsonp.java.net/">JSR353/JSONP</a> to 
+						<a href="https://github.com/google/gson">Google GSON</a>. This
+						should be an invisible change for most users (the only thing that
+						broke for us was that a few extra spaces are inserted in pretty-printed
+						encoding and this broke some overly sensitive unit tests). Gson is
+						a much more active project than JSONP and should be better
+						supported in the future.
+					</li>
+					<li>
+						STU3 definitions have been updated to the FHIR 1.6.0
+						2016 September Ballot Candidate definitions
+						 (aka the 2016 Baltimore Connectathon version). 
+					</li>
+					<li>
+						Content-Types emitted by the library have been updated to use
+						the new content type strings proposed for use as of STU3 (when using
+						HAPI in STU3 mode). E.g. <code>application/fhir+xml</code> insead
+						of the previous <code>application/xml+fhir</code>
+					</li>
+				</ul>
+			</p>
+			<p>
+				This release also brings a number of bugfixes and also quite a few enhancements.
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version. Among the enhancements in this release are:
+			</p>
+			<p>
+				As always, we welcome new contributions and contributors! Please feel free to get 
+				in touch if you are interested in getting involved with HAPI but don't know
+				where to start.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p> --> 
  <!-- <br/><br/>
 			<p>
 				<b>July 7, 2016 - HAPI FHIR 1.6 Released</b> -
