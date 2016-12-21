@@ -55,7 +55,6 @@
 						<td><a href="http://build.fhir.org/">DSTU3 1.4.0 Snapshot</a> (May 2016 / Baltimore)</td>
 					</tr>
 					<tr>
-					<tr>
 						<td rowspan="6">hapi-fhir-structures-dstu3</td>
 						<td>HAPI FHIR 1.4</td>
 						<td><a href="http://build.fhir.org/">STU3 1.3.0 Snapshot</a> (SVN 7602)</td>
