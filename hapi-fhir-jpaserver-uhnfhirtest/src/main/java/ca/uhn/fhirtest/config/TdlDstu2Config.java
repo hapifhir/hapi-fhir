@@ -71,7 +71,7 @@ public class TdlDstu2Config extends BaseJavaConfigDstu2 {
 	@DependsOn("dbServer")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.ClientDriver());
+//		retVal.setDriver(new org.apache.derby.jdbc.ClientDriver());
 		// retVal.setUrl("jdbc:derby:directory:" + myFhirDbLocation + ";create=true");
 		retVal.setUrl("jdbc:derby://localhost:1527/" + myFhirDbLocation + ";create=true");
 		retVal.setUsername("SA");

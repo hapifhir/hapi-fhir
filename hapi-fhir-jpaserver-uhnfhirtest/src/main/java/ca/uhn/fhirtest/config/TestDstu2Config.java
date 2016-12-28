@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.DerbyTenSevenDialect;
+import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,10 +33,12 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	public static final String FHIR_LUCENE_LOCATION_DSTU2 = "${fhir.lucene.location.dstu2}";
-	public static final String FHIR_DB_LOCATION_DSTU2 = "${fhir.db.location.dstu2}";
 
-	@Value(FHIR_DB_LOCATION_DSTU2)
-	private String myFhirDbLocation;
+	@Value(TestDstu1Config.FHIR_DB_USERNAME)
+	private String myDbUsername;
+
+	@Value(TestDstu1Config.FHIR_DB_PASSWORD)
+	private String myDbPassword;
 
 	@Value(FHIR_LUCENE_LOCATION_DSTU2)
 	private String myFhirLuceneLocation;
@@ -48,7 +51,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-	@Bean 
+	@Bean
 	public IServerInterceptor securityInterceptor() {
 		return new PublicSecurityInterceptor();
 	}
@@ -71,11 +74,10 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	@DependsOn("dbServer")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.ClientDriver());
-		// retVal.setUrl("jdbc:derby:directory:" + myFhirDbLocation + ";create=true");
-		retVal.setUrl("jdbc:derby://localhost:1527/" + myFhirDbLocation + ";create=true");
-		retVal.setUsername("SA");
-		retVal.setPassword("SA");
+		retVal.setDriver(new org.postgresql.Driver());
+		retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu2");
+		retVal.setUsername(myDbUsername);
+		retVal.setPassword(myDbPassword);
 		return retVal;
 	}
 
@@ -99,7 +101,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", DerbyTenSevenDialect.class.getName());
+		extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
@@ -108,16 +110,15 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
-		extraProperties.put("hibernate.search.default.directory_provider" ,"filesystem");
+		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", myFhirLuceneLocation);
-		extraProperties.put("hibernate.search.lucene_version","LUCENE_CURRENT");
+		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		return extraProperties;
 	}
 
-	@Bean(autowire=Autowire.BY_TYPE)
+	@Bean(autowire = Autowire.BY_TYPE)
 	public IServerInterceptor subscriptionSecurityInterceptor() {
 		return new SubscriptionsRequireManualActivationInterceptorDstu2();
 	}
-	
-	
+
 }

@@ -171,6 +171,10 @@
 				return CapabilityStatement instead of the previously used
 				"Conformance" resource
 			</action>
+			<action type="fix">
+				CLI example uploader couldn't find STU3 examples after CI server
+				was moved to build.fhir.org
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
