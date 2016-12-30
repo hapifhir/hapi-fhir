@@ -138,6 +138,13 @@ public class LoggingInterceptor extends InterceptorAdapter {
 	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
 
 	/**
+	 * Constructor for server logging interceptor
+	 */
+	public LoggingInterceptor() {
+		super();
+	}
+	
+	/**
 	 * Get the log message format to be used when logging exceptions
 	 */
 	public String getErrorMessageFormat() {

@@ -47,14 +47,14 @@ public class LoggingInterceptor implements IClientInterceptor {
 	private boolean myLogResponseSummary = true;
 
 	/**
-	 * Constructor
+	 * Constructor for client logging interceptor
 	 */
 	public LoggingInterceptor() {
 		super();
 	}
 
 	/**
-	 * Constructor
+	 * Constructor for client logging interceptor
 	 * 
 	 * @param theVerbose
 	 *            If set to true, all logging is enabled

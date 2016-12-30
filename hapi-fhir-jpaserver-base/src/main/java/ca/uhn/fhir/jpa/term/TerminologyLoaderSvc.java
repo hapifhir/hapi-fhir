@@ -45,6 +45,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,7 +175,7 @@ public class TerminologyLoaderSvc implements IHapiTerminologyLoaderSvc {
 						Reader reader = null;
 						CSVParser parsed = null;
 						try {
-							reader = new InputStreamReader(zis, Charsets.UTF_8);
+							reader = new InputStreamReader(new BOMInputStream(zis), Charsets.UTF_8);
 							CSVFormat format = CSVFormat.newFormat(theDelimiter).withFirstRecordAsHeader();
 							if (theQuoteMode != null) {
 								format = format.withQuote('"').withQuoteMode(theQuoteMode);

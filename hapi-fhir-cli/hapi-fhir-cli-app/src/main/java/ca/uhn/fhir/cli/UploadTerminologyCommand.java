@@ -17,6 +17,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class UploadTerminologyCommand extends BaseCommand {
 
@@ -59,6 +60,10 @@ public class UploadTerminologyCommand extends BaseCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
+		opt = new Option("v", "verbose", false, "Verbose output");
+		opt.setRequired(false);
+		options.addOption(opt);
+		
 		return options;
 	}
 
@@ -85,7 +90,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 		
 		String bearerToken = theCommandLine.getOptionValue("b");
 
-		
 		IGenericClient client = super.newClient(ctx, targetServer);
 		IBaseParameters inputParameters;
 		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -101,6 +105,10 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 		if (isNotBlank(bearerToken)) {
 			client.registerInterceptor(new BearerTokenAuthInterceptor(bearerToken));
+		}
+
+		if (theCommandLine.hasOption('v')) {
+			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 		
 		ourLog.info("Beginning upload - This may take a while...");

@@ -24,9 +24,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -95,4 +98,17 @@ public class HapiLocalizer {
 			return retVal;
 		}
 	}
+	
+	
+	public Set<String> getAllKeys(){
+		HashSet<String> retVal = new HashSet<String>();
+		for (ResourceBundle nextBundle : myBundle) {
+			Enumeration<String> keysEnum = nextBundle.getKeys();
+			while (keysEnum.hasMoreElements()) {
+				retVal.add(keysEnum.nextElement());
+			}
+		}
+		return retVal;
+	}
+	
 }
