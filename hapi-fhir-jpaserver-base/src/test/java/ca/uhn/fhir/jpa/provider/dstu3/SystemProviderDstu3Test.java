@@ -11,6 +11,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -473,7 +474,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
@@ -491,7 +492,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.toString(), containsString(""));
+			assertThat(e.toString(), containsString("missing or invalid HTTP Verb"));
 		}
 	}
 
