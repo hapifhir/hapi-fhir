@@ -342,11 +342,11 @@
 			
 			<p>
 				The HAPI <a href="./doc_jpa.html">JPA Server</a> is an added layer on top of the HAPI
-				REST server framework. If you are using it, you may wish to also register interceptors
+				REST server framework. If you are using it, you may wish register interceptors
 				against the <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig</a>
 				bean that you create using Spring configuration. 
 			</p>
-		
+
 			<p>
 				By registering an interceptor against the DaoConfig, the server will invoke 
 				interceptor methods for operations such as <b>create</b>, <b>update</b>, etc even
@@ -354,13 +354,34 @@
 				if you are using interceptors to make access control decisions because
 				it avoids clients using transactions as a means of bypassing these controls.
 			</p>
+
+			<p>
+				When an interceptor is registered against the DaoConfig instead of the RestfulServer, 
+				the <code>incomingRequestPreHandled</code> method will be called once for most
+				operations (e.g. a FHIR <code>create</code>), but in the case where the client
+				performs a FHIR <code>transaction</code> that method might be called multiple
+				times over the course of a single client invocation. For example if the transaction
+				contained a single create, the <code>incomingRequestPreHandled</code> method will
+				be called twice: once to indicate the transaction, and once to indicate the create. 
+			</p>
+			
+			<p>
+				This use of interceptors is typically only useful for situations where it's more important
+				to understand the semantics of the request, as opposed to the physical contents. In other 
+				words, if you are creating an auditing interceptor for a JPA server, it probably
+				makes sense to register the interceptor with the DaoConfig. If you are creating
+				an HTTP Request Logger for a JPA server, it probably makes sense to register it
+				with the RestfulServer. Note that it <b>generally doesn't make sense to register
+				the same interceptor against both</b> the DaoConfig and the RestfulServer since 
+				both places will end up invoking the same methods. 
+			</p>
 			
 			<p>
 				You may also choose to create interceptors which implement the 
 				more specialized
 				<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>
 				interface, as this interceptor adds additional methods which are called during the JPA
-				lifecycle. 
+				lifecycle.
 			</p>
 		
 		</section>

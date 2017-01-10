@@ -651,8 +651,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 
-		requestDetails.notifyIncomingRequestPreHandled(theOperationType);
-
 		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
 		if (interceptors == null) {
 			return;
