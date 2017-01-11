@@ -130,11 +130,16 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 
 		// SubscriptionCandidateResource
 
-		Collection<Long> subscriptions = mySubscriptionTableDao.findSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE.getCode(), new Date());
-
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		
+		Collection<Long> subscriptions = txTemplate.execute(new TransactionCallback<Collection<Long>>() {
+			@Override
+			public Collection<Long> doInTransaction(TransactionStatus theStatus) {
+				return mySubscriptionTableDao.findSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE.getCode(), new Date());
+			}
+		});
+
 		int retVal = 0;
 		for (final Long nextSubscriptionTablePid : subscriptions) {
 			retVal += txTemplate.execute(new TransactionCallback<Integer>() {
@@ -244,15 +249,24 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 			return;
 		}
 
-		Date cutoff = new Date(System.currentTimeMillis() - purgeInactiveAfterMillis);
-		Collection<SubscriptionTable> toPurge = mySubscriptionTableDao.findInactiveBeforeCutoff(cutoff);
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		final Date cutoff = new Date(System.currentTimeMillis() - purgeInactiveAfterMillis);
+		
+		Collection<SubscriptionTable> toPurge = txTemplate.execute(new TransactionCallback<Collection<SubscriptionTable>>() {
+			@Override
+			public Collection<SubscriptionTable> doInTransaction(TransactionStatus theStatus) {
+				Collection<SubscriptionTable> toPurge = mySubscriptionTableDao.findInactiveBeforeCutoff(cutoff);
+				toPurge.size();
+				return toPurge;
+			}
+		});
+		
 		for (SubscriptionTable subscriptionTable : toPurge) {
 
 			final IdDt subscriptionId = subscriptionTable.getSubscriptionResource().getIdDt();
 			ourLog.info("Deleting inactive subscription {} - Created {}, last client poll {}",
 					new Object[] { subscriptionId.toUnqualified(), subscriptionTable.getCreated(), subscriptionTable.getLastClientPoll() });
-			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			txTemplate.execute(new TransactionCallback<Void>() {
 				@Override
 				public Void doInTransaction(TransactionStatus theStatus) {

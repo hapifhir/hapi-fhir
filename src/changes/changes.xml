@@ -175,6 +175,10 @@
 				CLI example uploader couldn't find STU3 examples after CI server
 				was moved to build.fhir.org
 			</action>
+			<action type="fix">
+				Fix issue in JPA subscription module that prevented purging stale
+				subscriptions when many were present on Postgres
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
