@@ -26,7 +26,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -40,13 +42,18 @@ import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
 @EnableWebSocket()
 @EnableWebMvc
 @Controller
-public class WebsocketDstu2Config implements WebSocketConfigurer {
+public class WebsocketDstu2Config extends WebMvcConfigurerAdapter implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
 		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2").setAllowedOrigins("*");
 	}
 
+	 @Override
+	  public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) { 
+	    configurer.enable(); 
+	  }
+	
 	@Bean
 	public ServletServerContainerFactoryBean createWebSocketContainer() {
 		ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
