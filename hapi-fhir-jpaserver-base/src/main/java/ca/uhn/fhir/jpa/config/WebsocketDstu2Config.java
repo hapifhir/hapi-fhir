@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -35,11 +36,12 @@ import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
 
 @Configuration
 @EnableWebSocket()
+@Controller
 public class WebsocketDstu2Config implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2");
+		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2").setAllowedOrigins("*");
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

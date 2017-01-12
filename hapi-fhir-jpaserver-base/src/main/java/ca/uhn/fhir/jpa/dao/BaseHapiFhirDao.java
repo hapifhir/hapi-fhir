@@ -141,12 +141,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
+	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
 	public static final long INDEX_STATUS_INDEXED = Long.valueOf(1L);
 	public static final long INDEX_STATUS_INDEXING_FAILED = Long.valueOf(2L);
 	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
@@ -644,22 +646,34 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		theProvider.setSearchResultDao(mySearchResultDao);
 	}
 
-	protected void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails requestDetails) {
-		if (requestDetails.getId() != null && requestDetails.getId().hasResourceType() && isNotBlank(requestDetails.getResourceType())) {
-			if (requestDetails.getId().getResourceType().equals(requestDetails.getResourceType()) == false) {
-				throw new InternalErrorException("Inconsistent server state - Resource types don't match: " + requestDetails.getId().getResourceType() + " / " + requestDetails.getResourceType());
+	protected void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {
+		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
+			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
+				throw new InternalErrorException("Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
 			}
 		}
 
+		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
+			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
+		}
+		
 		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
 		if (interceptors == null) {
 			return;
 		}
 		for (IServerInterceptor next : interceptors) {
-			next.incomingRequestPreHandled(theOperationType, requestDetails);
+			next.incomingRequestPreHandled(theOperationType, theRequestDetails);
 		}
 	}
 
+	protected void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+		theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+	}
+
+	protected void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+		theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
+	}
+	
 	public String parseContentTextIntoWords(IBaseResource theResource) {
 		StringBuilder retVal = new StringBuilder();
 		@SuppressWarnings("rawtypes")

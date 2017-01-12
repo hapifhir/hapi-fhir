@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,6 +73,7 @@ public abstract class BaseJpaTest {
 		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
 		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
 		when(mySrd.getServer().getInterceptors()).thenReturn(new ArrayList<IServerInterceptor>());
+		when(mySrd.getUserData()).thenReturn(new HashMap<Object, Object>());
 	}
 
 	@SuppressWarnings({ "rawtypes" })

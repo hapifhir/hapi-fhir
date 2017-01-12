@@ -179,6 +179,12 @@
 				Fix issue in JPA subscription module that prevented purging stale
 				subscriptions when many were present on Postgres
 			</action>
+			<action type="fix" issue="532">
+				Server interceptor methods were being called twice unnecessarily
+				by the JPA server, and the DaoConfig interceptor registration 
+				framework was not actually useful. Thanks to GitHub user
+				@mattiuusitalo for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

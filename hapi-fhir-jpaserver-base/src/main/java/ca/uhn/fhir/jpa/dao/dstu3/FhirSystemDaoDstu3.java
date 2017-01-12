@@ -253,8 +253,17 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return transaction((ServletRequestDetails) theRequestDetails, theRequest, actionName);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Bundle transaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
+		super.markRequestAsProcessingSubRequest(theRequestDetails);
+		try {
+			return doTransaction(theRequestDetails, theRequest, theActionName);
+		} finally {
+			super.clearRequestAsProcessingSubRequest(theRequestDetails);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Bundle doTransaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
 		BundleType transactionType = theRequest.getTypeElement().getValue();
 		if (transactionType == BundleType.BATCH) {
 			return batch(theRequestDetails, theRequest);
@@ -593,6 +602,8 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return response;
 	}
 
+	
+	
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdType, IdType> idSubstitutions, Map<IdType, DaoMethodOutcome> idToPersistedOutcome, IdType nextResourceId, DaoMethodOutcome outcome,
 			BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes) {
 		IdType newId = (IdType) outcome.getId().toUnqualifiedVersionless();

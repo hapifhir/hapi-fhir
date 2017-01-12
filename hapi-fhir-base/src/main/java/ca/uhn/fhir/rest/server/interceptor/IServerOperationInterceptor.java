@@ -24,7 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.method.RequestDetails;
 
-public interface IServerOperationInterceptor {
+public interface IServerOperationInterceptor extends IServerInterceptor {
 
 	/**
 	 * User code may call this method to indicate to an interceptor that

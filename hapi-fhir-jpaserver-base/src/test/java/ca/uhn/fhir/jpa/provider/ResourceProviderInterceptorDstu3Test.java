@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
+package ca.uhn.fhir.jpa.provider;
 
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -21,17 +21,19 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.interceptor.IJpaServerInterceptor;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
@@ -39,14 +41,16 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 
-public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDstu3Test {
+public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderInterceptorDstu3Test.class);
 	private IServerInterceptor myDaoInterceptor;
 
 	private IServerInterceptor myServerInterceptor;
+	private IServerOperationInterceptor myJpaServerInterceptor;
 
 	@Override
 	@After
@@ -55,6 +59,7 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 
 		myDaoConfig.getInterceptors().remove(myDaoInterceptor);
 		ourRestServer.unregisterInterceptor(myServerInterceptor);
+		ourRestServer.unregisterInterceptor(myJpaServerInterceptor);
 	}
 
 	@Override
@@ -63,6 +68,7 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 
 		myServerInterceptor = mock(IServerInterceptor.class);
 		myDaoInterceptor = mock(IServerInterceptor.class);
+		myJpaServerInterceptor = mock(IServerOperationInterceptor.class);
 
 		when(myServerInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
@@ -70,8 +76,15 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class))).thenReturn(true);
 		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
+		when(myJpaServerInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myJpaServerInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myJpaServerInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myJpaServerInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class))).thenReturn(true);
+		when(myJpaServerInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+
 		myDaoConfig.getInterceptors().add(myDaoInterceptor);
 		ourRestServer.registerInterceptor(myServerInterceptor);
+		ourRestServer.registerInterceptor(myJpaServerInterceptor);
 
 		 ourRestServer.registerInterceptor(new InterceptorAdapter() {
 		 @Override
@@ -86,7 +99,7 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 		String methodName = "testCreateResource";
 
 		Patient pt = new Patient();
-		pt.addName().setFamily(methodName);
+		pt.addName().addFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
@@ -122,14 +135,14 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 		String methodName = "testCreateResourceInTransaction";
 
 		Patient pt = new Patient();
-		pt.addName().setFamily(methodName);
+		pt.addName().addFamily(methodName);
 
 		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.TRANSACTION);
-		BundleEntryComponent entry = bundle.addEntry();
+		bundle.setType(BundleTypeEnum.TRANSACTION);
+		Entry entry = bundle.addEntry();
 		entry.setFullUrl("Patient");
 		entry.setResource(pt);
-		entry.getRequest().setMethod(HTTPVerb.POST);
+		entry.getRequest().setMethod(HTTPVerbEnum.POST);
 		entry.getRequest().setUrl("Patient");
 
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(bundle);
@@ -162,6 +175,8 @@ public class ResourceProviderInterceptorDstu3Test extends BaseResourceProviderDs
 		ArgumentCaptor<HttpServletResponse> sRespCaptor = ArgumentCaptor.forClass(HttpServletResponse.class);
 		verify(myServerInterceptor, times(1)).incomingRequestPostProcessed(rdCaptor.capture(), srCaptor.capture(), sRespCaptor.capture());
 
+		verify(myJpaServerInterceptor, times(1)).resourceCreated(ArgumentCaptor.forClass(RequestDetails.class).capture(), ArgumentCaptor.forClass(IBaseResource.class).capture());
+		
 		/*
 		 * DAO Interceptor 
 		 */

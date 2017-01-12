@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -475,6 +476,13 @@ public interface IServerInterceptor {
 		 * Returns the same map which was
 		 */
 		public Map<Object, Object> getUserData() {
+			if (myRequestDetails == null) {
+				/*
+				 * Technically this shouldn't happen.. But some of the unit tests use old IXXXDao methods that don't
+				 * take in a RequestDetails object. Eventually I guess we should clean that up.
+				 */
+				return Collections.emptyMap();
+			}
 			return myRequestDetails.getUserData();
 		}
 

@@ -268,8 +268,17 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		return transaction((ServletRequestDetails) theRequestDetails, theRequest, actionName);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Bundle transaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
+		super.markRequestAsProcessingSubRequest(theRequestDetails);
+		try {
+			return doTransaction(theRequestDetails, theRequest, theActionName);
+		} finally {
+			super.clearRequestAsProcessingSubRequest(theRequestDetails);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Bundle doTransaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
 		BundleTypeEnum transactionType = theRequest.getTypeElement().getValueAsEnum();
 		if (transactionType == BundleTypeEnum.BATCH) {
 			return batch(theRequestDetails, theRequest);

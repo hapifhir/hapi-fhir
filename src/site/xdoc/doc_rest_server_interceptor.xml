@@ -342,21 +342,12 @@
 			
 			<p>
 				The HAPI <a href="./doc_jpa.html">JPA Server</a> is an added layer on top of the HAPI
-				REST server framework. If you are using it, you may wish register interceptors
-				against the <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig</a>
-				bean that you create using Spring configuration. 
+				REST server framework. When you 
 			</p>
 
 			<p>
-				By registering an interceptor against the DaoConfig, the server will invoke 
-				interceptor methods for operations such as <b>create</b>, <b>update</b>, etc even
-				when these operations are found nested within a transaction. This is useful
-				if you are using interceptors to make access control decisions because
-				it avoids clients using transactions as a means of bypassing these controls.
-			</p>
-
-			<p>
-				When an interceptor is registered against the DaoConfig instead of the RestfulServer, 
+				When an interceptor is registered against a RestfulServer which is backed by the
+				HAPI JPA Server, 
 				the <code>incomingRequestPreHandled</code> method will be called once for most
 				operations (e.g. a FHIR <code>create</code>), but in the case where the client
 				performs a FHIR <code>transaction</code> that method might be called multiple
@@ -366,22 +357,25 @@
 			</p>
 			
 			<p>
-				This use of interceptors is typically only useful for situations where it's more important
-				to understand the semantics of the request, as opposed to the physical contents. In other 
-				words, if you are creating an auditing interceptor for a JPA server, it probably
-				makes sense to register the interceptor with the DaoConfig. If you are creating
-				an HTTP Request Logger for a JPA server, it probably makes sense to register it
-				with the RestfulServer. Note that it <b>generally doesn't make sense to register
-				the same interceptor against both</b> the DaoConfig and the RestfulServer since 
-				both places will end up invoking the same methods. 
+				This behaviour can be useful in cases where you want to audit exactly what was done
+				over the course of a request. Since a transaction can contain creates, updates, and
+				even more nested transactions, this behaviour ensures that you are notified for each
+				activity.
 			</p>
 			
 			<p>
 				You may also choose to create interceptors which implement the 
 				more specialized
-				<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>
+				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/IServerOperationInterceptor.html">IJpaServerInterceptor</a>
 				interface, as this interceptor adds additional methods which are called during the JPA
 				lifecycle.
+			</p>
+			
+			<p>
+				Note that this documentation used to <b>erroneously</b> suggest that in order to achieve
+				this behaviour you needed to register the interceptor with the DaoConfig. In actual fact this
+				did not make any difference, and registering interceptors with the DaoConfig has now been
+				deprecated since it does not achieve anything extra.
 			</p>
 		
 		</section>

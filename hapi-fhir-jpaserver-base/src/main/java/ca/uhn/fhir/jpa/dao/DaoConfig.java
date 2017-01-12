@@ -127,7 +127,10 @@ public class DaoConfig {
 	 * Returns the interceptors which will be notified of operations.
 	 * 
 	 * @see #setInterceptors(List)
+	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
+	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
+	@Deprecated
 	public List<IServerInterceptor> getInterceptors() {
 		if (myInterceptors == null) {
 			return Collections.emptyList();
@@ -352,13 +355,10 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 * <p>
-	 * Registering server action interceptors against the JPA DAOs can be more powerful than registering them against the
-	 * {@link RestfulServer}, since the DAOs are able to break transactions into individual actions, and will account for
-	 * match URLs (e.g. if a request contains an If-None-Match URL, the ID will be adjusted to account for the matching
-	 * ID).
-	 * </p>
+	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
+	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
+	@Deprecated
 	public void setInterceptors(IServerInterceptor... theInterceptor) {
 		setInterceptors(new ArrayList<IServerInterceptor>());
 		if (theInterceptor != null && theInterceptor.length != 0) {
@@ -368,13 +368,10 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 * <p>
-	 * Registering server action interceptors against the JPA DAOs can be more powerful than registering them against the
-	 * {@link RestfulServer}, since the DAOs are able to break transactions into individual actions, and will account for
-	 * match URLs (e.g. if a request contains an If-None-Match URL, the ID will be adjusted to account for the matching
-	 * ID).
-	 * </p>
+	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
+	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
+	@Deprecated
 	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
 		myInterceptors = theInterceptors;
 	}

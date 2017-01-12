@@ -44,6 +44,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	private static Server ourServer;
 	protected static String ourServerBase;
 	private static GenericWebApplicationContext ourWebApplicationContext;
+	protected static RestfulServer ourRestServer;
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -86,7 +87,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@After
-	public void after() {
+	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 	}
 
@@ -99,21 +100,21 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		if (ourServer == null) {
 			ourPort = RandomServerPortProvider.findFreePort();
 	
-			RestfulServer restServer = new RestfulServer(myFhirCtx);
+			ourRestServer = new RestfulServer(myFhirCtx);
 	
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 	
-			restServer.setResourceProviders((List)myResourceProviders);
+			ourRestServer.setResourceProviders((List)myResourceProviders);
 	
-			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 	
-			restServer.setPlainProviders(mySystemProvider);
+			ourRestServer.setPlainProviders(mySystemProvider);
 	
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myDaoConfig);
+			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
-			restServer.setServerConformanceProvider(confProvider);
+			ourRestServer.setServerConformanceProvider(confProvider);
 	
-			restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+			ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 	
 			Server server = new Server(ourPort);
 	
@@ -121,7 +122,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			proxyHandler.setContextPath("/");
 	
 			ServletHolder servletHolder = new ServletHolder();
-			servletHolder.setServlet(restServer);
+			servletHolder.setServlet(ourRestServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 	
 			ourWebApplicationContext = new GenericWebApplicationContext();

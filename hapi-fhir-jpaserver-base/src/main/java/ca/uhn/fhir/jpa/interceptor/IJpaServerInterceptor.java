@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 
 /*
  * #%L
@@ -27,7 +28,10 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 /**
  * Server interceptor for JPA DAOs which adds methods that will be called at certain points
  * in the operation lifecycle for JPA operations.
+ * 
+ * @deprecated Use {@link IServerOperationInterceptor instead}. Deprecated since HAPI FHIR 2.3
  */
+@Deprecated
 public interface IJpaServerInterceptor extends IServerInterceptor {
 
 	/**
