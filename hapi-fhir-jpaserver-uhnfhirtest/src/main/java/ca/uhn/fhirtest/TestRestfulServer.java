@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
+import ca.uhn.fhir.jpa.config.WebsocketDstu2TomcatConfig;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -105,7 +106,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TdlDstu2Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL2;
 			} else {
-				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2TomcatConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU2;
 			}
 			myAppCtx.refresh();

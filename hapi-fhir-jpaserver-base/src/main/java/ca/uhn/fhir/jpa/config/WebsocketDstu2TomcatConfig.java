@@ -25,48 +25,43 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
 
 @Configuration
 @EnableWebSocket()
-public class WebsocketDstu2Config implements WebSocketConfigurer {
+@Controller
+@EnableWebMvc
+public class WebsocketDstu2TomcatConfig extends WebMvcConfigurerAdapter implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2").setAllowedOrigins("*");
+		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2");
 	}
 
-//	 @Override
-//	  public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) { 
-//	    configurer.enable(); 
-//	  }
-//	
-//	 @Bean
-//	 public String containerInit() {
-//		 try {
-//			Class.forName("javax.websocket.WebSocketContainer");
-//			createWebSocketContainer();
-//		} catch (ClassNotFoundException e) {
-//			// ok
-//		}
-//		 
-//		 return "";
-//	 }
-//	 
-//	@Bean
-//	@Lazy
-//	public ServletServerContainerFactoryBean createWebSocketContainer() {
-//		ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-//		container.setMaxTextMessageBufferSize(8192);
-//		container.setMaxBinaryMessageBufferSize(8192);
-//		return container;
-//	}
+	 @Override
+	  public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) { 
+	    configurer.enable(); 
+	  }
+	
+	 
+	@Bean
+	public ServletServerContainerFactoryBean createWebSocketContainer() {
+		ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+		container.setMaxTextMessageBufferSize(8192);
+		container.setMaxBinaryMessageBufferSize(8192);
+		return container;
+	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {
