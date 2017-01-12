@@ -36,37 +36,12 @@ import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
 @Configuration
 @EnableWebSocket()
 public class WebsocketDstu2Config implements WebSocketConfigurer {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketDstu2Config.class);
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
 		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2").setAllowedOrigins("*");
 	}
-
-//	 @Override
-//	  public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) { 
-//	    configurer.enable(); 
-//	  }
-//	
-//	 @Bean
-//	 public String containerInit() {
-//		 try {
-//			Class.forName("javax.websocket.WebSocketContainer");
-//			createWebSocketContainer();
-//		} catch (ClassNotFoundException e) {
-//			// ok
-//		}
-//		 
-//		 return "";
-//	 }
-//	 
-//	@Bean
-//	@Lazy
-//	public ServletServerContainerFactoryBean createWebSocketContainer() {
-//		ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-//		container.setMaxTextMessageBufferSize(8192);
-//		container.setMaxBinaryMessageBufferSize(8192);
-//		return container;
-//	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {

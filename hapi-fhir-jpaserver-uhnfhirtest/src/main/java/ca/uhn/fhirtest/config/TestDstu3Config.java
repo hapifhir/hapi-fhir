@@ -128,10 +128,10 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return requestValidator;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor subscriptionSecurityInterceptor() {
-		return new SubscriptionsRequireManualActivationInterceptorDstu3();
-	}
+//	@Bean(autowire = Autowire.BY_TYPE)
+//	public IServerInterceptor subscriptionSecurityInterceptor() {
+//		return new SubscriptionsRequireManualActivationInterceptorDstu3();
+//	}
 
 	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {

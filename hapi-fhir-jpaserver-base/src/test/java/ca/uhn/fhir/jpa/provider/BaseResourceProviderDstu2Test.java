@@ -22,6 +22,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
+import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
@@ -135,7 +136,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
-			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu2Config.class.getName());
+			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu2Config.class.getName() + "\n" + WebsocketDstu2DispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			

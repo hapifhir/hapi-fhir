@@ -51,7 +51,7 @@ public class WebsocketDstu3Config implements WebSocketConfigurer {
 	}
 
 	@Bean(destroyMethod="destroy")
-	public TaskScheduler websocketTaskScheduler() {
+	public TaskScheduler websocketTaskSchedulerDstu3() {
 		final ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler() {
 			private static final long serialVersionUID = 1L;
 

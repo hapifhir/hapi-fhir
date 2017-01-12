@@ -115,9 +115,9 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return extraProperties;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor subscriptionSecurityInterceptor() {
-		return new SubscriptionsRequireManualActivationInterceptorDstu2();
-	}
+//	@Bean(autowire = Autowire.BY_TYPE)
+//	public IServerInterceptor subscriptionSecurityInterceptor() {
+//		return new SubscriptionsRequireManualActivationInterceptorDstu2();
+//	}
 
 }

@@ -48,7 +48,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu2Config.class/*, ca.uhn.fhir.jpa.config.WebsocketDstu2Config.class*/ })
+@ContextConfiguration(classes= {TestDstu2Config.class, ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig.class})
 //@formatter:on
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
