@@ -15,7 +15,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -55,6 +58,79 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		}
 	}
 
+	/**
+	 * See #503
+	 */
+	@Test
+	public void testDeleteIsBlocked() {
+		
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+						.deny().delete().allResources().withAnyId().andThen()
+						.allowAll()
+						.build();
+			}
+		});
+		
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		IIdType id = ourClient.create().resource(patient).execute().getId();
+
+		try {
+			ourClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+		
+		patient = ourClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
+		assertEquals(id.getValue(), patient.getId());
+	}
+	
+
+	/**
+	 * See #503
+	 */
+	@Test
+	public void testDeleteIsAllowedForCompartment() {
+		
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		final IIdType id = ourClient.create().resource(patient).execute().getId();
+		
+		Observation obsInCompartment = new Observation();
+		obsInCompartment.setStatus(ObservationStatus.FINAL);
+		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
+		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+		
+		Observation obsNotInCompartment = new Observation();
+		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
+		IIdType obsNotInCompartmentId = ourClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+		
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+						.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
+						.deny().delete().allResources().withAnyId().andThen()
+						.allowAll()
+						.build();
+			}
+		});
+		
+		ourClient.delete().resourceById(obsInCompartmentId.toUnqualifiedVersionless()).execute();
+
+		try {
+			ourClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
 
 	@Test
 	public void testCreateConditional() {

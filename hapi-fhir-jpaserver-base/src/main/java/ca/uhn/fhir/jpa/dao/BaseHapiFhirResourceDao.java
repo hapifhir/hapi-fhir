@@ -183,6 +183,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
 		}
 
+		T resourceToDelete = toResource(myResourceType, entity, false);
+
 		validateOkToDelete(deleteConflicts, entity);
 
 		// Notify interceptors
@@ -197,7 +199,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Notify JPA interceptors
 		if (theRequestDetails != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getContext(), theId.getResourceType(), theId);
-			T resourceToDelete = toResource(myResourceType, entity, false);
 			theRequestDetails.getRequestOperationCallback().resourceDeleted(resourceToDelete);
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IJpaServerInterceptor) {

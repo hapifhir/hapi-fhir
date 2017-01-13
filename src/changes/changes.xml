@@ -185,6 +185,13 @@
 				framework was not actually useful. Thanks to GitHub user
 				@mattiuusitalo for reporting!
 			</action>
+			<action type="fix" issue="503">
+				AuthorizationInterceptor on JPA server did not correctly
+				apply rules on deleting resources in a specific compartment
+				because the resource metadata was stripped by the JPA server
+				before the interceptor could see it. Thanks to
+				GitHub user @eevaturkka for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
