@@ -1812,6 +1812,34 @@ public class JsonParserDstu2Test {
 	}
 	
 	/**
+	 * See #537
+	 */
+	@Test
+	public void testEncodeNestedContained() {
+		
+		Organization org04 = new Organization();
+		org04.setName("LEVEL04");
+		
+		Organization org03 = new Organization();
+		org03.setName("LEVEL03");
+		org03.getPartOf().setResource(org04);
+		
+		Organization org02 = new Organization();
+		org02.setName("LEVEL02");
+		org02.getPartOf().setResource(org03);
+		
+		Organization org01 = new Organization();
+		org01.setName("LEVEL01");
+		org01.getPartOf().setResource(org02);
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(org01);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, stringContainsInOrder("LEVEL02","LEVEL03","LEVEL04","LEVEL01" ));
+	}
+	
+	
+	/**
 	 * See #505
 	 */
 	@Test
