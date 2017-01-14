@@ -382,18 +382,6 @@ class ModelScanner {
 		 * sure that this type gets scanned as well
 		 */
 		resourceDef.populateScanAlso(myScanAlso);
-
-		/*
-		 * See #504:
-		 * Bundle types may not have extensions
-		 */
-		if (resourceDef.hasExtensions()) {
-			if (IAnyResource.class.isAssignableFrom(theClass)) {
-				if (!IDomainResource.class.isAssignableFrom(theClass)) {
-					throw new ConfigurationException("Class \"" + theClass + "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
-				}
-			}
-		}
 		
 		return resourceName;
 	}

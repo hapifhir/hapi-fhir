@@ -2,21 +2,7 @@ package ca.uhn.fhir.context;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.Property;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.dstu3.model.*;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;
@@ -28,7 +14,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
-public class ResourceWithExtensionsDstu3A extends Resource {
+public class ResourceWithExtensionsDstu3A extends DomainResource {
 
 	/*
 	 * NB: several unit tests depend on the structure here
@@ -243,7 +229,7 @@ public class ResourceWithExtensionsDstu3A extends Resource {
 	}
 
 	@Override
-	public Resource copy() {
+	public DomainResource copy() {
 		return null;
 	}
 

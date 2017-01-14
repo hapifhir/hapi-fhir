@@ -28,8 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.UrlUtil;
@@ -203,6 +205,19 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 				myBaseType = (Class<? extends IBaseResource>) target;
 			}
 		} while (target.equals(Object.class) == false);
+		
+		/*
+		 * See #504:
+		 * Bundle types may not have extensions
+		 */
+		if (hasExtensions()) {
+			if (IAnyResource.class.isAssignableFrom(getImplementingClass())) {
+				if (!IDomainResource.class.isAssignableFrom(getImplementingClass())) {
+					throw new ConfigurationException("Class \"" + getImplementingClass() + "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
+				}
+			}
+		}
+
 	}
 
 	@Deprecated

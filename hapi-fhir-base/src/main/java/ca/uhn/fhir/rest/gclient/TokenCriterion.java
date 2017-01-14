@@ -85,6 +85,10 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 		myValue = b.toString();
 	}
 
+	public TokenCriterion(String theParamName, Collection<String> theCodes) {
+		this(theParamName, null, theCodes);
+	}
+
 	@Override
 	public String getParameterValue(FhirContext theContext) {
 		return myValue;

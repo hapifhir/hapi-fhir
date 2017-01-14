@@ -86,6 +86,18 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 				return new TokenCriterion(getParamName(), defaultString(theSystem), convertToList(theValues));
 			}
 
+			@Override
+			public ICriterion<?> codes(String... theCodes) {
+				return new TokenCriterion(getParamName(), convertToList(theCodes));
+			}
+
+			@Override
+			public ICriterion<?> codes(Collection<String> theCodes) {
+				return new TokenCriterion(getParamName(), theCodes);
+			}
+
+			
+			
 			private List<String> convertToList(String[] theValues) {
 				String[] values = ObjectUtils.defaultIfNull(theValues, EMPTY_STRING_LIST);
 				return Arrays.asList(values);
@@ -124,6 +136,17 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 		 * @return A criterion
 		 */
 		ICriterion<TokenClientParam> code(String theIdentifier);
+
+
+		/**
+		 * Creates a search criterion that matches a given system with a collection of possible 
+		 * codes (this will be used to form a comma-separated OR query) with any system value.
+		 * The URL form of this method will create a parameter like 
+		 * <code>parameter=code1,code2</code>
+		 * 
+		 * @param theCodes The codes
+		 */
+		ICriterion<?> codes(Collection<String> theCodes);
 
 
 		/**
@@ -203,6 +226,17 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 		 * @param theValues The values
 		 */
 		public ICriterion<?> systemAndValues(String theSystem, Collection<String> theValues);
+
+
+		/**
+		 * Creates a search criterion that matches a given system with a collection of possible 
+		 * codes (this will be used to form a comma-separated OR query) with any system value.
+		 * The URL form of this method will create a parameter like 
+		 * <code>parameter=code1,code2</code>
+		 * 
+		 * @param theCodes The codes
+		 */
+		ICriterion<?> codes(String...theCodes);
 
 	}
 

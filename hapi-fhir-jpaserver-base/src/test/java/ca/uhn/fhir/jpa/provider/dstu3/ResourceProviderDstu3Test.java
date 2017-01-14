@@ -2287,16 +2287,53 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().systemAndValues(null, id1.getIdPart(), id2.getIdPart()))
-			.and(BaseResource.RES_ID.exactly().systemAndCode(null, id1.getIdPart()))
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIds(found), empty());
 		
 		found = ourClient
 				.search()
 				.forResource(Patient.class)
-				.where(BaseResource.RES_ID.exactly().systemAndValues(null, id1.getIdPart(), id2.getIdPart()))
+				.where(BaseResource.RES_ID.exactly().systemAndValues(null, Arrays.asList(id1.getIdPart(), id2.getIdPart(), "FOOOOO")))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		assertThat(toUnqualifiedVersionlessIds(found), empty());
+
+		found = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(BaseResource.RES_ID.exactly().systemAndCode(null, id1.getIdPart()))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		assertThat(toUnqualifiedVersionlessIds(found), empty());
+
+		found = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(BaseResource.RES_ID.exactly().codes(id1.getIdPart(), id2.getIdPart()))
+				.and(BaseResource.RES_ID.exactly().code(id1.getIdPart()))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+			
+		found = ourClient
+					.search()
+					.forResource(Patient.class)
+					.where(BaseResource.RES_ID.exactly().codes(Arrays.asList(id1.getIdPart(), id2.getIdPart(), "FOOOOO")))
+					.and(BaseResource.RES_ID.exactly().code(id1.getIdPart()))
+					.returnBundle(Bundle.class)
+					.execute();
+
+		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+
+		found = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(BaseResource.RES_ID.exactly().codes(id1.getIdPart(), id2.getIdPart(), "FOOO"))
 				.returnBundle(Bundle.class)
 				.execute();
 
