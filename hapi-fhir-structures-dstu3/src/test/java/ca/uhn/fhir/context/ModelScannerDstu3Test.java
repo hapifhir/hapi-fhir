@@ -36,6 +36,15 @@ public class ModelScannerDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Test
+	public void testScanBundle() {
+		FhirContext ctx = FhirContext.forDstu3();
+		RuntimeResourceDefinition def = ctx.getResourceDefinition("Bundle");
+		
+		assertNotNull(def.getSearchParam("composition"));
+		assertNotNull(def.getSearchParam("_id"));
+	}
+	
 
 	@Test
 	public void testBundleMustImplementIBaseBundle() throws DataFormatException {

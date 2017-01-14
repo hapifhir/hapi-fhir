@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 
 /*
@@ -34,6 +36,8 @@ import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
  */
 public class TokenClientParam extends BaseClientParam  implements IParam {
 
+	private static final String[] EMPTY_STRING_LIST = new String[0];
+	
 	private String myParamName;
 
 	public TokenClientParam(String theParamName) {
@@ -78,6 +82,16 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 			}
 
 			@Override
+			public ICriterion<?> systemAndValues(String theSystem, String... theValues) {
+				return new TokenCriterion(getParamName(), defaultString(theSystem), convertToList(theValues));
+			}
+
+			private List<String> convertToList(String[] theValues) {
+				String[] values = ObjectUtils.defaultIfNull(theValues, EMPTY_STRING_LIST);
+				return Arrays.asList(values);
+			}
+
+			@Override
 			public ICriterion<?> systemAndValues(String theSystem, Collection<String> theValues) {
 				return new TokenCriterion(getParamName(), defaultString(theSystem), theValues);
 			}
@@ -110,6 +124,7 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 		 * @return A criterion
 		 */
 		ICriterion<TokenClientParam> code(String theIdentifier);
+
 
 		/**
 		 * Creates a search criterion that matches against the given identifier (system and code if both are present, or whatever is present)
@@ -161,15 +176,6 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 		ICriterion<TokenClientParam> systemAndCode(String theSystem, String theCode);
 
 		/**
-		 * Creates a search criterion that matches a given system with a collection of possible 
-		 * values (this will be used to form a comma-separated OR query)
-		 * 
-		 * @param theSystem The system, which will be used with each value
-		 * @param theValues The values
-		 */
-		public ICriterion<?> systemAndValues(String theSystem, Collection<String> theValues);
-
-		/**
 		 * Creates a search criterion that matches against the given system and identifier
 		 * 
 		 * @param theSystem
@@ -179,6 +185,24 @@ public class TokenClientParam extends BaseClientParam  implements IParam {
 		 * @return A criterion
 		 */
 		ICriterion<TokenClientParam> systemAndIdentifier(String theSystem, String theIdentifier);
+
+		/**
+		 * Creates a search criterion that matches a given system with a collection of possible 
+		 * values (this will be used to form a comma-separated OR query)
+		 * 
+		 * @param theSystem The system, which will be used with each value
+		 * @param theValues The values
+		 */
+		ICriterion<?> systemAndValues(String theSystem, String... theValues);
+
+		/**
+		 * Creates a search criterion that matches a given system with a collection of possible 
+		 * values (this will be used to form a comma-separated OR query)
+		 * 
+		 * @param theSystem The system, which will be used with each value
+		 * @param theValues The values
+		 */
+		public ICriterion<?> systemAndValues(String theSystem, Collection<String> theValues);
 
 	}
 

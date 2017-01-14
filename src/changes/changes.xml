@@ -192,6 +192,12 @@
 				before the interceptor could see it. Thanks to
 				Eeva Turkka for reporting!
 			</action>
+			<action type="fix" issue="519">
+				JPA server exported CapabilityStatement includes 
+				double entries for the _id parameter and uses the
+				wrong type (string instead of token). Thanks to 
+				Robert Lichtenberger for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

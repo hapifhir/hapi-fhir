@@ -236,10 +236,14 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.myProject = new MavenProject();
-		mojo.version = "dstu3";
+		mojo.version = "dstu2";
 		mojo.packageBase = "ca.uhn.test";
 		mojo.configPackageBase = "ca.uhn.test";
-		mojo.baseResourceNames = new ArrayList<String>(Arrays.asList("structuredefinition", "observation"));
+		mojo.baseResourceNames = new ArrayList<String>(Arrays.asList(
+//				"observation"
+//				"communicationrequest"
+				"binary"
+				));
 		mojo.targetDirectory = new File("target/generated/valuesets");
 		mojo.targetResourceDirectory = new File("target/generated/valuesets");
 		mojo.targetResourceSpringBeansFile = "tmp_beans.xml";

@@ -45,14 +45,6 @@ public class ${className}ResourceProvider extends
 			
 			ca.uhn.fhir.rest.method.RequestDetails theRequestDetails,
 			
-			@Description(shortDefinition="The resource identity")
-			@OptionalParam(name="_id")
-			StringAndListParam theId, 
-
-			@Description(shortDefinition="The resource language")
-			@OptionalParam(name="_language")
-			StringAndListParam theResourceLanguage, 
-
 			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
 			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT)
 			StringAndListParam theFtContent, 
@@ -141,8 +133,6 @@ public class ${className}ResourceProvider extends
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add("_id", theId);
-			paramMap.add("_language", theResourceLanguage);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT, theFtContent);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TEXT, theFtText);
 			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TAG, theSearchForTag);

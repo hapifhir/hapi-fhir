@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
 @ResourceDef(name="Binary", profile="http://hl7.org/fhir/Profile/Binary")
-public class Binary extends BaseBinary implements IBaseBinary {
+public class Binary extends BaseBinary implements IBaseBinary, IAnyResource {
 
     /**
      * MimeType of the binary content represented as a standard MimeType (BCP 13).

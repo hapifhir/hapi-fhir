@@ -28,17 +28,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -408,7 +399,23 @@ class ModelScanner {
 		Map<String, RuntimeSearchParam> nameToParam = new HashMap<String, RuntimeSearchParam>();
 		Map<Field, SearchParamDefinition> compositeFields = new LinkedHashMap<Field, SearchParamDefinition>();
 
-		for (Field nextField : theClass.getFields()) {
+		/*
+		 * Make sure we pick up fields in interfaces too.. This ensures that we
+		 * grab the _id field which generally gets picked up via interface
+		 */
+		Set<Field> fields = new HashSet<Field>(Arrays.asList(theClass.getFields()));
+		Class<?> nextClass = theClass;
+		do {
+			for (Class<?> nextInterface : nextClass.getInterfaces()) {
+				fields.addAll(Arrays.asList(nextInterface.getFields()));
+			}
+			nextClass = nextClass.getSuperclass();
+		} while (nextClass.equals(Object.class) == false);
+		
+		/*
+		 * Now scan the fields for search params
+		 */
+		for (Field nextField : fields) {
 			SearchParamDefinition searchParam = pullAnnotation(nextField, SearchParamDefinition.class);
 			if (searchParam != null) {
 				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(searchParam.type().toLowerCase());

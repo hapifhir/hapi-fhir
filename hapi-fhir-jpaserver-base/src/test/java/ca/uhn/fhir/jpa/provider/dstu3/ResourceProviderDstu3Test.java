@@ -2283,17 +2283,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		//@formatter:off
 		Bundle found = ourClient
 			.search()
 			.forResource(Patient.class)
-			.where(BaseResource.RES_ID.matches().values(id1.getIdPart(), id2.getIdPart()))
-			.and(BaseResource.RES_ID.matches().value(id1.getIdPart()))
+			.where(BaseResource.RES_ID.exactly().systemAndValues(null, id1.getIdPart(), id2.getIdPart()))
+			.and(BaseResource.RES_ID.exactly().systemAndCode(null, id1.getIdPart()))
 			.returnBundle(Bundle.class)
 			.execute();
-		//@formatter:on
 
 		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+		
+		found = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(BaseResource.RES_ID.exactly().systemAndValues(null, id1.getIdPart(), id2.getIdPart()))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1, id2));
+
 	}
 
 	@Test
