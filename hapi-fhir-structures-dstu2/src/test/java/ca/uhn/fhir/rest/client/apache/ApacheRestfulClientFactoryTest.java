@@ -1,8 +1,15 @@
 package ca.uhn.fhir.rest.client.apache;
 
+import static org.apache.http.protocol.HTTP.USER_AGENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;

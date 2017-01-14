@@ -421,6 +421,8 @@
 					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
 				</configuration>
 			</plugin>
+
+
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
@@ -451,7 +453,6 @@
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
-								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
 							</excludeResourceNames>
 						</configuration>
 					</execution>
@@ -467,7 +468,6 @@
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
-								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
 							</excludeResourceNames>
 						</configuration>
 					</execution>
@@ -495,6 +495,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 		</plugins>
 		<resources>
 			<resource>

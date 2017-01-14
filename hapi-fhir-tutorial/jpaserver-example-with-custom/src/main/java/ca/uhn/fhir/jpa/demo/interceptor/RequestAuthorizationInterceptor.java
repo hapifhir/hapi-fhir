@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.demo.interceptor;
+package ca.uhn.fhir.jpa.demo.subscription;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
