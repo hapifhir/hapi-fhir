@@ -32,15 +32,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
@@ -391,6 +383,18 @@ class ModelScanner {
 		 */
 		resourceDef.populateScanAlso(myScanAlso);
 
+		/*
+		 * See #504:
+		 * Bundle types may not have extensions
+		 */
+		if (resourceDef.hasExtensions()) {
+			if (IAnyResource.class.isAssignableFrom(theClass)) {
+				if (!IDomainResource.class.isAssignableFrom(theClass)) {
+					throw new ConfigurationException("Class \"" + theClass + "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
+				}
+			}
+		}
+		
 		return resourceName;
 	}
 

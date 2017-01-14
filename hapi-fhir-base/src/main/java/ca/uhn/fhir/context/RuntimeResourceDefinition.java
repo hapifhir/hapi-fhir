@@ -229,4 +229,5 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		return retVal;
 	}
+
 }

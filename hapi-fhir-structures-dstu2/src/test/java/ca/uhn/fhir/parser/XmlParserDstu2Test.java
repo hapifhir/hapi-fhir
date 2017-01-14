@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -34,7 +33,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.answers.ThrowsException;
@@ -45,8 +43,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.*;
@@ -2782,61 +2778,4 @@ public class XmlParserDstu2Test {
 		}
 	}
 
-	
-	/**
-	 * See #504
-	 */
-	@Test
-	@Ignore
-	public void testBinaryEncodingWithKnownExtension() {
-	    LetterTemplate template = new LetterTemplate();
-	    template.setName(new StringDt("Testname"));
-	    template.setContentType(new CodeDt("test-type"));
-
-	    IParser parser = FhirContext.forDstu2().newJsonParser();
-	    String resourceToString = parser.encodeResourceToString(template);
-	    LetterTemplate resource = parser.parseResource(LetterTemplate.class, resourceToString);
-	    assertNotNull(resource.getContentType());
-	    assertNotNull(resource.getName());
-	}
-
-	/**
-	 * See #504
-	 */
-	@Test
-	@Ignore
-	public void testBinaryEncodingWithUnknownExtension() {
-	    Binary template = new Binary();
-	    String extensionURL = "http://www.something.org/StructureDefinition/letter-template";
-	    ExtensionDt e = new ExtensionDt(false, extensionURL, new StringDt("Testname"));
-	    template.getUndeclaredExtensions().add(e);
-	    template.setContentType(new CodeDt("test-type"));
-
-	    IParser parser = FhirContext.forDstu2().newJsonParser();
-	    String resourceToString = parser.encodeResourceToString(template);
-	    Binary resource = parser.parseResource(Binary.class, resourceToString);
-	    assertNotNull(resource.getContentType());
-	    assertFalse((resource.getUndeclaredExtensionsByUrl(extensionURL).isEmpty()));
-	    assertNotNull(resource.getUndeclaredExtensionsByUrl(extensionURL).get(0));
-	}
-
-	@ResourceDef(name = "Binary", id = "letter-template", profile = "http://www.something.org/StructureDefinition/letter-template")
-	public static class LetterTemplate extends Binary {
-
-	    @Child(name="name")
-	    @Extension(url="http://example.com/dontuse#name", definedLocally=false, isModifier=false)
-	    @Description(shortDefinition="The name of the template")
-	    private StringDt myName;
-
-	    public LetterTemplate() {}
-
-	    public void setName(StringDt name) {
-	        myName = name;
-	    }
-
-	    public StringDt getName() {
-	        return myName;
-	    }
-	}
-	
 }

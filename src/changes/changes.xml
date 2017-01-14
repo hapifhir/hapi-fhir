@@ -198,6 +198,12 @@
 				wrong type (string instead of token). Thanks to 
 				Robert Lichtenberger for reporting!
 			</action>
+			<action type="add" issue="504">
+				Custom resource types which extend Binary must not
+				have declared extensions since this is invalid in 
+				FHIR (and HAPI would just ignore them anyhow). Thanks 
+				to Thomas S Berg for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

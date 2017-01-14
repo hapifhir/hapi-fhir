@@ -21,11 +21,7 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -134,6 +130,11 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	 */
 	public String getName() {
 		return myName;
+	}
+
+	public boolean hasExtensions() {
+		validateSealed();
+		return myExtensions.size() > 0;
 	}
 
 	public boolean isStandardType() {
