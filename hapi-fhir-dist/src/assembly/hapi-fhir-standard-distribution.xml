@@ -29,7 +29,24 @@
 			<unpack>false</unpack>
 			<scope>runtime</scope>
 		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/src</outputDirectory>
+			<useProjectArtifact>true</useProjectArtifact>
+			<unpack>false</unpack>
+			<includes>
+				<include>*:hapi*:jar:sources:*</include>
+			</includes>
+			<scope>provided</scope>
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/javadoc</outputDirectory>
+			<useProjectArtifact>true</useProjectArtifact>
+			<unpack>false</unpack>
+			<includes>
+				<include>*:hapi*:jar:javadoc:*</include>
+			</includes>
+			<scope>provided</scope>
+		</dependencySet>
 	</dependencySets>
-	
 
 </assembly>

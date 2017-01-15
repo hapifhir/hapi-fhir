@@ -204,6 +204,11 @@
 				FHIR (and HAPI would just ignore them anyhow). Thanks 
 				to Thomas S Berg for reporting!
 			</action>
+			<action type="add">
+				Standard HAPI zip/tar distributions did not include the project
+				sources and JavaDoc JARs. Thanks to Keith Boone for pointing
+				this out!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
