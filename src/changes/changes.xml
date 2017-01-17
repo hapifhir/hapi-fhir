@@ -209,6 +209,10 @@
 				sources and JavaDoc JARs. Thanks to Keith Boone for pointing
 				this out!
 			</action>
+			<action type="fix">
+				Server AuthorizationInterceptor always rejects history operation 
+				at the type level even if rules should allow it.
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

@@ -17,12 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -44,28 +39,13 @@ import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.method.IRequestOperationCallback;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
@@ -119,6 +99,12 @@ public class AuthorizationInterceptorDstu2Test {
 		return retVal;
 	}
 
+	private IResource createPatient(Integer theId, int theVersion) {
+		IResource retVal = createPatient(theId);
+		retVal.setId(retVal.getId().withVersion(Integer.toString(theVersion)));
+		return retVal;
+	}
+	
 	private IResource createPatient(Integer theId) {
 		Patient retVal = new Patient();
 		if (theId != null) {
@@ -940,6 +926,46 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testHistoryWithReadAll() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
+				return new RuleBuilder()
+					.allow("Rule 1").read().allResources().withAnyId()
+					.build();
+				//@formatter:on
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		ourReturn = Arrays.asList(createPatient(2, 1));
+		
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/_history");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/_history");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+	
+	@Test
 	public void testReadByAnyId() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -1685,6 +1711,19 @@ public class AuthorizationInterceptorDstu2Test {
 			return retVal;
 		}
 
+		@History()
+		public List<IResource> history() {
+			ourHitMethod = true;
+			return (ourReturn);
+		}
+
+		@History()
+		public List<IResource> history(@IdParam IdDt theId) {
+			ourHitMethod = true;
+			return (ourReturn);
+		}
+
+		
 		@Delete()
 		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
@@ -1794,6 +1833,13 @@ public class AuthorizationInterceptorDstu2Test {
 			return (Bundle) ourReturn.get(0);
 		}
 
+		@History()
+		public List<IResource> history() {
+			ourHitMethod = true;
+			return (ourReturn);
+		}
+
 	}
+
 
 }

@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -75,6 +77,7 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 				case SEARCH_TYPE:
 				case HISTORY_INSTANCE:
 				case HISTORY_SYSTEM:
+				case HISTORY_TYPE:
 					return new Verdict(PolicyEnum.ALLOW, this);
 				default:
 					return null;
@@ -252,6 +255,19 @@ class RuleImplOp extends BaseRule implements IAuthRule {
 		}
 
 		return newVerdict();
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		builder.append("op", myOp);
+		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
+		builder.append("appliesTo", myAppliesTo);
+		builder.append("appliesToTypes", myAppliesToTypes);
+		builder.append("classifierCompartmentName", myClassifierCompartmentName);
+		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
+		builder.append("classifierType", myClassifierType);
+		return builder.toString();
 	}
 
 	private boolean requestAppliesToTransaction(FhirContext theContext, RuleOpEnum theOp, IBaseResource theInputResource) {
