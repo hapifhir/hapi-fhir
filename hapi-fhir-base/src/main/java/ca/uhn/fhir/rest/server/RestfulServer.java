@@ -75,6 +75,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
@@ -253,7 +254,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		} else {
 			resourceBinding = myResourceNameToBinding.get(resourceName);
 			if (resourceBinding == null) {
-				throw new InvalidRequestException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
+				throw new ResourceNotFoundException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
 			}
 		}
 

@@ -527,7 +527,7 @@ public class RestfulServerMethodTest {
 	}
 
 	@Test
-	public void testInvalidResourceTriggers400() throws Exception {
+	public void testInvalidResourceTriggers404() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/FooResource?blah=bar");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -537,7 +537,7 @@ public class RestfulServerMethodTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertEquals(404, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
