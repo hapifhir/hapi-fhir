@@ -90,6 +90,8 @@ public abstract class BaseClient implements IRestfulClient {
 	private Boolean myPrettyPrint = false;
 	private SummaryEnum mySummary;
 	private final String myUrlBase;
+        private Boolean myAsync = null;
+        private String myResponseUrl = null;
 
 	BaseClient(IHttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
@@ -235,6 +237,17 @@ public abstract class BaseClient implements IRestfulClient {
 			if (theSubsetElements != null && theSubsetElements.isEmpty() == false) {
 				params.put(Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
 			}
+                        
+                        /*
+                        Message Client Params
+                        */
+                        if(myAsync != null && myAsync == true ) {
+                            params.put(Constants.PARAM_ASYNC, Collections.singletonList(myAsync.toString()));
+                        }
+                        
+                        if(myResponseUrl != null && !myResponseUrl.isEmpty() ) {
+                            params.put(Constants.PARAM_RESPONSE_URL, Collections.singletonList(myResponseUrl));
+                        }
 
 			EncodingEnum encoding = getEncoding();
 			if (theEncoding != null) {
@@ -470,6 +483,7 @@ public abstract class BaseClient implements IRestfulClient {
 	public void setSummary(SummaryEnum theSummary) {
 		mySummary = theSummary;
 	}
+  
 
 	@Override
 	public void unregisterInterceptor(IClientInterceptor theInterceptor) {
@@ -484,6 +498,16 @@ public abstract class BaseClient implements IRestfulClient {
 		}
 		return preferResponseTypes;
 	}
+
+        @Override
+        public void setMessageAsync(Boolean isAsync) {
+            myAsync = isAsync;
+        }
+
+        @Override
+        public void setMessageResponseUrl(String responseUrl) {
+            myResponseUrl = responseUrl;
+        }
 
 	protected final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
 

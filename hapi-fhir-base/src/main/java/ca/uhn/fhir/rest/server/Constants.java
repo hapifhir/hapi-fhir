@@ -139,6 +139,9 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
+        public static final String PARAM_ASYNC = "async"; //Used in messaging
+        public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
+        public static final String EXTOP_PROCESS_MESSAGE = "$process-message"; //Used in messaging
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";

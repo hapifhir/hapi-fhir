@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -318,6 +319,21 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		myDescription = theDescription;
 	}
 
+        public static BaseHttpClientInvocation createProcessMsgInvocation(FhirContext theContext, String theOperationName, IBaseBundle theInput) {
+		StringBuilder b = new StringBuilder();
+		
+		if (b.length() > 0) {
+			b.append('/');
+		}
+		if (!theOperationName.startsWith("$")) {
+			b.append("$");
+		}
+		b.append(theOperationName);
+
+		
+            return new HttpPostClientInvocation(theContext, theInput, b.toString());
+		
+	}
 	public static BaseHttpClientInvocation createOperationInvocation(FhirContext theContext, String theResourceName, String theId, String theOperationName, IBaseParameters theInput, boolean theUseHttpGet) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {

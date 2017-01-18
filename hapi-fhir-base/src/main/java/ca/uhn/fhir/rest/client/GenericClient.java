@@ -66,6 +66,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -102,6 +103,7 @@ import ca.uhn.fhir.rest.gclient.IMetaAddOrDeleteSourced;
 import ca.uhn.fhir.rest.gclient.IMetaAddOrDeleteUnsourced;
 import ca.uhn.fhir.rest.gclient.IMetaGetUnsourced;
 import ca.uhn.fhir.rest.gclient.IOperation;
+import ca.uhn.fhir.rest.gclient.IOperationProcessMsg;
 import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
 import ca.uhn.fhir.rest.gclient.IOperationUntyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
@@ -1443,7 +1445,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput, IOperationUntypedWithInputAndPartialOutput {
+	private class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput, IOperationUntypedWithInputAndPartialOutput, IOperationProcessMsg {
 
 		private IIdType myId;
 		private String myOperationName;
@@ -1451,6 +1453,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private RuntimeResourceDefinition myParametersDef;
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
+                private IBaseBundle myMsgBundle;
+             
 
 		@SuppressWarnings("unchecked")
 		private void addParam(String theName, IBase theValue) {
@@ -1505,41 +1509,58 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object execute() {
-			String resourceName;
-			String id;
-			if (myType != null) {
-				resourceName = myContext.getResourceDefinition(myType).getName();
-				id = null;
-			} else if (myId != null) {
-				resourceName = myId.getResourceType();
-				id = myId.getIdPart();
-			} else {
-				resourceName = null;
-				id = null;
-			}
+                    if  (myOperationName != null && myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE)) {
+                        //If is $process-message operation
+                        BaseHttpClientInvocation invocation = OperationMethodBinding.createProcessMsgInvocation(myContext, myOperationName, myMsgBundle);
 
-			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
+                        ResourceResponseHandler handler = new ResourceResponseHandler();
+                        handler.setPreferResponseTypes(getPreferResponseTypes(myType));
+                        
+                        /*
+                        Map<String, List<String>> urlParams = new LinkedHashMap<String, List<String>>();
+                        GenericClient.this.addParam(urlParams, Constants.PARAM_ASYNC, String.valueOf(myAsync));  
+                        GenericClient.this.addParam(urlParams, Constants.PARAM_RESPONSE_URL, String.valueOf(myRespondToUri));
+                        */
 
-			ResourceResponseHandler handler = new ResourceResponseHandler();
-			handler.setPreferResponseTypes(getPreferResponseTypes(myType));
+                        Object retVal = invoke(null, handler, invocation);
+                        return retVal;
+                    } else {
+                        String resourceName;
+                        String id;
+                        if (myType != null) {
+                                resourceName = myContext.getResourceDefinition(myType).getName();
+                                id = null;
+                        } else if (myId != null) {
+                                resourceName = myId.getResourceType();
+                                id = myId.getIdPart();
+                        } else {
+                                resourceName = null;
+                                id = null;
+                        }
 
-			Object retVal = invoke(null, handler, invocation);
-			if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
-				return retVal;
-			} else {
-				RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
-				IBaseResource parameters = def.newInstance();
+                        BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
 
-				BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-				BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
-				IBase parameter = paramChildElem.newInstance();
-				paramChild.getMutator().addValue(parameters, parameter);
+                        ResourceResponseHandler handler = new ResourceResponseHandler();
+                        handler.setPreferResponseTypes(getPreferResponseTypes(myType));
 
-				BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
-				resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+                        Object retVal = invoke(null, handler, invocation);
+                        if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
+                                return retVal;
+                        } else {
+                                RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
+                                IBaseResource parameters = def.newInstance();
 
-				return parameters;
-			}
+                                BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+                                BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+                                IBase parameter = paramChildElem.newInstance();
+                                paramChild.getMutator().addValue(parameters, parameter);
+
+                                BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
+                                resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+
+                                return parameters;
+                        }
+                    }
 		}
 
 		@Override
@@ -1548,12 +1569,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myOperationName = theName;
 			return this;
 		}
+                
+                @Override
+                public IOperationProcessMsg processMessage() {
+                    myOperationName = Constants.EXTOP_PROCESS_MESSAGE;
+                    return this;
+                }
 
 		@Override
 		public IOperationUnnamed onInstance(IIdType theId) {
 			myId = theId;
 			return this;
 		}
+               
 
 		@Override
 		public IOperationUnnamed onServer() {
@@ -1624,6 +1652,36 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			return this;
 		}
+
+                @Override
+                public IOperationProcessMsg setMessageBundle(IBaseBundle theMsgBundle) {
+                    
+                    Validate.notNull(theMsgBundle, "theMsgBundle must not be null");
+                   /* Validate.isTrue(theMsgBundle.getType().getValueAsEnum() == BundleTypeEnum.MESSAGE);
+                    Validate.isTrue(theMsgBundle.getEntries().size() > 0);
+                    Validate.notNull(theMsgBundle.getEntries().get(0).getResource(), "Message Bundle first entry must be a MessageHeader resource");
+                    Validate.isTrue(theMsgBundle.getEntries().get(0).getResource().getResourceName().equals("MessageHeader"), "Message Bundle first entry must be a MessageHeader resource");
+                   */
+                    myMsgBundle = (IBaseBundle) theMsgBundle;
+                    return this;
+                }
+
+                @Override
+                public  IOperationProcessMsg<IBaseOperationOutcome> setAsyncProcessingMode() {
+                    setMessageAsync(true);
+                    return this;
+                }
+
+                @Override
+                public  IOperationProcessMsg setResponseUrlParam(String responseUrl) {
+                    Validate.notEmpty(responseUrl, "responseUrl must not be null");
+                    Validate.matchesPattern(responseUrl, "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "responseUrl must be a valid URL");
+                    setMessageResponseUrl(responseUrl);
+                    return this;
+                }
+
+    
+               
 
 	}
 

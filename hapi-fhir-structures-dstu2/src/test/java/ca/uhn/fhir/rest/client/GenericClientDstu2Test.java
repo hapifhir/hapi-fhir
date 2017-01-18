@@ -2703,6 +2703,16 @@ public class GenericClientDstu2Test {
 		public void unregisterInterceptor(IClientInterceptor theInterceptor) {
 			//nothing
 		}
+
+        @Override
+        public void setMessageAsync(Boolean isAsync) {
+           
+        }
+
+        @Override
+        public void setMessageResponseUrl(String responseUrl) {
+           
+        }
 	}
 
 }
