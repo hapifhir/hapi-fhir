@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -125,7 +126,8 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
      * @return the ascii string for the server base
      */
     public String getBaseForServer() {
-        return getUriInfo().getBaseUri().toASCIIString();
+        final String url = getUriInfo().getBaseUri().toASCIIString();
+        return StringUtils.isNotBlank(url) && url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }
 
     /**

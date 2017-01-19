@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jaxrs.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -44,9 +45,11 @@ import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -152,7 +155,7 @@ public class AbstractJaxRsResourceProviderTest {
 		toCreate.getIdentifierFirstRep().setValue("myIdentifier");
 		outcome.setResource(toCreate);
 
-		when(mock.create(patientCaptor.capture(), eq("Patient?_format=json&identifier=2"))).thenReturn(outcome);
+		when(mock.create(patientCaptor.capture(), eq("/Patient?_format=json&identifier=2"))).thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
 
 		MethodOutcome response = client.create().resource(toCreate).conditional()
@@ -411,6 +414,21 @@ public class AbstractJaxRsResourceProviderTest {
 		}
 	}
 
+  @Test
+	public void testValidate() {
+		// prepare mock
+		final OperationOutcome oo = new OperationOutcome();
+		final Patient patient = new Patient();
+		patient.addIdentifier((new IdentifierDt().setValue("1")));
+		//invoke
+		final Parameters inParams = new Parameters();
+		inParams.addParameter().setResource(patient);
+
+		final MethodOutcome mO = client.validate().resource(patient).execute();
+		//verify
+		assertNotNull(mO.getOperationOutcome());
+	}
+  
 	private <T> T withId(final T id) {
 		return argThat(new BaseMatcher<T>() {
 			@Override

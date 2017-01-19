@@ -286,6 +286,12 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
         return execute(theRequest, compartment);
     }
 
+    @POST
+    @Path("/$validate")
+    public Response validate(final String resource) throws IOException {
+        return customOperation(resource, RequestTypeEnum.POST, null, "$validate", RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+    }
+    
     /**
      * Execute the method described by the requestBuilder and methodKey
      * 
