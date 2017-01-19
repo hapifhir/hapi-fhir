@@ -667,11 +667,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
-		theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+		}
 	}
 
 	protected void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
-		theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
+		}
 	}
 	
 	public String parseContentTextIntoWords(IBaseResource theResource) {
