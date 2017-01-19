@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,12 +42,134 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
  */
 @ResourceDef(name="Contract", profile="http://hl7.org/fhir/Profile/Contract")
 public class Contract extends DomainResource {
+
+    public enum ContractStatus {
+        /**
+         * The instance is currently in-force.
+         */
+        ACTIVE, 
+        /**
+         * The instance is withdrawn, rescinded or reversed.
+         */
+        CANCELLED, 
+        /**
+         * A new instance the contents of which is not complete.
+         */
+        DRAFT, 
+        /**
+         * The instance was entered in error.
+         */
+        ENTEREDINERROR, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static ContractStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ContractStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ACTIVE: return "active";
+            case CANCELLED: return "cancelled";
+            case DRAFT: return "draft";
+            case ENTEREDINERROR: return "entered-in-error";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ACTIVE: return "http://hl7.org/fhir/fm-status";
+            case CANCELLED: return "http://hl7.org/fhir/fm-status";
+            case DRAFT: return "http://hl7.org/fhir/fm-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/fm-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ACTIVE: return "The instance is currently in-force.";
+            case CANCELLED: return "The instance is withdrawn, rescinded or reversed.";
+            case DRAFT: return "A new instance the contents of which is not complete.";
+            case ENTEREDINERROR: return "The instance was entered in error.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ACTIVE: return "Active";
+            case CANCELLED: return "Cancelled";
+            case DRAFT: return "Draft";
+            case ENTEREDINERROR: return "Entered in Error";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class ContractStatusEnumFactory implements EnumFactory<ContractStatus> {
+    public ContractStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("active".equals(codeString))
+          return ContractStatus.ACTIVE;
+        if ("cancelled".equals(codeString))
+          return ContractStatus.CANCELLED;
+        if ("draft".equals(codeString))
+          return ContractStatus.DRAFT;
+        if ("entered-in-error".equals(codeString))
+          return ContractStatus.ENTEREDINERROR;
+        throw new IllegalArgumentException("Unknown ContractStatus code '"+codeString+"'");
+        }
+        public Enumeration<ContractStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.ACTIVE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.CANCELLED);
+        if ("draft".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.DRAFT);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ContractStatus>(this, ContractStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown ContractStatus code '"+codeString+"'");
+        }
+    public String toCode(ContractStatus code) {
+      if (code == ContractStatus.ACTIVE)
+        return "active";
+      if (code == ContractStatus.CANCELLED)
+        return "cancelled";
+      if (code == ContractStatus.DRAFT)
+        return "draft";
+      if (code == ContractStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      return "?";
+      }
+    public String toSystem(ContractStatus code) {
+      return code.getSystem();
+      }
+    }
 
     @Block()
     public static class AgentComponent extends BackboneElement implements IBaseBackboneElement {
@@ -992,7 +1114,7 @@ public class Contract extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1298275357: // entity
-          this.entity = (Type) value; // Type
+          this.entity = castToType(value); // Type
           break;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
@@ -1023,7 +1145,7 @@ public class Contract extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("entity[x]"))
-          this.entity = (Type) value; // Type
+          this.entity = castToType(value); // Type
         else if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
         else if (name.equals("effectiveTime"))
@@ -2687,7 +2809,7 @@ public class Contract extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1298275357: // entity
-          this.entity = (Type) value; // Type
+          this.entity = castToType(value); // Type
           break;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
@@ -2718,7 +2840,7 @@ public class Contract extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("entity[x]"))
-          this.entity = (Type) value; // Type
+          this.entity = castToType(value); // Type
         else if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
         else if (name.equals("effectiveTime"))
@@ -2930,7 +3052,7 @@ public class Contract extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 951530617: // content
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -2940,7 +3062,7 @@ public class Contract extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -3095,7 +3217,7 @@ public class Contract extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 951530617: // content
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -3105,7 +3227,7 @@ public class Contract extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -3260,7 +3382,7 @@ public class Contract extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 951530617: // content
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -3270,7 +3392,7 @@ public class Contract extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("content[x]"))
-          this.content = (Type) value; // Type
+          this.content = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -3344,23 +3466,31 @@ public class Contract extends DomainResource {
     protected Identifier identifier;
 
     /**
+     * The status of the resource instance.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fm-status")
+    protected Enumeration<ContractStatus> status;
+
+    /**
      * When this  Contract was issued.
      */
-    @Child(name = "issued", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "issued", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When this Contract was issued", formalDefinition="When this  Contract was issued." )
     protected DateTimeType issued;
 
     /**
      * Relevant time or time-period when this Contract is applicable.
      */
-    @Child(name = "applies", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "applies", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Effective time", formalDefinition="Relevant time or time-period when this Contract is applicable." )
     protected Period applies;
 
     /**
      * The target entity impacted by or of interest to parties to the agreement.
      */
-    @Child(name = "subject", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "subject", type = {Reference.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contract Target Entity", formalDefinition="The target entity impacted by or of interest to parties to the agreement." )
     protected List<Reference> subject;
     /**
@@ -3372,7 +3502,7 @@ public class Contract extends DomainResource {
     /**
      * The matter of concern in the context of this agreement.
      */
-    @Child(name = "topic", type = {Reference.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "topic", type = {Reference.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Context of the Contract", formalDefinition="The matter of concern in the context of this agreement." )
     protected List<Reference> topic;
     /**
@@ -3384,7 +3514,7 @@ public class Contract extends DomainResource {
     /**
      * A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies.
      */
-    @Child(name = "authority", type = {Organization.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "authority", type = {Organization.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Authority under which this Contract has standing", formalDefinition="A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies." )
     protected List<Reference> authority;
     /**
@@ -3396,7 +3526,7 @@ public class Contract extends DomainResource {
     /**
      * Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources.
      */
-    @Child(name = "domain", type = {Location.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "domain", type = {Location.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Domain in which this Contract applies", formalDefinition="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources." )
     protected List<Reference> domain;
     /**
@@ -3408,7 +3538,7 @@ public class Contract extends DomainResource {
     /**
      * Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Contract Type", formalDefinition="Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-type")
     protected CodeableConcept type;
@@ -3416,7 +3546,7 @@ public class Contract extends DomainResource {
     /**
      * More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent.
      */
-    @Child(name = "subType", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "subType", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contract Subtype", formalDefinition="More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-subtype")
     protected List<CodeableConcept> subType;
@@ -3424,7 +3554,7 @@ public class Contract extends DomainResource {
     /**
      * Action stipulated by this Contract.
      */
-    @Child(name = "action", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "action", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Action", formalDefinition="Action stipulated by this Contract." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/contract-action")
     protected List<CodeableConcept> action;
@@ -3432,7 +3562,7 @@ public class Contract extends DomainResource {
     /**
      * Reason for action stipulated by this Contract.
      */
-    @Child(name = "actionReason", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "actionReason", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Action Reason", formalDefinition="Reason for action stipulated by this Contract." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
     protected List<CodeableConcept> actionReason;
@@ -3440,60 +3570,60 @@ public class Contract extends DomainResource {
     /**
      * An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.
      */
-    @Child(name = "agent", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "agent", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Agent", formalDefinition="An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place." )
     protected List<AgentComponent> agent;
 
     /**
      * Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness.
      */
-    @Child(name = "signer", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "signer", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Signer", formalDefinition="Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness." )
     protected List<SignatoryComponent> signer;
 
     /**
      * Contract Valued Item List.
      */
-    @Child(name = "valuedItem", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "valuedItem", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Valued Item", formalDefinition="Contract Valued Item List." )
     protected List<ValuedItemComponent> valuedItem;
 
     /**
      * One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.
      */
-    @Child(name = "term", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "term", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Term List", formalDefinition="One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups." )
     protected List<TermComponent> term;
 
     /**
      * Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.
      */
-    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=16, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract." )
     protected Type binding;
 
     /**
      * The "patient friendly language" versionof the Contract in whole or in parts. "Patient friendly language" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.
      */
-    @Child(name = "friendly", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "friendly", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Friendly Language", formalDefinition="The \"patient friendly language\" versionof the Contract in whole or in parts. \"Patient friendly language\" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement." )
     protected List<FriendlyLanguageComponent> friendly;
 
     /**
      * List of Legal expressions or representations of this Contract.
      */
-    @Child(name = "legal", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "legal", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Legal Language", formalDefinition="List of Legal expressions or representations of this Contract." )
     protected List<LegalLanguageComponent> legal;
 
     /**
      * List of Computable Policy Rule Language Representations of this Contract.
      */
-    @Child(name = "rule", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "rule", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Computable Contract Language", formalDefinition="List of Computable Policy Rule Language Representations of this Contract." )
     protected List<ComputableLanguageComponent> rule;
 
-    private static final long serialVersionUID = -1116217303L;
+    private static final long serialVersionUID = 90292068L;
 
   /**
    * Constructor
@@ -3523,6 +3653,55 @@ public class Contract extends DomainResource {
      */
     public Contract setIdentifier(Identifier value) { 
       this.identifier = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<ContractStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<ContractStatus>(new ContractStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the resource instance.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Contract setStatusElement(Enumeration<ContractStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the resource instance.
+     */
+    public ContractStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the resource instance.
+     */
+    public Contract setStatus(ContractStatus value) { 
+      if (value == null)
+        this.status = null;
+      else {
+        if (this.status == null)
+          this.status = new Enumeration<ContractStatus>(new ContractStatusEnumFactory());
+        this.status.setValue(value);
+      }
       return this;
     }
 
@@ -4477,6 +4656,7 @@ public class Contract extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier for this Contract.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("issued", "dateTime", "When this  Contract was issued.", 0, java.lang.Integer.MAX_VALUE, issued));
         childrenList.add(new Property("applies", "Period", "Relevant time or time-period when this Contract is applicable.", 0, java.lang.Integer.MAX_VALUE, applies));
         childrenList.add(new Property("subject", "Reference(Any)", "The target entity impacted by or of interest to parties to the agreement.", 0, java.lang.Integer.MAX_VALUE, subject));
@@ -4501,6 +4681,7 @@ public class Contract extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ContractStatus>
         case -1179159893: /*issued*/ return this.issued == null ? new Base[0] : new Base[] {this.issued}; // DateTimeType
         case -793235316: /*applies*/ return this.applies == null ? new Base[0] : new Base[] {this.applies}; // Period
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : this.subject.toArray(new Base[this.subject.size()]); // Reference
@@ -4529,6 +4710,9 @@ public class Contract extends DomainResource {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -892481550: // status
+          this.status = new ContractStatusEnumFactory().fromType(value); // Enumeration<ContractStatus>
           break;
         case -1179159893: // issued
           this.issued = castToDateTime(value); // DateTimeType
@@ -4573,7 +4757,7 @@ public class Contract extends DomainResource {
           this.getTerm().add((TermComponent) value); // TermComponent
           break;
         case -108220795: // binding
-          this.binding = (Type) value; // Type
+          this.binding = castToType(value); // Type
           break;
         case -1423054677: // friendly
           this.getFriendly().add((FriendlyLanguageComponent) value); // FriendlyLanguageComponent
@@ -4593,6 +4777,8 @@ public class Contract extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("status"))
+          this.status = new ContractStatusEnumFactory().fromType(value); // Enumeration<ContractStatus>
         else if (name.equals("issued"))
           this.issued = castToDateTime(value); // DateTimeType
         else if (name.equals("applies"))
@@ -4622,7 +4808,7 @@ public class Contract extends DomainResource {
         else if (name.equals("term"))
           this.getTerm().add((TermComponent) value);
         else if (name.equals("binding[x]"))
-          this.binding = (Type) value; // Type
+          this.binding = castToType(value); // Type
         else if (name.equals("friendly"))
           this.getFriendly().add((FriendlyLanguageComponent) value);
         else if (name.equals("legal"))
@@ -4637,6 +4823,7 @@ public class Contract extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return getIdentifier(); // Identifier
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ContractStatus>
         case -1179159893: throw new FHIRException("Cannot make property issued as it is not a complex type"); // DateTimeType
         case -793235316:  return getApplies(); // Period
         case -1867885268:  return addSubject(); // Reference
@@ -4665,6 +4852,9 @@ public class Contract extends DomainResource {
         if (name.equals("identifier")) {
           this.identifier = new Identifier();
           return this.identifier;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.status");
         }
         else if (name.equals("issued")) {
           throw new FHIRException("Cannot call addChild on a primitive type Contract.issued");
@@ -4740,6 +4930,7 @@ public class Contract extends DomainResource {
         Contract dst = new Contract();
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
+        dst.status = status == null ? null : status.copy();
         dst.issued = issued == null ? null : issued.copy();
         dst.applies = applies == null ? null : applies.copy();
         if (subject != null) {
@@ -4828,13 +5019,13 @@ public class Contract extends DomainResource {
         if (!(other instanceof Contract))
           return false;
         Contract o = (Contract) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(issued, o.issued, true) && compareDeep(applies, o.applies, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(topic, o.topic, true) && compareDeep(authority, o.authority, true)
-           && compareDeep(domain, o.domain, true) && compareDeep(type, o.type, true) && compareDeep(subType, o.subType, true)
-           && compareDeep(action, o.action, true) && compareDeep(actionReason, o.actionReason, true) && compareDeep(agent, o.agent, true)
-           && compareDeep(signer, o.signer, true) && compareDeep(valuedItem, o.valuedItem, true) && compareDeep(term, o.term, true)
-           && compareDeep(binding, o.binding, true) && compareDeep(friendly, o.friendly, true) && compareDeep(legal, o.legal, true)
-           && compareDeep(rule, o.rule, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(issued, o.issued, true)
+           && compareDeep(applies, o.applies, true) && compareDeep(subject, o.subject, true) && compareDeep(topic, o.topic, true)
+           && compareDeep(authority, o.authority, true) && compareDeep(domain, o.domain, true) && compareDeep(type, o.type, true)
+           && compareDeep(subType, o.subType, true) && compareDeep(action, o.action, true) && compareDeep(actionReason, o.actionReason, true)
+           && compareDeep(agent, o.agent, true) && compareDeep(signer, o.signer, true) && compareDeep(valuedItem, o.valuedItem, true)
+           && compareDeep(term, o.term, true) && compareDeep(binding, o.binding, true) && compareDeep(friendly, o.friendly, true)
+           && compareDeep(legal, o.legal, true) && compareDeep(rule, o.rule, true);
       }
 
       @Override
@@ -4844,13 +5035,13 @@ public class Contract extends DomainResource {
         if (!(other instanceof Contract))
           return false;
         Contract o = (Contract) other;
-        return compareValues(issued, o.issued, true);
+        return compareValues(status, o.status, true) && compareValues(issued, o.issued, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, issued, applies
-          , subject, topic, authority, domain, type, subType, action, actionReason, agent
-          , signer, valuedItem, term, binding, friendly, legal, rule);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, issued
+          , applies, subject, topic, authority, domain, type, subType, action, actionReason
+          , agent, signer, valuedItem, term, binding, friendly, legal, rule);
       }
 
   @Override

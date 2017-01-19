@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -71,11 +73,20 @@ public abstract class BaseJpaTest {
 		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
 		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
 		when(mySrd.getServer().getInterceptors()).thenReturn(new ArrayList<IServerInterceptor>());
+		when(mySrd.getUserData()).thenReturn(new HashMap<Object, Object>());
 	}
 
 	@SuppressWarnings({ "rawtypes" })
 	protected List toList(IBundleProvider theSearch) {
 		return theSearch.getResources(0, theSearch.size());
+	}
+
+	protected org.hl7.fhir.dstu3.model.Bundle toBundle(IBundleProvider theSearch) {
+		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+			bundle.addEntry().setResource((Resource) next);
+		}
+		return bundle;
 	}
 
 	protected abstract FhirContext getContext();

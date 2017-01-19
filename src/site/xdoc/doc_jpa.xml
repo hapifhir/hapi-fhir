@@ -239,8 +239,50 @@ public DaoConfig daoConfig() {
 			
 		</section>
 		
+		<section name="Additional Information">
+		
+			<ul>
+				<li>
+					<a href="https://www.openhealthhub.org/t/hapi-terminology-server-uk-snomed-ct-import/592">This page</a>
+					has information on loading national editions (UK specifically) of SNOMED CT files into
+					the database.
+				</li>
+			</ul>
+			
+		</section>
+		
 		<!-- 
 		alter table hfj_res_link ALTER COLUMN "TARGET_RESOURCE_ID" NULL;
+		
+		select sp_index_status, count(*) from hfj_resource group by sp_index_status
+delete from hfj_history_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_coords where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_number where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_quantity where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_string where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_token where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_uri where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_search_result where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_link where src_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_link where target_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_subscription where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_subscription_flag_res where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+
+
+delete from trm_concept_pc_link where pid in (select pid from trm_concept where codesystem_pid in (select pid from trm_codesystem_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2)));
+delete from trm_concept where codesystem_pid in (select pid from trm_codesystem_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2));
+delete from trm_codesystem_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from trm_codesystem where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+
+update hfj_resource set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+update hfj_res_ver set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_forced_id where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_resource where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+		
+		
+		
 		 -->
 				
 	</body>

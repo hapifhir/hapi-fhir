@@ -3,6 +3,10 @@
 		<lastUpdated value="2013-07-18T16:17:54-04:00"/>
 	</meta>
 	<type value="document"/>
+	<identifier>
+		<system value="urn:sys"/>
+		<value value="foo"/>
+	</identifier>
 	<entry>
 		<fullUrl value="urn:oid:1.3.6.1.4.1.22812.4.111.2.1.2.1"/>
 		<resource>

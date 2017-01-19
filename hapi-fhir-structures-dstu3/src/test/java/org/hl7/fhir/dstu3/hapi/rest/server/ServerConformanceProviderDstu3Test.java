@@ -37,6 +37,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -76,6 +77,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 
+@SuppressWarnings({"deprecation","unused"})
 public class ServerConformanceProviderDstu3Test {
 
 	private static FhirContext ourCtx;
@@ -288,7 +290,7 @@ public class ServerConformanceProviderDstu3Test {
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"));
 			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
-			Set<String> types = toStrings(opDef.getType());
+			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
@@ -303,7 +305,7 @@ public class ServerConformanceProviderDstu3Test {
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"));
 			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
-			Set<String> types = toStrings(opDef.getType());
+			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
@@ -318,7 +320,7 @@ public class ServerConformanceProviderDstu3Test {
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"));
 			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
-			Set<String> types = toStrings(opDef.getType());
+			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("validate", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
@@ -564,6 +566,34 @@ public class ServerConformanceProviderDstu3Test {
 	}
 
 	@Test
+	public void testSearchReferenceParameterWithList() throws Exception {
+
+		RestfulServer rsNoType = new RestfulServer(ourCtx);
+		rsNoType.registerProvider(new SearchProviderWithListNoType());
+		ServerConformanceProvider scNoType = new ServerConformanceProvider(rsNoType);
+		rsNoType.setServerConformanceProvider(scNoType);
+		rsNoType.init(createServletConfig());
+		scNoType.getServerConfiguration().setConformanceDate("2011-02-22T11:22:33Z");
+		
+		Conformance conformance = scNoType.getServerConformance(createHttpServletRequest());
+		String confNoType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(confNoType);
+
+		RestfulServer rsWithType = new RestfulServer(ourCtx);
+		rsWithType.registerProvider(new SearchProviderWithListWithType());
+		ServerConformanceProvider scWithType = new ServerConformanceProvider(rsWithType);
+		rsWithType.setServerConformanceProvider(scWithType);
+		rsWithType.init(createServletConfig());
+		scWithType.getServerConfiguration().setConformanceDate("2011-02-22T11:22:33Z");
+
+		Conformance conformanceWithType = scWithType.getServerConformance(createHttpServletRequest());
+		String confWithType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformanceWithType);
+		ourLog.info(confWithType);
+
+		assertEquals(confNoType, confWithType);
+	}
+
+	@Test
 	public void testSystemHistorySupported() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -602,6 +632,7 @@ public class ServerConformanceProviderDstu3Test {
 	}
 
 	@Test
+	@Ignore
 	public void testValidateGeneratedStatement() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -849,6 +880,39 @@ public class ServerConformanceProviderDstu3Test {
 
 	}
 
+	public static class SearchProviderWithListNoType  implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+
+
+		@Search()
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+			return null;
+		}
+
+	}
+
+	public static class SearchProviderWithListWithType  implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+
+
+		@Search(type=Patient.class)
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+			return null;
+		}
+
+	}
+
+	
 	public static class SystemHistoryProvider {
 
 		@History

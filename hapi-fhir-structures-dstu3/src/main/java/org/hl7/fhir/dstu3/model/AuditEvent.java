@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.
  */
@@ -534,12 +534,12 @@ public class AuditEvent extends DomainResource {
         /**
          * The reason (purpose of use), specific to this agent, that was used during the event being recorded.
          */
-        @Child(name = "purposeOfUse", type = {Coding.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "purposeOfUse", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Reason given for this user", formalDefinition="The reason (purpose of use), specific to this agent, that was used during the event being recorded." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
-        protected List<Coding> purposeOfUse;
+        protected List<CodeableConcept> purposeOfUse;
 
-        private static final long serialVersionUID = 1802747339L;
+        private static final long serialVersionUID = 1205071410L;
 
     /**
      * Constructor
@@ -971,16 +971,16 @@ public class AuditEvent extends DomainResource {
         /**
          * @return {@link #purposeOfUse} (The reason (purpose of use), specific to this agent, that was used during the event being recorded.)
          */
-        public List<Coding> getPurposeOfUse() { 
+        public List<CodeableConcept> getPurposeOfUse() { 
           if (this.purposeOfUse == null)
-            this.purposeOfUse = new ArrayList<Coding>();
+            this.purposeOfUse = new ArrayList<CodeableConcept>();
           return this.purposeOfUse;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public AuditEventAgentComponent setPurposeOfUse(List<Coding> thePurposeOfUse) { 
+        public AuditEventAgentComponent setPurposeOfUse(List<CodeableConcept> thePurposeOfUse) { 
           this.purposeOfUse = thePurposeOfUse;
           return this;
         }
@@ -988,25 +988,25 @@ public class AuditEvent extends DomainResource {
         public boolean hasPurposeOfUse() { 
           if (this.purposeOfUse == null)
             return false;
-          for (Coding item : this.purposeOfUse)
+          for (CodeableConcept item : this.purposeOfUse)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Coding addPurposeOfUse() { //3
-          Coding t = new Coding();
+        public CodeableConcept addPurposeOfUse() { //3
+          CodeableConcept t = new CodeableConcept();
           if (this.purposeOfUse == null)
-            this.purposeOfUse = new ArrayList<Coding>();
+            this.purposeOfUse = new ArrayList<CodeableConcept>();
           this.purposeOfUse.add(t);
           return t;
         }
 
-        public AuditEventAgentComponent addPurposeOfUse(Coding t) { //3
+        public AuditEventAgentComponent addPurposeOfUse(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.purposeOfUse == null)
-            this.purposeOfUse = new ArrayList<Coding>();
+            this.purposeOfUse = new ArrayList<CodeableConcept>();
           this.purposeOfUse.add(t);
           return this;
         }
@@ -1014,7 +1014,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @return The first repetition of repeating field {@link #purposeOfUse}, creating it if it does not already exist
          */
-        public Coding getPurposeOfUseFirstRep() { 
+        public CodeableConcept getPurposeOfUseFirstRep() { 
           if (getPurposeOfUse().isEmpty()) {
             addPurposeOfUse();
           }
@@ -1033,7 +1033,7 @@ public class AuditEvent extends DomainResource {
           childrenList.add(new Property("policy", "uri", "The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used.", 0, java.lang.Integer.MAX_VALUE, policy));
           childrenList.add(new Property("media", "Coding", "Type of media involved. Used when the event is about exporting/importing onto media.", 0, java.lang.Integer.MAX_VALUE, media));
           childrenList.add(new Property("network", "", "Logical network location for application activity, if the activity has a network location.", 0, java.lang.Integer.MAX_VALUE, network));
-          childrenList.add(new Property("purposeOfUse", "Coding", "The reason (purpose of use), specific to this agent, that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfUse));
+          childrenList.add(new Property("purposeOfUse", "CodeableConcept", "The reason (purpose of use), specific to this agent, that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfUse));
         }
 
       @Override
@@ -1049,7 +1049,7 @@ public class AuditEvent extends DomainResource {
         case -982670030: /*policy*/ return this.policy == null ? new Base[0] : this.policy.toArray(new Base[this.policy.size()]); // UriType
         case 103772132: /*media*/ return this.media == null ? new Base[0] : new Base[] {this.media}; // Coding
         case 1843485230: /*network*/ return this.network == null ? new Base[0] : new Base[] {this.network}; // AuditEventAgentNetworkComponent
-        case -1881902670: /*purposeOfUse*/ return this.purposeOfUse == null ? new Base[0] : this.purposeOfUse.toArray(new Base[this.purposeOfUse.size()]); // Coding
+        case -1881902670: /*purposeOfUse*/ return this.purposeOfUse == null ? new Base[0] : this.purposeOfUse.toArray(new Base[this.purposeOfUse.size()]); // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1089,7 +1089,7 @@ public class AuditEvent extends DomainResource {
           this.network = (AuditEventAgentNetworkComponent) value; // AuditEventAgentNetworkComponent
           break;
         case -1881902670: // purposeOfUse
-          this.getPurposeOfUse().add(castToCoding(value)); // Coding
+          this.getPurposeOfUse().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1119,7 +1119,7 @@ public class AuditEvent extends DomainResource {
         else if (name.equals("network"))
           this.network = (AuditEventAgentNetworkComponent) value; // AuditEventAgentNetworkComponent
         else if (name.equals("purposeOfUse"))
-          this.getPurposeOfUse().add(castToCoding(value));
+          this.getPurposeOfUse().add(castToCodeableConcept(value));
         else
           super.setProperty(name, value);
       }
@@ -1137,7 +1137,7 @@ public class AuditEvent extends DomainResource {
         case -982670030: throw new FHIRException("Cannot make property policy as it is not a complex type"); // UriType
         case 103772132:  return getMedia(); // Coding
         case 1843485230:  return getNetwork(); // AuditEventAgentNetworkComponent
-        case -1881902670:  return addPurposeOfUse(); // Coding
+        case -1881902670:  return addPurposeOfUse(); // CodeableConcept
         default: return super.makeProperty(hash, name);
         }
 
@@ -1209,8 +1209,8 @@ public class AuditEvent extends DomainResource {
         dst.media = media == null ? null : media.copy();
         dst.network = network == null ? null : network.copy();
         if (purposeOfUse != null) {
-          dst.purposeOfUse = new ArrayList<Coding>();
-          for (Coding i : purposeOfUse)
+          dst.purposeOfUse = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : purposeOfUse)
             dst.purposeOfUse.add(i.copy());
         };
         return dst;
@@ -2730,10 +2730,10 @@ public class AuditEvent extends DomainResource {
     /**
      * The purposeOfUse (reason) that was used during the event being recorded.
      */
-    @Child(name = "purposeOfEvent", type = {Coding.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "purposeOfEvent", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The purposeOfUse of the event", formalDefinition="The purposeOfUse (reason) that was used during the event being recorded." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
-    protected List<Coding> purposeOfEvent;
+    protected List<CodeableConcept> purposeOfEvent;
 
     /**
      * An actor taking an active role in the event or activity that is logged.
@@ -2756,7 +2756,7 @@ public class AuditEvent extends DomainResource {
     @Description(shortDefinition="Data or objects used", formalDefinition="Specific instances of data or objects that have been accessed." )
     protected List<AuditEventEntityComponent> entity;
 
-    private static final long serialVersionUID = 945153702L;
+    private static final long serialVersionUID = 2102955199L;
 
   /**
    * Constructor
@@ -3047,16 +3047,16 @@ public class AuditEvent extends DomainResource {
     /**
      * @return {@link #purposeOfEvent} (The purposeOfUse (reason) that was used during the event being recorded.)
      */
-    public List<Coding> getPurposeOfEvent() { 
+    public List<CodeableConcept> getPurposeOfEvent() { 
       if (this.purposeOfEvent == null)
-        this.purposeOfEvent = new ArrayList<Coding>();
+        this.purposeOfEvent = new ArrayList<CodeableConcept>();
       return this.purposeOfEvent;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public AuditEvent setPurposeOfEvent(List<Coding> thePurposeOfEvent) { 
+    public AuditEvent setPurposeOfEvent(List<CodeableConcept> thePurposeOfEvent) { 
       this.purposeOfEvent = thePurposeOfEvent;
       return this;
     }
@@ -3064,25 +3064,25 @@ public class AuditEvent extends DomainResource {
     public boolean hasPurposeOfEvent() { 
       if (this.purposeOfEvent == null)
         return false;
-      for (Coding item : this.purposeOfEvent)
+      for (CodeableConcept item : this.purposeOfEvent)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Coding addPurposeOfEvent() { //3
-      Coding t = new Coding();
+    public CodeableConcept addPurposeOfEvent() { //3
+      CodeableConcept t = new CodeableConcept();
       if (this.purposeOfEvent == null)
-        this.purposeOfEvent = new ArrayList<Coding>();
+        this.purposeOfEvent = new ArrayList<CodeableConcept>();
       this.purposeOfEvent.add(t);
       return t;
     }
 
-    public AuditEvent addPurposeOfEvent(Coding t) { //3
+    public AuditEvent addPurposeOfEvent(CodeableConcept t) { //3
       if (t == null)
         return this;
       if (this.purposeOfEvent == null)
-        this.purposeOfEvent = new ArrayList<Coding>();
+        this.purposeOfEvent = new ArrayList<CodeableConcept>();
       this.purposeOfEvent.add(t);
       return this;
     }
@@ -3090,7 +3090,7 @@ public class AuditEvent extends DomainResource {
     /**
      * @return The first repetition of repeating field {@link #purposeOfEvent}, creating it if it does not already exist
      */
-    public Coding getPurposeOfEventFirstRep() { 
+    public CodeableConcept getPurposeOfEventFirstRep() { 
       if (getPurposeOfEvent().isEmpty()) {
         addPurposeOfEvent();
       }
@@ -3235,7 +3235,7 @@ public class AuditEvent extends DomainResource {
         childrenList.add(new Property("recorded", "instant", "The time when the event occurred on the source.", 0, java.lang.Integer.MAX_VALUE, recorded));
         childrenList.add(new Property("outcome", "code", "Indicates whether the event succeeded or failed.", 0, java.lang.Integer.MAX_VALUE, outcome));
         childrenList.add(new Property("outcomeDesc", "string", "A free text description of the outcome of the event.", 0, java.lang.Integer.MAX_VALUE, outcomeDesc));
-        childrenList.add(new Property("purposeOfEvent", "Coding", "The purposeOfUse (reason) that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfEvent));
+        childrenList.add(new Property("purposeOfEvent", "CodeableConcept", "The purposeOfUse (reason) that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfEvent));
         childrenList.add(new Property("agent", "", "An actor taking an active role in the event or activity that is logged.", 0, java.lang.Integer.MAX_VALUE, agent));
         childrenList.add(new Property("source", "", "The system that is reporting the event.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("entity", "", "Specific instances of data or objects that have been accessed.", 0, java.lang.Integer.MAX_VALUE, entity));
@@ -3250,7 +3250,7 @@ public class AuditEvent extends DomainResource {
         case -799233872: /*recorded*/ return this.recorded == null ? new Base[0] : new Base[] {this.recorded}; // InstantType
         case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<AuditEventOutcome>
         case 1062502659: /*outcomeDesc*/ return this.outcomeDesc == null ? new Base[0] : new Base[] {this.outcomeDesc}; // StringType
-        case -341917691: /*purposeOfEvent*/ return this.purposeOfEvent == null ? new Base[0] : this.purposeOfEvent.toArray(new Base[this.purposeOfEvent.size()]); // Coding
+        case -341917691: /*purposeOfEvent*/ return this.purposeOfEvent == null ? new Base[0] : this.purposeOfEvent.toArray(new Base[this.purposeOfEvent.size()]); // CodeableConcept
         case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // AuditEventAgentComponent
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // AuditEventSourceComponent
         case -1298275357: /*entity*/ return this.entity == null ? new Base[0] : this.entity.toArray(new Base[this.entity.size()]); // AuditEventEntityComponent
@@ -3281,7 +3281,7 @@ public class AuditEvent extends DomainResource {
           this.outcomeDesc = castToString(value); // StringType
           break;
         case -341917691: // purposeOfEvent
-          this.getPurposeOfEvent().add(castToCoding(value)); // Coding
+          this.getPurposeOfEvent().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case 92750597: // agent
           this.getAgent().add((AuditEventAgentComponent) value); // AuditEventAgentComponent
@@ -3312,7 +3312,7 @@ public class AuditEvent extends DomainResource {
         else if (name.equals("outcomeDesc"))
           this.outcomeDesc = castToString(value); // StringType
         else if (name.equals("purposeOfEvent"))
-          this.getPurposeOfEvent().add(castToCoding(value));
+          this.getPurposeOfEvent().add(castToCodeableConcept(value));
         else if (name.equals("agent"))
           this.getAgent().add((AuditEventAgentComponent) value);
         else if (name.equals("source"))
@@ -3332,7 +3332,7 @@ public class AuditEvent extends DomainResource {
         case -799233872: throw new FHIRException("Cannot make property recorded as it is not a complex type"); // InstantType
         case -1106507950: throw new FHIRException("Cannot make property outcome as it is not a complex type"); // Enumeration<AuditEventOutcome>
         case 1062502659: throw new FHIRException("Cannot make property outcomeDesc as it is not a complex type"); // StringType
-        case -341917691:  return addPurposeOfEvent(); // Coding
+        case -341917691:  return addPurposeOfEvent(); // CodeableConcept
         case 92750597:  return addAgent(); // AuditEventAgentComponent
         case -896505829:  return getSource(); // AuditEventSourceComponent
         case -1298275357:  return addEntity(); // AuditEventEntityComponent
@@ -3398,8 +3398,8 @@ public class AuditEvent extends DomainResource {
         dst.outcome = outcome == null ? null : outcome.copy();
         dst.outcomeDesc = outcomeDesc == null ? null : outcomeDesc.copy();
         if (purposeOfEvent != null) {
-          dst.purposeOfEvent = new ArrayList<Coding>();
-          for (Coding i : purposeOfEvent)
+          dst.purposeOfEvent = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : purposeOfEvent)
             dst.purposeOfEvent.add(i.copy());
         };
         if (agent != null) {

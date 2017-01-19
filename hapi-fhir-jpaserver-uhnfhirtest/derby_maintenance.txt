@@ -1,3 +1,29 @@
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SA', 'HFJ_SEARCH_RESULT', 1);
 CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE( 'SA', 'HFJ_SEARCH_RESULT', 0, 0, 1 );
 
+
+dd if=/dev/urandom of=/opt/glassfish/tmp.tmp bs=1M count=500
+
+# Reindex
+curl -H "Authorization: Bearer " "http://fhirtest.uhn.ca/baseDstu3/\$mark-all-resources-for-reindexing"
+
+
+# Delete all errored resources
+update hfj_res_ver set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+update hfj_resource set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_forced_id where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_link where src_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_link where target_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_coords where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_date where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_number where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_quantity where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_string where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_token where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_uri where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_search_result where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_resource where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+
+

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -280,9 +281,34 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		
 		IBaseResource conformance;
 		try {
+			String capabilityStatementResourceName = "CapabilityStatement";
+			if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				capabilityStatementResourceName = "Conformance";
+			}
+			
 			@SuppressWarnings("rawtypes")
-			Class implementingClass = myContext.getResourceDefinition("Conformance").getImplementingClass();
-			conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+			Class implementingClass;
+			try {
+				implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+			} catch (DataFormatException e) {
+				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+					capabilityStatementResourceName = "Conformance";
+					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+				} else {
+					throw e;
+				}
+			}
+			try {
+				conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+			} catch (FhirClientConnectionException e) {
+				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) && e.getCause() instanceof DataFormatException) {
+					capabilityStatementResourceName = "Conformance";
+					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
+					conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
+				} else {
+					throw e;
+				}
+			}
 		} catch (FhirClientConnectionException e) {
 			String msg = myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA);
 			throw new FhirClientConnectionException(msg, e);

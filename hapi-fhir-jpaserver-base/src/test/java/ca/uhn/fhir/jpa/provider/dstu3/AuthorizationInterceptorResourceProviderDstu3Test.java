@@ -15,7 +15,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -32,8 +35,6 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.TestUtil;
 
 public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorResourceProviderDstu3Test.class);
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -57,13 +58,86 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		}
 	}
 
+	/**
+	 * See #503
+	 */
+	@Test
+	public void testDeleteIsBlocked() {
+		
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+						.deny().delete().allResources().withAnyId().andThen()
+						.allowAll()
+						.build();
+			}
+		});
+		
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		IIdType id = ourClient.create().resource(patient).execute().getId();
+
+		try {
+			ourClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+		
+		patient = ourClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
+		assertEquals(id.getValue(), patient.getId());
+	}
+	
+
+	/**
+	 * See #503
+	 */
+	@Test
+	public void testDeleteIsAllowedForCompartment() {
+		
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		final IIdType id = ourClient.create().resource(patient).execute().getId();
+		
+		Observation obsInCompartment = new Observation();
+		obsInCompartment.setStatus(ObservationStatus.FINAL);
+		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
+		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+		
+		Observation obsNotInCompartment = new Observation();
+		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
+		IIdType obsNotInCompartmentId = ourClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+		
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+						.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
+						.deny().delete().allResources().withAnyId().andThen()
+						.allowAll()
+						.build();
+			}
+		});
+		
+		ourClient.delete().resourceById(obsInCompartmentId.toUnqualifiedVersionless()).execute();
+
+		try {
+			ourClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
 
 	@Test
 	public void testCreateConditional() {
 		
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		final MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -72,6 +146,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/" + output1.getId().getIdPart())).andThen()
+					.allow().updateConditional().allResources()
 					.build();
 				//@formatter:on
 			}
@@ -80,14 +155,14 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		patient = new Patient();
 		patient.setId(output1.getId().toUnqualifiedVersionless());
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
 		
 		patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
 			ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
 			fail();
@@ -98,7 +173,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		patient = new Patient();
 		patient.setId("999");
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().addFamily("Tester").addGiven("Raghad");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
 			ourClient.update().resource(patient).execute();
 			fail();
@@ -113,7 +188,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		String methodName = "testDeleteResourceConditional";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
@@ -130,7 +205,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		}
 
 		pt = new Patient();
-		pt.addName().addFamily("FOOFOOFOO");
+		pt.addName().setFamily("FOOFOOFOO");
 		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		post = new HttpPost(ourServerBase + "/Patient");
@@ -160,7 +235,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
-			assertEquals(204, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
 		}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -349,6 +349,12 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			ourLog.info("Saving {} deferred concept relationships...", count);
 			while (relCount < count && myConceptLinksToSaveLater.size() > 0) {
 				TermConceptParentChildLink next = myConceptLinksToSaveLater.remove(0);
+				
+				if (myConceptDao.findOne(next.getChild().getId()) == null || myConceptDao.findOne(next.getParent().getId()) == null) {
+					ourLog.warn("Not inserting link from child {} to parent {} because it appears to have been deleted", next.getParent().getCode(), next.getChild().getCode());
+					continue;
+				}
+				
 				saveConceptLink(next);
 				relCount++;
 			}

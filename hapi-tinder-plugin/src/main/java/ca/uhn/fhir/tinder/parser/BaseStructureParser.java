@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.tinder.TinderStructuresMojo;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
+import ca.uhn.fhir.tinder.VelocityHelper;
 import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.Child;
@@ -66,11 +68,30 @@ public abstract class BaseStructureParser {
 	protected List<BaseRootType> myResources = new ArrayList<BaseRootType>();
 	private String myVersion;
 	private boolean myIsRi;
+	private FhirContext myCtx;
+	private String myFilenamePrefix = "";
+	private String myFilenameSuffix = "";
+	private String myTemplate = null;
+	private File myTemplateFile = null;
+	private String myVelocityPath = null;
+	private String myVelocityProperties = null;
 
 	public BaseStructureParser(String theVersion, String theBaseDir) {
 		myVersion = theVersion;
 		myBaseDir = theBaseDir;
 		myIsRi = myVersion.equals("dstu3");
+
+		if (myVersion.equals("dstu3")) {
+			myCtx = FhirContext.forDstu3();
+		} else if (myVersion.equals("dstu2")) {
+			myCtx = FhirContext.forDstu2();
+		} else if (myVersion.equals("dstu")) {
+			myCtx = FhirContext.forDstu1();
+		}
+	}
+
+	public FhirContext getCtx() {
+		return myCtx;
 	}
 
 	public String getVersion() {
@@ -160,7 +181,13 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	protected abstract String getFilenameSuffix();
+	protected String getFilenamePrefix() {
+		return myFilenamePrefix != null ? myFilenamePrefix : "";
+	}
+
+	protected String getFilenameSuffix() {
+		return myFilenameSuffix != null ? myFilenameSuffix : "";
+	}
 
 	public Map<String, String> getLocalImports() {
 		return myLocallyDefinedClassNames;
@@ -174,9 +201,17 @@ public abstract class BaseStructureParser {
 		return myResources;
 	}
 
-	protected abstract String getTemplate();
-	
-	protected abstract File getTemplateFile();
+	protected String getTemplate() {
+		return myTemplate;
+	}
+
+	protected File getTemplateFile() {
+		return myTemplateFile;
+	}
+
+	protected String getVelocityPath() {
+		return myVelocityPath;
+	}
 
 	protected boolean isSpreadsheet(String theFileName) {
 		return true;
@@ -228,7 +263,7 @@ public abstract class BaseStructureParser {
 					// not found
 				}
 			}
-			
+
 			try {
 				return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName).getName();
 			} catch (ClassNotFoundException e) {
@@ -422,6 +457,30 @@ public abstract class BaseStructureParser {
 		myExtensions = theExts;
 	}
 
+	public void setFilenamePrefix(String theFilenamePrefix) {
+		myFilenamePrefix = theFilenamePrefix;
+	}
+
+	public void setFilenameSuffix(String theFilenameSuffix) {
+		myFilenameSuffix = theFilenameSuffix;
+	}
+
+	public void setTemplate(String theTemplate) {
+		myTemplate = theTemplate;
+	}
+
+	public void setTemplateFile (File theTemplateFile) {
+		myTemplateFile = theTemplateFile;
+	}
+
+	public void setVelocityPath(String theVelocityPath) {
+		myVelocityPath = theVelocityPath;
+	}
+
+	public void setVelocityProperties(String theVelocityProperties) {
+		myVelocityProperties = theVelocityProperties;
+	}
+
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileOutputStream fos = new FileOutputStream(theFile, false);
 		OutputStreamWriter w = new OutputStreamWriter(fos, "UTF-8");
@@ -447,7 +506,7 @@ public abstract class BaseStructureParser {
 		if (determineVersionEnum().isRi()) {
 			packageSuffix = "." + myVersion;
 		}
-		
+
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("includeDescriptionAnnotations", true);
 		ctx.put("packageBase", thePackageBase);
@@ -483,16 +542,16 @@ public abstract class BaseStructureParser {
 			capitalize = "Dstu1";
 		}
 		ctx.put("versionCapitalized", capitalize);
+		ctx.put("this", theResource);
 
-		VelocityEngine v = new VelocityEngine();
-		v.setProperty("resource.loader", "cp");
-		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		v.setProperty("runtime.references.strict", Boolean.TRUE);
+		VelocityEngine v = VelocityHelper.configureVelocityEngine(getTemplateFile(), getVelocityPath(), myVelocityProperties);
+		InputStream templateIs = null;
+		if (getTemplateFile() != null) {
+			templateIs = new FileInputStream(getTemplateFile());
+		} else {
+			templateIs = this.getClass().getResourceAsStream(getTemplate());
+		}
 
-		InputStream templateIs =
-			getTemplateFile() != null
-				? new FileInputStream(getTemplateFile())
-				: ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(getTemplate());
 		InputStreamReader templateReader = new InputStreamReader(templateIs);
 		v.evaluate(ctx, w, "", templateReader);
 
@@ -501,6 +560,10 @@ public abstract class BaseStructureParser {
 	}
 
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
+		writeAll(TargetType.SOURCE, theOutputDirectory, theResourceOutputDirectory, thePackageBase);
+	}
+	
+	public void writeAll(TargetType theTarget, File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
 		myPackageBase = thePackageBase;
 
 		if (!theOutputDirectory.exists()) {
@@ -537,14 +600,17 @@ public abstract class BaseStructureParser {
 			// File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ +
 			// ".java");
 			String elementName = Resource.correctName(next.getElementName());
-			String fwork = getFilenameSuffix();
-			// TODO -- how to generate multiple non-Java files??
-			if (fwork.endsWith(".java")) {
-				fwork = elementName + fwork;
-			} else {
-				fwork = elementName + fwork + ".java";
+			String prefix = getFilenamePrefix();
+			String suffix = getFilenameSuffix();
+			if (theTarget == TargetType.SOURCE) {
+				if (!suffix.endsWith(".java")) {
+					suffix += ".java";
+				}
 			}
-			File f = new File(theOutputDirectory, fwork);
+			String fileName = prefix + elementName + suffix;
+			int ix = fileName.lastIndexOf('.');
+			String className = ix < 0 ? fileName : fileName.substring(0, ix); 
+			File f = new File(theOutputDirectory, fileName);
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
@@ -552,9 +618,9 @@ public abstract class BaseStructureParser {
 			}
 
 			if (next instanceof Resource) {
-				myNameToResourceClass.put(next.getElementName(), thePackageBase + ".resource." + elementName);
+				myNameToResourceClass.put(next.getElementName(), thePackageBase + ".resource." + className);
 			} else if (next instanceof Composite) {
-				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + ".composite." + elementName + "Dt");
+				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + ".composite." + className);
 			} else {
 				throw new IllegalStateException(next.getClass().toString());
 			}
@@ -573,7 +639,7 @@ public abstract class BaseStructureParser {
 				myNameToDatatypeClass.put("boundCode", BoundCodeDt.class.getName());
 				myNameToDatatypeClass.put("boundCodeableConcept", ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt.class.getName());
 			}
-			
+
 			try {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
 				OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(versionFile, false), "UTF-8");
@@ -584,7 +650,7 @@ public abstract class BaseStructureParser {
 				if (determineVersionEnum().isRi()) {
 					packageSuffix = "." + myVersion;
 				}
-				
+
 				VelocityContext ctx = new VelocityContext();
 				ctx.put("nameToResourceClass", myNameToResourceClass);
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);

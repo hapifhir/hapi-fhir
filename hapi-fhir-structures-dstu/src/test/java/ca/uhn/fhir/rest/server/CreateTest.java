@@ -49,7 +49,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class CreateTest {
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateTest.class);

@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,12 +266,12 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvc implements I
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		ValueSet source = new ValueSet();
-		source.getCompose().addImport(theValueSet);
+		source.getCompose().addInclude().addValueSet(theValueSet);
 		try {
 			ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>();
 
 			HapiWorkerContext worker = new HapiWorkerContext(myContext, myValidationSupport);
-			ValueSetExpansionOutcome outcome = worker.expand(source);
+			ValueSetExpansionOutcome outcome = worker.expand(source, null);
 			for (ValueSetExpansionContainsComponent next : outcome.getValueset().getExpansion().getContains()) {
 				retVal.add(new VersionIndependentConcept(next.getSystem(), next.getCode()));
 			}

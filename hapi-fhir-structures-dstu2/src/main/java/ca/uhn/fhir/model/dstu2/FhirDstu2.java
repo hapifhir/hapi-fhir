@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dstu2;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -55,6 +57,11 @@ public class FhirDstu2 implements IFhirVersion {
 	private String myId;
 
 	@Override
+	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
+	}
+
+	@Override
 	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
@@ -62,6 +69,11 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
 		return new ServerProfileProvider(theRestfulServer);
+	}
+
+	@Override
+	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+		throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
 	}
 
 	@Override
@@ -130,5 +142,6 @@ public class FhirDstu2 implements IFhirVersion {
 	public IIdType newIdType() {
 		return new IdDt();
 	}
+
 
 }

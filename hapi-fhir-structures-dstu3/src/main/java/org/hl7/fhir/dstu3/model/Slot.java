@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A slot of time on a schedule that may be available for booking appointments.
  */
@@ -66,6 +66,10 @@ public class Slot extends DomainResource {
          */
         BUSYTENTATIVE, 
         /**
+         * This instance should not have been part of this patient's medical record.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -80,6 +84,8 @@ public class Slot extends DomainResource {
           return BUSYUNAVAILABLE;
         if ("busy-tentative".equals(codeString))
           return BUSYTENTATIVE;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -91,6 +97,7 @@ public class Slot extends DomainResource {
             case FREE: return "free";
             case BUSYUNAVAILABLE: return "busy-unavailable";
             case BUSYTENTATIVE: return "busy-tentative";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -100,6 +107,7 @@ public class Slot extends DomainResource {
             case FREE: return "http://hl7.org/fhir/slotstatus";
             case BUSYUNAVAILABLE: return "http://hl7.org/fhir/slotstatus";
             case BUSYTENTATIVE: return "http://hl7.org/fhir/slotstatus";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/slotstatus";
             default: return "?";
           }
         }
@@ -109,6 +117,7 @@ public class Slot extends DomainResource {
             case FREE: return "Indicates that the time interval is free for scheduling.";
             case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval can not be scheduled.";
             case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.";
+            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";
           }
         }
@@ -118,6 +127,7 @@ public class Slot extends DomainResource {
             case FREE: return "Free";
             case BUSYUNAVAILABLE: return "Busy (Unavailable)";
             case BUSYTENTATIVE: return "Busy (Tentative)";
+            case ENTEREDINERROR: return "Entered in error";
             default: return "?";
           }
         }
@@ -136,6 +146,8 @@ public class Slot extends DomainResource {
           return SlotStatus.BUSYUNAVAILABLE;
         if ("busy-tentative".equals(codeString))
           return SlotStatus.BUSYTENTATIVE;
+        if ("entered-in-error".equals(codeString))
+          return SlotStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown SlotStatus code '"+codeString+"'");
         }
         public Enumeration<SlotStatus> fromType(Base code) throws FHIRException {
@@ -152,6 +164,8 @@ public class Slot extends DomainResource {
           return new Enumeration<SlotStatus>(this, SlotStatus.BUSYUNAVAILABLE);
         if ("busy-tentative".equals(codeString))
           return new Enumeration<SlotStatus>(this, SlotStatus.BUSYTENTATIVE);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<SlotStatus>(this, SlotStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown SlotStatus code '"+codeString+"'");
         }
     public String toCode(SlotStatus code) {
@@ -163,6 +177,8 @@ public class Slot extends DomainResource {
         return "busy-unavailable";
       if (code == SlotStatus.BUSYTENTATIVE)
         return "busy-tentative";
+      if (code == SlotStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(SlotStatus code) {
@@ -222,10 +238,10 @@ public class Slot extends DomainResource {
     protected Schedule scheduleTarget;
 
     /**
-     * busy | free | busy-unavailable | busy-tentative.
+     * busy | free | busy-unavailable | busy-tentative | entered-in-error.
      */
     @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="busy | free | busy-unavailable | busy-tentative", formalDefinition="busy | free | busy-unavailable | busy-tentative." )
+    @Description(shortDefinition="busy | free | busy-unavailable | busy-tentative | entered-in-error", formalDefinition="busy | free | busy-unavailable | busy-tentative | entered-in-error." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/slotstatus")
     protected Enumeration<SlotStatus> status;
 
@@ -529,7 +545,7 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (busy | free | busy-unavailable | busy-tentative.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (busy | free | busy-unavailable | busy-tentative | entered-in-error.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<SlotStatus> getStatusElement() { 
       if (this.status == null)
@@ -549,7 +565,7 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (busy | free | busy-unavailable | busy-tentative.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (busy | free | busy-unavailable | busy-tentative | entered-in-error.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Slot setStatusElement(Enumeration<SlotStatus> value) { 
       this.status = value;
@@ -557,14 +573,14 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @return busy | free | busy-unavailable | busy-tentative.
+     * @return busy | free | busy-unavailable | busy-tentative | entered-in-error.
      */
     public SlotStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value busy | free | busy-unavailable | busy-tentative.
+     * @param value busy | free | busy-unavailable | busy-tentative | entered-in-error.
      */
     public Slot setStatus(SlotStatus value) { 
         if (this.status == null)
@@ -765,7 +781,7 @@ public class Slot extends DomainResource {
         childrenList.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
         childrenList.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that has been booked in the slot (not service type).", 0, java.lang.Integer.MAX_VALUE, appointmentType));
         childrenList.add(new Property("schedule", "Reference(Schedule)", "The schedule resource that this slot defines an interval of status information.", 0, java.lang.Integer.MAX_VALUE, schedule));
-        childrenList.add(new Property("status", "code", "busy | free | busy-unavailable | busy-tentative.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("status", "code", "busy | free | busy-unavailable | busy-tentative | entered-in-error.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("start", "instant", "Date/Time that the slot is to begin.", 0, java.lang.Integer.MAX_VALUE, start));
         childrenList.add(new Property("end", "instant", "Date/Time that the slot is to conclude.", 0, java.lang.Integer.MAX_VALUE, end));
         childrenList.add(new Property("overbooked", "boolean", "This slot has already been overbooked, appointments are unlikely to be accepted for this time.", 0, java.lang.Integer.MAX_VALUE, overbooked));

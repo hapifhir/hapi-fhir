@@ -4,22 +4,9 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>2.0-SNAPSHOT</version>
+		<version>2.3-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
-
-	<repositories>
-		<repository>
-			<id>maven.java.net</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<url>https://maven.java.net/service/local/repositories/snapshots/content/</url>
-		</repository>
-	</repositories>
 
 	<artifactId>hapi-fhir-jpaserver-base</artifactId>
 	<packaging>jar</packaging>
@@ -36,7 +23,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -47,32 +34,32 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -113,6 +100,17 @@
 			<artifactId>jscience</artifactId>
 		</dependency>
 
+		<!-- Patch Dependencies -->
+		<dependency>
+			<groupId>net.riotopsys</groupId>
+			<artifactId>json_patch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.dnault</groupId>
+			<artifactId>xml-patch</artifactId>
+			<version>0.3.0</version>
+		</dependency>
+
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
 		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> 
 			</exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> 
@@ -132,7 +130,14 @@
 			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<!-- 
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-catalina</artifactId>
+			<scope>test</scope>
+		</dependency>
+		 -->
+		 
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -336,6 +341,56 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
+				<groupId>de.juplo</groupId>
+				<artifactId>hibernate-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>postgres94</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.PostgreSQL94Dialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_postgres94.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>mysql57</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.MySQL57InnoDBDialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mysql57.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>oracle12c</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.Oracle12cDialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_oracle12c.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>sqlserver2012</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.SQLServer2012Dialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_sqlserver2012.sql</outputFile>	
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
@@ -363,14 +418,13 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
-					<forkCount>1</forkCount>
+					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>2.0-SNAPSHOT</version>
+				<version>2.3-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>build_dstu1</id>
@@ -422,22 +476,22 @@
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu</artifactId>
-						<version>2.0-SNAPSHOT</version>
+						<version>2.3-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu2</artifactId>
-						<version>2.0-SNAPSHOT</version>
+						<version>2.3-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu3</artifactId>
-						<version>2.0-SNAPSHOT</version>
+						<version>2.3-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-						<version>2.0-SNAPSHOT</version>
+						<version>2.3-SNAPSHOT</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -471,77 +525,13 @@
 				<skip-hib4>true</skip-hib4>
 			</properties>
 		</profile>
-			<!-- 
-		<profile>
-			<id>DIST</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>de.juplo</groupId>
-						<artifactId>hibernate4-maven-plugin</artifactId>
-						<configuration>
-							<force>true</force>
-							<target>SCRIPT</target>
-							<skip>${skip-hib4}</skip>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>org.hibernate</groupId>
-								<artifactId>hibernate-core</artifactId>
-								<version>${hibernate_version}</version>
-							</dependency>
-						</dependencies>
-						<executions>
-							<execution>
-								<id>o10g</id>
-								<goals>
-									<goal>export</goal>
-								</goals>
-								<phase>test</phase>
-								<configuration>
-									<hibernateDialect>org.hibernate.dialect.Oracle10gDialect</hibernateDialect>
-									<outputFile>${project.build.directory}/schema_oracle_10g.sql</outputFile>
-								</configuration>
-							</execution>
-							<execution>
-								<id>derby</id>
-								<goals>
-									<goal>export</goal>
-								</goals>
-								<phase>test</phase>
-								<configuration>
-									<hibernateDialect>org.hibernate.dialect.DerbyTenSevenDialect</hibernateDialect>
-									<outputFile>${project.build.directory}/schema_derby.sql</outputFile>
-								</configuration>
-							</execution>
-							<execution>
-								<id>hsql</id>
-								<goals>
-									<goal>export</goal>
-								</goals>
-								<phase>test</phase>
-								<configuration>
-									<hibernateDialect>org.hibernate.dialect.HSQLDialect</hibernateDialect>
-									<outputFile>${project.build.directory}/schema_hsql.sql</outputFile>
-								</configuration>
-							</execution>
-							<execution>
-								<id>mysql5</id>
-								<goals>
-									<goal>export</goal>
-								</goals>
-								<phase>test</phase>
-								<configuration>
-									<hibernateDialect>org.hibernate.dialect.MySQL5Dialect</hibernateDialect>
-									<outputFile>${project.build.directory}/schema_mysql_5.sql</outputFile>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		 -->
+		<!-- <profile> <id>DIST</id> <build> <plugins> <plugin> <groupId>de.juplo</groupId> <artifactId>hibernate4-maven-plugin</artifactId> <configuration> <force>true</force> <target>SCRIPT</target> <skip>${skip-hib4}</skip> 
+			</configuration> <dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> <version>${hibernate_version}</version> </dependency> </dependencies> <executions> 
+			<execution> <id>o10g</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.Oracle10gDialect</hibernateDialect> <outputFile>${project.build.directory}/schema_oracle_10g.sql</outputFile> 
+			</configuration> </execution> <execution> <id>derby</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.DerbyTenSevenDialect</hibernateDialect> 
+			<outputFile>${project.build.directory}/schema_derby.sql</outputFile> </configuration> </execution> <execution> <id>hsql</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.HSQLDialect</hibernateDialect> 
+			<outputFile>${project.build.directory}/schema_hsql.sql</outputFile> </configuration> </execution> <execution> <id>mysql5</id> <goals> <goal>export</goal> </goals> <phase>test</phase> <configuration> <hibernateDialect>org.hibernate.dialect.MySQL5Dialect</hibernateDialect> 
+			<outputFile>${project.build.directory}/schema_mysql_5.sql</outputFile> </configuration> </execution> </executions> </plugin> </plugins> </build> </profile> -->
 	</profiles>
 
 </project>

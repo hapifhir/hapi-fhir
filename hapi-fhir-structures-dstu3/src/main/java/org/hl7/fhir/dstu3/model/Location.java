@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
  */
@@ -1795,6 +1795,32 @@ Requires the near parameter to be included also</b><br>
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_COUNTRY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_COUNTRY);
 
  /**
+   * Search parameter: <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the location</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Location.endpoint</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="endpoint", path="Location.endpoint", description="Technical endpoints providing access to services operated for the location", type="reference", target={Endpoint.class } )
+  public static final String SP_ENDPOINT = "endpoint";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
+   * <p>
+   * Description: <b>Technical endpoints providing access to services operated for the location</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Location.endpoint</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENDPOINT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENDPOINT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Location:endpoint</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENDPOINT = new ca.uhn.fhir.model.api.Include("Location:endpoint").toLocked();
+
+ /**
    * Search parameter: <b>organization</b>
    * <p>
    * Description: <b>Searches for locations that are managed by the provided organization</b><br>
@@ -1863,19 +1889,19 @@ Requires the near parameter to be included also</b><br>
  /**
    * Search parameter: <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
+   * Description: <b>The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
 
 Requires the near-distance parameter to be provided also</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). \n\nRequires the near-distance parameter to be provided also", type="token" )
+  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). \n\nRequires the near-distance parameter to be provided also", type="token" )
   public static final String SP_NEAR = "near";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
+   * Description: <b>The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency). 
 
 Requires the near-distance parameter to be provided also</b><br>
    * Type: <b>token</b><br>

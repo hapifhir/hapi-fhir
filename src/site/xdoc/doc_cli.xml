@@ -123,10 +123,9 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.60-b23, mixed mode)]]></pre>
 			</h4>
 			<pre>./hapi-fhir-cli upload-terminology -d Downloads/SnomedCT_RF2Release_INT_20160131.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://snomed.info/sct</pre>
 			
-			<p>
-			
-			./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://loinc.org
-			</p>
+			<h4>LOINC</h4>
+			<pre>./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://loinc.org</pre>
+		
 			
 			
 		</section>

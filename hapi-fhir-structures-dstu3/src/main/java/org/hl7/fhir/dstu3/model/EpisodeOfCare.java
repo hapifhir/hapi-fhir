@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
  */
@@ -74,6 +74,10 @@ public class EpisodeOfCare extends DomainResource {
          */
         CANCELLED, 
         /**
+         * This instance should not have been part of this patient's medical record.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -92,6 +96,8 @@ public class EpisodeOfCare extends DomainResource {
           return FINISHED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -105,6 +111,7 @@ public class EpisodeOfCare extends DomainResource {
             case ONHOLD: return "onhold";
             case FINISHED: return "finished";
             case CANCELLED: return "cancelled";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -116,6 +123,7 @@ public class EpisodeOfCare extends DomainResource {
             case ONHOLD: return "http://hl7.org/fhir/episode-of-care-status";
             case FINISHED: return "http://hl7.org/fhir/episode-of-care-status";
             case CANCELLED: return "http://hl7.org/fhir/episode-of-care-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/episode-of-care-status";
             default: return "?";
           }
         }
@@ -127,6 +135,7 @@ public class EpisodeOfCare extends DomainResource {
             case ONHOLD: return "This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite).";
             case FINISHED: return "This episode of care is finished at the organization is not expecting to be providing care to the patient. Can also be known as \"closed\", \"completed\" or other similar terms.";
             case CANCELLED: return "The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow.";
+            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";
           }
         }
@@ -138,6 +147,7 @@ public class EpisodeOfCare extends DomainResource {
             case ONHOLD: return "On Hold";
             case FINISHED: return "Finished";
             case CANCELLED: return "Cancelled";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -160,6 +170,8 @@ public class EpisodeOfCare extends DomainResource {
           return EpisodeOfCareStatus.FINISHED;
         if ("cancelled".equals(codeString))
           return EpisodeOfCareStatus.CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return EpisodeOfCareStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
         }
         public Enumeration<EpisodeOfCareStatus> fromType(Base code) throws FHIRException {
@@ -180,6 +192,8 @@ public class EpisodeOfCare extends DomainResource {
           return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.FINISHED);
         if ("cancelled".equals(codeString))
           return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.CANCELLED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
         }
     public String toCode(EpisodeOfCareStatus code) {
@@ -195,6 +209,8 @@ public class EpisodeOfCare extends DomainResource {
         return "finished";
       if (code == EpisodeOfCareStatus.CANCELLED)
         return "cancelled";
+      if (code == EpisodeOfCareStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(EpisodeOfCareStatus code) {
@@ -208,7 +224,7 @@ public class EpisodeOfCare extends DomainResource {
          * planned | waitlist | active | onhold | finished | cancelled.
          */
         @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="planned | waitlist | active | onhold | finished | cancelled", formalDefinition="planned | waitlist | active | onhold | finished | cancelled." )
+        @Description(shortDefinition="planned | waitlist | active | onhold | finished | cancelled | entered-in-error", formalDefinition="planned | waitlist | active | onhold | finished | cancelled." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/episode-of-care-status")
         protected Enumeration<EpisodeOfCareStatus> status;
 
@@ -419,7 +435,7 @@ public class EpisodeOfCare extends DomainResource {
      * planned | waitlist | active | onhold | finished | cancelled.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="planned | waitlist | active | onhold | finished | cancelled", formalDefinition="planned | waitlist | active | onhold | finished | cancelled." )
+    @Description(shortDefinition="planned | waitlist | active | onhold | finished | cancelled | entered-in-error", formalDefinition="planned | waitlist | active | onhold | finished | cancelled." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/episode-of-care-status")
     protected Enumeration<EpisodeOfCareStatus> status;
 

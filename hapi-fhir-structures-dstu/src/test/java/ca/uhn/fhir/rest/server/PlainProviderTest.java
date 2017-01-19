@@ -50,7 +50,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class PlainProviderTest {
 
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PlainProviderTest.class);
 	private CloseableHttpClient myClient;
 	private int myPort;

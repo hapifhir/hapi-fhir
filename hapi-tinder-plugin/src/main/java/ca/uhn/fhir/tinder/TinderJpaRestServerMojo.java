@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -29,6 +31,7 @@ import org.apache.velocity.tools.generic.EscapeTool;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 @Mojo(name = "generate-jparest-server", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
@@ -114,6 +117,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				baseResourceNames.remove("binary");
 			}
+			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+				baseResourceNames.remove("conformance");
+			}
 		}
 
 		for (int i = 0; i < baseResourceNames.size(); i++) {
@@ -134,7 +140,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		File packageDirectoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
 		packageDirectoryBase.mkdirs();
 
-		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet(version, baseDir);
+		ResourceGeneratorUsingModel gen = new ResourceGeneratorUsingModel(version, baseDir);
 		gen.setBaseResourceNames(baseResourceNames);
 
 		try {
@@ -230,10 +236,14 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.myProject = new MavenProject();
-		mojo.version = "dstu3";
+		mojo.version = "dstu2";
 		mojo.packageBase = "ca.uhn.test";
 		mojo.configPackageBase = "ca.uhn.test";
-//		mojo.baseResourceNames = new ArrayList<String>(Collections.singletonList("observation"));
+		mojo.baseResourceNames = new ArrayList<String>(Arrays.asList(
+//				"observation"
+//				"communicationrequest"
+				"binary"
+				));
 		mojo.targetDirectory = new File("target/generated/valuesets");
 		mojo.targetResourceDirectory = new File("target/generated/valuesets");
 		mojo.targetResourceSpringBeansFile = "tmp_beans.xml";

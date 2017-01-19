@@ -7,7 +7,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,17 @@ public class AuthenticationException extends BaseServerResponseException {
 
 	public AuthenticationException(String theMessage, Throwable theCause) {
 		super(STATUS_CODE, theMessage, theCause);
+	}
+	
+	/**
+	 * Adds a <code>WWW-Authenticate</code> header to the response, of the form:<br/>
+	 * <code>WWW-Authenticate: Basic realm="theRealm"</code> 
+	 * 
+	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 */
+	public AuthenticationException addAuthenticateHeaderForRealm(String theRealm) {
+		addResponseHeader("WWW-Authenticate", "Basic realm=\"" + theRealm + "\"");
+		return this;
 	}
 
 }

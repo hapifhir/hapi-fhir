@@ -49,7 +49,7 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 		PrimitiveType<?> o = (PrimitiveType<?>) obj;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getValueAsString(), o.getValueAsString());
+		b.append(getValue(), o.getValue());
 		return b.isEquals();
 	}
 
@@ -65,18 +65,18 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 		PrimitiveType<?> o = (PrimitiveType<?>) obj;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getValueAsString(), o.getValueAsString());
+		b.append(getValue(), o.getValue());
 		return b.isEquals();
 	}
 
 	public void fromStringValue(String theValue) {
+		myStringValue = theValue;
 		if (theValue == null) {
 			myCoercedValue = null;
 		} else {
 			// NB this might be null
 			myCoercedValue = parse(theValue);
 		}
-		myStringValue = theValue;
 	}
 
 	public T getValue() {

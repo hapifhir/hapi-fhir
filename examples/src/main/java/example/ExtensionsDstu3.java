@@ -25,7 +25,7 @@ IGenericClient client = FhirContext.forDstu3().newRestfulGenericClient("http://f
 //START SNIPPET: customTypeClientSimple
 // Create an example patient
 MyPatient custPatient = new MyPatient();
-custPatient.addName().addFamily("Smith").addGiven("John");
+custPatient.addName().setFamily("Smith").addGiven("John");
 custPatient.setPetName(new StringType("Rover")); // populate the extension
 
 // Create the resource like normal
@@ -115,7 +115,7 @@ patient.addExtension(ext);
 // Continuing the example from above, we will add a name to the patient, and then
 // add an extension to part of that name
 HumanName name = patient.addName();
-name.addFamily("Shmoe");
+name.setFamily("Shmoe");
 
 // Add a new "given name", which is of type String 
 StringType given = name.addGivenElement();

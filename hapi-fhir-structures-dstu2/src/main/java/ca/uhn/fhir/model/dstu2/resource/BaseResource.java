@@ -9,7 +9,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,6 +307,8 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			myId = (IdDt) theId;
 		} else if (theId != null) {
 			myId = new IdDt(theId.getValue());
+		} else {
+			myId = null;
 		}
 		return this;
 	}

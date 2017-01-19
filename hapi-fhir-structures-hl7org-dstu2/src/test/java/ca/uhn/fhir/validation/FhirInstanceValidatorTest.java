@@ -42,6 +42,7 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -371,7 +372,56 @@ public class FhirInstanceValidatorTest {
   }
 
 
-  
+  @Test
+  public void testValidateJsonNumericId() {
+    String input="{\"resourceType\": \"Patient\",\n" + 
+        "  \"id\": 123,\n" + 
+        "  \"meta\": {\n" + 
+        "    \"versionId\": \"29\",\n" + 
+        "    \"lastUpdated\": \"2015-12-22T19:53:11.000Z\"\n" + 
+        "  },\n" + 
+        "  \"communication\": {\n" + 
+        "    \"language\": {\n" + 
+        "      \"coding\": [\n" + 
+        "        {\n" + 
+        "          \"system\": \"urn:ietf:bcp:47\",\n" + 
+        "          \"code\": \"hi\",\n" + 
+        "          \"display\": \"Hindi\",\n" + 
+        "          \"userSelected\": false\n" + 
+        "        }],\n" + 
+        "      \"text\": \"Hindi\"\n" + 
+        "    },\n" + 
+        "    \"preferred\": true\n" + 
+        "  }\n" + 
+        "}";
+    
+    ValidationResult output = myVal.validateWithResult(input);
+    List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+    assertEquals(0, all.size());
+    
+  }
+
+  @Test
+  public void testValidateCodeableConceptContainingOnlyGoodCode() {
+    Patient p = new Patient();
+    p.getMaritalStatus().addCoding().setSystem("http://hl7.org/fhir/v3/MaritalStatus").setCode("M");
+    
+    ValidationResult output = myVal.validateWithResult(p);
+    List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+    assertEquals(0, all.size());
+  }
+
+  @Test
+  public void testValidateCodeableConceptContainingOnlyBadCode() {
+    Patient p = new Patient();
+    p.getMaritalStatus().addCoding().setSystem("http://hl7.org/fhir/v3/MaritalStatus").setCode("FOO");
+    
+    ValidationResult output = myVal.validateWithResult(p);
+    List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+    assertEquals(1, all.size());
+    
+    assertEquals("Unknown Code (http://hl7.org/fhir/v3/MaritalStatus#FOO)", output.getMessages().get(0).getMessage());
+  }
   
   @Test
   public void testValidateResourceWithValuesetExpansion() {

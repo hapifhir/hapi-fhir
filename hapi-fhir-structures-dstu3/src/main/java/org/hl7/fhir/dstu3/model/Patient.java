@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
@@ -909,6 +909,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "language", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The language which can be used to communicate with the patient about his or her health", formalDefinition="The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
         protected CodeableConcept language;
 
         /**
@@ -2352,7 +2353,7 @@ public class Patient extends DomainResource {
           this.birthDate = castToDate(value); // DateType
           break;
         case 561497972: // deceased
-          this.deceased = (Type) value; // Type
+          this.deceased = castToType(value); // Type
           break;
         case -1147692044: // address
           this.getAddress().add(castToAddress(value)); // Address
@@ -2361,7 +2362,7 @@ public class Patient extends DomainResource {
           this.maritalStatus = castToCodeableConcept(value); // CodeableConcept
           break;
         case -677369713: // multipleBirth
-          this.multipleBirth = (Type) value; // Type
+          this.multipleBirth = castToType(value); // Type
           break;
         case 106642994: // photo
           this.getPhoto().add(castToAttachment(value)); // Attachment
@@ -2404,13 +2405,13 @@ public class Patient extends DomainResource {
         else if (name.equals("birthDate"))
           this.birthDate = castToDate(value); // DateType
         else if (name.equals("deceased[x]"))
-          this.deceased = (Type) value; // Type
+          this.deceased = castToType(value); // Type
         else if (name.equals("address"))
           this.getAddress().add(castToAddress(value));
         else if (name.equals("maritalStatus"))
           this.maritalStatus = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("multipleBirth[x]"))
-          this.multipleBirth = (Type) value; // Type
+          this.multipleBirth = castToType(value); // Type
         else if (name.equals("photo"))
           this.getPhoto().add(castToAttachment(value));
         else if (name.equals("contact"))
@@ -2960,17 +2961,17 @@ public class Patient extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part of the patient</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Patient.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="Patient.address", description="An address in any kind of address/part of the patient", type="string" )
+  @SearchParamDefinition(name="address", path="Patient.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part of the patient</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Patient.address</b><br>
    * </p>
@@ -3092,17 +3093,17 @@ public class Patient extends DomainResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A portion of either family or given name of the patient</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Patient.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string" )
+  @SearchParamDefinition(name="name", path="Patient.name", description="A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A portion of either family or given name of the patient</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>Patient.name</b><br>
    * </p>

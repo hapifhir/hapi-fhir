@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A homogeneous material with a definite composition.
  */
@@ -420,7 +420,7 @@ public class Substance extends DomainResource {
           this.quantity = castToRatio(value); // Ratio
           break;
         case 530040176: // substance
-          this.substance = (Type) value; // Type
+          this.substance = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -432,7 +432,7 @@ public class Substance extends DomainResource {
         if (name.equals("quantity"))
           this.quantity = castToRatio(value); // Ratio
         else if (name.equals("substance[x]"))
-          this.substance = (Type) value; // Type
+          this.substance = castToType(value); // Type
         else
           super.setProperty(name, value);
       }

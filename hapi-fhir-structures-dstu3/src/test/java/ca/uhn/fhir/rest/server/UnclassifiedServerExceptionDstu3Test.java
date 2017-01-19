@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -21,13 +22,11 @@ import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -51,7 +50,7 @@ public class UnclassifiedServerExceptionDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 			assertEquals(477, status.getStatusLine().getStatusCode());

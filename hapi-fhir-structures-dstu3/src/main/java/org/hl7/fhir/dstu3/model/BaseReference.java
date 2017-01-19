@@ -1,10 +1,6 @@
 package org.hl7.fhir.dstu3.model;
 
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.*;
 
 public abstract class BaseReference extends Type implements IBaseReference, ICompositeType {
 

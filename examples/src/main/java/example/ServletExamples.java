@@ -1,17 +1,16 @@
 package example;
 
+import java.util.Arrays;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.*;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
 @SuppressWarnings("serial")
@@ -118,5 +117,39 @@ public class ServletExamples {
       
    }
    // END SNIPPET: responseHighlighterInterceptor
+
+   // START SNIPPET: corsInterceptor
+   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+   public class RestfulServerWithCors extends RestfulServer {
+
+      @Override
+      protected void initialize() throws ServletException {
+         
+         // ... define your resource providers here ...
+
+         // Define your CORS configuration. This is an example
+         // showing a typical setup. You should customize this
+         // to your specific needs  
+         CorsConfiguration config = new CorsConfiguration();
+         config.addAllowedHeader("x-fhir-starter");
+         config.addAllowedHeader("Origin");
+         config.addAllowedHeader("Accept");
+         config.addAllowedHeader("X-Requested-With");
+         config.addAllowedHeader("Content-Type");
+
+         config.addAllowedOrigin("*");
+
+         config.addExposedHeader("Location");
+         config.addExposedHeader("Content-Location");
+         config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+
+         // Create the interceptor and register it
+         CorsInterceptor interceptor = new CorsInterceptor(config);
+         registerInterceptor(interceptor);
+
+      }
+      
+   }
+   // END SNIPPET: corsInterceptor
 
 }

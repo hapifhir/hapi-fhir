@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.
  */
@@ -429,10 +429,10 @@ public class Signature extends Type implements ICompositeType {
           this.when = castToInstant(value); // InstantType
           break;
         case 117694: // who
-          this.who = (Type) value; // Type
+          this.who = castToType(value); // Type
           break;
         case -14402964: // onBehalfOf
-          this.onBehalfOf = (Type) value; // Type
+          this.onBehalfOf = castToType(value); // Type
           break;
         case -389131437: // contentType
           this.contentType = castToCode(value); // CodeType
@@ -452,9 +452,9 @@ public class Signature extends Type implements ICompositeType {
         else if (name.equals("when"))
           this.when = castToInstant(value); // InstantType
         else if (name.equals("who[x]"))
-          this.who = (Type) value; // Type
+          this.who = castToType(value); // Type
         else if (name.equals("onBehalfOf[x]"))
-          this.onBehalfOf = (Type) value; // Type
+          this.onBehalfOf = castToType(value); // Type
         else if (name.equals("contentType"))
           this.contentType = castToCode(value); // CodeType
         else if (name.equals("blob"))

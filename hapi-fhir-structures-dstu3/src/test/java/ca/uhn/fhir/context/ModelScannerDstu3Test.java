@@ -6,22 +6,14 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Property;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import ca.uhn.fhir.model.api.annotation.Compartment;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -32,6 +24,14 @@ public class ModelScannerDstu3Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Test
+	public void testScanBundle() {
+		FhirContext ctx = FhirContext.forDstu3();
+		RuntimeResourceDefinition def = ctx.getResourceDefinition("Bundle");
+
+		assertNotNull(def.getSearchParam("composition"));
+		assertNotNull(def.getSearchParam("_id"));
+	}
 
 	@Test
 	public void testBundleMustImplementIBaseBundle() throws DataFormatException {
@@ -149,7 +149,7 @@ public class ModelScannerDstu3Test {
 	}
 
 	@ResourceDef(name = "Bundle")
-	public static class MyBundle extends BaseResource {
+	public static class MyBundle extends Resource {
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -163,17 +163,17 @@ public class ModelScannerDstu3Test {
 		}
 
 		@Override
-		public IIdType getIdElement() {
+		public IdType getIdElement() {
 			return null;
 		}
 
 		@Override
-		public IPrimitiveType<String> getLanguageElement() {
+		public CodeType getLanguageElement() {
 			return null;
 		}
 
 		@Override
-		public IBaseMetaType getMeta() {
+		public Meta getMeta() {
 			return null;
 		}
 
@@ -183,12 +183,22 @@ public class ModelScannerDstu3Test {
 		}
 
 		@Override
-		public IAnyResource setId(String theId) {
+		public Resource setId(String theId) {
 			return null;
 		}
 
 		@Override
-		public BaseResource setIdElement(IdType theIdType) {
+		public Resource setIdElement(IdType theIdType) {
+			return null;
+		}
+
+		@Override
+		public Resource copy() {
+			return null;
+		}
+
+		@Override
+		public ResourceType getResourceType() {
 			return null;
 		}
 
@@ -200,6 +210,42 @@ public class ModelScannerDstu3Test {
 		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
 		public static final String SP_TELECOM = "foo";
 
+	}
+
+	/**
+	 * See #504
+	 */
+	@Test
+	public void testBinaryMayNotHaveExtensions() {
+		FhirContext ctx = FhirContext.forDstu3();
+		try {
+			ctx.getResourceDefinition(LetterTemplate.class);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions", e.getMessage());
+		}
+	}
+	
+	@ResourceDef(name = "Binary", id = "letter-template", profile = "http://www.something.org/StructureDefinition/letter-template")
+	public static class LetterTemplate extends Binary {
+
+		private static final long serialVersionUID = 1L;
+		
+		@Child(name = "name")
+		@Extension(url = "http://example.com/dontuse#name", definedLocally = false, isModifier = false)
+		@Description(shortDefinition = "The name of the template")
+		private StringDt myName;
+
+		public LetterTemplate() {
+		}
+
+		public void setName(StringDt name) {
+			myName = name;
+		}
+
+		public StringDt getName() {
+			return myName;
+		}
 	}
 
 }

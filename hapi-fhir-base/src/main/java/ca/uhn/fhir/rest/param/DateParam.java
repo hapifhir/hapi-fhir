@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	 *           The string
 	 */
 	public DateParam(String theString) {
-		setValueAsQueryToken(null, theString);
+		setValueAsQueryToken(null, null, null, theString);
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	}
 
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		setValueAsString(theValue);
 	}
 
@@ -285,7 +285,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	}
 
 	@Override
-	public void  setValuesAsQueryTokens(QualifiedParamList theParameters) {
+	public void  setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 		setMissing(null);
 		setPrefix(null);
 		setValueAsString(null);

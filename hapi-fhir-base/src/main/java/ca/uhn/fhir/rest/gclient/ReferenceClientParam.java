@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import java.util.Collection;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 
@@ -7,7 +9,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +59,17 @@ public class ReferenceClientParam extends BaseClientParam  implements IParam {
 		return new StringCriterion<ReferenceClientParam>(getParamName(), theId);
 	}
 
+	/**
+	 * Match the referenced resource if the resource has ANY of the given IDs
+	 * (this is an OR search, not an AND search), (this can be the logical ID or
+	 * the absolute URL of the resource). Note that to specify an AND search,
+	 * simply add a subsequent {@link IQuery#where(ICriterion) where} criteria
+	 * with the same parameter.
+	 */
+	public ICriterion<ReferenceClientParam> hasAnyOfIds(Collection<String> theIds) {
+		return new StringCriterion<ReferenceClientParam>(getParamName(), theIds);
+	}
+	
 	private static class ReferenceChainCriterion implements ICriterion<ReferenceClientParam>, ICriterionInternal {
 
 		private String myParamName;

@@ -64,6 +64,21 @@
 				<param name="id" value="basicAuthInterceptor" />
 				<param name="file" value="examples/src/main/java/example/SecurityInterceptors.java" />
 			</macro>
+
+			<subsection name="HTTP Basic Auth">
+			
+				<p>
+					Note that if you are implementing HTTP Basic Auth, you may want to 
+					return a <code>WWW-Authenticate</code> header with the response.
+					The following snippet shows how to add such a header with a custom
+					realm:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="basicAuthInterceptorRealm" />
+					<param name="file" value="examples/src/main/java/example/SecurityInterceptors.java" />
+				</macro>
+				
+			</subsection>
 			
 		</section>
 		
@@ -76,8 +91,10 @@
 			<p>
 				This interceptor can help with the complicated task of determining whether a user
 				has the appropriate permission to perform a given task on a FHIR server. This is
-				done by declaring
+				done by declaring a set of rules that can selectively allow (whitelist) and/or selectively
+				block (blacklist) requests.
 			</p>
+
 			<p class="doc_info_bubble">
 				AuthorizationInterceptor is a new feature in HAPI FHIR, and has not yet
 				been heavily tested. Use with caution, and do lots of testing! We welcome

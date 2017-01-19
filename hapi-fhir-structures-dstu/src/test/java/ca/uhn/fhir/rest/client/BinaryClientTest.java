@@ -38,19 +38,19 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class BinaryClientTest {
 
-	private FhirContext ctx;
-	private HttpClient httpClient;
+	private FhirContext mtCtx;
+	private HttpClient myHttpClient;
 	private HttpResponse httpResponse;
 
 	// atom-document-large.xml
 
 	@Before
 	public void before() {
-		ctx = FhirContext.forDstu1();
+		mtCtx = FhirContext.forDstu1();
 
-		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		ctx.getRestfulClientFactory().setHttpClient(httpClient);
-		ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
+		mtCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		mtCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -58,12 +58,12 @@ public class BinaryClientTest {
 	@Test
 	public void testRead() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(myHttpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "foo/bar"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] { 1, 2, 3, 4 }));
 
-		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
+		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		Binary resp = client.read(new IdDt("http://foo/Patient/123"));
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
@@ -81,12 +81,12 @@ public class BinaryClientTest {
 		res.setContentType("text/plain");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(myHttpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] {}));
 
-		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
+		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		client.create(res);
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());

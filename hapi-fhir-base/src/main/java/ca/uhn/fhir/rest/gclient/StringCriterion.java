@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.gclient;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +15,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +48,7 @@ class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInte
 		myValue = ParameterUtil.escapeWithDefault(theValue);
 	}
 
-	public StringCriterion(String theName, List<String> theValue) {
+	public StringCriterion(String theName, Collection<String> theValue) {
 		myName=theName;
 		StringBuilder b = new StringBuilder();
 		for (String next : theValue) {

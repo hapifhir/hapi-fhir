@@ -11,7 +11,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -34,6 +40,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -54,6 +61,30 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
 
+	/**
+	 * #516
+	 */
+	@Test
+	public void testInvalidFilter() throws Exception {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
+		HttpPost post = new HttpPost(ourServerBase+"/ValueSet/%24expand");
+		post.setEntity(new StringEntity(string, ContentType.parse(Constants.CT_FHIR_JSON_NEW)));
+		
+		CloseableHttpResponse resp = ourHttpClient.execute(post);
+		try {
+			
+			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(respString);
+			
+			ourLog.info(resp.toString());
+			
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+			assertThat(respString, containsString("Unknown FilterOperator code 'n'"));
+			
+		}finally {
+			IOUtils.closeQuietly(resp);
+		}
+	}
 
 	private CodeSystem createExternalCs() {
 		CodeSystem codeSystem = new CodeSystem();

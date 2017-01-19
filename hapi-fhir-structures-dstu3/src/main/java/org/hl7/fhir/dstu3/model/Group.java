@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
  */
@@ -442,7 +442,7 @@ public class Group extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
           break;
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         case -1321148966: // exclude
           this.exclude = castToBoolean(value); // BooleanType
@@ -460,7 +460,7 @@ public class Group extends DomainResource {
         if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else if (name.equals("exclude"))
           this.exclude = castToBoolean(value); // BooleanType
         else if (name.equals("period"))
@@ -1579,7 +1579,7 @@ public class Group extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"} )
+  @SearchParamDefinition(name="characteristic-value", path="Group.characteristic", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"} )
   public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic-value</b>

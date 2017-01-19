@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,12 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLResolver;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.*;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
@@ -47,6 +33,7 @@ import org.codehaus.stax2.io.EscapingWriterFactory;
 import com.ctc.wstx.api.WstxInputProperties;
 import com.ctc.wstx.stax.WstxOutputFactory;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.util.jar.DependencyLogFactory;
 import ca.uhn.fhir.util.jar.IDependencyLog;
 
@@ -56,12 +43,13 @@ import ca.uhn.fhir.util.jar.IDependencyLog;
  * This class contains code adapted from the Apache Axiom project.
  */
 public class XmlUtil {
+	private static XMLOutputFactory ourFragmentOutputFactory;
 	private static volatile boolean ourHaveLoggedStaxImplementation;
 	private static volatile XMLInputFactory ourInputFactory;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlUtil.class);
-	private static volatile XMLOutputFactory ourOutputFactory;
-	private static XMLOutputFactory ourFragmentOutputFactory;
 	private static Throwable ourNextException;
+	private static volatile XMLOutputFactory ourOutputFactory;
+	private static Boolean ourStaxPresent;
 	private static final Map<String, Integer> VALID_ENTITY_NAMES;
 	private static final ExtendedEntityReplacingXmlResolver XML_RESOLVER = new ExtendedEntityReplacingXmlResolver();
 
@@ -1519,6 +1507,42 @@ public class XmlUtil {
 		VALID_ENTITY_NAMES = Collections.unmodifiableMap(validEntityNames);
 	}
 
+	private static XMLOutputFactory createOutputFactory() throws FactoryConfigurationError {
+		try {
+			// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
+			Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLOutputFactory");
+			System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+		} catch (ClassNotFoundException e) {
+			// ok
+		}
+
+		XMLOutputFactory outputFactory = newOutputFactory();
+		
+		if (!ourHaveLoggedStaxImplementation) {
+			logStaxImplementation(outputFactory.getClass());
+		}
+
+		/*
+		 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
+		 * being used (e.g. glassfish) so we don't set them there.
+		 */
+		try {
+			Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
+			if (outputFactory instanceof WstxOutputFactory) {
+				outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+			}
+		} catch (ClassNotFoundException e) {
+			ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
+		}
+		return outputFactory;
+	}
+
+	public static XMLEventWriter createXmlFragmentWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
+		XMLOutputFactory outputFactory = getOrCreateFragmentOutputFactory();
+		XMLEventWriter retVal = outputFactory.createXMLEventWriter(theWriter);
+		return retVal;
+	}
+
 	public static XMLEventReader createXmlReader(Reader reader) throws FactoryConfigurationError, XMLStreamException {
 		throwUnitTestExceptionIfConfiguredToDoSo();
 		
@@ -1529,16 +1553,6 @@ public class XmlUtil {
 		return er;
 	}
 
-	private static void throwUnitTestExceptionIfConfiguredToDoSo() throws FactoryConfigurationError, XMLStreamException {
-		if (ourNextException != null) {
-			if (ourNextException instanceof FactoryConfigurationError) {
-				throw ((FactoryConfigurationError)ourNextException);
-			} else {
-				throw (XMLStreamException)ourNextException;
-			}
-		}
-	}
-
 	public static XMLStreamWriter createXmlStreamWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
 		throwUnitTestExceptionIfConfiguredToDoSo();
 		
@@ -1547,15 +1561,20 @@ public class XmlUtil {
 		return retVal;
 	}
 
-	public static XMLEventWriter createXmlFragmentWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
-		XMLOutputFactory outputFactory = getOrCreateFragmentOutputFactory();
+	public static XMLEventWriter createXmlWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
+		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
 		XMLEventWriter retVal = outputFactory.createXMLEventWriter(theWriter);
 		return retVal;
 	}
 
-	public static XMLEventWriter createXmlWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
-		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
-		XMLEventWriter retVal = outputFactory.createXMLEventWriter(theWriter);
+	private static XMLOutputFactory getOrCreateFragmentOutputFactory() throws FactoryConfigurationError {
+		XMLOutputFactory retVal = ourFragmentOutputFactory;
+		if (retVal == null) {
+			retVal = createOutputFactory();
+			retVal.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, Boolean.TRUE);
+			ourFragmentOutputFactory = retVal;
+			return retVal;
+		}
 		return retVal;
 	}
 
@@ -1570,8 +1589,7 @@ public class XmlUtil {
 				// ok
 			}
 			
-			XMLInputFactory inputFactory;
-			inputFactory = XMLInputFactory.newInstance();
+			XMLInputFactory inputFactory = newInputFactory();
 
 			if (!ourHaveLoggedStaxImplementation) {
 				logStaxImplementation(inputFactory.getClass());
@@ -1614,53 +1632,11 @@ public class XmlUtil {
 		return ourInputFactory;
 	}
 
-	private static XMLOutputFactory getOrCreateFragmentOutputFactory() throws FactoryConfigurationError {
-		XMLOutputFactory retVal = ourFragmentOutputFactory;
-		if (retVal == null) {
-			retVal = createOutputFactory();
-			retVal.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, Boolean.TRUE);
-			ourFragmentOutputFactory = retVal;
-			return retVal;
-		}
-		return retVal;
-	}
-
-	
 	private static XMLOutputFactory getOrCreateOutputFactory() throws FactoryConfigurationError {
 		if (ourOutputFactory == null) {
 			ourOutputFactory = createOutputFactory();
 		}
 		return ourOutputFactory;
-	}
-
-	private static XMLOutputFactory createOutputFactory() throws FactoryConfigurationError {
-		try {
-			// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
-			Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLOutputFactory");
-			System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
-		} catch (ClassNotFoundException e) {
-			// ok
-		}
-
-		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-
-		if (!ourHaveLoggedStaxImplementation) {
-			logStaxImplementation(outputFactory.getClass());
-		}
-
-		/*
-		 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
-		 * being used (e.g. glassfish) so we don't set them there.
-		 */
-		try {
-			Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
-			if (outputFactory instanceof WstxOutputFactory) {
-				outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
-			}
-		} catch (ClassNotFoundException e) {
-			ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
-		}
-		return outputFactory;
 	}
 
 	private static void logStaxImplementation(Class<?> theClass) {
@@ -1669,6 +1645,46 @@ public class XmlUtil {
 			logger.logStaxImplementation(theClass);
 		}
 		ourHaveLoggedStaxImplementation = true;
+	}
+
+	
+	static XMLInputFactory newInputFactory() throws FactoryConfigurationError {
+		XMLInputFactory inputFactory;
+		try {
+			inputFactory = XMLInputFactory.newInstance();
+			throwUnitTestExceptionIfConfiguredToDoSo();
+		} catch (Throwable e) {
+			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);
+		}
+		return inputFactory;
+	}
+
+	static XMLOutputFactory newOutputFactory() throws FactoryConfigurationError {
+		XMLOutputFactory outputFactory;
+		try {
+			outputFactory = XMLOutputFactory.newInstance();
+			throwUnitTestExceptionIfConfiguredToDoSo();
+		} catch (Throwable e) {
+			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);
+		}
+		return outputFactory;
+	}
+
+	/**
+	 * FOR UNIT TESTS ONLY - Throw this exception for the next operation
+	 */
+	static void setThrowExceptionForUnitTest(Throwable theException) {
+		ourNextException = theException;
+	}
+
+	private static void throwUnitTestExceptionIfConfiguredToDoSo() throws FactoryConfigurationError, XMLStreamException {
+		if (ourNextException != null) {
+			if (ourNextException instanceof FactoryConfigurationError) {
+				throw ((FactoryConfigurationError)ourNextException);
+			} else {
+				throw (XMLStreamException)ourNextException;
+			}
+		}
 	}
 
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
@@ -1684,6 +1700,26 @@ public class XmlUtil {
 		}
 	}
 
+	/**
+	 * This method will return <code>true</code> if a StAX XML parsing library is present
+	 * on the classpath 
+	 */
+	public static boolean isStaxPresent() {
+		Boolean retVal = ourStaxPresent;
+		if (retVal == null) {
+			try {
+				newInputFactory();
+				ourStaxPresent = Boolean.TRUE;
+				retVal = Boolean.TRUE;
+			} catch (ConfigurationException e) {
+				ourLog.info("StAX not detected on classpath, XML processing will be disabled");
+				ourStaxPresent = Boolean.FALSE;
+				retVal = Boolean.FALSE;
+			}
+		}
+		return retVal;
+	}
+	
 	public static class MyEscaper implements EscapingWriterFactory {
 
 		@Override
@@ -1733,13 +1769,6 @@ public class XmlUtil {
 			};
 		}
 
-	}
-
-	/**
-	 * FOR UNIT TESTS ONLY - Throw this exception for the next operation
-	 */
-	static void setThrowExceptionForUnitTest(Throwable theException) {
-		ourNextException = theException;
 	}
 
 }

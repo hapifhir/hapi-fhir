@@ -4,13 +4,13 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,9 +95,11 @@ public abstract class BaseParser implements IParser {
 	private boolean myOmitResourceId;
 	private List<Class<? extends IBaseResource>> myPreferTypes;
 	private String myServerBaseUrl;
-	private boolean myStripVersionsFromReferences = true;
+	private Boolean myStripVersionsFromReferences;
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
+	private Set<String> myDontStripVersionsFromReferencesAtPaths;
+
 	/**
 	 * Constructor
 	 * 
@@ -240,6 +244,9 @@ public abstract class BaseParser implements IParser {
 							continue;
 						}
 						theContained.addContained(resource);
+						if (resource.getIdElement().isLocal() && existingIdToContainedResource != null) {
+							existingIdToContainedResource.remove(resource.getIdElement().getValue());
+						}
 					} else {
 						continue;
 					}
@@ -265,7 +272,7 @@ public abstract class BaseParser implements IParser {
 		myContainedResources = contained;
 	}
 
-	private String determineReferenceText(IBaseReference theRef) {
+	private String determineReferenceText(IBaseReference theRef, CompositeChildElement theCompositeChildElement) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
@@ -281,13 +288,17 @@ public abstract class BaseParser implements IParser {
 					IIdType refId = theRef.getResource().getIdElement();
 					if (refId != null) {
 						if (refId.hasIdPart()) {
-							if (!refId.hasResourceType()) {
-								refId = refId.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
-							}
-							if (isStripVersionsFromReferences()) {
-								reference = refId.toVersionless().getValue();
-							} else {
+							if (refId.getValue().startsWith("urn:")) {
 								reference = refId.getValue();
+							} else {
+								if (!refId.hasResourceType()) {
+									refId = refId.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
+								}
+								if (isStripVersionsFromReferences(theCompositeChildElement)) {
+									reference = refId.toVersionless().getValue();
+								} else {
+									reference = refId.getValue();
+								}
 							}
 						}
 					}
@@ -299,19 +310,44 @@ public abstract class BaseParser implements IParser {
 				ref = ref.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
 			}
 			if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
-				if (isStripVersionsFromReferences()) {
+				if (isStripVersionsFromReferences(theCompositeChildElement)) {
 					return ref.toUnqualifiedVersionless().getValue();
 				} else {
 					return ref.toUnqualified().getValue();
 				}
 			} else {
-				if (isStripVersionsFromReferences()) {
+				if (isStripVersionsFromReferences(theCompositeChildElement)) {
 					return ref.toVersionless().getValue();
 				} else {
 					return ref.getValue();
 				}
 			}
 		}
+	}
+
+	private boolean isStripVersionsFromReferences(CompositeChildElement theCompositeChildElement) {
+		Boolean stripVersionsFromReferences = myStripVersionsFromReferences;
+		if (stripVersionsFromReferences != null) {
+			return stripVersionsFromReferences;
+		}
+
+		if (myContext.getParserOptions().isStripVersionsFromReferences() == false) {
+			return false;
+		}
+
+		Set<String> dontStripVersionsFromReferencesAtPaths = myDontStripVersionsFromReferencesAtPaths;
+		if (dontStripVersionsFromReferencesAtPaths != null) {
+			if (dontStripVersionsFromReferencesAtPaths.isEmpty() == false && theCompositeChildElement.anyPathMatches(dontStripVersionsFromReferencesAtPaths)) {
+				return false;
+			}
+		}
+
+		dontStripVersionsFromReferencesAtPaths = myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
+		if (dontStripVersionsFromReferencesAtPaths.isEmpty() == false && theCompositeChildElement.anyPathMatches(dontStripVersionsFromReferencesAtPaths)) {
+			return false;
+		}
+
+		return true;
 	}
 
 	protected abstract void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
@@ -359,7 +395,8 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theWriter, "theWriter can not be null");
 
 		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
-			throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+			throw new IllegalArgumentException(
+					"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
 		doEncodeResourceToWriter(theResource, theWriter);
@@ -401,10 +438,10 @@ public abstract class BaseParser implements IParser {
 		String childName = theChild.getChildNameByDatatype(type);
 		BaseRuntimeElementDefinition<?> childDef = theChild.getChildElementDefinitionByDatatype(type);
 		if (childDef == null) {
-//			if (theValue instanceof IBaseExtension) {
-//				return null;
-//			}
-			
+			// if (theValue instanceof IBaseExtension) {
+			// return null;
+			// }
+
 			/*
 			 * For RI structures Enumeration class, this replaces the child def
 			 * with the "code" one. This is messy, and presumably there is a better
@@ -431,12 +468,12 @@ public abstract class BaseParser implements IParser {
 					nextSuperType = nextSuperType.getSuperclass();
 				}
 			}
-			
+
 			if (childDef == null) {
 				throwExceptionForUnknownChildType(theChild, type);
 			}
 		}
-		
+
 		return new ChildNameAndDef(childName, childDef);
 	}
 
@@ -549,7 +586,8 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected boolean isChildContained(BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource) {
-		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false && theIncludedResource == false;
+		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false
+				&& theIncludedResource == false;
 	}
 
 	@Override
@@ -558,7 +596,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public boolean isStripVersionsFromReferences() {
+	public Boolean getStripVersionsFromReferences() {
 		return myStripVersionsFromReferences;
 	}
 
@@ -594,13 +632,15 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
 
+		/*
+		 * We do this so that the context can verify that the structure is for
+		 * the correct FHIR version
+		 */
 		if (theResourceType != null) {
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
-			if (def.getStructureVersion() != myContext.getVersion().getVersion()) {
-				throw new IllegalArgumentException("This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not parse a structure for version " + def.getStructureVersion());
-			}
+			myContext.getResourceDefinition(theResourceType);
 		}
 
+		// Actually do the parse
 		T retVal = doParseResource(theResourceType, theReader);
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
@@ -667,7 +707,8 @@ public abstract class BaseParser implements IParser {
 		return parseTagList(new StringReader(theString));
 	}
 
-	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues) {
+	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues,
+			CompositeChildElement theCompositeChildElement) {
 		if (myContext.getVersion().getVersion().isRi()) {
 
 			/*
@@ -736,7 +777,7 @@ public abstract class BaseParser implements IParser {
 			 */
 			if (next instanceof IBaseReference) {
 				IBaseReference nextRef = (IBaseReference) next;
-				String refText = determineReferenceText(nextRef);
+				String refText = determineReferenceText(nextRef, theCompositeChildElement);
 				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
 
 					if (retVal == theValues) {
@@ -824,9 +865,37 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public IParser setStripVersionsFromReferences(boolean theStripVersionsFromReferences) {
+	public IParser setStripVersionsFromReferences(Boolean theStripVersionsFromReferences) {
 		myStripVersionsFromReferences = theStripVersionsFromReferences;
 		return this;
+	}
+
+	@Override
+	public IParser setDontStripVersionsFromReferencesAtPaths(String... thePaths) {
+		if (thePaths == null) {
+			setDontStripVersionsFromReferencesAtPaths((List<String>) null);
+		} else {
+			setDontStripVersionsFromReferencesAtPaths(Arrays.asList(thePaths));
+		}
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public IParser setDontStripVersionsFromReferencesAtPaths(Collection<String> thePaths) {
+		if (thePaths == null) {
+			myDontStripVersionsFromReferencesAtPaths = Collections.emptySet();
+		} else if (thePaths instanceof HashSet) {
+			myDontStripVersionsFromReferencesAtPaths = (Set<String>) ((HashSet<String>) thePaths).clone();
+		} else {
+			myDontStripVersionsFromReferencesAtPaths = new HashSet<String>(thePaths);
+		}
+		return this;
+	}
+
+	@Override
+	public Set<String> getDontStripVersionsFromReferencesAtPaths() {
+		return myDontStripVersionsFromReferencesAtPaths;
 	}
 
 	@Override
@@ -970,6 +1039,34 @@ public abstract class BaseParser implements IParser {
 
 		}
 
+		public boolean anyPathMatches(Set<String> thePaths) {
+			StringBuilder b = new StringBuilder();
+			addParent(this, b);
+
+			String path = b.toString();
+			return thePaths.contains(path);
+		}
+
+		private void addParent(CompositeChildElement theParent, StringBuilder theB) {
+			if (theParent != null) {
+				if (theParent.myResDef != null) {
+					theB.append(theParent.myResDef.getName());
+					return;
+				}
+
+				if (theParent.myParent != null) {
+					addParent(theParent.myParent, theB);
+				}
+
+				if (theParent.myDef != null) {
+					if (theB.length() > 0) {
+						theB.append('.');
+					}
+					theB.append(theParent.myDef.getElementName());
+				}
+			}
+		}
+
 		public CompositeChildElement(RuntimeResourceDefinition theResDef) {
 			myResDef = theResDef;
 			myDef = null;
@@ -981,25 +1078,27 @@ public abstract class BaseParser implements IParser {
 				StringBuilder b = new StringBuilder();
 				b.append(myResDef.getName());
 				return b;
-			} else {
+			} else if (myParent != null) {
 				StringBuilder b = myParent.buildPath();
 				if (b != null && myDef != null) {
 					b.append('.');
 					b.append(myDef.getElementName());
 				}
 				return b;
+			} else {
+				return null;
 			}
 		}
 
 		private boolean checkIfParentShouldBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
-			return checkIfPathMatches(thePathBuilder, theStarPass, myEncodeElementsAppliesToResourceTypes, myEncodeElements, true);
+			return checkIfPathMatchesForEncoding(thePathBuilder, theStarPass, myEncodeElementsAppliesToResourceTypes, myEncodeElements, true);
 		}
 
 		private boolean checkIfParentShouldNotBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
-			return checkIfPathMatches(thePathBuilder, theStarPass, null, myDontEncodeElements, false);
+			return checkIfPathMatchesForEncoding(thePathBuilder, theStarPass, null, myDontEncodeElements, false);
 		}
 
-		private boolean checkIfPathMatches(StringBuilder thePathBuilder, boolean theStarPass, Set<String> theResourceTypes, Set<String> theElements, boolean theCheckingForWhitelist) {
+		private boolean checkIfPathMatchesForEncoding(StringBuilder thePathBuilder, boolean theStarPass, Set<String> theResourceTypes, Set<String> theElements, boolean theCheckingForWhitelist) {
 			if (myResDef != null) {
 				if (theResourceTypes != null) {
 					if (!theResourceTypes.contains(myResDef.getName())) {
@@ -1069,12 +1168,12 @@ public abstract class BaseParser implements IParser {
 					retVal = !checkIfParentShouldNotBeEncodedAndBuildPath(new StringBuilder(), true);
 				}
 			}
-//			if (retVal == false && myEncodeElements.contains("*.(mandatory)")) {
-//				if (myDef.getMin() > 0) {
-//					retVal = true;
-//				}
-//			}
-			
+			// if (retVal == false && myEncodeElements.contains("*.(mandatory)")) {
+			// if (myDef.getMin() > 0) {
+			// retVal = true;
+			// }
+			// }
+
 			return retVal;
 		}
 	}

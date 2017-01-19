@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -38,27 +40,31 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 
 public interface IFhirVersion {
 
-	FhirVersionEnum getVersion();
+	IFluentPath createFluentPathExecutor(FhirContext theFhirContext);
 	
-	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer); 
+	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer); 
 	
-	InputStream getFhirVersionPropertiesFile();
+	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
 	
+	IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport();
+
 	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
-	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer);
+	Class<?> getContainedType();
+
+	InputStream getFhirVersionPropertiesFile();
+
+	IPrimitiveType<Date> getLastUpdated(IBaseResource theResource);
 
 	String getPathToSchemaDefinitions();
 
 	Class<? extends IBase> getResourceReferenceType();
 
-	Class<?> getContainedType();
-
-	IBase newCodingDt();
+	FhirVersionEnum getVersion();
 
 	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
 
-	IPrimitiveType<Date> getLastUpdated(IBaseResource theResource);
+	IBase newCodingDt();
 
 	IIdType newIdType();
 

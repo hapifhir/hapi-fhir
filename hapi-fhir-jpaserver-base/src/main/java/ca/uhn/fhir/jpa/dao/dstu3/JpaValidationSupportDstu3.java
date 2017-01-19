@@ -16,7 +16,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,6 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 
 	@Autowired
-	@Qualifier("myFhirContextDstu3")
 	private FhirContext myDstu3Ctx;
 
 	public JpaValidationSupportDstu3() {
@@ -98,6 +97,9 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 				search = myValueSetDao.search(ValueSet.SP_URL, new UriParam(theUri));
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
+			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+				return null;
+			}
 			search = myStructureDefinitionDao.search(StructureDefinition.SP_URL, new UriParam(theUri));
 		} else if ("Questionnaire".equals(resourceName)) {
 			search = myQuestionnaireDao.search(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));

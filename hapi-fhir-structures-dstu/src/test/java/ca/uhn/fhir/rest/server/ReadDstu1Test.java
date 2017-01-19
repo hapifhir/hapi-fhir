@@ -36,7 +36,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class ReadDstu1Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu1Test.class);
 	private static int ourPort;
 	private static Server ourServer;

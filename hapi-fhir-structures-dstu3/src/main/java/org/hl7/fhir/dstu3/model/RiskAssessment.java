@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,12 +42,182 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.
  */
 @ResourceDef(name="RiskAssessment", profile="http://hl7.org/fhir/Profile/RiskAssessment")
 public class RiskAssessment extends DomainResource {
+
+    public enum RiskAssessmentStatus {
+        /**
+         * The existence of the observation is registered, but there is no result yet available.
+         */
+        REGISTERED, 
+        /**
+         * This is an initial or interim observation: data may be incomplete or unverified.
+         */
+        PRELIMINARY, 
+        /**
+         * The observation is complete.
+         */
+        FINAL, 
+        /**
+         * The observation has been modified subsequent to being Final.
+         */
+        AMENDED, 
+        /**
+         * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
+         */
+        CANCELLED, 
+        /**
+         * The observation has been withdrawn following previous final release.
+         */
+        ENTEREDINERROR, 
+        /**
+         * The observation status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
+         */
+        UNKNOWN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RiskAssessmentStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("registered".equals(codeString))
+          return REGISTERED;
+        if ("preliminary".equals(codeString))
+          return PRELIMINARY;
+        if ("final".equals(codeString))
+          return FINAL;
+        if ("amended".equals(codeString))
+          return AMENDED;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RiskAssessmentStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case REGISTERED: return "registered";
+            case PRELIMINARY: return "preliminary";
+            case FINAL: return "final";
+            case AMENDED: return "amended";
+            case CANCELLED: return "cancelled";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case REGISTERED: return "http://hl7.org/fhir/observation-status";
+            case PRELIMINARY: return "http://hl7.org/fhir/observation-status";
+            case FINAL: return "http://hl7.org/fhir/observation-status";
+            case AMENDED: return "http://hl7.org/fhir/observation-status";
+            case CANCELLED: return "http://hl7.org/fhir/observation-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/observation-status";
+            case UNKNOWN: return "http://hl7.org/fhir/observation-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case REGISTERED: return "The existence of the observation is registered, but there is no result yet available.";
+            case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified.";
+            case FINAL: return "The observation is complete.";
+            case AMENDED: return "The observation has been modified subsequent to being Final.";
+            case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
+            case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.";
+            case UNKNOWN: return "The observation status is unknown.  Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\".";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case REGISTERED: return "Registered";
+            case PRELIMINARY: return "Preliminary";
+            case FINAL: return "Final";
+            case AMENDED: return "Amended";
+            case CANCELLED: return "cancelled";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown Status";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RiskAssessmentStatusEnumFactory implements EnumFactory<RiskAssessmentStatus> {
+    public RiskAssessmentStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("registered".equals(codeString))
+          return RiskAssessmentStatus.REGISTERED;
+        if ("preliminary".equals(codeString))
+          return RiskAssessmentStatus.PRELIMINARY;
+        if ("final".equals(codeString))
+          return RiskAssessmentStatus.FINAL;
+        if ("amended".equals(codeString))
+          return RiskAssessmentStatus.AMENDED;
+        if ("cancelled".equals(codeString))
+          return RiskAssessmentStatus.CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return RiskAssessmentStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return RiskAssessmentStatus.UNKNOWN;
+        throw new IllegalArgumentException("Unknown RiskAssessmentStatus code '"+codeString+"'");
+        }
+        public Enumeration<RiskAssessmentStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("registered".equals(codeString))
+          return new Enumeration<RiskAssessmentStatus>(this, RiskAssessmentStatus.REGISTERED);
+        if ("preliminary".equals(codeString))
+          return new Enumeration<RiskAssessmentStatus>(this, RiskAssessmentStatus.PRELIMINARY);
+        if ("final".equals(codeString))
+          return new Enumeration<RiskAssessmentStatus>(this, RiskAssessmentStatus.FINAL);
+        if ("amended".equals(codeString))
+          return new Enumeration<RiskAssessmentStatus>(this, RiskAssessmentStatus.AMENDED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<RiskAssessmentStatus>(this, RiskAssessmentStatus.CANCELLED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<RiskAssessmentStatus>(this, RiskAssessmentStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<RiskAssessmentStatus>(this, RiskAssessmentStatus.UNKNOWN);
+        throw new FHIRException("Unknown RiskAssessmentStatus code '"+codeString+"'");
+        }
+    public String toCode(RiskAssessmentStatus code) {
+      if (code == RiskAssessmentStatus.REGISTERED)
+        return "registered";
+      if (code == RiskAssessmentStatus.PRELIMINARY)
+        return "preliminary";
+      if (code == RiskAssessmentStatus.FINAL)
+        return "final";
+      if (code == RiskAssessmentStatus.AMENDED)
+        return "amended";
+      if (code == RiskAssessmentStatus.CANCELLED)
+        return "cancelled";
+      if (code == RiskAssessmentStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == RiskAssessmentStatus.UNKNOWN)
+        return "unknown";
+      return "?";
+      }
+    public String toSystem(RiskAssessmentStatus code) {
+      return code.getSystem();
+      }
+    }
 
     @Block()
     public static class RiskAssessmentPredictionComponent extends BackboneElement implements IBaseBackboneElement {
@@ -376,13 +546,13 @@ public class RiskAssessment extends DomainResource {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
           break;
         case -1290561483: // probability
-          this.probability = (Type) value; // Type
+          this.probability = castToType(value); // Type
           break;
         case -70741061: // relativeRisk
           this.relativeRisk = castToDecimal(value); // DecimalType
           break;
         case 3648314: // when
-          this.when = (Type) value; // Type
+          this.when = castToType(value); // Type
           break;
         case 345689335: // rationale
           this.rationale = castToString(value); // StringType
@@ -397,11 +567,11 @@ public class RiskAssessment extends DomainResource {
         if (name.equals("outcome"))
           this.outcome = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("probability[x]"))
-          this.probability = (Type) value; // Type
+          this.probability = castToType(value); // Type
         else if (name.equals("relativeRisk"))
           this.relativeRisk = castToDecimal(value); // DecimalType
         else if (name.equals("when[x]"))
-          this.when = (Type) value; // Type
+          this.when = castToType(value); // Type
         else if (name.equals("rationale"))
           this.rationale = castToString(value); // StringType
         else
@@ -503,9 +673,55 @@ public class RiskAssessment extends DomainResource {
   }
 
     /**
+     * Business identifier assigned to the risk assessment.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Unique identifier for the assessment", formalDefinition="Business identifier assigned to the risk assessment." )
+    protected Identifier identifier;
+
+    /**
+     * A reference to the request that is fulfilled by this risk assessment.
+     */
+    @Child(name = "basedOn", type = {Reference.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Request fulfilled by this assessment", formalDefinition="A reference to the request that is fulfilled by this risk assessment." )
+    protected Reference basedOn;
+
+    /**
+     * The actual object that is the target of the reference (A reference to the request that is fulfilled by this risk assessment.)
+     */
+    protected Resource basedOnTarget;
+
+    /**
+     * A reference to a resource that this risk assessment is part of, such as a Procedure.
+     */
+    @Child(name = "parent", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Part of this occurrence", formalDefinition="A reference to a resource that this risk assessment is part of, such as a Procedure." )
+    protected Reference parent;
+
+    /**
+     * The actual object that is the target of the reference (A reference to a resource that this risk assessment is part of, such as a Procedure.)
+     */
+    protected Resource parentTarget;
+
+    /**
+     * The status of the RiskAssessment, using the same statuses as an Observation.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="registered | preliminary | final | amended +", formalDefinition="The status of the RiskAssessment, using the same statuses as an Observation." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-status")
+    protected Enumeration<RiskAssessmentStatus> status;
+
+    /**
+     * The type of the risk assessment performed.
+     */
+    @Child(name = "code", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Type of assessment", formalDefinition="The type of the risk assessment performed." )
+    protected CodeableConcept code;
+
+    /**
      * The patient or group the risk assessment applies to.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who/what does assessment apply to?", formalDefinition="The patient or group the risk assessment applies to." )
     protected Reference subject;
 
@@ -515,16 +731,28 @@ public class RiskAssessment extends DomainResource {
     protected Resource subjectTarget;
 
     /**
+     * The encounter where the assessment was performed.
+     */
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Where was assessment performed?", formalDefinition="The encounter where the assessment was performed." )
+    protected Reference context;
+
+    /**
+     * The actual object that is the target of the reference (The encounter where the assessment was performed.)
+     */
+    protected Resource contextTarget;
+
+    /**
      * The date (and possibly time) the risk assessment was performed.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "occurrence", type = {DateTimeType.class, Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When was assessment made?", formalDefinition="The date (and possibly time) the risk assessment was performed." )
-    protected DateTimeType date;
+    protected Type occurrence;
 
     /**
      * For assessments or prognosis specific to a particular condition, indicates the condition being assessed.
      */
-    @Child(name = "condition", type = {Condition.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "condition", type = {Condition.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Condition assessed", formalDefinition="For assessments or prognosis specific to a particular condition, indicates the condition being assessed." )
     protected Reference condition;
 
@@ -534,21 +762,9 @@ public class RiskAssessment extends DomainResource {
     protected Condition conditionTarget;
 
     /**
-     * The encounter where the assessment was performed.
-     */
-    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Where was assessment performed?", formalDefinition="The encounter where the assessment was performed." )
-    protected Reference encounter;
-
-    /**
-     * The actual object that is the target of the reference (The encounter where the assessment was performed.)
-     */
-    protected Encounter encounterTarget;
-
-    /**
      * The provider or software application that performed the assessment.
      */
-    @Child(name = "performer", type = {Practitioner.class, Device.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "performer", type = {Practitioner.class, Device.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who did assessment?", formalDefinition="The provider or software application that performed the assessment." )
     protected Reference performer;
 
@@ -558,23 +774,23 @@ public class RiskAssessment extends DomainResource {
     protected Resource performerTarget;
 
     /**
-     * Business identifier assigned to the risk assessment.
+     * The reason the risk assessment was performed.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Unique identifier for the assessment", formalDefinition="Business identifier assigned to the risk assessment." )
-    protected Identifier identifier;
+    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why the assessment was necessary?", formalDefinition="The reason the risk assessment was performed." )
+    protected Type reason;
 
     /**
      * The algorithm, process or mechanism used to evaluate the risk.
      */
-    @Child(name = "method", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "method", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Evaluation mechanism", formalDefinition="The algorithm, process or mechanism used to evaluate the risk." )
     protected CodeableConcept method;
 
     /**
      * Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).
      */
-    @Child(name = "basis", type = {Reference.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "basis", type = {Reference.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Information used in assessment", formalDefinition="Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.)." )
     protected List<Reference> basis;
     /**
@@ -586,24 +802,210 @@ public class RiskAssessment extends DomainResource {
     /**
      * Describes the expected outcome for the subject.
      */
-    @Child(name = "prediction", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "prediction", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Outcome predicted", formalDefinition="Describes the expected outcome for the subject." )
     protected List<RiskAssessmentPredictionComponent> prediction;
 
     /**
      * A description of the steps that might be taken to reduce the identified risk(s).
      */
-    @Child(name = "mitigation", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "mitigation", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How to reduce risk", formalDefinition="A description of the steps that might be taken to reduce the identified risk(s)." )
     protected StringType mitigation;
 
-    private static final long serialVersionUID = 724306293L;
+    /**
+     * Additional comments about the risk assessment.
+     */
+    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Comments on the risk assessment", formalDefinition="Additional comments about the risk assessment." )
+    protected Annotation note;
+
+    private static final long serialVersionUID = 1014111911L;
 
   /**
    * Constructor
    */
     public RiskAssessment() {
       super();
+    }
+
+  /**
+   * Constructor
+   */
+    public RiskAssessment(Enumeration<RiskAssessmentStatus> status) {
+      super();
+      this.status = status;
+    }
+
+    /**
+     * @return {@link #identifier} (Business identifier assigned to the risk assessment.)
+     */
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.identifier");
+        else if (Configuration.doAutoCreate())
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #identifier} (Business identifier assigned to the risk assessment.)
+     */
+    public RiskAssessment setIdentifier(Identifier value) { 
+      this.identifier = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #basedOn} (A reference to the request that is fulfilled by this risk assessment.)
+     */
+    public Reference getBasedOn() { 
+      if (this.basedOn == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.basedOn");
+        else if (Configuration.doAutoCreate())
+          this.basedOn = new Reference(); // cc
+      return this.basedOn;
+    }
+
+    public boolean hasBasedOn() { 
+      return this.basedOn != null && !this.basedOn.isEmpty();
+    }
+
+    /**
+     * @param value {@link #basedOn} (A reference to the request that is fulfilled by this risk assessment.)
+     */
+    public RiskAssessment setBasedOn(Reference value) { 
+      this.basedOn = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #basedOn} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the request that is fulfilled by this risk assessment.)
+     */
+    public Resource getBasedOnTarget() { 
+      return this.basedOnTarget;
+    }
+
+    /**
+     * @param value {@link #basedOn} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the request that is fulfilled by this risk assessment.)
+     */
+    public RiskAssessment setBasedOnTarget(Resource value) { 
+      this.basedOnTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #parent} (A reference to a resource that this risk assessment is part of, such as a Procedure.)
+     */
+    public Reference getParent() { 
+      if (this.parent == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.parent");
+        else if (Configuration.doAutoCreate())
+          this.parent = new Reference(); // cc
+      return this.parent;
+    }
+
+    public boolean hasParent() { 
+      return this.parent != null && !this.parent.isEmpty();
+    }
+
+    /**
+     * @param value {@link #parent} (A reference to a resource that this risk assessment is part of, such as a Procedure.)
+     */
+    public RiskAssessment setParent(Reference value) { 
+      this.parent = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #parent} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to a resource that this risk assessment is part of, such as a Procedure.)
+     */
+    public Resource getParentTarget() { 
+      return this.parentTarget;
+    }
+
+    /**
+     * @param value {@link #parent} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a resource that this risk assessment is part of, such as a Procedure.)
+     */
+    public RiskAssessment setParentTarget(Resource value) { 
+      this.parentTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The status of the RiskAssessment, using the same statuses as an Observation.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<RiskAssessmentStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<RiskAssessmentStatus>(new RiskAssessmentStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the RiskAssessment, using the same statuses as an Observation.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public RiskAssessment setStatusElement(Enumeration<RiskAssessmentStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the RiskAssessment, using the same statuses as an Observation.
+     */
+    public RiskAssessmentStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the RiskAssessment, using the same statuses as an Observation.
+     */
+    public RiskAssessment setStatus(RiskAssessmentStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<RiskAssessmentStatus>(new RiskAssessmentStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #code} (The type of the risk assessment performed.)
+     */
+    public CodeableConcept getCode() { 
+      if (this.code == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.code");
+        else if (Configuration.doAutoCreate())
+          this.code = new CodeableConcept(); // cc
+      return this.code;
+    }
+
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
+    }
+
+    /**
+     * @param value {@link #code} (The type of the risk assessment performed.)
+     */
+    public RiskAssessment setCode(CodeableConcept value) { 
+      this.code = value;
+      return this;
     }
 
     /**
@@ -646,51 +1048,86 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date (and possibly time) the risk assessment was performed.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #context} (The encounter where the assessment was performed.)
      */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
+    public Reference getContext() { 
+      if (this.context == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.date");
+          throw new Error("Attempt to auto-create RiskAssessment.context");
         else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
+          this.context = new Reference(); // cc
+      return this.context;
     }
 
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
+    public boolean hasContext() { 
+      return this.context != null && !this.context.isEmpty();
     }
 
     /**
-     * @param value {@link #date} (The date (and possibly time) the risk assessment was performed.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #context} (The encounter where the assessment was performed.)
      */
-    public RiskAssessment setDateElement(DateTimeType value) { 
-      this.date = value;
+    public RiskAssessment setContext(Reference value) { 
+      this.context = value;
       return this;
     }
 
     /**
-     * @return The date (and possibly time) the risk assessment was performed.
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
      */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
+    public Resource getContextTarget() { 
+      return this.contextTarget;
     }
 
     /**
-     * @param value The date (and possibly time) the risk assessment was performed.
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
      */
-    public RiskAssessment setDate(Date value) { 
-      if (value == null)
-        this.date = null;
-      else {
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
-      }
+    public RiskAssessment setContextTarget(Resource value) { 
+      this.contextTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #occurrence} (The date (and possibly time) the risk assessment was performed.)
+     */
+    public Type getOccurrence() { 
+      return this.occurrence;
+    }
+
+    /**
+     * @return {@link #occurrence} (The date (and possibly time) the risk assessment was performed.)
+     */
+    public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (!(this.occurrence instanceof DateTimeType))
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
+      return (DateTimeType) this.occurrence;
+    }
+
+    public boolean hasOccurrenceDateTimeType() { 
+      return this.occurrence instanceof DateTimeType;
+    }
+
+    /**
+     * @return {@link #occurrence} (The date (and possibly time) the risk assessment was performed.)
+     */
+    public Period getOccurrencePeriod() throws FHIRException { 
+      if (!(this.occurrence instanceof Period))
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
+      return (Period) this.occurrence;
+    }
+
+    public boolean hasOccurrencePeriod() { 
+      return this.occurrence instanceof Period;
+    }
+
+    public boolean hasOccurrence() { 
+      return this.occurrence != null && !this.occurrence.isEmpty();
+    }
+
+    /**
+     * @param value {@link #occurrence} (The date (and possibly time) the risk assessment was performed.)
+     */
+    public RiskAssessment setOccurrence(Type value) { 
+      this.occurrence = value;
       return this;
     }
 
@@ -739,50 +1176,6 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #encounter} (The encounter where the assessment was performed.)
-     */
-    public Reference getEncounter() { 
-      if (this.encounter == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.encounter");
-        else if (Configuration.doAutoCreate())
-          this.encounter = new Reference(); // cc
-      return this.encounter;
-    }
-
-    public boolean hasEncounter() { 
-      return this.encounter != null && !this.encounter.isEmpty();
-    }
-
-    /**
-     * @param value {@link #encounter} (The encounter where the assessment was performed.)
-     */
-    public RiskAssessment setEncounter(Reference value) { 
-      this.encounter = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
-     */
-    public Encounter getEncounterTarget() { 
-      if (this.encounterTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.encounter");
-        else if (Configuration.doAutoCreate())
-          this.encounterTarget = new Encounter(); // aa
-      return this.encounterTarget;
-    }
-
-    /**
-     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
-     */
-    public RiskAssessment setEncounterTarget(Encounter value) { 
-      this.encounterTarget = value;
-      return this;
-    }
-
-    /**
      * @return {@link #performer} (The provider or software application that performed the assessment.)
      */
     public Reference getPerformer() { 
@@ -822,26 +1215,47 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Business identifier assigned to the risk assessment.)
+     * @return {@link #reason} (The reason the risk assessment was performed.)
      */
-    public Identifier getIdentifier() { 
-      if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
-      return this.identifier;
-    }
-
-    public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+    public Type getReason() { 
+      return this.reason;
     }
 
     /**
-     * @param value {@link #identifier} (Business identifier assigned to the risk assessment.)
+     * @return {@link #reason} (The reason the risk assessment was performed.)
      */
-    public RiskAssessment setIdentifier(Identifier value) { 
-      this.identifier = value;
+    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
+      if (!(this.reason instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.reason;
+    }
+
+    public boolean hasReasonCodeableConcept() { 
+      return this.reason instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #reason} (The reason the risk assessment was performed.)
+     */
+    public Reference getReasonReference() throws FHIRException { 
+      if (!(this.reason instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (Reference) this.reason;
+    }
+
+    public boolean hasReasonReference() { 
+      return this.reason instanceof Reference;
+    }
+
+    public boolean hasReason() { 
+      return this.reason != null && !this.reason.isEmpty();
+    }
+
+    /**
+     * @param value {@link #reason} (The reason the risk assessment was performed.)
+     */
+    public RiskAssessment setReason(Type value) { 
+      this.reason = value;
       return this;
     }
 
@@ -1034,33 +1448,69 @@ public class RiskAssessment extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #note} (Additional comments about the risk assessment.)
+     */
+    public Annotation getNote() { 
+      if (this.note == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.note");
+        else if (Configuration.doAutoCreate())
+          this.note = new Annotation(); // cc
+      return this.note;
+    }
+
+    public boolean hasNote() { 
+      return this.note != null && !this.note.isEmpty();
+    }
+
+    /**
+     * @param value {@link #note} (Additional comments about the risk assessment.)
+     */
+    public RiskAssessment setNote(Annotation value) { 
+      this.note = value;
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient or group the risk assessment applies to.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("date", "dateTime", "The date (and possibly time) the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, java.lang.Integer.MAX_VALUE, condition));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter where the assessment was performed.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("identifier", "Identifier", "Business identifier assigned to the risk assessment.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("basedOn", "Reference(Any)", "A reference to the request that is fulfilled by this risk assessment.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("parent", "Reference(Any)", "A reference to a resource that this risk assessment is part of, such as a Procedure.", 0, java.lang.Integer.MAX_VALUE, parent));
+        childrenList.add(new Property("status", "code", "The status of the RiskAssessment, using the same statuses as an Observation.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("code", "CodeableConcept", "The type of the risk assessment performed.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient or group the risk assessment applies to.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter where the assessment was performed.", 0, java.lang.Integer.MAX_VALUE, context));
+        childrenList.add(new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, occurrence));
+        childrenList.add(new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, java.lang.Integer.MAX_VALUE, condition));
+        childrenList.add(new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, java.lang.Integer.MAX_VALUE, performer));
+        childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "The reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("method", "CodeableConcept", "The algorithm, process or mechanism used to evaluate the risk.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis));
         childrenList.add(new Property("prediction", "", "Describes the expected outcome for the subject.", 0, java.lang.Integer.MAX_VALUE, prediction));
         childrenList.add(new Property("mitigation", "string", "A description of the steps that might be taken to reduce the identified risk(s).", 0, java.lang.Integer.MAX_VALUE, mitigation));
+        childrenList.add(new Property("note", "Annotation", "Additional comments about the risk assessment.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // Reference
-        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
-        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : new Base[] {this.basedOn}; // Reference
+        case -995424086: /*parent*/ return this.parent == null ? new Base[0] : new Base[] {this.parent}; // Reference
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<RiskAssessmentStatus>
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case 1687874001: /*occurrence*/ return this.occurrence == null ? new Base[0] : new Base[] {this.occurrence}; // Type
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // Reference
+        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
         case 93508670: /*basis*/ return this.basis == null ? new Base[0] : this.basis.toArray(new Base[this.basis.size()]); // Reference
         case 1161234575: /*prediction*/ return this.prediction == null ? new Base[0] : this.prediction.toArray(new Base[this.prediction.size()]); // RiskAssessmentPredictionComponent
         case 1293793087: /*mitigation*/ return this.mitigation == null ? new Base[0] : new Base[] {this.mitigation}; // StringType
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : new Base[] {this.note}; // Annotation
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1069,23 +1519,38 @@ public class RiskAssessment extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          break;
+        case -332612366: // basedOn
+          this.basedOn = castToReference(value); // Reference
+          break;
+        case -995424086: // parent
+          this.parent = castToReference(value); // Reference
+          break;
+        case -892481550: // status
+          this.status = new RiskAssessmentStatusEnumFactory().fromType(value); // Enumeration<RiskAssessmentStatus>
+          break;
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          break;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           break;
-        case 3076014: // date
-          this.date = castToDateTime(value); // DateTimeType
+        case 951530927: // context
+          this.context = castToReference(value); // Reference
+          break;
+        case 1687874001: // occurrence
+          this.occurrence = castToType(value); // Type
           break;
         case -861311717: // condition
           this.condition = castToReference(value); // Reference
           break;
-        case 1524132147: // encounter
-          this.encounter = castToReference(value); // Reference
-          break;
         case 481140686: // performer
           this.performer = castToReference(value); // Reference
           break;
-        case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+        case -934964668: // reason
+          this.reason = castToType(value); // Type
           break;
         case -1077554975: // method
           this.method = castToCodeableConcept(value); // CodeableConcept
@@ -1099,6 +1564,9 @@ public class RiskAssessment extends DomainResource {
         case 1293793087: // mitigation
           this.mitigation = castToString(value); // StringType
           break;
+        case 3387378: // note
+          this.note = castToAnnotation(value); // Annotation
+          break;
         default: super.setProperty(hash, name, value);
         }
 
@@ -1106,18 +1574,28 @@ public class RiskAssessment extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("subject"))
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("basedOn"))
+          this.basedOn = castToReference(value); // Reference
+        else if (name.equals("parent"))
+          this.parent = castToReference(value); // Reference
+        else if (name.equals("status"))
+          this.status = new RiskAssessmentStatusEnumFactory().fromType(value); // Enumeration<RiskAssessmentStatus>
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
-        else if (name.equals("date"))
-          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("context"))
+          this.context = castToReference(value); // Reference
+        else if (name.equals("occurrence[x]"))
+          this.occurrence = castToType(value); // Type
         else if (name.equals("condition"))
           this.condition = castToReference(value); // Reference
-        else if (name.equals("encounter"))
-          this.encounter = castToReference(value); // Reference
         else if (name.equals("performer"))
           this.performer = castToReference(value); // Reference
-        else if (name.equals("identifier"))
-          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("reason[x]"))
+          this.reason = castToType(value); // Type
         else if (name.equals("method"))
           this.method = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("basis"))
@@ -1126,6 +1604,8 @@ public class RiskAssessment extends DomainResource {
           this.getPrediction().add((RiskAssessmentPredictionComponent) value);
         else if (name.equals("mitigation"))
           this.mitigation = castToString(value); // StringType
+        else if (name.equals("note"))
+          this.note = castToAnnotation(value); // Annotation
         else
           super.setProperty(name, value);
       }
@@ -1133,16 +1613,22 @@ public class RiskAssessment extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1867885268:  return getSubject(); // Reference
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -861311717:  return getCondition(); // Reference
-        case 1524132147:  return getEncounter(); // Reference
-        case 481140686:  return getPerformer(); // Reference
         case -1618432855:  return getIdentifier(); // Identifier
+        case -332612366:  return getBasedOn(); // Reference
+        case -995424086:  return getParent(); // Reference
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<RiskAssessmentStatus>
+        case 3059181:  return getCode(); // CodeableConcept
+        case -1867885268:  return getSubject(); // Reference
+        case 951530927:  return getContext(); // Reference
+        case -2022646513:  return getOccurrence(); // Type
+        case -861311717:  return getCondition(); // Reference
+        case 481140686:  return getPerformer(); // Reference
+        case -669418564:  return getReason(); // Type
         case -1077554975:  return getMethod(); // CodeableConcept
         case 93508670:  return addBasis(); // Reference
         case 1161234575:  return addPrediction(); // RiskAssessmentPredictionComponent
         case 1293793087: throw new FHIRException("Cannot make property mitigation as it is not a complex type"); // StringType
+        case 3387378:  return getNote(); // Annotation
         default: return super.makeProperty(hash, name);
         }
 
@@ -1150,28 +1636,56 @@ public class RiskAssessment extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("subject")) {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("basedOn")) {
+          this.basedOn = new Reference();
+          return this.basedOn;
+        }
+        else if (name.equals("parent")) {
+          this.parent = new Reference();
+          return this.parent;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.status");
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("subject")) {
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.date");
+        else if (name.equals("context")) {
+          this.context = new Reference();
+          return this.context;
+        }
+        else if (name.equals("occurrenceDateTime")) {
+          this.occurrence = new DateTimeType();
+          return this.occurrence;
+        }
+        else if (name.equals("occurrencePeriod")) {
+          this.occurrence = new Period();
+          return this.occurrence;
         }
         else if (name.equals("condition")) {
           this.condition = new Reference();
           return this.condition;
         }
-        else if (name.equals("encounter")) {
-          this.encounter = new Reference();
-          return this.encounter;
-        }
         else if (name.equals("performer")) {
           this.performer = new Reference();
           return this.performer;
         }
-        else if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+        else if (name.equals("reasonCodeableConcept")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("reasonReference")) {
+          this.reason = new Reference();
+          return this.reason;
         }
         else if (name.equals("method")) {
           this.method = new CodeableConcept();
@@ -1186,6 +1700,10 @@ public class RiskAssessment extends DomainResource {
         else if (name.equals("mitigation")) {
           throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.mitigation");
         }
+        else if (name.equals("note")) {
+          this.note = new Annotation();
+          return this.note;
+        }
         else
           return super.addChild(name);
       }
@@ -1198,12 +1716,17 @@ public class RiskAssessment extends DomainResource {
       public RiskAssessment copy() {
         RiskAssessment dst = new RiskAssessment();
         copyValues(dst);
-        dst.subject = subject == null ? null : subject.copy();
-        dst.date = date == null ? null : date.copy();
-        dst.condition = condition == null ? null : condition.copy();
-        dst.encounter = encounter == null ? null : encounter.copy();
-        dst.performer = performer == null ? null : performer.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
+        dst.basedOn = basedOn == null ? null : basedOn.copy();
+        dst.parent = parent == null ? null : parent.copy();
+        dst.status = status == null ? null : status.copy();
+        dst.code = code == null ? null : code.copy();
+        dst.subject = subject == null ? null : subject.copy();
+        dst.context = context == null ? null : context.copy();
+        dst.occurrence = occurrence == null ? null : occurrence.copy();
+        dst.condition = condition == null ? null : condition.copy();
+        dst.performer = performer == null ? null : performer.copy();
+        dst.reason = reason == null ? null : reason.copy();
         dst.method = method == null ? null : method.copy();
         if (basis != null) {
           dst.basis = new ArrayList<Reference>();
@@ -1216,6 +1739,7 @@ public class RiskAssessment extends DomainResource {
             dst.prediction.add(i.copy());
         };
         dst.mitigation = mitigation == null ? null : mitigation.copy();
+        dst.note = note == null ? null : note.copy();
         return dst;
       }
 
@@ -1230,10 +1754,12 @@ public class RiskAssessment extends DomainResource {
         if (!(other instanceof RiskAssessment))
           return false;
         RiskAssessment o = (RiskAssessment) other;
-        return compareDeep(subject, o.subject, true) && compareDeep(date, o.date, true) && compareDeep(condition, o.condition, true)
-           && compareDeep(encounter, o.encounter, true) && compareDeep(performer, o.performer, true) && compareDeep(identifier, o.identifier, true)
-           && compareDeep(method, o.method, true) && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true)
-           && compareDeep(mitigation, o.mitigation, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(parent, o.parent, true)
+           && compareDeep(status, o.status, true) && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true) && compareDeep(condition, o.condition, true)
+           && compareDeep(performer, o.performer, true) && compareDeep(reason, o.reason, true) && compareDeep(method, o.method, true)
+           && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true) && compareDeep(mitigation, o.mitigation, true)
+           && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -1243,12 +1769,13 @@ public class RiskAssessment extends DomainResource {
         if (!(other instanceof RiskAssessment))
           return false;
         RiskAssessment o = (RiskAssessment) other;
-        return compareValues(date, o.date, true) && compareValues(mitigation, o.mitigation, true);
+        return compareValues(status, o.status, true) && compareValues(mitigation, o.mitigation, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(subject, date, condition
-          , encounter, performer, identifier, method, basis, prediction, mitigation);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent
+          , status, code, subject, context, occurrence, condition, performer, reason, method
+          , basis, prediction, mitigation, note);
       }
 
   @Override
@@ -1261,17 +1788,17 @@ public class RiskAssessment extends DomainResource {
    * <p>
    * Description: <b>When was assessment made?</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>RiskAssessment.date</b><br>
+   * Path: <b>RiskAssessment.occurrenceDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="RiskAssessment.date", description="When was assessment made?", type="date" )
+  @SearchParamDefinition(name="date", path="RiskAssessment.occurrence.as(DateTime)", description="When was assessment made?", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
    * Description: <b>When was assessment made?</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>RiskAssessment.date</b><br>
+   * Path: <b>RiskAssessment.occurrenceDateTime</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
@@ -1425,17 +1952,17 @@ public class RiskAssessment extends DomainResource {
    * <p>
    * Description: <b>Where was assessment performed?</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>RiskAssessment.encounter</b><br>
+   * Path: <b>RiskAssessment.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="RiskAssessment.encounter", description="Where was assessment performed?", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="RiskAssessment.context", description="Where was assessment performed?", type="reference", target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
    * <p>
    * Description: <b>Where was assessment performed?</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>RiskAssessment.encounter</b><br>
+   * Path: <b>RiskAssessment.context</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);

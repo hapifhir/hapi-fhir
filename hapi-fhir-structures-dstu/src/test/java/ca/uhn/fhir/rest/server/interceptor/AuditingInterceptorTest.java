@@ -62,7 +62,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class AuditingInterceptorTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;

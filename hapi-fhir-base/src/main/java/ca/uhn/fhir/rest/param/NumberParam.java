@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
 public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQueryParameterType {
@@ -49,7 +48,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	 *            A string value, e.g. "&gt;5.0"
 	 */
 	public NumberParam(String theValue) {
-		setValueAsQueryToken(null, theValue);
+		setValueAsQueryToken(null, null, null, theValue);
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	}
 	
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		if (getMissing() != null && isBlank(theValue)) {
 			return;
 		}

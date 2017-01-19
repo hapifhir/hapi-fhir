@@ -4,13 +4,13 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +36,7 @@ import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Base;
@@ -63,7 +63,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -195,7 +195,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					if (dates.isEmpty()) {
 						continue;
 					}
-					
+
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last());
 				} else if (nextObject instanceof StringType) {
 					// CarePlan.activitydate can be a string
@@ -344,14 +344,11 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 				if (nextObject instanceof Quantity) {
 					Quantity nextValue = (Quantity) nextObject;
-					if (nextValue.getValueElement().isEmpty()) {
-						continue;
-					}
-
-					ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValue.getValueElement().getValue(),
-							nextValue.getSystemElement().getValueAsString(), nextValue.getCode());
-					nextEntity.setResource(theEntity);
-					retVal.add(nextEntity);
+					addQuantity(theEntity, retVal, resourceName, nextValue);
+				} else if (nextObject instanceof Range) {
+					Range nextValue = (Range)nextObject;
+					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
+					addQuantity(theEntity, retVal, resourceName, nextValue.getHigh());
 				} else if (nextObject instanceof LocationPositionComponent) {
 					continue;
 				} else {
@@ -365,6 +362,17 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		}
 
 		return retVal;
+	}
+
+	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {
+		if (!nextValue.getValueElement().isEmpty()) {
+			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
+			String nextValueString = nextValue.getSystemElement().getValueAsString();
+			String nextValueCode = nextValue.getCode();
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
+			nextEntity.setResource(theEntity);
+			retVal.add(nextEntity);
+		}
 	}
 
 	/*
@@ -415,7 +423,9 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					if (nextObject instanceof HumanName) {
 						ArrayList<StringType> allNames = new ArrayList<StringType>();
 						HumanName nextHumanName = (HumanName) nextObject;
-						allNames.addAll(nextHumanName.getFamily());
+						if (isNotBlank(nextHumanName.getFamily())) {
+							allNames.add(nextHumanName.getFamilyElement());
+						}
 						allNames.addAll(nextHumanName.getGiven());
 						for (StringType nextName : allNames) {
 							addSearchTerm(theEntity, retVal, resourceName, nextName.getValue());
@@ -707,7 +717,10 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		try {
 			String[] nextPathsSplit = SPLIT.split(thePaths);
 			for (String nextPath : nextPathsSplit) {
-				values.addAll(fp.evaluate((Base) theResource, nextPath));
+				List<Base> allValues = fp.evaluate((Base) theResource, nextPath);
+				if (allValues.isEmpty() == false) {
+					values.addAll(allValues);
+				}
 			}
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);

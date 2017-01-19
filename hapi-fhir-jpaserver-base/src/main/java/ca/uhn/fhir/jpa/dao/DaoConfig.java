@@ -1,11 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -15,7 +10,7 @@ import org.apache.commons.lang3.time.DateUtils;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,37 +47,39 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	// ***
 	private int myDeferIndexingForCodesystemsOfSize = 2000;
+	private boolean myDeleteStaleSearches = true;
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
+	
 	private int myHardSearchLimit = 1000;
 	
 	private int myHardTagListLimit = 1000;
 	
 	private int myIncludeLimit = 2000;
-	
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private boolean myIndexContainedResources = true;
 
 	private List<IServerInterceptor> myInterceptors;
-
+	
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myMaximumExpansionSize = 5000;
-	
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+
 	private boolean mySchedulingDisabled;
 
 	private boolean mySubscriptionEnabled;
-
+	
 	private long mySubscriptionPollDelay = 1000;
 	
 	private Long mySubscriptionPurgeInactiveAfterMillis;
-	
+
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
 
 	/**
@@ -104,6 +101,9 @@ public class DaoConfig {
 	 * requests. After this
 	 * number of milliseconds, they will be deleted from the database, and any paging links
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour. 
+	 * </p>
+	 * <p>
+	 * @see To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
 	 * </p>
 	 * 
 	 * @since 1.5
@@ -127,7 +127,10 @@ public class DaoConfig {
 	 * Returns the interceptors which will be notified of operations.
 	 * 
 	 * @see #setInterceptors(List)
+	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
+	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
+	@Deprecated
 	public List<IServerInterceptor> getInterceptors() {
 		if (myInterceptors == null) {
 			return Collections.emptyList();
@@ -200,6 +203,18 @@ public class DaoConfig {
 	}
 	public boolean isAllowMultipleDelete() {
 		return myAllowMultipleDelete;
+	}
+
+	/**
+	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion 
+	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION. 
+	 * <p>
+	 * This feature is useful if you want to define your own process for deleting these (e.g. because
+	 * you are running in a cluster)
+	 * </p>
+	 */
+	public boolean isExpireSearchResults() {
+		return myDeleteStaleSearches;
 	}
 
 	/**
@@ -281,6 +296,18 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion 
+	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION. 
+	 * <p>
+	 * This feature is useful if you want to define your own process for deleting these (e.g. because
+	 * you are running in a cluster)
+	 * </p>
+	 */
+	public void setExpireSearchResults(boolean theDeleteStaleSearches) {
+		myDeleteStaleSearches = theDeleteStaleSearches;
+	}
+
+	/**
 	 * Sets the number of milliseconds that search results for a given client search 
 	 * should be preserved before being purged from the database.
 	 * <p>
@@ -289,7 +316,9 @@ public class DaoConfig {
 	 * number of milliseconds, they will be deleted from the database, and any paging links
 	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour. 
 	 * </p>
-	 * 
+	 * <p>
+	 * @see To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
+	 * </p>
 	 * @since 1.5
 	 */
 	public void setExpireSearchResultsAfterMillis(long theExpireSearchResultsAfterMillis) {
@@ -326,13 +355,10 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 * <p>
-	 * Registering server action interceptors against the JPA DAOs can be more powerful than registering them against the
-	 * {@link RestfulServer}, since the DAOs are able to break transactions into individual actions, and will account for
-	 * match URLs (e.g. if a request contains an If-None-Match URL, the ID will be adjusted to account for the matching
-	 * ID).
-	 * </p>
+	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
+	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
+	@Deprecated
 	public void setInterceptors(IServerInterceptor... theInterceptor) {
 		setInterceptors(new ArrayList<IServerInterceptor>());
 		if (theInterceptor != null && theInterceptor.length != 0) {
@@ -342,13 +368,10 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 * <p>
-	 * Registering server action interceptors against the JPA DAOs can be more powerful than registering them against the
-	 * {@link RestfulServer}, since the DAOs are able to break transactions into individual actions, and will account for
-	 * match URLs (e.g. if a request contains an If-None-Match URL, the ID will be adjusted to account for the matching
-	 * ID).
-	 * </p>
+	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
+	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
+	@Deprecated
 	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
 		myInterceptors = theInterceptors;
 	}
@@ -389,11 +412,11 @@ public class DaoConfig {
 		}
 		mySubscriptionPurgeInactiveAfterMillis = theMillis;
 	}
-
+	
 	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
 		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
-
+	
 	/**
 	 * This setting may be used to advise the server that any references found in
 	 * resources that have any of the base URLs given here will be replaced with

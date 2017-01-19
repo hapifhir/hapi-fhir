@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.
  */
@@ -57,9 +57,16 @@ public class RelatedPerson extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
+     * Whether this related person record is in active use.
+     */
+    @Child(name = "active", type = {BooleanType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="Whether this related person's record is in active use", formalDefinition="Whether this related person record is in active use." )
+    protected BooleanType active;
+
+    /**
      * The patient this person is related to.
      */
-    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "patient", type = {Patient.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The patient this person is related to", formalDefinition="The patient this person is related to." )
     protected Reference patient;
 
@@ -71,7 +78,7 @@ public class RelatedPerson extends DomainResource {
     /**
      * The nature of the relationship between a patient and the related person.
      */
-    @Child(name = "relationship", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "relationship", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The nature of the relationship", formalDefinition="The nature of the relationship between a patient and the related person." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/relatedperson-relationshiptype")
     protected CodeableConcept relationship;
@@ -79,21 +86,21 @@ public class RelatedPerson extends DomainResource {
     /**
      * A name associated with the person.
      */
-    @Child(name = "name", type = {HumanName.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "name", type = {HumanName.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected List<HumanName> name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      */
-    @Child(name = "gender", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "gender", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/administrative-gender")
     protected Enumeration<AdministrativeGender> gender;
@@ -101,32 +108,32 @@ public class RelatedPerson extends DomainResource {
     /**
      * The date on which the related person was born.
      */
-    @Child(name = "birthDate", type = {DateType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "birthDate", type = {DateType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The date on which the related person was born", formalDefinition="The date on which the related person was born." )
     protected DateType birthDate;
 
     /**
      * Address where the related person can be contacted or visited.
      */
-    @Child(name = "address", type = {Address.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "address", type = {Address.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Address where the related person can be contacted or visited", formalDefinition="Address where the related person can be contacted or visited." )
     protected List<Address> address;
 
     /**
      * Image of the person.
      */
-    @Child(name = "photo", type = {Attachment.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "photo", type = {Attachment.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
     protected List<Attachment> photo;
 
     /**
      * The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.
      */
-    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "period", type = {Period.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown." )
     protected Period period;
 
-    private static final long serialVersionUID = 66582675L;
+    private static final long serialVersionUID = 1633785157L;
 
   /**
    * Constructor
@@ -194,6 +201,51 @@ public class RelatedPerson extends DomainResource {
         addIdentifier();
       }
       return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #active} (Whether this related person record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public BooleanType getActiveElement() { 
+      if (this.active == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RelatedPerson.active");
+        else if (Configuration.doAutoCreate())
+          this.active = new BooleanType(); // bb
+      return this.active;
+    }
+
+    public boolean hasActiveElement() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    /**
+     * @param value {@link #active} (Whether this related person record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public RelatedPerson setActiveElement(BooleanType value) { 
+      this.active = value;
+      return this;
+    }
+
+    /**
+     * @return Whether this related person record is in active use.
+     */
+    public boolean getActive() { 
+      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
+    }
+
+    /**
+     * @param value Whether this related person record is in active use.
+     */
+    public RelatedPerson setActive(boolean value) { 
+        if (this.active == null)
+          this.active = new BooleanType();
+        this.active.setValue(value);
+      return this;
     }
 
     /**
@@ -601,6 +653,7 @@ public class RelatedPerson extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("active", "boolean", "Whether this related person record is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("patient", "Reference(Patient)", "The patient this person is related to.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, java.lang.Integer.MAX_VALUE, relationship));
         childrenList.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
@@ -616,6 +669,7 @@ public class RelatedPerson extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // BooleanType
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : this.name.toArray(new Base[this.name.size()]); // HumanName
@@ -635,6 +689,9 @@ public class RelatedPerson extends DomainResource {
         switch (hash) {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          break;
+        case -1422950650: // active
+          this.active = castToBoolean(value); // BooleanType
           break;
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
@@ -672,6 +729,8 @@ public class RelatedPerson extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("active"))
+          this.active = castToBoolean(value); // BooleanType
         else if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
         else if (name.equals("relationship"))
@@ -698,6 +757,7 @@ public class RelatedPerson extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
+        case -1422950650: throw new FHIRException("Cannot make property active as it is not a complex type"); // BooleanType
         case -791418107:  return getPatient(); // Reference
         case -261851592:  return getRelationship(); // CodeableConcept
         case 3373707:  return addName(); // HumanName
@@ -716,6 +776,9 @@ public class RelatedPerson extends DomainResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
           return addIdentifier();
+        }
+        else if (name.equals("active")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedPerson.active");
         }
         else if (name.equals("patient")) {
           this.patient = new Reference();
@@ -764,6 +827,7 @@ public class RelatedPerson extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.active = active == null ? null : active.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.relationship = relationship == null ? null : relationship.copy();
         if (name != null) {
@@ -803,10 +867,10 @@ public class RelatedPerson extends DomainResource {
         if (!(other instanceof RelatedPerson))
           return false;
         RelatedPerson o = (RelatedPerson) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true) && compareDeep(gender, o.gender, true)
-           && compareDeep(birthDate, o.birthDate, true) && compareDeep(address, o.address, true) && compareDeep(photo, o.photo, true)
-           && compareDeep(period, o.period, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(patient, o.patient, true)
+           && compareDeep(relationship, o.relationship, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
+           && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true) && compareDeep(address, o.address, true)
+           && compareDeep(photo, o.photo, true) && compareDeep(period, o.period, true);
       }
 
       @Override
@@ -816,12 +880,13 @@ public class RelatedPerson extends DomainResource {
         if (!(other instanceof RelatedPerson))
           return false;
         RelatedPerson o = (RelatedPerson) other;
-        return compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true);
+        return compareValues(active, o.active, true) && compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, patient, relationship
-          , name, telecom, gender, birthDate, address, photo, period);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, patient
+          , relationship, name, telecom, gender, birthDate, address, photo, period);
       }
 
   @Override
@@ -832,17 +897,17 @@ public class RelatedPerson extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>A patient Identifier</b><br>
+   * Description: <b>An Identifier of the RelatedPerson</b><br>
    * Type: <b>token</b><br>
    * Path: <b>RelatedPerson.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="An Identifier of the RelatedPerson", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>A patient Identifier</b><br>
+   * Description: <b>An Identifier of the RelatedPerson</b><br>
    * Type: <b>token</b><br>
    * Path: <b>RelatedPerson.identifier</b><br>
    * </p>
@@ -852,17 +917,17 @@ public class RelatedPerson extends DomainResource {
  /**
    * Search parameter: <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>RelatedPerson.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string" )
+  @SearchParamDefinition(name="address", path="RelatedPerson.address", description="A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
-   * Description: <b>An address in any kind of address/part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>RelatedPerson.address</b><br>
    * </p>
@@ -928,6 +993,26 @@ public class RelatedPerson extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam GENDER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_GENDER);
+
+ /**
+   * Search parameter: <b>active</b>
+   * <p>
+   * Description: <b>Wheter the related person record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RelatedPerson.active</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="active", path="RelatedPerson.active", description="Wheter the related person record is active", type="token" )
+  public static final String SP_ACTIVE = "active";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>active</b>
+   * <p>
+   * Description: <b>Wheter the related person record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RelatedPerson.active</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTIVE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTIVE);
 
  /**
    * Search parameter: <b>address-postalcode</b>
@@ -1038,17 +1123,17 @@ public class RelatedPerson extends DomainResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>A portion of name in any name part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>RelatedPerson.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string" )
+  @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>A portion of name in any name part</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in the HumanName, including family, give, prefix, suffix, suffix, and/or text</b><br>
    * Type: <b>string</b><br>
    * Path: <b>RelatedPerson.name</b><br>
    * </p>

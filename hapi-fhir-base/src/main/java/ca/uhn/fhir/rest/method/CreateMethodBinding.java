@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,10 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -79,9 +81,13 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 			String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInUrlForCreate", theUrlId);
 			throw new InvalidRequestException(msg);
 		}
-		if (isNotBlank(theResourceId)) {
-			String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInBodyForCreate", theResourceId);
-			throw new InvalidRequestException(msg);
+		if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+			if (isNotBlank(theResourceId)) {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInBodyForCreate", theResourceId);
+				throw new InvalidRequestException(msg);
+			}
+		} else {
+			theResource.setId((IIdType)null);
 		}
 	}
 

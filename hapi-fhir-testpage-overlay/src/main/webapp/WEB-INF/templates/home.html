@@ -8,7 +8,7 @@
 
 	<body>
 		<form action="" method="get" id="outerForm">
-		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/> 
+		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"></input> 
 
 		<div th:replace="tmpl-navbar-top :: top" ></div>
 		
@@ -25,7 +25,7 @@
 					<!-- ** Default Home                                         ** -->
 					<!-- ********************************************************** -->
 
-						<div th:replace="tmpl-home-welcome :: banner"/>
+						<div th:replace="tmpl-home-welcome :: banner"></div>
 
 						<table class="table table-bordered table-striped" th:if="${resourceName.empty}">
 							<colgroup>
@@ -72,7 +72,7 @@
 								    	<div class="col-sm-3 form-group">
 											<a type="button" id="fetch-conformance-btn"
 												class="btn btn-primary btn-block">
-												<i class="fa fa-dot-circle-o"></i>
+												<span class="fa fa-dot-circle-o"></i>
 												Conformance
 											</a>
 											<script type="text/javascript">
@@ -96,7 +96,7 @@
 								    	<div class="col-sm-3">
 										<button type="button" id="server-history-btn"
 											class="btn btn-primary btn-block">
-											<i class="fa fa-calendar"></i>
+											<span class="fa fa-calendar"></i>
 											History
 										</button>
 								    	</div>
@@ -156,7 +156,7 @@
 								    <div class="row-fluid">
 								    	<div class="col-sm-3">
 											<button type="button" id="transaction-btn" class="btn btn-primary btn-block">
-												<i class="fa fa-files-o"></i>
+												<span class="fa fa-files-o"></i>
 												Transaction
 											</button>
 										</div>
@@ -209,7 +209,7 @@
 								    <div class="row-fluid">
 								    	<div class="col-sm-3 form-group">
 											<button type="button" id="get-server-tags-btn" class="btn btn-primary btn-block">
-												<i class="fa fa-tags"></i>
+												<span class="fa fa-tags"></i>
 												Get Tags
 											</button>
 											<script type="text/javascript">

@@ -59,6 +59,10 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			myCtx = FhirContext.forDstu2();
 		} else if ("HL7ORG_DSTU2".equals(fhirVersion)) {
 			myCtx = FhirContext.forDstu2Hl7Org();
+		} else if ("DSTU2_1".equals(fhirVersion)) {
+			myCtx = FhirContext.forDstu2_1();
+		} else if ("DSTU3".equals(fhirVersion)) {
+			myCtx = FhirContext.forDstu3();
 		} else {
 			throw new MojoFailureException("Unknown version: " + fhirVersion);
 		}
@@ -102,6 +106,13 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 					if (nextEntry.getResource() instanceof org.hl7.fhir.dstu3.model.DomainResource) {
 						((org.hl7.fhir.dstu3.model.DomainResource) nextEntry.getResource()).getText().getDiv().setValueAsString((String) null);
 						((org.hl7.fhir.dstu3.model.DomainResource) nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
+					}
+				}
+			} else if (input instanceof org.hl7.fhir.dstu2016may.model.Bundle) {
+				for (org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent nextEntry : ((org.hl7.fhir.dstu2016may.model.Bundle) input).getEntry()) {
+					if (nextEntry.getResource() instanceof org.hl7.fhir.dstu2016may.model.DomainResource) {
+						((org.hl7.fhir.dstu2016may.model.DomainResource) nextEntry.getResource()).getText().getDiv().setValueAsString((String) null);
+						((org.hl7.fhir.dstu2016may.model.DomainResource) nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
 					}
 				}
 			} else if (input instanceof DomainResource) {
@@ -161,6 +172,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 		FhirContext ctxDstu2 = FhirContext.forDstu2();
+		FhirContext ctxDstu2_1 = FhirContext.forDstu2_1();
 		FhirContext ctxDstu3 = FhirContext.forDstu3();
 		
 		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
@@ -208,6 +220,22 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		m.myCtx = ctxDstu3;
 		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset");
 		m.fhirVersion = "DSTU3";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxDstu2_1;
+		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/profile");
+		m.fhirVersion = "DSTU2_1";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxDstu2_1;
+		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2.1/src/main/resources/org/hl7/fhir/dstu2016may/valueset");
+		m.fhirVersion = "DSTU2_1";
 		m.execute();
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();

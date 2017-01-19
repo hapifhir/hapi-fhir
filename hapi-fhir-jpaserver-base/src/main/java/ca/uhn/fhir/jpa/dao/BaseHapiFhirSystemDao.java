@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
@@ -185,10 +186,12 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
-		notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
-
+		if (theRequestDetails != null) {
+			// Notify interceptors
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
+			notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
+		}
+		
 		StopWatch w = new StopWatch();
 		IBundleProvider retVal = super.history(null, null, theSince, theUntil);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
@@ -290,5 +293,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		}
 		return entity;
 	}
+
 
 }

@@ -54,7 +54,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class ReferenceParameterTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static ReferenceParam ourLastRefParam;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
 	private static int ourPort;

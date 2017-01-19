@@ -448,7 +448,7 @@ public class RequestValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Conformance"));
+		assertThat(responseContent, containsString("CapabilityStatement"));
 	}
 
 	@Test

@@ -1,13 +1,8 @@
 package org.hl7.fhir.dstu3.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.hl7.fhir.dstu3.model.ExpressionNode.CollectionStatus;
-import org.hl7.fhir.dstu3.model.ExpressionNode.TypeDetails;
 import org.hl7.fhir.utilities.Utilities;
 
 public class ExpressionNode {
@@ -45,7 +40,7 @@ public class ExpressionNode {
     
     Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Item /*implicit from name[]*/, As, Is, Single,
     First, Last, Tail, Skip, Take, Iif, ToInteger, ToDecimal, ToString, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
-    Children, Descendents, MemberOf, Trace, Today, Now, Resolve, Extension;
+    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, HasValue;
 
     public static Function fromCode(String name) {
       if (name.equals("empty")) return Function.Empty;
@@ -82,13 +77,14 @@ public class ExpressionNode {
       if (name.equals("replace")) return Function.Replace;
       if (name.equals("length")) return Function.Length;
       if (name.equals("children")) return Function.Children;
-      if (name.equals("descendents")) return Function.Descendents;
+      if (name.equals("descendants")) return Function.Descendants;
       if (name.equals("memberOf")) return Function.MemberOf;
       if (name.equals("trace")) return Function.Trace;
       if (name.equals("today")) return Function.Today;
       if (name.equals("now")) return Function.Now;
       if (name.equals("resolve")) return Function.Resolve;
       if (name.equals("extension")) return Function.Extension;
+      if (name.equals("hasValue")) return Function.HasValue;
       return null;
     }
     public String toCode() {
@@ -127,13 +123,14 @@ public class ExpressionNode {
       case Replace : return "replace";
       case Length : return "length";
       case Children : return "children";
-      case Descendents : return "descendents";
+      case Descendants : return "descendants";
       case MemberOf : return "memberOf";
       case Trace : return "trace";
       case Today : return "today";
       case Now : return "now";
       case Resolve : return "resolve";
       case Extension : return "extension";
+      case HasValue : return "hasValue";
       default: return "??";
       }
     }
@@ -229,89 +226,10 @@ public class ExpressionNode {
 	}
 
   public enum CollectionStatus {
-    SINGLETON, ORDERED, UNORDERED
+    SINGLETON, ORDERED, UNORDERED;
   }
-
-  public static class TypeDetails {
-    private Set<String> types = new HashSet<String>();
-    private CollectionStatus collectionStatus;
-    public TypeDetails(CollectionStatus collectionStatus, String... names) {
-      super();
-      this.collectionStatus = collectionStatus;
-      for (String n : names)
-        this.types.add(n);
-    }
-    public TypeDetails(CollectionStatus collectionStatus, Set<String> names) {
-      super();
-      this.collectionStatus = collectionStatus;
-      for (String n : names)
-        this.types.add(n);
-    }
-    public void addType(String n) {
-      this.types.add(n);      
-    }
-    public void addTypes(Collection<String> n) {
-      this.types.addAll(n);      
-    }
-    public boolean hasType(String... tn) {
-      for (String t: tn)
-      if (types.contains(t))
-        return true;
-      return false;
-    }
-    public void update(TypeDetails source) {
-      types.addAll(source.types);
-      if (collectionStatus == null)
-        collectionStatus = source.collectionStatus;
-      else if (source.collectionStatus == CollectionStatus.UNORDERED)
-        collectionStatus = source.collectionStatus;
-      else
-        collectionStatus = CollectionStatus.ORDERED;
-    }
-    public TypeDetails union(TypeDetails right) {
-      TypeDetails result = new TypeDetails(null);
-      if (right.collectionStatus == CollectionStatus.UNORDERED || collectionStatus == CollectionStatus.UNORDERED)
-        result.collectionStatus = CollectionStatus.UNORDERED;
-      else 
-        result.collectionStatus = CollectionStatus.ORDERED;
-      result.types.addAll(types);
-      result.types.addAll(right.types);
-      return result;
-    }
-    
-    public boolean hasNoTypes() {
-      return types.isEmpty();
-    }
-    public Set<String> getTypes() {
-      return types;
-    }
-    public TypeDetails toSingleton() {
-      TypeDetails result = new TypeDetails(CollectionStatus.SINGLETON);
-      result.types.addAll(types);
-      return result;
-    }
-    public CollectionStatus getCollectionStatus() {
-      return collectionStatus;
-    }
-    public boolean hasType(Set<String> tn) {
-      for (String t: tn)
-      if (types.contains(t))
-        return true;
-      return false;
-    }
-    public String describe() {
-      return types.toString();
-    }
-    public String getType() {
-      for (String t : types)
-        return t;
-      return null;
-    }
-    
-  }
-
-
-	//the expression will have one of either name or constant
+  
+  //the expression will have one of either name or constant
 	private String uniqueId;
 	private Kind kind;
 	private String name;

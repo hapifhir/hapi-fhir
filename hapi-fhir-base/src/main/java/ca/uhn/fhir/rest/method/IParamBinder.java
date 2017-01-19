@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,6 @@ interface IParamBinder<T> {
 	
 	List<IQueryParameterOr<?>> encode(FhirContext theContext, T theString) throws InternalErrorException;
 
-	T parse(String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
+	T parse(FhirContext theContext, String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
 
 }

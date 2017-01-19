@@ -1,0 +1,47 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://sample/ValueSet/education-levels",
+  "version": "1",
+  "name": "Education Levels",
+  "status": "draft",
+  "compose": {
+    "include": [
+      {
+        "filter": [
+          {
+            "property": "n",
+            "op": "n",
+            "value": "365460000"
+          }
+        ],
+        "system": "http://snomed.info/sct"
+      }
+    ],
+    "exclude": [
+      {
+        "concept": [
+          {
+            "code": "224298008"
+          },
+          {
+            "code": "365460000"
+          },
+          {
+            "code": "473462005"
+          },
+          {
+            "code": "424587006"
+          }
+        ],
+        "system": "http://snomed.info/sct"
+      }
+    ]
+  },
+  "description": "A\nselection of Education Levels",
+  "text": {
+    "status": "generated",
+    "div": "<div\nxmlns=\"http://www.w3.org/1999/xhtml\"><h2>Education\nLevels</h2><tt>http://csiro.au/ValueSet/education-levels</tt><p>A selection of\nEducation Levels</p></div>"
+  },
+  "experimental": true,
+  "date": "2016-07-26"
+}

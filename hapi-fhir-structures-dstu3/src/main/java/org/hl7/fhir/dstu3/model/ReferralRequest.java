@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.
  */
@@ -302,7 +302,7 @@ public class ReferralRequest extends DomainResource {
     /**
      * Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.
      */
-    @Child(name = "basedOn", type = {ReferralRequest.class, CarePlan.class, DiagnosticOrder.class, ProcedureRequest.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "basedOn", type = {ReferralRequest.class, CarePlan.class, DiagnosticRequest.class, ProcedureRequest.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Request fulfilled by this request", formalDefinition="Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part." )
     protected List<Reference> basedOn;
     /**
@@ -346,7 +346,7 @@ public class ReferralRequest extends DomainResource {
      */
     @Child(name = "priority", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Urgency of referral / transfer of care request", formalDefinition="An indication of the urgency of referral (or where applicable the type of transfer of care) request." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnostic-order-priority")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-priority")
     protected CodeableConcept priority;
 
     /**
@@ -1223,7 +1223,7 @@ public class ReferralRequest extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Business identifier that uniquely identifies the referral/care transfer request instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|DiagnosticOrder|ProcedureRequest)", "Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|DiagnosticRequest|ProcedureRequest)", "Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         childrenList.add(new Property("parent", "Identifier", "The business identifier of the logical \"grouping\" request/order that this referral is a part of.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("status", "code", "The status of the authorization/intention reflected by the referral request record.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("category", "code", "Distinguishes the \"level\" of authorization/demand implicit in this request.", 0, java.lang.Integer.MAX_VALUE, category));
@@ -1791,7 +1791,7 @@ public class ReferralRequest extends DomainResource {
    * Path: <b>ReferralRequest.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference", target={CarePlan.class, DiagnosticOrder.class, ProcedureRequest.class, ReferralRequest.class } )
+  @SearchParamDefinition(name="basedon", path="ReferralRequest.basedOn", description="Request being fulfilled", type="reference", target={CarePlan.class, DiagnosticRequest.class, ProcedureRequest.class, ReferralRequest.class } )
   public static final String SP_BASEDON = "basedon";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>basedon</b>

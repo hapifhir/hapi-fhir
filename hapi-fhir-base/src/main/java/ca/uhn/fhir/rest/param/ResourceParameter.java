@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,11 +210,12 @@ public class ResourceParameter implements IParameter {
 		if (IBaseBinary.class.isAssignableFrom(theResourceType)) {
 			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (EncodingEnum.forContentTypeStrict(ct) == null) {
-			FhirContext ctx = theRequest.getServer().getFhirContext();
-			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
-			binary.setContentType(ct);
-			binary.setContent(theRequest.loadRequestContents());
-			retVal = binary;
+				FhirContext ctx = theRequest.getServer().getFhirContext();
+				IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
+				binary.setId(theRequest.getId());
+				binary.setContentType(ct);
+				binary.setContent(theRequest.loadRequestContents());
+				retVal = binary;
 			}
 		}
 		

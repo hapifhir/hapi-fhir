@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A container for a collection of resources.
  */
@@ -63,7 +63,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         TRANSACTION, 
         /**
-         * The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.
+         * The bundle is a transaction response. Because the response is a transaction response, the transaction has succeeded, and all responses are error free.
          */
         TRANSACTIONRESPONSE, 
         /**
@@ -83,7 +83,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         SEARCHSET, 
         /**
-         * The bundle is a set of resources collected into a single document for ease of distribution.
+         * The bundle is a set of resources collected into a single package for ease of distribution.
          */
         COLLECTION, 
         /**
@@ -149,12 +149,12 @@ public class Bundle extends Resource implements IBaseBundle {
             case DOCUMENT: return "The bundle is a document. The first resource is a Composition.";
             case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader.";
             case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit.";
-            case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free.";
+            case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transaction has succeeded, and all responses are error free.";
             case BATCH: return "The bundle is a transaction - intended to be processed by a server as a group of actions.";
             case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.";
             case HISTORY: return "The bundle is a list of resources from a history interaction on a server.";
             case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.";
-            case COLLECTION: return "The bundle is a set of resources collected into a single document for ease of distribution.";
+            case COLLECTION: return "The bundle is a set of resources collected into a single package for ease of distribution.";
             default: return "?";
           }
         }
@@ -482,10 +482,10 @@ public class Bundle extends Resource implements IBaseBundle {
     @Block()
     public static class BundleLinkComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
+         * A name which details the functional use for this link - see [http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1](http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1).
          */
         @Child(name = "relation", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="http://www.iana.org/assignments/link-relations/link-relations.xhtml", formalDefinition="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]." )
+        @Description(shortDefinition="See http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1", formalDefinition="A name which details the functional use for this link - see [http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1](http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1)." )
         protected StringType relation;
 
         /**
@@ -514,7 +514,7 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
         /**
-         * @return {@link #relation} (A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].). This is the underlying object with id, value and extensions. The accessor "getRelation" gives direct access to the value
+         * @return {@link #relation} (A name which details the functional use for this link - see [http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1](http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1).). This is the underlying object with id, value and extensions. The accessor "getRelation" gives direct access to the value
          */
         public StringType getRelationElement() { 
           if (this.relation == null)
@@ -534,7 +534,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #relation} (A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].). This is the underlying object with id, value and extensions. The accessor "getRelation" gives direct access to the value
+         * @param value {@link #relation} (A name which details the functional use for this link - see [http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1](http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1).). This is the underlying object with id, value and extensions. The accessor "getRelation" gives direct access to the value
          */
         public BundleLinkComponent setRelationElement(StringType value) { 
           this.relation = value;
@@ -542,14 +542,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
+         * @return A name which details the functional use for this link - see [http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1](http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1).
          */
         public String getRelation() { 
           return this.relation == null ? null : this.relation.getValue();
         }
 
         /**
-         * @param value A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
+         * @param value A name which details the functional use for this link - see [http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1](http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1).
          */
         public BundleLinkComponent setRelation(String value) { 
             if (this.relation == null)
@@ -605,7 +605,7 @@ public class Bundle extends Resource implements IBaseBundle {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("relation", "string", "A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].", 0, java.lang.Integer.MAX_VALUE, relation));
+          childrenList.add(new Property("relation", "string", "A name which details the functional use for this link - see [http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1](http://www.iana.org/assignments/link-relations/link-relations.xhtml#link-relations-1).", 0, java.lang.Integer.MAX_VALUE, relation));
           childrenList.add(new Property("url", "uri", "The reference details for the link.", 0, java.lang.Integer.MAX_VALUE, url));
         }
 
@@ -1929,10 +1929,10 @@ public class Bundle extends Resource implements IBaseBundle {
         protected UriType location;
 
         /**
-         * The etag for the resource, it the operation for the entry produced a versioned resource.
+         * The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         @Child(name = "etag", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The etag for the resource (if relevant)", formalDefinition="The etag for the resource, it the operation for the entry produced a versioned resource." )
+        @Description(shortDefinition="The etag for the resource (if relevant)", formalDefinition="The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency))." )
         protected StringType etag;
 
         /**
@@ -2061,7 +2061,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #etag} (The etag for the resource, it the operation for the entry produced a versioned resource.). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
+         * @return {@link #etag} (The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
          */
         public StringType getEtagElement() { 
           if (this.etag == null)
@@ -2081,7 +2081,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #etag} (The etag for the resource, it the operation for the entry produced a versioned resource.). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
+         * @param value {@link #etag} (The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
          */
         public BundleEntryResponseComponent setEtagElement(StringType value) { 
           this.etag = value;
@@ -2089,14 +2089,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The etag for the resource, it the operation for the entry produced a versioned resource.
+         * @return The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         public String getEtag() { 
           return this.etag == null ? null : this.etag.getValue();
         }
 
         /**
-         * @param value The etag for the resource, it the operation for the entry produced a versioned resource.
+         * @param value The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         public BundleEntryResponseComponent setEtag(String value) { 
           if (Utilities.noString(value))
@@ -2181,7 +2181,7 @@ public class Bundle extends Resource implements IBaseBundle {
           super.listChildren(childrenList);
           childrenList.add(new Property("status", "string", "The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.", 0, java.lang.Integer.MAX_VALUE, status));
           childrenList.add(new Property("location", "uri", "The location header created by processing this operation.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("etag", "string", "The etag for the resource, it the operation for the entry produced a versioned resource.", 0, java.lang.Integer.MAX_VALUE, etag));
+          childrenList.add(new Property("etag", "string", "The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, java.lang.Integer.MAX_VALUE, etag));
           childrenList.add(new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, java.lang.Integer.MAX_VALUE, lastModified));
           childrenList.add(new Property("outcome", "Resource", "An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction.", 0, java.lang.Integer.MAX_VALUE, outcome));
         }
@@ -2326,34 +2326,41 @@ public class Bundle extends Resource implements IBaseBundle {
     protected Enumeration<BundleType> type;
 
     /**
+     * A persistent identifier for the batch that won't change as a batch is copied from server to server.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Persistent identifier for the bundle", formalDefinition="A persistent identifier for the batch that won't change as a batch is copied from server to server." )
+    protected Identifier identifier;
+
+    /**
      * If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).
      */
-    @Child(name = "total", type = {UnsignedIntType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "total", type = {UnsignedIntType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If search, the total number of matches", formalDefinition="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)." )
     protected UnsignedIntType total;
 
     /**
      * A series of links that provide context to this bundle.
      */
-    @Child(name = "link", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "link", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Links related to this Bundle", formalDefinition="A series of links that provide context to this bundle." )
     protected List<BundleLinkComponent> link;
 
     /**
      * An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).
      */
-    @Child(name = "entry", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "entry", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Entry in the bundle - will have a resource, or information", formalDefinition="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)." )
     protected List<BundleEntryComponent> entry;
 
     /**
      * Digital Signature - base64 encoded. XML DigSIg or a JWT.
      */
-    @Child(name = "signature", type = {Signature.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "signature", type = {Signature.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Digital Signature", formalDefinition="Digital Signature - base64 encoded. XML DigSIg or a JWT." )
     protected Signature signature;
 
-    private static final long serialVersionUID = -2041954721L;
+    private static final long serialVersionUID = -1833647607L;
 
   /**
    * Constructor
@@ -2412,6 +2419,30 @@ public class Bundle extends Resource implements IBaseBundle {
         if (this.type == null)
           this.type = new Enumeration<BundleType>(new BundleTypeEnumFactory());
         this.type.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #identifier} (A persistent identifier for the batch that won't change as a batch is copied from server to server.)
+     */
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Bundle.identifier");
+        else if (Configuration.doAutoCreate())
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #identifier} (A persistent identifier for the batch that won't change as a batch is copied from server to server.)
+     */
+    public Bundle setIdentifier(Identifier value) { 
+      this.identifier = value;
       return this;
     }
 
@@ -2640,6 +2671,7 @@ public class Bundle extends Resource implements IBaseBundle {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "code", "Indicates the purpose of this bundle- how it was intended to be used.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("identifier", "Identifier", "A persistent identifier for the batch that won't change as a batch is copied from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("total", "unsignedInt", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, java.lang.Integer.MAX_VALUE, total));
         childrenList.add(new Property("link", "", "A series of links that provide context to this bundle.", 0, java.lang.Integer.MAX_VALUE, link));
         childrenList.add(new Property("entry", "", "An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry));
@@ -2650,6 +2682,7 @@ public class Bundle extends Resource implements IBaseBundle {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<BundleType>
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 110549828: /*total*/ return this.total == null ? new Base[0] : new Base[] {this.total}; // UnsignedIntType
         case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // BundleLinkComponent
         case 96667762: /*entry*/ return this.entry == null ? new Base[0] : this.entry.toArray(new Base[this.entry.size()]); // BundleEntryComponent
@@ -2664,6 +2697,9 @@ public class Bundle extends Resource implements IBaseBundle {
         switch (hash) {
         case 3575610: // type
           this.type = new BundleTypeEnumFactory().fromType(value); // Enumeration<BundleType>
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           break;
         case 110549828: // total
           this.total = castToUnsignedInt(value); // UnsignedIntType
@@ -2686,6 +2722,8 @@ public class Bundle extends Resource implements IBaseBundle {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
           this.type = new BundleTypeEnumFactory().fromType(value); // Enumeration<BundleType>
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
         else if (name.equals("total"))
           this.total = castToUnsignedInt(value); // UnsignedIntType
         else if (name.equals("link"))
@@ -2702,6 +2740,7 @@ public class Bundle extends Resource implements IBaseBundle {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<BundleType>
+        case -1618432855:  return getIdentifier(); // Identifier
         case 110549828: throw new FHIRException("Cannot make property total as it is not a complex type"); // UnsignedIntType
         case 3321850:  return addLink(); // BundleLinkComponent
         case 96667762:  return addEntry(); // BundleEntryComponent
@@ -2715,6 +2754,10 @@ public class Bundle extends Resource implements IBaseBundle {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type Bundle.type");
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("total")) {
           throw new FHIRException("Cannot call addChild on a primitive type Bundle.total");
@@ -2742,6 +2785,7 @@ public class Bundle extends Resource implements IBaseBundle {
         Bundle dst = new Bundle();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.total = total == null ? null : total.copy();
         if (link != null) {
           dst.link = new ArrayList<BundleLinkComponent>();
@@ -2768,8 +2812,9 @@ public class Bundle extends Resource implements IBaseBundle {
         if (!(other instanceof Bundle))
           return false;
         Bundle o = (Bundle) other;
-        return compareDeep(type, o.type, true) && compareDeep(total, o.total, true) && compareDeep(link, o.link, true)
-           && compareDeep(entry, o.entry, true) && compareDeep(signature, o.signature, true);
+        return compareDeep(type, o.type, true) && compareDeep(identifier, o.identifier, true) && compareDeep(total, o.total, true)
+           && compareDeep(link, o.link, true) && compareDeep(entry, o.entry, true) && compareDeep(signature, o.signature, true)
+          ;
       }
 
       @Override
@@ -2783,8 +2828,8 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, total, link, entry
-          , signature);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, identifier, total
+          , link, entry, signature);
       }
 
   @Override
@@ -2793,21 +2838,41 @@ public class Bundle extends Resource implements IBaseBundle {
    }
 
  /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Persistent identifier for the bundle</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Bundle.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="identifier", path="Bundle.identifier", description="Persistent identifier for the bundle", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Persistent identifier for the bundle</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Bundle.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
    * Search parameter: <b>composition</b>
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to searches its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="composition", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference", target={Composition.class } )
+  @SearchParamDefinition(name="composition", path="Bundle.entry[0].resource", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference", target={Composition.class } )
   public static final String SP_COMPOSITION = "composition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>composition</b>
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to searches its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam COMPOSITION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_COMPOSITION);
@@ -2843,17 +2908,17 @@ public class Bundle extends Resource implements IBaseBundle {
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "message" - this is a message header, and this parameter provides access to search its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="message", path="Bundle.entry.resource[0]", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference", target={MessageHeader.class } )
+  @SearchParamDefinition(name="message", path="Bundle.entry[0].resource", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference", target={MessageHeader.class } )
   public static final String SP_MESSAGE = "message";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>message</b>
    * <p>
    * Description: <b>The first resource in the bundle, if the bundle type is "message" - this is a message header, and this parameter provides access to search its contents</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>Bundle.entry.resource(0)</b><br>
+   * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam MESSAGE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_MESSAGE);

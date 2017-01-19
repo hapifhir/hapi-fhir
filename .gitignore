@@ -1,3 +1,4 @@
+.attach*
 /bin
 /target
 target/
@@ -16,6 +17,7 @@ tmp.txt
 tmp.txt
 ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/
 ca.uhn.fhir.jpa.entity.ResourceTable/
+ca.uhn.fhir.jpa.entity.TermConcept/
 
 # Vagrant stuff.
 .vagrant
@@ -123,6 +125,7 @@ tmp/
 *~.nib
 local.properties
 .loadpath
+*.hprof
 
 # External tool builders
 .externalToolBuilders/

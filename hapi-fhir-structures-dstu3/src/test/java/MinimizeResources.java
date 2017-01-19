@@ -20,7 +20,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class MinimizeResources {
 private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MinimizeResources.class);
 
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 
 	@AfterClass
 	public static void afterClassClearContext() {

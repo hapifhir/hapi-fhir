@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource identifies an instance or a type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.
  */
@@ -179,7 +179,7 @@ public class Device extends DomainResource {
     /**
      * Code or identifier to identify a kind of device.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What kind of device this is", formalDefinition="Code or identifier to identify a kind of device." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-kind")
     protected CodeableConcept type;
@@ -290,14 +290,6 @@ public class Device extends DomainResource {
    */
     public Device() {
       super();
-    }
-
-  /**
-   * Constructor
-   */
-    public Device(CodeableConcept type) {
-      super();
-      this.type = type;
     }
 
     /**

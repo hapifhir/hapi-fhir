@@ -142,7 +142,7 @@
 				<h4>Search - Multi-valued Parameters (ALL/AND)</h4>
 				<p>
 					To search for a set of possible values where <b>ALL</b> should be matched,
-					you can provide multiple instances of a marameter, as shown in the example below.
+					you can provide multiple instances of a parameter, as shown in the example below.
 					This leads to a URL resembling <code>?address=Toronto&amp;address=Ontario&amp;address=Canada</code> 
 				</p>
 				<macro name="snippet">

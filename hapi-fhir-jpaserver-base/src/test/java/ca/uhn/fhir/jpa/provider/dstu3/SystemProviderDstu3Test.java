@@ -11,6 +11,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -85,7 +86,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 		
 		Patient p = new Patient();
-		p.addName().addFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
+		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
 		myPatientDao.create(p, mySrd);
 		
 		Organization o = new Organization();
@@ -144,7 +145,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 		
 		Patient p = new Patient();
-		p.addName().addFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
+		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		ourClient.read().resource(Patient.class).withId(id);
@@ -251,7 +252,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		HttpGet get = new HttpGet(ourServerBase);
 //		get.addHeader("Accept", "application/xml, text/html");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
-		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/json+fhir"));
+		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/fhir+json"));
 	}
 	
 
@@ -304,7 +305,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("Name" + i);
+			p.addName().setFamily("Name" + i);
 			ourClient.create().resource(p).execute();
 		}
 
@@ -333,7 +334,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("Name" + i);
+			p.addName().setFamily("Name" + i);
 			ourClient.create().resource(p).execute();
 		}
 
@@ -385,7 +386,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testSuggestKeywords() throws Exception {
 
 		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
+		patient.addName().setFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
@@ -421,7 +422,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testSuggestKeywordsInvalid() throws Exception {
 		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
+		patient.addName().setFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
@@ -473,7 +474,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
-		String bundle = IOUtils.toString(bundleRes);
+		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
@@ -491,7 +492,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.toString(), containsString(""));
+			assertThat(e.toString(), containsString("missing or invalid HTTP Verb"));
 		}
 	}
 
@@ -591,7 +592,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testTransactionSearch() throws Exception {
 		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("PATIENT_" + i);
+			p.addName().setFamily("PATIENT_" + i);
 			myPatientDao.create(p, mySrd);
 		}
 
@@ -615,7 +616,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	public void testTransactionCount() throws Exception {
 		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
-			p.addName().addFamily("PATIENT_" + i);
+			p.addName().setFamily("PATIENT_" + i);
 			myPatientDao.create(p, mySrd);
 		}
 

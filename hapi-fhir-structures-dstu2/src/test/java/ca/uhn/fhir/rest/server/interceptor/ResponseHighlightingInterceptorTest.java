@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertArrayEquals;
@@ -14,11 +15,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +29,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.ebaysf.web.cors.CORSFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -40,6 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.web.cors.CorsConfiguration;
 
 import com.phloc.commons.collections.iterate.ArrayEnumeration;
 
@@ -60,11 +58,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.server.BundleInclusionRule;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
@@ -74,7 +68,7 @@ import ca.uhn.fhir.util.UrlUtil;
 public class ResponseHighlightingInterceptorTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlightingInterceptorTest.class);
 	private static int ourPort;
 
@@ -86,13 +80,80 @@ public class ResponseHighlightingInterceptorTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	/**
+	 * See #464
+	 */
+	@Test
+	public void testPrettyPrintDefaultsToTrue() throws Exception {
+		ourServlet.setDefaultPrettyPrint(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "text/html");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+	}
+
+	/**
+	 * See #464
+	 */
+	@Test
+	public void testPrettyPrintDefaultsToTrueWithExplicitTrue() throws Exception {
+		ourServlet.setDefaultPrettyPrint(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
+		httpGet.addHeader("Accept", "text/html");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+	}
+
+	/**
+	 * See #464
+	 */
+	@Test
+	public void testPrettyPrintDefaultsToTrueWithExplicitFalse() throws Exception {
+		ourServlet.setDefaultPrettyPrint(false);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
+		httpGet.addHeader("Accept", "text/html");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+	}
+
+	@Test
+	public void testForceResponseTime() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(responseContent.replace('\n', ' ').replace('\r', ' '), matchesPattern(".*Response generated in [0-9]+ms.*"));
+		
+	}
 
 	@Test
 	public void testGetInvalidResource() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
 		httpGet.addHeader("Accept", "text/html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
@@ -106,7 +167,7 @@ public class ResponseHighlightingInterceptorTest {
 	public void testGetInvalidResourceNoAcceptHeader() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
@@ -375,7 +436,7 @@ public class ResponseHighlightingInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
-		assertThat(output, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(output, stringContainsInOrder("<body>", "<pre>", "\n", "</pre>"));
 		assertThat(output, containsString("<a href=\"?_format=json\">"));
 	}
 
@@ -457,7 +518,7 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithWildcardRetVal&_summary=count");
 		httpGet.addHeader("Accept", "html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
@@ -501,7 +562,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
 		
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -515,7 +576,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -527,7 +588,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -539,7 +600,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -552,7 +613,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -567,7 +628,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -639,13 +700,29 @@ public class ResponseHighlightingInterceptorTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
+		
+		/*
+		 * Enable CORS
+		 */
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Origin");
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		ourServlet.registerInterceptor(corsInterceptor);
+		
 		ourServlet.registerInterceptor(new ResponseHighlighterInterceptor());
 		ourServlet.setResourceProviders(patientProvider, new DummyBinaryResourceProvider());
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		
-		proxyHandler.addFilterWithMapping(CORSFilter.class, "/*", 1);
 		
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();

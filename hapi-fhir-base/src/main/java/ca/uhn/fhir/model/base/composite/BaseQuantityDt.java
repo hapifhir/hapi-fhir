@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 
 	
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
+	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		getComparatorElement().setValue(null);
 		setCode( null);
 		setSystem(null);

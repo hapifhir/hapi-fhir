@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -12,22 +13,22 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
+import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
@@ -36,8 +37,8 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
@@ -111,10 +112,25 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
-			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu3Config.class.getName());
+			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu3Config.class.getName() + "\n" + WebsocketDstu3DispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
-			
+			// Register a CORS filter
+			CorsConfiguration config = new CorsConfiguration();
+			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+			config.addAllowedHeader("x-fhir-starter");
+			config.addAllowedHeader("Origin");
+			config.addAllowedHeader("Accept");
+			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedHeader("Content-Type");
+			config.addAllowedHeader("Access-Control-Request-Method");
+			config.addAllowedHeader("Access-Control-Request-Headers");
+			config.addAllowedOrigin("*");
+			config.addExposedHeader("Location");
+			config.addExposedHeader("Content-Location");
+			config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+			ourRestServer.registerInterceptor(corsInterceptor);
+
 			server.setHandler(proxyHandler);
 			server.start();
 			
@@ -137,7 +153,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		List<String> names = new ArrayList<String>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
-			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamilyAsSingleString() : "";
+			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamily() : "";
 			if (isNotBlank(nextStr)) {
 				names.add(nextStr);
 			}

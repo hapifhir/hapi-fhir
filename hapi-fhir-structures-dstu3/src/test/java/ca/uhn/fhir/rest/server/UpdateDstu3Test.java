@@ -1,7 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -25,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -36,34 +39,17 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class UpdateDstu3Test {
 	private static CloseableHttpClient ourClient;
+	private static String ourConditionalUrl;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static IdType ourId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
-	@Test
-	public void testUpdateMissingUrlInBody() throws Exception {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
-
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("OODETAILS", oo.getIssue().get(0).getDiagnostics());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-
+	@Before
+	public void before() {
+		ourConditionalUrl = null;
+		ourId = null;
 	}
 
 	@Test
@@ -78,7 +64,7 @@ public class UpdateDstu3Test {
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
@@ -91,7 +77,7 @@ public class UpdateDstu3Test {
 	}
 
 	@Test
-	public void testUpdateNormal() throws Exception {
+	public void testUpdateMissingIdInBody() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -99,9 +85,32 @@ public class UpdateDstu3Test {
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		
+		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
+	}
+
+	@Test
+	public void testUpdateNormal() throws Exception {
+
+		Patient patient = new Patient();
+		patient.setId("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
@@ -114,31 +123,24 @@ public class UpdateDstu3Test {
 	}
 
 	@Test
-	public void testUpdateWrongUrlInBody() throws Exception {
+	public void testUpdateWrongIdInBody() throws Exception {
 
 		Patient patient = new Patient();
-		patient.setId("3");
+		patient.setId("Patient/3/_history/4");
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/1/_history/2");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals(
-				"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"3\" does not match URL ID of \"001\"",
-				oo.getIssue().get(0).getDiagnostics());
-
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader("location"));
-		assertNull(status.getFirstHeader("content-location"));
-
+		assertThat(responseContent, containsString("Resource body ID of &quot;3&quot; does not match"));
 	}
 
 	@AfterClass
@@ -166,16 +168,6 @@ public class UpdateDstu3Test {
 		ourClient = builder.build();
 
 	}
-
-	private static String ourConditionalUrl;
-
-	@Before
-	public void before() {
-		ourConditionalUrl = null;
-		ourId = null;
-	}
-
-	private static IdType ourId;
 
 	public static class PatientProvider implements IResourceProvider {
 

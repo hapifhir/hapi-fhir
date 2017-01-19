@@ -11,7 +11,7 @@
 			</button>
 			<a class="navbar-brand"
 				th:href="'home?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty}">
-				<i class="fa fa-home topbarIcon" /> Home
+				<span class="fa fa-home topbarIcon"></span> Home
 			</a> 
 			<a class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
 				th:if="${resourceName} != null and ${resourceName.empty} == false"
@@ -38,12 +38,13 @@
 				Server Selection Dropdown 
 				-->
 				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"	data-toggle="dropdown"><span id="serverSelectorFhirIcon" class="glyphicon glyphicon-fire topbarIcon" />&nbsp;<span id="serverSelectorName" th:text="'Server: ' + ${baseName}" />&nbsp;<span class="caret" /></a>
+					<a href="#" class="dropdown-toggle"	data-toggle="dropdown">
+					<span id="serverSelectorFhirIcon" class="glyphicon glyphicon-fire topbarIcon"></span>&nbsp;<span id="serverSelectorName" th:text="'Server: ' + ${baseName}"></span>&nbsp;<span class="caret" /></a>
 					<ul class="dropdown-menu" role="menu">
 						<li th:each="serverEntry : ${serverEntries}">
 							<a th:href="'javascript:selectServer(\'' + ${serverEntry.key} + '\');'">
-								<i class="fa fa-check-square-o" th:if="${serverEntry.key} == ${serverId}" />
-								<i class="fa fa-square-o" style="color: #CCC;" th:unless="${serverEntry.key} == ${serverId}" />
+								<span class="fa fa-check-square-o" th:if="${serverEntry.key} == ${serverId}"></span>
+								<span class="fa fa-square-o" style="color: #CCC;" th:unless="${serverEntry.key} == ${serverId}"></span>
 								&nbsp;&nbsp;
 								<th:block 	th:text="${serverEntry.value}"/>
 							</a>
@@ -56,7 +57,7 @@
 				-->
 				<th:block th:if="${apiKey != null}">
 					<li class="dropdown">
-						<a href="#" class="dropdown-toggle"	data-toggle="dropdown"><span class="fa fa-key topbarIcon" />&nbsp;API Key&nbsp;<span class="caret" /></a>
+						<a href="#" class="dropdown-toggle"	data-toggle="dropdown"><span class="fa fa-key topbarIcon"></span>&nbsp;API Key&nbsp;<span class="caret" /></a>
 						<ul class="dropdown-menu" role="menu">
 							<div style="padding: 10px;">
 								<p>If your chosen server requires an API key / Bearer token, enter it here:</p>

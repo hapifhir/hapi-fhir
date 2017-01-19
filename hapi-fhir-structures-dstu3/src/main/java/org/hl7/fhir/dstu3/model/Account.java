@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,9 +41,9 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
+ * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.
  */
 @ResourceDef(name="Account", profile="http://hl7.org/fhir/Profile/Account")
 public class Account extends DomainResource {
@@ -58,6 +58,10 @@ public class Account extends DomainResource {
          */
         INACTIVE, 
         /**
+         * This instance should not have been part of this patient's medical record.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -68,6 +72,8 @@ public class Account extends DomainResource {
           return ACTIVE;
         if ("inactive".equals(codeString))
           return INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -77,6 +83,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "active";
             case INACTIVE: return "inactive";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -84,6 +91,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "http://hl7.org/fhir/account-status";
             case INACTIVE: return "http://hl7.org/fhir/account-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/account-status";
             default: return "?";
           }
         }
@@ -91,6 +99,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "This account is active and may be used.";
             case INACTIVE: return "This account is inactive and should not be used to track financial information.";
+            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";
           }
         }
@@ -98,6 +107,7 @@ public class Account extends DomainResource {
           switch (this) {
             case ACTIVE: return "Active";
             case INACTIVE: return "Inactive";
+            case ENTEREDINERROR: return "Entered in error";
             default: return "?";
           }
         }
@@ -112,6 +122,8 @@ public class Account extends DomainResource {
           return AccountStatus.ACTIVE;
         if ("inactive".equals(codeString))
           return AccountStatus.INACTIVE;
+        if ("entered-in-error".equals(codeString))
+          return AccountStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown AccountStatus code '"+codeString+"'");
         }
         public Enumeration<AccountStatus> fromType(Base code) throws FHIRException {
@@ -124,6 +136,8 @@ public class Account extends DomainResource {
           return new Enumeration<AccountStatus>(this, AccountStatus.ACTIVE);
         if ("inactive".equals(codeString))
           return new Enumeration<AccountStatus>(this, AccountStatus.INACTIVE);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
         }
     public String toCode(AccountStatus code) {
@@ -131,12 +145,283 @@ public class Account extends DomainResource {
         return "active";
       if (code == AccountStatus.INACTIVE)
         return "inactive";
+      if (code == AccountStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(AccountStatus code) {
       return code.getSystem();
       }
     }
+
+    @Block()
+    public static class GuarantorComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The entity who is responsible.
+         */
+        @Child(name = "party", type = {Patient.class, RelatedPerson.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Responsible entity", formalDefinition="The entity who is responsible." )
+        protected Reference party;
+
+        /**
+         * The actual object that is the target of the reference (The entity who is responsible.)
+         */
+        protected Resource partyTarget;
+
+        /**
+         * A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.
+         */
+        @Child(name = "onHold", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Credit or other hold applied", formalDefinition="A guarantor may be placed on credit hold or otherwise have their role temporarily suspended." )
+        protected BooleanType onHold;
+
+        /**
+         * The timeframe during which the guarantor accepts responsibility for the account.
+         */
+        @Child(name = "period", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Guarrantee account during", formalDefinition="The timeframe during which the guarantor accepts responsibility for the account." )
+        protected Period period;
+
+        private static final long serialVersionUID = -1012345396L;
+
+    /**
+     * Constructor
+     */
+      public GuarantorComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public GuarantorComponent(Reference party) {
+        super();
+        this.party = party;
+      }
+
+        /**
+         * @return {@link #party} (The entity who is responsible.)
+         */
+        public Reference getParty() { 
+          if (this.party == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GuarantorComponent.party");
+            else if (Configuration.doAutoCreate())
+              this.party = new Reference(); // cc
+          return this.party;
+        }
+
+        public boolean hasParty() { 
+          return this.party != null && !this.party.isEmpty();
+        }
+
+        /**
+         * @param value {@link #party} (The entity who is responsible.)
+         */
+        public GuarantorComponent setParty(Reference value) { 
+          this.party = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #party} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The entity who is responsible.)
+         */
+        public Resource getPartyTarget() { 
+          return this.partyTarget;
+        }
+
+        /**
+         * @param value {@link #party} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The entity who is responsible.)
+         */
+        public GuarantorComponent setPartyTarget(Resource value) { 
+          this.partyTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #onHold} (A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.). This is the underlying object with id, value and extensions. The accessor "getOnHold" gives direct access to the value
+         */
+        public BooleanType getOnHoldElement() { 
+          if (this.onHold == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GuarantorComponent.onHold");
+            else if (Configuration.doAutoCreate())
+              this.onHold = new BooleanType(); // bb
+          return this.onHold;
+        }
+
+        public boolean hasOnHoldElement() { 
+          return this.onHold != null && !this.onHold.isEmpty();
+        }
+
+        public boolean hasOnHold() { 
+          return this.onHold != null && !this.onHold.isEmpty();
+        }
+
+        /**
+         * @param value {@link #onHold} (A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.). This is the underlying object with id, value and extensions. The accessor "getOnHold" gives direct access to the value
+         */
+        public GuarantorComponent setOnHoldElement(BooleanType value) { 
+          this.onHold = value;
+          return this;
+        }
+
+        /**
+         * @return A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.
+         */
+        public boolean getOnHold() { 
+          return this.onHold == null || this.onHold.isEmpty() ? false : this.onHold.getValue();
+        }
+
+        /**
+         * @param value A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.
+         */
+        public GuarantorComponent setOnHold(boolean value) { 
+            if (this.onHold == null)
+              this.onHold = new BooleanType();
+            this.onHold.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #period} (The timeframe during which the guarantor accepts responsibility for the account.)
+         */
+        public Period getPeriod() { 
+          if (this.period == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create GuarantorComponent.period");
+            else if (Configuration.doAutoCreate())
+              this.period = new Period(); // cc
+          return this.period;
+        }
+
+        public boolean hasPeriod() { 
+          return this.period != null && !this.period.isEmpty();
+        }
+
+        /**
+         * @param value {@link #period} (The timeframe during which the guarantor accepts responsibility for the account.)
+         */
+        public GuarantorComponent setPeriod(Period value) { 
+          this.period = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("party", "Reference(Patient|RelatedPerson|Organization)", "The entity who is responsible.", 0, java.lang.Integer.MAX_VALUE, party));
+          childrenList.add(new Property("onHold", "boolean", "A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.", 0, java.lang.Integer.MAX_VALUE, onHold));
+          childrenList.add(new Property("period", "Period", "The timeframe during which the guarantor accepts responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, period));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 106437350: /*party*/ return this.party == null ? new Base[0] : new Base[] {this.party}; // Reference
+        case -1013289154: /*onHold*/ return this.onHold == null ? new Base[0] : new Base[] {this.onHold}; // BooleanType
+        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 106437350: // party
+          this.party = castToReference(value); // Reference
+          break;
+        case -1013289154: // onHold
+          this.onHold = castToBoolean(value); // BooleanType
+          break;
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("party"))
+          this.party = castToReference(value); // Reference
+        else if (name.equals("onHold"))
+          this.onHold = castToBoolean(value); // BooleanType
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 106437350:  return getParty(); // Reference
+        case -1013289154: throw new FHIRException("Cannot make property onHold as it is not a complex type"); // BooleanType
+        case -991726143:  return getPeriod(); // Period
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("party")) {
+          this.party = new Reference();
+          return this.party;
+        }
+        else if (name.equals("onHold")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.onHold");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public GuarantorComponent copy() {
+        GuarantorComponent dst = new GuarantorComponent();
+        copyValues(dst);
+        dst.party = party == null ? null : party.copy();
+        dst.onHold = onHold == null ? null : onHold.copy();
+        dst.period = period == null ? null : period.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof GuarantorComponent))
+          return false;
+        GuarantorComponent o = (GuarantorComponent) other;
+        return compareDeep(party, o.party, true) && compareDeep(onHold, o.onHold, true) && compareDeep(period, o.period, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof GuarantorComponent))
+          return false;
+        GuarantorComponent o = (GuarantorComponent) other;
+        return compareValues(onHold, o.onHold, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(party, onHold, period);
+      }
+
+  public String fhirType() {
+    return "Account.guarantor";
+
+  }
+
+  }
 
     /**
      * Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).
@@ -163,16 +448,17 @@ public class Account extends DomainResource {
      * Indicates whether the account is presently used/useable or not.
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | inactive", formalDefinition="Indicates whether the account is presently used/useable or not." )
+    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/useable or not." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
     protected Enumeration<AccountStatus> status;
 
     /**
-     * Indicates the period of time over which the account is allowed.
+     * Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.
      */
-    @Child(name = "activePeriod", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Valid from..to", formalDefinition="Indicates the period of time over which the account is allowed." )
-    protected Period activePeriod;
+    @Child(name = "active", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Time window that transactions may be posted to this account", formalDefinition="Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur." )
+    protected Period active;
 
     /**
      * Identifies the currency to which transactions must be converted when crediting or debiting the account.
@@ -189,16 +475,32 @@ public class Account extends DomainResource {
     protected Money balance;
 
     /**
+     * The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.
+     */
+    @Child(name = "coverage", type = {Coverage.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The party(s) that are responsible for covering the payment of this account", formalDefinition="The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing." )
+    protected List<Reference> coverage;
+    /**
+     * The actual objects that are the target of the reference (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+     */
+    protected List<Coverage> coverageTarget;
+
+
+    /**
      * Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.
      */
-    @Child(name = "coveragePeriod", type = {Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "coveragePeriod", type = {Period.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc." )
     protected Period coveragePeriod;
 
     /**
      * Identifies the patient, device, practitioner, location or other object the account is associated with.
      */
-    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What is account tied to?", formalDefinition="Identifies the patient, device, practitioner, location or other object the account is associated with." )
     protected Reference subject;
 
@@ -210,7 +512,7 @@ public class Account extends DomainResource {
     /**
      * Indicates the organization, department, etc. with responsibility for the account.
      */
-    @Child(name = "owner", type = {Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "owner", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who is responsible?", formalDefinition="Indicates the organization, department, etc. with responsibility for the account." )
     protected Reference owner;
 
@@ -222,11 +524,18 @@ public class Account extends DomainResource {
     /**
      * Provides additional information about what the account tracks and how it is used.
      */
-    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Explanation of purpose/use", formalDefinition="Provides additional information about what the account tracks and how it is used." )
     protected StringType description;
 
-    private static final long serialVersionUID = -1926153194L;
+    /**
+     * Parties financially responsible for the account.
+     */
+    @Child(name = "guarantor", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Responsible for the account", formalDefinition="Parties financially responsible for the account." )
+    protected List<GuarantorComponent> guarantor;
+
+    private static final long serialVersionUID = -124781610L;
 
   /**
    * Constructor
@@ -411,26 +720,28 @@ public class Account extends DomainResource {
     }
 
     /**
-     * @return {@link #activePeriod} (Indicates the period of time over which the account is allowed.)
+     * @return {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.)
      */
-    public Period getActivePeriod() { 
-      if (this.activePeriod == null)
+    public Period getActive() { 
+      if (this.active == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.activePeriod");
+          throw new Error("Attempt to auto-create Account.active");
         else if (Configuration.doAutoCreate())
-          this.activePeriod = new Period(); // cc
-      return this.activePeriod;
+          this.active = new Period(); // cc
+      return this.active;
     }
 
-    public boolean hasActivePeriod() { 
-      return this.activePeriod != null && !this.activePeriod.isEmpty();
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
     }
 
     /**
-     * @param value {@link #activePeriod} (Indicates the period of time over which the account is allowed.)
+     * @param value {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
+This period may be different to the coveragePeriod which is the duration of time that services may occur.)
      */
-    public Account setActivePeriod(Period value) { 
-      this.activePeriod = value;
+    public Account setActive(Period value) { 
+      this.active = value;
       return this;
     }
 
@@ -480,6 +791,83 @@ public class Account extends DomainResource {
     public Account setBalance(Money value) { 
       this.balance = value;
       return this;
+    }
+
+    /**
+     * @return {@link #coverage} (The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).
+
+A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
+     */
+    public List<Reference> getCoverage() { 
+      if (this.coverage == null)
+        this.coverage = new ArrayList<Reference>();
+      return this.coverage;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Account setCoverage(List<Reference> theCoverage) { 
+      this.coverage = theCoverage;
+      return this;
+    }
+
+    public boolean hasCoverage() { 
+      if (this.coverage == null)
+        return false;
+      for (Reference item : this.coverage)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addCoverage() { //3
+      Reference t = new Reference();
+      if (this.coverage == null)
+        this.coverage = new ArrayList<Reference>();
+      this.coverage.add(t);
+      return t;
+    }
+
+    public Account addCoverage(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.coverage == null)
+        this.coverage = new ArrayList<Reference>();
+      this.coverage.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     */
+    public Reference getCoverageFirstRep() { 
+      if (getCoverage().isEmpty()) {
+        addCoverage();
+      }
+      return getCoverage().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Coverage> getCoverageTarget() { 
+      if (this.coverageTarget == null)
+        this.coverageTarget = new ArrayList<Coverage>();
+      return this.coverageTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Coverage addCoverageTarget() { 
+      Coverage r = new Coverage();
+      if (this.coverageTarget == null)
+        this.coverageTarget = new ArrayList<Coverage>();
+      this.coverageTarget.add(r);
+      return r;
     }
 
     /**
@@ -638,19 +1026,74 @@ public class Account extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #guarantor} (Parties financially responsible for the account.)
+     */
+    public List<GuarantorComponent> getGuarantor() { 
+      if (this.guarantor == null)
+        this.guarantor = new ArrayList<GuarantorComponent>();
+      return this.guarantor;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Account setGuarantor(List<GuarantorComponent> theGuarantor) { 
+      this.guarantor = theGuarantor;
+      return this;
+    }
+
+    public boolean hasGuarantor() { 
+      if (this.guarantor == null)
+        return false;
+      for (GuarantorComponent item : this.guarantor)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public GuarantorComponent addGuarantor() { //3
+      GuarantorComponent t = new GuarantorComponent();
+      if (this.guarantor == null)
+        this.guarantor = new ArrayList<GuarantorComponent>();
+      this.guarantor.add(t);
+      return t;
+    }
+
+    public Account addGuarantor(GuarantorComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.guarantor == null)
+        this.guarantor = new ArrayList<GuarantorComponent>();
+      this.guarantor.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #guarantor}, creating it if it does not already exist
+     */
+    public GuarantorComponent getGuarantorFirstRep() { 
+      if (getGuarantor().isEmpty()) {
+        addGuarantor();
+      }
+      return getGuarantor().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("status", "code", "Indicates whether the account is presently used/useable or not.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("activePeriod", "Period", "Indicates the period of time over which the account is allowed.", 0, java.lang.Integer.MAX_VALUE, activePeriod));
+        childrenList.add(new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("currency", "Coding", "Identifies the currency to which transactions must be converted when crediting or debiting the account.", 0, java.lang.Integer.MAX_VALUE, currency));
         childrenList.add(new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, java.lang.Integer.MAX_VALUE, balance));
+        childrenList.add(new Property("coverage", "Reference(Coverage)", "The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.", 0, java.lang.Integer.MAX_VALUE, coverage));
         childrenList.add(new Property("coveragePeriod", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, java.lang.Integer.MAX_VALUE, coveragePeriod));
         childrenList.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, owner));
         childrenList.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("guarantor", "", "Parties financially responsible for the account.", 0, java.lang.Integer.MAX_VALUE, guarantor));
       }
 
       @Override
@@ -660,13 +1103,15 @@ public class Account extends DomainResource {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<AccountStatus>
-        case 1325532263: /*activePeriod*/ return this.activePeriod == null ? new Base[0] : new Base[] {this.activePeriod}; // Period
+        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // Period
         case 575402001: /*currency*/ return this.currency == null ? new Base[0] : new Base[] {this.currency}; // Coding
         case -339185956: /*balance*/ return this.balance == null ? new Base[0] : new Base[] {this.balance}; // Money
+        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // Reference
         case 1024117193: /*coveragePeriod*/ return this.coveragePeriod == null ? new Base[0] : new Base[] {this.coveragePeriod}; // Period
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -188629045: /*guarantor*/ return this.guarantor == null ? new Base[0] : this.guarantor.toArray(new Base[this.guarantor.size()]); // GuarantorComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -687,14 +1132,17 @@ public class Account extends DomainResource {
         case -892481550: // status
           this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
           break;
-        case 1325532263: // activePeriod
-          this.activePeriod = castToPeriod(value); // Period
+        case -1422950650: // active
+          this.active = castToPeriod(value); // Period
           break;
         case 575402001: // currency
           this.currency = castToCoding(value); // Coding
           break;
         case -339185956: // balance
           this.balance = castToMoney(value); // Money
+          break;
+        case -351767064: // coverage
+          this.getCoverage().add(castToReference(value)); // Reference
           break;
         case 1024117193: // coveragePeriod
           this.coveragePeriod = castToPeriod(value); // Period
@@ -707,6 +1155,9 @@ public class Account extends DomainResource {
           break;
         case -1724546052: // description
           this.description = castToString(value); // StringType
+          break;
+        case -188629045: // guarantor
+          this.getGuarantor().add((GuarantorComponent) value); // GuarantorComponent
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -723,12 +1174,14 @@ public class Account extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("status"))
           this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
-        else if (name.equals("activePeriod"))
-          this.activePeriod = castToPeriod(value); // Period
+        else if (name.equals("active"))
+          this.active = castToPeriod(value); // Period
         else if (name.equals("currency"))
           this.currency = castToCoding(value); // Coding
         else if (name.equals("balance"))
           this.balance = castToMoney(value); // Money
+        else if (name.equals("coverage"))
+          this.getCoverage().add(castToReference(value));
         else if (name.equals("coveragePeriod"))
           this.coveragePeriod = castToPeriod(value); // Period
         else if (name.equals("subject"))
@@ -737,6 +1190,8 @@ public class Account extends DomainResource {
           this.owner = castToReference(value); // Reference
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
+        else if (name.equals("guarantor"))
+          this.getGuarantor().add((GuarantorComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -748,13 +1203,15 @@ public class Account extends DomainResource {
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
         case 3575610:  return getType(); // CodeableConcept
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<AccountStatus>
-        case 1325532263:  return getActivePeriod(); // Period
+        case -1422950650:  return getActive(); // Period
         case 575402001:  return getCurrency(); // Coding
         case -339185956:  return getBalance(); // Money
+        case -351767064:  return addCoverage(); // Reference
         case 1024117193:  return getCoveragePeriod(); // Period
         case -1867885268:  return getSubject(); // Reference
         case 106164915:  return getOwner(); // Reference
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -188629045:  return addGuarantor(); // GuarantorComponent
         default: return super.makeProperty(hash, name);
         }
 
@@ -775,9 +1232,9 @@ public class Account extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Account.status");
         }
-        else if (name.equals("activePeriod")) {
-          this.activePeriod = new Period();
-          return this.activePeriod;
+        else if (name.equals("active")) {
+          this.active = new Period();
+          return this.active;
         }
         else if (name.equals("currency")) {
           this.currency = new Coding();
@@ -786,6 +1243,9 @@ public class Account extends DomainResource {
         else if (name.equals("balance")) {
           this.balance = new Money();
           return this.balance;
+        }
+        else if (name.equals("coverage")) {
+          return addCoverage();
         }
         else if (name.equals("coveragePeriod")) {
           this.coveragePeriod = new Period();
@@ -801,6 +1261,9 @@ public class Account extends DomainResource {
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Account.description");
+        }
+        else if (name.equals("guarantor")) {
+          return addGuarantor();
         }
         else
           return super.addChild(name);
@@ -822,13 +1285,23 @@ public class Account extends DomainResource {
         dst.name = name == null ? null : name.copy();
         dst.type = type == null ? null : type.copy();
         dst.status = status == null ? null : status.copy();
-        dst.activePeriod = activePeriod == null ? null : activePeriod.copy();
+        dst.active = active == null ? null : active.copy();
         dst.currency = currency == null ? null : currency.copy();
         dst.balance = balance == null ? null : balance.copy();
+        if (coverage != null) {
+          dst.coverage = new ArrayList<Reference>();
+          for (Reference i : coverage)
+            dst.coverage.add(i.copy());
+        };
         dst.coveragePeriod = coveragePeriod == null ? null : coveragePeriod.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.owner = owner == null ? null : owner.copy();
         dst.description = description == null ? null : description.copy();
+        if (guarantor != null) {
+          dst.guarantor = new ArrayList<GuarantorComponent>();
+          for (GuarantorComponent i : guarantor)
+            dst.guarantor.add(i.copy());
+        };
         return dst;
       }
 
@@ -844,10 +1317,10 @@ public class Account extends DomainResource {
           return false;
         Account o = (Account) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(type, o.type, true)
-           && compareDeep(status, o.status, true) && compareDeep(activePeriod, o.activePeriod, true) && compareDeep(currency, o.currency, true)
-           && compareDeep(balance, o.balance, true) && compareDeep(coveragePeriod, o.coveragePeriod, true)
+           && compareDeep(status, o.status, true) && compareDeep(active, o.active, true) && compareDeep(currency, o.currency, true)
+           && compareDeep(balance, o.balance, true) && compareDeep(coverage, o.coverage, true) && compareDeep(coveragePeriod, o.coveragePeriod, true)
            && compareDeep(subject, o.subject, true) && compareDeep(owner, o.owner, true) && compareDeep(description, o.description, true)
-          ;
+           && compareDeep(guarantor, o.guarantor, true);
       }
 
       @Override
@@ -863,8 +1336,8 @@ public class Account extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, type, status
-          , activePeriod, currency, balance, coveragePeriod, subject, owner, description
-          );
+          , active, currency, balance, coverage, coveragePeriod, subject, owner, description
+          , guarantor);
       }
 
   @Override
@@ -1053,17 +1526,17 @@ public class Account extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>active | inactive</b><br>
+   * Description: <b>active | inactive | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Account.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive", type="token" )
+  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>active | inactive</b><br>
+   * Description: <b>active | inactive | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Account.status</b><br>
    * </p>

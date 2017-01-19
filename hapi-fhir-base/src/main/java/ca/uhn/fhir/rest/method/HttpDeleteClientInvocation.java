@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,12 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
 		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.DELETE);
+	}
+
+	@Override
+	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
+		// TODO Auto-generated method stub
+		return super.createHttpRequest(theUrl, theEncoding, theRequestType);
 	}
 
 }

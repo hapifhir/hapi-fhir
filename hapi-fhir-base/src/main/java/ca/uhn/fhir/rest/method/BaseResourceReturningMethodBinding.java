@@ -4,13 +4,13 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,15 +25,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -91,7 +83,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	private MethodReturnTypeEnum myMethodReturnType;
 	private Class<?> myResourceListCollectionType;
 	private String myResourceName;
-	private Class<? extends IResource> myResourceType;
+	private Class<? extends IBaseResource> myResourceType;
+	private List<Class<? extends IBaseResource>> myPreferTypesList;
 
 	@SuppressWarnings("unchecked")
 	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
@@ -137,6 +130,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				}
 			}
 		}
+		
+		myPreferTypesList = createPreferTypesList();
 	}
 
 	public MethodReturnTypeEnum getMethodReturnType() {
@@ -157,11 +152,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	@Override
 	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) {
-		IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
+		IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode, myPreferTypesList);
 
 		switch (getReturnType()) {
 		case BUNDLE: {
-			
+
 			Bundle dstu1bundle = null;
 			IBaseBundle dstu2bundle = null;
 			List<? extends IBaseResource> listOfResources = null;
@@ -177,7 +172,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				dstu2bundle = (IBaseBundle) parser.parseResource(type, theResponseReader);
 				listOfResources = BundleUtil.toListOfResources(getContext(), dstu2bundle);
 			}
-			
+
 			switch (getMethodReturnType()) {
 			case BUNDLE:
 				return dstu1bundle;
@@ -185,7 +180,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				return dstu2bundle;
 			case LIST_OF_RESOURCES:
 				if (myResourceListCollectionType != null) {
-					for (Iterator<? extends IBaseResource> iter = listOfResources.iterator(); iter.hasNext(); ) {
+					for (Iterator<? extends IBaseResource> iter = listOfResources.iterator(); iter.hasNext();) {
 						IBaseResource next = iter.next();
 						if (!myResourceListCollectionType.isAssignableFrom(next.getClass())) {
 							ourLog.debug("Not returning resource of type {} because it is not a subclass or instance of {}", next.getClass(), myResourceListCollectionType);
@@ -243,6 +238,19 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		throw new IllegalStateException("Should not get here!");
 	}
 
+	@SuppressWarnings("unchecked")
+	private List<Class<? extends IBaseResource>> createPreferTypesList() {
+		List<Class<? extends IBaseResource>> preferTypes = null;
+		if (myResourceListCollectionType != null && IBaseResource.class.isAssignableFrom(myResourceListCollectionType)) {
+			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
+//		} else if (myResourceType != null) {
+//			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+//			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
+		}
+		return preferTypes;
+	}
+
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 
@@ -250,7 +258,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 		if (responseObject.getResource() != null) {
-			
+
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);
 				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getResource());
@@ -258,12 +266,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					return null;
 				}
 			}
-			
+
 			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-			
-			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null,
-					theRequest.isRespondGzip(), isAddContentLocationHeader());
-			
+
+			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, null, theRequest.isRespondGzip(),
+					isAddContentLocationHeader());
+
 		} else {
 			// Is this request coming from a browser
 			String uaHeader = theRequest.getHeader("user-agent");
@@ -271,7 +279,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (uaHeader != null && uaHeader.contains("Mozilla")) {
 				requestIsBrowser = true;
 			}
-			
+
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);
 				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
@@ -356,7 +364,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 				responseObject = new ResourceOrDstu1Bundle(resource);
 				break;
-				
+
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
 
@@ -364,20 +372,21 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				if (count == null) {
 					count = result.preferredPageSize();
 				}
-				
+
 				Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 				if (offsetI == null || offsetI < 0) {
 					offsetI = 0;
 				}
 				int start = Math.max(0, Math.min(offsetI, result.size() - 1));
-				
+
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
 				ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
 
 				boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, null, getResponseBundleType(), includes);
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, null, getResponseBundleType(),
+						includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
 					responseObject = new ResourceOrDstu1Bundle(bundle);

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A sample to be used for analysis.
  */
@@ -413,7 +413,7 @@ public class Specimen extends DomainResource {
           this.collector = castToReference(value); // Reference
           break;
         case 1883491145: // collected
-          this.collected = (Type) value; // Type
+          this.collected = castToType(value); // Type
           break;
         case -1285004149: // quantity
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
@@ -434,7 +434,7 @@ public class Specimen extends DomainResource {
         if (name.equals("collector"))
           this.collector = castToReference(value); // Reference
         else if (name.equals("collected[x]"))
-          this.collected = (Type) value; // Type
+          this.collected = castToType(value); // Type
         else if (name.equals("quantity"))
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
         else if (name.equals("method"))
@@ -803,7 +803,7 @@ public class Specimen extends DomainResource {
           this.getAdditive().add(castToReference(value)); // Reference
           break;
         case 3560141: // time
-          this.time = (Type) value; // Type
+          this.time = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -819,7 +819,7 @@ public class Specimen extends DomainResource {
         else if (name.equals("additive"))
           this.getAdditive().add(castToReference(value));
         else if (name.equals("time[x]"))
-          this.time = (Type) value; // Type
+          this.time = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -1224,7 +1224,7 @@ public class Specimen extends DomainResource {
           this.specimenQuantity = castToSimpleQuantity(value); // SimpleQuantity
           break;
         case -1226589236: // additive
-          this.additive = (Type) value; // Type
+          this.additive = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1244,7 +1244,7 @@ public class Specimen extends DomainResource {
         else if (name.equals("specimenQuantity"))
           this.specimenQuantity = castToSimpleQuantity(value); // SimpleQuantity
         else if (name.equals("additive[x]"))
-          this.additive = (Type) value; // Type
+          this.additive = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -1409,7 +1409,7 @@ public class Specimen extends DomainResource {
     /**
      * Details concerning a test or procedure request that required a specimen to be collected.
      */
-    @Child(name = "request", type = {DiagnosticOrder.class, ProcedureRequest.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "request", type = {DiagnosticRequest.class, ProcedureRequest.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Why the specimen was collected", formalDefinition="Details concerning a test or procedure request that required a specimen to be collected." )
     protected List<Reference> request;
     /**
@@ -2031,7 +2031,7 @@ public class Specimen extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Substance)", "Where the specimen came from. This may be from the patient(s) or from the environment or a device.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("receivedTime", "dateTime", "Time when specimen was received for processing or testing.", 0, java.lang.Integer.MAX_VALUE, receivedTime));
         childrenList.add(new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.", 0, java.lang.Integer.MAX_VALUE, parent));
-        childrenList.add(new Property("request", "Reference(DiagnosticOrder|ProcedureRequest)", "Details concerning a test or procedure request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request));
+        childrenList.add(new Property("request", "Reference(DiagnosticRequest|ProcedureRequest)", "Details concerning a test or procedure request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("collection", "", "Details concerning the specimen collection.", 0, java.lang.Integer.MAX_VALUE, collection));
         childrenList.add(new Property("treatment", "", "Details concerning treatment and processing steps for the specimen.", 0, java.lang.Integer.MAX_VALUE, treatment));
         childrenList.add(new Property("container", "", "The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.", 0, java.lang.Integer.MAX_VALUE, container));

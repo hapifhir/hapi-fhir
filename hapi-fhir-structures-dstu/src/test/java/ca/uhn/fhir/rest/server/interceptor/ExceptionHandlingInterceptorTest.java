@@ -48,7 +48,7 @@ public class ExceptionHandlingInterceptorTest {
 	private static ExceptionHandlingInterceptor myInterceptor;
 	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);

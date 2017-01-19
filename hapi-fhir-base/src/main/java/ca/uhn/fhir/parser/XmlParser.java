@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.model.api.BaseBundle;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -174,7 +175,7 @@ public class XmlParser extends BaseParser implements IParser {
 		try {
 			eventWriter = createXmlWriter(theWriter);
 
-			encodeResourceToXmlStreamWriter(theResource, eventWriter, false);
+			encodeResourceToXmlStreamWriter(theResource, eventWriter, false, false);
 			eventWriter.flush();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
@@ -205,16 +206,24 @@ public class XmlParser extends BaseParser implements IParser {
 
 						if ("extension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								throw new DataFormatException("Extension element has no 'url' attribute");
+								getErrorHandler().missingRequiredElement(new ParseLocation("extension"), "url");
+								url = null;
+							} else {
+								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, urlAttr.getValue(), false);
+							parserState.enteringNewElementExtension(elem, url, false);
 						} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+							String url;
 							if (urlAttr == null || isBlank(urlAttr.getValue())) {
-								throw new DataFormatException("Extension element has no 'url' attribute");
+								getErrorHandler().missingRequiredElement(new ParseLocation("modifierExtension"), "url");
+								url = null;
+							} else {
+								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, urlAttr.getValue(), true);
+							parserState.enteringNewElementExtension(elem, url, true);
 						} else {
 							String elementName = elem.getName().getLocalPart();
 							parserState.enteringNewElement(namespaceURI, elementName);
@@ -309,12 +318,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 		writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
 
-		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
-			eventWriter.writeStartElement("author");
-			writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
-			writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
-			eventWriter.writeEndElement();
-		}
+		writeAuthor(eventWriter, theBundle);
 
 		writeCategories(eventWriter, theBundle.getCategories());
 
@@ -366,6 +370,8 @@ public class XmlParser extends BaseParser implements IParser {
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
+			writeAuthor(eventWriter, nextEntry);
+
 			writeCategories(eventWriter, nextEntry.getCategories());
 
 			if (!nextEntry.getLinkSelf().isEmpty()) {
@@ -384,7 +390,7 @@ public class XmlParser extends BaseParser implements IParser {
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				eventWriter.writeStartElement("content");
 				eventWriter.writeAttribute("type", "text/xml");
-				encodeResourceToXmlStreamWriter(resource, eventWriter, false);
+				encodeResourceToXmlStreamWriter(resource, eventWriter, false, true);
 				eventWriter.writeEndElement(); // content
 			} else {
 				ourLog.debug("Bundle entry contains null resource");
@@ -447,7 +453,7 @@ public class XmlParser extends BaseParser implements IParser {
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				theEventWriter.writeStartElement("resource");
-				encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
+				encodeResourceToXmlStreamWriter(resource, theEventWriter, false, true);
 				theEventWriter.writeEndElement(); // content
 			} else {
 				ourLog.debug("Bundle entry contains null resource");
@@ -557,7 +563,7 @@ public class XmlParser extends BaseParser implements IParser {
 		case RESOURCE: {
 			theEventWriter.writeStartElement(childName);
 			IBaseResource resource = (IBaseResource) theElement;
-			encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
+			encodeResourceToXmlStreamWriter(resource, theEventWriter, false, true);
 			theEventWriter.writeEndElement();
 			break;
 		}
@@ -632,7 +638,7 @@ public class XmlParser extends BaseParser implements IParser {
 			} else {
 
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-				values = super.preProcessValues(nextChild, theResource, values);
+				values = super.preProcessValues(nextChild, theResource, values, nextChildElem);
 
 				if (values == null || values.isEmpty()) {
 					continue;
@@ -711,7 +717,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, boolean theSubResource) throws XMLStreamException, DataFormatException {
 		IIdType resourceId = null;
 
 		if (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
@@ -727,7 +733,7 @@ public class XmlParser extends BaseParser implements IParser {
 		if (!theIncludedResource) {
 			if (super.shouldEncodeResourceId(theResource) == false) {
 				resourceId = null;
-			} else if (getEncodeForceResourceId() != null) {
+			} else if (theSubResource == false && getEncodeForceResourceId() != null) {
 				resourceId = getEncodeForceResourceId();
 			}
 		}
@@ -1068,6 +1074,15 @@ public class XmlParser extends BaseParser implements IParser {
 		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
 		retVal.addAll(theList);
 		return retVal;
+	}
+
+	private void writeAuthor(XMLStreamWriter theEventWriter, BaseBundle theBundle) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
+			theEventWriter.writeStartElement("author");
+			writeTagWithTextNode(theEventWriter, "name", theBundle.getAuthorName());
+			writeOptionalTagWithTextNode(theEventWriter, "uri", theBundle.getAuthorUri());
+			theEventWriter.writeEndElement();
+		}
 	}
 
 	private void writeAtomLink(XMLStreamWriter theEventWriter, String theRel, StringDt theStringDt) throws XMLStreamException {

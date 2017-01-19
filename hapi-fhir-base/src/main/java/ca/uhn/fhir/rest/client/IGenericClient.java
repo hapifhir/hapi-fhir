@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -38,19 +37,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.gclient.ICreate;
-import ca.uhn.fhir.rest.gclient.IDelete;
-import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
-import ca.uhn.fhir.rest.gclient.IGetPage;
-import ca.uhn.fhir.rest.gclient.IGetTags;
-import ca.uhn.fhir.rest.gclient.IHistory;
-import ca.uhn.fhir.rest.gclient.IMeta;
-import ca.uhn.fhir.rest.gclient.IOperation;
-import ca.uhn.fhir.rest.gclient.IRead;
-import ca.uhn.fhir.rest.gclient.ITransaction;
-import ca.uhn.fhir.rest.gclient.IUntypedQuery;
-import ca.uhn.fhir.rest.gclient.IUpdate;
-import ca.uhn.fhir.rest.gclient.IValidate;
+import ca.uhn.fhir.rest.gclient.*;
 
 public interface IGenericClient extends IRestfulClient {
 
@@ -252,6 +239,11 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	@Override
 	void registerInterceptor(IClientInterceptor theInterceptor);
+
+	/**
+	 * Fluent method for the "patch" operation, which performs a logical patch on a server resource
+	 */
+	IPatch patch();
 
 	/**
 	 * Search for resources matching a given set of criteria. Searching is a very powerful

@@ -1,0 +1,69 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<id value="487d3669-0e1c-4867-b124-400d1849548d"></id>
+	<type value="searchset"></type>
+	<base value="http://localhost:19080/fhir/dstu1"></base>
+	<link>
+		<relation value="just trying add link"></relation>
+		<url value="blarion"></url>
+	</link>
+	<link>
+		<relation value="self"></relation>
+		<url value="http://localhost:19080/fhir/dstu1/Observation?subject.identifier=puppet|CLONE-AA102"></url>
+	</link>
+	<entry>
+		<link>
+			<relation value="orionhealth.edit"></relation>
+			<url value="Observation"></url>
+		</link>
+		<resource>
+			<Observation xmlns="http://hl7.org/fhir">
+				<id value="0d87f02c-da2c-4551-9ead-2956f0165a4f"></id>
+				<extension url="http://orionhealth.com/fhir/extensions#created-by"></extension>
+				<extension url="http://orionhealth.com/fhir/extensions#last-modified-by"></extension>
+				<extension url="http://orionhealth.com/fhir/extensions#received-instant">
+					<valueInstant value="2015-06-25T17:08:47.190+12:00"></valueInstant>
+				</extension>
+				<code>
+					<coding>
+						<system value="http://loinc.org"></system>
+						<code value="8867-4"></code>
+					</coding>
+				</code>
+				<valueString value="observationValue"></valueString>
+				<status value="final"></status>
+				<reliability value="ok"></reliability>
+				<subject>
+					<reference value="Patient/INGE6TSFFVAUCMJQGJAHA5LQOBSXI"></reference>
+				</subject>
+			</Observation>
+		</resource>
+	</entry>
+	<entry>
+		<link>
+			<relation value="orionhealth.edit"></relation>
+			<url value="Observation"></url>
+		</link>
+		<resource>
+			<Observation xmlns="http://hl7.org/fhir">
+				<id value="c54ac0cc-a99f-40aa-9541-c5aa853a2e88"></id>
+				<extension url="http://orionhealth.com/fhir/extensions#created-by"></extension>
+				<extension url="http://orionhealth.com/fhir/extensions#last-modified-by"></extension>
+				<extension url="http://orionhealth.com/fhir/extensions#received-instant">
+					<valueInstant value="2015-06-25T17:08:47.190+12:00"></valueInstant>
+				</extension>
+				<code>
+					<coding>
+						<system value="http://loinc.org"></system>
+						<code value="3141-9"></code>
+					</coding>
+				</code>
+				<valueString value="observationValue"></valueString>
+				<status value="final"></status>
+				<reliability value="ok"></reliability>
+				<subject>
+					<reference value="Patient/INGE6TSFFVAUCMJQGJAHA5LQOBSXI"></reference>
+				</subject>
+			</Observation>
+		</resource>
+	</entry>
+</Bundle>

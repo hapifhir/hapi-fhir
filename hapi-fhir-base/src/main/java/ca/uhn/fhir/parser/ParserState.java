@@ -4,13 +4,13 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,16 +20,10 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
@@ -37,50 +31,12 @@ import javax.xml.stream.events.XMLEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
-import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.BaseBundle;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IFhirVersion;
-import ca.uhn.fhir.model.api.IIdentifiableElement;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -105,6 +61,7 @@ class ParserState<T> {
 	private final IParser myParser;
 	private IBase myPreviousElement;
 	private BaseState myState;
+
 	private ParserState(IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
 		myParser = theParser;
 		myContext = theContext;
@@ -127,6 +84,10 @@ class ParserState<T> {
 			IBase element = myState.getCurrentElement();
 			element.getFormatCommentsPre().add(theCommentText);
 		}
+	}
+
+	public boolean elementIsRepeating(String theChildName) {
+		return myState.elementIsRepeating(theChildName);
 	}
 
 	public void endingElement() throws DataFormatException {
@@ -223,7 +184,8 @@ class ParserState<T> {
 		}
 	}
 
-	static ParserState<Bundle> getPreAtomInstance(IParser theParser, FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+	static ParserState<Bundle> getPreAtomInstance(IParser theParser, FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler)
+			throws DataFormatException {
 		ParserState<Bundle> retVal = new ParserState<Bundle>(theParser, theContext, theJsonMode, theErrorHandler);
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			retVal.push(retVal.new PreAtomState(theResourceType));
@@ -237,7 +199,8 @@ class ParserState<T> {
 	 * @param theResourceType
 	 *           May be null
 	 */
-	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(IParser theParser, Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(IParser theParser, Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler)
+			throws DataFormatException {
 		ParserState<T> retVal = new ParserState<T>(theParser, theContext, theJsonMode, theErrorHandler);
 		if (theResourceType == null) {
 			if (theContext.getVersion().getVersion().isRi()) {
@@ -789,7 +752,8 @@ class ParserState<T> {
 		}
 
 	}
-
+	
+	
 	private abstract class BaseState {
 
 		private PreResourceState myPreResourceState;
@@ -806,6 +770,10 @@ class ParserState<T> {
 		 */
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			myErrorHandler.unknownAttribute(null, theName);
+		}
+
+		public boolean elementIsRepeating(@SuppressWarnings("unused") String theChildName) {
+			return false;
 		}
 
 		public void endingElement() throws DataFormatException {
@@ -826,7 +794,8 @@ class ParserState<T> {
 		@SuppressWarnings("unused")
 		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
-				ExtensionDt newExtension = new ExtensionDt(theIsModifier, theUrlAttr);
+				ExtensionDt newExtension = new ExtensionDt(theIsModifier);
+				newExtension.setUrl(theUrlAttr);
 				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
 				elem.addUndeclaredExtension(newExtension);
 				ExtensionState newState = new ExtensionState(myPreResourceState, newExtension);
@@ -1389,16 +1358,18 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-			
+
 			IResource res = (IResource) getCurrentElement();
 			assert res != null;
 			if (res.getId() == null || res.getId().isEmpty()) {
-				ourLog.debug("Discarding contained resource with no ID!");
+				// If there is no ID, we don't keep the resource because it's useless (contained resources
+				// need an ID to be referred to)
+				myErrorHandler.containedResourceWithNoId(null);
 			} else {
-				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 				if (!res.getId().isLocal()) {
 					res.setId(new IdDt('#' + res.getId().getIdPart()));
 				}
+				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
 			IResource preResCurrentElement = (IResource) getPreResourceState().getCurrentElement();
 
@@ -1433,12 +1404,12 @@ class ParserState<T> {
 			IBaseResource res = getCurrentElement();
 			assert res != null;
 			if (res.getIdElement() == null || res.getIdElement().isEmpty()) {
-				ourLog.debug("Discarding contained resource with no ID!");
+				// If there is no ID, we don't keep the resource because it's useless (contained resources
+				// need an ID to be referred to)
+				myErrorHandler.containedResourceWithNoId(null);
 			} else {
+				res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
 				getPreResourceState().getContainedResources().put(res.getIdElement().getValue(), res);
-				if (!res.getIdElement().isLocal()) {
-					res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
-				}
 			}
 
 			IBaseResource preResCurrentElement = getPreResourceState().getCurrentElement();
@@ -1564,10 +1535,20 @@ class ParserState<T> {
 		}
 
 		@Override
+		public boolean elementIsRepeating(String theChildName) {
+			try {
+				BaseRuntimeChildDefinition child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
+				return child.getMax() > 1 || child.getMax() == Child.MAX_UNLIMITED;
+			} catch (DataFormatException e) {
+				return false;
+			}
+		}
+
+		@Override
 		public void endingElement() {
 			pop();
 		}
-
+		
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
 			BaseRuntimeChildDefinition child;
@@ -1580,7 +1561,7 @@ class ParserState<T> {
 						return;
 					}
 				}
-				
+
 				/*
 				 * This means we've found an element that doesn't exist on the structure. If the error handler doesn't throw
 				 * an exception, swallow the element silently along with any child elements
@@ -1740,10 +1721,10 @@ class ParserState<T> {
 			}
 			if ("id".equals(theName)) {
 				if (getCurrentElement() instanceof IBaseElement) {
-					((IBaseElement)getCurrentElement()).setId(theValue);
+					((IBaseElement) getCurrentElement()).setId(theValue);
 					return;
 				} else if (getCurrentElement() instanceof IIdentifiableElement) {
-					((IIdentifiableElement)getCurrentElement()).setElementSpecificId(theValue);
+					((IIdentifiableElement) getCurrentElement()).setElementSpecificId(theValue);
 					return;
 				}
 			}
@@ -1771,42 +1752,35 @@ class ParserState<T> {
 			}
 			
 			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
-			if (target == null) {
-				myErrorHandler.unknownElement(null, theLocalPart);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
-				return;
+			
+			if (target != null) {
+				switch (target.getChildType()) {
+				case COMPOSITE_DATATYPE: {
+					BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
+					ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance();
+					myExtension.setValue(newChildInstance);
+					ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
+					push(newState);
+					return;
+				}
+				case ID_DATATYPE:
+				case PRIMITIVE_DATATYPE: {
+					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
+					IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
+					myExtension.setValue(newChildInstance);
+					PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
+					push(newState);
+					return;
+				}
+				}
 			}
 
-			switch (target.getChildType()) {
-			case COMPOSITE_DATATYPE: {
-				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-				ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance();
-				myExtension.setValue(newChildInstance);
-				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
-				push(newState);
-				return;
-			}
-			case PRIMITIVE_DATATYPE: {
-				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
-				myExtension.setValue(newChildInstance);
-				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
-				push(newState);
-				return;
-			}
-			case PRIMITIVE_XHTML:
-			case RESOURCE:
-			case RESOURCE_BLOCK:
-			case UNDECL_EXT:
-			case EXTENSION_DECLARED:
-			case CONTAINED_RESOURCES:
-			case CONTAINED_RESOURCE_LIST:
-			case ID_DATATYPE:
-			case PRIMITIVE_XHTML_HL7ORG:
-				break;
-			}
+			// We hit an invalid type for the extension
+			myErrorHandler.unknownElement(null, theLocalPart);
+			push(new SwallowChildrenWholeState(getPreResourceState()));
+			return;
 		}
-
+		
 		@Override
 		protected IBaseExtension<?, ?> getCurrentElement() {
 			return myExtension;
@@ -1872,13 +1846,17 @@ class ParserState<T> {
 			} else if (theLocalPart.equals("profile")) {
 				@SuppressWarnings("unchecked")
 				List<IdDt> profiles = (List<IdDt>) myMap.get(ResourceMetadataKeyEnum.PROFILES);
-				if (profiles == null) {
-					profiles = new ArrayList<IdDt>();
-					myMap.put(ResourceMetadataKeyEnum.PROFILES, profiles);
+				List<IdDt> newProfiles;
+				if (profiles != null) {
+					newProfiles = new ArrayList<IdDt>(profiles.size() + 1);
+					newProfiles.addAll(profiles);
+				} else {
+					newProfiles = new ArrayList<IdDt>(1);
 				}
 				IdDt profile = new IdDt();
 				push(new PrimitiveState(getPreResourceState(), profile));
-				profiles.add(profile);
+				newProfiles.add(profile);
+				myMap.put(ResourceMetadataKeyEnum.PROFILES, Collections.unmodifiableList(newProfiles));
 			} else if (theLocalPart.equals("tag")) {
 				TagList tagList = (TagList) myMap.get(ResourceMetadataKeyEnum.TAG_LIST);
 				if (tagList == null) {
@@ -1989,7 +1967,6 @@ class ParserState<T> {
 
 		@Override
 		public void endingElement() throws DataFormatException {
-//			postProcess();
 			stitchBundleCrossReferences();
 			pop();
 		}
@@ -2041,7 +2018,7 @@ class ParserState<T> {
 				push(new ResourceStateHl7Org(getRootPreResourceState(), def, myInstance));
 			}
 		}
-
+		
 		public Map<String, IBaseResource> getContainedResources() {
 			return myContainedResources;
 		}
@@ -2066,16 +2043,6 @@ class ParserState<T> {
 
 		protected abstract void populateTarget();
 
-		public ParserState<T>.PreResourceState setRequireResourceType(boolean theRequireResourceType) {
-			myRequireResourceType = theRequireResourceType;
-			return this;
-		}
-
-		@Override
-		public void wereBack() {
-			postProcess();
-		}
-
 		private void postProcess() {
 			if (myContext.hasDefaultTypeForProfile()) {
 				IBaseMetaType meta = myInstance.getMeta();
@@ -2090,11 +2057,11 @@ class ParserState<T> {
 						}
 					}
 				}
-	
+
 				if (wantedProfileType != null && !wantedProfileType.equals(myInstance.getClass())) {
 					if (myResourceType == null || myResourceType.isAssignableFrom(wantedProfileType)) {
-						ourLog.debug("Converting resource of type {} to type defined for profile \"{}\": {}", new Object[] {myInstance.getClass().getName(), usedProfile, wantedProfileType});
-						
+						ourLog.debug("Converting resource of type {} to type defined for profile \"{}\": {}", new Object[] { myInstance.getClass().getName(), usedProfile, wantedProfileType });
+
 						/*
 						 * This isn't the most efficient thing really.. If we want a specific
 						 * type we just re-parse into that type. The problem is that we don't know
@@ -2111,53 +2078,18 @@ class ParserState<T> {
 				}
 			}
 			
-			FhirTerser terser = myContext.newTerser();
-			terser.visit(myInstance, new IModelVisitor() {
-
-				@Override
-				public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
-					if (theElement instanceof BaseResourceReferenceDt) {
-						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
-						String ref = nextRef.getReference().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IResource target = (IResource) myContainedResources.get(ref.substring(1));
-								if (target != null) {
-									nextRef.setResource(target);
-								} else {
-									ourLog.warn("Resource contains unknown local ref: " + ref);
-								}
-							}
-						}
-					} else if (theElement instanceof IBaseReference) {
-						IBaseReference nextRef = (IBaseReference) theElement;
-						String ref = nextRef.getReferenceElement().getValue();
-						if (isNotBlank(ref)) {
-							if (ref.startsWith("#")) {
-								IBaseResource target = myContainedResources.get(ref.substring(1));
-								if (target != null) {
-									nextRef.setResource(target);
-								} else {
-									ourLog.warn("Resource contains unknown local ref: " + ref);
-								}
-							}
-						}
-					}
-				}
-
-				@Override
-				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
-					acceptElement(theNextExt.getValue(), null, null, null);
-				}
-			});
-
 			populateTarget();
+		}
+
+		public ParserState<T>.PreResourceState setRequireResourceType(boolean theRequireResourceType) {
+			myRequireResourceType = theRequireResourceType;
+			return this;
 		}
 
 		private void stitchBundleCrossReferences() {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
 			if (bundle) {
-				
+
 				/*
 				 * Stitch together resource references
 				 */
@@ -2195,8 +2127,52 @@ class ParserState<T> {
 						}
 					}
 				}
-				
+
 			}
+		}
+
+		protected void weaveContainedResources() {
+			FhirTerser terser = myContext.newTerser();
+			terser.visit(myInstance, new IModelVisitor() {
+
+				@Override
+				public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+					if (theElement instanceof BaseResourceReferenceDt) {
+						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
+						String ref = nextRef.getReference().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IResource target = (IResource) myContainedResources.get(ref);
+								if (target != null) {
+									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
+									nextRef.setResource(target);
+								} else {
+									myErrorHandler.unknownReference(null, ref);
+								}
+							}
+						}
+					} else if (theElement instanceof IBaseReference) {
+						IBaseReference nextRef = (IBaseReference) theElement;
+						String ref = nextRef.getReferenceElement().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IBaseResource target = myContainedResources.get(ref);
+								if (target != null) {
+									ourLog.debug("Resource contains local ref {} in field {}", ref, thePathToElement);
+									nextRef.setResource(target);
+								} else {
+									myErrorHandler.unknownReference(null, ref);
+								}
+							}
+						}
+					}
+				}
+			});
+		}
+
+		@Override
+		public void wereBack() {
+			postProcess();
 		}
 
 	}
@@ -2224,14 +2200,15 @@ class ParserState<T> {
 			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
 
-//		@Override
-//		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-//			super.enteringNewElement(theNamespaceUri, theLocalPart);
-//			populateTarget();
-//		}
+		// @Override
+		// public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
+		// super.enteringNewElement(theNamespaceUri, theLocalPart);
+		// populateTarget();
+		// }
 
 		@Override
 		protected void populateTarget() {
+			weaveContainedResources();
 			if (myEntry != null) {
 				myEntry.setResource((IResource) getCurrentElement());
 			}
@@ -2277,6 +2254,7 @@ class ParserState<T> {
 
 		@Override
 		protected void populateTarget() {
+			weaveContainedResources();
 			if (myMutator != null) {
 				myMutator.setValue(myTarget, getCurrentElement());
 			}
@@ -2348,7 +2326,17 @@ class ParserState<T> {
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("value".equals(theName)) {
-				myInstance.setValueAsString(theValue);
+				if ("".equals(theValue)) {
+					myErrorHandler.invalidValue(null, theValue, "Attribute values must not be empty (\"\")");
+				} else {
+					try {
+						myInstance.setValueAsString(theValue);
+					} catch (DataFormatException e) {
+						myErrorHandler.invalidValue(null, theValue, e.getMessage());
+					} catch (IllegalArgumentException e) {
+						myErrorHandler.invalidValue(null, theValue, e.getMessage());
+					}
+				}
 			} else if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId(theValue);

@@ -109,7 +109,7 @@ public class SearchWithGenericListDstu3Test {
 				@RequiredParam(name=Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			ourLastMethod = "searchByIdentifier";
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
 		//@formatter:on

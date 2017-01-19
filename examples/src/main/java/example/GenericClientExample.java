@@ -3,6 +3,7 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -234,7 +235,7 @@ public class GenericClientExample {
       }
       {
          // START SNIPPET: delete
-          BaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
+          IBaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
 
          // outcome may be null if the server didn't return one
           if (resp != null) {
@@ -463,16 +464,16 @@ public class GenericClientExample {
          IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
          
          // Perform a search
-         Bundle results = client.search()
+         Bundle resultBundle = client.search()
                .forResource(Patient.class)
                .where(Patient.NAME.matches().value("Smith"))
                .returnBundle(Bundle.class)
                .execute();
          
-         if (results.getLink(Bundle.LINK_NEXT) != null) {
+         if (resultBundle.getLink(Bundle.LINK_NEXT) != null) {
 
             // load next page
-            Bundle nextPage = client.loadPage().next(results).execute();
+            Bundle nextPage = client.loadPage().next(resultBundle).execute();
          }
          // END SNIPPET: searchPaging
       }

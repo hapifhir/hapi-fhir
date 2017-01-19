@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				resource.setId(urlId);
 			} else {
+				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+					resource.setId(theRequest.getId());
+				}
+
 				String matchUrl = null;
 				if (myConditionalUrlIndex != -1) {
 					matchUrl = (String) theParams[myConditionalUrlIndex];

@@ -28,7 +28,7 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.db.location", "./target/testdb");
 		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
 		System.setProperty("fhir.lucene.location.dstu2", "./target/testlucene_dstu2");
-		System.setProperty("fhir.db.location.dstu3", "./target/testdb_dstu3");
+		System.setProperty("fhir.db.location.dstu3", "./target/fhirtest_dstu3");
 		System.setProperty("fhir.lucene.location.dstu3", "./target/testlucene_dstu3");
 		System.setProperty("fhir.db.location.tdl2", "./target/testdb_tdl2");
 		System.setProperty("fhir.lucene.location.tdl2", "./target/testlucene_tdl2");
@@ -75,7 +75,7 @@ public class UhnFhirTestApp {
 			Patient p1 = new Patient();
 			p1.getMeta().addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
 			p1.addIdentifier().setSystem("foo:bar").setValue("12345");
-			p1.addName().addFamily("Smith").addGiven("John");
+			p1.addName().setFamily("Smith").addGiven("John");
 			p1.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
 
 			Subscription subs = new Subscription();

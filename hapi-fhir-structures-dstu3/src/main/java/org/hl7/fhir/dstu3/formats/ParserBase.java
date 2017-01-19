@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hl7.fhir.dstu3.exceptions.FHIRFormatError;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.utilities.Utilities;

@@ -34,21 +34,16 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	public DatatypeGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
+		super.setFilenameSuffix("Dt");
 	}
 
 	@Override
 	protected String getTemplate() {
+		String template = super.getTemplate();
+		if (template != null) {
+			return template;
+		}
 		return "dstu".equals(getVersion()) ? "/vm/dt_composite_dstu.vm" : "/vm/dt_composite.vm";
-	}
-	
-	@Override
-	protected File getTemplateFile() {
-		return null;
-	}
-
-	@Override
-	protected String getFilenameSuffix() {
-		return "Dt";
 	}
 
 	@Override

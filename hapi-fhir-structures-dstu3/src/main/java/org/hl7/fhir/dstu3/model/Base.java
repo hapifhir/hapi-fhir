@@ -3,12 +3,12 @@ package org.hl7.fhir.dstu3.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import ca.uhn.fhir.model.api.IElement;
@@ -43,6 +43,11 @@ private Map<String, Object> userData;
     userData.put(name, value);
   }
 
+  public void clearUserData(String name) {
+    if (userData != null)
+      userData.remove(name);
+  }
+  
   public void setUserDataINN(String name, Object value) {
     if (value == null)
       return;
@@ -144,21 +149,20 @@ private Map<String, Object> userData;
   }  
   
   public List<Base> listChildrenByName(String name) throws FHIRException {
-  	List<Base> result = new ArrayList<Base>();
+    List<Base> result = new ArrayList<Base>();
   	for (Base b : listChildrenByName(name, true))
   		if (b != null)
   		  result.add(b);
-  	return result;
+    return result;
   }
-  
+
   public Base[] listChildrenByName(String name, boolean checkValid) throws FHIRException {
   	if (name.equals("*")) {
   		List<Property> children = new ArrayList<Property>();
   		listChildren(children);
   		List<Base> result = new ArrayList<Base>();
   		for (Property c : children)
-  			if (name.equals("*") || c.getName().equals(name) || (c.getName().endsWith("[x]") && c.getName().startsWith(name)))
-  				result.addAll(c.getValues());
+				result.addAll(c.getValues());
   		return result.toArray(new Base[result.size()]);
   	}
   	else
@@ -200,7 +204,7 @@ private Map<String, Object> userData;
 			boolean noLeft = e1 == null || e1.isEmpty();
 			boolean noRight = e2 == null || e2.isEmpty();
 			if (noLeft && noRight) {
-				return true;
+			return true;
 			}
 		}
 		if (e1 == null || e2 == null)
@@ -238,7 +242,7 @@ private Map<String, Object> userData;
 		boolean noLeft = e1 == null || e1.isEmpty();
 		boolean noRight = e2 == null || e2.isEmpty();
       if (noLeft && noRight && allowNull) {
-         return true;
+			return true;
       }
 		if (noLeft != noRight)
 			return false;
@@ -247,6 +251,15 @@ private Map<String, Object> userData;
 	
 	// -- converters for property setters
 	
+  public Type castToType(Base b) throws FHIRException {
+    if (b instanceof Type)
+      return (Type) b;
+    else if (b.isMetadataBased())
+      return ((org.hl7.fhir.dstu3.elementmodel.Element) b).asType();
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Reference");
+  }
+  
 
 	public BooleanType castToBoolean(Base b) throws FHIRException {
 		if (b instanceof BooleanType)
@@ -297,7 +310,7 @@ private Map<String, Object> userData;
 			return (UriType) b;
 		else if (b.hasPrimitiveValue())
 			return new UriType(b.primitiveValue());
-		else 
+		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Uri");
 	}
 	
@@ -306,7 +319,7 @@ private Map<String, Object> userData;
 			return (DateType) b;
 		else if (b.hasPrimitiveValue())
 			return new DateType(b.primitiveValue());
-		else	
+		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Date");
 	}
 	
@@ -370,12 +383,20 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Markdown");
 	}
 		
-	public Annotation castToAnnotation(Base b) throws FHIRException {
-		if (b instanceof Annotation)
-			return (Annotation) b;
-		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an Annotation");
-	}
+  public Annotation castToAnnotation(Base b) throws FHIRException {
+    if (b instanceof Annotation)
+      return (Annotation) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an Annotation");
+  }
+  
+  public DosageInstruction castToDosageInstruction(Base b) throws FHIRException {
+    if (b instanceof DosageInstruction)
+      return (DosageInstruction) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an DosageInstruction");
+  }
+  
 	
 	public Attachment castToAttachment(Base b) throws FHIRException {
 		if (b instanceof Attachment)
@@ -494,7 +515,7 @@ private Map<String, Object> userData;
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Address");
 	}
-
+	
 	public ContactDetail castToContactDetail(Base b) throws FHIRException {
 		if (b instanceof ContactDetail)
 			return (ContactDetail) b;
@@ -516,11 +537,11 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a UsageContext");
 	}
 
-	public RelatedResource castToRelatedResource(Base b) throws FHIRException {
-		if (b instanceof RelatedResource)
-			return (RelatedResource) b;
+	public RelatedArtifact castToRelatedArtifact(Base b) throws FHIRException {
+		if (b instanceof RelatedArtifact)
+			return (RelatedArtifact) b;
 		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a RelatedResource");
+			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a RelatedArtifact");
 	}
 
 	public ContactPoint castToContactPoint(Base b) throws FHIRException {
@@ -540,7 +561,12 @@ private Map<String, Object> userData;
 	public Reference castToReference(Base b) throws FHIRException {
 		if (b instanceof Reference)
 			return (Reference) b;
-		else
+		else if (b.isPrimitive() && Utilities.isURL(b.primitiveValue()))
+      return new Reference().setReference(b.primitiveValue());
+    else if (b instanceof org.hl7.fhir.dstu3.elementmodel.Element && b.fhirType().equals("Reference")) {
+      org.hl7.fhir.dstu3.elementmodel.Element e = (org.hl7.fhir.dstu3.elementmodel.Element) b;
+      return new Reference().setReference(e.getChildValue("reference")).setDisplay(e.getChildValue("display"));
+    } else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Reference");
 	}
 	
@@ -578,20 +604,6 @@ private Map<String, Object> userData;
 			return (ElementDefinition) b;
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ElementDefinition");
-	}
-
-	public ModuleMetadata castToModuleMetadata(Base b) throws FHIRException {
-		if (b instanceof ModuleMetadata)
-			return (ModuleMetadata) b;
-		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ModuleMetadata");
-	}
-
-	public ActionDefinition castToActionDefinition(Base b) throws FHIRException {
-		if (b instanceof ActionDefinition)
-			return (ActionDefinition) b;
-		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ActionDefinition");
 	}
 
 	public DataRequirement castToDataRequirement(Base b) throws FHIRException {
@@ -641,6 +653,12 @@ private Map<String, Object> userData;
   	else
   		return v1.equals(v2);
 	}
+
+  public boolean isResource() {
+    return false;
+  }
 	
 
+  public abstract String getIdBase();
+  public abstract void setIdBase(String value);
 }

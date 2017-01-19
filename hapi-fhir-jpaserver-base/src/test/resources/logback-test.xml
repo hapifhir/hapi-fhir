@@ -10,11 +10,11 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" level="debug">
+	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<logger name="ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2" additivity="false" level="debug">
+	<logger name="ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
@@ -34,7 +34,7 @@
 	</logger>
 	
 	<!-- Set to 'trace' to enable SQL logging -->
-	<logger name="org.hibernate.SQL" additivity="false" level="trace">
+	<logger name="org.hibernate.SQL" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 	<!-- Set to 'trace' to enable SQL Value logging -->

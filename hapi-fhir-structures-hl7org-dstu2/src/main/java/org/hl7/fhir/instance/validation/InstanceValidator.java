@@ -464,7 +464,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     else if (fixed == null && focus != null)
       rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, false, "Unexpected element " + focus.getName());
     else if (fixed != null && focus == null)
-      rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, false, "Mising element " + propName);
+      rule(errors, IssueType.VALUE, 0, 0, path, false, "Mising element " + propName);
     else {
       String value = focus.getAttribute("value");
       if (fixed instanceof org.hl7.fhir.instance.model.BooleanType)
@@ -1814,8 +1814,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           else {
             if (type.equals("Identifier"))
               checkIdentifier(errors, ei.path, ei.element, ei.definition);
-            else if (type.equals("Coding"))
-              checkCoding(errors, ei.path, ei.element, profile, ei.definition);
+            else if (type.equals("Coding")) {
+                checkCoding(errors, ei.path, ei.element, profile, ei.definition);
+            }
             else if (type.equals("CodeableConcept"))
               checkCodeableConcept(errors, ei.path, ei.element, profile, ei.definition);
             else if (type.equals("Reference"))

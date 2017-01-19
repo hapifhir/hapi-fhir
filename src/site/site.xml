@@ -136,6 +136,7 @@
 			<item name="Google Group (Ask Questions)" href="https://groups.google.com/d/forum/hapi-fhir" />
 			<item name="Issue Tracker (Report Bugs/Request Features)" href="https://github.com/jamesagnew/hapi-fhir/issues" />
 			<item name="Frequently Asked Questions (FAQ)" href="./hapi-fhir-faq.html" />
+			<item name="FHIR.org Chat (Live Chat with FHIR Implementors)" href="https://chat.fhir.org/" />
 		</menu>
 
 		<menu name="Test Server">

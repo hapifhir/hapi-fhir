@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides payment details and claim references supporting a bulk payment.
  */
@@ -51,19 +51,19 @@ public class PaymentReconciliation extends DomainResource {
 
     public enum PaymentReconciliationStatus {
         /**
-         * The resource instance is currently in-force.
+         * The instance is currently in-force.
          */
         ACTIVE, 
         /**
-         * The resource instance is withdrawn, rescinded or reversed.
+         * The instance is withdrawn, rescinded or reversed.
          */
         CANCELLED, 
         /**
-         * A new resource instance the contents of which is not complete.
+         * A new instance the contents of which is not complete.
          */
         DRAFT, 
         /**
-         * The resource instance was entered in error.
+         * The instance was entered in error.
          */
         ENTEREDINERROR, 
         /**
@@ -97,19 +97,19 @@ public class PaymentReconciliation extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ACTIVE: return "http://hl7.org/fhir/paymentreconciliation-status";
-            case CANCELLED: return "http://hl7.org/fhir/paymentreconciliation-status";
-            case DRAFT: return "http://hl7.org/fhir/paymentreconciliation-status";
-            case ENTEREDINERROR: return "http://hl7.org/fhir/paymentreconciliation-status";
+            case ACTIVE: return "http://hl7.org/fhir/fm-status";
+            case CANCELLED: return "http://hl7.org/fhir/fm-status";
+            case DRAFT: return "http://hl7.org/fhir/fm-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/fm-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The resource instance is currently in-force.";
-            case CANCELLED: return "The resource instance is withdrawn, rescinded or reversed.";
-            case DRAFT: return "A new resource instance the contents of which is not complete.";
-            case ENTEREDINERROR: return "The resource instance was entered in error.";
+            case ACTIVE: return "The instance is currently in-force.";
+            case CANCELLED: return "The instance is withdrawn, rescinded or reversed.";
+            case DRAFT: return "A new instance the contents of which is not complete.";
+            case ENTEREDINERROR: return "The instance was entered in error.";
             default: return "?";
           }
         }
@@ -118,7 +118,7 @@ public class PaymentReconciliation extends DomainResource {
             case ACTIVE: return "Active";
             case CANCELLED: return "Cancelled";
             case DRAFT: return "Draft";
-            case ENTEREDINERROR: return "Entered In Error";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -176,38 +176,58 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * Code to indicate the nature of the payment, adjustment, funds advance, etc.
          */
-        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Type code", formalDefinition="Code to indicate the nature of the payment, adjustment, funds advance, etc." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payment-type")
-        protected Coding type;
+        protected CodeableConcept type;
 
         /**
          * The claim or financial resource.
          */
-        @Child(name = "request", type = {Identifier.class, Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "request", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Claim", formalDefinition="The claim or financial resource." )
-        protected Type request;
+        protected Reference request;
+
+        /**
+         * The actual object that is the target of the reference (The claim or financial resource.)
+         */
+        protected Resource requestTarget;
 
         /**
          * The claim response resource.
          */
-        @Child(name = "responce", type = {Identifier.class, Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "response", type = {Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Claim Response", formalDefinition="The claim response resource." )
-        protected Type responce;
+        protected Reference response;
+
+        /**
+         * The actual object that is the target of the reference (The claim response resource.)
+         */
+        protected Resource responseTarget;
 
         /**
          * The Organization which submitted the invoice or financial transaction.
          */
-        @Child(name = "submitter", type = {Identifier.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "submitter", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Submitter", formalDefinition="The Organization which submitted the invoice or financial transaction." )
-        protected Type submitter;
+        protected Reference submitter;
+
+        /**
+         * The actual object that is the target of the reference (The Organization which submitted the invoice or financial transaction.)
+         */
+        protected Organization submitterTarget;
 
         /**
          * The organization which is receiving the payment.
          */
-        @Child(name = "payee", type = {Identifier.class, Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "payee", type = {Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Payee", formalDefinition="The organization which is receiving the payment." )
-        protected Type payee;
+        protected Reference payee;
+
+        /**
+         * The actual object that is the target of the reference (The organization which is receiving the payment.)
+         */
+        protected Organization payeeTarget;
 
         /**
          * The date of the invoice or financial resource.
@@ -223,7 +243,7 @@ public class PaymentReconciliation extends DomainResource {
         @Description(shortDefinition="Detail amount", formalDefinition="Amount paid for this detail." )
         protected Money amount;
 
-        private static final long serialVersionUID = 1706468339L;
+        private static final long serialVersionUID = 661095855L;
 
     /**
      * Constructor
@@ -235,7 +255,7 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * Constructor
      */
-      public DetailsComponent(Coding type) {
+      public DetailsComponent(CodeableConcept type) {
         super();
         this.type = type;
       }
@@ -243,12 +263,12 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @return {@link #type} (Code to indicate the nature of the payment, adjustment, funds advance, etc.)
          */
-        public Coding getType() { 
+        public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create DetailsComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
+              this.type = new CodeableConcept(); // cc
           return this.type;
         }
 
@@ -259,7 +279,7 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @param value {@link #type} (Code to indicate the nature of the payment, adjustment, funds advance, etc.)
          */
-        public DetailsComponent setType(Coding value) { 
+        public DetailsComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
@@ -267,34 +287,13 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @return {@link #request} (The claim or financial resource.)
          */
-        public Type getRequest() { 
+        public Reference getRequest() { 
+          if (this.request == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.request");
+            else if (Configuration.doAutoCreate())
+              this.request = new Reference(); // cc
           return this.request;
-        }
-
-        /**
-         * @return {@link #request} (The claim or financial resource.)
-         */
-        public Identifier getRequestIdentifier() throws FHIRException { 
-          if (!(this.request instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.request.getClass().getName()+" was encountered");
-          return (Identifier) this.request;
-        }
-
-        public boolean hasRequestIdentifier() { 
-          return this.request instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #request} (The claim or financial resource.)
-         */
-        public Reference getRequestReference() throws FHIRException { 
-          if (!(this.request instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.request.getClass().getName()+" was encountered");
-          return (Reference) this.request;
-        }
-
-        public boolean hasRequestReference() { 
-          return this.request instanceof Reference;
         }
 
         public boolean hasRequest() { 
@@ -304,87 +303,75 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @param value {@link #request} (The claim or financial resource.)
          */
-        public DetailsComponent setRequest(Type value) { 
+        public DetailsComponent setRequest(Reference value) { 
           this.request = value;
           return this;
         }
 
         /**
-         * @return {@link #responce} (The claim response resource.)
+         * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The claim or financial resource.)
          */
-        public Type getResponce() { 
-          return this.responce;
+        public Resource getRequestTarget() { 
+          return this.requestTarget;
         }
 
         /**
-         * @return {@link #responce} (The claim response resource.)
+         * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The claim or financial resource.)
          */
-        public Identifier getResponceIdentifier() throws FHIRException { 
-          if (!(this.responce instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.responce.getClass().getName()+" was encountered");
-          return (Identifier) this.responce;
-        }
-
-        public boolean hasResponceIdentifier() { 
-          return this.responce instanceof Identifier;
+        public DetailsComponent setRequestTarget(Resource value) { 
+          this.requestTarget = value;
+          return this;
         }
 
         /**
-         * @return {@link #responce} (The claim response resource.)
+         * @return {@link #response} (The claim response resource.)
          */
-        public Reference getResponceReference() throws FHIRException { 
-          if (!(this.responce instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.responce.getClass().getName()+" was encountered");
-          return (Reference) this.responce;
+        public Reference getResponse() { 
+          if (this.response == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.response");
+            else if (Configuration.doAutoCreate())
+              this.response = new Reference(); // cc
+          return this.response;
         }
 
-        public boolean hasResponceReference() { 
-          return this.responce instanceof Reference;
-        }
-
-        public boolean hasResponce() { 
-          return this.responce != null && !this.responce.isEmpty();
+        public boolean hasResponse() { 
+          return this.response != null && !this.response.isEmpty();
         }
 
         /**
-         * @param value {@link #responce} (The claim response resource.)
+         * @param value {@link #response} (The claim response resource.)
          */
-        public DetailsComponent setResponce(Type value) { 
-          this.responce = value;
+        public DetailsComponent setResponse(Reference value) { 
+          this.response = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #response} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The claim response resource.)
+         */
+        public Resource getResponseTarget() { 
+          return this.responseTarget;
+        }
+
+        /**
+         * @param value {@link #response} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The claim response resource.)
+         */
+        public DetailsComponent setResponseTarget(Resource value) { 
+          this.responseTarget = value;
           return this;
         }
 
         /**
          * @return {@link #submitter} (The Organization which submitted the invoice or financial transaction.)
          */
-        public Type getSubmitter() { 
+        public Reference getSubmitter() { 
+          if (this.submitter == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.submitter");
+            else if (Configuration.doAutoCreate())
+              this.submitter = new Reference(); // cc
           return this.submitter;
-        }
-
-        /**
-         * @return {@link #submitter} (The Organization which submitted the invoice or financial transaction.)
-         */
-        public Identifier getSubmitterIdentifier() throws FHIRException { 
-          if (!(this.submitter instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.submitter.getClass().getName()+" was encountered");
-          return (Identifier) this.submitter;
-        }
-
-        public boolean hasSubmitterIdentifier() { 
-          return this.submitter instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #submitter} (The Organization which submitted the invoice or financial transaction.)
-         */
-        public Reference getSubmitterReference() throws FHIRException { 
-          if (!(this.submitter instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.submitter.getClass().getName()+" was encountered");
-          return (Reference) this.submitter;
-        }
-
-        public boolean hasSubmitterReference() { 
-          return this.submitter instanceof Reference;
         }
 
         public boolean hasSubmitter() { 
@@ -394,42 +381,41 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @param value {@link #submitter} (The Organization which submitted the invoice or financial transaction.)
          */
-        public DetailsComponent setSubmitter(Type value) { 
+        public DetailsComponent setSubmitter(Reference value) { 
           this.submitter = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #submitter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Organization which submitted the invoice or financial transaction.)
+         */
+        public Organization getSubmitterTarget() { 
+          if (this.submitterTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.submitter");
+            else if (Configuration.doAutoCreate())
+              this.submitterTarget = new Organization(); // aa
+          return this.submitterTarget;
+        }
+
+        /**
+         * @param value {@link #submitter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Organization which submitted the invoice or financial transaction.)
+         */
+        public DetailsComponent setSubmitterTarget(Organization value) { 
+          this.submitterTarget = value;
           return this;
         }
 
         /**
          * @return {@link #payee} (The organization which is receiving the payment.)
          */
-        public Type getPayee() { 
+        public Reference getPayee() { 
+          if (this.payee == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.payee");
+            else if (Configuration.doAutoCreate())
+              this.payee = new Reference(); // cc
           return this.payee;
-        }
-
-        /**
-         * @return {@link #payee} (The organization which is receiving the payment.)
-         */
-        public Identifier getPayeeIdentifier() throws FHIRException { 
-          if (!(this.payee instanceof Identifier))
-            throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.payee.getClass().getName()+" was encountered");
-          return (Identifier) this.payee;
-        }
-
-        public boolean hasPayeeIdentifier() { 
-          return this.payee instanceof Identifier;
-        }
-
-        /**
-         * @return {@link #payee} (The organization which is receiving the payment.)
-         */
-        public Reference getPayeeReference() throws FHIRException { 
-          if (!(this.payee instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.payee.getClass().getName()+" was encountered");
-          return (Reference) this.payee;
-        }
-
-        public boolean hasPayeeReference() { 
-          return this.payee instanceof Reference;
         }
 
         public boolean hasPayee() { 
@@ -439,8 +425,28 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @param value {@link #payee} (The organization which is receiving the payment.)
          */
-        public DetailsComponent setPayee(Type value) { 
+        public DetailsComponent setPayee(Reference value) { 
           this.payee = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #payee} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is receiving the payment.)
+         */
+        public Organization getPayeeTarget() { 
+          if (this.payeeTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.payee");
+            else if (Configuration.doAutoCreate())
+              this.payeeTarget = new Organization(); // aa
+          return this.payeeTarget;
+        }
+
+        /**
+         * @param value {@link #payee} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is receiving the payment.)
+         */
+        public DetailsComponent setPayeeTarget(Organization value) { 
+          this.payeeTarget = value;
           return this;
         }
 
@@ -519,11 +525,11 @@ public class PaymentReconciliation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "Code to indicate the nature of the payment, adjustment, funds advance, etc.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("request[x]", "Identifier|Reference(Any)", "The claim or financial resource.", 0, java.lang.Integer.MAX_VALUE, request));
-          childrenList.add(new Property("responce[x]", "Identifier|Reference(Any)", "The claim response resource.", 0, java.lang.Integer.MAX_VALUE, responce));
-          childrenList.add(new Property("submitter[x]", "Identifier|Reference(Organization)", "The Organization which submitted the invoice or financial transaction.", 0, java.lang.Integer.MAX_VALUE, submitter));
-          childrenList.add(new Property("payee[x]", "Identifier|Reference(Organization)", "The organization which is receiving the payment.", 0, java.lang.Integer.MAX_VALUE, payee));
+          childrenList.add(new Property("type", "CodeableConcept", "Code to indicate the nature of the payment, adjustment, funds advance, etc.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("request", "Reference(Any)", "The claim or financial resource.", 0, java.lang.Integer.MAX_VALUE, request));
+          childrenList.add(new Property("response", "Reference(Any)", "The claim response resource.", 0, java.lang.Integer.MAX_VALUE, response));
+          childrenList.add(new Property("submitter", "Reference(Organization)", "The Organization which submitted the invoice or financial transaction.", 0, java.lang.Integer.MAX_VALUE, submitter));
+          childrenList.add(new Property("payee", "Reference(Organization)", "The organization which is receiving the payment.", 0, java.lang.Integer.MAX_VALUE, payee));
           childrenList.add(new Property("date", "date", "The date of the invoice or financial resource.", 0, java.lang.Integer.MAX_VALUE, date));
           childrenList.add(new Property("amount", "Money", "Amount paid for this detail.", 0, java.lang.Integer.MAX_VALUE, amount));
         }
@@ -531,11 +537,11 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
-        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Type
-        case -340323759: /*responce*/ return this.responce == null ? new Base[0] : new Base[] {this.responce}; // Type
-        case 348678409: /*submitter*/ return this.submitter == null ? new Base[0] : new Base[] {this.submitter}; // Type
-        case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // Type
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
+        case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Reference
+        case 348678409: /*submitter*/ return this.submitter == null ? new Base[0] : new Base[] {this.submitter}; // Reference
+        case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // Reference
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateType
         case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Money
         default: return super.getProperty(hash, name, checkValid);
@@ -547,19 +553,19 @@ public class PaymentReconciliation extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
-          this.type = castToCoding(value); // Coding
+          this.type = castToCodeableConcept(value); // CodeableConcept
           break;
         case 1095692943: // request
-          this.request = (Type) value; // Type
+          this.request = castToReference(value); // Reference
           break;
-        case -340323759: // responce
-          this.responce = (Type) value; // Type
+        case -340323263: // response
+          this.response = castToReference(value); // Reference
           break;
         case 348678409: // submitter
-          this.submitter = (Type) value; // Type
+          this.submitter = castToReference(value); // Reference
           break;
         case 106443592: // payee
-          this.payee = (Type) value; // Type
+          this.payee = castToReference(value); // Reference
           break;
         case 3076014: // date
           this.date = castToDate(value); // DateType
@@ -575,15 +581,15 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
-          this.type = castToCoding(value); // Coding
-        else if (name.equals("request[x]"))
-          this.request = (Type) value; // Type
-        else if (name.equals("responce[x]"))
-          this.responce = (Type) value; // Type
-        else if (name.equals("submitter[x]"))
-          this.submitter = (Type) value; // Type
-        else if (name.equals("payee[x]"))
-          this.payee = (Type) value; // Type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("response"))
+          this.response = castToReference(value); // Reference
+        else if (name.equals("submitter"))
+          this.submitter = castToReference(value); // Reference
+        else if (name.equals("payee"))
+          this.payee = castToReference(value); // Reference
         else if (name.equals("date"))
           this.date = castToDate(value); // DateType
         else if (name.equals("amount"))
@@ -595,11 +601,11 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // Coding
-        case 37106577:  return getRequest(); // Type
-        case 1832772751:  return getResponce(); // Type
-        case -2047315241:  return getSubmitter(); // Type
-        case 1375276088:  return getPayee(); // Type
+        case 3575610:  return getType(); // CodeableConcept
+        case 1095692943:  return getRequest(); // Reference
+        case -340323263:  return getResponse(); // Reference
+        case 348678409:  return getSubmitter(); // Reference
+        case 106443592:  return getPayee(); // Reference
         case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateType
         case -1413853096:  return getAmount(); // Money
         default: return super.makeProperty(hash, name);
@@ -610,38 +616,22 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("type")) {
-          this.type = new Coding();
+          this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("requestIdentifier")) {
-          this.request = new Identifier();
-          return this.request;
-        }
-        else if (name.equals("requestReference")) {
+        else if (name.equals("request")) {
           this.request = new Reference();
           return this.request;
         }
-        else if (name.equals("responceIdentifier")) {
-          this.responce = new Identifier();
-          return this.responce;
+        else if (name.equals("response")) {
+          this.response = new Reference();
+          return this.response;
         }
-        else if (name.equals("responceReference")) {
-          this.responce = new Reference();
-          return this.responce;
-        }
-        else if (name.equals("submitterIdentifier")) {
-          this.submitter = new Identifier();
-          return this.submitter;
-        }
-        else if (name.equals("submitterReference")) {
+        else if (name.equals("submitter")) {
           this.submitter = new Reference();
           return this.submitter;
         }
-        else if (name.equals("payeeIdentifier")) {
-          this.payee = new Identifier();
-          return this.payee;
-        }
-        else if (name.equals("payeeReference")) {
+        else if (name.equals("payee")) {
           this.payee = new Reference();
           return this.payee;
         }
@@ -661,7 +651,7 @@ public class PaymentReconciliation extends DomainResource {
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.request = request == null ? null : request.copy();
-        dst.responce = responce == null ? null : responce.copy();
+        dst.response = response == null ? null : response.copy();
         dst.submitter = submitter == null ? null : submitter.copy();
         dst.payee = payee == null ? null : payee.copy();
         dst.date = date == null ? null : date.copy();
@@ -676,7 +666,7 @@ public class PaymentReconciliation extends DomainResource {
         if (!(other instanceof DetailsComponent))
           return false;
         DetailsComponent o = (DetailsComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(request, o.request, true) && compareDeep(responce, o.responce, true)
+        return compareDeep(type, o.type, true) && compareDeep(request, o.request, true) && compareDeep(response, o.response, true)
            && compareDeep(submitter, o.submitter, true) && compareDeep(payee, o.payee, true) && compareDeep(date, o.date, true)
            && compareDeep(amount, o.amount, true);
       }
@@ -692,7 +682,7 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, request, responce
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, request, response
           , submitter, payee, date, amount);
       }
 
@@ -708,10 +698,10 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * The note purpose: Print/Display.
          */
-        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="display | print | printoper", formalDefinition="The note purpose: Print/Display." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/note-type")
-        protected Coding type;
+        protected CodeableConcept type;
 
         /**
          * The note text.
@@ -720,7 +710,7 @@ public class PaymentReconciliation extends DomainResource {
         @Description(shortDefinition="Notes text", formalDefinition="The note text." )
         protected StringType text;
 
-        private static final long serialVersionUID = 129959202L;
+        private static final long serialVersionUID = 874830709L;
 
     /**
      * Constructor
@@ -732,12 +722,12 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @return {@link #type} (The note purpose: Print/Display.)
          */
-        public Coding getType() { 
+        public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NotesComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
+              this.type = new CodeableConcept(); // cc
           return this.type;
         }
 
@@ -748,7 +738,7 @@ public class PaymentReconciliation extends DomainResource {
         /**
          * @param value {@link #type} (The note purpose: Print/Display.)
          */
-        public NotesComponent setType(Coding value) { 
+        public NotesComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
@@ -804,14 +794,14 @@ public class PaymentReconciliation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "The note purpose: Print/Display.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("text", "string", "The note text.", 0, java.lang.Integer.MAX_VALUE, text));
         }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -822,7 +812,7 @@ public class PaymentReconciliation extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3575610: // type
-          this.type = castToCoding(value); // Coding
+          this.type = castToCodeableConcept(value); // CodeableConcept
           break;
         case 3556653: // text
           this.text = castToString(value); // StringType
@@ -835,7 +825,7 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type"))
-          this.type = castToCoding(value); // Coding
+          this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("text"))
           this.text = castToString(value); // StringType
         else
@@ -845,7 +835,7 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // Coding
+        case 3575610:  return getType(); // CodeableConcept
         case 3556653: throw new FHIRException("Cannot make property text as it is not a complex type"); // StringType
         default: return super.makeProperty(hash, name);
         }
@@ -855,7 +845,7 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("type")) {
-          this.type = new Coding();
+          this.type = new CodeableConcept();
           return this.type;
         }
         else if (name.equals("text")) {
@@ -914,129 +904,124 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * The status of the resource instance.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/paymentreconciliation-status")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fm-status")
     protected Enumeration<PaymentReconciliationStatus> status;
-
-    /**
-     * Original request resource reference.
-     */
-    @Child(name = "request", type = {Identifier.class, ProcessRequest.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Claim reference", formalDefinition="Original request resource reference." )
-    protected Type request;
-
-    /**
-     * Transaction status: error, complete.
-     */
-    @Child(name = "outcome", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="complete | error | partial", formalDefinition="Transaction status: error, complete." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
-    protected Enumeration<RemittanceOutcome> outcome;
-
-    /**
-     * A description of the status of the adjudication.
-     */
-    @Child(name = "disposition", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication." )
-    protected StringType disposition;
-
-    /**
-     * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
-     */
-    @Child(name = "ruleset", type = {Coding.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ruleset")
-    protected Coding ruleset;
-
-    /**
-     * The style (standard) and version of the original material which was converted into this resource.
-     */
-    @Child(name = "originalRuleset", type = {Coding.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ruleset")
-    protected Coding originalRuleset;
-
-    /**
-     * The date when the enclosed suite of services were performed or completed.
-     */
-    @Child(name = "created", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
-    protected DateTimeType created;
 
     /**
      * The period of time for which payments have been gathered into this bulk payment for settlement.
      */
-    @Child(name = "period", type = {Period.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Period covered", formalDefinition="The period of time for which payments have been gathered into this bulk payment for settlement." )
     protected Period period;
 
     /**
+     * The date when the enclosed suite of services were performed or completed.
+     */
+    @Child(name = "created", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
+    protected DateTimeType created;
+
+    /**
      * The Insurer who produced this adjudicated response.
      */
-    @Child(name = "organization", type = {Identifier.class, Organization.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "organization", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
-    protected Type organization;
+    protected Reference organization;
+
+    /**
+     * The actual object that is the target of the reference (The Insurer who produced this adjudicated response.)
+     */
+    protected Organization organizationTarget;
+
+    /**
+     * Original request resource reference.
+     */
+    @Child(name = "request", type = {ProcessRequest.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Claim reference", formalDefinition="Original request resource reference." )
+    protected Reference request;
+
+    /**
+     * The actual object that is the target of the reference (Original request resource reference.)
+     */
+    protected ProcessRequest requestTarget;
+
+    /**
+     * Transaction status: error, complete.
+     */
+    @Child(name = "outcome", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="complete | error | partial", formalDefinition="Transaction status: error, complete." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
+    protected CodeableConcept outcome;
+
+    /**
+     * A description of the status of the adjudication.
+     */
+    @Child(name = "disposition", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication." )
+    protected StringType disposition;
 
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Identifier.class, Practitioner.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
-    protected Type requestProvider;
+    protected Reference requestProvider;
+
+    /**
+     * The actual object that is the target of the reference (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    protected Practitioner requestProviderTarget;
 
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestOrganization", type = {Identifier.class, Organization.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestOrganization", type = {Organization.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
-    protected Type requestOrganization;
+    protected Reference requestOrganization;
+
+    /**
+     * The actual object that is the target of the reference (The organization which is responsible for the services rendered to the patient.)
+     */
+    protected Organization requestOrganizationTarget;
 
     /**
      * List of individual settlement amounts and the corresponding transaction.
      */
-    @Child(name = "detail", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "detail", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Details", formalDefinition="List of individual settlement amounts and the corresponding transaction." )
     protected List<DetailsComponent> detail;
 
     /**
      * The form to be used for printing the content.
      */
-    @Child(name = "form", type = {Coding.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "form", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/forms")
-    protected Coding form;
+    protected CodeableConcept form;
 
     /**
      * Total payment amount.
      */
-    @Child(name = "total", type = {Money.class}, order=14, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "total", type = {Money.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Total amount of Payment", formalDefinition="Total payment amount." )
     protected Money total;
 
     /**
      * Suite of notes.
      */
-    @Child(name = "note", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Note text", formalDefinition="Suite of notes." )
     protected List<NotesComponent> note;
 
-    private static final long serialVersionUID = 1164496989L;
+    private static final long serialVersionUID = -358990199L;
 
   /**
    * Constructor
    */
     public PaymentReconciliation() {
       super();
-    }
-
-  /**
-   * Constructor
-   */
-    public PaymentReconciliation(Enumeration<PaymentReconciliationStatus> status, Money total) {
-      super();
-      this.status = status;
-      this.total = total;
     }
 
     /**
@@ -1131,200 +1116,37 @@ public class PaymentReconciliation extends DomainResource {
      * @param value The status of the resource instance.
      */
     public PaymentReconciliation setStatus(PaymentReconciliationStatus value) { 
+      if (value == null)
+        this.status = null;
+      else {
         if (this.status == null)
           this.status = new Enumeration<PaymentReconciliationStatus>(new PaymentReconciliationStatusEnumFactory());
         this.status.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #request} (Original request resource reference.)
-     */
-    public Type getRequest() { 
-      return this.request;
-    }
-
-    /**
-     * @return {@link #request} (Original request resource reference.)
-     */
-    public Identifier getRequestIdentifier() throws FHIRException { 
-      if (!(this.request instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.request.getClass().getName()+" was encountered");
-      return (Identifier) this.request;
-    }
-
-    public boolean hasRequestIdentifier() { 
-      return this.request instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #request} (Original request resource reference.)
-     */
-    public Reference getRequestReference() throws FHIRException { 
-      if (!(this.request instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.request.getClass().getName()+" was encountered");
-      return (Reference) this.request;
-    }
-
-    public boolean hasRequestReference() { 
-      return this.request instanceof Reference;
-    }
-
-    public boolean hasRequest() { 
-      return this.request != null && !this.request.isEmpty();
-    }
-
-    /**
-     * @param value {@link #request} (Original request resource reference.)
-     */
-    public PaymentReconciliation setRequest(Type value) { 
-      this.request = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
-     */
-    public Enumeration<RemittanceOutcome> getOutcomeElement() { 
-      if (this.outcome == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.outcome");
-        else if (Configuration.doAutoCreate())
-          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory()); // bb
-      return this.outcome;
-    }
-
-    public boolean hasOutcomeElement() { 
-      return this.outcome != null && !this.outcome.isEmpty();
-    }
-
-    public boolean hasOutcome() { 
-      return this.outcome != null && !this.outcome.isEmpty();
-    }
-
-    /**
-     * @param value {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
-     */
-    public PaymentReconciliation setOutcomeElement(Enumeration<RemittanceOutcome> value) { 
-      this.outcome = value;
-      return this;
-    }
-
-    /**
-     * @return Transaction status: error, complete.
-     */
-    public RemittanceOutcome getOutcome() { 
-      return this.outcome == null ? null : this.outcome.getValue();
-    }
-
-    /**
-     * @param value Transaction status: error, complete.
-     */
-    public PaymentReconciliation setOutcome(RemittanceOutcome value) { 
-      if (value == null)
-        this.outcome = null;
-      else {
-        if (this.outcome == null)
-          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory());
-        this.outcome.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #disposition} (A description of the status of the adjudication.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
+     * @return {@link #period} (The period of time for which payments have been gathered into this bulk payment for settlement.)
      */
-    public StringType getDispositionElement() { 
-      if (this.disposition == null)
+    public Period getPeriod() { 
+      if (this.period == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.disposition");
+          throw new Error("Attempt to auto-create PaymentReconciliation.period");
         else if (Configuration.doAutoCreate())
-          this.disposition = new StringType(); // bb
-      return this.disposition;
+          this.period = new Period(); // cc
+      return this.period;
     }
 
-    public boolean hasDispositionElement() { 
-      return this.disposition != null && !this.disposition.isEmpty();
-    }
-
-    public boolean hasDisposition() { 
-      return this.disposition != null && !this.disposition.isEmpty();
+    public boolean hasPeriod() { 
+      return this.period != null && !this.period.isEmpty();
     }
 
     /**
-     * @param value {@link #disposition} (A description of the status of the adjudication.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
+     * @param value {@link #period} (The period of time for which payments have been gathered into this bulk payment for settlement.)
      */
-    public PaymentReconciliation setDispositionElement(StringType value) { 
-      this.disposition = value;
-      return this;
-    }
-
-    /**
-     * @return A description of the status of the adjudication.
-     */
-    public String getDisposition() { 
-      return this.disposition == null ? null : this.disposition.getValue();
-    }
-
-    /**
-     * @param value A description of the status of the adjudication.
-     */
-    public PaymentReconciliation setDisposition(String value) { 
-      if (Utilities.noString(value))
-        this.disposition = null;
-      else {
-        if (this.disposition == null)
-          this.disposition = new StringType();
-        this.disposition.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #ruleset} (The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.)
-     */
-    public Coding getRuleset() { 
-      if (this.ruleset == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.ruleset");
-        else if (Configuration.doAutoCreate())
-          this.ruleset = new Coding(); // cc
-      return this.ruleset;
-    }
-
-    public boolean hasRuleset() { 
-      return this.ruleset != null && !this.ruleset.isEmpty();
-    }
-
-    /**
-     * @param value {@link #ruleset} (The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.)
-     */
-    public PaymentReconciliation setRuleset(Coding value) { 
-      this.ruleset = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #originalRuleset} (The style (standard) and version of the original material which was converted into this resource.)
-     */
-    public Coding getOriginalRuleset() { 
-      if (this.originalRuleset == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.originalRuleset");
-        else if (Configuration.doAutoCreate())
-          this.originalRuleset = new Coding(); // cc
-      return this.originalRuleset;
-    }
-
-    public boolean hasOriginalRuleset() { 
-      return this.originalRuleset != null && !this.originalRuleset.isEmpty();
-    }
-
-    /**
-     * @param value {@link #originalRuleset} (The style (standard) and version of the original material which was converted into this resource.)
-     */
-    public PaymentReconciliation setOriginalRuleset(Coding value) { 
-      this.originalRuleset = value;
+    public PaymentReconciliation setPeriod(Period value) { 
+      this.period = value;
       return this;
     }
 
@@ -1378,60 +1200,15 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return {@link #period} (The period of time for which payments have been gathered into this bulk payment for settlement.)
+     * @return {@link #organization} (The Insurer who produced this adjudicated response.)
      */
-    public Period getPeriod() { 
-      if (this.period == null)
+    public Reference getOrganization() { 
+      if (this.organization == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.period");
+          throw new Error("Attempt to auto-create PaymentReconciliation.organization");
         else if (Configuration.doAutoCreate())
-          this.period = new Period(); // cc
-      return this.period;
-    }
-
-    public boolean hasPeriod() { 
-      return this.period != null && !this.period.isEmpty();
-    }
-
-    /**
-     * @param value {@link #period} (The period of time for which payments have been gathered into this bulk payment for settlement.)
-     */
-    public PaymentReconciliation setPeriod(Period value) { 
-      this.period = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #organization} (The Insurer who produced this adjudicated response.)
-     */
-    public Type getOrganization() { 
+          this.organization = new Reference(); // cc
       return this.organization;
-    }
-
-    /**
-     * @return {@link #organization} (The Insurer who produced this adjudicated response.)
-     */
-    public Identifier getOrganizationIdentifier() throws FHIRException { 
-      if (!(this.organization instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Identifier) this.organization;
-    }
-
-    public boolean hasOrganizationIdentifier() { 
-      return this.organization instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #organization} (The Insurer who produced this adjudicated response.)
-     */
-    public Reference getOrganizationReference() throws FHIRException { 
-      if (!(this.organization instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.organization.getClass().getName()+" was encountered");
-      return (Reference) this.organization;
-    }
-
-    public boolean hasOrganizationReference() { 
-      return this.organization instanceof Reference;
     }
 
     public boolean hasOrganization() { 
@@ -1441,42 +1218,158 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * @param value {@link #organization} (The Insurer who produced this adjudicated response.)
      */
-    public PaymentReconciliation setOrganization(Type value) { 
+    public PaymentReconciliation setOrganization(Reference value) { 
       this.organization = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Insurer who produced this adjudicated response.)
+     */
+    public Organization getOrganizationTarget() { 
+      if (this.organizationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.organization");
+        else if (Configuration.doAutoCreate())
+          this.organizationTarget = new Organization(); // aa
+      return this.organizationTarget;
+    }
+
+    /**
+     * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Insurer who produced this adjudicated response.)
+     */
+    public PaymentReconciliation setOrganizationTarget(Organization value) { 
+      this.organizationTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #request} (Original request resource reference.)
+     */
+    public Reference getRequest() { 
+      if (this.request == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.request");
+        else if (Configuration.doAutoCreate())
+          this.request = new Reference(); // cc
+      return this.request;
+    }
+
+    public boolean hasRequest() { 
+      return this.request != null && !this.request.isEmpty();
+    }
+
+    /**
+     * @param value {@link #request} (Original request resource reference.)
+     */
+    public PaymentReconciliation setRequest(Reference value) { 
+      this.request = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
+     */
+    public ProcessRequest getRequestTarget() { 
+      if (this.requestTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.request");
+        else if (Configuration.doAutoCreate())
+          this.requestTarget = new ProcessRequest(); // aa
+      return this.requestTarget;
+    }
+
+    /**
+     * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
+     */
+    public PaymentReconciliation setRequestTarget(ProcessRequest value) { 
+      this.requestTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #outcome} (Transaction status: error, complete.)
+     */
+    public CodeableConcept getOutcome() { 
+      if (this.outcome == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.outcome");
+        else if (Configuration.doAutoCreate())
+          this.outcome = new CodeableConcept(); // cc
+      return this.outcome;
+    }
+
+    public boolean hasOutcome() { 
+      return this.outcome != null && !this.outcome.isEmpty();
+    }
+
+    /**
+     * @param value {@link #outcome} (Transaction status: error, complete.)
+     */
+    public PaymentReconciliation setOutcome(CodeableConcept value) { 
+      this.outcome = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #disposition} (A description of the status of the adjudication.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
+     */
+    public StringType getDispositionElement() { 
+      if (this.disposition == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.disposition");
+        else if (Configuration.doAutoCreate())
+          this.disposition = new StringType(); // bb
+      return this.disposition;
+    }
+
+    public boolean hasDispositionElement() { 
+      return this.disposition != null && !this.disposition.isEmpty();
+    }
+
+    public boolean hasDisposition() { 
+      return this.disposition != null && !this.disposition.isEmpty();
+    }
+
+    /**
+     * @param value {@link #disposition} (A description of the status of the adjudication.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
+     */
+    public PaymentReconciliation setDispositionElement(StringType value) { 
+      this.disposition = value;
+      return this;
+    }
+
+    /**
+     * @return A description of the status of the adjudication.
+     */
+    public String getDisposition() { 
+      return this.disposition == null ? null : this.disposition.getValue();
+    }
+
+    /**
+     * @param value A description of the status of the adjudication.
+     */
+    public PaymentReconciliation setDisposition(String value) { 
+      if (Utilities.noString(value))
+        this.disposition = null;
+      else {
+        if (this.disposition == null)
+          this.disposition = new StringType();
+        this.disposition.setValue(value);
+      }
       return this;
     }
 
     /**
      * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public Type getRequestProvider() { 
+    public Reference getRequestProvider() { 
+      if (this.requestProvider == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.requestProvider");
+        else if (Configuration.doAutoCreate())
+          this.requestProvider = new Reference(); // cc
       return this.requestProvider;
-    }
-
-    /**
-     * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
-     */
-    public Identifier getRequestProviderIdentifier() throws FHIRException { 
-      if (!(this.requestProvider instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.requestProvider.getClass().getName()+" was encountered");
-      return (Identifier) this.requestProvider;
-    }
-
-    public boolean hasRequestProviderIdentifier() { 
-      return this.requestProvider instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
-     */
-    public Reference getRequestProviderReference() throws FHIRException { 
-      if (!(this.requestProvider instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.requestProvider.getClass().getName()+" was encountered");
-      return (Reference) this.requestProvider;
-    }
-
-    public boolean hasRequestProviderReference() { 
-      return this.requestProvider instanceof Reference;
     }
 
     public boolean hasRequestProvider() { 
@@ -1486,42 +1379,41 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public PaymentReconciliation setRequestProvider(Type value) { 
+    public PaymentReconciliation setRequestProvider(Reference value) { 
       this.requestProvider = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public Practitioner getRequestProviderTarget() { 
+      if (this.requestProviderTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.requestProvider");
+        else if (Configuration.doAutoCreate())
+          this.requestProviderTarget = new Practitioner(); // aa
+      return this.requestProviderTarget;
+    }
+
+    /**
+     * @param value {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public PaymentReconciliation setRequestProviderTarget(Practitioner value) { 
+      this.requestProviderTarget = value;
       return this;
     }
 
     /**
      * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public Type getRequestOrganization() { 
+    public Reference getRequestOrganization() { 
+      if (this.requestOrganization == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.requestOrganization");
+        else if (Configuration.doAutoCreate())
+          this.requestOrganization = new Reference(); // cc
       return this.requestOrganization;
-    }
-
-    /**
-     * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Identifier getRequestOrganizationIdentifier() throws FHIRException { 
-      if (!(this.requestOrganization instanceof Identifier))
-        throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.requestOrganization.getClass().getName()+" was encountered");
-      return (Identifier) this.requestOrganization;
-    }
-
-    public boolean hasRequestOrganizationIdentifier() { 
-      return this.requestOrganization instanceof Identifier;
-    }
-
-    /**
-     * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Reference getRequestOrganizationReference() throws FHIRException { 
-      if (!(this.requestOrganization instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.requestOrganization.getClass().getName()+" was encountered");
-      return (Reference) this.requestOrganization;
-    }
-
-    public boolean hasRequestOrganizationReference() { 
-      return this.requestOrganization instanceof Reference;
     }
 
     public boolean hasRequestOrganization() { 
@@ -1531,8 +1423,28 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public PaymentReconciliation setRequestOrganization(Type value) { 
+    public PaymentReconciliation setRequestOrganization(Reference value) { 
       this.requestOrganization = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
+     */
+    public Organization getRequestOrganizationTarget() { 
+      if (this.requestOrganizationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.requestOrganization");
+        else if (Configuration.doAutoCreate())
+          this.requestOrganizationTarget = new Organization(); // aa
+      return this.requestOrganizationTarget;
+    }
+
+    /**
+     * @param value {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
+     */
+    public PaymentReconciliation setRequestOrganizationTarget(Organization value) { 
+      this.requestOrganizationTarget = value;
       return this;
     }
 
@@ -1592,12 +1504,12 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * @return {@link #form} (The form to be used for printing the content.)
      */
-    public Coding getForm() { 
+    public CodeableConcept getForm() { 
       if (this.form == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create PaymentReconciliation.form");
         else if (Configuration.doAutoCreate())
-          this.form = new Coding(); // cc
+          this.form = new CodeableConcept(); // cc
       return this.form;
     }
 
@@ -1608,7 +1520,7 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * @param value {@link #form} (The form to be used for printing the content.)
      */
-    public PaymentReconciliation setForm(Coding value) { 
+    public PaymentReconciliation setForm(CodeableConcept value) { 
       this.form = value;
       return this;
     }
@@ -1694,18 +1606,16 @@ public class PaymentReconciliation extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("request[x]", "Identifier|Reference(ProcessRequest)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("outcome", "code", "Transaction status: error, complete.", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));
-        childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
-        childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
-        childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("period", "Period", "The period of time for which payments have been gathered into this bulk payment for settlement.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("organization[x]", "Identifier|Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("requestProvider[x]", "Identifier|Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
-        childrenList.add(new Property("requestOrganization[x]", "Identifier|Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
+        childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
+        childrenList.add(new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
+        childrenList.add(new Property("request", "Reference(ProcessRequest)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
+        childrenList.add(new Property("outcome", "CodeableConcept", "Transaction status: error, complete.", 0, java.lang.Integer.MAX_VALUE, outcome));
+        childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));
+        childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
+        childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
         childrenList.add(new Property("detail", "", "List of individual settlement amounts and the corresponding transaction.", 0, java.lang.Integer.MAX_VALUE, detail));
-        childrenList.add(new Property("form", "Coding", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
+        childrenList.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
         childrenList.add(new Property("total", "Money", "Total payment amount.", 0, java.lang.Integer.MAX_VALUE, total));
         childrenList.add(new Property("note", "", "Suite of notes.", 0, java.lang.Integer.MAX_VALUE, note));
       }
@@ -1715,18 +1625,16 @@ public class PaymentReconciliation extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PaymentReconciliationStatus>
-        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Type
-        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<RemittanceOutcome>
-        case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
-        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // Coding
-        case 1089373397: /*originalRuleset*/ return this.originalRuleset == null ? new Base[0] : new Base[] {this.originalRuleset}; // Coding
-        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Type
-        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Type
-        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Type
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
+        case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
+        case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // CodeableConcept
+        case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
+        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
+        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
         case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : this.detail.toArray(new Base[this.detail.size()]); // DetailsComponent
-        case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // Coding
+        case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
         case 110549828: /*total*/ return this.total == null ? new Base[0] : new Base[] {this.total}; // Money
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // NotesComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1743,41 +1651,35 @@ public class PaymentReconciliation extends DomainResource {
         case -892481550: // status
           this.status = new PaymentReconciliationStatusEnumFactory().fromType(value); // Enumeration<PaymentReconciliationStatus>
           break;
-        case 1095692943: // request
-          this.request = (Type) value; // Type
-          break;
-        case -1106507950: // outcome
-          this.outcome = new RemittanceOutcomeEnumFactory().fromType(value); // Enumeration<RemittanceOutcome>
-          break;
-        case 583380919: // disposition
-          this.disposition = castToString(value); // StringType
-          break;
-        case 1548678118: // ruleset
-          this.ruleset = castToCoding(value); // Coding
-          break;
-        case 1089373397: // originalRuleset
-          this.originalRuleset = castToCoding(value); // Coding
+        case -991726143: // period
+          this.period = castToPeriod(value); // Period
           break;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
           break;
-        case -991726143: // period
-          this.period = castToPeriod(value); // Period
-          break;
         case 1178922291: // organization
-          this.organization = (Type) value; // Type
+          this.organization = castToReference(value); // Reference
+          break;
+        case 1095692943: // request
+          this.request = castToReference(value); // Reference
+          break;
+        case -1106507950: // outcome
+          this.outcome = castToCodeableConcept(value); // CodeableConcept
+          break;
+        case 583380919: // disposition
+          this.disposition = castToString(value); // StringType
           break;
         case 1601527200: // requestProvider
-          this.requestProvider = (Type) value; // Type
+          this.requestProvider = castToReference(value); // Reference
           break;
         case 599053666: // requestOrganization
-          this.requestOrganization = (Type) value; // Type
+          this.requestOrganization = castToReference(value); // Reference
           break;
         case -1335224239: // detail
           this.getDetail().add((DetailsComponent) value); // DetailsComponent
           break;
         case 3148996: // form
-          this.form = castToCoding(value); // Coding
+          this.form = castToCodeableConcept(value); // CodeableConcept
           break;
         case 110549828: // total
           this.total = castToMoney(value); // Money
@@ -1796,30 +1698,26 @@ public class PaymentReconciliation extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("status"))
           this.status = new PaymentReconciliationStatusEnumFactory().fromType(value); // Enumeration<PaymentReconciliationStatus>
-        else if (name.equals("request[x]"))
-          this.request = (Type) value; // Type
-        else if (name.equals("outcome"))
-          this.outcome = new RemittanceOutcomeEnumFactory().fromType(value); // Enumeration<RemittanceOutcome>
-        else if (name.equals("disposition"))
-          this.disposition = castToString(value); // StringType
-        else if (name.equals("ruleset"))
-          this.ruleset = castToCoding(value); // Coding
-        else if (name.equals("originalRuleset"))
-          this.originalRuleset = castToCoding(value); // Coding
-        else if (name.equals("created"))
-          this.created = castToDateTime(value); // DateTimeType
         else if (name.equals("period"))
           this.period = castToPeriod(value); // Period
-        else if (name.equals("organization[x]"))
-          this.organization = (Type) value; // Type
-        else if (name.equals("requestProvider[x]"))
-          this.requestProvider = (Type) value; // Type
-        else if (name.equals("requestOrganization[x]"))
-          this.requestOrganization = (Type) value; // Type
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("outcome"))
+          this.outcome = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("disposition"))
+          this.disposition = castToString(value); // StringType
+        else if (name.equals("requestProvider"))
+          this.requestProvider = castToReference(value); // Reference
+        else if (name.equals("requestOrganization"))
+          this.requestOrganization = castToReference(value); // Reference
         else if (name.equals("detail"))
           this.getDetail().add((DetailsComponent) value);
         else if (name.equals("form"))
-          this.form = castToCoding(value); // Coding
+          this.form = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("total"))
           this.total = castToMoney(value); // Money
         else if (name.equals("note"))
@@ -1833,18 +1731,16 @@ public class PaymentReconciliation extends DomainResource {
         switch (hash) {
         case -1618432855:  return addIdentifier(); // Identifier
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PaymentReconciliationStatus>
-        case 37106577:  return getRequest(); // Type
-        case -1106507950: throw new FHIRException("Cannot make property outcome as it is not a complex type"); // Enumeration<RemittanceOutcome>
-        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
-        case 1548678118:  return getRuleset(); // Coding
-        case 1089373397:  return getOriginalRuleset(); // Coding
-        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
         case -991726143:  return getPeriod(); // Period
-        case 1326483053:  return getOrganization(); // Type
-        case -1694784800:  return getRequestProvider(); // Type
-        case 818740190:  return getRequestOrganization(); // Type
+        case 1028554472: throw new FHIRException("Cannot make property created as it is not a complex type"); // DateTimeType
+        case 1178922291:  return getOrganization(); // Reference
+        case 1095692943:  return getRequest(); // Reference
+        case -1106507950:  return getOutcome(); // CodeableConcept
+        case 583380919: throw new FHIRException("Cannot make property disposition as it is not a complex type"); // StringType
+        case 1601527200:  return getRequestProvider(); // Reference
+        case 599053666:  return getRequestOrganization(); // Reference
         case -1335224239:  return addDetail(); // DetailsComponent
-        case 3148996:  return getForm(); // Coding
+        case 3148996:  return getForm(); // CodeableConcept
         case 110549828:  return getTotal(); // Money
         case 3387378:  return addNote(); // NotesComponent
         default: return super.makeProperty(hash, name);
@@ -1860,56 +1756,33 @@ public class PaymentReconciliation extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.status");
         }
-        else if (name.equals("requestIdentifier")) {
-          this.request = new Identifier();
-          return this.request;
-        }
-        else if (name.equals("requestReference")) {
-          this.request = new Reference();
-          return this.request;
-        }
-        else if (name.equals("outcome")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.outcome");
-        }
-        else if (name.equals("disposition")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.disposition");
-        }
-        else if (name.equals("ruleset")) {
-          this.ruleset = new Coding();
-          return this.ruleset;
-        }
-        else if (name.equals("originalRuleset")) {
-          this.originalRuleset = new Coding();
-          return this.originalRuleset;
-        }
-        else if (name.equals("created")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.created");
-        }
         else if (name.equals("period")) {
           this.period = new Period();
           return this.period;
         }
-        else if (name.equals("organizationIdentifier")) {
-          this.organization = new Identifier();
-          return this.organization;
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.created");
         }
-        else if (name.equals("organizationReference")) {
+        else if (name.equals("organization")) {
           this.organization = new Reference();
           return this.organization;
         }
-        else if (name.equals("requestProviderIdentifier")) {
-          this.requestProvider = new Identifier();
-          return this.requestProvider;
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
         }
-        else if (name.equals("requestProviderReference")) {
+        else if (name.equals("outcome")) {
+          this.outcome = new CodeableConcept();
+          return this.outcome;
+        }
+        else if (name.equals("disposition")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.disposition");
+        }
+        else if (name.equals("requestProvider")) {
           this.requestProvider = new Reference();
           return this.requestProvider;
         }
-        else if (name.equals("requestOrganizationIdentifier")) {
-          this.requestOrganization = new Identifier();
-          return this.requestOrganization;
-        }
-        else if (name.equals("requestOrganizationReference")) {
+        else if (name.equals("requestOrganization")) {
           this.requestOrganization = new Reference();
           return this.requestOrganization;
         }
@@ -1917,7 +1790,7 @@ public class PaymentReconciliation extends DomainResource {
           return addDetail();
         }
         else if (name.equals("form")) {
-          this.form = new Coding();
+          this.form = new CodeableConcept();
           return this.form;
         }
         else if (name.equals("total")) {
@@ -1945,14 +1818,12 @@ public class PaymentReconciliation extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
+        dst.period = period == null ? null : period.copy();
+        dst.created = created == null ? null : created.copy();
+        dst.organization = organization == null ? null : organization.copy();
         dst.request = request == null ? null : request.copy();
         dst.outcome = outcome == null ? null : outcome.copy();
         dst.disposition = disposition == null ? null : disposition.copy();
-        dst.ruleset = ruleset == null ? null : ruleset.copy();
-        dst.originalRuleset = originalRuleset == null ? null : originalRuleset.copy();
-        dst.created = created == null ? null : created.copy();
-        dst.period = period == null ? null : period.copy();
-        dst.organization = organization == null ? null : organization.copy();
         dst.requestProvider = requestProvider == null ? null : requestProvider.copy();
         dst.requestOrganization = requestOrganization == null ? null : requestOrganization.copy();
         if (detail != null) {
@@ -1981,10 +1852,9 @@ public class PaymentReconciliation extends DomainResource {
         if (!(other instanceof PaymentReconciliation))
           return false;
         PaymentReconciliation o = (PaymentReconciliation) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(request, o.request, true)
-           && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(ruleset, o.ruleset, true)
-           && compareDeep(originalRuleset, o.originalRuleset, true) && compareDeep(created, o.created, true)
-           && compareDeep(period, o.period, true) && compareDeep(organization, o.organization, true) && compareDeep(requestProvider, o.requestProvider, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(period, o.period, true)
+           && compareDeep(created, o.created, true) && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true)
+           && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(requestProvider, o.requestProvider, true)
            && compareDeep(requestOrganization, o.requestOrganization, true) && compareDeep(detail, o.detail, true)
            && compareDeep(form, o.form, true) && compareDeep(total, o.total, true) && compareDeep(note, o.note, true)
           ;
@@ -1997,60 +1867,20 @@ public class PaymentReconciliation extends DomainResource {
         if (!(other instanceof PaymentReconciliation))
           return false;
         PaymentReconciliation o = (PaymentReconciliation) other;
-        return compareValues(status, o.status, true) && compareValues(outcome, o.outcome, true) && compareValues(disposition, o.disposition, true)
-           && compareValues(created, o.created, true);
+        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(disposition, o.disposition, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, request
-          , outcome, disposition, ruleset, originalRuleset, created, period, organization
-          , requestProvider, requestOrganization, detail, form, total, note);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, period
+          , created, organization, request, outcome, disposition, requestProvider, requestOrganization
+          , detail, form, total, note);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.PaymentReconciliation;
    }
-
- /**
-   * Search parameter: <b>requestprovideridentifier</b>
-   * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestprovideridentifier", path="PaymentReconciliation.requestProvider.as(Identifier)", description="The reference to the provider who sumbitted the claim", type="token" )
-  public static final String SP_REQUESTPROVIDERIDENTIFIER = "requestprovideridentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestprovideridentifier</b>
-   * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUESTPROVIDERIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUESTPROVIDERIDENTIFIER);
-
- /**
-   * Search parameter: <b>requestorganizationidentifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestorganizationidentifier", path="PaymentReconciliation.requestOrganization.as(Identifier)", description="The organization who generated this resource", type="token" )
-  public static final String SP_REQUESTORGANIZATIONIDENTIFIER = "requestorganizationidentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestorganizationidentifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUESTORGANIZATIONIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUESTORGANIZATIONIDENTIFIER);
 
  /**
    * Search parameter: <b>identifier</b>
@@ -2073,6 +1903,32 @@ public class PaymentReconciliation extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>request</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.request</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="request", path="PaymentReconciliation.request", description="The reference to the claim", type="reference", target={ProcessRequest.class } )
+  public static final String SP_REQUEST = "request";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>request</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.request</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request").toLocked();
+
+ /**
    * Search parameter: <b>disposition</b>
    * <p>
    * Description: <b>The contents of the disposition message</b><br>
@@ -2091,26 +1947,6 @@ public class PaymentReconciliation extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DISPOSITION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DISPOSITION);
-
- /**
-   * Search parameter: <b>organizationidentifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.organizationIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organizationidentifier", path="PaymentReconciliation.organization.as(Identifier)", description="The organization who generated this resource", type="token" )
-  public static final String SP_ORGANIZATIONIDENTIFIER = "organizationidentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organizationidentifier</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.organizationIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ORGANIZATIONIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ORGANIZATIONIDENTIFIER);
 
  /**
    * Search parameter: <b>created</b>
@@ -2133,128 +1969,82 @@ public class PaymentReconciliation extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
-   * Search parameter: <b>requestidentifier</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestIdentifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestidentifier", path="PaymentReconciliation.request.as(Identifier)", description="The reference to the claim", type="token" )
-  public static final String SP_REQUESTIDENTIFIER = "requestidentifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestidentifier</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>PaymentReconciliation.requestIdentifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUESTIDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUESTIDENTIFIER);
-
- /**
-   * Search parameter: <b>organizationreference</b>
+   * Search parameter: <b>organization</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.organizationReference</b><br>
+   * Path: <b>PaymentReconciliation.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organizationreference", path="PaymentReconciliation.organization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATIONREFERENCE = "organizationreference";
+  @SearchParamDefinition(name="organization", path="PaymentReconciliation.organization", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_ORGANIZATION = "organization";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organizationreference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
    * <p>
    * Description: <b>The organization who generated this resource</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.organizationReference</b><br>
+   * Path: <b>PaymentReconciliation.organization</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATIONREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATIONREFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:organizationreference</b>".
+   * the path value of "<b>PaymentReconciliation:organization</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATIONREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:organizationreference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:organization").toLocked();
 
  /**
-   * Search parameter: <b>requestproviderreference</b>
+   * Search parameter: <b>request-organization</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestOrganization</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="request-organization", path="PaymentReconciliation.requestOrganization", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_REQUEST_ORGANIZATION = "request-organization";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>request-organization</b>
+   * <p>
+   * Description: <b>The organization who generated this resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestOrganization</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_ORGANIZATION);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:request-organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_ORGANIZATION = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request-organization").toLocked();
+
+ /**
+   * Search parameter: <b>request-provider</b>
    * <p>
    * Description: <b>The reference to the provider who sumbitted the claim</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderReference</b><br>
+   * Path: <b>PaymentReconciliation.requestProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requestproviderreference", path="PaymentReconciliation.requestProvider.as(Reference)", description="The reference to the provider who sumbitted the claim", type="reference", target={Practitioner.class } )
-  public static final String SP_REQUESTPROVIDERREFERENCE = "requestproviderreference";
+  @SearchParamDefinition(name="request-provider", path="PaymentReconciliation.requestProvider", description="The reference to the provider who sumbitted the claim", type="reference", target={Practitioner.class } )
+  public static final String SP_REQUEST_PROVIDER = "request-provider";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestproviderreference</b>
+   * <b>Fluent Client</b> search parameter constant for <b>request-provider</b>
    * <p>
    * Description: <b>The reference to the provider who sumbitted the claim</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestProviderReference</b><br>
+   * Path: <b>PaymentReconciliation.requestProvider</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTPROVIDERREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTPROVIDERREFERENCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_PROVIDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_PROVIDER);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:requestproviderreference</b>".
+   * the path value of "<b>PaymentReconciliation:request-provider</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTPROVIDERREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestproviderreference").toLocked();
-
- /**
-   * Search parameter: <b>requestorganizationreference</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestorganizationreference", path="PaymentReconciliation.requestOrganization.as(Reference)", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_REQUESTORGANIZATIONREFERENCE = "requestorganizationreference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestorganizationreference</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestOrganizationReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTORGANIZATIONREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTORGANIZATIONREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:requestorganizationreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTORGANIZATIONREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestorganizationreference").toLocked();
-
- /**
-   * Search parameter: <b>requestreference</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestReference</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="requestreference", path="PaymentReconciliation.request.as(Reference)", description="The reference to the claim", type="reference", target={ProcessRequest.class } )
-  public static final String SP_REQUESTREFERENCE = "requestreference";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>requestreference</b>
-   * <p>
-   * Description: <b>The reference to the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestReference</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTREFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTREFERENCE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:requestreference</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTREFERENCE = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestreference").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_PROVIDER = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request-provider").toLocked();
 
  /**
    * Search parameter: <b>outcome</b>

@@ -62,7 +62,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void testUpdateAndGetHistoryResource() throws InterruptedException {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().addFamily("Tester").addGiven("Joe");
+		patient.addName().setFamily("Tester").addGiven("Joe");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
 		assertNotNull(outcome.getId());
@@ -139,7 +139,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 
 		myPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
@@ -213,7 +213,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 
 		String matchUrl = "Patient?_lastUpdated=gt" + start.getValueAsString();
@@ -251,7 +251,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 
 		myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
@@ -271,7 +271,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		Patient p = new Patient();
 		String methodName = "testUpdateCreatesTextualIdIfItDoesntAlreadyExist";
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
 
 		IIdType id = myPatientDao.update(p, mySrd).getId();
@@ -286,7 +286,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		String methodName = "testUpdateFailsForUnknownIdWithNumberThenText";
 		Patient p = new Patient();
 		p.setId("0" + methodName);
-		p.addName().addFamily(methodName);
+		p.addName().setFamily(methodName);
 
 		myPatientDao.update(p, mySrd);
 	}
@@ -301,7 +301,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		IIdType p1id;
 		{
 			Patient p1 = new Patient();
-			p1.addName().addFamily(methodName);
+			p1.addName().setFamily(methodName);
 			
 			p1.getMeta().addTag("tag_scheme1", "tag_term1",null);
 			p1.getMeta().addSecurity("sec_scheme1", "sec_term1",null);
@@ -312,7 +312,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient p1 = new Patient();
 			p1.setId(p1id);
-			p1.addName().addFamily(methodName);
+			p1.addName().setFamily(methodName);
 
 			p1.getMeta().addTag("tag_scheme2", "tag_term2", null);
 			p1.getMeta().addSecurity("sec_scheme2", "sec_term2", null);
@@ -344,12 +344,12 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void testUpdateMaintainsSearchParams() throws InterruptedException {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2AAA");
-		p1.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2AAA");
+		p1.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2AAA");
 		IIdType p1id = myPatientDao.create(p1, mySrd).getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2BBB");
-		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
+		p2.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd).getId();
 
 		Set<Long> ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA"));
@@ -380,7 +380,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
-		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
 		IIdType p1id = myPatientDao.create(p1, mySrd).getId();
 
 		Organization p2 = new Organization();
@@ -410,7 +410,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p1.addName().addFamily("Tester").addGiven(methodName);
+		p1.addName().setFamily("Tester").addGiven(methodName);
 		IIdType p1id = myPatientDao.create(p1, mySrd).getId();
 
 		IIdType p1id2 = myPatientDao.update(p1, mySrd).getId();
@@ -428,7 +428,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		IIdType id;
 		{
 			Patient patient = new Patient();
-			patient.addName().addFamily(name);
+			patient.addName().setFamily(name);
 
 			List<IdType> tl = new ArrayList<IdType>();
 			tl.add(new IdType("http://foo/bar"));
@@ -455,7 +455,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		IIdType id;
 		{
 			Patient patient = new Patient();
-			patient.addName().addFamily(name);
+			patient.addName().setFamily(name);
 
 			List<IdType> tl = new ArrayList<IdType>();
 			tl.add(new IdType("http://foo/bar"));
@@ -476,7 +476,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient patient = new Patient();
 			patient.setId(id);
-			patient.addName().addFamily(name);
+			patient.addName().setFamily(name);
 
 			List<IdType> tl = new ArrayList<IdType>();
 			tl.add(new IdType("http://foo/baz"));
@@ -500,7 +500,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void testUpdateUnknownNumericIdFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/9999999999999999");
 		try {
 			myPatientDao.update(p, mySrd);
@@ -514,7 +514,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void testUpdateWithInvalidIdFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/123:456");
 		try {
 			myPatientDao.update(p, mySrd);
@@ -528,7 +528,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void testUpdateWithNumericIdFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/123");
 		try {
 			myPatientDao.update(p, mySrd);
@@ -542,7 +542,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	public void testUpdateWithNumericThenTextIdSucceeds() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");
-		p.addName().addFamily("Hello");
+		p.addName().setFamily("Hello");
 		p.setId("Patient/123abc");
 		IIdType id = myPatientDao.update(p, mySrd).getId();
 		assertEquals("123abc", id.getIdPart());
@@ -550,7 +550,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		p = myPatientDao.read(id.toUnqualifiedVersionless(), mySrd);
 		assertEquals("Patient/123abc", p.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals("Hello", p.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("Hello", p.getName().get(0).getFamily());
 
 	}
 

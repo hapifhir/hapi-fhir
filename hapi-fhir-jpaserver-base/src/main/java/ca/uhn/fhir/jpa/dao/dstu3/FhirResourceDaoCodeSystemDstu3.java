@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 					retVal.setFound(true);
 					retVal.setSearchedForCode(code);
 					retVal.setSearchedForSystem(system);
-					retVal.setCodeDisplay(result.getDisplay());
+					retVal.setCodeDisplay(result.asConceptDefinition().getDisplay());
 					retVal.setCodeSystemDisplayName("Unknown");
 					retVal.setCodeSystemVersion("");
 					return retVal;

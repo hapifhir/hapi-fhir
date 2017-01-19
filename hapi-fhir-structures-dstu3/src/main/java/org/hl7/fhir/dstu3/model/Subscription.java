@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
  */
@@ -326,10 +326,10 @@ public class Subscription extends DomainResource {
         protected UriType endpoint;
 
         /**
-         * The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.
+         * The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
          */
         @Child(name = "payload", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Mimetype to send, or omit for no payload", formalDefinition="The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification." )
+        @Description(shortDefinition="Mimetype to send, or omit for no payload", formalDefinition="The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification." )
         protected StringType payload;
 
         /**
@@ -451,7 +451,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @return {@link #payload} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
         public StringType getPayloadElement() { 
           if (this.payload == null)
@@ -471,7 +471,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @param value {@link #payload} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
         public SubscriptionChannelComponent setPayloadElement(StringType value) { 
           this.payload = value;
@@ -479,14 +479,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.
+         * @return The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
          */
         public String getPayload() { 
           return this.payload == null ? null : this.payload.getValue();
         }
 
         /**
-         * @param value The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.
+         * @param value The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
          */
         public SubscriptionChannelComponent setPayload(String value) { 
           if (Utilities.noString(value))
@@ -552,7 +552,7 @@ public class Subscription extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "code", "The type of channel to send notifications on.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-          childrenList.add(new Property("payload", "string", "The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the payload is not present, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payload));
+          childrenList.add(new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payload));
           childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         }
 

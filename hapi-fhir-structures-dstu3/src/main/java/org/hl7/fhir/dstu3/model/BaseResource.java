@@ -31,4 +31,10 @@ public abstract class BaseResource extends Base implements IAnyResource, IElemen
 		return FhirVersionEnum.DSTU3;
 	}
 
+  @Override
+  public boolean isResource() {
+    return true;
+  }
+
+	
 }

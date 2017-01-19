@@ -40,28 +40,7 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.dstu2.resource.Appointment;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
-import ca.uhn.fhir.model.dstu2.resource.Device;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Encounter;
-import ca.uhn.fhir.model.dstu2.resource.Immunization;
-import ca.uhn.fhir.model.dstu2.resource.Location;
-import ca.uhn.fhir.model.dstu2.resource.Media;
-import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Practitioner;
-import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
-import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.resource.Substance;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -69,7 +48,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu2Config.class/*, ca.uhn.fhir.jpa.config.WebsocketDstu2Config.class*/ })
+@ContextConfiguration(classes= {TestDstu2Config.class, ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig.class})
 //@formatter:on
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
@@ -119,6 +98,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myMedicationDaoDstu2")
 	protected IFhirResourceDao<Medication> myMedicationDao;
+	@Autowired
+	@Qualifier("myMedicationAdministrationDaoDstu2")
+	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 	@Autowired
 	@Qualifier("myMedicationOrderDaoDstu2")
 	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;

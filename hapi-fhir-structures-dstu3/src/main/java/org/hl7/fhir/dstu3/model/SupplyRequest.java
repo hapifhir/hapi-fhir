@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a request for a medication, substance or device used in the healthcare setting.
  */
@@ -917,13 +917,13 @@ public class SupplyRequest extends DomainResource {
           this.kind = castToCodeableConcept(value); // CodeableConcept
           break;
         case 2129914144: // orderedItem
-          this.orderedItem = (Type) value; // Type
+          this.orderedItem = castToType(value); // Type
           break;
         case -1663305268: // supplier
           this.getSupplier().add(castToReference(value)); // Reference
           break;
         case -934964668: // reason
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
           break;
         case 3648314: // when
           this.when = (SupplyRequestWhenComponent) value; // SupplyRequestWhenComponent
@@ -948,11 +948,11 @@ public class SupplyRequest extends DomainResource {
         else if (name.equals("kind"))
           this.kind = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("orderedItem[x]"))
-          this.orderedItem = (Type) value; // Type
+          this.orderedItem = castToType(value); // Type
         else if (name.equals("supplier"))
           this.getSupplier().add(castToReference(value));
         else if (name.equals("reason[x]"))
-          this.reason = (Type) value; // Type
+          this.reason = castToType(value); // Type
         else if (name.equals("when"))
           this.when = (SupplyRequestWhenComponent) value; // SupplyRequestWhenComponent
         else

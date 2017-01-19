@@ -1,6 +1,7 @@
 package ca.uhn.fhirtest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,10 +13,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
+import ca.uhn.fhir.jpa.config.WebsocketDstu2DispatcherConfig;
 import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
+import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3DispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
@@ -25,19 +29,21 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TdlDstu2Config;
 import ca.uhn.fhirtest.config.TdlDstu3Config;
 import ca.uhn.fhirtest.config.TestDstu2Config;
+import ca.uhn.fhirtest.config.TestDstu3Config;
 
 public class TestRestfulServer extends RestfulServer {
 
@@ -105,7 +111,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TdlDstu2Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL2;
 			} else {
-				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
+				myAppCtx.register(TestDstu2Config.class, WebsocketDstu2DispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU2;
 			}
 			myAppCtx.refresh();
@@ -128,7 +134,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TdlDstu3Config.class);
 				baseUrlProperty = FHIR_BASEURL_TDL3;
 			} else {
-				myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
+				myAppCtx.register(TestDstu3Config.class, WebsocketDstu3DispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU3;
 			}
 			myAppCtx.refresh();
@@ -171,10 +177,28 @@ public class TestRestfulServer extends RestfulServer {
 		setPlainProviders(plainProviders);
 
 		/*
+		 * Enable CORS
+		 */
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Origin");
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+		registerInterceptor(corsInterceptor);
+
+		/*
 		 * We want to format the response using nice HTML if it's a browser, since this
 		 * makes things a little easier for testers.
 		 */
 		registerInterceptor(new ResponseHighlighterInterceptor());
+		registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
 		
 		/*
 		 * Default to JSON with pretty printing
@@ -198,11 +222,10 @@ public class TestRestfulServer extends RestfulServer {
 		setServerAddressStrategy(new MyHardcodedServerAddressStrategy(baseUrl));
 		
 		/*
-		 * This is a simple paging strategy that keeps the last 10 
-		 * searches in memory
+		 * Spool results to the database 
 		 */
-		setPagingProvider(new FifoMemoryPagingProvider(10).setMaximumPageSize(500));
-
+		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
+		
 		/*
 		 * Load interceptors for the server from Spring
 		 */

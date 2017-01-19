@@ -31,7 +31,7 @@ FhirContext ctx = FhirContext.forDstu3();
 
 // Working with RI structures is similar to how it works with the HAPI structures
 org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
-patient.addName().addGiven("John").addFamily("Smith");
+patient.addName().addGiven("John").setFamily("Smith");
 patient.getBirthDateElement().setValueAsString("1998-02-22");
 
 // Parsing and encoding works the same way too

@@ -7,7 +7,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -206,7 +209,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome());
+		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest);
 
 		return false;
 	}
@@ -276,12 +279,12 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theResponseObject);
+		streamResponse(theRequestDetails, theServletResponse, theResponseObject, theServletRequest);
 
 		return false;
 	}
 
-	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource) {
+	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource, ServletRequest theServletRequest) {
 		IParser p;
 		Map<String, String[]> parameters = theRequestDetails.getParameters();
 		if (parameters.containsKey(Constants.PARAM_FORMAT)) {
@@ -292,6 +295,20 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			RestfulServerUtils.configureResponseParser(theRequestDetails, p);
 		}
 
+		// This interceptor defaults to pretty printing unless the user
+		// has specifically requested us not to
+		boolean prettyPrintResponse = true;
+		String[] prettyParams = parameters.get(Constants.PARAM_PRETTY);
+		if (prettyParams != null && prettyParams.length > 0) {
+			if (Constants.PARAM_PRETTY_VALUE_FALSE.equals(prettyParams[0])) {
+				prettyPrintResponse = false;
+			}
+		}
+		if (prettyPrintResponse) {
+			p.setPrettyPrint(prettyPrintResponse);
+		}
+		
+		
 		EncodingEnum encoding = p.getEncoding();
 		String encoded = p.encodeResourceToString(resource);
 
@@ -360,6 +377,16 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		b.append("<a href=\"");
 		b.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
 		b.append("\">HTML XML</a>.");
+		
+		Date startTime = (Date) theServletRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
+		if (startTime != null) {
+			long time = System.currentTimeMillis() - startTime.getTime();
+			b.append(" Response generated in ");
+			b.append(time);
+			b.append("ms.");
+		}
+
+		
 		b.append("</p>");
 		
 		b.append("\n");

@@ -1,6 +1,6 @@
 package org.hl7.fhir.dstu3.validation;
 
-import org.hl7.fhir.dstu3.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
 

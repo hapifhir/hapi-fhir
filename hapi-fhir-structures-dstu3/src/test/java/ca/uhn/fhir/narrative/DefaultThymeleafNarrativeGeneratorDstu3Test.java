@@ -13,8 +13,8 @@ import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationOrder;
-import org.hl7.fhir.dstu3.model.MedicationOrder.MedicationOrderStatus;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.MedicationRequest.MedicationRequestStatus;
 import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -60,7 +60,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().addFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
+		value.addName().setFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
 		//@formatter:off
 		value.addAddress()
 			.addLine("123 Fake Street").addLine("Unit 1")
@@ -73,7 +73,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		myGen.generateNarrative(ourCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
 
 	}
 
@@ -168,13 +168,13 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	@Test
 	@Ignore
 	public void testGenerateMedicationPrescription() {
-		MedicationOrder mp = new MedicationOrder();
+		MedicationRequest mp = new MedicationRequest();
 		mp.setId("12345");
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 		Reference medRef = new Reference(med);
 		mp.setMedication(medRef);
-		mp.setStatus(MedicationOrderStatus.ACTIVE);
+		mp.setStatus(MedicationRequestStatus.ACTIVE);
 		mp.setDateWrittenElement(new DateTimeType("2014-09-01"));
 
 		Narrative narrative = new Narrative();

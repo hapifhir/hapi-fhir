@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.param;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
@@ -40,11 +41,11 @@ public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implement
 	public abstract BaseAndListParam<T> addAnd(T theValue);
 
 	@Override
-	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException {
+	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters) throws InvalidRequestException {
 		myValues.clear();
 		for (QualifiedParamList nextParam : theParameters) {
 			T nextList = newInstance();
-			nextList.setValuesAsQueryTokens(nextParam);
+			nextList.setValuesAsQueryTokens(theContext, theParamName, nextParam);
 			myValues.add(nextList);
 		}
 	}

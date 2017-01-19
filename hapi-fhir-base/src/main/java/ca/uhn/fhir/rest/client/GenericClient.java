@@ -4,13 +4,13 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,38 +24,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -69,15 +46,12 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
@@ -140,6 +114,8 @@ import ca.uhn.fhir.rest.method.SortParameter;
 import ca.uhn.fhir.rest.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu1;
 import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2Plus;
+import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.rest.method.*;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -239,7 +215,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return delete(theType, new IdDt(theId));
 	}
 
-	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint, SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
+			SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -390,8 +367,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	/**
 	 * @deprecated Use {@link LoggingInterceptor} as a client interceptor registered to your
-	 * client instead, as this provides much more fine-grained control over what is logged. This
-	 * method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16) 
+	 *             client instead, as this provides much more fine-grained control over what is logged. This
+	 *             method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16)
 	 */
 	@Deprecated
 	public boolean isLogRequestAndResponse() {
@@ -520,6 +497,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		Bundle resp = invokeClient(myContext, new BundleResponseHandler(null), invocation, myLogRequestAndResponse);
 
 		return new ArrayList<IBaseResource>(resp.toListOfResources());
+	}
+
+	@Override
+	public IPatch patch() {
+		return new PatchInternal();
 	}
 
 	@Override
@@ -903,7 +885,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, BaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
+	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, IBaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
 		private CriterionList myCriterionList;
 		private IIdType myId;
@@ -917,7 +899,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public BaseOperationOutcome execute() {
+		public IBaseOperationOutcome execute() {
 			HttpDeleteClientInvocation invocation;
 			if (myId != null) {
 				invocation = DeleteMethodBinding.createDeleteInvocation(getFhirContext(), myId);
@@ -1453,8 +1435,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private RuntimeResourceDefinition myParametersDef;
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
-                private IBaseBundle myMsgBundle;
-             
+    private IBaseBundle myMsgBundle;        
+		private Class myReturnResourceType;
+
 
 		@SuppressWarnings("unchecked")
 		private void addParam(String theName, IBase theValue) {
@@ -1509,58 +1492,60 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object execute() {
-                    if  (myOperationName != null && myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE)) {
-                        //If is $process-message operation
-                        BaseHttpClientInvocation invocation = OperationMethodBinding.createProcessMsgInvocation(myContext, myOperationName, myMsgBundle);
 
-                        ResourceResponseHandler handler = new ResourceResponseHandler();
-                        handler.setPreferResponseTypes(getPreferResponseTypes(myType));
-                        
-                        /*
-                        Map<String, List<String>> urlParams = new LinkedHashMap<String, List<String>>();
-                        GenericClient.this.addParam(urlParams, Constants.PARAM_ASYNC, String.valueOf(myAsync));  
-                        GenericClient.this.addParam(urlParams, Constants.PARAM_RESPONSE_URL, String.valueOf(myRespondToUri));
-                        */
+      if  (myOperationName != null && myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE)) {
+          //If is $process-message operation
+          BaseHttpClientInvocation invocation = OperationMethodBinding.createProcessMsgInvocation(myContext, myOperationName, myMsgBundle);
 
-                        Object retVal = invoke(null, handler, invocation);
-                        return retVal;
-                    } else {
-                        String resourceName;
-                        String id;
-                        if (myType != null) {
-                                resourceName = myContext.getResourceDefinition(myType).getName();
-                                id = null;
-                        } else if (myId != null) {
-                                resourceName = myId.getResourceType();
-                                id = myId.getIdPart();
-                        } else {
-                                resourceName = null;
-                                id = null;
-                        }
+          ResourceResponseHandler handler = new ResourceResponseHandler();
+          handler.setPreferResponseTypes(getPreferResponseTypes(myType));
 
-                        BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
+          /*
+          Map<String, List<String>> urlParams = new LinkedHashMap<String, List<String>>();
+          GenericClient.this.addParam(urlParams, Constants.PARAM_ASYNC, String.valueOf(myAsync));  
+          GenericClient.this.addParam(urlParams, Constants.PARAM_RESPONSE_URL, String.valueOf(myRespondToUri));
+          */
 
-                        ResourceResponseHandler handler = new ResourceResponseHandler();
-                        handler.setPreferResponseTypes(getPreferResponseTypes(myType));
+          Object retVal = invoke(null, handler, invocation);
+          return retVal;
+      } else {
+          String resourceName;
+          String id;
+          if (myType != null) {
+                  resourceName = myContext.getResourceDefinition(myType).getName();
+                  id = null;
+          } else if (myId != null) {
+                  resourceName = myId.getResourceType();
+                  id = myId.getIdPart();
+          } else {
+                  resourceName = null;
+                  id = null;
+          }
 
-                        Object retVal = invoke(null, handler, invocation);
-                        if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
-                                return retVal;
-                        } else {
-                                RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
-                                IBaseResource parameters = def.newInstance();
+          BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
 
-                                BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-                                BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
-                                IBase parameter = paramChildElem.newInstance();
-                                paramChild.getMutator().addValue(parameters, parameter);
+          ResourceResponseHandler handler = new ResourceResponseHandler();
+          handler.setPreferResponseTypes(getPreferResponseTypes(myType));
 
-                                BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
-                                resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+          Object retVal = invoke(null, handler, invocation);
+          if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
+                  return retVal;
+          } else {
+                  RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
+                  IBaseResource parameters = def.newInstance();
 
-                                return parameters;
-                        }
-                    }
+                  BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+                  BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+                  IBase parameter = paramChildElem.newInstance();
+                  paramChild.getMutator().addValue(parameters, parameter);
+
+                  BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
+                  resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+
+                  return parameters;
+          }
+      }
+
 		}
 
 		@Override
@@ -1609,7 +1594,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type: " + theOutputParameterType.getName());
 			}
 			if (!"Parameters".equals(def.getName())) {
-				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName() + " is a resource named: " + def.getName());
+				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName()
+						+ " is a resource named: " + def.getName());
 			}
 			myParameters = (IBaseParameters) def.newInstance();
 			return this;
@@ -1653,51 +1639,62 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
-                @Override
-                public IOperationProcessMsg setMessageBundle(IBaseBundle theMsgBundle) {
-                    
-                    Validate.notNull(theMsgBundle, "theMsgBundle must not be null");
-                   /* Validate.isTrue(theMsgBundle.getType().getValueAsEnum() == BundleTypeEnum.MESSAGE);
-                    Validate.isTrue(theMsgBundle.getEntries().size() > 0);
-                    Validate.notNull(theMsgBundle.getEntries().get(0).getResource(), "Message Bundle first entry must be a MessageHeader resource");
-                    Validate.isTrue(theMsgBundle.getEntries().get(0).getResource().getResourceName().equals("MessageHeader"), "Message Bundle first entry must be a MessageHeader resource");
-                   */
-                    myMsgBundle = (IBaseBundle) theMsgBundle;
-                    return this;
-                }
 
-                @Override
-                public  IOperationProcessMsg<IBaseOperationOutcome> setAsyncProcessingMode() {
-                    setMessageAsync(true);
-                    return this;
-                }
+    @Override
+    public IOperationProcessMsg setMessageBundle(IBaseBundle theMsgBundle) {
 
-                @Override
-                public  IOperationProcessMsg setResponseUrlParam(String responseUrl) {
-                    Validate.notEmpty(responseUrl, "responseUrl must not be null");
-                    Validate.matchesPattern(responseUrl, "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "responseUrl must be a valid URL");
-                    setMessageResponseUrl(responseUrl);
-                    return this;
-                }
+      Validate.notNull(theMsgBundle, "theMsgBundle must not be null");
+     /* Validate.isTrue(theMsgBundle.getType().getValueAsEnum() == BundleTypeEnum.MESSAGE);
+      Validate.isTrue(theMsgBundle.getEntries().size() > 0);
+      Validate.notNull(theMsgBundle.getEntries().get(0).getResource(), "Message Bundle first entry must be a MessageHeader resource");
+      Validate.isTrue(theMsgBundle.getEntries().get(0).getResource().getResourceName().equals("MessageHeader"), "Message Bundle first entry must be a MessageHeader resource");
+     */
+      myMsgBundle = (IBaseBundle) theMsgBundle;
+      return this;
+    }
+
+    @Override
+    public  IOperationProcessMsg<IBaseOperationOutcome> setAsyncProcessingMode() {
+      setMessageAsync(true);
+      return this;
+    }
+
+    @Override
+    public  IOperationProcessMsg setResponseUrlParam(String responseUrl) {
+      Validate.notEmpty(responseUrl, "responseUrl must not be null");
+      Validate.matchesPattern(responseUrl, "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "responseUrl must be a valid URL");
+      setMessageResponseUrl(responseUrl);
+      return this;
+    }
 
     
                
 
+		@Override
+		public IOperationUntypedWithInput returnResourceType(Class theReturnType) {
+			Validate.notNull(theReturnType, "theReturnType must not be null");
+			Validate.isTrue(IBaseResource.class.isAssignableFrom(theReturnType), "theReturnType must be a class which extends from IBaseResource");
+			myReturnResourceType = theReturnType;
+			return this;
+		}
+
+
 	}
 
-	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {
+	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<IBaseOperationOutcome> {
 
 		@Override
-		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public IBaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
 			}
 			IParser parser = respType.newParser(myContext);
-			BaseOperationOutcome retVal;
+			IBaseOperationOutcome retVal;
 			try {
 				// TODO: handle if something else than OO comes back
-				retVal = (BaseOperationOutcome) parser.parseResource(theResponseReader);
+				retVal = (IBaseOperationOutcome) parser.parseResource(theResponseReader);
 			} catch (DataFormatException e) {
 				ourLog.warn("Failed to parse OperationOutcome response", e);
 				return null;
@@ -1884,7 +1881,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				Class<? extends IBaseResource> bundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
 				ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType);
@@ -1906,7 +1904,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private List<Include> myInclude = new ArrayList<Include>();
 		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
-		private List<String> myProfile = new ArrayList<String>();
+		private List<Collection<String>> myProfiles = new ArrayList<Collection<String>>();
 		private String myResourceId;
 		private String myResourceName;
 		private Class<? extends IBaseResource> myResourceType;
@@ -1987,8 +1985,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken(myContext));
 			}
 
-			for (String next : myProfile) {
-				addParam(params, Constants.PARAM_PROFILE, next);
+			for (Collection<String> profileUris : myProfiles) {
+				StringBuilder builder = new StringBuilder();
+				for (Iterator<String> profileItr = profileUris.iterator(); profileItr.hasNext();) {
+					builder.append(profileItr.next());
+					if (profileItr.hasNext()) {
+						builder.append(',');
+					}
+				}
+				addParam(params, Constants.PARAM_PROFILE, builder.toString());
 			}
 
 			for (Include next : myInclude) {
@@ -2037,7 +2042,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			if (myReturnBundleType == null && myContext.getVersion().getVersion().isRi()) {
-				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify " + "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
+				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify "
+						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
 			}
 
 			IClientResponseHandler<? extends IBase> binding;
@@ -2149,7 +2155,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IQuery<Object> withProfile(String theProfileUri) {
 			Validate.notBlank(theProfileUri, "theProfileUri must not be null or empty");
-			myProfile.add(theProfileUri);
+			myProfiles.add(Collections.singletonList(theProfileUri));
+			return this;
+		}
+
+		@Override
+		public IQuery<Object> withAnyProfile(Collection<String> theProfileUris) {
+			Validate.notEmpty(theProfileUris, "theProfileUris must not be null or empty");
+			myProfiles.add(theProfileUris);
 			return this;
 		}
 
@@ -2238,7 +2251,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class StringResponseHandler implements IClientResponseHandler<String> {
 
 		@Override
-		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws IOException, BaseServerResponseException {
 			return IOUtils.toString(theResponseReader);
 		}
 	}
@@ -2342,6 +2356,132 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources) {
 			Validate.notNull(theResources, "theResources must not be null");
 			return new TransactionExecutable<List<IBaseResource>>(theResources);
+		}
+
+	}
+
+	private class PatchInternal extends BaseClientExecutable<IPatchExecutable, MethodOutcome> implements IPatch, IPatchWithBody, IPatchExecutable, IPatchWithQuery, IPatchWithQueryTyped {
+
+		private CriterionList myCriterionList;
+		private IIdType myId;
+		private PreferReturnEnum myPrefer;
+		private PatchTypeEnum myPatchType;
+		private String myPatchBody;
+		private String mySearchUrl;
+		private String myResourceType;
+
+		@Override
+		public IPatchWithQueryTyped and(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public IPatchWithQuery conditional(String theResourceType) {
+			Validate.notBlank(theResourceType, "theResourceType must not be null");
+			myResourceType = theResourceType;
+			myCriterionList = new CriterionList();
+			return this;
+		}
+
+		// TODO: This is not longer used.. Deprecate it or just remove it?
+		@Override
+		public IPatchWithBody conditionalByUrl(String theSearchUrl) {
+			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
+			return this;
+		}
+
+		@Override
+		public MethodOutcome execute() {
+
+			if (myPatchType == null) {
+				throw new InvalidRequestException("No patch type supplied, cannot invoke server");
+			}
+			if (myPatchBody == null) {
+				throw new InvalidRequestException("No patch body supplied, cannot invoke server");
+			}
+
+			BaseHttpClientInvocation invocation;
+			if (isNotBlank(mySearchUrl)) {
+				invocation = MethodUtil.createPatchInvocation(myContext, mySearchUrl, myPatchType, myPatchBody);
+			} else if (myCriterionList != null) {
+				invocation = MethodUtil.createPatchInvocation(myContext, myPatchType, myPatchBody, myResourceType, myCriterionList.toParamList());
+			} else {
+				if (myId == null || myId.hasIdPart() == false) {
+					throw new InvalidRequestException("No ID supplied for resource to patch, can not invoke server");
+				}
+				invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
+			}
+
+			addPreferHeader(myPrefer, invocation);
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(null, myPrefer);
+
+			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			return invoke(params, binding, invocation);
+
+		}
+
+		@Override
+		public IPatchExecutable prefer(PreferReturnEnum theReturn) {
+			myPrefer = theReturn;
+			return this;
+		}
+
+
+		@Override
+		public IPatchWithQueryTyped where(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public IPatchExecutable withId(IIdType theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (theId.hasIdPart() == false) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
+			}
+			myId = theId;
+			return this;
+		}
+
+		@Override
+		public IPatchExecutable withId(String theId) {
+			if (theId == null) {
+				throw new NullPointerException("theId can not be null");
+			}
+			if (isBlank(theId)) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
+			}
+			myId = new IdDt(theId);
+			return this;
+		}
+
+		@Override
+		public IPatchWithBody withBody(String thePatchBody) {
+			Validate.notBlank(thePatchBody, "thePatchBody must not be blank");
+			
+			myPatchBody = thePatchBody;
+
+			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(thePatchBody);
+			if (encoding == EncodingEnum.XML) {
+				myPatchType = PatchTypeEnum.XML_PATCH;
+			} else if (encoding == EncodingEnum.JSON) {
+				myPatchType = PatchTypeEnum.JSON_PATCH;
+			} else {
+				throw new IllegalArgumentException("Unable to determine encoding of patch");
+			}
+			
+			return this;
+		}
+
+		@Override
+		public IPatchWithQuery conditional(Class<? extends IBaseResource> theClass) {
+			Validate.notNull(theClass, "theClass must not be null");
+			String resourceType = myContext.getResourceDefinition(theClass).getName();
+			return conditional(resourceType);
 		}
 
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
 	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
 	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS") 
+	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS")
 })
 @AnalyzerDefs({
 	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
@@ -164,9 +164,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
 
-	@Column(name = "IS_CONTAINED", nullable = true)
-	private boolean myIsContainedResource;
-
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	private String myLanguage;
 
@@ -174,7 +171,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
 	@Transient()
-	@Field()
+	@Fields({
+		@Field(name = "myNarrativeText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
+		@Field(name = "myNarrativeTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
+		@Field(name = "myNarrativeTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
+		@Field(name = "myNarrativeTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
+	})
 	private String myNarrativeText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
@@ -357,10 +359,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myHasLinks;
 	}
 
-	public boolean isIsContainedResource() {
-		return myIsContainedResource;
-	}
-
 	public boolean isParamsCoordsPopulated() {
 		return myParamsCoordsPopulated;
 	}
@@ -403,10 +401,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
-	}
-
-	public void setIsContainedResource(boolean theIsContainedResource) {
-		myIsContainedResource = theIsContainedResource;
 	}
 
 	public void setLanguage(String theLanguage) {

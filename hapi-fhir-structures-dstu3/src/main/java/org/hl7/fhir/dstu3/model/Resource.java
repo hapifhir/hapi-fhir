@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This is the base resource type for everything.
  */
@@ -74,6 +74,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
      */
     @Child(name = "language", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Language of the resource content", formalDefinition="The base language in which the resource is written." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected CodeType language;
 
     private static final long serialVersionUID = -559462759L;
@@ -381,6 +382,16 @@ public abstract class Resource extends BaseResource implements IAnyResource {
           , language);
       }
 
+
+  @Override
+  public String getIdBase() {
+    return getId();
+  }
+  
+  @Override
+  public void setIdBase(String value) {
+    setId(value);
+  }
   public abstract ResourceType getResourceType();
 
 }

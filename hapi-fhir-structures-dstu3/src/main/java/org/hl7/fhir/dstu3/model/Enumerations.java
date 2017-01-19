@@ -29,11 +29,11 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Fri, Apr 1, 2016 17:57-0400 for FHIR v1.4.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 public class Enumerations {
 
@@ -43,7 +43,6 @@ public class Enumerations {
 //   AgeUnits: A valueSet of UCUM codes for representing age value units.
 //   BindingStrength: Indication of the degree of conformance expectations associated with a binding.
 //   ConceptMapEquivalence: The degree of equivalence between concepts.
-//   ConformanceResourceStatus: The lifecycle status of a Value Set or Concept Map.
 //   DataAbsentReason: Used to specify why the normally expected content of the data element is missing.
 //   DataType: The type of an element - one of the FHIR data types.
 //   DocumentReferenceStatus: The status of the document reference.
@@ -51,6 +50,7 @@ public class Enumerations {
 //   FHIRDefinedType: Either a resource or a data type.
 //   MessageEvent: One of the message events defined as part of FHIR.
 //   NoteType: The presentation types of notes.
+//   PublicationStatus: The lifecycle status of a Value Set or Concept Map.
 //   RemittanceOutcome: The outcome of the processing.
 //   ResourceType: One of the resource types defined as part of FHIR.
 //   SearchParamType: Data types allowed to be used for search parameters.
@@ -535,6 +535,10 @@ public class Enumerations {
 
     public enum ConceptMapEquivalence {
         /**
+         * The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known
+         */
+        RELATEDTO, 
+        /**
          * The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).
          */
         EQUIVALENT, 
@@ -551,7 +555,7 @@ public class Enumerations {
          */
         SUBSUMES, 
         /**
-         * The target mapping is narrower in meaning that the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.
+         * The target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.
          */
         NARROWER, 
         /**
@@ -577,6 +581,8 @@ public class Enumerations {
         public static ConceptMapEquivalence fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("relatedto".equals(codeString))
+          return RELATEDTO;
         if ("equivalent".equals(codeString))
           return EQUIVALENT;
         if ("equal".equals(codeString))
@@ -599,6 +605,7 @@ public class Enumerations {
         }
         public String toCode() {
           switch (this) {
+            case RELATEDTO: return "relatedto";
             case EQUIVALENT: return "equivalent";
             case EQUAL: return "equal";
             case WIDER: return "wider";
@@ -613,6 +620,7 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
+            case RELATEDTO: return "http://hl7.org/fhir/concept-map-equivalence";
             case EQUIVALENT: return "http://hl7.org/fhir/concept-map-equivalence";
             case EQUAL: return "http://hl7.org/fhir/concept-map-equivalence";
             case WIDER: return "http://hl7.org/fhir/concept-map-equivalence";
@@ -627,11 +635,12 @@ public class Enumerations {
         }
         public String getDefinition() {
           switch (this) {
+            case RELATEDTO: return "The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known";
             case EQUIVALENT: return "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).";
             case EQUAL: return "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical).";
             case WIDER: return "The target mapping is wider in meaning than the source concept.";
             case SUBSUMES: return "The target mapping subsumes the meaning of the source concept (e.g. the source is-a target).";
-            case NARROWER: return "The target mapping is narrower in meaning that the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
+            case NARROWER: return "The target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
             case SPECIALIZES: return "The target mapping specializes the meaning of the source concept (e.g. the target is-a source).";
             case INEXACT: return "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
             case UNMATCHED: return "There is no match for this concept in the destination concept system.";
@@ -641,6 +650,7 @@ public class Enumerations {
         }
         public String getDisplay() {
           switch (this) {
+            case RELATEDTO: return "Related To";
             case EQUIVALENT: return "Equivalent";
             case EQUAL: return "Equal";
             case WIDER: return "Wider";
@@ -660,6 +670,8 @@ public class Enumerations {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("relatedto".equals(codeString))
+          return ConceptMapEquivalence.RELATEDTO;
         if ("equivalent".equals(codeString))
           return ConceptMapEquivalence.EQUIVALENT;
         if ("equal".equals(codeString))
@@ -686,6 +698,8 @@ public class Enumerations {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
+        if ("relatedto".equals(codeString))
+          return new Enumeration<ConceptMapEquivalence>(this, ConceptMapEquivalence.RELATEDTO);
         if ("equivalent".equals(codeString))
           return new Enumeration<ConceptMapEquivalence>(this, ConceptMapEquivalence.EQUIVALENT);
         if ("equal".equals(codeString))
@@ -707,6 +721,8 @@ public class Enumerations {
         throw new FHIRException("Unknown ConceptMapEquivalence code '"+codeString+"'");
         }
     public String toCode(ConceptMapEquivalence code) {
+      if (code == ConceptMapEquivalence.RELATEDTO)
+        return "relatedto";
       if (code == ConceptMapEquivalence.EQUIVALENT)
         return "equivalent";
       if (code == ConceptMapEquivalence.EQUAL)
@@ -728,109 +744,6 @@ public class Enumerations {
       return "?";
       }
     public String toSystem(ConceptMapEquivalence code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum ConformanceResourceStatus {
-        /**
-         * This resource is still under development.
-         */
-        DRAFT, 
-        /**
-         * This resource is ready for normal use.
-         */
-        ACTIVE, 
-        /**
-         * This resource has been withdrawn or superseded and should no longer be used.
-         */
-        RETIRED, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static ConformanceResourceStatus fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("draft".equals(codeString))
-          return DRAFT;
-        if ("active".equals(codeString))
-          return ACTIVE;
-        if ("retired".equals(codeString))
-          return RETIRED;
-        throw new FHIRException("Unknown ConformanceResourceStatus code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case DRAFT: return "draft";
-            case ACTIVE: return "active";
-            case RETIRED: return "retired";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case DRAFT: return "http://hl7.org/fhir/conformance-resource-status";
-            case ACTIVE: return "http://hl7.org/fhir/conformance-resource-status";
-            case RETIRED: return "http://hl7.org/fhir/conformance-resource-status";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case DRAFT: return "This resource is still under development.";
-            case ACTIVE: return "This resource is ready for normal use.";
-            case RETIRED: return "This resource has been withdrawn or superseded and should no longer be used.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case DRAFT: return "Draft";
-            case ACTIVE: return "Active";
-            case RETIRED: return "Retired";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ConformanceResourceStatusEnumFactory implements EnumFactory<ConformanceResourceStatus> {
-    public ConformanceResourceStatus fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("draft".equals(codeString))
-          return ConformanceResourceStatus.DRAFT;
-        if ("active".equals(codeString))
-          return ConformanceResourceStatus.ACTIVE;
-        if ("retired".equals(codeString))
-          return ConformanceResourceStatus.RETIRED;
-        throw new IllegalArgumentException("Unknown ConformanceResourceStatus code '"+codeString+"'");
-        }
-        public Enumeration<ConformanceResourceStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
-            return null;
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("draft".equals(codeString))
-          return new Enumeration<ConformanceResourceStatus>(this, ConformanceResourceStatus.DRAFT);
-        if ("active".equals(codeString))
-          return new Enumeration<ConformanceResourceStatus>(this, ConformanceResourceStatus.ACTIVE);
-        if ("retired".equals(codeString))
-          return new Enumeration<ConformanceResourceStatus>(this, ConformanceResourceStatus.RETIRED);
-        throw new FHIRException("Unknown ConformanceResourceStatus code '"+codeString+"'");
-        }
-    public String toCode(ConformanceResourceStatus code) {
-      if (code == ConformanceResourceStatus.DRAFT)
-        return "draft";
-      if (code == ConformanceResourceStatus.ACTIVE)
-        return "active";
-      if (code == ConformanceResourceStatus.RETIRED)
-        return "retired";
-      return "?";
-      }
-    public String toSystem(ConformanceResourceStatus code) {
       return code.getSystem();
       }
     }
@@ -873,6 +786,10 @@ public class Enumerations {
          */
         NAN, 
         /**
+         * The value is not available because the observation procedure (test, etc.) was not performed.
+         */
+        NOTPERFORMED, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -897,6 +814,8 @@ public class Enumerations {
           return ERROR;
         if ("NaN".equals(codeString))
           return NAN;
+        if ("not-performed".equals(codeString))
+          return NOTPERFORMED;
         throw new FHIRException("Unknown DataAbsentReason code '"+codeString+"'");
         }
         public String toCode() {
@@ -910,6 +829,7 @@ public class Enumerations {
             case ASTEXT: return "astext";
             case ERROR: return "error";
             case NAN: return "NaN";
+            case NOTPERFORMED: return "not-performed";
             default: return "?";
           }
         }
@@ -924,6 +844,7 @@ public class Enumerations {
             case ASTEXT: return "http://hl7.org/fhir/data-absent-reason";
             case ERROR: return "http://hl7.org/fhir/data-absent-reason";
             case NAN: return "http://hl7.org/fhir/data-absent-reason";
+            case NOTPERFORMED: return "http://hl7.org/fhir/data-absent-reason";
             default: return "?";
           }
         }
@@ -938,6 +859,7 @@ public class Enumerations {
             case ASTEXT: return "The content of the data is represented in the resource narrative.";
             case ERROR: return "Some system or workflow process error means that the information is not available.";
             case NAN: return "NaN, standing for not a number, is a numeric data type value representing an undefined or unrepresentable value.";
+            case NOTPERFORMED: return "The value is not available because the observation procedure (test, etc.) was not performed.";
             default: return "?";
           }
         }
@@ -952,6 +874,7 @@ public class Enumerations {
             case ASTEXT: return "As Text";
             case ERROR: return "Error";
             case NAN: return "Not a Number";
+            case NOTPERFORMED: return "Not Performed";
             default: return "?";
           }
         }
@@ -980,6 +903,8 @@ public class Enumerations {
           return DataAbsentReason.ERROR;
         if ("NaN".equals(codeString))
           return DataAbsentReason.NAN;
+        if ("not-performed".equals(codeString))
+          return DataAbsentReason.NOTPERFORMED;
         throw new IllegalArgumentException("Unknown DataAbsentReason code '"+codeString+"'");
         }
         public Enumeration<DataAbsentReason> fromType(Base code) throws FHIRException {
@@ -1006,6 +931,8 @@ public class Enumerations {
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.ERROR);
         if ("NaN".equals(codeString))
           return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NAN);
+        if ("not-performed".equals(codeString))
+          return new Enumeration<DataAbsentReason>(this, DataAbsentReason.NOTPERFORMED);
         throw new FHIRException("Unknown DataAbsentReason code '"+codeString+"'");
         }
     public String toCode(DataAbsentReason code) {
@@ -1027,6 +954,8 @@ public class Enumerations {
         return "error";
       if (code == DataAbsentReason.NAN)
         return "NaN";
+      if (code == DataAbsentReason.NOTPERFORMED)
+        return "not-performed";
       return "?";
       }
     public String toSystem(DataAbsentReason code) {
@@ -1036,15 +965,11 @@ public class Enumerations {
 
     public enum DataType {
         /**
-         * The definition of an action to be performed. Some aspects of the definition are specified statically, and some aspects can be specified dynamically by referencing logic defined in a library.
-         */
-        ACTIONDEFINITION, 
-        /**
          * An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.
          */
         ADDRESS, 
         /**
-         * null
+         * A duration of time during which an organism (or a process) has existed.
          */
         AGE, 
         /**
@@ -1068,11 +993,19 @@ public class Enumerations {
          */
         CODING, 
         /**
+         * Specifies contact information for a person or organization.
+         */
+        CONTACTDETAIL, 
+        /**
          * Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
          */
         CONTACTPOINT, 
         /**
-         * null
+         * A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.
+         */
+        CONTRIBUTOR, 
+        /**
+         * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
          */
         COUNT, 
         /**
@@ -1080,11 +1013,15 @@ public class Enumerations {
          */
         DATAREQUIREMENT, 
         /**
-         * null
+         * A length - a value with a unit that is a physical distance.
          */
         DISTANCE, 
         /**
-         * null
+         * Indicates how the medication is to be used by the patient.
+         */
+        DOSAGEINSTRUCTION, 
+        /**
+         * A length of time.
          */
         DURATION, 
         /**
@@ -1112,11 +1049,7 @@ public class Enumerations {
          */
         META, 
         /**
-         * The ModuleMetadata structure defines the common metadata elements used by quality improvement artifacts. This information includes descriptive and topical metadata to enable repository searches, as well as governance and evidentiary support information.
-         */
-        MODULEMETADATA, 
-        /**
-         * null
+         * An amount of economic utility in some recognised currency.
          */
         MONEY, 
         /**
@@ -1148,6 +1081,10 @@ public class Enumerations {
          */
         REFERENCE, 
         /**
+         * Related artifacts such as additional documentation, justification, or bibliographic references.
+         */
+        RELATEDARTIFACT, 
+        /**
          * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
          */
         SAMPLEDDATA, 
@@ -1167,6 +1104,10 @@ public class Enumerations {
          * A description of a triggering event.
          */
         TRIGGERDEFINITION, 
+        /**
+         * Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
+         */
+        USAGECONTEXT, 
         /**
          * A stream of bytes
          */
@@ -1246,8 +1187,6 @@ public class Enumerations {
         public static DataType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ActionDefinition".equals(codeString))
-          return ACTIONDEFINITION;
         if ("Address".equals(codeString))
           return ADDRESS;
         if ("Age".equals(codeString))
@@ -1262,14 +1201,20 @@ public class Enumerations {
           return CODEABLECONCEPT;
         if ("Coding".equals(codeString))
           return CODING;
+        if ("ContactDetail".equals(codeString))
+          return CONTACTDETAIL;
         if ("ContactPoint".equals(codeString))
           return CONTACTPOINT;
+        if ("Contributor".equals(codeString))
+          return CONTRIBUTOR;
         if ("Count".equals(codeString))
           return COUNT;
         if ("DataRequirement".equals(codeString))
           return DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return DISTANCE;
+        if ("DosageInstruction".equals(codeString))
+          return DOSAGEINSTRUCTION;
         if ("Duration".equals(codeString))
           return DURATION;
         if ("Element".equals(codeString))
@@ -1284,8 +1229,6 @@ public class Enumerations {
           return IDENTIFIER;
         if ("Meta".equals(codeString))
           return META;
-        if ("ModuleMetadata".equals(codeString))
-          return MODULEMETADATA;
         if ("Money".equals(codeString))
           return MONEY;
         if ("Narrative".equals(codeString))
@@ -1302,6 +1245,8 @@ public class Enumerations {
           return RATIO;
         if ("Reference".equals(codeString))
           return REFERENCE;
+        if ("RelatedArtifact".equals(codeString))
+          return RELATEDARTIFACT;
         if ("SampledData".equals(codeString))
           return SAMPLEDDATA;
         if ("Signature".equals(codeString))
@@ -1312,6 +1257,8 @@ public class Enumerations {
           return TIMING;
         if ("TriggerDefinition".equals(codeString))
           return TRIGGERDEFINITION;
+        if ("UsageContext".equals(codeString))
+          return USAGECONTEXT;
         if ("base64Binary".equals(codeString))
           return BASE64BINARY;
         if ("boolean".equals(codeString))
@@ -1352,7 +1299,6 @@ public class Enumerations {
         }
         public String toCode() {
           switch (this) {
-            case ACTIONDEFINITION: return "ActionDefinition";
             case ADDRESS: return "Address";
             case AGE: return "Age";
             case ANNOTATION: return "Annotation";
@@ -1360,10 +1306,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "BackboneElement";
             case CODEABLECONCEPT: return "CodeableConcept";
             case CODING: return "Coding";
+            case CONTACTDETAIL: return "ContactDetail";
             case CONTACTPOINT: return "ContactPoint";
+            case CONTRIBUTOR: return "Contributor";
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
+            case DOSAGEINSTRUCTION: return "DosageInstruction";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -1371,7 +1320,6 @@ public class Enumerations {
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case META: return "Meta";
-            case MODULEMETADATA: return "ModuleMetadata";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
@@ -1380,11 +1328,13 @@ public class Enumerations {
             case RANGE: return "Range";
             case RATIO: return "Ratio";
             case REFERENCE: return "Reference";
+            case RELATEDARTIFACT: return "RelatedArtifact";
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
+            case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
             case CODE: return "code";
@@ -1408,7 +1358,6 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case ACTIONDEFINITION: return "http://hl7.org/fhir/data-types";
             case ADDRESS: return "http://hl7.org/fhir/data-types";
             case AGE: return "http://hl7.org/fhir/data-types";
             case ANNOTATION: return "http://hl7.org/fhir/data-types";
@@ -1416,10 +1365,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "http://hl7.org/fhir/data-types";
             case CODEABLECONCEPT: return "http://hl7.org/fhir/data-types";
             case CODING: return "http://hl7.org/fhir/data-types";
+            case CONTACTDETAIL: return "http://hl7.org/fhir/data-types";
             case CONTACTPOINT: return "http://hl7.org/fhir/data-types";
+            case CONTRIBUTOR: return "http://hl7.org/fhir/data-types";
             case COUNT: return "http://hl7.org/fhir/data-types";
             case DATAREQUIREMENT: return "http://hl7.org/fhir/data-types";
             case DISTANCE: return "http://hl7.org/fhir/data-types";
+            case DOSAGEINSTRUCTION: return "http://hl7.org/fhir/data-types";
             case DURATION: return "http://hl7.org/fhir/data-types";
             case ELEMENT: return "http://hl7.org/fhir/data-types";
             case ELEMENTDEFINITION: return "http://hl7.org/fhir/data-types";
@@ -1427,7 +1379,6 @@ public class Enumerations {
             case HUMANNAME: return "http://hl7.org/fhir/data-types";
             case IDENTIFIER: return "http://hl7.org/fhir/data-types";
             case META: return "http://hl7.org/fhir/data-types";
-            case MODULEMETADATA: return "http://hl7.org/fhir/data-types";
             case MONEY: return "http://hl7.org/fhir/data-types";
             case NARRATIVE: return "http://hl7.org/fhir/data-types";
             case PARAMETERDEFINITION: return "http://hl7.org/fhir/data-types";
@@ -1436,11 +1387,13 @@ public class Enumerations {
             case RANGE: return "http://hl7.org/fhir/data-types";
             case RATIO: return "http://hl7.org/fhir/data-types";
             case REFERENCE: return "http://hl7.org/fhir/data-types";
+            case RELATEDARTIFACT: return "http://hl7.org/fhir/data-types";
             case SAMPLEDDATA: return "http://hl7.org/fhir/data-types";
             case SIGNATURE: return "http://hl7.org/fhir/data-types";
             case SIMPLEQUANTITY: return "http://hl7.org/fhir/data-types";
             case TIMING: return "http://hl7.org/fhir/data-types";
             case TRIGGERDEFINITION: return "http://hl7.org/fhir/data-types";
+            case USAGECONTEXT: return "http://hl7.org/fhir/data-types";
             case BASE64BINARY: return "http://hl7.org/fhir/data-types";
             case BOOLEAN: return "http://hl7.org/fhir/data-types";
             case CODE: return "http://hl7.org/fhir/data-types";
@@ -1464,27 +1417,28 @@ public class Enumerations {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIONDEFINITION: return "The definition of an action to be performed. Some aspects of the definition are specified statically, and some aspects can be specified dynamically by referencing logic defined in a library.";
             case ADDRESS: return "An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.";
-            case AGE: return "";
+            case AGE: return "A duration of time during which an organism (or a process) has existed.";
             case ANNOTATION: return "A  text note which also  contains information about who made the statement and when.";
             case ATTACHMENT: return "For referring to data content defined in other formats.";
             case BACKBONEELEMENT: return "Base definition for all elements that are defined inside a resource - but not those in a data type.";
             case CODEABLECONCEPT: return "A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.";
             case CODING: return "A reference to a code defined by a terminology system.";
+            case CONTACTDETAIL: return "Specifies contact information for a person or organization.";
             case CONTACTPOINT: return "Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.";
-            case COUNT: return "";
+            case CONTRIBUTOR: return "A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.";
+            case COUNT: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
             case DATAREQUIREMENT: return "Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.";
-            case DISTANCE: return "";
-            case DURATION: return "";
+            case DISTANCE: return "A length - a value with a unit that is a physical distance.";
+            case DOSAGEINSTRUCTION: return "Indicates how the medication is to be used by the patient.";
+            case DURATION: return "A length of time.";
             case ELEMENT: return "Base definition for all elements in a resource.";
             case ELEMENTDEFINITION: return "Captures constraints on each element within the resource, profile, or extension.";
             case EXTENSION: return "Optional Extensions Element - found in all resources.";
             case HUMANNAME: return "A human's name with the ability to identify parts and usage.";
             case IDENTIFIER: return "A technical identifier - identifies some entity uniquely and unambiguously.";
             case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.";
-            case MODULEMETADATA: return "The ModuleMetadata structure defines the common metadata elements used by quality improvement artifacts. This information includes descriptive and topical metadata to enable repository searches, as well as governance and evidentiary support information.";
-            case MONEY: return "";
+            case MONEY: return "An amount of economic utility in some recognised currency.";
             case NARRATIVE: return "A human-readable formatted text, including images.";
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
@@ -1492,11 +1446,13 @@ public class Enumerations {
             case RANGE: return "A set of ordered Quantities defined by a low and high limit.";
             case RATIO: return "A relationship of two Quantity values - expressed as a numerator and a denominator.";
             case REFERENCE: return "A reference from one resource to another.";
+            case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.";
             case TRIGGERDEFINITION: return "A description of a triggering event.";
+            case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
@@ -1520,7 +1476,6 @@ public class Enumerations {
         }
         public String getDisplay() {
           switch (this) {
-            case ACTIONDEFINITION: return "ActionDefinition";
             case ADDRESS: return "Address";
             case AGE: return "Age";
             case ANNOTATION: return "Annotation";
@@ -1528,10 +1483,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "BackboneElement";
             case CODEABLECONCEPT: return "CodeableConcept";
             case CODING: return "Coding";
+            case CONTACTDETAIL: return "ContactDetail";
             case CONTACTPOINT: return "ContactPoint";
+            case CONTRIBUTOR: return "Contributor";
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
+            case DOSAGEINSTRUCTION: return "DosageInstruction";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -1539,7 +1497,6 @@ public class Enumerations {
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case META: return "Meta";
-            case MODULEMETADATA: return "ModuleMetadata";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
@@ -1548,11 +1505,13 @@ public class Enumerations {
             case RANGE: return "Range";
             case RATIO: return "Ratio";
             case REFERENCE: return "Reference";
+            case RELATEDARTIFACT: return "RelatedArtifact";
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
+            case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
             case CODE: return "code";
@@ -1581,8 +1540,6 @@ public class Enumerations {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ActionDefinition".equals(codeString))
-          return DataType.ACTIONDEFINITION;
         if ("Address".equals(codeString))
           return DataType.ADDRESS;
         if ("Age".equals(codeString))
@@ -1597,14 +1554,20 @@ public class Enumerations {
           return DataType.CODEABLECONCEPT;
         if ("Coding".equals(codeString))
           return DataType.CODING;
+        if ("ContactDetail".equals(codeString))
+          return DataType.CONTACTDETAIL;
         if ("ContactPoint".equals(codeString))
           return DataType.CONTACTPOINT;
+        if ("Contributor".equals(codeString))
+          return DataType.CONTRIBUTOR;
         if ("Count".equals(codeString))
           return DataType.COUNT;
         if ("DataRequirement".equals(codeString))
           return DataType.DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return DataType.DISTANCE;
+        if ("DosageInstruction".equals(codeString))
+          return DataType.DOSAGEINSTRUCTION;
         if ("Duration".equals(codeString))
           return DataType.DURATION;
         if ("Element".equals(codeString))
@@ -1619,8 +1582,6 @@ public class Enumerations {
           return DataType.IDENTIFIER;
         if ("Meta".equals(codeString))
           return DataType.META;
-        if ("ModuleMetadata".equals(codeString))
-          return DataType.MODULEMETADATA;
         if ("Money".equals(codeString))
           return DataType.MONEY;
         if ("Narrative".equals(codeString))
@@ -1637,6 +1598,8 @@ public class Enumerations {
           return DataType.RATIO;
         if ("Reference".equals(codeString))
           return DataType.REFERENCE;
+        if ("RelatedArtifact".equals(codeString))
+          return DataType.RELATEDARTIFACT;
         if ("SampledData".equals(codeString))
           return DataType.SAMPLEDDATA;
         if ("Signature".equals(codeString))
@@ -1647,6 +1610,8 @@ public class Enumerations {
           return DataType.TIMING;
         if ("TriggerDefinition".equals(codeString))
           return DataType.TRIGGERDEFINITION;
+        if ("UsageContext".equals(codeString))
+          return DataType.USAGECONTEXT;
         if ("base64Binary".equals(codeString))
           return DataType.BASE64BINARY;
         if ("boolean".equals(codeString))
@@ -1691,8 +1656,6 @@ public class Enumerations {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("ActionDefinition".equals(codeString))
-          return new Enumeration<DataType>(this, DataType.ACTIONDEFINITION);
         if ("Address".equals(codeString))
           return new Enumeration<DataType>(this, DataType.ADDRESS);
         if ("Age".equals(codeString))
@@ -1707,14 +1670,20 @@ public class Enumerations {
           return new Enumeration<DataType>(this, DataType.CODEABLECONCEPT);
         if ("Coding".equals(codeString))
           return new Enumeration<DataType>(this, DataType.CODING);
+        if ("ContactDetail".equals(codeString))
+          return new Enumeration<DataType>(this, DataType.CONTACTDETAIL);
         if ("ContactPoint".equals(codeString))
           return new Enumeration<DataType>(this, DataType.CONTACTPOINT);
+        if ("Contributor".equals(codeString))
+          return new Enumeration<DataType>(this, DataType.CONTRIBUTOR);
         if ("Count".equals(codeString))
           return new Enumeration<DataType>(this, DataType.COUNT);
         if ("DataRequirement".equals(codeString))
           return new Enumeration<DataType>(this, DataType.DATAREQUIREMENT);
         if ("Distance".equals(codeString))
           return new Enumeration<DataType>(this, DataType.DISTANCE);
+        if ("DosageInstruction".equals(codeString))
+          return new Enumeration<DataType>(this, DataType.DOSAGEINSTRUCTION);
         if ("Duration".equals(codeString))
           return new Enumeration<DataType>(this, DataType.DURATION);
         if ("Element".equals(codeString))
@@ -1729,8 +1698,6 @@ public class Enumerations {
           return new Enumeration<DataType>(this, DataType.IDENTIFIER);
         if ("Meta".equals(codeString))
           return new Enumeration<DataType>(this, DataType.META);
-        if ("ModuleMetadata".equals(codeString))
-          return new Enumeration<DataType>(this, DataType.MODULEMETADATA);
         if ("Money".equals(codeString))
           return new Enumeration<DataType>(this, DataType.MONEY);
         if ("Narrative".equals(codeString))
@@ -1747,6 +1714,8 @@ public class Enumerations {
           return new Enumeration<DataType>(this, DataType.RATIO);
         if ("Reference".equals(codeString))
           return new Enumeration<DataType>(this, DataType.REFERENCE);
+        if ("RelatedArtifact".equals(codeString))
+          return new Enumeration<DataType>(this, DataType.RELATEDARTIFACT);
         if ("SampledData".equals(codeString))
           return new Enumeration<DataType>(this, DataType.SAMPLEDDATA);
         if ("Signature".equals(codeString))
@@ -1757,6 +1726,8 @@ public class Enumerations {
           return new Enumeration<DataType>(this, DataType.TIMING);
         if ("TriggerDefinition".equals(codeString))
           return new Enumeration<DataType>(this, DataType.TRIGGERDEFINITION);
+        if ("UsageContext".equals(codeString))
+          return new Enumeration<DataType>(this, DataType.USAGECONTEXT);
         if ("base64Binary".equals(codeString))
           return new Enumeration<DataType>(this, DataType.BASE64BINARY);
         if ("boolean".equals(codeString))
@@ -1796,8 +1767,6 @@ public class Enumerations {
         throw new FHIRException("Unknown DataType code '"+codeString+"'");
         }
     public String toCode(DataType code) {
-      if (code == DataType.ACTIONDEFINITION)
-        return "ActionDefinition";
       if (code == DataType.ADDRESS)
         return "Address";
       if (code == DataType.AGE)
@@ -1812,14 +1781,20 @@ public class Enumerations {
         return "CodeableConcept";
       if (code == DataType.CODING)
         return "Coding";
+      if (code == DataType.CONTACTDETAIL)
+        return "ContactDetail";
       if (code == DataType.CONTACTPOINT)
         return "ContactPoint";
+      if (code == DataType.CONTRIBUTOR)
+        return "Contributor";
       if (code == DataType.COUNT)
         return "Count";
       if (code == DataType.DATAREQUIREMENT)
         return "DataRequirement";
       if (code == DataType.DISTANCE)
         return "Distance";
+      if (code == DataType.DOSAGEINSTRUCTION)
+        return "DosageInstruction";
       if (code == DataType.DURATION)
         return "Duration";
       if (code == DataType.ELEMENT)
@@ -1834,8 +1809,6 @@ public class Enumerations {
         return "Identifier";
       if (code == DataType.META)
         return "Meta";
-      if (code == DataType.MODULEMETADATA)
-        return "ModuleMetadata";
       if (code == DataType.MONEY)
         return "Money";
       if (code == DataType.NARRATIVE)
@@ -1852,6 +1825,8 @@ public class Enumerations {
         return "Ratio";
       if (code == DataType.REFERENCE)
         return "Reference";
+      if (code == DataType.RELATEDARTIFACT)
+        return "RelatedArtifact";
       if (code == DataType.SAMPLEDDATA)
         return "SampledData";
       if (code == DataType.SIGNATURE)
@@ -1862,6 +1837,8 @@ public class Enumerations {
         return "Timing";
       if (code == DataType.TRIGGERDEFINITION)
         return "TriggerDefinition";
+      if (code == DataType.USAGECONTEXT)
+        return "UsageContext";
       if (code == DataType.BASE64BINARY)
         return "base64Binary";
       if (code == DataType.BOOLEAN)
@@ -2010,15 +1987,11 @@ public class Enumerations {
 
     public enum FHIRAllTypes {
         /**
-         * The definition of an action to be performed. Some aspects of the definition are specified statically, and some aspects can be specified dynamically by referencing logic defined in a library.
-         */
-        ACTIONDEFINITION, 
-        /**
          * An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.
          */
         ADDRESS, 
         /**
-         * null
+         * A duration of time during which an organism (or a process) has existed.
          */
         AGE, 
         /**
@@ -2042,11 +2015,19 @@ public class Enumerations {
          */
         CODING, 
         /**
+         * Specifies contact information for a person or organization.
+         */
+        CONTACTDETAIL, 
+        /**
          * Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
          */
         CONTACTPOINT, 
         /**
-         * null
+         * A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.
+         */
+        CONTRIBUTOR, 
+        /**
+         * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
          */
         COUNT, 
         /**
@@ -2054,11 +2035,15 @@ public class Enumerations {
          */
         DATAREQUIREMENT, 
         /**
-         * null
+         * A length - a value with a unit that is a physical distance.
          */
         DISTANCE, 
         /**
-         * null
+         * Indicates how the medication is to be used by the patient.
+         */
+        DOSAGEINSTRUCTION, 
+        /**
+         * A length of time.
          */
         DURATION, 
         /**
@@ -2086,11 +2071,7 @@ public class Enumerations {
          */
         META, 
         /**
-         * The ModuleMetadata structure defines the common metadata elements used by quality improvement artifacts. This information includes descriptive and topical metadata to enable repository searches, as well as governance and evidentiary support information.
-         */
-        MODULEMETADATA, 
-        /**
-         * null
+         * An amount of economic utility in some recognised currency.
          */
         MONEY, 
         /**
@@ -2122,6 +2103,10 @@ public class Enumerations {
          */
         REFERENCE, 
         /**
+         * Related artifacts such as additional documentation, justification, or bibliographic references.
+         */
+        RELATEDARTIFACT, 
+        /**
          * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
          */
         SAMPLEDDATA, 
@@ -2141,6 +2126,10 @@ public class Enumerations {
          * A description of a triggering event.
          */
         TRIGGERDEFINITION, 
+        /**
+         * Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
+         */
+        USAGECONTEXT, 
         /**
          * A stream of bytes
          */
@@ -2214,9 +2203,13 @@ public class Enumerations {
          */
         XHTML, 
         /**
-         * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
+         * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.
          */
         ACCOUNT, 
+        /**
+         * This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.
+         */
+        ACTIVITYDEFINITION, 
         /**
          * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
          */
@@ -2249,6 +2242,10 @@ public class Enumerations {
          * A container for a collection of resources.
          */
         BUNDLE, 
+        /**
+         * A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         */
+        CAPABILITYSTATEMENT, 
         /**
          * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
          */
@@ -2298,9 +2295,9 @@ public class Enumerations {
          */
         CONDITION, 
         /**
-         * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
          */
-        CONFORMANCE, 
+        CONSENT, 
         /**
          * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
          */
@@ -2313,14 +2310,6 @@ public class Enumerations {
          * The formal description of a single piece of information that can be gathered and reported.
          */
         DATAELEMENT, 
-        /**
-         * This resource defines a decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of a actions that should be taken whenever some condition is met in response to a particular event or events.
-         */
-        DECISIONSUPPORTRULE, 
-        /**
-         * The DecisionSupportServiceModule describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
-         */
-        DECISIONSUPPORTSERVICEMODULE, 
         /**
          * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
          */
@@ -2346,13 +2335,13 @@ public class Enumerations {
          */
         DEVICEUSESTATEMENT, 
         /**
-         * A record of a request for a diagnostic investigation service to be performed.
-         */
-        DIAGNOSTICORDER, 
-        /**
          * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.
          */
         DIAGNOSTICREPORT, 
+        /**
+         * A record of a request for a diagnostic investigation service to be performed.
+         */
+        DIAGNOSTICREQUEST, 
         /**
          * A manifest that defines a set of documents.
          */
@@ -2362,11 +2351,11 @@ public class Enumerations {
          */
         DOCUMENTREFERENCE, 
         /**
-         * --- Abstract Type! ---A resource that includes narrative, extensions, and contained resources.
+         * A resource that includes narrative, extensions, and contained resources.
          */
         DOMAINRESOURCE, 
         /**
-         * This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.
+         * This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.
          */
         ELIGIBILITYREQUEST, 
         /**
@@ -2377,6 +2366,10 @@ public class Enumerations {
          * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
          */
         ENCOUNTER, 
+        /**
+         * The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.
+         */
+        ENDPOINT, 
         /**
          * This resource provides the insurance enrollment details to the insurer regarding a specified coverage.
          */
@@ -2422,13 +2415,9 @@ public class Enumerations {
          */
         HEALTHCARESERVICE, 
         /**
-         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingExcerpt resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
+         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances may have been selected for a purpose, such as  conference, or consult.  Reflecting a range of sharing purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); both a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
          */
-        IMAGINGEXCERPT, 
-        /**
-         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
-         */
-        IMAGINGOBJECTSELECTION, 
+        IMAGINGMANIFEST, 
         /**
          * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
          */
@@ -2446,7 +2435,7 @@ public class Enumerations {
          */
         IMPLEMENTATIONGUIDE, 
         /**
-         * The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.
+         * The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose exist knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.
          */
         LIBRARY, 
         /**
@@ -2486,21 +2475,21 @@ public class Enumerations {
          */
         MEDICATIONDISPENSE, 
         /**
-         * An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationOrder" rather than "MedicationPrescription" to generalize the use across inpatient and outpatient settings as well as for care plans, etc.
+         * An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationRequest" rather than "MedicationPrescription" or "MedicationOrder" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.
          */
-        MEDICATIONORDER, 
+        MEDICATIONREQUEST, 
         /**
          * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
+         * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
+         */
+        MESSAGEDEFINITION, 
+        /**
          * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
          */
         MESSAGEHEADER, 
-        /**
-         * The ModuleDefinition resource defines the data requirements for a quality artifact.
-         */
-        MODULEDEFINITION, 
         /**
          * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
          */
@@ -2508,7 +2497,7 @@ public class Enumerations {
         /**
          * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
          */
-        NUTRITIONORDER, 
+        NUTRITIONREQUEST, 
         /**
          * Measurements and simple assertions made about a patient, device or other subject.
          */
@@ -2521,18 +2510,6 @@ public class Enumerations {
          * A collection of error, warning or information messages that result from a system action.
          */
         OPERATIONOUTCOME, 
-        /**
-         * A request to perform an action.
-         */
-        ORDER, 
-        /**
-         * A response to an order.
-         */
-        ORDERRESPONSE, 
-        /**
-         * This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.
-         */
-        ORDERSET, 
         /**
          * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
          */
@@ -2558,6 +2535,10 @@ public class Enumerations {
          */
         PERSON, 
         /**
+         * This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.
+         */
+        PLANDEFINITION, 
+        /**
          * A person who is directly or indirectly involved in the provisioning of healthcare.
          */
         PRACTITIONER, 
@@ -2582,10 +2563,6 @@ public class Enumerations {
          */
         PROCESSRESPONSE, 
         /**
-         * A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.
-         */
-        PROTOCOL, 
-        /**
          * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
          */
         PROVENANCE, 
@@ -2606,7 +2583,19 @@ public class Enumerations {
          */
         RELATEDPERSON, 
         /**
-         * --- Abstract Type! ---This is the base resource type for everything.
+         * A group of related requests that can be used to capture intended activities that have inter-dependencies such as "give this medication after that one".
+         */
+        REQUESTGROUP, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSTUDY, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSUBJECT, 
+        /**
+         * This is the base resource type for everything.
          */
         RESOURCE, 
         /**
@@ -2622,9 +2611,13 @@ public class Enumerations {
          */
         SEARCHPARAMETER, 
         /**
-         * Variation and Sequence data.
+         * Raw data describing a biological sequence.
          */
         SEQUENCE, 
+        /**
+         * The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
+         */
+        SERVICEDEFINITION, 
         /**
          * A slot of time on a schedule that may be available for booking appointments.
          */
@@ -2662,6 +2655,10 @@ public class Enumerations {
          */
         TASK, 
         /**
+         * TestReport is a resource that includes summary information on the results of executing a TestScript.
+         */
+        TESTREPORT, 
+        /**
          * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
          */
         TESTSCRIPT, 
@@ -2688,8 +2685,6 @@ public class Enumerations {
         public static FHIRAllTypes fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ActionDefinition".equals(codeString))
-          return ACTIONDEFINITION;
         if ("Address".equals(codeString))
           return ADDRESS;
         if ("Age".equals(codeString))
@@ -2704,14 +2699,20 @@ public class Enumerations {
           return CODEABLECONCEPT;
         if ("Coding".equals(codeString))
           return CODING;
+        if ("ContactDetail".equals(codeString))
+          return CONTACTDETAIL;
         if ("ContactPoint".equals(codeString))
           return CONTACTPOINT;
+        if ("Contributor".equals(codeString))
+          return CONTRIBUTOR;
         if ("Count".equals(codeString))
           return COUNT;
         if ("DataRequirement".equals(codeString))
           return DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return DISTANCE;
+        if ("DosageInstruction".equals(codeString))
+          return DOSAGEINSTRUCTION;
         if ("Duration".equals(codeString))
           return DURATION;
         if ("Element".equals(codeString))
@@ -2726,8 +2727,6 @@ public class Enumerations {
           return IDENTIFIER;
         if ("Meta".equals(codeString))
           return META;
-        if ("ModuleMetadata".equals(codeString))
-          return MODULEMETADATA;
         if ("Money".equals(codeString))
           return MONEY;
         if ("Narrative".equals(codeString))
@@ -2744,6 +2743,8 @@ public class Enumerations {
           return RATIO;
         if ("Reference".equals(codeString))
           return REFERENCE;
+        if ("RelatedArtifact".equals(codeString))
+          return RELATEDARTIFACT;
         if ("SampledData".equals(codeString))
           return SAMPLEDDATA;
         if ("Signature".equals(codeString))
@@ -2754,6 +2755,8 @@ public class Enumerations {
           return TIMING;
         if ("TriggerDefinition".equals(codeString))
           return TRIGGERDEFINITION;
+        if ("UsageContext".equals(codeString))
+          return USAGECONTEXT;
         if ("base64Binary".equals(codeString))
           return BASE64BINARY;
         if ("boolean".equals(codeString))
@@ -2792,6 +2795,8 @@ public class Enumerations {
           return XHTML;
         if ("Account".equals(codeString))
           return ACCOUNT;
+        if ("ActivityDefinition".equals(codeString))
+          return ACTIVITYDEFINITION;
         if ("AllergyIntolerance".equals(codeString))
           return ALLERGYINTOLERANCE;
         if ("Appointment".equals(codeString))
@@ -2808,6 +2813,8 @@ public class Enumerations {
           return BODYSITE;
         if ("Bundle".equals(codeString))
           return BUNDLE;
+        if ("CapabilityStatement".equals(codeString))
+          return CAPABILITYSTATEMENT;
         if ("CarePlan".equals(codeString))
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
@@ -2832,18 +2839,14 @@ public class Enumerations {
           return CONCEPTMAP;
         if ("Condition".equals(codeString))
           return CONDITION;
-        if ("Conformance".equals(codeString))
-          return CONFORMANCE;
+        if ("Consent".equals(codeString))
+          return CONSENT;
         if ("Contract".equals(codeString))
           return CONTRACT;
         if ("Coverage".equals(codeString))
           return COVERAGE;
         if ("DataElement".equals(codeString))
           return DATAELEMENT;
-        if ("DecisionSupportRule".equals(codeString))
-          return DECISIONSUPPORTRULE;
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return DECISIONSUPPORTSERVICEMODULE;
         if ("DetectedIssue".equals(codeString))
           return DETECTEDISSUE;
         if ("Device".equals(codeString))
@@ -2856,10 +2859,10 @@ public class Enumerations {
           return DEVICEUSEREQUEST;
         if ("DeviceUseStatement".equals(codeString))
           return DEVICEUSESTATEMENT;
-        if ("DiagnosticOrder".equals(codeString))
-          return DIAGNOSTICORDER;
         if ("DiagnosticReport".equals(codeString))
           return DIAGNOSTICREPORT;
+        if ("DiagnosticRequest".equals(codeString))
+          return DIAGNOSTICREQUEST;
         if ("DocumentManifest".equals(codeString))
           return DOCUMENTMANIFEST;
         if ("DocumentReference".equals(codeString))
@@ -2872,6 +2875,8 @@ public class Enumerations {
           return ELIGIBILITYRESPONSE;
         if ("Encounter".equals(codeString))
           return ENCOUNTER;
+        if ("Endpoint".equals(codeString))
+          return ENDPOINT;
         if ("EnrollmentRequest".equals(codeString))
           return ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
@@ -2894,10 +2899,8 @@ public class Enumerations {
           return GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return HEALTHCARESERVICE;
-        if ("ImagingExcerpt".equals(codeString))
-          return IMAGINGEXCERPT;
-        if ("ImagingObjectSelection".equals(codeString))
-          return IMAGINGOBJECTSELECTION;
+        if ("ImagingManifest".equals(codeString))
+          return IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
@@ -2926,30 +2929,24 @@ public class Enumerations {
           return MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return MEDICATIONDISPENSE;
-        if ("MedicationOrder".equals(codeString))
-          return MEDICATIONORDER;
+        if ("MedicationRequest".equals(codeString))
+          return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return MEDICATIONSTATEMENT;
+        if ("MessageDefinition".equals(codeString))
+          return MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
           return MESSAGEHEADER;
-        if ("ModuleDefinition".equals(codeString))
-          return MODULEDEFINITION;
         if ("NamingSystem".equals(codeString))
           return NAMINGSYSTEM;
-        if ("NutritionOrder".equals(codeString))
-          return NUTRITIONORDER;
+        if ("NutritionRequest".equals(codeString))
+          return NUTRITIONREQUEST;
         if ("Observation".equals(codeString))
           return OBSERVATION;
         if ("OperationDefinition".equals(codeString))
           return OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return OPERATIONOUTCOME;
-        if ("Order".equals(codeString))
-          return ORDER;
-        if ("OrderResponse".equals(codeString))
-          return ORDERRESPONSE;
-        if ("OrderSet".equals(codeString))
-          return ORDERSET;
         if ("Organization".equals(codeString))
           return ORGANIZATION;
         if ("Parameters".equals(codeString))
@@ -2962,6 +2959,8 @@ public class Enumerations {
           return PAYMENTRECONCILIATION;
         if ("Person".equals(codeString))
           return PERSON;
+        if ("PlanDefinition".equals(codeString))
+          return PLANDEFINITION;
         if ("Practitioner".equals(codeString))
           return PRACTITIONER;
         if ("PractitionerRole".equals(codeString))
@@ -2974,8 +2973,6 @@ public class Enumerations {
           return PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return PROCESSRESPONSE;
-        if ("Protocol".equals(codeString))
-          return PROTOCOL;
         if ("Provenance".equals(codeString))
           return PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -2986,6 +2983,12 @@ public class Enumerations {
           return REFERRALREQUEST;
         if ("RelatedPerson".equals(codeString))
           return RELATEDPERSON;
+        if ("RequestGroup".equals(codeString))
+          return REQUESTGROUP;
+        if ("ResearchStudy".equals(codeString))
+          return RESEARCHSTUDY;
+        if ("ResearchSubject".equals(codeString))
+          return RESEARCHSUBJECT;
         if ("Resource".equals(codeString))
           return RESOURCE;
         if ("RiskAssessment".equals(codeString))
@@ -2996,6 +2999,8 @@ public class Enumerations {
           return SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return SEQUENCE;
+        if ("ServiceDefinition".equals(codeString))
+          return SERVICEDEFINITION;
         if ("Slot".equals(codeString))
           return SLOT;
         if ("Specimen".equals(codeString))
@@ -3014,6 +3019,8 @@ public class Enumerations {
           return SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return TASK;
+        if ("TestReport".equals(codeString))
+          return TESTREPORT;
         if ("TestScript".equals(codeString))
           return TESTSCRIPT;
         if ("ValueSet".equals(codeString))
@@ -3028,7 +3035,6 @@ public class Enumerations {
         }
         public String toCode() {
           switch (this) {
-            case ACTIONDEFINITION: return "ActionDefinition";
             case ADDRESS: return "Address";
             case AGE: return "Age";
             case ANNOTATION: return "Annotation";
@@ -3036,10 +3042,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "BackboneElement";
             case CODEABLECONCEPT: return "CodeableConcept";
             case CODING: return "Coding";
+            case CONTACTDETAIL: return "ContactDetail";
             case CONTACTPOINT: return "ContactPoint";
+            case CONTRIBUTOR: return "Contributor";
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
+            case DOSAGEINSTRUCTION: return "DosageInstruction";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -3047,7 +3056,6 @@ public class Enumerations {
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case META: return "Meta";
-            case MODULEMETADATA: return "ModuleMetadata";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
@@ -3056,11 +3064,13 @@ public class Enumerations {
             case RANGE: return "Range";
             case RATIO: return "Ratio";
             case REFERENCE: return "Reference";
+            case RELATEDARTIFACT: return "RelatedArtifact";
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
+            case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
             case CODE: return "code";
@@ -3080,6 +3090,7 @@ public class Enumerations {
             case UUID: return "uuid";
             case XHTML: return "xhtml";
             case ACCOUNT: return "Account";
+            case ACTIVITYDEFINITION: return "ActivityDefinition";
             case ALLERGYINTOLERANCE: return "AllergyIntolerance";
             case APPOINTMENT: return "Appointment";
             case APPOINTMENTRESPONSE: return "AppointmentResponse";
@@ -3088,6 +3099,7 @@ public class Enumerations {
             case BINARY: return "Binary";
             case BODYSITE: return "BodySite";
             case BUNDLE: return "Bundle";
+            case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
             case CLAIM: return "Claim";
@@ -3100,26 +3112,25 @@ public class Enumerations {
             case COMPOSITION: return "Composition";
             case CONCEPTMAP: return "ConceptMap";
             case CONDITION: return "Condition";
-            case CONFORMANCE: return "Conformance";
+            case CONSENT: return "Consent";
             case CONTRACT: return "Contract";
             case COVERAGE: return "Coverage";
             case DATAELEMENT: return "DataElement";
-            case DECISIONSUPPORTRULE: return "DecisionSupportRule";
-            case DECISIONSUPPORTSERVICEMODULE: return "DecisionSupportServiceModule";
             case DETECTEDISSUE: return "DetectedIssue";
             case DEVICE: return "Device";
             case DEVICECOMPONENT: return "DeviceComponent";
             case DEVICEMETRIC: return "DeviceMetric";
             case DEVICEUSEREQUEST: return "DeviceUseRequest";
             case DEVICEUSESTATEMENT: return "DeviceUseStatement";
-            case DIAGNOSTICORDER: return "DiagnosticOrder";
             case DIAGNOSTICREPORT: return "DiagnosticReport";
+            case DIAGNOSTICREQUEST: return "DiagnosticRequest";
             case DOCUMENTMANIFEST: return "DocumentManifest";
             case DOCUMENTREFERENCE: return "DocumentReference";
             case DOMAINRESOURCE: return "DomainResource";
             case ELIGIBILITYREQUEST: return "EligibilityRequest";
             case ELIGIBILITYRESPONSE: return "EligibilityResponse";
             case ENCOUNTER: return "Encounter";
+            case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
@@ -3131,8 +3142,7 @@ public class Enumerations {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGEXCERPT: return "ImagingExcerpt";
-            case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
+            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
@@ -3147,41 +3157,42 @@ public class Enumerations {
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
-            case MEDICATIONORDER: return "MedicationOrder";
+            case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
-            case MODULEDEFINITION: return "ModuleDefinition";
             case NAMINGSYSTEM: return "NamingSystem";
-            case NUTRITIONORDER: return "NutritionOrder";
+            case NUTRITIONREQUEST: return "NutritionRequest";
             case OBSERVATION: return "Observation";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
-            case ORDER: return "Order";
-            case ORDERRESPONSE: return "OrderResponse";
-            case ORDERSET: return "OrderSet";
             case ORGANIZATION: return "Organization";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
             case PAYMENTRECONCILIATION: return "PaymentReconciliation";
             case PERSON: return "Person";
+            case PLANDEFINITION: return "PlanDefinition";
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
-            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
+            case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
+            case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -3191,6 +3202,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
             case VALUESET: return "ValueSet";
             case VISIONPRESCRIPTION: return "VisionPrescription";
@@ -3201,7 +3213,6 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case ACTIONDEFINITION: return "http://hl7.org/fhir/data-types";
             case ADDRESS: return "http://hl7.org/fhir/data-types";
             case AGE: return "http://hl7.org/fhir/data-types";
             case ANNOTATION: return "http://hl7.org/fhir/data-types";
@@ -3209,10 +3220,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "http://hl7.org/fhir/data-types";
             case CODEABLECONCEPT: return "http://hl7.org/fhir/data-types";
             case CODING: return "http://hl7.org/fhir/data-types";
+            case CONTACTDETAIL: return "http://hl7.org/fhir/data-types";
             case CONTACTPOINT: return "http://hl7.org/fhir/data-types";
+            case CONTRIBUTOR: return "http://hl7.org/fhir/data-types";
             case COUNT: return "http://hl7.org/fhir/data-types";
             case DATAREQUIREMENT: return "http://hl7.org/fhir/data-types";
             case DISTANCE: return "http://hl7.org/fhir/data-types";
+            case DOSAGEINSTRUCTION: return "http://hl7.org/fhir/data-types";
             case DURATION: return "http://hl7.org/fhir/data-types";
             case ELEMENT: return "http://hl7.org/fhir/data-types";
             case ELEMENTDEFINITION: return "http://hl7.org/fhir/data-types";
@@ -3220,7 +3234,6 @@ public class Enumerations {
             case HUMANNAME: return "http://hl7.org/fhir/data-types";
             case IDENTIFIER: return "http://hl7.org/fhir/data-types";
             case META: return "http://hl7.org/fhir/data-types";
-            case MODULEMETADATA: return "http://hl7.org/fhir/data-types";
             case MONEY: return "http://hl7.org/fhir/data-types";
             case NARRATIVE: return "http://hl7.org/fhir/data-types";
             case PARAMETERDEFINITION: return "http://hl7.org/fhir/data-types";
@@ -3229,11 +3242,13 @@ public class Enumerations {
             case RANGE: return "http://hl7.org/fhir/data-types";
             case RATIO: return "http://hl7.org/fhir/data-types";
             case REFERENCE: return "http://hl7.org/fhir/data-types";
+            case RELATEDARTIFACT: return "http://hl7.org/fhir/data-types";
             case SAMPLEDDATA: return "http://hl7.org/fhir/data-types";
             case SIGNATURE: return "http://hl7.org/fhir/data-types";
             case SIMPLEQUANTITY: return "http://hl7.org/fhir/data-types";
             case TIMING: return "http://hl7.org/fhir/data-types";
             case TRIGGERDEFINITION: return "http://hl7.org/fhir/data-types";
+            case USAGECONTEXT: return "http://hl7.org/fhir/data-types";
             case BASE64BINARY: return "http://hl7.org/fhir/data-types";
             case BOOLEAN: return "http://hl7.org/fhir/data-types";
             case CODE: return "http://hl7.org/fhir/data-types";
@@ -3253,6 +3268,7 @@ public class Enumerations {
             case UUID: return "http://hl7.org/fhir/data-types";
             case XHTML: return "http://hl7.org/fhir/data-types";
             case ACCOUNT: return "http://hl7.org/fhir/resource-types";
+            case ACTIVITYDEFINITION: return "http://hl7.org/fhir/resource-types";
             case ALLERGYINTOLERANCE: return "http://hl7.org/fhir/resource-types";
             case APPOINTMENT: return "http://hl7.org/fhir/resource-types";
             case APPOINTMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -3261,6 +3277,7 @@ public class Enumerations {
             case BINARY: return "http://hl7.org/fhir/resource-types";
             case BODYSITE: return "http://hl7.org/fhir/resource-types";
             case BUNDLE: return "http://hl7.org/fhir/resource-types";
+            case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
@@ -3273,26 +3290,25 @@ public class Enumerations {
             case COMPOSITION: return "http://hl7.org/fhir/resource-types";
             case CONCEPTMAP: return "http://hl7.org/fhir/resource-types";
             case CONDITION: return "http://hl7.org/fhir/resource-types";
-            case CONFORMANCE: return "http://hl7.org/fhir/resource-types";
+            case CONSENT: return "http://hl7.org/fhir/resource-types";
             case CONTRACT: return "http://hl7.org/fhir/resource-types";
             case COVERAGE: return "http://hl7.org/fhir/resource-types";
             case DATAELEMENT: return "http://hl7.org/fhir/resource-types";
-            case DECISIONSUPPORTRULE: return "http://hl7.org/fhir/resource-types";
-            case DECISIONSUPPORTSERVICEMODULE: return "http://hl7.org/fhir/resource-types";
             case DETECTEDISSUE: return "http://hl7.org/fhir/resource-types";
             case DEVICE: return "http://hl7.org/fhir/resource-types";
             case DEVICECOMPONENT: return "http://hl7.org/fhir/resource-types";
             case DEVICEMETRIC: return "http://hl7.org/fhir/resource-types";
             case DEVICEUSEREQUEST: return "http://hl7.org/fhir/resource-types";
             case DEVICEUSESTATEMENT: return "http://hl7.org/fhir/resource-types";
-            case DIAGNOSTICORDER: return "http://hl7.org/fhir/resource-types";
             case DIAGNOSTICREPORT: return "http://hl7.org/fhir/resource-types";
+            case DIAGNOSTICREQUEST: return "http://hl7.org/fhir/resource-types";
             case DOCUMENTMANIFEST: return "http://hl7.org/fhir/resource-types";
             case DOCUMENTREFERENCE: return "http://hl7.org/fhir/resource-types";
             case DOMAINRESOURCE: return "http://hl7.org/fhir/resource-types";
             case ELIGIBILITYREQUEST: return "http://hl7.org/fhir/resource-types";
             case ELIGIBILITYRESPONSE: return "http://hl7.org/fhir/resource-types";
             case ENCOUNTER: return "http://hl7.org/fhir/resource-types";
+            case ENDPOINT: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTREQUEST: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
@@ -3304,8 +3320,7 @@ public class Enumerations {
             case GROUP: return "http://hl7.org/fhir/resource-types";
             case GUIDANCERESPONSE: return "http://hl7.org/fhir/resource-types";
             case HEALTHCARESERVICE: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGEXCERPT: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGOBJECTSELECTION: return "http://hl7.org/fhir/resource-types";
+            case IMAGINGMANIFEST: return "http://hl7.org/fhir/resource-types";
             case IMAGINGSTUDY: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATION: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
@@ -3320,41 +3335,42 @@ public class Enumerations {
             case MEDICATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONADMINISTRATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONDISPENSE: return "http://hl7.org/fhir/resource-types";
-            case MEDICATIONORDER: return "http://hl7.org/fhir/resource-types";
+            case MEDICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONSTATEMENT: return "http://hl7.org/fhir/resource-types";
+            case MESSAGEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case MESSAGEHEADER: return "http://hl7.org/fhir/resource-types";
-            case MODULEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case NAMINGSYSTEM: return "http://hl7.org/fhir/resource-types";
-            case NUTRITIONORDER: return "http://hl7.org/fhir/resource-types";
+            case NUTRITIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case OBSERVATION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONDEFINITION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONOUTCOME: return "http://hl7.org/fhir/resource-types";
-            case ORDER: return "http://hl7.org/fhir/resource-types";
-            case ORDERRESPONSE: return "http://hl7.org/fhir/resource-types";
-            case ORDERSET: return "http://hl7.org/fhir/resource-types";
             case ORGANIZATION: return "http://hl7.org/fhir/resource-types";
             case PARAMETERS: return "http://hl7.org/fhir/resource-types";
             case PATIENT: return "http://hl7.org/fhir/resource-types";
             case PAYMENTNOTICE: return "http://hl7.org/fhir/resource-types";
             case PAYMENTRECONCILIATION: return "http://hl7.org/fhir/resource-types";
             case PERSON: return "http://hl7.org/fhir/resource-types";
+            case PLANDEFINITION: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONER: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONERROLE: return "http://hl7.org/fhir/resource-types";
             case PROCEDURE: return "http://hl7.org/fhir/resource-types";
             case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSRESPONSE: return "http://hl7.org/fhir/resource-types";
-            case PROTOCOL: return "http://hl7.org/fhir/resource-types";
             case PROVENANCE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRERESPONSE: return "http://hl7.org/fhir/resource-types";
             case REFERRALREQUEST: return "http://hl7.org/fhir/resource-types";
             case RELATEDPERSON: return "http://hl7.org/fhir/resource-types";
+            case REQUESTGROUP: return "http://hl7.org/fhir/resource-types";
+            case RESEARCHSTUDY: return "http://hl7.org/fhir/resource-types";
+            case RESEARCHSUBJECT: return "http://hl7.org/fhir/resource-types";
             case RESOURCE: return "http://hl7.org/fhir/resource-types";
             case RISKASSESSMENT: return "http://hl7.org/fhir/resource-types";
             case SCHEDULE: return "http://hl7.org/fhir/resource-types";
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
             case SEQUENCE: return "http://hl7.org/fhir/resource-types";
+            case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
@@ -3364,6 +3380,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "http://hl7.org/fhir/resource-types";
             case SUPPLYREQUEST: return "http://hl7.org/fhir/resource-types";
             case TASK: return "http://hl7.org/fhir/resource-types";
+            case TESTREPORT: return "http://hl7.org/fhir/resource-types";
             case TESTSCRIPT: return "http://hl7.org/fhir/resource-types";
             case VALUESET: return "http://hl7.org/fhir/resource-types";
             case VISIONPRESCRIPTION: return "http://hl7.org/fhir/resource-types";
@@ -3374,27 +3391,28 @@ public class Enumerations {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIONDEFINITION: return "The definition of an action to be performed. Some aspects of the definition are specified statically, and some aspects can be specified dynamically by referencing logic defined in a library.";
             case ADDRESS: return "An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.";
-            case AGE: return "";
+            case AGE: return "A duration of time during which an organism (or a process) has existed.";
             case ANNOTATION: return "A  text note which also  contains information about who made the statement and when.";
             case ATTACHMENT: return "For referring to data content defined in other formats.";
             case BACKBONEELEMENT: return "Base definition for all elements that are defined inside a resource - but not those in a data type.";
             case CODEABLECONCEPT: return "A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.";
             case CODING: return "A reference to a code defined by a terminology system.";
+            case CONTACTDETAIL: return "Specifies contact information for a person or organization.";
             case CONTACTPOINT: return "Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.";
-            case COUNT: return "";
+            case CONTRIBUTOR: return "A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.";
+            case COUNT: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
             case DATAREQUIREMENT: return "Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.";
-            case DISTANCE: return "";
-            case DURATION: return "";
+            case DISTANCE: return "A length - a value with a unit that is a physical distance.";
+            case DOSAGEINSTRUCTION: return "Indicates how the medication is to be used by the patient.";
+            case DURATION: return "A length of time.";
             case ELEMENT: return "Base definition for all elements in a resource.";
             case ELEMENTDEFINITION: return "Captures constraints on each element within the resource, profile, or extension.";
             case EXTENSION: return "Optional Extensions Element - found in all resources.";
             case HUMANNAME: return "A human's name with the ability to identify parts and usage.";
             case IDENTIFIER: return "A technical identifier - identifies some entity uniquely and unambiguously.";
             case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.";
-            case MODULEMETADATA: return "The ModuleMetadata structure defines the common metadata elements used by quality improvement artifacts. This information includes descriptive and topical metadata to enable repository searches, as well as governance and evidentiary support information.";
-            case MONEY: return "";
+            case MONEY: return "An amount of economic utility in some recognised currency.";
             case NARRATIVE: return "A human-readable formatted text, including images.";
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
@@ -3402,11 +3420,13 @@ public class Enumerations {
             case RANGE: return "A set of ordered Quantities defined by a low and high limit.";
             case RATIO: return "A relationship of two Quantity values - expressed as a numerator and a denominator.";
             case REFERENCE: return "A reference from one resource to another.";
+            case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.";
             case TRIGGERDEFINITION: return "A description of a triggering event.";
+            case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
@@ -3425,7 +3445,8 @@ public class Enumerations {
             case URI: return "String of characters used to identify a name or a resource";
             case UUID: return "A UUID, represented as a URI";
             case XHTML: return "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)";
-            case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.";
+            case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.";
+            case ACTIVITYDEFINITION: return "This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.";
             case ALLERGYINTOLERANCE: return "Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.";
             case APPOINTMENT: return "A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).";
             case APPOINTMENTRESPONSE: return "A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.";
@@ -3434,6 +3455,7 @@ public class Enumerations {
             case BINARY: return "A binary resource can contain any content, whether text, image, pdf, zip archive, etc.";
             case BODYSITE: return "Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.";
             case BUNDLE: return "A container for a collection of resources.";
+            case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
@@ -3446,26 +3468,25 @@ public class Enumerations {
             case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a diagnosis during an encounter; populating a problem list or a summary statement, such as a discharge summary.";
-            case CONFORMANCE: return "A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
+            case CONSENT: return "A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
             case CONTRACT: return "A formal agreement between parties regarding the conduct of business, exchange of information or other matters.";
             case COVERAGE: return "Financial instrument which may be used to pay for or reimburse health care products and services.";
             case DATAELEMENT: return "The formal description of a single piece of information that can be gathered and reported.";
-            case DECISIONSUPPORTRULE: return "This resource defines a decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of a actions that should be taken whenever some condition is met in response to a particular event or events.";
-            case DECISIONSUPPORTSERVICEMODULE: return "The DecisionSupportServiceModule describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case DETECTEDISSUE: return "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.";
             case DEVICE: return "This resource identifies an instance or a type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.";
             case DEVICECOMPONENT: return "Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.";
             case DEVICEMETRIC: return "Describes a measurement, calculation or setting capability of a medical device.";
             case DEVICEUSEREQUEST: return "Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.";
             case DEVICEUSESTATEMENT: return "A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.";
-            case DIAGNOSTICORDER: return "A record of a request for a diagnostic investigation service to be performed.";
             case DIAGNOSTICREPORT: return "The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.";
+            case DIAGNOSTICREQUEST: return "A record of a request for a diagnostic investigation service to be performed.";
             case DOCUMENTMANIFEST: return "A manifest that defines a set of documents.";
             case DOCUMENTREFERENCE: return "A reference to a document .";
-            case DOMAINRESOURCE: return "--- Abstract Type! ---A resource that includes narrative, extensions, and contained resources.";
-            case ELIGIBILITYREQUEST: return "This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.";
+            case DOMAINRESOURCE: return "A resource that includes narrative, extensions, and contained resources.";
+            case ELIGIBILITYREQUEST: return "This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.";
             case ELIGIBILITYRESPONSE: return "This resource provides eligibility and plan details from the processing of an Eligibility resource.";
             case ENCOUNTER: return "An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.";
+            case ENDPOINT: return "The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.";
             case ENROLLMENTREQUEST: return "This resource provides the insurance enrollment details to the insurer regarding a specified coverage.";
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
@@ -3477,13 +3498,12 @@ public class Enumerations {
             case GROUP: return "Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.";
             case GUIDANCERESPONSE: return "A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.";
             case HEALTHCARESERVICE: return "The details of a healthcare service available at a location.";
-            case IMAGINGEXCERPT: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingExcerpt resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
-            case IMAGINGOBJECTSELECTION: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
+            case IMAGINGMANIFEST: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances may have been selected for a purpose, such as  conference, or consult.  Reflecting a range of sharing purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); both a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
             case IMAGINGSTUDY: return "Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.";
             case IMMUNIZATION: return "Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.";
             case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts.";
-            case LIBRARY: return "The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.";
+            case LIBRARY: return "The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose exist knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.";
             case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
             case LOCATION: return "Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.";
@@ -3493,41 +3513,42 @@ public class Enumerations {
             case MEDICATION: return "This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.";
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
-            case MEDICATIONORDER: return "An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationOrder\" rather than \"MedicationPrescription\" to generalize the use across inpatient and outpatient settings as well as for care plans, etc.";
+            case MEDICATIONREQUEST: return "An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
-            case MODULEDEFINITION: return "The ModuleDefinition resource defines the data requirements for a quality artifact.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
-            case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
+            case NUTRITIONREQUEST: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
-            case ORDER: return "A request to perform an action.";
-            case ORDERRESPONSE: return "A response to an order.";
-            case ORDERSET: return "This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
             case PARAMETERS: return "This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.";
             case PATIENT: return "Demographics and other administrative information about an individual or animal receiving care or other health-related services.";
             case PAYMENTNOTICE: return "This resource provides the status of the payment for goods and services rendered, and the request and response resource references.";
             case PAYMENTRECONCILIATION: return "This resource provides payment details and claim references supporting a bulk payment.";
             case PERSON: return "Demographics and administrative information about a person independent of a specific health-related context.";
+            case PLANDEFINITION: return "This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.";
             case PRACTITIONER: return "A person who is directly or indirectly involved in the provisioning of healthcare.";
             case PRACTITIONERROLE: return "A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.";
             case PROCEDURE: return "An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.";
             case PROCEDUREREQUEST: return "A request for a procedure to be performed. May be a proposal or an order.";
             case PROCESSREQUEST: return "This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.";
             case PROCESSRESPONSE: return "This resource provides processing status, errors and notes from the processing of a resource.";
-            case PROTOCOL: return "A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.";
             case PROVENANCE: return "Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.";
             case QUESTIONNAIRE: return "A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case QUESTIONNAIRERESPONSE: return "A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case REFERRALREQUEST: return "Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.";
             case RELATEDPERSON: return "Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.";
-            case RESOURCE: return "--- Abstract Type! ---This is the base resource type for everything.";
+            case REQUESTGROUP: return "A group of related requests that can be used to capture intended activities that have inter-dependencies such as \"give this medication after that one\".";
+            case RESEARCHSTUDY: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
+            case RESEARCHSUBJECT: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
+            case RESOURCE: return "This is the base resource type for everything.";
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slot(s) of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
-            case SEQUENCE: return "Variation and Sequence data.";
+            case SEQUENCE: return "Raw data describing a biological sequence.";
+            case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.";
@@ -3537,6 +3558,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "Record of delivery of what is supplied.";
             case SUPPLYREQUEST: return "A record of a request for a medication, substance or device used in the healthcare setting.";
             case TASK: return "A task to be performed.";
+            case TESTREPORT: return "TestReport is a resource that includes summary information on the results of executing a TestScript.";
             case TESTSCRIPT: return "TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.";
             case VALUESET: return "A value set specifies a set of codes drawn from one or more code systems.";
             case VISIONPRESCRIPTION: return "An authorization for the supply of glasses and/or contact lenses to a patient.";
@@ -3547,7 +3569,6 @@ public class Enumerations {
         }
         public String getDisplay() {
           switch (this) {
-            case ACTIONDEFINITION: return "ActionDefinition";
             case ADDRESS: return "Address";
             case AGE: return "Age";
             case ANNOTATION: return "Annotation";
@@ -3555,10 +3576,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "BackboneElement";
             case CODEABLECONCEPT: return "CodeableConcept";
             case CODING: return "Coding";
+            case CONTACTDETAIL: return "ContactDetail";
             case CONTACTPOINT: return "ContactPoint";
+            case CONTRIBUTOR: return "Contributor";
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
+            case DOSAGEINSTRUCTION: return "DosageInstruction";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -3566,7 +3590,6 @@ public class Enumerations {
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case META: return "Meta";
-            case MODULEMETADATA: return "ModuleMetadata";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
@@ -3575,11 +3598,13 @@ public class Enumerations {
             case RANGE: return "Range";
             case RATIO: return "Ratio";
             case REFERENCE: return "Reference";
+            case RELATEDARTIFACT: return "RelatedArtifact";
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
+            case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
             case CODE: return "code";
@@ -3599,6 +3624,7 @@ public class Enumerations {
             case UUID: return "uuid";
             case XHTML: return "XHTML";
             case ACCOUNT: return "Account";
+            case ACTIVITYDEFINITION: return "ActivityDefinition";
             case ALLERGYINTOLERANCE: return "AllergyIntolerance";
             case APPOINTMENT: return "Appointment";
             case APPOINTMENTRESPONSE: return "AppointmentResponse";
@@ -3607,6 +3633,7 @@ public class Enumerations {
             case BINARY: return "Binary";
             case BODYSITE: return "BodySite";
             case BUNDLE: return "Bundle";
+            case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
             case CLAIM: return "Claim";
@@ -3619,26 +3646,25 @@ public class Enumerations {
             case COMPOSITION: return "Composition";
             case CONCEPTMAP: return "ConceptMap";
             case CONDITION: return "Condition";
-            case CONFORMANCE: return "Conformance";
+            case CONSENT: return "Consent";
             case CONTRACT: return "Contract";
             case COVERAGE: return "Coverage";
             case DATAELEMENT: return "DataElement";
-            case DECISIONSUPPORTRULE: return "DecisionSupportRule";
-            case DECISIONSUPPORTSERVICEMODULE: return "DecisionSupportServiceModule";
             case DETECTEDISSUE: return "DetectedIssue";
             case DEVICE: return "Device";
             case DEVICECOMPONENT: return "DeviceComponent";
             case DEVICEMETRIC: return "DeviceMetric";
             case DEVICEUSEREQUEST: return "DeviceUseRequest";
             case DEVICEUSESTATEMENT: return "DeviceUseStatement";
-            case DIAGNOSTICORDER: return "DiagnosticOrder";
             case DIAGNOSTICREPORT: return "DiagnosticReport";
+            case DIAGNOSTICREQUEST: return "DiagnosticRequest";
             case DOCUMENTMANIFEST: return "DocumentManifest";
             case DOCUMENTREFERENCE: return "DocumentReference";
             case DOMAINRESOURCE: return "DomainResource";
             case ELIGIBILITYREQUEST: return "EligibilityRequest";
             case ELIGIBILITYRESPONSE: return "EligibilityResponse";
             case ENCOUNTER: return "Encounter";
+            case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
@@ -3650,8 +3676,7 @@ public class Enumerations {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGEXCERPT: return "ImagingExcerpt";
-            case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
+            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
@@ -3666,41 +3691,42 @@ public class Enumerations {
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
-            case MEDICATIONORDER: return "MedicationOrder";
+            case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
-            case MODULEDEFINITION: return "ModuleDefinition";
             case NAMINGSYSTEM: return "NamingSystem";
-            case NUTRITIONORDER: return "NutritionOrder";
+            case NUTRITIONREQUEST: return "NutritionRequest";
             case OBSERVATION: return "Observation";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
-            case ORDER: return "Order";
-            case ORDERRESPONSE: return "OrderResponse";
-            case ORDERSET: return "OrderSet";
             case ORGANIZATION: return "Organization";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
             case PAYMENTRECONCILIATION: return "PaymentReconciliation";
             case PERSON: return "Person";
+            case PLANDEFINITION: return "PlanDefinition";
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
-            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
+            case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
+            case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -3710,6 +3736,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
             case VALUESET: return "ValueSet";
             case VISIONPRESCRIPTION: return "VisionPrescription";
@@ -3725,8 +3752,6 @@ public class Enumerations {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ActionDefinition".equals(codeString))
-          return FHIRAllTypes.ACTIONDEFINITION;
         if ("Address".equals(codeString))
           return FHIRAllTypes.ADDRESS;
         if ("Age".equals(codeString))
@@ -3741,14 +3766,20 @@ public class Enumerations {
           return FHIRAllTypes.CODEABLECONCEPT;
         if ("Coding".equals(codeString))
           return FHIRAllTypes.CODING;
+        if ("ContactDetail".equals(codeString))
+          return FHIRAllTypes.CONTACTDETAIL;
         if ("ContactPoint".equals(codeString))
           return FHIRAllTypes.CONTACTPOINT;
+        if ("Contributor".equals(codeString))
+          return FHIRAllTypes.CONTRIBUTOR;
         if ("Count".equals(codeString))
           return FHIRAllTypes.COUNT;
         if ("DataRequirement".equals(codeString))
           return FHIRAllTypes.DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return FHIRAllTypes.DISTANCE;
+        if ("DosageInstruction".equals(codeString))
+          return FHIRAllTypes.DOSAGEINSTRUCTION;
         if ("Duration".equals(codeString))
           return FHIRAllTypes.DURATION;
         if ("Element".equals(codeString))
@@ -3763,8 +3794,6 @@ public class Enumerations {
           return FHIRAllTypes.IDENTIFIER;
         if ("Meta".equals(codeString))
           return FHIRAllTypes.META;
-        if ("ModuleMetadata".equals(codeString))
-          return FHIRAllTypes.MODULEMETADATA;
         if ("Money".equals(codeString))
           return FHIRAllTypes.MONEY;
         if ("Narrative".equals(codeString))
@@ -3781,6 +3810,8 @@ public class Enumerations {
           return FHIRAllTypes.RATIO;
         if ("Reference".equals(codeString))
           return FHIRAllTypes.REFERENCE;
+        if ("RelatedArtifact".equals(codeString))
+          return FHIRAllTypes.RELATEDARTIFACT;
         if ("SampledData".equals(codeString))
           return FHIRAllTypes.SAMPLEDDATA;
         if ("Signature".equals(codeString))
@@ -3791,6 +3822,8 @@ public class Enumerations {
           return FHIRAllTypes.TIMING;
         if ("TriggerDefinition".equals(codeString))
           return FHIRAllTypes.TRIGGERDEFINITION;
+        if ("UsageContext".equals(codeString))
+          return FHIRAllTypes.USAGECONTEXT;
         if ("base64Binary".equals(codeString))
           return FHIRAllTypes.BASE64BINARY;
         if ("boolean".equals(codeString))
@@ -3829,6 +3862,8 @@ public class Enumerations {
           return FHIRAllTypes.XHTML;
         if ("Account".equals(codeString))
           return FHIRAllTypes.ACCOUNT;
+        if ("ActivityDefinition".equals(codeString))
+          return FHIRAllTypes.ACTIVITYDEFINITION;
         if ("AllergyIntolerance".equals(codeString))
           return FHIRAllTypes.ALLERGYINTOLERANCE;
         if ("Appointment".equals(codeString))
@@ -3845,6 +3880,8 @@ public class Enumerations {
           return FHIRAllTypes.BODYSITE;
         if ("Bundle".equals(codeString))
           return FHIRAllTypes.BUNDLE;
+        if ("CapabilityStatement".equals(codeString))
+          return FHIRAllTypes.CAPABILITYSTATEMENT;
         if ("CarePlan".equals(codeString))
           return FHIRAllTypes.CAREPLAN;
         if ("CareTeam".equals(codeString))
@@ -3869,18 +3906,14 @@ public class Enumerations {
           return FHIRAllTypes.CONCEPTMAP;
         if ("Condition".equals(codeString))
           return FHIRAllTypes.CONDITION;
-        if ("Conformance".equals(codeString))
-          return FHIRAllTypes.CONFORMANCE;
+        if ("Consent".equals(codeString))
+          return FHIRAllTypes.CONSENT;
         if ("Contract".equals(codeString))
           return FHIRAllTypes.CONTRACT;
         if ("Coverage".equals(codeString))
           return FHIRAllTypes.COVERAGE;
         if ("DataElement".equals(codeString))
           return FHIRAllTypes.DATAELEMENT;
-        if ("DecisionSupportRule".equals(codeString))
-          return FHIRAllTypes.DECISIONSUPPORTRULE;
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return FHIRAllTypes.DECISIONSUPPORTSERVICEMODULE;
         if ("DetectedIssue".equals(codeString))
           return FHIRAllTypes.DETECTEDISSUE;
         if ("Device".equals(codeString))
@@ -3893,10 +3926,10 @@ public class Enumerations {
           return FHIRAllTypes.DEVICEUSEREQUEST;
         if ("DeviceUseStatement".equals(codeString))
           return FHIRAllTypes.DEVICEUSESTATEMENT;
-        if ("DiagnosticOrder".equals(codeString))
-          return FHIRAllTypes.DIAGNOSTICORDER;
         if ("DiagnosticReport".equals(codeString))
           return FHIRAllTypes.DIAGNOSTICREPORT;
+        if ("DiagnosticRequest".equals(codeString))
+          return FHIRAllTypes.DIAGNOSTICREQUEST;
         if ("DocumentManifest".equals(codeString))
           return FHIRAllTypes.DOCUMENTMANIFEST;
         if ("DocumentReference".equals(codeString))
@@ -3909,6 +3942,8 @@ public class Enumerations {
           return FHIRAllTypes.ELIGIBILITYRESPONSE;
         if ("Encounter".equals(codeString))
           return FHIRAllTypes.ENCOUNTER;
+        if ("Endpoint".equals(codeString))
+          return FHIRAllTypes.ENDPOINT;
         if ("EnrollmentRequest".equals(codeString))
           return FHIRAllTypes.ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
@@ -3931,10 +3966,8 @@ public class Enumerations {
           return FHIRAllTypes.GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return FHIRAllTypes.HEALTHCARESERVICE;
-        if ("ImagingExcerpt".equals(codeString))
-          return FHIRAllTypes.IMAGINGEXCERPT;
-        if ("ImagingObjectSelection".equals(codeString))
-          return FHIRAllTypes.IMAGINGOBJECTSELECTION;
+        if ("ImagingManifest".equals(codeString))
+          return FHIRAllTypes.IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return FHIRAllTypes.IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
@@ -3963,30 +3996,24 @@ public class Enumerations {
           return FHIRAllTypes.MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return FHIRAllTypes.MEDICATIONDISPENSE;
-        if ("MedicationOrder".equals(codeString))
-          return FHIRAllTypes.MEDICATIONORDER;
+        if ("MedicationRequest".equals(codeString))
+          return FHIRAllTypes.MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return FHIRAllTypes.MEDICATIONSTATEMENT;
+        if ("MessageDefinition".equals(codeString))
+          return FHIRAllTypes.MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
           return FHIRAllTypes.MESSAGEHEADER;
-        if ("ModuleDefinition".equals(codeString))
-          return FHIRAllTypes.MODULEDEFINITION;
         if ("NamingSystem".equals(codeString))
           return FHIRAllTypes.NAMINGSYSTEM;
-        if ("NutritionOrder".equals(codeString))
-          return FHIRAllTypes.NUTRITIONORDER;
+        if ("NutritionRequest".equals(codeString))
+          return FHIRAllTypes.NUTRITIONREQUEST;
         if ("Observation".equals(codeString))
           return FHIRAllTypes.OBSERVATION;
         if ("OperationDefinition".equals(codeString))
           return FHIRAllTypes.OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return FHIRAllTypes.OPERATIONOUTCOME;
-        if ("Order".equals(codeString))
-          return FHIRAllTypes.ORDER;
-        if ("OrderResponse".equals(codeString))
-          return FHIRAllTypes.ORDERRESPONSE;
-        if ("OrderSet".equals(codeString))
-          return FHIRAllTypes.ORDERSET;
         if ("Organization".equals(codeString))
           return FHIRAllTypes.ORGANIZATION;
         if ("Parameters".equals(codeString))
@@ -3999,6 +4026,8 @@ public class Enumerations {
           return FHIRAllTypes.PAYMENTRECONCILIATION;
         if ("Person".equals(codeString))
           return FHIRAllTypes.PERSON;
+        if ("PlanDefinition".equals(codeString))
+          return FHIRAllTypes.PLANDEFINITION;
         if ("Practitioner".equals(codeString))
           return FHIRAllTypes.PRACTITIONER;
         if ("PractitionerRole".equals(codeString))
@@ -4011,8 +4040,6 @@ public class Enumerations {
           return FHIRAllTypes.PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return FHIRAllTypes.PROCESSRESPONSE;
-        if ("Protocol".equals(codeString))
-          return FHIRAllTypes.PROTOCOL;
         if ("Provenance".equals(codeString))
           return FHIRAllTypes.PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -4023,6 +4050,12 @@ public class Enumerations {
           return FHIRAllTypes.REFERRALREQUEST;
         if ("RelatedPerson".equals(codeString))
           return FHIRAllTypes.RELATEDPERSON;
+        if ("RequestGroup".equals(codeString))
+          return FHIRAllTypes.REQUESTGROUP;
+        if ("ResearchStudy".equals(codeString))
+          return FHIRAllTypes.RESEARCHSTUDY;
+        if ("ResearchSubject".equals(codeString))
+          return FHIRAllTypes.RESEARCHSUBJECT;
         if ("Resource".equals(codeString))
           return FHIRAllTypes.RESOURCE;
         if ("RiskAssessment".equals(codeString))
@@ -4033,6 +4066,8 @@ public class Enumerations {
           return FHIRAllTypes.SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return FHIRAllTypes.SEQUENCE;
+        if ("ServiceDefinition".equals(codeString))
+          return FHIRAllTypes.SERVICEDEFINITION;
         if ("Slot".equals(codeString))
           return FHIRAllTypes.SLOT;
         if ("Specimen".equals(codeString))
@@ -4051,6 +4086,8 @@ public class Enumerations {
           return FHIRAllTypes.SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return FHIRAllTypes.TASK;
+        if ("TestReport".equals(codeString))
+          return FHIRAllTypes.TESTREPORT;
         if ("TestScript".equals(codeString))
           return FHIRAllTypes.TESTSCRIPT;
         if ("ValueSet".equals(codeString))
@@ -4069,8 +4106,6 @@ public class Enumerations {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("ActionDefinition".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ACTIONDEFINITION);
         if ("Address".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ADDRESS);
         if ("Age".equals(codeString))
@@ -4085,14 +4120,20 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CODEABLECONCEPT);
         if ("Coding".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CODING);
+        if ("ContactDetail".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONTACTDETAIL);
         if ("ContactPoint".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONTACTPOINT);
+        if ("Contributor".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONTRIBUTOR);
         if ("Count".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.COUNT);
         if ("DataRequirement".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DATAREQUIREMENT);
         if ("Distance".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DISTANCE);
+        if ("DosageInstruction".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DOSAGEINSTRUCTION);
         if ("Duration".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DURATION);
         if ("Element".equals(codeString))
@@ -4107,8 +4148,6 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.IDENTIFIER);
         if ("Meta".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.META);
-        if ("ModuleMetadata".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MODULEMETADATA);
         if ("Money".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MONEY);
         if ("Narrative".equals(codeString))
@@ -4125,6 +4164,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.RATIO);
         if ("Reference".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.REFERENCE);
+        if ("RelatedArtifact".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.RELATEDARTIFACT);
         if ("SampledData".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SAMPLEDDATA);
         if ("Signature".equals(codeString))
@@ -4135,6 +4176,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.TIMING);
         if ("TriggerDefinition".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.TRIGGERDEFINITION);
+        if ("UsageContext".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.USAGECONTEXT);
         if ("base64Binary".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.BASE64BINARY);
         if ("boolean".equals(codeString))
@@ -4173,6 +4216,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.XHTML);
         if ("Account".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ACCOUNT);
+        if ("ActivityDefinition".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ACTIVITYDEFINITION);
         if ("AllergyIntolerance".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ALLERGYINTOLERANCE);
         if ("Appointment".equals(codeString))
@@ -4189,6 +4234,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.BODYSITE);
         if ("Bundle".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.BUNDLE);
+        if ("CapabilityStatement".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CAPABILITYSTATEMENT);
         if ("CarePlan".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CAREPLAN);
         if ("CareTeam".equals(codeString))
@@ -4213,18 +4260,14 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONCEPTMAP);
         if ("Condition".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONDITION);
-        if ("Conformance".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONFORMANCE);
+        if ("Consent".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONSENT);
         if ("Contract".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.CONTRACT);
         if ("Coverage".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.COVERAGE);
         if ("DataElement".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DATAELEMENT);
-        if ("DecisionSupportRule".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DECISIONSUPPORTRULE);
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DECISIONSUPPORTSERVICEMODULE);
         if ("DetectedIssue".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DETECTEDISSUE);
         if ("Device".equals(codeString))
@@ -4237,10 +4280,10 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DEVICEUSEREQUEST);
         if ("DeviceUseStatement".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DEVICEUSESTATEMENT);
-        if ("DiagnosticOrder".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DIAGNOSTICORDER);
         if ("DiagnosticReport".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DIAGNOSTICREPORT);
+        if ("DiagnosticRequest".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DIAGNOSTICREQUEST);
         if ("DocumentManifest".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.DOCUMENTMANIFEST);
         if ("DocumentReference".equals(codeString))
@@ -4253,6 +4296,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ELIGIBILITYRESPONSE);
         if ("Encounter".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ENCOUNTER);
+        if ("Endpoint".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ENDPOINT);
         if ("EnrollmentRequest".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ENROLLMENTREQUEST);
         if ("EnrollmentResponse".equals(codeString))
@@ -4275,10 +4320,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.GUIDANCERESPONSE);
         if ("HealthcareService".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.HEALTHCARESERVICE);
-        if ("ImagingExcerpt".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.IMAGINGEXCERPT);
-        if ("ImagingObjectSelection".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.IMAGINGOBJECTSELECTION);
+        if ("ImagingManifest".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.IMAGINGMANIFEST);
         if ("ImagingStudy".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.IMAGINGSTUDY);
         if ("Immunization".equals(codeString))
@@ -4307,30 +4350,24 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MEDICATIONADMINISTRATION);
         if ("MedicationDispense".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MEDICATIONDISPENSE);
-        if ("MedicationOrder".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MEDICATIONORDER);
+        if ("MedicationRequest".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MEDICATIONREQUEST);
         if ("MedicationStatement".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MEDICATIONSTATEMENT);
+        if ("MessageDefinition".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MESSAGEDEFINITION);
         if ("MessageHeader".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MESSAGEHEADER);
-        if ("ModuleDefinition".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.MODULEDEFINITION);
         if ("NamingSystem".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.NAMINGSYSTEM);
-        if ("NutritionOrder".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.NUTRITIONORDER);
+        if ("NutritionRequest".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.NUTRITIONREQUEST);
         if ("Observation".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.OBSERVATION);
         if ("OperationDefinition".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.OPERATIONDEFINITION);
         if ("OperationOutcome".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.OPERATIONOUTCOME);
-        if ("Order".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ORDER);
-        if ("OrderResponse".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ORDERRESPONSE);
-        if ("OrderSet".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ORDERSET);
         if ("Organization".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.ORGANIZATION);
         if ("Parameters".equals(codeString))
@@ -4343,6 +4380,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PAYMENTRECONCILIATION);
         if ("Person".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PERSON);
+        if ("PlanDefinition".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PLANDEFINITION);
         if ("Practitioner".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PRACTITIONER);
         if ("PractitionerRole".equals(codeString))
@@ -4355,8 +4394,6 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PROCESSREQUEST);
         if ("ProcessResponse".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PROCESSRESPONSE);
-        if ("Protocol".equals(codeString))
-          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PROTOCOL);
         if ("Provenance".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.PROVENANCE);
         if ("Questionnaire".equals(codeString))
@@ -4367,6 +4404,12 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.REFERRALREQUEST);
         if ("RelatedPerson".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.RELATEDPERSON);
+        if ("RequestGroup".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.REQUESTGROUP);
+        if ("ResearchStudy".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.RESEARCHSTUDY);
+        if ("ResearchSubject".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.RESEARCHSUBJECT);
         if ("Resource".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.RESOURCE);
         if ("RiskAssessment".equals(codeString))
@@ -4377,6 +4420,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SEARCHPARAMETER);
         if ("Sequence".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SEQUENCE);
+        if ("ServiceDefinition".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SERVICEDEFINITION);
         if ("Slot".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SLOT);
         if ("Specimen".equals(codeString))
@@ -4395,6 +4440,8 @@ public class Enumerations {
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.SUPPLYREQUEST);
         if ("Task".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.TASK);
+        if ("TestReport".equals(codeString))
+          return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.TESTREPORT);
         if ("TestScript".equals(codeString))
           return new Enumeration<FHIRAllTypes>(this, FHIRAllTypes.TESTSCRIPT);
         if ("ValueSet".equals(codeString))
@@ -4408,8 +4455,6 @@ public class Enumerations {
         throw new FHIRException("Unknown FHIRAllTypes code '"+codeString+"'");
         }
     public String toCode(FHIRAllTypes code) {
-      if (code == FHIRAllTypes.ACTIONDEFINITION)
-        return "ActionDefinition";
       if (code == FHIRAllTypes.ADDRESS)
         return "Address";
       if (code == FHIRAllTypes.AGE)
@@ -4424,14 +4469,20 @@ public class Enumerations {
         return "CodeableConcept";
       if (code == FHIRAllTypes.CODING)
         return "Coding";
+      if (code == FHIRAllTypes.CONTACTDETAIL)
+        return "ContactDetail";
       if (code == FHIRAllTypes.CONTACTPOINT)
         return "ContactPoint";
+      if (code == FHIRAllTypes.CONTRIBUTOR)
+        return "Contributor";
       if (code == FHIRAllTypes.COUNT)
         return "Count";
       if (code == FHIRAllTypes.DATAREQUIREMENT)
         return "DataRequirement";
       if (code == FHIRAllTypes.DISTANCE)
         return "Distance";
+      if (code == FHIRAllTypes.DOSAGEINSTRUCTION)
+        return "DosageInstruction";
       if (code == FHIRAllTypes.DURATION)
         return "Duration";
       if (code == FHIRAllTypes.ELEMENT)
@@ -4446,8 +4497,6 @@ public class Enumerations {
         return "Identifier";
       if (code == FHIRAllTypes.META)
         return "Meta";
-      if (code == FHIRAllTypes.MODULEMETADATA)
-        return "ModuleMetadata";
       if (code == FHIRAllTypes.MONEY)
         return "Money";
       if (code == FHIRAllTypes.NARRATIVE)
@@ -4464,6 +4513,8 @@ public class Enumerations {
         return "Ratio";
       if (code == FHIRAllTypes.REFERENCE)
         return "Reference";
+      if (code == FHIRAllTypes.RELATEDARTIFACT)
+        return "RelatedArtifact";
       if (code == FHIRAllTypes.SAMPLEDDATA)
         return "SampledData";
       if (code == FHIRAllTypes.SIGNATURE)
@@ -4474,6 +4525,8 @@ public class Enumerations {
         return "Timing";
       if (code == FHIRAllTypes.TRIGGERDEFINITION)
         return "TriggerDefinition";
+      if (code == FHIRAllTypes.USAGECONTEXT)
+        return "UsageContext";
       if (code == FHIRAllTypes.BASE64BINARY)
         return "base64Binary";
       if (code == FHIRAllTypes.BOOLEAN)
@@ -4512,6 +4565,8 @@ public class Enumerations {
         return "xhtml";
       if (code == FHIRAllTypes.ACCOUNT)
         return "Account";
+      if (code == FHIRAllTypes.ACTIVITYDEFINITION)
+        return "ActivityDefinition";
       if (code == FHIRAllTypes.ALLERGYINTOLERANCE)
         return "AllergyIntolerance";
       if (code == FHIRAllTypes.APPOINTMENT)
@@ -4528,6 +4583,8 @@ public class Enumerations {
         return "BodySite";
       if (code == FHIRAllTypes.BUNDLE)
         return "Bundle";
+      if (code == FHIRAllTypes.CAPABILITYSTATEMENT)
+        return "CapabilityStatement";
       if (code == FHIRAllTypes.CAREPLAN)
         return "CarePlan";
       if (code == FHIRAllTypes.CARETEAM)
@@ -4552,18 +4609,14 @@ public class Enumerations {
         return "ConceptMap";
       if (code == FHIRAllTypes.CONDITION)
         return "Condition";
-      if (code == FHIRAllTypes.CONFORMANCE)
-        return "Conformance";
+      if (code == FHIRAllTypes.CONSENT)
+        return "Consent";
       if (code == FHIRAllTypes.CONTRACT)
         return "Contract";
       if (code == FHIRAllTypes.COVERAGE)
         return "Coverage";
       if (code == FHIRAllTypes.DATAELEMENT)
         return "DataElement";
-      if (code == FHIRAllTypes.DECISIONSUPPORTRULE)
-        return "DecisionSupportRule";
-      if (code == FHIRAllTypes.DECISIONSUPPORTSERVICEMODULE)
-        return "DecisionSupportServiceModule";
       if (code == FHIRAllTypes.DETECTEDISSUE)
         return "DetectedIssue";
       if (code == FHIRAllTypes.DEVICE)
@@ -4576,10 +4629,10 @@ public class Enumerations {
         return "DeviceUseRequest";
       if (code == FHIRAllTypes.DEVICEUSESTATEMENT)
         return "DeviceUseStatement";
-      if (code == FHIRAllTypes.DIAGNOSTICORDER)
-        return "DiagnosticOrder";
       if (code == FHIRAllTypes.DIAGNOSTICREPORT)
         return "DiagnosticReport";
+      if (code == FHIRAllTypes.DIAGNOSTICREQUEST)
+        return "DiagnosticRequest";
       if (code == FHIRAllTypes.DOCUMENTMANIFEST)
         return "DocumentManifest";
       if (code == FHIRAllTypes.DOCUMENTREFERENCE)
@@ -4592,6 +4645,8 @@ public class Enumerations {
         return "EligibilityResponse";
       if (code == FHIRAllTypes.ENCOUNTER)
         return "Encounter";
+      if (code == FHIRAllTypes.ENDPOINT)
+        return "Endpoint";
       if (code == FHIRAllTypes.ENROLLMENTREQUEST)
         return "EnrollmentRequest";
       if (code == FHIRAllTypes.ENROLLMENTRESPONSE)
@@ -4614,10 +4669,8 @@ public class Enumerations {
         return "GuidanceResponse";
       if (code == FHIRAllTypes.HEALTHCARESERVICE)
         return "HealthcareService";
-      if (code == FHIRAllTypes.IMAGINGEXCERPT)
-        return "ImagingExcerpt";
-      if (code == FHIRAllTypes.IMAGINGOBJECTSELECTION)
-        return "ImagingObjectSelection";
+      if (code == FHIRAllTypes.IMAGINGMANIFEST)
+        return "ImagingManifest";
       if (code == FHIRAllTypes.IMAGINGSTUDY)
         return "ImagingStudy";
       if (code == FHIRAllTypes.IMMUNIZATION)
@@ -4646,30 +4699,24 @@ public class Enumerations {
         return "MedicationAdministration";
       if (code == FHIRAllTypes.MEDICATIONDISPENSE)
         return "MedicationDispense";
-      if (code == FHIRAllTypes.MEDICATIONORDER)
-        return "MedicationOrder";
+      if (code == FHIRAllTypes.MEDICATIONREQUEST)
+        return "MedicationRequest";
       if (code == FHIRAllTypes.MEDICATIONSTATEMENT)
         return "MedicationStatement";
+      if (code == FHIRAllTypes.MESSAGEDEFINITION)
+        return "MessageDefinition";
       if (code == FHIRAllTypes.MESSAGEHEADER)
         return "MessageHeader";
-      if (code == FHIRAllTypes.MODULEDEFINITION)
-        return "ModuleDefinition";
       if (code == FHIRAllTypes.NAMINGSYSTEM)
         return "NamingSystem";
-      if (code == FHIRAllTypes.NUTRITIONORDER)
-        return "NutritionOrder";
+      if (code == FHIRAllTypes.NUTRITIONREQUEST)
+        return "NutritionRequest";
       if (code == FHIRAllTypes.OBSERVATION)
         return "Observation";
       if (code == FHIRAllTypes.OPERATIONDEFINITION)
         return "OperationDefinition";
       if (code == FHIRAllTypes.OPERATIONOUTCOME)
         return "OperationOutcome";
-      if (code == FHIRAllTypes.ORDER)
-        return "Order";
-      if (code == FHIRAllTypes.ORDERRESPONSE)
-        return "OrderResponse";
-      if (code == FHIRAllTypes.ORDERSET)
-        return "OrderSet";
       if (code == FHIRAllTypes.ORGANIZATION)
         return "Organization";
       if (code == FHIRAllTypes.PARAMETERS)
@@ -4682,6 +4729,8 @@ public class Enumerations {
         return "PaymentReconciliation";
       if (code == FHIRAllTypes.PERSON)
         return "Person";
+      if (code == FHIRAllTypes.PLANDEFINITION)
+        return "PlanDefinition";
       if (code == FHIRAllTypes.PRACTITIONER)
         return "Practitioner";
       if (code == FHIRAllTypes.PRACTITIONERROLE)
@@ -4694,8 +4743,6 @@ public class Enumerations {
         return "ProcessRequest";
       if (code == FHIRAllTypes.PROCESSRESPONSE)
         return "ProcessResponse";
-      if (code == FHIRAllTypes.PROTOCOL)
-        return "Protocol";
       if (code == FHIRAllTypes.PROVENANCE)
         return "Provenance";
       if (code == FHIRAllTypes.QUESTIONNAIRE)
@@ -4706,6 +4753,12 @@ public class Enumerations {
         return "ReferralRequest";
       if (code == FHIRAllTypes.RELATEDPERSON)
         return "RelatedPerson";
+      if (code == FHIRAllTypes.REQUESTGROUP)
+        return "RequestGroup";
+      if (code == FHIRAllTypes.RESEARCHSTUDY)
+        return "ResearchStudy";
+      if (code == FHIRAllTypes.RESEARCHSUBJECT)
+        return "ResearchSubject";
       if (code == FHIRAllTypes.RESOURCE)
         return "Resource";
       if (code == FHIRAllTypes.RISKASSESSMENT)
@@ -4716,6 +4769,8 @@ public class Enumerations {
         return "SearchParameter";
       if (code == FHIRAllTypes.SEQUENCE)
         return "Sequence";
+      if (code == FHIRAllTypes.SERVICEDEFINITION)
+        return "ServiceDefinition";
       if (code == FHIRAllTypes.SLOT)
         return "Slot";
       if (code == FHIRAllTypes.SPECIMEN)
@@ -4734,6 +4789,8 @@ public class Enumerations {
         return "SupplyRequest";
       if (code == FHIRAllTypes.TASK)
         return "Task";
+      if (code == FHIRAllTypes.TESTREPORT)
+        return "TestReport";
       if (code == FHIRAllTypes.TESTSCRIPT)
         return "TestScript";
       if (code == FHIRAllTypes.VALUESET)
@@ -4753,15 +4810,11 @@ public class Enumerations {
 
     public enum FHIRDefinedType {
         /**
-         * The definition of an action to be performed. Some aspects of the definition are specified statically, and some aspects can be specified dynamically by referencing logic defined in a library.
-         */
-        ACTIONDEFINITION, 
-        /**
          * An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.
          */
         ADDRESS, 
         /**
-         * null
+         * A duration of time during which an organism (or a process) has existed.
          */
         AGE, 
         /**
@@ -4785,11 +4838,19 @@ public class Enumerations {
          */
         CODING, 
         /**
+         * Specifies contact information for a person or organization.
+         */
+        CONTACTDETAIL, 
+        /**
          * Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
          */
         CONTACTPOINT, 
         /**
-         * null
+         * A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.
+         */
+        CONTRIBUTOR, 
+        /**
+         * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
          */
         COUNT, 
         /**
@@ -4797,11 +4858,15 @@ public class Enumerations {
          */
         DATAREQUIREMENT, 
         /**
-         * null
+         * A length - a value with a unit that is a physical distance.
          */
         DISTANCE, 
         /**
-         * null
+         * Indicates how the medication is to be used by the patient.
+         */
+        DOSAGEINSTRUCTION, 
+        /**
+         * A length of time.
          */
         DURATION, 
         /**
@@ -4829,11 +4894,7 @@ public class Enumerations {
          */
         META, 
         /**
-         * The ModuleMetadata structure defines the common metadata elements used by quality improvement artifacts. This information includes descriptive and topical metadata to enable repository searches, as well as governance and evidentiary support information.
-         */
-        MODULEMETADATA, 
-        /**
-         * null
+         * An amount of economic utility in some recognised currency.
          */
         MONEY, 
         /**
@@ -4865,6 +4926,10 @@ public class Enumerations {
          */
         REFERENCE, 
         /**
+         * Related artifacts such as additional documentation, justification, or bibliographic references.
+         */
+        RELATEDARTIFACT, 
+        /**
          * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
          */
         SAMPLEDDATA, 
@@ -4884,6 +4949,10 @@ public class Enumerations {
          * A description of a triggering event.
          */
         TRIGGERDEFINITION, 
+        /**
+         * Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
+         */
+        USAGECONTEXT, 
         /**
          * A stream of bytes
          */
@@ -4957,9 +5026,13 @@ public class Enumerations {
          */
         XHTML, 
         /**
-         * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
+         * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.
          */
         ACCOUNT, 
+        /**
+         * This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.
+         */
+        ACTIVITYDEFINITION, 
         /**
          * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
          */
@@ -4992,6 +5065,10 @@ public class Enumerations {
          * A container for a collection of resources.
          */
         BUNDLE, 
+        /**
+         * A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         */
+        CAPABILITYSTATEMENT, 
         /**
          * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
          */
@@ -5041,9 +5118,9 @@ public class Enumerations {
          */
         CONDITION, 
         /**
-         * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
          */
-        CONFORMANCE, 
+        CONSENT, 
         /**
          * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
          */
@@ -5056,14 +5133,6 @@ public class Enumerations {
          * The formal description of a single piece of information that can be gathered and reported.
          */
         DATAELEMENT, 
-        /**
-         * This resource defines a decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of a actions that should be taken whenever some condition is met in response to a particular event or events.
-         */
-        DECISIONSUPPORTRULE, 
-        /**
-         * The DecisionSupportServiceModule describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
-         */
-        DECISIONSUPPORTSERVICEMODULE, 
         /**
          * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
          */
@@ -5089,13 +5158,13 @@ public class Enumerations {
          */
         DEVICEUSESTATEMENT, 
         /**
-         * A record of a request for a diagnostic investigation service to be performed.
-         */
-        DIAGNOSTICORDER, 
-        /**
          * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.
          */
         DIAGNOSTICREPORT, 
+        /**
+         * A record of a request for a diagnostic investigation service to be performed.
+         */
+        DIAGNOSTICREQUEST, 
         /**
          * A manifest that defines a set of documents.
          */
@@ -5105,11 +5174,11 @@ public class Enumerations {
          */
         DOCUMENTREFERENCE, 
         /**
-         * --- Abstract Type! ---A resource that includes narrative, extensions, and contained resources.
+         * A resource that includes narrative, extensions, and contained resources.
          */
         DOMAINRESOURCE, 
         /**
-         * This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.
+         * This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.
          */
         ELIGIBILITYREQUEST, 
         /**
@@ -5120,6 +5189,10 @@ public class Enumerations {
          * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
          */
         ENCOUNTER, 
+        /**
+         * The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.
+         */
+        ENDPOINT, 
         /**
          * This resource provides the insurance enrollment details to the insurer regarding a specified coverage.
          */
@@ -5165,13 +5238,9 @@ public class Enumerations {
          */
         HEALTHCARESERVICE, 
         /**
-         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingExcerpt resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
+         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances may have been selected for a purpose, such as  conference, or consult.  Reflecting a range of sharing purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); both a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
          */
-        IMAGINGEXCERPT, 
-        /**
-         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
-         */
-        IMAGINGOBJECTSELECTION, 
+        IMAGINGMANIFEST, 
         /**
          * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
          */
@@ -5189,7 +5258,7 @@ public class Enumerations {
          */
         IMPLEMENTATIONGUIDE, 
         /**
-         * The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.
+         * The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose exist knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.
          */
         LIBRARY, 
         /**
@@ -5229,21 +5298,21 @@ public class Enumerations {
          */
         MEDICATIONDISPENSE, 
         /**
-         * An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationOrder" rather than "MedicationPrescription" to generalize the use across inpatient and outpatient settings as well as for care plans, etc.
+         * An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationRequest" rather than "MedicationPrescription" or "MedicationOrder" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.
          */
-        MEDICATIONORDER, 
+        MEDICATIONREQUEST, 
         /**
          * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
+         * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
+         */
+        MESSAGEDEFINITION, 
+        /**
          * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
          */
         MESSAGEHEADER, 
-        /**
-         * The ModuleDefinition resource defines the data requirements for a quality artifact.
-         */
-        MODULEDEFINITION, 
         /**
          * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
          */
@@ -5251,7 +5320,7 @@ public class Enumerations {
         /**
          * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
          */
-        NUTRITIONORDER, 
+        NUTRITIONREQUEST, 
         /**
          * Measurements and simple assertions made about a patient, device or other subject.
          */
@@ -5264,18 +5333,6 @@ public class Enumerations {
          * A collection of error, warning or information messages that result from a system action.
          */
         OPERATIONOUTCOME, 
-        /**
-         * A request to perform an action.
-         */
-        ORDER, 
-        /**
-         * A response to an order.
-         */
-        ORDERRESPONSE, 
-        /**
-         * This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.
-         */
-        ORDERSET, 
         /**
          * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
          */
@@ -5301,6 +5358,10 @@ public class Enumerations {
          */
         PERSON, 
         /**
+         * This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.
+         */
+        PLANDEFINITION, 
+        /**
          * A person who is directly or indirectly involved in the provisioning of healthcare.
          */
         PRACTITIONER, 
@@ -5325,10 +5386,6 @@ public class Enumerations {
          */
         PROCESSRESPONSE, 
         /**
-         * A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.
-         */
-        PROTOCOL, 
-        /**
          * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
          */
         PROVENANCE, 
@@ -5349,7 +5406,19 @@ public class Enumerations {
          */
         RELATEDPERSON, 
         /**
-         * --- Abstract Type! ---This is the base resource type for everything.
+         * A group of related requests that can be used to capture intended activities that have inter-dependencies such as "give this medication after that one".
+         */
+        REQUESTGROUP, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSTUDY, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSUBJECT, 
+        /**
+         * This is the base resource type for everything.
          */
         RESOURCE, 
         /**
@@ -5365,9 +5434,13 @@ public class Enumerations {
          */
         SEARCHPARAMETER, 
         /**
-         * Variation and Sequence data.
+         * Raw data describing a biological sequence.
          */
         SEQUENCE, 
+        /**
+         * The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
+         */
+        SERVICEDEFINITION, 
         /**
          * A slot of time on a schedule that may be available for booking appointments.
          */
@@ -5405,6 +5478,10 @@ public class Enumerations {
          */
         TASK, 
         /**
+         * TestReport is a resource that includes summary information on the results of executing a TestScript.
+         */
+        TESTREPORT, 
+        /**
          * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
          */
         TESTSCRIPT, 
@@ -5423,8 +5500,6 @@ public class Enumerations {
         public static FHIRDefinedType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ActionDefinition".equals(codeString))
-          return ACTIONDEFINITION;
         if ("Address".equals(codeString))
           return ADDRESS;
         if ("Age".equals(codeString))
@@ -5439,14 +5514,20 @@ public class Enumerations {
           return CODEABLECONCEPT;
         if ("Coding".equals(codeString))
           return CODING;
+        if ("ContactDetail".equals(codeString))
+          return CONTACTDETAIL;
         if ("ContactPoint".equals(codeString))
           return CONTACTPOINT;
+        if ("Contributor".equals(codeString))
+          return CONTRIBUTOR;
         if ("Count".equals(codeString))
           return COUNT;
         if ("DataRequirement".equals(codeString))
           return DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return DISTANCE;
+        if ("DosageInstruction".equals(codeString))
+          return DOSAGEINSTRUCTION;
         if ("Duration".equals(codeString))
           return DURATION;
         if ("Element".equals(codeString))
@@ -5461,8 +5542,6 @@ public class Enumerations {
           return IDENTIFIER;
         if ("Meta".equals(codeString))
           return META;
-        if ("ModuleMetadata".equals(codeString))
-          return MODULEMETADATA;
         if ("Money".equals(codeString))
           return MONEY;
         if ("Narrative".equals(codeString))
@@ -5479,6 +5558,8 @@ public class Enumerations {
           return RATIO;
         if ("Reference".equals(codeString))
           return REFERENCE;
+        if ("RelatedArtifact".equals(codeString))
+          return RELATEDARTIFACT;
         if ("SampledData".equals(codeString))
           return SAMPLEDDATA;
         if ("Signature".equals(codeString))
@@ -5489,6 +5570,8 @@ public class Enumerations {
           return TIMING;
         if ("TriggerDefinition".equals(codeString))
           return TRIGGERDEFINITION;
+        if ("UsageContext".equals(codeString))
+          return USAGECONTEXT;
         if ("base64Binary".equals(codeString))
           return BASE64BINARY;
         if ("boolean".equals(codeString))
@@ -5527,6 +5610,8 @@ public class Enumerations {
           return XHTML;
         if ("Account".equals(codeString))
           return ACCOUNT;
+        if ("ActivityDefinition".equals(codeString))
+          return ACTIVITYDEFINITION;
         if ("AllergyIntolerance".equals(codeString))
           return ALLERGYINTOLERANCE;
         if ("Appointment".equals(codeString))
@@ -5543,6 +5628,8 @@ public class Enumerations {
           return BODYSITE;
         if ("Bundle".equals(codeString))
           return BUNDLE;
+        if ("CapabilityStatement".equals(codeString))
+          return CAPABILITYSTATEMENT;
         if ("CarePlan".equals(codeString))
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
@@ -5567,18 +5654,14 @@ public class Enumerations {
           return CONCEPTMAP;
         if ("Condition".equals(codeString))
           return CONDITION;
-        if ("Conformance".equals(codeString))
-          return CONFORMANCE;
+        if ("Consent".equals(codeString))
+          return CONSENT;
         if ("Contract".equals(codeString))
           return CONTRACT;
         if ("Coverage".equals(codeString))
           return COVERAGE;
         if ("DataElement".equals(codeString))
           return DATAELEMENT;
-        if ("DecisionSupportRule".equals(codeString))
-          return DECISIONSUPPORTRULE;
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return DECISIONSUPPORTSERVICEMODULE;
         if ("DetectedIssue".equals(codeString))
           return DETECTEDISSUE;
         if ("Device".equals(codeString))
@@ -5591,10 +5674,10 @@ public class Enumerations {
           return DEVICEUSEREQUEST;
         if ("DeviceUseStatement".equals(codeString))
           return DEVICEUSESTATEMENT;
-        if ("DiagnosticOrder".equals(codeString))
-          return DIAGNOSTICORDER;
         if ("DiagnosticReport".equals(codeString))
           return DIAGNOSTICREPORT;
+        if ("DiagnosticRequest".equals(codeString))
+          return DIAGNOSTICREQUEST;
         if ("DocumentManifest".equals(codeString))
           return DOCUMENTMANIFEST;
         if ("DocumentReference".equals(codeString))
@@ -5607,6 +5690,8 @@ public class Enumerations {
           return ELIGIBILITYRESPONSE;
         if ("Encounter".equals(codeString))
           return ENCOUNTER;
+        if ("Endpoint".equals(codeString))
+          return ENDPOINT;
         if ("EnrollmentRequest".equals(codeString))
           return ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
@@ -5629,10 +5714,8 @@ public class Enumerations {
           return GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return HEALTHCARESERVICE;
-        if ("ImagingExcerpt".equals(codeString))
-          return IMAGINGEXCERPT;
-        if ("ImagingObjectSelection".equals(codeString))
-          return IMAGINGOBJECTSELECTION;
+        if ("ImagingManifest".equals(codeString))
+          return IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
@@ -5661,30 +5744,24 @@ public class Enumerations {
           return MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return MEDICATIONDISPENSE;
-        if ("MedicationOrder".equals(codeString))
-          return MEDICATIONORDER;
+        if ("MedicationRequest".equals(codeString))
+          return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return MEDICATIONSTATEMENT;
+        if ("MessageDefinition".equals(codeString))
+          return MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
           return MESSAGEHEADER;
-        if ("ModuleDefinition".equals(codeString))
-          return MODULEDEFINITION;
         if ("NamingSystem".equals(codeString))
           return NAMINGSYSTEM;
-        if ("NutritionOrder".equals(codeString))
-          return NUTRITIONORDER;
+        if ("NutritionRequest".equals(codeString))
+          return NUTRITIONREQUEST;
         if ("Observation".equals(codeString))
           return OBSERVATION;
         if ("OperationDefinition".equals(codeString))
           return OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return OPERATIONOUTCOME;
-        if ("Order".equals(codeString))
-          return ORDER;
-        if ("OrderResponse".equals(codeString))
-          return ORDERRESPONSE;
-        if ("OrderSet".equals(codeString))
-          return ORDERSET;
         if ("Organization".equals(codeString))
           return ORGANIZATION;
         if ("Parameters".equals(codeString))
@@ -5697,6 +5774,8 @@ public class Enumerations {
           return PAYMENTRECONCILIATION;
         if ("Person".equals(codeString))
           return PERSON;
+        if ("PlanDefinition".equals(codeString))
+          return PLANDEFINITION;
         if ("Practitioner".equals(codeString))
           return PRACTITIONER;
         if ("PractitionerRole".equals(codeString))
@@ -5709,8 +5788,6 @@ public class Enumerations {
           return PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return PROCESSRESPONSE;
-        if ("Protocol".equals(codeString))
-          return PROTOCOL;
         if ("Provenance".equals(codeString))
           return PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -5721,6 +5798,12 @@ public class Enumerations {
           return REFERRALREQUEST;
         if ("RelatedPerson".equals(codeString))
           return RELATEDPERSON;
+        if ("RequestGroup".equals(codeString))
+          return REQUESTGROUP;
+        if ("ResearchStudy".equals(codeString))
+          return RESEARCHSTUDY;
+        if ("ResearchSubject".equals(codeString))
+          return RESEARCHSUBJECT;
         if ("Resource".equals(codeString))
           return RESOURCE;
         if ("RiskAssessment".equals(codeString))
@@ -5731,6 +5814,8 @@ public class Enumerations {
           return SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return SEQUENCE;
+        if ("ServiceDefinition".equals(codeString))
+          return SERVICEDEFINITION;
         if ("Slot".equals(codeString))
           return SLOT;
         if ("Specimen".equals(codeString))
@@ -5749,6 +5834,8 @@ public class Enumerations {
           return SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return TASK;
+        if ("TestReport".equals(codeString))
+          return TESTREPORT;
         if ("TestScript".equals(codeString))
           return TESTSCRIPT;
         if ("ValueSet".equals(codeString))
@@ -5759,7 +5846,6 @@ public class Enumerations {
         }
         public String toCode() {
           switch (this) {
-            case ACTIONDEFINITION: return "ActionDefinition";
             case ADDRESS: return "Address";
             case AGE: return "Age";
             case ANNOTATION: return "Annotation";
@@ -5767,10 +5853,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "BackboneElement";
             case CODEABLECONCEPT: return "CodeableConcept";
             case CODING: return "Coding";
+            case CONTACTDETAIL: return "ContactDetail";
             case CONTACTPOINT: return "ContactPoint";
+            case CONTRIBUTOR: return "Contributor";
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
+            case DOSAGEINSTRUCTION: return "DosageInstruction";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -5778,7 +5867,6 @@ public class Enumerations {
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case META: return "Meta";
-            case MODULEMETADATA: return "ModuleMetadata";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
@@ -5787,11 +5875,13 @@ public class Enumerations {
             case RANGE: return "Range";
             case RATIO: return "Ratio";
             case REFERENCE: return "Reference";
+            case RELATEDARTIFACT: return "RelatedArtifact";
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
+            case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
             case CODE: return "code";
@@ -5811,6 +5901,7 @@ public class Enumerations {
             case UUID: return "uuid";
             case XHTML: return "xhtml";
             case ACCOUNT: return "Account";
+            case ACTIVITYDEFINITION: return "ActivityDefinition";
             case ALLERGYINTOLERANCE: return "AllergyIntolerance";
             case APPOINTMENT: return "Appointment";
             case APPOINTMENTRESPONSE: return "AppointmentResponse";
@@ -5819,6 +5910,7 @@ public class Enumerations {
             case BINARY: return "Binary";
             case BODYSITE: return "BodySite";
             case BUNDLE: return "Bundle";
+            case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
             case CLAIM: return "Claim";
@@ -5831,26 +5923,25 @@ public class Enumerations {
             case COMPOSITION: return "Composition";
             case CONCEPTMAP: return "ConceptMap";
             case CONDITION: return "Condition";
-            case CONFORMANCE: return "Conformance";
+            case CONSENT: return "Consent";
             case CONTRACT: return "Contract";
             case COVERAGE: return "Coverage";
             case DATAELEMENT: return "DataElement";
-            case DECISIONSUPPORTRULE: return "DecisionSupportRule";
-            case DECISIONSUPPORTSERVICEMODULE: return "DecisionSupportServiceModule";
             case DETECTEDISSUE: return "DetectedIssue";
             case DEVICE: return "Device";
             case DEVICECOMPONENT: return "DeviceComponent";
             case DEVICEMETRIC: return "DeviceMetric";
             case DEVICEUSEREQUEST: return "DeviceUseRequest";
             case DEVICEUSESTATEMENT: return "DeviceUseStatement";
-            case DIAGNOSTICORDER: return "DiagnosticOrder";
             case DIAGNOSTICREPORT: return "DiagnosticReport";
+            case DIAGNOSTICREQUEST: return "DiagnosticRequest";
             case DOCUMENTMANIFEST: return "DocumentManifest";
             case DOCUMENTREFERENCE: return "DocumentReference";
             case DOMAINRESOURCE: return "DomainResource";
             case ELIGIBILITYREQUEST: return "EligibilityRequest";
             case ELIGIBILITYRESPONSE: return "EligibilityResponse";
             case ENCOUNTER: return "Encounter";
+            case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
@@ -5862,8 +5953,7 @@ public class Enumerations {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGEXCERPT: return "ImagingExcerpt";
-            case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
+            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
@@ -5878,41 +5968,42 @@ public class Enumerations {
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
-            case MEDICATIONORDER: return "MedicationOrder";
+            case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
-            case MODULEDEFINITION: return "ModuleDefinition";
             case NAMINGSYSTEM: return "NamingSystem";
-            case NUTRITIONORDER: return "NutritionOrder";
+            case NUTRITIONREQUEST: return "NutritionRequest";
             case OBSERVATION: return "Observation";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
-            case ORDER: return "Order";
-            case ORDERRESPONSE: return "OrderResponse";
-            case ORDERSET: return "OrderSet";
             case ORGANIZATION: return "Organization";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
             case PAYMENTRECONCILIATION: return "PaymentReconciliation";
             case PERSON: return "Person";
+            case PLANDEFINITION: return "PlanDefinition";
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
-            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
+            case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
+            case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -5922,6 +6013,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
             case VALUESET: return "ValueSet";
             case VISIONPRESCRIPTION: return "VisionPrescription";
@@ -5930,7 +6022,6 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case ACTIONDEFINITION: return "http://hl7.org/fhir/data-types";
             case ADDRESS: return "http://hl7.org/fhir/data-types";
             case AGE: return "http://hl7.org/fhir/data-types";
             case ANNOTATION: return "http://hl7.org/fhir/data-types";
@@ -5938,10 +6029,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "http://hl7.org/fhir/data-types";
             case CODEABLECONCEPT: return "http://hl7.org/fhir/data-types";
             case CODING: return "http://hl7.org/fhir/data-types";
+            case CONTACTDETAIL: return "http://hl7.org/fhir/data-types";
             case CONTACTPOINT: return "http://hl7.org/fhir/data-types";
+            case CONTRIBUTOR: return "http://hl7.org/fhir/data-types";
             case COUNT: return "http://hl7.org/fhir/data-types";
             case DATAREQUIREMENT: return "http://hl7.org/fhir/data-types";
             case DISTANCE: return "http://hl7.org/fhir/data-types";
+            case DOSAGEINSTRUCTION: return "http://hl7.org/fhir/data-types";
             case DURATION: return "http://hl7.org/fhir/data-types";
             case ELEMENT: return "http://hl7.org/fhir/data-types";
             case ELEMENTDEFINITION: return "http://hl7.org/fhir/data-types";
@@ -5949,7 +6043,6 @@ public class Enumerations {
             case HUMANNAME: return "http://hl7.org/fhir/data-types";
             case IDENTIFIER: return "http://hl7.org/fhir/data-types";
             case META: return "http://hl7.org/fhir/data-types";
-            case MODULEMETADATA: return "http://hl7.org/fhir/data-types";
             case MONEY: return "http://hl7.org/fhir/data-types";
             case NARRATIVE: return "http://hl7.org/fhir/data-types";
             case PARAMETERDEFINITION: return "http://hl7.org/fhir/data-types";
@@ -5958,11 +6051,13 @@ public class Enumerations {
             case RANGE: return "http://hl7.org/fhir/data-types";
             case RATIO: return "http://hl7.org/fhir/data-types";
             case REFERENCE: return "http://hl7.org/fhir/data-types";
+            case RELATEDARTIFACT: return "http://hl7.org/fhir/data-types";
             case SAMPLEDDATA: return "http://hl7.org/fhir/data-types";
             case SIGNATURE: return "http://hl7.org/fhir/data-types";
             case SIMPLEQUANTITY: return "http://hl7.org/fhir/data-types";
             case TIMING: return "http://hl7.org/fhir/data-types";
             case TRIGGERDEFINITION: return "http://hl7.org/fhir/data-types";
+            case USAGECONTEXT: return "http://hl7.org/fhir/data-types";
             case BASE64BINARY: return "http://hl7.org/fhir/data-types";
             case BOOLEAN: return "http://hl7.org/fhir/data-types";
             case CODE: return "http://hl7.org/fhir/data-types";
@@ -5982,6 +6077,7 @@ public class Enumerations {
             case UUID: return "http://hl7.org/fhir/data-types";
             case XHTML: return "http://hl7.org/fhir/data-types";
             case ACCOUNT: return "http://hl7.org/fhir/resource-types";
+            case ACTIVITYDEFINITION: return "http://hl7.org/fhir/resource-types";
             case ALLERGYINTOLERANCE: return "http://hl7.org/fhir/resource-types";
             case APPOINTMENT: return "http://hl7.org/fhir/resource-types";
             case APPOINTMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -5990,6 +6086,7 @@ public class Enumerations {
             case BINARY: return "http://hl7.org/fhir/resource-types";
             case BODYSITE: return "http://hl7.org/fhir/resource-types";
             case BUNDLE: return "http://hl7.org/fhir/resource-types";
+            case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
@@ -6002,26 +6099,25 @@ public class Enumerations {
             case COMPOSITION: return "http://hl7.org/fhir/resource-types";
             case CONCEPTMAP: return "http://hl7.org/fhir/resource-types";
             case CONDITION: return "http://hl7.org/fhir/resource-types";
-            case CONFORMANCE: return "http://hl7.org/fhir/resource-types";
+            case CONSENT: return "http://hl7.org/fhir/resource-types";
             case CONTRACT: return "http://hl7.org/fhir/resource-types";
             case COVERAGE: return "http://hl7.org/fhir/resource-types";
             case DATAELEMENT: return "http://hl7.org/fhir/resource-types";
-            case DECISIONSUPPORTRULE: return "http://hl7.org/fhir/resource-types";
-            case DECISIONSUPPORTSERVICEMODULE: return "http://hl7.org/fhir/resource-types";
             case DETECTEDISSUE: return "http://hl7.org/fhir/resource-types";
             case DEVICE: return "http://hl7.org/fhir/resource-types";
             case DEVICECOMPONENT: return "http://hl7.org/fhir/resource-types";
             case DEVICEMETRIC: return "http://hl7.org/fhir/resource-types";
             case DEVICEUSEREQUEST: return "http://hl7.org/fhir/resource-types";
             case DEVICEUSESTATEMENT: return "http://hl7.org/fhir/resource-types";
-            case DIAGNOSTICORDER: return "http://hl7.org/fhir/resource-types";
             case DIAGNOSTICREPORT: return "http://hl7.org/fhir/resource-types";
+            case DIAGNOSTICREQUEST: return "http://hl7.org/fhir/resource-types";
             case DOCUMENTMANIFEST: return "http://hl7.org/fhir/resource-types";
             case DOCUMENTREFERENCE: return "http://hl7.org/fhir/resource-types";
             case DOMAINRESOURCE: return "http://hl7.org/fhir/resource-types";
             case ELIGIBILITYREQUEST: return "http://hl7.org/fhir/resource-types";
             case ELIGIBILITYRESPONSE: return "http://hl7.org/fhir/resource-types";
             case ENCOUNTER: return "http://hl7.org/fhir/resource-types";
+            case ENDPOINT: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTREQUEST: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
@@ -6033,8 +6129,7 @@ public class Enumerations {
             case GROUP: return "http://hl7.org/fhir/resource-types";
             case GUIDANCERESPONSE: return "http://hl7.org/fhir/resource-types";
             case HEALTHCARESERVICE: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGEXCERPT: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGOBJECTSELECTION: return "http://hl7.org/fhir/resource-types";
+            case IMAGINGMANIFEST: return "http://hl7.org/fhir/resource-types";
             case IMAGINGSTUDY: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATION: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
@@ -6049,41 +6144,42 @@ public class Enumerations {
             case MEDICATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONADMINISTRATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONDISPENSE: return "http://hl7.org/fhir/resource-types";
-            case MEDICATIONORDER: return "http://hl7.org/fhir/resource-types";
+            case MEDICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONSTATEMENT: return "http://hl7.org/fhir/resource-types";
+            case MESSAGEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case MESSAGEHEADER: return "http://hl7.org/fhir/resource-types";
-            case MODULEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case NAMINGSYSTEM: return "http://hl7.org/fhir/resource-types";
-            case NUTRITIONORDER: return "http://hl7.org/fhir/resource-types";
+            case NUTRITIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case OBSERVATION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONDEFINITION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONOUTCOME: return "http://hl7.org/fhir/resource-types";
-            case ORDER: return "http://hl7.org/fhir/resource-types";
-            case ORDERRESPONSE: return "http://hl7.org/fhir/resource-types";
-            case ORDERSET: return "http://hl7.org/fhir/resource-types";
             case ORGANIZATION: return "http://hl7.org/fhir/resource-types";
             case PARAMETERS: return "http://hl7.org/fhir/resource-types";
             case PATIENT: return "http://hl7.org/fhir/resource-types";
             case PAYMENTNOTICE: return "http://hl7.org/fhir/resource-types";
             case PAYMENTRECONCILIATION: return "http://hl7.org/fhir/resource-types";
             case PERSON: return "http://hl7.org/fhir/resource-types";
+            case PLANDEFINITION: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONER: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONERROLE: return "http://hl7.org/fhir/resource-types";
             case PROCEDURE: return "http://hl7.org/fhir/resource-types";
             case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSRESPONSE: return "http://hl7.org/fhir/resource-types";
-            case PROTOCOL: return "http://hl7.org/fhir/resource-types";
             case PROVENANCE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRERESPONSE: return "http://hl7.org/fhir/resource-types";
             case REFERRALREQUEST: return "http://hl7.org/fhir/resource-types";
             case RELATEDPERSON: return "http://hl7.org/fhir/resource-types";
+            case REQUESTGROUP: return "http://hl7.org/fhir/resource-types";
+            case RESEARCHSTUDY: return "http://hl7.org/fhir/resource-types";
+            case RESEARCHSUBJECT: return "http://hl7.org/fhir/resource-types";
             case RESOURCE: return "http://hl7.org/fhir/resource-types";
             case RISKASSESSMENT: return "http://hl7.org/fhir/resource-types";
             case SCHEDULE: return "http://hl7.org/fhir/resource-types";
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
             case SEQUENCE: return "http://hl7.org/fhir/resource-types";
+            case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
@@ -6093,6 +6189,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "http://hl7.org/fhir/resource-types";
             case SUPPLYREQUEST: return "http://hl7.org/fhir/resource-types";
             case TASK: return "http://hl7.org/fhir/resource-types";
+            case TESTREPORT: return "http://hl7.org/fhir/resource-types";
             case TESTSCRIPT: return "http://hl7.org/fhir/resource-types";
             case VALUESET: return "http://hl7.org/fhir/resource-types";
             case VISIONPRESCRIPTION: return "http://hl7.org/fhir/resource-types";
@@ -6101,27 +6198,28 @@ public class Enumerations {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIONDEFINITION: return "The definition of an action to be performed. Some aspects of the definition are specified statically, and some aspects can be specified dynamically by referencing logic defined in a library.";
             case ADDRESS: return "An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.";
-            case AGE: return "";
+            case AGE: return "A duration of time during which an organism (or a process) has existed.";
             case ANNOTATION: return "A  text note which also  contains information about who made the statement and when.";
             case ATTACHMENT: return "For referring to data content defined in other formats.";
             case BACKBONEELEMENT: return "Base definition for all elements that are defined inside a resource - but not those in a data type.";
             case CODEABLECONCEPT: return "A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.";
             case CODING: return "A reference to a code defined by a terminology system.";
+            case CONTACTDETAIL: return "Specifies contact information for a person or organization.";
             case CONTACTPOINT: return "Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.";
-            case COUNT: return "";
+            case CONTRIBUTOR: return "A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.";
+            case COUNT: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
             case DATAREQUIREMENT: return "Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.";
-            case DISTANCE: return "";
-            case DURATION: return "";
+            case DISTANCE: return "A length - a value with a unit that is a physical distance.";
+            case DOSAGEINSTRUCTION: return "Indicates how the medication is to be used by the patient.";
+            case DURATION: return "A length of time.";
             case ELEMENT: return "Base definition for all elements in a resource.";
             case ELEMENTDEFINITION: return "Captures constraints on each element within the resource, profile, or extension.";
             case EXTENSION: return "Optional Extensions Element - found in all resources.";
             case HUMANNAME: return "A human's name with the ability to identify parts and usage.";
             case IDENTIFIER: return "A technical identifier - identifies some entity uniquely and unambiguously.";
             case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.";
-            case MODULEMETADATA: return "The ModuleMetadata structure defines the common metadata elements used by quality improvement artifacts. This information includes descriptive and topical metadata to enable repository searches, as well as governance and evidentiary support information.";
-            case MONEY: return "";
+            case MONEY: return "An amount of economic utility in some recognised currency.";
             case NARRATIVE: return "A human-readable formatted text, including images.";
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
@@ -6129,11 +6227,13 @@ public class Enumerations {
             case RANGE: return "A set of ordered Quantities defined by a low and high limit.";
             case RATIO: return "A relationship of two Quantity values - expressed as a numerator and a denominator.";
             case REFERENCE: return "A reference from one resource to another.";
+            case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
             case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.";
             case TRIGGERDEFINITION: return "A description of a triggering event.";
+            case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
@@ -6152,7 +6252,8 @@ public class Enumerations {
             case URI: return "String of characters used to identify a name or a resource";
             case UUID: return "A UUID, represented as a URI";
             case XHTML: return "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)";
-            case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.";
+            case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.";
+            case ACTIVITYDEFINITION: return "This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.";
             case ALLERGYINTOLERANCE: return "Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.";
             case APPOINTMENT: return "A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).";
             case APPOINTMENTRESPONSE: return "A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.";
@@ -6161,6 +6262,7 @@ public class Enumerations {
             case BINARY: return "A binary resource can contain any content, whether text, image, pdf, zip archive, etc.";
             case BODYSITE: return "Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.";
             case BUNDLE: return "A container for a collection of resources.";
+            case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
@@ -6173,26 +6275,25 @@ public class Enumerations {
             case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a diagnosis during an encounter; populating a problem list or a summary statement, such as a discharge summary.";
-            case CONFORMANCE: return "A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
+            case CONSENT: return "A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
             case CONTRACT: return "A formal agreement between parties regarding the conduct of business, exchange of information or other matters.";
             case COVERAGE: return "Financial instrument which may be used to pay for or reimburse health care products and services.";
             case DATAELEMENT: return "The formal description of a single piece of information that can be gathered and reported.";
-            case DECISIONSUPPORTRULE: return "This resource defines a decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of a actions that should be taken whenever some condition is met in response to a particular event or events.";
-            case DECISIONSUPPORTSERVICEMODULE: return "The DecisionSupportServiceModule describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case DETECTEDISSUE: return "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.";
             case DEVICE: return "This resource identifies an instance or a type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.";
             case DEVICECOMPONENT: return "Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.";
             case DEVICEMETRIC: return "Describes a measurement, calculation or setting capability of a medical device.";
             case DEVICEUSEREQUEST: return "Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.";
             case DEVICEUSESTATEMENT: return "A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.";
-            case DIAGNOSTICORDER: return "A record of a request for a diagnostic investigation service to be performed.";
             case DIAGNOSTICREPORT: return "The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.";
+            case DIAGNOSTICREQUEST: return "A record of a request for a diagnostic investigation service to be performed.";
             case DOCUMENTMANIFEST: return "A manifest that defines a set of documents.";
             case DOCUMENTREFERENCE: return "A reference to a document .";
-            case DOMAINRESOURCE: return "--- Abstract Type! ---A resource that includes narrative, extensions, and contained resources.";
-            case ELIGIBILITYREQUEST: return "This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.";
+            case DOMAINRESOURCE: return "A resource that includes narrative, extensions, and contained resources.";
+            case ELIGIBILITYREQUEST: return "This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.";
             case ELIGIBILITYRESPONSE: return "This resource provides eligibility and plan details from the processing of an Eligibility resource.";
             case ENCOUNTER: return "An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.";
+            case ENDPOINT: return "The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.";
             case ENROLLMENTREQUEST: return "This resource provides the insurance enrollment details to the insurer regarding a specified coverage.";
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
@@ -6204,13 +6305,12 @@ public class Enumerations {
             case GROUP: return "Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.";
             case GUIDANCERESPONSE: return "A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.";
             case HEALTHCARESERVICE: return "The details of a healthcare service available at a location.";
-            case IMAGINGEXCERPT: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingExcerpt resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
-            case IMAGINGOBJECTSELECTION: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
+            case IMAGINGMANIFEST: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances may have been selected for a purpose, such as  conference, or consult.  Reflecting a range of sharing purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); both a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
             case IMAGINGSTUDY: return "Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.";
             case IMMUNIZATION: return "Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.";
             case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts.";
-            case LIBRARY: return "The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.";
+            case LIBRARY: return "The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose exist knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.";
             case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
             case LOCATION: return "Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.";
@@ -6220,41 +6320,42 @@ public class Enumerations {
             case MEDICATION: return "This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.";
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
-            case MEDICATIONORDER: return "An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationOrder\" rather than \"MedicationPrescription\" to generalize the use across inpatient and outpatient settings as well as for care plans, etc.";
+            case MEDICATIONREQUEST: return "An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
-            case MODULEDEFINITION: return "The ModuleDefinition resource defines the data requirements for a quality artifact.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
-            case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
+            case NUTRITIONREQUEST: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
-            case ORDER: return "A request to perform an action.";
-            case ORDERRESPONSE: return "A response to an order.";
-            case ORDERSET: return "This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
             case PARAMETERS: return "This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.";
             case PATIENT: return "Demographics and other administrative information about an individual or animal receiving care or other health-related services.";
             case PAYMENTNOTICE: return "This resource provides the status of the payment for goods and services rendered, and the request and response resource references.";
             case PAYMENTRECONCILIATION: return "This resource provides payment details and claim references supporting a bulk payment.";
             case PERSON: return "Demographics and administrative information about a person independent of a specific health-related context.";
+            case PLANDEFINITION: return "This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.";
             case PRACTITIONER: return "A person who is directly or indirectly involved in the provisioning of healthcare.";
             case PRACTITIONERROLE: return "A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.";
             case PROCEDURE: return "An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.";
             case PROCEDUREREQUEST: return "A request for a procedure to be performed. May be a proposal or an order.";
             case PROCESSREQUEST: return "This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.";
             case PROCESSRESPONSE: return "This resource provides processing status, errors and notes from the processing of a resource.";
-            case PROTOCOL: return "A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.";
             case PROVENANCE: return "Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.";
             case QUESTIONNAIRE: return "A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case QUESTIONNAIRERESPONSE: return "A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case REFERRALREQUEST: return "Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.";
             case RELATEDPERSON: return "Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.";
-            case RESOURCE: return "--- Abstract Type! ---This is the base resource type for everything.";
+            case REQUESTGROUP: return "A group of related requests that can be used to capture intended activities that have inter-dependencies such as \"give this medication after that one\".";
+            case RESEARCHSTUDY: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
+            case RESEARCHSUBJECT: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
+            case RESOURCE: return "This is the base resource type for everything.";
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slot(s) of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
-            case SEQUENCE: return "Variation and Sequence data.";
+            case SEQUENCE: return "Raw data describing a biological sequence.";
+            case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.";
@@ -6264,6 +6365,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "Record of delivery of what is supplied.";
             case SUPPLYREQUEST: return "A record of a request for a medication, substance or device used in the healthcare setting.";
             case TASK: return "A task to be performed.";
+            case TESTREPORT: return "TestReport is a resource that includes summary information on the results of executing a TestScript.";
             case TESTSCRIPT: return "TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.";
             case VALUESET: return "A value set specifies a set of codes drawn from one or more code systems.";
             case VISIONPRESCRIPTION: return "An authorization for the supply of glasses and/or contact lenses to a patient.";
@@ -6272,7 +6374,6 @@ public class Enumerations {
         }
         public String getDisplay() {
           switch (this) {
-            case ACTIONDEFINITION: return "ActionDefinition";
             case ADDRESS: return "Address";
             case AGE: return "Age";
             case ANNOTATION: return "Annotation";
@@ -6280,10 +6381,13 @@ public class Enumerations {
             case BACKBONEELEMENT: return "BackboneElement";
             case CODEABLECONCEPT: return "CodeableConcept";
             case CODING: return "Coding";
+            case CONTACTDETAIL: return "ContactDetail";
             case CONTACTPOINT: return "ContactPoint";
+            case CONTRIBUTOR: return "Contributor";
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
+            case DOSAGEINSTRUCTION: return "DosageInstruction";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -6291,7 +6395,6 @@ public class Enumerations {
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case META: return "Meta";
-            case MODULEMETADATA: return "ModuleMetadata";
             case MONEY: return "Money";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
@@ -6300,11 +6403,13 @@ public class Enumerations {
             case RANGE: return "Range";
             case RATIO: return "Ratio";
             case REFERENCE: return "Reference";
+            case RELATEDARTIFACT: return "RelatedArtifact";
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
+            case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
             case CODE: return "code";
@@ -6324,6 +6429,7 @@ public class Enumerations {
             case UUID: return "uuid";
             case XHTML: return "XHTML";
             case ACCOUNT: return "Account";
+            case ACTIVITYDEFINITION: return "ActivityDefinition";
             case ALLERGYINTOLERANCE: return "AllergyIntolerance";
             case APPOINTMENT: return "Appointment";
             case APPOINTMENTRESPONSE: return "AppointmentResponse";
@@ -6332,6 +6438,7 @@ public class Enumerations {
             case BINARY: return "Binary";
             case BODYSITE: return "BodySite";
             case BUNDLE: return "Bundle";
+            case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
             case CLAIM: return "Claim";
@@ -6344,26 +6451,25 @@ public class Enumerations {
             case COMPOSITION: return "Composition";
             case CONCEPTMAP: return "ConceptMap";
             case CONDITION: return "Condition";
-            case CONFORMANCE: return "Conformance";
+            case CONSENT: return "Consent";
             case CONTRACT: return "Contract";
             case COVERAGE: return "Coverage";
             case DATAELEMENT: return "DataElement";
-            case DECISIONSUPPORTRULE: return "DecisionSupportRule";
-            case DECISIONSUPPORTSERVICEMODULE: return "DecisionSupportServiceModule";
             case DETECTEDISSUE: return "DetectedIssue";
             case DEVICE: return "Device";
             case DEVICECOMPONENT: return "DeviceComponent";
             case DEVICEMETRIC: return "DeviceMetric";
             case DEVICEUSEREQUEST: return "DeviceUseRequest";
             case DEVICEUSESTATEMENT: return "DeviceUseStatement";
-            case DIAGNOSTICORDER: return "DiagnosticOrder";
             case DIAGNOSTICREPORT: return "DiagnosticReport";
+            case DIAGNOSTICREQUEST: return "DiagnosticRequest";
             case DOCUMENTMANIFEST: return "DocumentManifest";
             case DOCUMENTREFERENCE: return "DocumentReference";
             case DOMAINRESOURCE: return "DomainResource";
             case ELIGIBILITYREQUEST: return "EligibilityRequest";
             case ELIGIBILITYRESPONSE: return "EligibilityResponse";
             case ENCOUNTER: return "Encounter";
+            case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
@@ -6375,8 +6481,7 @@ public class Enumerations {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGEXCERPT: return "ImagingExcerpt";
-            case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
+            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
@@ -6391,41 +6496,42 @@ public class Enumerations {
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
-            case MEDICATIONORDER: return "MedicationOrder";
+            case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
-            case MODULEDEFINITION: return "ModuleDefinition";
             case NAMINGSYSTEM: return "NamingSystem";
-            case NUTRITIONORDER: return "NutritionOrder";
+            case NUTRITIONREQUEST: return "NutritionRequest";
             case OBSERVATION: return "Observation";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
-            case ORDER: return "Order";
-            case ORDERRESPONSE: return "OrderResponse";
-            case ORDERSET: return "OrderSet";
             case ORGANIZATION: return "Organization";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
             case PAYMENTRECONCILIATION: return "PaymentReconciliation";
             case PERSON: return "Person";
+            case PLANDEFINITION: return "PlanDefinition";
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
-            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
+            case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
+            case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -6435,6 +6541,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
             case VALUESET: return "ValueSet";
             case VISIONPRESCRIPTION: return "VisionPrescription";
@@ -6448,8 +6555,6 @@ public class Enumerations {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ActionDefinition".equals(codeString))
-          return FHIRDefinedType.ACTIONDEFINITION;
         if ("Address".equals(codeString))
           return FHIRDefinedType.ADDRESS;
         if ("Age".equals(codeString))
@@ -6464,14 +6569,20 @@ public class Enumerations {
           return FHIRDefinedType.CODEABLECONCEPT;
         if ("Coding".equals(codeString))
           return FHIRDefinedType.CODING;
+        if ("ContactDetail".equals(codeString))
+          return FHIRDefinedType.CONTACTDETAIL;
         if ("ContactPoint".equals(codeString))
           return FHIRDefinedType.CONTACTPOINT;
+        if ("Contributor".equals(codeString))
+          return FHIRDefinedType.CONTRIBUTOR;
         if ("Count".equals(codeString))
           return FHIRDefinedType.COUNT;
         if ("DataRequirement".equals(codeString))
           return FHIRDefinedType.DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return FHIRDefinedType.DISTANCE;
+        if ("DosageInstruction".equals(codeString))
+          return FHIRDefinedType.DOSAGEINSTRUCTION;
         if ("Duration".equals(codeString))
           return FHIRDefinedType.DURATION;
         if ("Element".equals(codeString))
@@ -6486,8 +6597,6 @@ public class Enumerations {
           return FHIRDefinedType.IDENTIFIER;
         if ("Meta".equals(codeString))
           return FHIRDefinedType.META;
-        if ("ModuleMetadata".equals(codeString))
-          return FHIRDefinedType.MODULEMETADATA;
         if ("Money".equals(codeString))
           return FHIRDefinedType.MONEY;
         if ("Narrative".equals(codeString))
@@ -6504,6 +6613,8 @@ public class Enumerations {
           return FHIRDefinedType.RATIO;
         if ("Reference".equals(codeString))
           return FHIRDefinedType.REFERENCE;
+        if ("RelatedArtifact".equals(codeString))
+          return FHIRDefinedType.RELATEDARTIFACT;
         if ("SampledData".equals(codeString))
           return FHIRDefinedType.SAMPLEDDATA;
         if ("Signature".equals(codeString))
@@ -6514,6 +6625,8 @@ public class Enumerations {
           return FHIRDefinedType.TIMING;
         if ("TriggerDefinition".equals(codeString))
           return FHIRDefinedType.TRIGGERDEFINITION;
+        if ("UsageContext".equals(codeString))
+          return FHIRDefinedType.USAGECONTEXT;
         if ("base64Binary".equals(codeString))
           return FHIRDefinedType.BASE64BINARY;
         if ("boolean".equals(codeString))
@@ -6552,6 +6665,8 @@ public class Enumerations {
           return FHIRDefinedType.XHTML;
         if ("Account".equals(codeString))
           return FHIRDefinedType.ACCOUNT;
+        if ("ActivityDefinition".equals(codeString))
+          return FHIRDefinedType.ACTIVITYDEFINITION;
         if ("AllergyIntolerance".equals(codeString))
           return FHIRDefinedType.ALLERGYINTOLERANCE;
         if ("Appointment".equals(codeString))
@@ -6568,6 +6683,8 @@ public class Enumerations {
           return FHIRDefinedType.BODYSITE;
         if ("Bundle".equals(codeString))
           return FHIRDefinedType.BUNDLE;
+        if ("CapabilityStatement".equals(codeString))
+          return FHIRDefinedType.CAPABILITYSTATEMENT;
         if ("CarePlan".equals(codeString))
           return FHIRDefinedType.CAREPLAN;
         if ("CareTeam".equals(codeString))
@@ -6592,18 +6709,14 @@ public class Enumerations {
           return FHIRDefinedType.CONCEPTMAP;
         if ("Condition".equals(codeString))
           return FHIRDefinedType.CONDITION;
-        if ("Conformance".equals(codeString))
-          return FHIRDefinedType.CONFORMANCE;
+        if ("Consent".equals(codeString))
+          return FHIRDefinedType.CONSENT;
         if ("Contract".equals(codeString))
           return FHIRDefinedType.CONTRACT;
         if ("Coverage".equals(codeString))
           return FHIRDefinedType.COVERAGE;
         if ("DataElement".equals(codeString))
           return FHIRDefinedType.DATAELEMENT;
-        if ("DecisionSupportRule".equals(codeString))
-          return FHIRDefinedType.DECISIONSUPPORTRULE;
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return FHIRDefinedType.DECISIONSUPPORTSERVICEMODULE;
         if ("DetectedIssue".equals(codeString))
           return FHIRDefinedType.DETECTEDISSUE;
         if ("Device".equals(codeString))
@@ -6616,10 +6729,10 @@ public class Enumerations {
           return FHIRDefinedType.DEVICEUSEREQUEST;
         if ("DeviceUseStatement".equals(codeString))
           return FHIRDefinedType.DEVICEUSESTATEMENT;
-        if ("DiagnosticOrder".equals(codeString))
-          return FHIRDefinedType.DIAGNOSTICORDER;
         if ("DiagnosticReport".equals(codeString))
           return FHIRDefinedType.DIAGNOSTICREPORT;
+        if ("DiagnosticRequest".equals(codeString))
+          return FHIRDefinedType.DIAGNOSTICREQUEST;
         if ("DocumentManifest".equals(codeString))
           return FHIRDefinedType.DOCUMENTMANIFEST;
         if ("DocumentReference".equals(codeString))
@@ -6632,6 +6745,8 @@ public class Enumerations {
           return FHIRDefinedType.ELIGIBILITYRESPONSE;
         if ("Encounter".equals(codeString))
           return FHIRDefinedType.ENCOUNTER;
+        if ("Endpoint".equals(codeString))
+          return FHIRDefinedType.ENDPOINT;
         if ("EnrollmentRequest".equals(codeString))
           return FHIRDefinedType.ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
@@ -6654,10 +6769,8 @@ public class Enumerations {
           return FHIRDefinedType.GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return FHIRDefinedType.HEALTHCARESERVICE;
-        if ("ImagingExcerpt".equals(codeString))
-          return FHIRDefinedType.IMAGINGEXCERPT;
-        if ("ImagingObjectSelection".equals(codeString))
-          return FHIRDefinedType.IMAGINGOBJECTSELECTION;
+        if ("ImagingManifest".equals(codeString))
+          return FHIRDefinedType.IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return FHIRDefinedType.IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
@@ -6686,30 +6799,24 @@ public class Enumerations {
           return FHIRDefinedType.MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return FHIRDefinedType.MEDICATIONDISPENSE;
-        if ("MedicationOrder".equals(codeString))
-          return FHIRDefinedType.MEDICATIONORDER;
+        if ("MedicationRequest".equals(codeString))
+          return FHIRDefinedType.MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return FHIRDefinedType.MEDICATIONSTATEMENT;
+        if ("MessageDefinition".equals(codeString))
+          return FHIRDefinedType.MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
           return FHIRDefinedType.MESSAGEHEADER;
-        if ("ModuleDefinition".equals(codeString))
-          return FHIRDefinedType.MODULEDEFINITION;
         if ("NamingSystem".equals(codeString))
           return FHIRDefinedType.NAMINGSYSTEM;
-        if ("NutritionOrder".equals(codeString))
-          return FHIRDefinedType.NUTRITIONORDER;
+        if ("NutritionRequest".equals(codeString))
+          return FHIRDefinedType.NUTRITIONREQUEST;
         if ("Observation".equals(codeString))
           return FHIRDefinedType.OBSERVATION;
         if ("OperationDefinition".equals(codeString))
           return FHIRDefinedType.OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return FHIRDefinedType.OPERATIONOUTCOME;
-        if ("Order".equals(codeString))
-          return FHIRDefinedType.ORDER;
-        if ("OrderResponse".equals(codeString))
-          return FHIRDefinedType.ORDERRESPONSE;
-        if ("OrderSet".equals(codeString))
-          return FHIRDefinedType.ORDERSET;
         if ("Organization".equals(codeString))
           return FHIRDefinedType.ORGANIZATION;
         if ("Parameters".equals(codeString))
@@ -6722,6 +6829,8 @@ public class Enumerations {
           return FHIRDefinedType.PAYMENTRECONCILIATION;
         if ("Person".equals(codeString))
           return FHIRDefinedType.PERSON;
+        if ("PlanDefinition".equals(codeString))
+          return FHIRDefinedType.PLANDEFINITION;
         if ("Practitioner".equals(codeString))
           return FHIRDefinedType.PRACTITIONER;
         if ("PractitionerRole".equals(codeString))
@@ -6734,8 +6843,6 @@ public class Enumerations {
           return FHIRDefinedType.PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return FHIRDefinedType.PROCESSRESPONSE;
-        if ("Protocol".equals(codeString))
-          return FHIRDefinedType.PROTOCOL;
         if ("Provenance".equals(codeString))
           return FHIRDefinedType.PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -6746,6 +6853,12 @@ public class Enumerations {
           return FHIRDefinedType.REFERRALREQUEST;
         if ("RelatedPerson".equals(codeString))
           return FHIRDefinedType.RELATEDPERSON;
+        if ("RequestGroup".equals(codeString))
+          return FHIRDefinedType.REQUESTGROUP;
+        if ("ResearchStudy".equals(codeString))
+          return FHIRDefinedType.RESEARCHSTUDY;
+        if ("ResearchSubject".equals(codeString))
+          return FHIRDefinedType.RESEARCHSUBJECT;
         if ("Resource".equals(codeString))
           return FHIRDefinedType.RESOURCE;
         if ("RiskAssessment".equals(codeString))
@@ -6756,6 +6869,8 @@ public class Enumerations {
           return FHIRDefinedType.SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return FHIRDefinedType.SEQUENCE;
+        if ("ServiceDefinition".equals(codeString))
+          return FHIRDefinedType.SERVICEDEFINITION;
         if ("Slot".equals(codeString))
           return FHIRDefinedType.SLOT;
         if ("Specimen".equals(codeString))
@@ -6774,6 +6889,8 @@ public class Enumerations {
           return FHIRDefinedType.SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return FHIRDefinedType.TASK;
+        if ("TestReport".equals(codeString))
+          return FHIRDefinedType.TESTREPORT;
         if ("TestScript".equals(codeString))
           return FHIRDefinedType.TESTSCRIPT;
         if ("ValueSet".equals(codeString))
@@ -6788,8 +6905,6 @@ public class Enumerations {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("ActionDefinition".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ACTIONDEFINITION);
         if ("Address".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ADDRESS);
         if ("Age".equals(codeString))
@@ -6804,14 +6919,20 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CODEABLECONCEPT);
         if ("Coding".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CODING);
+        if ("ContactDetail".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONTACTDETAIL);
         if ("ContactPoint".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONTACTPOINT);
+        if ("Contributor".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONTRIBUTOR);
         if ("Count".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.COUNT);
         if ("DataRequirement".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DATAREQUIREMENT);
         if ("Distance".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DISTANCE);
+        if ("DosageInstruction".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DOSAGEINSTRUCTION);
         if ("Duration".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DURATION);
         if ("Element".equals(codeString))
@@ -6826,8 +6947,6 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.IDENTIFIER);
         if ("Meta".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.META);
-        if ("ModuleMetadata".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MODULEMETADATA);
         if ("Money".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MONEY);
         if ("Narrative".equals(codeString))
@@ -6844,6 +6963,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.RATIO);
         if ("Reference".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.REFERENCE);
+        if ("RelatedArtifact".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.RELATEDARTIFACT);
         if ("SampledData".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SAMPLEDDATA);
         if ("Signature".equals(codeString))
@@ -6854,6 +6975,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.TIMING);
         if ("TriggerDefinition".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.TRIGGERDEFINITION);
+        if ("UsageContext".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.USAGECONTEXT);
         if ("base64Binary".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.BASE64BINARY);
         if ("boolean".equals(codeString))
@@ -6892,6 +7015,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.XHTML);
         if ("Account".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ACCOUNT);
+        if ("ActivityDefinition".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ACTIVITYDEFINITION);
         if ("AllergyIntolerance".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ALLERGYINTOLERANCE);
         if ("Appointment".equals(codeString))
@@ -6908,6 +7033,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.BODYSITE);
         if ("Bundle".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.BUNDLE);
+        if ("CapabilityStatement".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CAPABILITYSTATEMENT);
         if ("CarePlan".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CAREPLAN);
         if ("CareTeam".equals(codeString))
@@ -6932,18 +7059,14 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONCEPTMAP);
         if ("Condition".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONDITION);
-        if ("Conformance".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONFORMANCE);
+        if ("Consent".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONSENT);
         if ("Contract".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CONTRACT);
         if ("Coverage".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.COVERAGE);
         if ("DataElement".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DATAELEMENT);
-        if ("DecisionSupportRule".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DECISIONSUPPORTRULE);
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DECISIONSUPPORTSERVICEMODULE);
         if ("DetectedIssue".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DETECTEDISSUE);
         if ("Device".equals(codeString))
@@ -6956,10 +7079,10 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DEVICEUSEREQUEST);
         if ("DeviceUseStatement".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DEVICEUSESTATEMENT);
-        if ("DiagnosticOrder".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DIAGNOSTICORDER);
         if ("DiagnosticReport".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DIAGNOSTICREPORT);
+        if ("DiagnosticRequest".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DIAGNOSTICREQUEST);
         if ("DocumentManifest".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.DOCUMENTMANIFEST);
         if ("DocumentReference".equals(codeString))
@@ -6972,6 +7095,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ELIGIBILITYRESPONSE);
         if ("Encounter".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ENCOUNTER);
+        if ("Endpoint".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ENDPOINT);
         if ("EnrollmentRequest".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ENROLLMENTREQUEST);
         if ("EnrollmentResponse".equals(codeString))
@@ -6994,10 +7119,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.GUIDANCERESPONSE);
         if ("HealthcareService".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.HEALTHCARESERVICE);
-        if ("ImagingExcerpt".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.IMAGINGEXCERPT);
-        if ("ImagingObjectSelection".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.IMAGINGOBJECTSELECTION);
+        if ("ImagingManifest".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.IMAGINGMANIFEST);
         if ("ImagingStudy".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.IMAGINGSTUDY);
         if ("Immunization".equals(codeString))
@@ -7026,30 +7149,24 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MEDICATIONADMINISTRATION);
         if ("MedicationDispense".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MEDICATIONDISPENSE);
-        if ("MedicationOrder".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MEDICATIONORDER);
+        if ("MedicationRequest".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MEDICATIONREQUEST);
         if ("MedicationStatement".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MEDICATIONSTATEMENT);
+        if ("MessageDefinition".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MESSAGEDEFINITION);
         if ("MessageHeader".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MESSAGEHEADER);
-        if ("ModuleDefinition".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.MODULEDEFINITION);
         if ("NamingSystem".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.NAMINGSYSTEM);
-        if ("NutritionOrder".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.NUTRITIONORDER);
+        if ("NutritionRequest".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.NUTRITIONREQUEST);
         if ("Observation".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.OBSERVATION);
         if ("OperationDefinition".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.OPERATIONDEFINITION);
         if ("OperationOutcome".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.OPERATIONOUTCOME);
-        if ("Order".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ORDER);
-        if ("OrderResponse".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ORDERRESPONSE);
-        if ("OrderSet".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ORDERSET);
         if ("Organization".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.ORGANIZATION);
         if ("Parameters".equals(codeString))
@@ -7062,6 +7179,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PAYMENTRECONCILIATION);
         if ("Person".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PERSON);
+        if ("PlanDefinition".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PLANDEFINITION);
         if ("Practitioner".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PRACTITIONER);
         if ("PractitionerRole".equals(codeString))
@@ -7074,8 +7193,6 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROCESSREQUEST);
         if ("ProcessResponse".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROCESSRESPONSE);
-        if ("Protocol".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROTOCOL);
         if ("Provenance".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROVENANCE);
         if ("Questionnaire".equals(codeString))
@@ -7086,6 +7203,12 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.REFERRALREQUEST);
         if ("RelatedPerson".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.RELATEDPERSON);
+        if ("RequestGroup".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.REQUESTGROUP);
+        if ("ResearchStudy".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.RESEARCHSTUDY);
+        if ("ResearchSubject".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.RESEARCHSUBJECT);
         if ("Resource".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.RESOURCE);
         if ("RiskAssessment".equals(codeString))
@@ -7096,6 +7219,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SEARCHPARAMETER);
         if ("Sequence".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SEQUENCE);
+        if ("ServiceDefinition".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SERVICEDEFINITION);
         if ("Slot".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SLOT);
         if ("Specimen".equals(codeString))
@@ -7114,6 +7239,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SUPPLYREQUEST);
         if ("Task".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.TASK);
+        if ("TestReport".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.TESTREPORT);
         if ("TestScript".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.TESTSCRIPT);
         if ("ValueSet".equals(codeString))
@@ -7123,8 +7250,6 @@ public class Enumerations {
         throw new FHIRException("Unknown FHIRDefinedType code '"+codeString+"'");
         }
     public String toCode(FHIRDefinedType code) {
-      if (code == FHIRDefinedType.ACTIONDEFINITION)
-        return "ActionDefinition";
       if (code == FHIRDefinedType.ADDRESS)
         return "Address";
       if (code == FHIRDefinedType.AGE)
@@ -7139,14 +7264,20 @@ public class Enumerations {
         return "CodeableConcept";
       if (code == FHIRDefinedType.CODING)
         return "Coding";
+      if (code == FHIRDefinedType.CONTACTDETAIL)
+        return "ContactDetail";
       if (code == FHIRDefinedType.CONTACTPOINT)
         return "ContactPoint";
+      if (code == FHIRDefinedType.CONTRIBUTOR)
+        return "Contributor";
       if (code == FHIRDefinedType.COUNT)
         return "Count";
       if (code == FHIRDefinedType.DATAREQUIREMENT)
         return "DataRequirement";
       if (code == FHIRDefinedType.DISTANCE)
         return "Distance";
+      if (code == FHIRDefinedType.DOSAGEINSTRUCTION)
+        return "DosageInstruction";
       if (code == FHIRDefinedType.DURATION)
         return "Duration";
       if (code == FHIRDefinedType.ELEMENT)
@@ -7161,8 +7292,6 @@ public class Enumerations {
         return "Identifier";
       if (code == FHIRDefinedType.META)
         return "Meta";
-      if (code == FHIRDefinedType.MODULEMETADATA)
-        return "ModuleMetadata";
       if (code == FHIRDefinedType.MONEY)
         return "Money";
       if (code == FHIRDefinedType.NARRATIVE)
@@ -7179,6 +7308,8 @@ public class Enumerations {
         return "Ratio";
       if (code == FHIRDefinedType.REFERENCE)
         return "Reference";
+      if (code == FHIRDefinedType.RELATEDARTIFACT)
+        return "RelatedArtifact";
       if (code == FHIRDefinedType.SAMPLEDDATA)
         return "SampledData";
       if (code == FHIRDefinedType.SIGNATURE)
@@ -7189,6 +7320,8 @@ public class Enumerations {
         return "Timing";
       if (code == FHIRDefinedType.TRIGGERDEFINITION)
         return "TriggerDefinition";
+      if (code == FHIRDefinedType.USAGECONTEXT)
+        return "UsageContext";
       if (code == FHIRDefinedType.BASE64BINARY)
         return "base64Binary";
       if (code == FHIRDefinedType.BOOLEAN)
@@ -7227,6 +7360,8 @@ public class Enumerations {
         return "xhtml";
       if (code == FHIRDefinedType.ACCOUNT)
         return "Account";
+      if (code == FHIRDefinedType.ACTIVITYDEFINITION)
+        return "ActivityDefinition";
       if (code == FHIRDefinedType.ALLERGYINTOLERANCE)
         return "AllergyIntolerance";
       if (code == FHIRDefinedType.APPOINTMENT)
@@ -7243,6 +7378,8 @@ public class Enumerations {
         return "BodySite";
       if (code == FHIRDefinedType.BUNDLE)
         return "Bundle";
+      if (code == FHIRDefinedType.CAPABILITYSTATEMENT)
+        return "CapabilityStatement";
       if (code == FHIRDefinedType.CAREPLAN)
         return "CarePlan";
       if (code == FHIRDefinedType.CARETEAM)
@@ -7267,18 +7404,14 @@ public class Enumerations {
         return "ConceptMap";
       if (code == FHIRDefinedType.CONDITION)
         return "Condition";
-      if (code == FHIRDefinedType.CONFORMANCE)
-        return "Conformance";
+      if (code == FHIRDefinedType.CONSENT)
+        return "Consent";
       if (code == FHIRDefinedType.CONTRACT)
         return "Contract";
       if (code == FHIRDefinedType.COVERAGE)
         return "Coverage";
       if (code == FHIRDefinedType.DATAELEMENT)
         return "DataElement";
-      if (code == FHIRDefinedType.DECISIONSUPPORTRULE)
-        return "DecisionSupportRule";
-      if (code == FHIRDefinedType.DECISIONSUPPORTSERVICEMODULE)
-        return "DecisionSupportServiceModule";
       if (code == FHIRDefinedType.DETECTEDISSUE)
         return "DetectedIssue";
       if (code == FHIRDefinedType.DEVICE)
@@ -7291,10 +7424,10 @@ public class Enumerations {
         return "DeviceUseRequest";
       if (code == FHIRDefinedType.DEVICEUSESTATEMENT)
         return "DeviceUseStatement";
-      if (code == FHIRDefinedType.DIAGNOSTICORDER)
-        return "DiagnosticOrder";
       if (code == FHIRDefinedType.DIAGNOSTICREPORT)
         return "DiagnosticReport";
+      if (code == FHIRDefinedType.DIAGNOSTICREQUEST)
+        return "DiagnosticRequest";
       if (code == FHIRDefinedType.DOCUMENTMANIFEST)
         return "DocumentManifest";
       if (code == FHIRDefinedType.DOCUMENTREFERENCE)
@@ -7307,6 +7440,8 @@ public class Enumerations {
         return "EligibilityResponse";
       if (code == FHIRDefinedType.ENCOUNTER)
         return "Encounter";
+      if (code == FHIRDefinedType.ENDPOINT)
+        return "Endpoint";
       if (code == FHIRDefinedType.ENROLLMENTREQUEST)
         return "EnrollmentRequest";
       if (code == FHIRDefinedType.ENROLLMENTRESPONSE)
@@ -7329,10 +7464,8 @@ public class Enumerations {
         return "GuidanceResponse";
       if (code == FHIRDefinedType.HEALTHCARESERVICE)
         return "HealthcareService";
-      if (code == FHIRDefinedType.IMAGINGEXCERPT)
-        return "ImagingExcerpt";
-      if (code == FHIRDefinedType.IMAGINGOBJECTSELECTION)
-        return "ImagingObjectSelection";
+      if (code == FHIRDefinedType.IMAGINGMANIFEST)
+        return "ImagingManifest";
       if (code == FHIRDefinedType.IMAGINGSTUDY)
         return "ImagingStudy";
       if (code == FHIRDefinedType.IMMUNIZATION)
@@ -7361,30 +7494,24 @@ public class Enumerations {
         return "MedicationAdministration";
       if (code == FHIRDefinedType.MEDICATIONDISPENSE)
         return "MedicationDispense";
-      if (code == FHIRDefinedType.MEDICATIONORDER)
-        return "MedicationOrder";
+      if (code == FHIRDefinedType.MEDICATIONREQUEST)
+        return "MedicationRequest";
       if (code == FHIRDefinedType.MEDICATIONSTATEMENT)
         return "MedicationStatement";
+      if (code == FHIRDefinedType.MESSAGEDEFINITION)
+        return "MessageDefinition";
       if (code == FHIRDefinedType.MESSAGEHEADER)
         return "MessageHeader";
-      if (code == FHIRDefinedType.MODULEDEFINITION)
-        return "ModuleDefinition";
       if (code == FHIRDefinedType.NAMINGSYSTEM)
         return "NamingSystem";
-      if (code == FHIRDefinedType.NUTRITIONORDER)
-        return "NutritionOrder";
+      if (code == FHIRDefinedType.NUTRITIONREQUEST)
+        return "NutritionRequest";
       if (code == FHIRDefinedType.OBSERVATION)
         return "Observation";
       if (code == FHIRDefinedType.OPERATIONDEFINITION)
         return "OperationDefinition";
       if (code == FHIRDefinedType.OPERATIONOUTCOME)
         return "OperationOutcome";
-      if (code == FHIRDefinedType.ORDER)
-        return "Order";
-      if (code == FHIRDefinedType.ORDERRESPONSE)
-        return "OrderResponse";
-      if (code == FHIRDefinedType.ORDERSET)
-        return "OrderSet";
       if (code == FHIRDefinedType.ORGANIZATION)
         return "Organization";
       if (code == FHIRDefinedType.PARAMETERS)
@@ -7397,6 +7524,8 @@ public class Enumerations {
         return "PaymentReconciliation";
       if (code == FHIRDefinedType.PERSON)
         return "Person";
+      if (code == FHIRDefinedType.PLANDEFINITION)
+        return "PlanDefinition";
       if (code == FHIRDefinedType.PRACTITIONER)
         return "Practitioner";
       if (code == FHIRDefinedType.PRACTITIONERROLE)
@@ -7409,8 +7538,6 @@ public class Enumerations {
         return "ProcessRequest";
       if (code == FHIRDefinedType.PROCESSRESPONSE)
         return "ProcessResponse";
-      if (code == FHIRDefinedType.PROTOCOL)
-        return "Protocol";
       if (code == FHIRDefinedType.PROVENANCE)
         return "Provenance";
       if (code == FHIRDefinedType.QUESTIONNAIRE)
@@ -7421,6 +7548,12 @@ public class Enumerations {
         return "ReferralRequest";
       if (code == FHIRDefinedType.RELATEDPERSON)
         return "RelatedPerson";
+      if (code == FHIRDefinedType.REQUESTGROUP)
+        return "RequestGroup";
+      if (code == FHIRDefinedType.RESEARCHSTUDY)
+        return "ResearchStudy";
+      if (code == FHIRDefinedType.RESEARCHSUBJECT)
+        return "ResearchSubject";
       if (code == FHIRDefinedType.RESOURCE)
         return "Resource";
       if (code == FHIRDefinedType.RISKASSESSMENT)
@@ -7431,6 +7564,8 @@ public class Enumerations {
         return "SearchParameter";
       if (code == FHIRDefinedType.SEQUENCE)
         return "Sequence";
+      if (code == FHIRDefinedType.SERVICEDEFINITION)
+        return "ServiceDefinition";
       if (code == FHIRDefinedType.SLOT)
         return "Slot";
       if (code == FHIRDefinedType.SPECIMEN)
@@ -7449,6 +7584,8 @@ public class Enumerations {
         return "SupplyRequest";
       if (code == FHIRDefinedType.TASK)
         return "Task";
+      if (code == FHIRDefinedType.TESTREPORT)
+        return "TestReport";
       if (code == FHIRDefinedType.TESTSCRIPT)
         return "TestScript";
       if (code == FHIRDefinedType.VALUESET)
@@ -7488,6 +7625,10 @@ public class Enumerations {
          */
         ADMINNOTIFY, 
         /**
+         * Notification to convey information.
+         */
+        COMMUNICATIONREQUEST, 
+        /**
          * Provide a diagnostic report, or update a previously provided diagnostic report.
          */
         DIAGNOSTICREPORTPROVIDE, 
@@ -7526,6 +7667,8 @@ public class Enumerations {
           return MEDICATIONADMINISTRATIONUPDATE;
         if ("admin-notify".equals(codeString))
           return ADMINNOTIFY;
+        if ("communication-request".equals(codeString))
+          return COMMUNICATIONREQUEST;
         if ("diagnosticreport-provide".equals(codeString))
           return DIAGNOSTICREPORTPROVIDE;
         if ("observation-provide".equals(codeString))
@@ -7546,6 +7689,7 @@ public class Enumerations {
             case MEDICATIONADMINISTRATIONRECORDING: return "MedicationAdministration-Recording";
             case MEDICATIONADMINISTRATIONUPDATE: return "MedicationAdministration-Update";
             case ADMINNOTIFY: return "admin-notify";
+            case COMMUNICATIONREQUEST: return "communication-request";
             case DIAGNOSTICREPORTPROVIDE: return "diagnosticreport-provide";
             case OBSERVATIONPROVIDE: return "observation-provide";
             case PATIENTLINK: return "patient-link";
@@ -7562,6 +7706,7 @@ public class Enumerations {
             case MEDICATIONADMINISTRATIONRECORDING: return "http://hl7.org/fhir/message-events";
             case MEDICATIONADMINISTRATIONUPDATE: return "http://hl7.org/fhir/message-events";
             case ADMINNOTIFY: return "http://hl7.org/fhir/message-events";
+            case COMMUNICATIONREQUEST: return "http://hl7.org/fhir/message-events";
             case DIAGNOSTICREPORTPROVIDE: return "http://hl7.org/fhir/message-events";
             case OBSERVATIONPROVIDE: return "http://hl7.org/fhir/message-events";
             case PATIENTLINK: return "http://hl7.org/fhir/message-events";
@@ -7578,6 +7723,7 @@ public class Enumerations {
             case MEDICATIONADMINISTRATIONRECORDING: return "Indicates that a medication has been recorded against the patient's record.";
             case MEDICATIONADMINISTRATIONUPDATE: return "Update a Medication Administration record.";
             case ADMINNOTIFY: return "Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use.";
+            case COMMUNICATIONREQUEST: return "Notification to convey information.";
             case DIAGNOSTICREPORTPROVIDE: return "Provide a diagnostic report, or update a previously provided diagnostic report.";
             case OBSERVATIONPROVIDE: return "Provide a simple observation or update a previously provided simple observation.";
             case PATIENTLINK: return "Notification that two patient records actually identify the same patient.";
@@ -7594,6 +7740,7 @@ public class Enumerations {
             case MEDICATIONADMINISTRATIONRECORDING: return "MedicationAdministration-Recording";
             case MEDICATIONADMINISTRATIONUPDATE: return "MedicationAdministration-Update";
             case ADMINNOTIFY: return "admin-notify";
+            case COMMUNICATIONREQUEST: return "communication-request";
             case DIAGNOSTICREPORTPROVIDE: return "diagnosticreport-provide";
             case OBSERVATIONPROVIDE: return "observation-provide";
             case PATIENTLINK: return "patient-link";
@@ -7621,6 +7768,8 @@ public class Enumerations {
           return MessageEvent.MEDICATIONADMINISTRATIONUPDATE;
         if ("admin-notify".equals(codeString))
           return MessageEvent.ADMINNOTIFY;
+        if ("communication-request".equals(codeString))
+          return MessageEvent.COMMUNICATIONREQUEST;
         if ("diagnosticreport-provide".equals(codeString))
           return MessageEvent.DIAGNOSTICREPORTPROVIDE;
         if ("observation-provide".equals(codeString))
@@ -7651,6 +7800,8 @@ public class Enumerations {
           return new Enumeration<MessageEvent>(this, MessageEvent.MEDICATIONADMINISTRATIONUPDATE);
         if ("admin-notify".equals(codeString))
           return new Enumeration<MessageEvent>(this, MessageEvent.ADMINNOTIFY);
+        if ("communication-request".equals(codeString))
+          return new Enumeration<MessageEvent>(this, MessageEvent.COMMUNICATIONREQUEST);
         if ("diagnosticreport-provide".equals(codeString))
           return new Enumeration<MessageEvent>(this, MessageEvent.DIAGNOSTICREPORTPROVIDE);
         if ("observation-provide".equals(codeString))
@@ -7676,6 +7827,8 @@ public class Enumerations {
         return "MedicationAdministration-Update";
       if (code == MessageEvent.ADMINNOTIFY)
         return "admin-notify";
+      if (code == MessageEvent.COMMUNICATIONREQUEST)
+        return "communication-request";
       if (code == MessageEvent.DIAGNOSTICREPORTPROVIDE)
         return "diagnosticreport-provide";
       if (code == MessageEvent.OBSERVATIONPROVIDE)
@@ -7796,15 +7949,122 @@ public class Enumerations {
       }
     }
 
+    public enum PublicationStatus {
+        /**
+         * This resource is still under development.
+         */
+        DRAFT, 
+        /**
+         * This resource is ready for normal use.
+         */
+        ACTIVE, 
+        /**
+         * This resource has been withdrawn or superseded and should no longer be used.
+         */
+        RETIRED, 
+        /**
+         * added to help the parsers
+         */
+        NULL;
+        public static PublicationStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("retired".equals(codeString))
+          return RETIRED;
+        throw new FHIRException("Unknown PublicationStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case DRAFT: return "draft";
+            case ACTIVE: return "active";
+            case RETIRED: return "retired";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case DRAFT: return "http://hl7.org/fhir/publication-status";
+            case ACTIVE: return "http://hl7.org/fhir/publication-status";
+            case RETIRED: return "http://hl7.org/fhir/publication-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case DRAFT: return "This resource is still under development.";
+            case ACTIVE: return "This resource is ready for normal use.";
+            case RETIRED: return "This resource has been withdrawn or superseded and should no longer be used.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case DRAFT: return "Draft";
+            case ACTIVE: return "Active";
+            case RETIRED: return "Retired";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PublicationStatusEnumFactory implements EnumFactory<PublicationStatus> {
+    public PublicationStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("draft".equals(codeString))
+          return PublicationStatus.DRAFT;
+        if ("active".equals(codeString))
+          return PublicationStatus.ACTIVE;
+        if ("retired".equals(codeString))
+          return PublicationStatus.RETIRED;
+        throw new IllegalArgumentException("Unknown PublicationStatus code '"+codeString+"'");
+        }
+        public Enumeration<PublicationStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("draft".equals(codeString))
+          return new Enumeration<PublicationStatus>(this, PublicationStatus.DRAFT);
+        if ("active".equals(codeString))
+          return new Enumeration<PublicationStatus>(this, PublicationStatus.ACTIVE);
+        if ("retired".equals(codeString))
+          return new Enumeration<PublicationStatus>(this, PublicationStatus.RETIRED);
+        throw new FHIRException("Unknown PublicationStatus code '"+codeString+"'");
+        }
+    public String toCode(PublicationStatus code) {
+      if (code == PublicationStatus.DRAFT)
+        return "draft";
+      if (code == PublicationStatus.ACTIVE)
+        return "active";
+      if (code == PublicationStatus.RETIRED)
+        return "retired";
+      return "?";
+      }
+    public String toSystem(PublicationStatus code) {
+      return code.getSystem();
+      }
+    }
+
     public enum RemittanceOutcome {
         /**
-         * The processing completed without errors.
+         * The processing has completed without errors
          */
         COMPLETE, 
         /**
-         * The processing identified errors.
+         * One or more erros have been detected in the Claim
          */
         ERROR, 
+        /**
+         * No errors have been detected in the Claim and some of the adjudication has been performed.
+         */
+        PARTIAL, 
         /**
          * added to help the parsers
          */
@@ -7816,12 +8076,15 @@ public class Enumerations {
           return COMPLETE;
         if ("error".equals(codeString))
           return ERROR;
+        if ("partial".equals(codeString))
+          return PARTIAL;
         throw new FHIRException("Unknown RemittanceOutcome code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case COMPLETE: return "complete";
             case ERROR: return "error";
+            case PARTIAL: return "partial";
             default: return "?";
           }
         }
@@ -7829,20 +8092,23 @@ public class Enumerations {
           switch (this) {
             case COMPLETE: return "http://hl7.org/fhir/remittance-outcome";
             case ERROR: return "http://hl7.org/fhir/remittance-outcome";
+            case PARTIAL: return "http://hl7.org/fhir/remittance-outcome";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETE: return "The processing completed without errors.";
-            case ERROR: return "The processing identified errors.";
+            case COMPLETE: return "The processing has completed without errors";
+            case ERROR: return "One or more erros have been detected in the Claim";
+            case PARTIAL: return "No errors have been detected in the Claim and some of the adjudication has been performed.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case COMPLETE: return "Complete";
+            case COMPLETE: return "Processing Complete";
             case ERROR: return "Error";
+            case PARTIAL: return "Partial Processing";
             default: return "?";
           }
         }
@@ -7857,6 +8123,8 @@ public class Enumerations {
           return RemittanceOutcome.COMPLETE;
         if ("error".equals(codeString))
           return RemittanceOutcome.ERROR;
+        if ("partial".equals(codeString))
+          return RemittanceOutcome.PARTIAL;
         throw new IllegalArgumentException("Unknown RemittanceOutcome code '"+codeString+"'");
         }
         public Enumeration<RemittanceOutcome> fromType(Base code) throws FHIRException {
@@ -7869,6 +8137,8 @@ public class Enumerations {
           return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.COMPLETE);
         if ("error".equals(codeString))
           return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.ERROR);
+        if ("partial".equals(codeString))
+          return new Enumeration<RemittanceOutcome>(this, RemittanceOutcome.PARTIAL);
         throw new FHIRException("Unknown RemittanceOutcome code '"+codeString+"'");
         }
     public String toCode(RemittanceOutcome code) {
@@ -7876,6 +8146,8 @@ public class Enumerations {
         return "complete";
       if (code == RemittanceOutcome.ERROR)
         return "error";
+      if (code == RemittanceOutcome.PARTIAL)
+        return "partial";
       return "?";
       }
     public String toSystem(RemittanceOutcome code) {
@@ -7885,9 +8157,13 @@ public class Enumerations {
 
     public enum ResourceType {
         /**
-         * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
+         * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.
          */
         ACCOUNT, 
+        /**
+         * This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.
+         */
+        ACTIVITYDEFINITION, 
         /**
          * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
          */
@@ -7920,6 +8196,10 @@ public class Enumerations {
          * A container for a collection of resources.
          */
         BUNDLE, 
+        /**
+         * A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         */
+        CAPABILITYSTATEMENT, 
         /**
          * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
          */
@@ -7969,9 +8249,9 @@ public class Enumerations {
          */
         CONDITION, 
         /**
-         * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+         * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
          */
-        CONFORMANCE, 
+        CONSENT, 
         /**
          * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
          */
@@ -7984,14 +8264,6 @@ public class Enumerations {
          * The formal description of a single piece of information that can be gathered and reported.
          */
         DATAELEMENT, 
-        /**
-         * This resource defines a decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of a actions that should be taken whenever some condition is met in response to a particular event or events.
-         */
-        DECISIONSUPPORTRULE, 
-        /**
-         * The DecisionSupportServiceModule describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
-         */
-        DECISIONSUPPORTSERVICEMODULE, 
         /**
          * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
          */
@@ -8017,13 +8289,13 @@ public class Enumerations {
          */
         DEVICEUSESTATEMENT, 
         /**
-         * A record of a request for a diagnostic investigation service to be performed.
-         */
-        DIAGNOSTICORDER, 
-        /**
          * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.
          */
         DIAGNOSTICREPORT, 
+        /**
+         * A record of a request for a diagnostic investigation service to be performed.
+         */
+        DIAGNOSTICREQUEST, 
         /**
          * A manifest that defines a set of documents.
          */
@@ -8033,11 +8305,11 @@ public class Enumerations {
          */
         DOCUMENTREFERENCE, 
         /**
-         * --- Abstract Type! ---A resource that includes narrative, extensions, and contained resources.
+         * A resource that includes narrative, extensions, and contained resources.
          */
         DOMAINRESOURCE, 
         /**
-         * This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.
+         * This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.
          */
         ELIGIBILITYREQUEST, 
         /**
@@ -8048,6 +8320,10 @@ public class Enumerations {
          * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
          */
         ENCOUNTER, 
+        /**
+         * The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.
+         */
+        ENDPOINT, 
         /**
          * This resource provides the insurance enrollment details to the insurer regarding a specified coverage.
          */
@@ -8093,13 +8369,9 @@ public class Enumerations {
          */
         HEALTHCARESERVICE, 
         /**
-         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingExcerpt resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
+         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances may have been selected for a purpose, such as  conference, or consult.  Reflecting a range of sharing purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); both a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
          */
-        IMAGINGEXCERPT, 
-        /**
-         * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
-         */
-        IMAGINGOBJECTSELECTION, 
+        IMAGINGMANIFEST, 
         /**
          * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
          */
@@ -8117,7 +8389,7 @@ public class Enumerations {
          */
         IMPLEMENTATIONGUIDE, 
         /**
-         * The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.
+         * The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose exist knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.
          */
         LIBRARY, 
         /**
@@ -8157,21 +8429,21 @@ public class Enumerations {
          */
         MEDICATIONDISPENSE, 
         /**
-         * An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationOrder" rather than "MedicationPrescription" to generalize the use across inpatient and outpatient settings as well as for care plans, etc.
+         * An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationRequest" rather than "MedicationPrescription" or "MedicationOrder" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.
          */
-        MEDICATIONORDER, 
+        MEDICATIONREQUEST, 
         /**
          * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
+         * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
+         */
+        MESSAGEDEFINITION, 
+        /**
          * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
          */
         MESSAGEHEADER, 
-        /**
-         * The ModuleDefinition resource defines the data requirements for a quality artifact.
-         */
-        MODULEDEFINITION, 
         /**
          * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
          */
@@ -8179,7 +8451,7 @@ public class Enumerations {
         /**
          * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
          */
-        NUTRITIONORDER, 
+        NUTRITIONREQUEST, 
         /**
          * Measurements and simple assertions made about a patient, device or other subject.
          */
@@ -8192,18 +8464,6 @@ public class Enumerations {
          * A collection of error, warning or information messages that result from a system action.
          */
         OPERATIONOUTCOME, 
-        /**
-         * A request to perform an action.
-         */
-        ORDER, 
-        /**
-         * A response to an order.
-         */
-        ORDERRESPONSE, 
-        /**
-         * This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.
-         */
-        ORDERSET, 
         /**
          * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
          */
@@ -8229,6 +8489,10 @@ public class Enumerations {
          */
         PERSON, 
         /**
+         * This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.
+         */
+        PLANDEFINITION, 
+        /**
          * A person who is directly or indirectly involved in the provisioning of healthcare.
          */
         PRACTITIONER, 
@@ -8253,10 +8517,6 @@ public class Enumerations {
          */
         PROCESSRESPONSE, 
         /**
-         * A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.
-         */
-        PROTOCOL, 
-        /**
          * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
          */
         PROVENANCE, 
@@ -8277,7 +8537,19 @@ public class Enumerations {
          */
         RELATEDPERSON, 
         /**
-         * --- Abstract Type! ---This is the base resource type for everything.
+         * A group of related requests that can be used to capture intended activities that have inter-dependencies such as "give this medication after that one".
+         */
+        REQUESTGROUP, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSTUDY, 
+        /**
+         * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+         */
+        RESEARCHSUBJECT, 
+        /**
+         * This is the base resource type for everything.
          */
         RESOURCE, 
         /**
@@ -8293,9 +8565,13 @@ public class Enumerations {
          */
         SEARCHPARAMETER, 
         /**
-         * Variation and Sequence data.
+         * Raw data describing a biological sequence.
          */
         SEQUENCE, 
+        /**
+         * The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
+         */
+        SERVICEDEFINITION, 
         /**
          * A slot of time on a schedule that may be available for booking appointments.
          */
@@ -8333,6 +8609,10 @@ public class Enumerations {
          */
         TASK, 
         /**
+         * TestReport is a resource that includes summary information on the results of executing a TestScript.
+         */
+        TESTREPORT, 
+        /**
          * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
          */
         TESTSCRIPT, 
@@ -8353,6 +8633,8 @@ public class Enumerations {
                 return null;
         if ("Account".equals(codeString))
           return ACCOUNT;
+        if ("ActivityDefinition".equals(codeString))
+          return ACTIVITYDEFINITION;
         if ("AllergyIntolerance".equals(codeString))
           return ALLERGYINTOLERANCE;
         if ("Appointment".equals(codeString))
@@ -8369,6 +8651,8 @@ public class Enumerations {
           return BODYSITE;
         if ("Bundle".equals(codeString))
           return BUNDLE;
+        if ("CapabilityStatement".equals(codeString))
+          return CAPABILITYSTATEMENT;
         if ("CarePlan".equals(codeString))
           return CAREPLAN;
         if ("CareTeam".equals(codeString))
@@ -8393,18 +8677,14 @@ public class Enumerations {
           return CONCEPTMAP;
         if ("Condition".equals(codeString))
           return CONDITION;
-        if ("Conformance".equals(codeString))
-          return CONFORMANCE;
+        if ("Consent".equals(codeString))
+          return CONSENT;
         if ("Contract".equals(codeString))
           return CONTRACT;
         if ("Coverage".equals(codeString))
           return COVERAGE;
         if ("DataElement".equals(codeString))
           return DATAELEMENT;
-        if ("DecisionSupportRule".equals(codeString))
-          return DECISIONSUPPORTRULE;
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return DECISIONSUPPORTSERVICEMODULE;
         if ("DetectedIssue".equals(codeString))
           return DETECTEDISSUE;
         if ("Device".equals(codeString))
@@ -8417,10 +8697,10 @@ public class Enumerations {
           return DEVICEUSEREQUEST;
         if ("DeviceUseStatement".equals(codeString))
           return DEVICEUSESTATEMENT;
-        if ("DiagnosticOrder".equals(codeString))
-          return DIAGNOSTICORDER;
         if ("DiagnosticReport".equals(codeString))
           return DIAGNOSTICREPORT;
+        if ("DiagnosticRequest".equals(codeString))
+          return DIAGNOSTICREQUEST;
         if ("DocumentManifest".equals(codeString))
           return DOCUMENTMANIFEST;
         if ("DocumentReference".equals(codeString))
@@ -8433,6 +8713,8 @@ public class Enumerations {
           return ELIGIBILITYRESPONSE;
         if ("Encounter".equals(codeString))
           return ENCOUNTER;
+        if ("Endpoint".equals(codeString))
+          return ENDPOINT;
         if ("EnrollmentRequest".equals(codeString))
           return ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
@@ -8455,10 +8737,8 @@ public class Enumerations {
           return GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return HEALTHCARESERVICE;
-        if ("ImagingExcerpt".equals(codeString))
-          return IMAGINGEXCERPT;
-        if ("ImagingObjectSelection".equals(codeString))
-          return IMAGINGOBJECTSELECTION;
+        if ("ImagingManifest".equals(codeString))
+          return IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
@@ -8487,30 +8767,24 @@ public class Enumerations {
           return MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return MEDICATIONDISPENSE;
-        if ("MedicationOrder".equals(codeString))
-          return MEDICATIONORDER;
+        if ("MedicationRequest".equals(codeString))
+          return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return MEDICATIONSTATEMENT;
+        if ("MessageDefinition".equals(codeString))
+          return MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
           return MESSAGEHEADER;
-        if ("ModuleDefinition".equals(codeString))
-          return MODULEDEFINITION;
         if ("NamingSystem".equals(codeString))
           return NAMINGSYSTEM;
-        if ("NutritionOrder".equals(codeString))
-          return NUTRITIONORDER;
+        if ("NutritionRequest".equals(codeString))
+          return NUTRITIONREQUEST;
         if ("Observation".equals(codeString))
           return OBSERVATION;
         if ("OperationDefinition".equals(codeString))
           return OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return OPERATIONOUTCOME;
-        if ("Order".equals(codeString))
-          return ORDER;
-        if ("OrderResponse".equals(codeString))
-          return ORDERRESPONSE;
-        if ("OrderSet".equals(codeString))
-          return ORDERSET;
         if ("Organization".equals(codeString))
           return ORGANIZATION;
         if ("Parameters".equals(codeString))
@@ -8523,6 +8797,8 @@ public class Enumerations {
           return PAYMENTRECONCILIATION;
         if ("Person".equals(codeString))
           return PERSON;
+        if ("PlanDefinition".equals(codeString))
+          return PLANDEFINITION;
         if ("Practitioner".equals(codeString))
           return PRACTITIONER;
         if ("PractitionerRole".equals(codeString))
@@ -8535,8 +8811,6 @@ public class Enumerations {
           return PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return PROCESSRESPONSE;
-        if ("Protocol".equals(codeString))
-          return PROTOCOL;
         if ("Provenance".equals(codeString))
           return PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -8547,6 +8821,12 @@ public class Enumerations {
           return REFERRALREQUEST;
         if ("RelatedPerson".equals(codeString))
           return RELATEDPERSON;
+        if ("RequestGroup".equals(codeString))
+          return REQUESTGROUP;
+        if ("ResearchStudy".equals(codeString))
+          return RESEARCHSTUDY;
+        if ("ResearchSubject".equals(codeString))
+          return RESEARCHSUBJECT;
         if ("Resource".equals(codeString))
           return RESOURCE;
         if ("RiskAssessment".equals(codeString))
@@ -8557,6 +8837,8 @@ public class Enumerations {
           return SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return SEQUENCE;
+        if ("ServiceDefinition".equals(codeString))
+          return SERVICEDEFINITION;
         if ("Slot".equals(codeString))
           return SLOT;
         if ("Specimen".equals(codeString))
@@ -8575,6 +8857,8 @@ public class Enumerations {
           return SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return TASK;
+        if ("TestReport".equals(codeString))
+          return TESTREPORT;
         if ("TestScript".equals(codeString))
           return TESTSCRIPT;
         if ("ValueSet".equals(codeString))
@@ -8586,6 +8870,7 @@ public class Enumerations {
         public String toCode() {
           switch (this) {
             case ACCOUNT: return "Account";
+            case ACTIVITYDEFINITION: return "ActivityDefinition";
             case ALLERGYINTOLERANCE: return "AllergyIntolerance";
             case APPOINTMENT: return "Appointment";
             case APPOINTMENTRESPONSE: return "AppointmentResponse";
@@ -8594,6 +8879,7 @@ public class Enumerations {
             case BINARY: return "Binary";
             case BODYSITE: return "BodySite";
             case BUNDLE: return "Bundle";
+            case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
             case CLAIM: return "Claim";
@@ -8606,26 +8892,25 @@ public class Enumerations {
             case COMPOSITION: return "Composition";
             case CONCEPTMAP: return "ConceptMap";
             case CONDITION: return "Condition";
-            case CONFORMANCE: return "Conformance";
+            case CONSENT: return "Consent";
             case CONTRACT: return "Contract";
             case COVERAGE: return "Coverage";
             case DATAELEMENT: return "DataElement";
-            case DECISIONSUPPORTRULE: return "DecisionSupportRule";
-            case DECISIONSUPPORTSERVICEMODULE: return "DecisionSupportServiceModule";
             case DETECTEDISSUE: return "DetectedIssue";
             case DEVICE: return "Device";
             case DEVICECOMPONENT: return "DeviceComponent";
             case DEVICEMETRIC: return "DeviceMetric";
             case DEVICEUSEREQUEST: return "DeviceUseRequest";
             case DEVICEUSESTATEMENT: return "DeviceUseStatement";
-            case DIAGNOSTICORDER: return "DiagnosticOrder";
             case DIAGNOSTICREPORT: return "DiagnosticReport";
+            case DIAGNOSTICREQUEST: return "DiagnosticRequest";
             case DOCUMENTMANIFEST: return "DocumentManifest";
             case DOCUMENTREFERENCE: return "DocumentReference";
             case DOMAINRESOURCE: return "DomainResource";
             case ELIGIBILITYREQUEST: return "EligibilityRequest";
             case ELIGIBILITYRESPONSE: return "EligibilityResponse";
             case ENCOUNTER: return "Encounter";
+            case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
@@ -8637,8 +8922,7 @@ public class Enumerations {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGEXCERPT: return "ImagingExcerpt";
-            case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
+            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
@@ -8653,41 +8937,42 @@ public class Enumerations {
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
-            case MEDICATIONORDER: return "MedicationOrder";
+            case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
-            case MODULEDEFINITION: return "ModuleDefinition";
             case NAMINGSYSTEM: return "NamingSystem";
-            case NUTRITIONORDER: return "NutritionOrder";
+            case NUTRITIONREQUEST: return "NutritionRequest";
             case OBSERVATION: return "Observation";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
-            case ORDER: return "Order";
-            case ORDERRESPONSE: return "OrderResponse";
-            case ORDERSET: return "OrderSet";
             case ORGANIZATION: return "Organization";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
             case PAYMENTRECONCILIATION: return "PaymentReconciliation";
             case PERSON: return "Person";
+            case PLANDEFINITION: return "PlanDefinition";
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
-            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
+            case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
+            case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -8697,6 +8982,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
             case VALUESET: return "ValueSet";
             case VISIONPRESCRIPTION: return "VisionPrescription";
@@ -8706,6 +8992,7 @@ public class Enumerations {
         public String getSystem() {
           switch (this) {
             case ACCOUNT: return "http://hl7.org/fhir/resource-types";
+            case ACTIVITYDEFINITION: return "http://hl7.org/fhir/resource-types";
             case ALLERGYINTOLERANCE: return "http://hl7.org/fhir/resource-types";
             case APPOINTMENT: return "http://hl7.org/fhir/resource-types";
             case APPOINTMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -8714,6 +9001,7 @@ public class Enumerations {
             case BINARY: return "http://hl7.org/fhir/resource-types";
             case BODYSITE: return "http://hl7.org/fhir/resource-types";
             case BUNDLE: return "http://hl7.org/fhir/resource-types";
+            case CAPABILITYSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case CAREPLAN: return "http://hl7.org/fhir/resource-types";
             case CARETEAM: return "http://hl7.org/fhir/resource-types";
             case CLAIM: return "http://hl7.org/fhir/resource-types";
@@ -8726,26 +9014,25 @@ public class Enumerations {
             case COMPOSITION: return "http://hl7.org/fhir/resource-types";
             case CONCEPTMAP: return "http://hl7.org/fhir/resource-types";
             case CONDITION: return "http://hl7.org/fhir/resource-types";
-            case CONFORMANCE: return "http://hl7.org/fhir/resource-types";
+            case CONSENT: return "http://hl7.org/fhir/resource-types";
             case CONTRACT: return "http://hl7.org/fhir/resource-types";
             case COVERAGE: return "http://hl7.org/fhir/resource-types";
             case DATAELEMENT: return "http://hl7.org/fhir/resource-types";
-            case DECISIONSUPPORTRULE: return "http://hl7.org/fhir/resource-types";
-            case DECISIONSUPPORTSERVICEMODULE: return "http://hl7.org/fhir/resource-types";
             case DETECTEDISSUE: return "http://hl7.org/fhir/resource-types";
             case DEVICE: return "http://hl7.org/fhir/resource-types";
             case DEVICECOMPONENT: return "http://hl7.org/fhir/resource-types";
             case DEVICEMETRIC: return "http://hl7.org/fhir/resource-types";
             case DEVICEUSEREQUEST: return "http://hl7.org/fhir/resource-types";
             case DEVICEUSESTATEMENT: return "http://hl7.org/fhir/resource-types";
-            case DIAGNOSTICORDER: return "http://hl7.org/fhir/resource-types";
             case DIAGNOSTICREPORT: return "http://hl7.org/fhir/resource-types";
+            case DIAGNOSTICREQUEST: return "http://hl7.org/fhir/resource-types";
             case DOCUMENTMANIFEST: return "http://hl7.org/fhir/resource-types";
             case DOCUMENTREFERENCE: return "http://hl7.org/fhir/resource-types";
             case DOMAINRESOURCE: return "http://hl7.org/fhir/resource-types";
             case ELIGIBILITYREQUEST: return "http://hl7.org/fhir/resource-types";
             case ELIGIBILITYRESPONSE: return "http://hl7.org/fhir/resource-types";
             case ENCOUNTER: return "http://hl7.org/fhir/resource-types";
+            case ENDPOINT: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTREQUEST: return "http://hl7.org/fhir/resource-types";
             case ENROLLMENTRESPONSE: return "http://hl7.org/fhir/resource-types";
             case EPISODEOFCARE: return "http://hl7.org/fhir/resource-types";
@@ -8757,8 +9044,7 @@ public class Enumerations {
             case GROUP: return "http://hl7.org/fhir/resource-types";
             case GUIDANCERESPONSE: return "http://hl7.org/fhir/resource-types";
             case HEALTHCARESERVICE: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGEXCERPT: return "http://hl7.org/fhir/resource-types";
-            case IMAGINGOBJECTSELECTION: return "http://hl7.org/fhir/resource-types";
+            case IMAGINGMANIFEST: return "http://hl7.org/fhir/resource-types";
             case IMAGINGSTUDY: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATION: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
@@ -8773,41 +9059,42 @@ public class Enumerations {
             case MEDICATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONADMINISTRATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONDISPENSE: return "http://hl7.org/fhir/resource-types";
-            case MEDICATIONORDER: return "http://hl7.org/fhir/resource-types";
+            case MEDICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONSTATEMENT: return "http://hl7.org/fhir/resource-types";
+            case MESSAGEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case MESSAGEHEADER: return "http://hl7.org/fhir/resource-types";
-            case MODULEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case NAMINGSYSTEM: return "http://hl7.org/fhir/resource-types";
-            case NUTRITIONORDER: return "http://hl7.org/fhir/resource-types";
+            case NUTRITIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case OBSERVATION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONDEFINITION: return "http://hl7.org/fhir/resource-types";
             case OPERATIONOUTCOME: return "http://hl7.org/fhir/resource-types";
-            case ORDER: return "http://hl7.org/fhir/resource-types";
-            case ORDERRESPONSE: return "http://hl7.org/fhir/resource-types";
-            case ORDERSET: return "http://hl7.org/fhir/resource-types";
             case ORGANIZATION: return "http://hl7.org/fhir/resource-types";
             case PARAMETERS: return "http://hl7.org/fhir/resource-types";
             case PATIENT: return "http://hl7.org/fhir/resource-types";
             case PAYMENTNOTICE: return "http://hl7.org/fhir/resource-types";
             case PAYMENTRECONCILIATION: return "http://hl7.org/fhir/resource-types";
             case PERSON: return "http://hl7.org/fhir/resource-types";
+            case PLANDEFINITION: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONER: return "http://hl7.org/fhir/resource-types";
             case PRACTITIONERROLE: return "http://hl7.org/fhir/resource-types";
             case PROCEDURE: return "http://hl7.org/fhir/resource-types";
             case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSRESPONSE: return "http://hl7.org/fhir/resource-types";
-            case PROTOCOL: return "http://hl7.org/fhir/resource-types";
             case PROVENANCE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRERESPONSE: return "http://hl7.org/fhir/resource-types";
             case REFERRALREQUEST: return "http://hl7.org/fhir/resource-types";
             case RELATEDPERSON: return "http://hl7.org/fhir/resource-types";
+            case REQUESTGROUP: return "http://hl7.org/fhir/resource-types";
+            case RESEARCHSTUDY: return "http://hl7.org/fhir/resource-types";
+            case RESEARCHSUBJECT: return "http://hl7.org/fhir/resource-types";
             case RESOURCE: return "http://hl7.org/fhir/resource-types";
             case RISKASSESSMENT: return "http://hl7.org/fhir/resource-types";
             case SCHEDULE: return "http://hl7.org/fhir/resource-types";
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
             case SEQUENCE: return "http://hl7.org/fhir/resource-types";
+            case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
@@ -8817,6 +9104,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "http://hl7.org/fhir/resource-types";
             case SUPPLYREQUEST: return "http://hl7.org/fhir/resource-types";
             case TASK: return "http://hl7.org/fhir/resource-types";
+            case TESTREPORT: return "http://hl7.org/fhir/resource-types";
             case TESTSCRIPT: return "http://hl7.org/fhir/resource-types";
             case VALUESET: return "http://hl7.org/fhir/resource-types";
             case VISIONPRESCRIPTION: return "http://hl7.org/fhir/resource-types";
@@ -8825,7 +9113,8 @@ public class Enumerations {
         }
         public String getDefinition() {
           switch (this) {
-            case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.";
+            case ACCOUNT: return "A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.";
+            case ACTIVITYDEFINITION: return "This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.";
             case ALLERGYINTOLERANCE: return "Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.";
             case APPOINTMENT: return "A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).";
             case APPOINTMENTRESPONSE: return "A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.";
@@ -8834,6 +9123,7 @@ public class Enumerations {
             case BINARY: return "A binary resource can contain any content, whether text, image, pdf, zip archive, etc.";
             case BODYSITE: return "Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.";
             case BUNDLE: return "A container for a collection of resources.";
+            case CAPABILITYSTATEMENT: return "A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
             case CAREPLAN: return "Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.";
             case CARETEAM: return "The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.";
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
@@ -8846,26 +9136,25 @@ public class Enumerations {
             case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a diagnosis during an encounter; populating a problem list or a summary statement, such as a discharge summary.";
-            case CONFORMANCE: return "A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.";
+            case CONSENT: return "A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
             case CONTRACT: return "A formal agreement between parties regarding the conduct of business, exchange of information or other matters.";
             case COVERAGE: return "Financial instrument which may be used to pay for or reimburse health care products and services.";
             case DATAELEMENT: return "The formal description of a single piece of information that can be gathered and reported.";
-            case DECISIONSUPPORTRULE: return "This resource defines a decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of a actions that should be taken whenever some condition is met in response to a particular event or events.";
-            case DECISIONSUPPORTSERVICEMODULE: return "The DecisionSupportServiceModule describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case DETECTEDISSUE: return "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.";
             case DEVICE: return "This resource identifies an instance or a type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.";
             case DEVICECOMPONENT: return "Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.";
             case DEVICEMETRIC: return "Describes a measurement, calculation or setting capability of a medical device.";
             case DEVICEUSEREQUEST: return "Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.";
             case DEVICEUSESTATEMENT: return "A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.";
-            case DIAGNOSTICORDER: return "A record of a request for a diagnostic investigation service to be performed.";
             case DIAGNOSTICREPORT: return "The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.";
+            case DIAGNOSTICREQUEST: return "A record of a request for a diagnostic investigation service to be performed.";
             case DOCUMENTMANIFEST: return "A manifest that defines a set of documents.";
             case DOCUMENTREFERENCE: return "A reference to a document .";
-            case DOMAINRESOURCE: return "--- Abstract Type! ---A resource that includes narrative, extensions, and contained resources.";
-            case ELIGIBILITYREQUEST: return "This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.";
+            case DOMAINRESOURCE: return "A resource that includes narrative, extensions, and contained resources.";
+            case ELIGIBILITYREQUEST: return "This resource provides the details  from the insurer to identify a specified coverage and optionally some class of service.";
             case ELIGIBILITYRESPONSE: return "This resource provides eligibility and plan details from the processing of an Eligibility resource.";
             case ENCOUNTER: return "An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.";
+            case ENDPOINT: return "The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.";
             case ENROLLMENTREQUEST: return "This resource provides the insurance enrollment details to the insurer regarding a specified coverage.";
             case ENROLLMENTRESPONSE: return "This resource provides enrollment and plan details from the processing of an Enrollment resource.";
             case EPISODEOFCARE: return "An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.";
@@ -8877,13 +9166,12 @@ public class Enumerations {
             case GROUP: return "Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.";
             case GUIDANCERESPONSE: return "A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.";
             case HEALTHCARESERVICE: return "The details of a healthcare service available at a location.";
-            case IMAGINGEXCERPT: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingExcerpt resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
-            case IMAGINGOBJECTSELECTION: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
+            case IMAGINGMANIFEST: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances may have been selected for a purpose, such as  conference, or consult.  Reflecting a range of sharing purposes, typical ImagingManifest resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); both a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
             case IMAGINGSTUDY: return "Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.";
             case IMMUNIZATION: return "Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.";
             case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts.";
-            case LIBRARY: return "The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.";
+            case LIBRARY: return "The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose exist knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.";
             case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
             case LOCATION: return "Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.";
@@ -8893,41 +9181,42 @@ public class Enumerations {
             case MEDICATION: return "This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.";
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
-            case MEDICATIONORDER: return "An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationOrder\" rather than \"MedicationPrescription\" to generalize the use across inpatient and outpatient settings as well as for care plans, etc.";
+            case MEDICATIONREQUEST: return "An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings as well as for care plans, etc and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
+            case MESSAGEDEFINITION: return "Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.";
             case MESSAGEHEADER: return "The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.";
-            case MODULEDEFINITION: return "The ModuleDefinition resource defines the data requirements for a quality artifact.";
             case NAMINGSYSTEM: return "A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a \"System\" used within the Identifier and Coding data types.";
-            case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
+            case NUTRITIONREQUEST: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
-            case ORDER: return "A request to perform an action.";
-            case ORDERRESPONSE: return "A response to an order.";
-            case ORDERSET: return "This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
             case PARAMETERS: return "This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.";
             case PATIENT: return "Demographics and other administrative information about an individual or animal receiving care or other health-related services.";
             case PAYMENTNOTICE: return "This resource provides the status of the payment for goods and services rendered, and the request and response resource references.";
             case PAYMENTRECONCILIATION: return "This resource provides payment details and claim references supporting a bulk payment.";
             case PERSON: return "Demographics and administrative information about a person independent of a specific health-related context.";
+            case PLANDEFINITION: return "This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.";
             case PRACTITIONER: return "A person who is directly or indirectly involved in the provisioning of healthcare.";
             case PRACTITIONERROLE: return "A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.";
             case PROCEDURE: return "An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.";
             case PROCEDUREREQUEST: return "A request for a procedure to be performed. May be a proposal or an order.";
             case PROCESSREQUEST: return "This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.";
             case PROCESSRESPONSE: return "This resource provides processing status, errors and notes from the processing of a resource.";
-            case PROTOCOL: return "A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.";
             case PROVENANCE: return "Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.";
             case QUESTIONNAIRE: return "A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case QUESTIONNAIRERESPONSE: return "A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case REFERRALREQUEST: return "Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.";
             case RELATEDPERSON: return "Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.";
-            case RESOURCE: return "--- Abstract Type! ---This is the base resource type for everything.";
+            case REQUESTGROUP: return "A group of related requests that can be used to capture intended activities that have inter-dependencies such as \"give this medication after that one\".";
+            case RESEARCHSTUDY: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
+            case RESEARCHSUBJECT: return "A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.";
+            case RESOURCE: return "This is the base resource type for everything.";
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slot(s) of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
-            case SEQUENCE: return "Variation and Sequence data.";
+            case SEQUENCE: return "Raw data describing a biological sequence.";
+            case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.";
@@ -8937,6 +9226,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "Record of delivery of what is supplied.";
             case SUPPLYREQUEST: return "A record of a request for a medication, substance or device used in the healthcare setting.";
             case TASK: return "A task to be performed.";
+            case TESTREPORT: return "TestReport is a resource that includes summary information on the results of executing a TestScript.";
             case TESTSCRIPT: return "TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.";
             case VALUESET: return "A value set specifies a set of codes drawn from one or more code systems.";
             case VISIONPRESCRIPTION: return "An authorization for the supply of glasses and/or contact lenses to a patient.";
@@ -8946,6 +9236,7 @@ public class Enumerations {
         public String getDisplay() {
           switch (this) {
             case ACCOUNT: return "Account";
+            case ACTIVITYDEFINITION: return "ActivityDefinition";
             case ALLERGYINTOLERANCE: return "AllergyIntolerance";
             case APPOINTMENT: return "Appointment";
             case APPOINTMENTRESPONSE: return "AppointmentResponse";
@@ -8954,6 +9245,7 @@ public class Enumerations {
             case BINARY: return "Binary";
             case BODYSITE: return "BodySite";
             case BUNDLE: return "Bundle";
+            case CAPABILITYSTATEMENT: return "CapabilityStatement";
             case CAREPLAN: return "CarePlan";
             case CARETEAM: return "CareTeam";
             case CLAIM: return "Claim";
@@ -8966,26 +9258,25 @@ public class Enumerations {
             case COMPOSITION: return "Composition";
             case CONCEPTMAP: return "ConceptMap";
             case CONDITION: return "Condition";
-            case CONFORMANCE: return "Conformance";
+            case CONSENT: return "Consent";
             case CONTRACT: return "Contract";
             case COVERAGE: return "Coverage";
             case DATAELEMENT: return "DataElement";
-            case DECISIONSUPPORTRULE: return "DecisionSupportRule";
-            case DECISIONSUPPORTSERVICEMODULE: return "DecisionSupportServiceModule";
             case DETECTEDISSUE: return "DetectedIssue";
             case DEVICE: return "Device";
             case DEVICECOMPONENT: return "DeviceComponent";
             case DEVICEMETRIC: return "DeviceMetric";
             case DEVICEUSEREQUEST: return "DeviceUseRequest";
             case DEVICEUSESTATEMENT: return "DeviceUseStatement";
-            case DIAGNOSTICORDER: return "DiagnosticOrder";
             case DIAGNOSTICREPORT: return "DiagnosticReport";
+            case DIAGNOSTICREQUEST: return "DiagnosticRequest";
             case DOCUMENTMANIFEST: return "DocumentManifest";
             case DOCUMENTREFERENCE: return "DocumentReference";
             case DOMAINRESOURCE: return "DomainResource";
             case ELIGIBILITYREQUEST: return "EligibilityRequest";
             case ELIGIBILITYRESPONSE: return "EligibilityResponse";
             case ENCOUNTER: return "Encounter";
+            case ENDPOINT: return "Endpoint";
             case ENROLLMENTREQUEST: return "EnrollmentRequest";
             case ENROLLMENTRESPONSE: return "EnrollmentResponse";
             case EPISODEOFCARE: return "EpisodeOfCare";
@@ -8997,8 +9288,7 @@ public class Enumerations {
             case GROUP: return "Group";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
-            case IMAGINGEXCERPT: return "ImagingExcerpt";
-            case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
+            case IMAGINGMANIFEST: return "ImagingManifest";
             case IMAGINGSTUDY: return "ImagingStudy";
             case IMMUNIZATION: return "Immunization";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
@@ -9013,41 +9303,42 @@ public class Enumerations {
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
-            case MEDICATIONORDER: return "MedicationOrder";
+            case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
+            case MESSAGEDEFINITION: return "MessageDefinition";
             case MESSAGEHEADER: return "MessageHeader";
-            case MODULEDEFINITION: return "ModuleDefinition";
             case NAMINGSYSTEM: return "NamingSystem";
-            case NUTRITIONORDER: return "NutritionOrder";
+            case NUTRITIONREQUEST: return "NutritionRequest";
             case OBSERVATION: return "Observation";
             case OPERATIONDEFINITION: return "OperationDefinition";
             case OPERATIONOUTCOME: return "OperationOutcome";
-            case ORDER: return "Order";
-            case ORDERRESPONSE: return "OrderResponse";
-            case ORDERSET: return "OrderSet";
             case ORGANIZATION: return "Organization";
             case PARAMETERS: return "Parameters";
             case PATIENT: return "Patient";
             case PAYMENTNOTICE: return "PaymentNotice";
             case PAYMENTRECONCILIATION: return "PaymentReconciliation";
             case PERSON: return "Person";
+            case PLANDEFINITION: return "PlanDefinition";
             case PRACTITIONER: return "Practitioner";
             case PRACTITIONERROLE: return "PractitionerRole";
             case PROCEDURE: return "Procedure";
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
-            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
             case REFERRALREQUEST: return "ReferralRequest";
             case RELATEDPERSON: return "RelatedPerson";
+            case REQUESTGROUP: return "RequestGroup";
+            case RESEARCHSTUDY: return "ResearchStudy";
+            case RESEARCHSUBJECT: return "ResearchSubject";
             case RESOURCE: return "Resource";
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
+            case SERVICEDEFINITION: return "ServiceDefinition";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -9057,6 +9348,7 @@ public class Enumerations {
             case SUPPLYDELIVERY: return "SupplyDelivery";
             case SUPPLYREQUEST: return "SupplyRequest";
             case TASK: return "Task";
+            case TESTREPORT: return "TestReport";
             case TESTSCRIPT: return "TestScript";
             case VALUESET: return "ValueSet";
             case VISIONPRESCRIPTION: return "VisionPrescription";
@@ -9072,6 +9364,8 @@ public class Enumerations {
                 return null;
         if ("Account".equals(codeString))
           return ResourceType.ACCOUNT;
+        if ("ActivityDefinition".equals(codeString))
+          return ResourceType.ACTIVITYDEFINITION;
         if ("AllergyIntolerance".equals(codeString))
           return ResourceType.ALLERGYINTOLERANCE;
         if ("Appointment".equals(codeString))
@@ -9088,6 +9382,8 @@ public class Enumerations {
           return ResourceType.BODYSITE;
         if ("Bundle".equals(codeString))
           return ResourceType.BUNDLE;
+        if ("CapabilityStatement".equals(codeString))
+          return ResourceType.CAPABILITYSTATEMENT;
         if ("CarePlan".equals(codeString))
           return ResourceType.CAREPLAN;
         if ("CareTeam".equals(codeString))
@@ -9112,18 +9408,14 @@ public class Enumerations {
           return ResourceType.CONCEPTMAP;
         if ("Condition".equals(codeString))
           return ResourceType.CONDITION;
-        if ("Conformance".equals(codeString))
-          return ResourceType.CONFORMANCE;
+        if ("Consent".equals(codeString))
+          return ResourceType.CONSENT;
         if ("Contract".equals(codeString))
           return ResourceType.CONTRACT;
         if ("Coverage".equals(codeString))
           return ResourceType.COVERAGE;
         if ("DataElement".equals(codeString))
           return ResourceType.DATAELEMENT;
-        if ("DecisionSupportRule".equals(codeString))
-          return ResourceType.DECISIONSUPPORTRULE;
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return ResourceType.DECISIONSUPPORTSERVICEMODULE;
         if ("DetectedIssue".equals(codeString))
           return ResourceType.DETECTEDISSUE;
         if ("Device".equals(codeString))
@@ -9136,10 +9428,10 @@ public class Enumerations {
           return ResourceType.DEVICEUSEREQUEST;
         if ("DeviceUseStatement".equals(codeString))
           return ResourceType.DEVICEUSESTATEMENT;
-        if ("DiagnosticOrder".equals(codeString))
-          return ResourceType.DIAGNOSTICORDER;
         if ("DiagnosticReport".equals(codeString))
           return ResourceType.DIAGNOSTICREPORT;
+        if ("DiagnosticRequest".equals(codeString))
+          return ResourceType.DIAGNOSTICREQUEST;
         if ("DocumentManifest".equals(codeString))
           return ResourceType.DOCUMENTMANIFEST;
         if ("DocumentReference".equals(codeString))
@@ -9152,6 +9444,8 @@ public class Enumerations {
           return ResourceType.ELIGIBILITYRESPONSE;
         if ("Encounter".equals(codeString))
           return ResourceType.ENCOUNTER;
+        if ("Endpoint".equals(codeString))
+          return ResourceType.ENDPOINT;
         if ("EnrollmentRequest".equals(codeString))
           return ResourceType.ENROLLMENTREQUEST;
         if ("EnrollmentResponse".equals(codeString))
@@ -9174,10 +9468,8 @@ public class Enumerations {
           return ResourceType.GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
           return ResourceType.HEALTHCARESERVICE;
-        if ("ImagingExcerpt".equals(codeString))
-          return ResourceType.IMAGINGEXCERPT;
-        if ("ImagingObjectSelection".equals(codeString))
-          return ResourceType.IMAGINGOBJECTSELECTION;
+        if ("ImagingManifest".equals(codeString))
+          return ResourceType.IMAGINGMANIFEST;
         if ("ImagingStudy".equals(codeString))
           return ResourceType.IMAGINGSTUDY;
         if ("Immunization".equals(codeString))
@@ -9206,30 +9498,24 @@ public class Enumerations {
           return ResourceType.MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return ResourceType.MEDICATIONDISPENSE;
-        if ("MedicationOrder".equals(codeString))
-          return ResourceType.MEDICATIONORDER;
+        if ("MedicationRequest".equals(codeString))
+          return ResourceType.MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
           return ResourceType.MEDICATIONSTATEMENT;
+        if ("MessageDefinition".equals(codeString))
+          return ResourceType.MESSAGEDEFINITION;
         if ("MessageHeader".equals(codeString))
           return ResourceType.MESSAGEHEADER;
-        if ("ModuleDefinition".equals(codeString))
-          return ResourceType.MODULEDEFINITION;
         if ("NamingSystem".equals(codeString))
           return ResourceType.NAMINGSYSTEM;
-        if ("NutritionOrder".equals(codeString))
-          return ResourceType.NUTRITIONORDER;
+        if ("NutritionRequest".equals(codeString))
+          return ResourceType.NUTRITIONREQUEST;
         if ("Observation".equals(codeString))
           return ResourceType.OBSERVATION;
         if ("OperationDefinition".equals(codeString))
           return ResourceType.OPERATIONDEFINITION;
         if ("OperationOutcome".equals(codeString))
           return ResourceType.OPERATIONOUTCOME;
-        if ("Order".equals(codeString))
-          return ResourceType.ORDER;
-        if ("OrderResponse".equals(codeString))
-          return ResourceType.ORDERRESPONSE;
-        if ("OrderSet".equals(codeString))
-          return ResourceType.ORDERSET;
         if ("Organization".equals(codeString))
           return ResourceType.ORGANIZATION;
         if ("Parameters".equals(codeString))
@@ -9242,6 +9528,8 @@ public class Enumerations {
           return ResourceType.PAYMENTRECONCILIATION;
         if ("Person".equals(codeString))
           return ResourceType.PERSON;
+        if ("PlanDefinition".equals(codeString))
+          return ResourceType.PLANDEFINITION;
         if ("Practitioner".equals(codeString))
           return ResourceType.PRACTITIONER;
         if ("PractitionerRole".equals(codeString))
@@ -9254,8 +9542,6 @@ public class Enumerations {
           return ResourceType.PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return ResourceType.PROCESSRESPONSE;
-        if ("Protocol".equals(codeString))
-          return ResourceType.PROTOCOL;
         if ("Provenance".equals(codeString))
           return ResourceType.PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -9266,6 +9552,12 @@ public class Enumerations {
           return ResourceType.REFERRALREQUEST;
         if ("RelatedPerson".equals(codeString))
           return ResourceType.RELATEDPERSON;
+        if ("RequestGroup".equals(codeString))
+          return ResourceType.REQUESTGROUP;
+        if ("ResearchStudy".equals(codeString))
+          return ResourceType.RESEARCHSTUDY;
+        if ("ResearchSubject".equals(codeString))
+          return ResourceType.RESEARCHSUBJECT;
         if ("Resource".equals(codeString))
           return ResourceType.RESOURCE;
         if ("RiskAssessment".equals(codeString))
@@ -9276,6 +9568,8 @@ public class Enumerations {
           return ResourceType.SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return ResourceType.SEQUENCE;
+        if ("ServiceDefinition".equals(codeString))
+          return ResourceType.SERVICEDEFINITION;
         if ("Slot".equals(codeString))
           return ResourceType.SLOT;
         if ("Specimen".equals(codeString))
@@ -9294,6 +9588,8 @@ public class Enumerations {
           return ResourceType.SUPPLYREQUEST;
         if ("Task".equals(codeString))
           return ResourceType.TASK;
+        if ("TestReport".equals(codeString))
+          return ResourceType.TESTREPORT;
         if ("TestScript".equals(codeString))
           return ResourceType.TESTSCRIPT;
         if ("ValueSet".equals(codeString))
@@ -9310,6 +9606,8 @@ public class Enumerations {
             return null;
         if ("Account".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.ACCOUNT);
+        if ("ActivityDefinition".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.ACTIVITYDEFINITION);
         if ("AllergyIntolerance".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.ALLERGYINTOLERANCE);
         if ("Appointment".equals(codeString))
@@ -9326,6 +9624,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.BODYSITE);
         if ("Bundle".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.BUNDLE);
+        if ("CapabilityStatement".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.CAPABILITYSTATEMENT);
         if ("CarePlan".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.CAREPLAN);
         if ("CareTeam".equals(codeString))
@@ -9350,18 +9650,14 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.CONCEPTMAP);
         if ("Condition".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.CONDITION);
-        if ("Conformance".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.CONFORMANCE);
+        if ("Consent".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.CONSENT);
         if ("Contract".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.CONTRACT);
         if ("Coverage".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.COVERAGE);
         if ("DataElement".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.DATAELEMENT);
-        if ("DecisionSupportRule".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.DECISIONSUPPORTRULE);
-        if ("DecisionSupportServiceModule".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.DECISIONSUPPORTSERVICEMODULE);
         if ("DetectedIssue".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.DETECTEDISSUE);
         if ("Device".equals(codeString))
@@ -9374,10 +9670,10 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.DEVICEUSEREQUEST);
         if ("DeviceUseStatement".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.DEVICEUSESTATEMENT);
-        if ("DiagnosticOrder".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.DIAGNOSTICORDER);
         if ("DiagnosticReport".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.DIAGNOSTICREPORT);
+        if ("DiagnosticRequest".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.DIAGNOSTICREQUEST);
         if ("DocumentManifest".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.DOCUMENTMANIFEST);
         if ("DocumentReference".equals(codeString))
@@ -9390,6 +9686,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.ELIGIBILITYRESPONSE);
         if ("Encounter".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.ENCOUNTER);
+        if ("Endpoint".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.ENDPOINT);
         if ("EnrollmentRequest".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.ENROLLMENTREQUEST);
         if ("EnrollmentResponse".equals(codeString))
@@ -9412,10 +9710,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.GUIDANCERESPONSE);
         if ("HealthcareService".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.HEALTHCARESERVICE);
-        if ("ImagingExcerpt".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.IMAGINGEXCERPT);
-        if ("ImagingObjectSelection".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.IMAGINGOBJECTSELECTION);
+        if ("ImagingManifest".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.IMAGINGMANIFEST);
         if ("ImagingStudy".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.IMAGINGSTUDY);
         if ("Immunization".equals(codeString))
@@ -9444,30 +9740,24 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.MEDICATIONADMINISTRATION);
         if ("MedicationDispense".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.MEDICATIONDISPENSE);
-        if ("MedicationOrder".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.MEDICATIONORDER);
+        if ("MedicationRequest".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.MEDICATIONREQUEST);
         if ("MedicationStatement".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.MEDICATIONSTATEMENT);
+        if ("MessageDefinition".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.MESSAGEDEFINITION);
         if ("MessageHeader".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.MESSAGEHEADER);
-        if ("ModuleDefinition".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.MODULEDEFINITION);
         if ("NamingSystem".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.NAMINGSYSTEM);
-        if ("NutritionOrder".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.NUTRITIONORDER);
+        if ("NutritionRequest".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.NUTRITIONREQUEST);
         if ("Observation".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.OBSERVATION);
         if ("OperationDefinition".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.OPERATIONDEFINITION);
         if ("OperationOutcome".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.OPERATIONOUTCOME);
-        if ("Order".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.ORDER);
-        if ("OrderResponse".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.ORDERRESPONSE);
-        if ("OrderSet".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.ORDERSET);
         if ("Organization".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.ORGANIZATION);
         if ("Parameters".equals(codeString))
@@ -9480,6 +9770,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.PAYMENTRECONCILIATION);
         if ("Person".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.PERSON);
+        if ("PlanDefinition".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.PLANDEFINITION);
         if ("Practitioner".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.PRACTITIONER);
         if ("PractitionerRole".equals(codeString))
@@ -9492,8 +9784,6 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.PROCESSREQUEST);
         if ("ProcessResponse".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.PROCESSRESPONSE);
-        if ("Protocol".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.PROTOCOL);
         if ("Provenance".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.PROVENANCE);
         if ("Questionnaire".equals(codeString))
@@ -9504,6 +9794,12 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.REFERRALREQUEST);
         if ("RelatedPerson".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.RELATEDPERSON);
+        if ("RequestGroup".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.REQUESTGROUP);
+        if ("ResearchStudy".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.RESEARCHSTUDY);
+        if ("ResearchSubject".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.RESEARCHSUBJECT);
         if ("Resource".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.RESOURCE);
         if ("RiskAssessment".equals(codeString))
@@ -9514,6 +9810,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.SEARCHPARAMETER);
         if ("Sequence".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.SEQUENCE);
+        if ("ServiceDefinition".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.SERVICEDEFINITION);
         if ("Slot".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.SLOT);
         if ("Specimen".equals(codeString))
@@ -9532,6 +9830,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.SUPPLYREQUEST);
         if ("Task".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.TASK);
+        if ("TestReport".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.TESTREPORT);
         if ("TestScript".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.TESTSCRIPT);
         if ("ValueSet".equals(codeString))
@@ -9543,6 +9843,8 @@ public class Enumerations {
     public String toCode(ResourceType code) {
       if (code == ResourceType.ACCOUNT)
         return "Account";
+      if (code == ResourceType.ACTIVITYDEFINITION)
+        return "ActivityDefinition";
       if (code == ResourceType.ALLERGYINTOLERANCE)
         return "AllergyIntolerance";
       if (code == ResourceType.APPOINTMENT)
@@ -9559,6 +9861,8 @@ public class Enumerations {
         return "BodySite";
       if (code == ResourceType.BUNDLE)
         return "Bundle";
+      if (code == ResourceType.CAPABILITYSTATEMENT)
+        return "CapabilityStatement";
       if (code == ResourceType.CAREPLAN)
         return "CarePlan";
       if (code == ResourceType.CARETEAM)
@@ -9583,18 +9887,14 @@ public class Enumerations {
         return "ConceptMap";
       if (code == ResourceType.CONDITION)
         return "Condition";
-      if (code == ResourceType.CONFORMANCE)
-        return "Conformance";
+      if (code == ResourceType.CONSENT)
+        return "Consent";
       if (code == ResourceType.CONTRACT)
         return "Contract";
       if (code == ResourceType.COVERAGE)
         return "Coverage";
       if (code == ResourceType.DATAELEMENT)
         return "DataElement";
-      if (code == ResourceType.DECISIONSUPPORTRULE)
-        return "DecisionSupportRule";
-      if (code == ResourceType.DECISIONSUPPORTSERVICEMODULE)
-        return "DecisionSupportServiceModule";
       if (code == ResourceType.DETECTEDISSUE)
         return "DetectedIssue";
       if (code == ResourceType.DEVICE)
@@ -9607,10 +9907,10 @@ public class Enumerations {
         return "DeviceUseRequest";
       if (code == ResourceType.DEVICEUSESTATEMENT)
         return "DeviceUseStatement";
-      if (code == ResourceType.DIAGNOSTICORDER)
-        return "DiagnosticOrder";
       if (code == ResourceType.DIAGNOSTICREPORT)
         return "DiagnosticReport";
+      if (code == ResourceType.DIAGNOSTICREQUEST)
+        return "DiagnosticRequest";
       if (code == ResourceType.DOCUMENTMANIFEST)
         return "DocumentManifest";
       if (code == ResourceType.DOCUMENTREFERENCE)
@@ -9623,6 +9923,8 @@ public class Enumerations {
         return "EligibilityResponse";
       if (code == ResourceType.ENCOUNTER)
         return "Encounter";
+      if (code == ResourceType.ENDPOINT)
+        return "Endpoint";
       if (code == ResourceType.ENROLLMENTREQUEST)
         return "EnrollmentRequest";
       if (code == ResourceType.ENROLLMENTRESPONSE)
@@ -9645,10 +9947,8 @@ public class Enumerations {
         return "GuidanceResponse";
       if (code == ResourceType.HEALTHCARESERVICE)
         return "HealthcareService";
-      if (code == ResourceType.IMAGINGEXCERPT)
-        return "ImagingExcerpt";
-      if (code == ResourceType.IMAGINGOBJECTSELECTION)
-        return "ImagingObjectSelection";
+      if (code == ResourceType.IMAGINGMANIFEST)
+        return "ImagingManifest";
       if (code == ResourceType.IMAGINGSTUDY)
         return "ImagingStudy";
       if (code == ResourceType.IMMUNIZATION)
@@ -9677,30 +9977,24 @@ public class Enumerations {
         return "MedicationAdministration";
       if (code == ResourceType.MEDICATIONDISPENSE)
         return "MedicationDispense";
-      if (code == ResourceType.MEDICATIONORDER)
-        return "MedicationOrder";
+      if (code == ResourceType.MEDICATIONREQUEST)
+        return "MedicationRequest";
       if (code == ResourceType.MEDICATIONSTATEMENT)
         return "MedicationStatement";
+      if (code == ResourceType.MESSAGEDEFINITION)
+        return "MessageDefinition";
       if (code == ResourceType.MESSAGEHEADER)
         return "MessageHeader";
-      if (code == ResourceType.MODULEDEFINITION)
-        return "ModuleDefinition";
       if (code == ResourceType.NAMINGSYSTEM)
         return "NamingSystem";
-      if (code == ResourceType.NUTRITIONORDER)
-        return "NutritionOrder";
+      if (code == ResourceType.NUTRITIONREQUEST)
+        return "NutritionRequest";
       if (code == ResourceType.OBSERVATION)
         return "Observation";
       if (code == ResourceType.OPERATIONDEFINITION)
         return "OperationDefinition";
       if (code == ResourceType.OPERATIONOUTCOME)
         return "OperationOutcome";
-      if (code == ResourceType.ORDER)
-        return "Order";
-      if (code == ResourceType.ORDERRESPONSE)
-        return "OrderResponse";
-      if (code == ResourceType.ORDERSET)
-        return "OrderSet";
       if (code == ResourceType.ORGANIZATION)
         return "Organization";
       if (code == ResourceType.PARAMETERS)
@@ -9713,6 +10007,8 @@ public class Enumerations {
         return "PaymentReconciliation";
       if (code == ResourceType.PERSON)
         return "Person";
+      if (code == ResourceType.PLANDEFINITION)
+        return "PlanDefinition";
       if (code == ResourceType.PRACTITIONER)
         return "Practitioner";
       if (code == ResourceType.PRACTITIONERROLE)
@@ -9725,8 +10021,6 @@ public class Enumerations {
         return "ProcessRequest";
       if (code == ResourceType.PROCESSRESPONSE)
         return "ProcessResponse";
-      if (code == ResourceType.PROTOCOL)
-        return "Protocol";
       if (code == ResourceType.PROVENANCE)
         return "Provenance";
       if (code == ResourceType.QUESTIONNAIRE)
@@ -9737,6 +10031,12 @@ public class Enumerations {
         return "ReferralRequest";
       if (code == ResourceType.RELATEDPERSON)
         return "RelatedPerson";
+      if (code == ResourceType.REQUESTGROUP)
+        return "RequestGroup";
+      if (code == ResourceType.RESEARCHSTUDY)
+        return "ResearchStudy";
+      if (code == ResourceType.RESEARCHSUBJECT)
+        return "ResearchSubject";
       if (code == ResourceType.RESOURCE)
         return "Resource";
       if (code == ResourceType.RISKASSESSMENT)
@@ -9747,6 +10047,8 @@ public class Enumerations {
         return "SearchParameter";
       if (code == ResourceType.SEQUENCE)
         return "Sequence";
+      if (code == ResourceType.SERVICEDEFINITION)
+        return "ServiceDefinition";
       if (code == ResourceType.SLOT)
         return "Slot";
       if (code == ResourceType.SPECIMEN)
@@ -9765,6 +10067,8 @@ public class Enumerations {
         return "SupplyRequest";
       if (code == ResourceType.TASK)
         return "Task";
+      if (code == ResourceType.TESTREPORT)
+        return "TestReport";
       if (code == ResourceType.TESTSCRIPT)
         return "TestScript";
       if (code == ResourceType.VALUESET)

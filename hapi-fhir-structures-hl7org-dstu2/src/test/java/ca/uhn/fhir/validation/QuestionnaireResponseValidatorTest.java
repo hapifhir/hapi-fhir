@@ -23,13 +23,15 @@ import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.utils.WorkerContext;
 import org.hl7.fhir.instance.validation.QuestionnaireResponseValidator;
 import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 
 public class QuestionnaireResponseValidatorTest {
-  private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorTest.class);
   private QuestionnaireResponseValidator myVal;
@@ -40,6 +42,11 @@ public class QuestionnaireResponseValidatorTest {
   public void before() {
     myWorkerCtx = new WorkerContext();
     myVal = new QuestionnaireResponseValidator(myWorkerCtx);
+  }
+
+  @AfterClass
+  public static void afterClassClearContext() {
+    TestUtil.clearAllStaticFieldsForUnitTest();
   }
 
   @Test

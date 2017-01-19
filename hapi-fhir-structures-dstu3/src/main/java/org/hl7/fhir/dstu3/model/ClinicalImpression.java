@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called "ClinicalImpression" rather than "ClinicalAssessment" to avoid confusion with the recording of assessment tools such as Apgar score.
  */
@@ -52,7 +52,7 @@ public class ClinicalImpression extends DomainResource {
         /**
          * The assessment is still on-going and results are not yet final.
          */
-        INPROGRESS, 
+        DRAFT, 
         /**
          * The assessment is done and the results are final.
          */
@@ -68,8 +68,8 @@ public class ClinicalImpression extends DomainResource {
         public static ClinicalImpressionStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("in-progress".equals(codeString))
-          return INPROGRESS;
+        if ("draft".equals(codeString))
+          return DRAFT;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -81,7 +81,7 @@ public class ClinicalImpression extends DomainResource {
         }
         public String toCode() {
           switch (this) {
-            case INPROGRESS: return "in-progress";
+            case DRAFT: return "draft";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
@@ -89,7 +89,7 @@ public class ClinicalImpression extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "http://hl7.org/fhir/clinical-impression-status";
+            case DRAFT: return "http://hl7.org/fhir/clinical-impression-status";
             case COMPLETED: return "http://hl7.org/fhir/clinical-impression-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/clinical-impression-status";
             default: return "?";
@@ -97,7 +97,7 @@ public class ClinicalImpression extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "The assessment is still on-going and results are not yet final.";
+            case DRAFT: return "The assessment is still on-going and results are not yet final.";
             case COMPLETED: return "The assessment is done and the results are final.";
             case ENTEREDINERROR: return "This assessment was never actually done and the record is erroneous (e.g. Wrong patient).";
             default: return "?";
@@ -105,7 +105,7 @@ public class ClinicalImpression extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case INPROGRESS: return "In progress";
+            case DRAFT: return "In progress";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
@@ -118,8 +118,8 @@ public class ClinicalImpression extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("in-progress".equals(codeString))
-          return ClinicalImpressionStatus.INPROGRESS;
+        if ("draft".equals(codeString))
+          return ClinicalImpressionStatus.DRAFT;
         if ("completed".equals(codeString))
           return ClinicalImpressionStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -132,8 +132,8 @@ public class ClinicalImpression extends DomainResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("in-progress".equals(codeString))
-          return new Enumeration<ClinicalImpressionStatus>(this, ClinicalImpressionStatus.INPROGRESS);
+        if ("draft".equals(codeString))
+          return new Enumeration<ClinicalImpressionStatus>(this, ClinicalImpressionStatus.DRAFT);
         if ("completed".equals(codeString))
           return new Enumeration<ClinicalImpressionStatus>(this, ClinicalImpressionStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
@@ -141,8 +141,8 @@ public class ClinicalImpression extends DomainResource {
         throw new FHIRException("Unknown ClinicalImpressionStatus code '"+codeString+"'");
         }
     public String toCode(ClinicalImpressionStatus code) {
-      if (code == ClinicalImpressionStatus.INPROGRESS)
-        return "in-progress";
+      if (code == ClinicalImpressionStatus.DRAFT)
+        return "draft";
       if (code == ClinicalImpressionStatus.COMPLETED)
         return "completed";
       if (code == ClinicalImpressionStatus.ENTEREDINERROR)
@@ -155,7 +155,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     @Block()
-    public static class ClinicalImpressionInvestigationsComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ClinicalImpressionInvestigationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.
          */
@@ -167,7 +167,7 @@ public class ClinicalImpression extends DomainResource {
         /**
          * A record of a specific investigation that was undertaken.
          */
-        @Child(name = "item", type = {Observation.class, QuestionnaireResponse.class, FamilyMemberHistory.class, DiagnosticReport.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "item", type = {Observation.class, QuestionnaireResponse.class, FamilyMemberHistory.class, DiagnosticReport.class, RiskAssessment.class, ImagingStudy.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Record of a specific investigation", formalDefinition="A record of a specific investigation that was undertaken." )
         protected List<Reference> item;
         /**
@@ -181,14 +181,14 @@ public class ClinicalImpression extends DomainResource {
     /**
      * Constructor
      */
-      public ClinicalImpressionInvestigationsComponent() {
+      public ClinicalImpressionInvestigationComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public ClinicalImpressionInvestigationsComponent(CodeableConcept code) {
+      public ClinicalImpressionInvestigationComponent(CodeableConcept code) {
         super();
         this.code = code;
       }
@@ -199,7 +199,7 @@ public class ClinicalImpression extends DomainResource {
         public CodeableConcept getCode() { 
           if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ClinicalImpressionInvestigationsComponent.code");
+              throw new Error("Attempt to auto-create ClinicalImpressionInvestigationComponent.code");
             else if (Configuration.doAutoCreate())
               this.code = new CodeableConcept(); // cc
           return this.code;
@@ -212,7 +212,7 @@ public class ClinicalImpression extends DomainResource {
         /**
          * @param value {@link #code} (A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.)
          */
-        public ClinicalImpressionInvestigationsComponent setCode(CodeableConcept value) { 
+        public ClinicalImpressionInvestigationComponent setCode(CodeableConcept value) { 
           this.code = value;
           return this;
         }
@@ -229,7 +229,7 @@ public class ClinicalImpression extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ClinicalImpressionInvestigationsComponent setItem(List<Reference> theItem) { 
+        public ClinicalImpressionInvestigationComponent setItem(List<Reference> theItem) { 
           this.item = theItem;
           return this;
         }
@@ -251,7 +251,7 @@ public class ClinicalImpression extends DomainResource {
           return t;
         }
 
-        public ClinicalImpressionInvestigationsComponent addItem(Reference t) { //3
+        public ClinicalImpressionInvestigationComponent addItem(Reference t) { //3
           if (t == null)
             return this;
           if (this.item == null)
@@ -283,7 +283,7 @@ public class ClinicalImpression extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "CodeableConcept", "A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("item", "Reference(Observation|QuestionnaireResponse|FamilyMemberHistory|DiagnosticReport)", "A record of a specific investigation that was undertaken.", 0, java.lang.Integer.MAX_VALUE, item));
+          childrenList.add(new Property("item", "Reference(Observation|QuestionnaireResponse|FamilyMemberHistory|DiagnosticReport|RiskAssessment|ImagingStudy)", "A record of a specific investigation that was undertaken.", 0, java.lang.Integer.MAX_VALUE, item));
         }
 
       @Override
@@ -343,8 +343,8 @@ public class ClinicalImpression extends DomainResource {
           return super.addChild(name);
       }
 
-      public ClinicalImpressionInvestigationsComponent copy() {
-        ClinicalImpressionInvestigationsComponent dst = new ClinicalImpressionInvestigationsComponent();
+      public ClinicalImpressionInvestigationComponent copy() {
+        ClinicalImpressionInvestigationComponent dst = new ClinicalImpressionInvestigationComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         if (item != null) {
@@ -359,9 +359,9 @@ public class ClinicalImpression extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof ClinicalImpressionInvestigationsComponent))
+        if (!(other instanceof ClinicalImpressionInvestigationComponent))
           return false;
-        ClinicalImpressionInvestigationsComponent o = (ClinicalImpressionInvestigationsComponent) other;
+        ClinicalImpressionInvestigationComponent o = (ClinicalImpressionInvestigationComponent) other;
         return compareDeep(code, o.code, true) && compareDeep(item, o.item, true);
       }
 
@@ -369,9 +369,9 @@ public class ClinicalImpression extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof ClinicalImpressionInvestigationsComponent))
+        if (!(other instanceof ClinicalImpressionInvestigationComponent))
           return false;
-        ClinicalImpressionInvestigationsComponent o = (ClinicalImpressionInvestigationsComponent) other;
+        ClinicalImpressionInvestigationComponent o = (ClinicalImpressionInvestigationComponent) other;
         return true;
       }
 
@@ -380,7 +380,7 @@ public class ClinicalImpression extends DomainResource {
       }
 
   public String fhirType() {
-    return "ClinicalImpression.investigations";
+    return "ClinicalImpression.investigation";
 
   }
 
@@ -389,21 +389,21 @@ public class ClinicalImpression extends DomainResource {
     @Block()
     public static class ClinicalImpressionFindingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Specific text of code for finding or diagnosis.
+         * Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.
          */
-        @Child(name = "item", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Specific text or code for finding", formalDefinition="Specific text of code for finding or diagnosis." )
+        @Child(name = "item", type = {CodeableConcept.class, Condition.class, Observation.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="What was found", formalDefinition="Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
-        protected CodeableConcept item;
+        protected Type item;
 
         /**
          * Which investigations support finding or diagnosis.
          */
-        @Child(name = "cause", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "basis", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Which investigations support finding", formalDefinition="Which investigations support finding or diagnosis." )
-        protected StringType cause;
+        protected StringType basis;
 
-        private static final long serialVersionUID = -888590978L;
+        private static final long serialVersionUID = 1690728236L;
 
     /**
      * Constructor
@@ -415,21 +415,42 @@ public class ClinicalImpression extends DomainResource {
     /**
      * Constructor
      */
-      public ClinicalImpressionFindingComponent(CodeableConcept item) {
+      public ClinicalImpressionFindingComponent(Type item) {
         super();
         this.item = item;
       }
 
         /**
-         * @return {@link #item} (Specific text of code for finding or diagnosis.)
+         * @return {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
          */
-        public CodeableConcept getItem() { 
-          if (this.item == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ClinicalImpressionFindingComponent.item");
-            else if (Configuration.doAutoCreate())
-              this.item = new CodeableConcept(); // cc
+        public Type getItem() { 
           return this.item;
+        }
+
+        /**
+         * @return {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         */
+        public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (!(this.item instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.item;
+        }
+
+        public boolean hasItemCodeableConcept() { 
+          return this.item instanceof CodeableConcept;
+        }
+
+        /**
+         * @return {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         */
+        public Reference getItemReference() throws FHIRException { 
+          if (!(this.item instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (Reference) this.item;
+        }
+
+        public boolean hasItemReference() { 
+          return this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -437,73 +458,73 @@ public class ClinicalImpression extends DomainResource {
         }
 
         /**
-         * @param value {@link #item} (Specific text of code for finding or diagnosis.)
+         * @param value {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
          */
-        public ClinicalImpressionFindingComponent setItem(CodeableConcept value) { 
+        public ClinicalImpressionFindingComponent setItem(Type value) { 
           this.item = value;
           return this;
         }
 
         /**
-         * @return {@link #cause} (Which investigations support finding or diagnosis.). This is the underlying object with id, value and extensions. The accessor "getCause" gives direct access to the value
+         * @return {@link #basis} (Which investigations support finding or diagnosis.). This is the underlying object with id, value and extensions. The accessor "getBasis" gives direct access to the value
          */
-        public StringType getCauseElement() { 
-          if (this.cause == null)
+        public StringType getBasisElement() { 
+          if (this.basis == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ClinicalImpressionFindingComponent.cause");
+              throw new Error("Attempt to auto-create ClinicalImpressionFindingComponent.basis");
             else if (Configuration.doAutoCreate())
-              this.cause = new StringType(); // bb
-          return this.cause;
+              this.basis = new StringType(); // bb
+          return this.basis;
         }
 
-        public boolean hasCauseElement() { 
-          return this.cause != null && !this.cause.isEmpty();
+        public boolean hasBasisElement() { 
+          return this.basis != null && !this.basis.isEmpty();
         }
 
-        public boolean hasCause() { 
-          return this.cause != null && !this.cause.isEmpty();
+        public boolean hasBasis() { 
+          return this.basis != null && !this.basis.isEmpty();
         }
 
         /**
-         * @param value {@link #cause} (Which investigations support finding or diagnosis.). This is the underlying object with id, value and extensions. The accessor "getCause" gives direct access to the value
+         * @param value {@link #basis} (Which investigations support finding or diagnosis.). This is the underlying object with id, value and extensions. The accessor "getBasis" gives direct access to the value
          */
-        public ClinicalImpressionFindingComponent setCauseElement(StringType value) { 
-          this.cause = value;
+        public ClinicalImpressionFindingComponent setBasisElement(StringType value) { 
+          this.basis = value;
           return this;
         }
 
         /**
          * @return Which investigations support finding or diagnosis.
          */
-        public String getCause() { 
-          return this.cause == null ? null : this.cause.getValue();
+        public String getBasis() { 
+          return this.basis == null ? null : this.basis.getValue();
         }
 
         /**
          * @param value Which investigations support finding or diagnosis.
          */
-        public ClinicalImpressionFindingComponent setCause(String value) { 
+        public ClinicalImpressionFindingComponent setBasis(String value) { 
           if (Utilities.noString(value))
-            this.cause = null;
+            this.basis = null;
           else {
-            if (this.cause == null)
-              this.cause = new StringType();
-            this.cause.setValue(value);
+            if (this.basis == null)
+              this.basis = new StringType();
+            this.basis.setValue(value);
           }
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("item", "CodeableConcept", "Specific text of code for finding or diagnosis.", 0, java.lang.Integer.MAX_VALUE, item));
-          childrenList.add(new Property("cause", "string", "Which investigations support finding or diagnosis.", 0, java.lang.Integer.MAX_VALUE, cause));
+          childrenList.add(new Property("item[x]", "CodeableConcept|Reference(Condition|Observation)", "Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, java.lang.Integer.MAX_VALUE, item));
+          childrenList.add(new Property("basis", "string", "Which investigations support finding or diagnosis.", 0, java.lang.Integer.MAX_VALUE, basis));
         }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // CodeableConcept
-        case 94434409: /*cause*/ return this.cause == null ? new Base[0] : new Base[] {this.cause}; // StringType
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // Type
+        case 93508670: /*basis*/ return this.basis == null ? new Base[0] : new Base[] {this.basis}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -513,10 +534,10 @@ public class ClinicalImpression extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3242771: // item
-          this.item = castToCodeableConcept(value); // CodeableConcept
+          this.item = castToType(value); // Type
           break;
-        case 94434409: // cause
-          this.cause = castToString(value); // StringType
+        case 93508670: // basis
+          this.basis = castToString(value); // StringType
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -525,10 +546,10 @@ public class ClinicalImpression extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("item"))
-          this.item = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("cause"))
-          this.cause = castToString(value); // StringType
+        if (name.equals("item[x]"))
+          this.item = castToType(value); // Type
+        else if (name.equals("basis"))
+          this.basis = castToString(value); // StringType
         else
           super.setProperty(name, value);
       }
@@ -536,8 +557,8 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3242771:  return getItem(); // CodeableConcept
-        case 94434409: throw new FHIRException("Cannot make property cause as it is not a complex type"); // StringType
+        case 2116201613:  return getItem(); // Type
+        case 93508670: throw new FHIRException("Cannot make property basis as it is not a complex type"); // StringType
         default: return super.makeProperty(hash, name);
         }
 
@@ -545,12 +566,16 @@ public class ClinicalImpression extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("item")) {
+        if (name.equals("itemCodeableConcept")) {
           this.item = new CodeableConcept();
           return this.item;
         }
-        else if (name.equals("cause")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.cause");
+        else if (name.equals("itemReference")) {
+          this.item = new Reference();
+          return this.item;
+        }
+        else if (name.equals("basis")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.basis");
         }
         else
           return super.addChild(name);
@@ -560,7 +585,7 @@ public class ClinicalImpression extends DomainResource {
         ClinicalImpressionFindingComponent dst = new ClinicalImpressionFindingComponent();
         copyValues(dst);
         dst.item = item == null ? null : item.copy();
-        dst.cause = cause == null ? null : cause.copy();
+        dst.basis = basis == null ? null : basis.copy();
         return dst;
       }
 
@@ -571,7 +596,7 @@ public class ClinicalImpression extends DomainResource {
         if (!(other instanceof ClinicalImpressionFindingComponent))
           return false;
         ClinicalImpressionFindingComponent o = (ClinicalImpressionFindingComponent) other;
-        return compareDeep(item, o.item, true) && compareDeep(cause, o.cause, true);
+        return compareDeep(item, o.item, true) && compareDeep(basis, o.basis, true);
       }
 
       @Override
@@ -581,11 +606,11 @@ public class ClinicalImpression extends DomainResource {
         if (!(other instanceof ClinicalImpressionFindingComponent))
           return false;
         ClinicalImpressionFindingComponent o = (ClinicalImpressionFindingComponent) other;
-        return compareValues(cause, o.cause, true);
+        return compareValues(basis, o.basis, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(item, cause);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(item, basis);
       }
 
   public String fhirType() {
@@ -595,231 +620,51 @@ public class ClinicalImpression extends DomainResource {
 
   }
 
-    @Block()
-    public static class ClinicalImpressionRuledOutComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Specific text of code for diagnosis.
-         */
-        @Child(name = "item", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Specific text of code for diagnosis", formalDefinition="Specific text of code for diagnosis." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
-        protected CodeableConcept item;
-
-        /**
-         * Grounds for elimination.
-         */
-        @Child(name = "reason", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Grounds for elimination", formalDefinition="Grounds for elimination." )
-        protected StringType reason;
-
-        private static final long serialVersionUID = -1001661243L;
+    /**
+     * A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Business identifier", formalDefinition="A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on." )
+    protected List<Identifier> identifier;
 
     /**
-     * Constructor
+     * Identifies the workflow status of the assessment.
      */
-      public ClinicalImpressionRuledOutComponent() {
-        super();
-      }
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="draft | completed | entered-in-error", formalDefinition="Identifies the workflow status of the assessment." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-impression-status")
+    protected Enumeration<ClinicalImpressionStatus> status;
 
     /**
-     * Constructor
+     * Categorizes the type of clinical assessment performed.
      */
-      public ClinicalImpressionRuledOutComponent(CodeableConcept item) {
-        super();
-        this.item = item;
-      }
-
-        /**
-         * @return {@link #item} (Specific text of code for diagnosis.)
-         */
-        public CodeableConcept getItem() { 
-          if (this.item == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ClinicalImpressionRuledOutComponent.item");
-            else if (Configuration.doAutoCreate())
-              this.item = new CodeableConcept(); // cc
-          return this.item;
-        }
-
-        public boolean hasItem() { 
-          return this.item != null && !this.item.isEmpty();
-        }
-
-        /**
-         * @param value {@link #item} (Specific text of code for diagnosis.)
-         */
-        public ClinicalImpressionRuledOutComponent setItem(CodeableConcept value) { 
-          this.item = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #reason} (Grounds for elimination.). This is the underlying object with id, value and extensions. The accessor "getReason" gives direct access to the value
-         */
-        public StringType getReasonElement() { 
-          if (this.reason == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ClinicalImpressionRuledOutComponent.reason");
-            else if (Configuration.doAutoCreate())
-              this.reason = new StringType(); // bb
-          return this.reason;
-        }
-
-        public boolean hasReasonElement() { 
-          return this.reason != null && !this.reason.isEmpty();
-        }
-
-        public boolean hasReason() { 
-          return this.reason != null && !this.reason.isEmpty();
-        }
-
-        /**
-         * @param value {@link #reason} (Grounds for elimination.). This is the underlying object with id, value and extensions. The accessor "getReason" gives direct access to the value
-         */
-        public ClinicalImpressionRuledOutComponent setReasonElement(StringType value) { 
-          this.reason = value;
-          return this;
-        }
-
-        /**
-         * @return Grounds for elimination.
-         */
-        public String getReason() { 
-          return this.reason == null ? null : this.reason.getValue();
-        }
-
-        /**
-         * @param value Grounds for elimination.
-         */
-        public ClinicalImpressionRuledOutComponent setReason(String value) { 
-          if (Utilities.noString(value))
-            this.reason = null;
-          else {
-            if (this.reason == null)
-              this.reason = new StringType();
-            this.reason.setValue(value);
-          }
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("item", "CodeableConcept", "Specific text of code for diagnosis.", 0, java.lang.Integer.MAX_VALUE, item));
-          childrenList.add(new Property("reason", "string", "Grounds for elimination.", 0, java.lang.Integer.MAX_VALUE, reason));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // CodeableConcept
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // StringType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3242771: // item
-          this.item = castToCodeableConcept(value); // CodeableConcept
-          break;
-        case -934964668: // reason
-          this.reason = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("item"))
-          this.item = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("reason"))
-          this.reason = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3242771:  return getItem(); // CodeableConcept
-        case -934964668: throw new FHIRException("Cannot make property reason as it is not a complex type"); // StringType
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("item")) {
-          this.item = new CodeableConcept();
-          return this.item;
-        }
-        else if (name.equals("reason")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.reason");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ClinicalImpressionRuledOutComponent copy() {
-        ClinicalImpressionRuledOutComponent dst = new ClinicalImpressionRuledOutComponent();
-        copyValues(dst);
-        dst.item = item == null ? null : item.copy();
-        dst.reason = reason == null ? null : reason.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ClinicalImpressionRuledOutComponent))
-          return false;
-        ClinicalImpressionRuledOutComponent o = (ClinicalImpressionRuledOutComponent) other;
-        return compareDeep(item, o.item, true) && compareDeep(reason, o.reason, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ClinicalImpressionRuledOutComponent))
-          return false;
-        ClinicalImpressionRuledOutComponent o = (ClinicalImpressionRuledOutComponent) other;
-        return compareValues(reason, o.reason, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(item, reason);
-      }
-
-  public String fhirType() {
-    return "ClinicalImpression.ruledOut";
-
-  }
-
-  }
+    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Kind of assessment performed", formalDefinition="Categorizes the type of clinical assessment performed." )
+    protected CodeableConcept code;
 
     /**
-     * The patient being assessed.
+     * A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.
      */
-    @Child(name = "patient", type = {Patient.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The patient being assessed", formalDefinition="The patient being assessed." )
-    protected Reference patient;
+    @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Why/how the assessment was performed", formalDefinition="A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it." )
+    protected StringType description;
 
     /**
-     * The actual object that is the target of the reference (The patient being assessed.)
+     * The patient or group of individuals assessed as part of this record.
      */
-    protected Patient patientTarget;
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Patient or group assessed", formalDefinition="The patient or group of individuals assessed as part of this record." )
+    protected Reference subject;
+
+    /**
+     * The actual object that is the target of the reference (The patient or group of individuals assessed as part of this record.)
+     */
+    protected Resource subjectTarget;
 
     /**
      * The clinician performing the assessment.
      */
-    @Child(name = "assessor", type = {Practitioner.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "assessor", type = {Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The clinician performing the assessment", formalDefinition="The clinician performing the assessment." )
     protected Reference assessor;
 
@@ -829,31 +674,35 @@ public class ClinicalImpression extends DomainResource {
     protected Practitioner assessorTarget;
 
     /**
-     * Identifies the workflow status of the assessment.
+     * Indicates when the documentation of the assessment was complete.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="in-progress | completed | entered-in-error", formalDefinition="Identifies the workflow status of the assessment." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-impression-status")
-    protected Enumeration<ClinicalImpressionStatus> status;
-
-    /**
-     * The point in time at which the assessment was concluded (not when it was recorded).
-     */
-    @Child(name = "date", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When the assessment occurred", formalDefinition="The point in time at which the assessment was concluded (not when it was recorded)." )
+    @Child(name = "date", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="When the assessment was documented", formalDefinition="Indicates when the documentation of the assessment was complete." )
     protected DateTimeType date;
 
     /**
-     * A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.
+     * The point in time or period over which the subject was assessed.
      */
-    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Why/how the assessment was performed", formalDefinition="A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it." )
-    protected StringType description;
+    @Child(name = "effective", type = {DateTimeType.class, Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Time of assessment", formalDefinition="The point in time or period over which the subject was assessed." )
+    protected Type effective;
+
+    /**
+     * The encounter or episode of care this impression was created as part of.
+     */
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Encounter or Episode created from", formalDefinition="The encounter or episode of care this impression was created as part of." )
+    protected Reference context;
+
+    /**
+     * The actual object that is the target of the reference (The encounter or episode of care this impression was created as part of.)
+     */
+    protected Resource contextTarget;
 
     /**
      * A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.
      */
-    @Child(name = "previous", type = {ClinicalImpression.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "previous", type = {ClinicalImpression.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Reference to last assessment", formalDefinition="A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes." )
     protected Reference previous;
 
@@ -863,100 +712,85 @@ public class ClinicalImpression extends DomainResource {
     protected ClinicalImpression previousTarget;
 
     /**
-     * This a list of the general problems/conditions for a patient.
+     * This a list of the relevant problems/conditions for a patient.
      */
-    @Child(name = "problem", type = {Condition.class, AllergyIntolerance.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="General assessment of patient state", formalDefinition="This a list of the general problems/conditions for a patient." )
+    @Child(name = "problem", type = {Condition.class, AllergyIntolerance.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Relevant impressions of patient state", formalDefinition="This a list of the relevant problems/conditions for a patient." )
     protected List<Reference> problem;
     /**
-     * The actual objects that are the target of the reference (This a list of the general problems/conditions for a patient.)
+     * The actual objects that are the target of the reference (This a list of the relevant problems/conditions for a patient.)
      */
     protected List<Resource> problemTarget;
 
 
     /**
-     * The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.
-     */
-    @Child(name = "trigger", type = {CodeableConcept.class, Reference.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Request or event that necessitated this assessment", formalDefinition="The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-findings")
-    protected Type trigger;
-
-    /**
      * One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.
      */
-    @Child(name = "investigations", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "investigation", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="One or more sets of investigations (signs, symptions, etc.)", formalDefinition="One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes." )
-    protected List<ClinicalImpressionInvestigationsComponent> investigations;
+    protected List<ClinicalImpressionInvestigationComponent> investigation;
 
     /**
      * Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.
      */
-    @Child(name = "protocol", type = {UriType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "protocol", type = {UriType.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Clinical Protocol followed", formalDefinition="Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis." )
-    protected UriType protocol;
+    protected List<UriType> protocol;
 
     /**
      * A text summary of the investigations and the diagnosis.
      */
-    @Child(name = "summary", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "summary", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Summary of the assessment", formalDefinition="A text summary of the investigations and the diagnosis." )
     protected StringType summary;
 
     /**
      * Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.
      */
-    @Child(name = "finding", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "finding", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Possible or likely findings and diagnoses", formalDefinition="Specific findings or diagnoses that was considered likely or relevant to ongoing treatment." )
     protected List<ClinicalImpressionFindingComponent> finding;
 
     /**
-     * Diagnoses/conditions resolved since the last assessment.
-     */
-    @Child(name = "resolved", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Diagnoses/conditions resolved since previous assessment", formalDefinition="Diagnoses/conditions resolved since the last assessment." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
-    protected List<CodeableConcept> resolved;
-
-    /**
-     * Diagnosis considered not possible.
-     */
-    @Child(name = "ruledOut", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Diagnosis considered not possible", formalDefinition="Diagnosis considered not possible." )
-    protected List<ClinicalImpressionRuledOutComponent> ruledOut;
-
-    /**
      * Estimate of likely outcome.
      */
-    @Child(name = "prognosis", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "prognosisCodeableConcept", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Estimate of likely outcome", formalDefinition="Estimate of likely outcome." )
-    protected StringType prognosis;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinicalimpression-prognosis")
+    protected List<CodeableConcept> prognosisCodeableConcept;
 
     /**
-     * Plan of action after assessment.
+     * RiskAssessment expressing likely outcome.
      */
-    @Child(name = "plan", type = {CarePlan.class, Appointment.class, CommunicationRequest.class, DeviceUseRequest.class, DiagnosticOrder.class, MedicationOrder.class, NutritionOrder.class, Order.class, ProcedureRequest.class, ProcessRequest.class, ReferralRequest.class, SupplyRequest.class, VisionPrescription.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Plan of action after assessment", formalDefinition="Plan of action after assessment." )
-    protected List<Reference> plan;
+    @Child(name = "prognosisReference", type = {RiskAssessment.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="RiskAssessment expressing likely outcome", formalDefinition="RiskAssessment expressing likely outcome." )
+    protected List<Reference> prognosisReference;
     /**
-     * The actual objects that are the target of the reference (Plan of action after assessment.)
+     * The actual objects that are the target of the reference (RiskAssessment expressing likely outcome.)
      */
-    protected List<Resource> planTarget;
+    protected List<RiskAssessment> prognosisReferenceTarget;
 
 
     /**
-     * Actions taken during assessment.
+     * Action taken as part of assessment procedure.
      */
-    @Child(name = "action", type = {ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationOrder.class, DiagnosticOrder.class, NutritionOrder.class, SupplyRequest.class, Appointment.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Actions taken during assessment", formalDefinition="Actions taken during assessment." )
+    @Child(name = "action", type = {ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationRequest.class, DiagnosticRequest.class, Appointment.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Action taken as part of assessment procedure", formalDefinition="Action taken as part of assessment procedure." )
     protected List<Reference> action;
     /**
-     * The actual objects that are the target of the reference (Actions taken during assessment.)
+     * The actual objects that are the target of the reference (Action taken as part of assessment procedure.)
      */
     protected List<Resource> actionTarget;
 
 
-    private static final long serialVersionUID = 1650458630L;
+    /**
+     * Commentary about the impression, typically recorded after the impression itself was made, though supplemental notes by the original author could also appear.
+     */
+    @Child(name = "note", type = {Annotation.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Comments made about the ClinicalImpression", formalDefinition="Commentary about the impression, typically recorded after the impression itself was made, though supplemental notes by the original author could also appear." )
+    protected List<Annotation> note;
+
+    private static final long serialVersionUID = 1406248163L;
 
   /**
    * Constructor
@@ -968,98 +802,63 @@ public class ClinicalImpression extends DomainResource {
   /**
    * Constructor
    */
-    public ClinicalImpression(Reference patient, Enumeration<ClinicalImpressionStatus> status) {
+    public ClinicalImpression(Enumeration<ClinicalImpressionStatus> status, Reference subject) {
       super();
-      this.patient = patient;
       this.status = status;
+      this.subject = subject;
     }
 
     /**
-     * @return {@link #patient} (The patient being assessed.)
+     * @return {@link #identifier} (A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.)
      */
-    public Reference getPatient() { 
-      if (this.patient == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ClinicalImpression.patient");
-        else if (Configuration.doAutoCreate())
-          this.patient = new Reference(); // cc
-      return this.patient;
-    }
-
-    public boolean hasPatient() { 
-      return this.patient != null && !this.patient.isEmpty();
+    public List<Identifier> getIdentifier() { 
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      return this.identifier;
     }
 
     /**
-     * @param value {@link #patient} (The patient being assessed.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ClinicalImpression setPatient(Reference value) { 
-      this.patient = value;
+    public ClinicalImpression setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
+    public boolean hasIdentifier() { 
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public ClinicalImpression addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
       return this;
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient being assessed.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public Patient getPatientTarget() { 
-      if (this.patientTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ClinicalImpression.patient");
-        else if (Configuration.doAutoCreate())
-          this.patientTarget = new Patient(); // aa
-      return this.patientTarget;
-    }
-
-    /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient being assessed.)
-     */
-    public ClinicalImpression setPatientTarget(Patient value) { 
-      this.patientTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #assessor} (The clinician performing the assessment.)
-     */
-    public Reference getAssessor() { 
-      if (this.assessor == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ClinicalImpression.assessor");
-        else if (Configuration.doAutoCreate())
-          this.assessor = new Reference(); // cc
-      return this.assessor;
-    }
-
-    public boolean hasAssessor() { 
-      return this.assessor != null && !this.assessor.isEmpty();
-    }
-
-    /**
-     * @param value {@link #assessor} (The clinician performing the assessment.)
-     */
-    public ClinicalImpression setAssessor(Reference value) { 
-      this.assessor = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #assessor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The clinician performing the assessment.)
-     */
-    public Practitioner getAssessorTarget() { 
-      if (this.assessorTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ClinicalImpression.assessor");
-        else if (Configuration.doAutoCreate())
-          this.assessorTarget = new Practitioner(); // aa
-      return this.assessorTarget;
-    }
-
-    /**
-     * @param value {@link #assessor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The clinician performing the assessment.)
-     */
-    public ClinicalImpression setAssessorTarget(Practitioner value) { 
-      this.assessorTarget = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1108,56 +907,31 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The point in time at which the assessment was concluded (not when it was recorded).). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #code} (Categorizes the type of clinical assessment performed.)
      */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
+    public CodeableConcept getCode() { 
+      if (this.code == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ClinicalImpression.date");
+          throw new Error("Attempt to auto-create ClinicalImpression.code");
         else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
+          this.code = new CodeableConcept(); // cc
+      return this.code;
     }
 
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
     }
 
     /**
-     * @param value {@link #date} (The point in time at which the assessment was concluded (not when it was recorded).). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #code} (Categorizes the type of clinical assessment performed.)
      */
-    public ClinicalImpression setDateElement(DateTimeType value) { 
-      this.date = value;
+    public ClinicalImpression setCode(CodeableConcept value) { 
+      this.code = value;
       return this;
     }
 
     /**
-     * @return The point in time at which the assessment was concluded (not when it was recorded).
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The point in time at which the assessment was concluded (not when it was recorded).
-     */
-    public ClinicalImpression setDate(Date value) { 
-      if (value == null)
-        this.date = null;
-      else {
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #description} (A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -1177,7 +951,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public ClinicalImpression setDescriptionElement(StringType value) { 
       this.description = value;
@@ -1185,14 +959,14 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.
+     * @return A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.
+     * @param value A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.
      */
     public ClinicalImpression setDescription(String value) { 
       if (Utilities.noString(value))
@@ -1202,6 +976,222 @@ public class ClinicalImpression extends DomainResource {
           this.description = new StringType();
         this.description.setValue(value);
       }
+      return this;
+    }
+
+    /**
+     * @return {@link #subject} (The patient or group of individuals assessed as part of this record.)
+     */
+    public Reference getSubject() { 
+      if (this.subject == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClinicalImpression.subject");
+        else if (Configuration.doAutoCreate())
+          this.subject = new Reference(); // cc
+      return this.subject;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (The patient or group of individuals assessed as part of this record.)
+     */
+    public ClinicalImpression setSubject(Reference value) { 
+      this.subject = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient or group of individuals assessed as part of this record.)
+     */
+    public Resource getSubjectTarget() { 
+      return this.subjectTarget;
+    }
+
+    /**
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient or group of individuals assessed as part of this record.)
+     */
+    public ClinicalImpression setSubjectTarget(Resource value) { 
+      this.subjectTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #assessor} (The clinician performing the assessment.)
+     */
+    public Reference getAssessor() { 
+      if (this.assessor == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClinicalImpression.assessor");
+        else if (Configuration.doAutoCreate())
+          this.assessor = new Reference(); // cc
+      return this.assessor;
+    }
+
+    public boolean hasAssessor() { 
+      return this.assessor != null && !this.assessor.isEmpty();
+    }
+
+    /**
+     * @param value {@link #assessor} (The clinician performing the assessment.)
+     */
+    public ClinicalImpression setAssessor(Reference value) { 
+      this.assessor = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #assessor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The clinician performing the assessment.)
+     */
+    public Practitioner getAssessorTarget() { 
+      if (this.assessorTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClinicalImpression.assessor");
+        else if (Configuration.doAutoCreate())
+          this.assessorTarget = new Practitioner(); // aa
+      return this.assessorTarget;
+    }
+
+    /**
+     * @param value {@link #assessor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The clinician performing the assessment.)
+     */
+    public ClinicalImpression setAssessorTarget(Practitioner value) { 
+      this.assessorTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (Indicates when the documentation of the assessment was complete.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClinicalImpression.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (Indicates when the documentation of the assessment was complete.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public ClinicalImpression setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates when the documentation of the assessment was complete.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value Indicates when the documentation of the assessment was complete.
+     */
+    public ClinicalImpression setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #effective} (The point in time or period over which the subject was assessed.)
+     */
+    public Type getEffective() { 
+      return this.effective;
+    }
+
+    /**
+     * @return {@link #effective} (The point in time or period over which the subject was assessed.)
+     */
+    public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
+      if (!(this.effective instanceof DateTimeType))
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (DateTimeType) this.effective;
+    }
+
+    public boolean hasEffectiveDateTimeType() { 
+      return this.effective instanceof DateTimeType;
+    }
+
+    /**
+     * @return {@link #effective} (The point in time or period over which the subject was assessed.)
+     */
+    public Period getEffectivePeriod() throws FHIRException { 
+      if (!(this.effective instanceof Period))
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (Period) this.effective;
+    }
+
+    public boolean hasEffectivePeriod() { 
+      return this.effective instanceof Period;
+    }
+
+    public boolean hasEffective() { 
+      return this.effective != null && !this.effective.isEmpty();
+    }
+
+    /**
+     * @param value {@link #effective} (The point in time or period over which the subject was assessed.)
+     */
+    public ClinicalImpression setEffective(Type value) { 
+      this.effective = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #context} (The encounter or episode of care this impression was created as part of.)
+     */
+    public Reference getContext() { 
+      if (this.context == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClinicalImpression.context");
+        else if (Configuration.doAutoCreate())
+          this.context = new Reference(); // cc
+      return this.context;
+    }
+
+    public boolean hasContext() { 
+      return this.context != null && !this.context.isEmpty();
+    }
+
+    /**
+     * @param value {@link #context} (The encounter or episode of care this impression was created as part of.)
+     */
+    public ClinicalImpression setContext(Reference value) { 
+      this.context = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter or episode of care this impression was created as part of.)
+     */
+    public Resource getContextTarget() { 
+      return this.contextTarget;
+    }
+
+    /**
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter or episode of care this impression was created as part of.)
+     */
+    public ClinicalImpression setContextTarget(Resource value) { 
+      this.contextTarget = value;
       return this;
     }
 
@@ -1250,7 +1240,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #problem} (This a list of the general problems/conditions for a patient.)
+     * @return {@link #problem} (This a list of the relevant problems/conditions for a patient.)
      */
     public List<Reference> getProblem() { 
       if (this.problem == null)
@@ -1313,150 +1303,117 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #trigger} (The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.)
+     * @return {@link #investigation} (One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.)
      */
-    public Type getTrigger() { 
-      return this.trigger;
-    }
-
-    /**
-     * @return {@link #trigger} (The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.)
-     */
-    public CodeableConcept getTriggerCodeableConcept() throws FHIRException { 
-      if (!(this.trigger instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.trigger.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.trigger;
-    }
-
-    public boolean hasTriggerCodeableConcept() { 
-      return this.trigger instanceof CodeableConcept;
-    }
-
-    /**
-     * @return {@link #trigger} (The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.)
-     */
-    public Reference getTriggerReference() throws FHIRException { 
-      if (!(this.trigger instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.trigger.getClass().getName()+" was encountered");
-      return (Reference) this.trigger;
-    }
-
-    public boolean hasTriggerReference() { 
-      return this.trigger instanceof Reference;
-    }
-
-    public boolean hasTrigger() { 
-      return this.trigger != null && !this.trigger.isEmpty();
-    }
-
-    /**
-     * @param value {@link #trigger} (The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.)
-     */
-    public ClinicalImpression setTrigger(Type value) { 
-      this.trigger = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #investigations} (One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.)
-     */
-    public List<ClinicalImpressionInvestigationsComponent> getInvestigations() { 
-      if (this.investigations == null)
-        this.investigations = new ArrayList<ClinicalImpressionInvestigationsComponent>();
-      return this.investigations;
+    public List<ClinicalImpressionInvestigationComponent> getInvestigation() { 
+      if (this.investigation == null)
+        this.investigation = new ArrayList<ClinicalImpressionInvestigationComponent>();
+      return this.investigation;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ClinicalImpression setInvestigations(List<ClinicalImpressionInvestigationsComponent> theInvestigations) { 
-      this.investigations = theInvestigations;
+    public ClinicalImpression setInvestigation(List<ClinicalImpressionInvestigationComponent> theInvestigation) { 
+      this.investigation = theInvestigation;
       return this;
     }
 
-    public boolean hasInvestigations() { 
-      if (this.investigations == null)
+    public boolean hasInvestigation() { 
+      if (this.investigation == null)
         return false;
-      for (ClinicalImpressionInvestigationsComponent item : this.investigations)
+      for (ClinicalImpressionInvestigationComponent item : this.investigation)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ClinicalImpressionInvestigationsComponent addInvestigations() { //3
-      ClinicalImpressionInvestigationsComponent t = new ClinicalImpressionInvestigationsComponent();
-      if (this.investigations == null)
-        this.investigations = new ArrayList<ClinicalImpressionInvestigationsComponent>();
-      this.investigations.add(t);
+    public ClinicalImpressionInvestigationComponent addInvestigation() { //3
+      ClinicalImpressionInvestigationComponent t = new ClinicalImpressionInvestigationComponent();
+      if (this.investigation == null)
+        this.investigation = new ArrayList<ClinicalImpressionInvestigationComponent>();
+      this.investigation.add(t);
       return t;
     }
 
-    public ClinicalImpression addInvestigations(ClinicalImpressionInvestigationsComponent t) { //3
+    public ClinicalImpression addInvestigation(ClinicalImpressionInvestigationComponent t) { //3
       if (t == null)
         return this;
-      if (this.investigations == null)
-        this.investigations = new ArrayList<ClinicalImpressionInvestigationsComponent>();
-      this.investigations.add(t);
+      if (this.investigation == null)
+        this.investigation = new ArrayList<ClinicalImpressionInvestigationComponent>();
+      this.investigation.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #investigations}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #investigation}, creating it if it does not already exist
      */
-    public ClinicalImpressionInvestigationsComponent getInvestigationsFirstRep() { 
-      if (getInvestigations().isEmpty()) {
-        addInvestigations();
+    public ClinicalImpressionInvestigationComponent getInvestigationFirstRep() { 
+      if (getInvestigation().isEmpty()) {
+        addInvestigation();
       }
-      return getInvestigations().get(0);
+      return getInvestigation().get(0);
     }
 
     /**
-     * @return {@link #protocol} (Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.). This is the underlying object with id, value and extensions. The accessor "getProtocol" gives direct access to the value
+     * @return {@link #protocol} (Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.)
      */
-    public UriType getProtocolElement() { 
+    public List<UriType> getProtocol() { 
       if (this.protocol == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ClinicalImpression.protocol");
-        else if (Configuration.doAutoCreate())
-          this.protocol = new UriType(); // bb
+        this.protocol = new ArrayList<UriType>();
       return this.protocol;
     }
 
-    public boolean hasProtocolElement() { 
-      return this.protocol != null && !this.protocol.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ClinicalImpression setProtocol(List<UriType> theProtocol) { 
+      this.protocol = theProtocol;
+      return this;
     }
 
     public boolean hasProtocol() { 
-      return this.protocol != null && !this.protocol.isEmpty();
+      if (this.protocol == null)
+        return false;
+      for (UriType item : this.protocol)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #protocol} (Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.). This is the underlying object with id, value and extensions. The accessor "getProtocol" gives direct access to the value
+     * @return {@link #protocol} (Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.)
      */
-    public ClinicalImpression setProtocolElement(UriType value) { 
-      this.protocol = value;
+    public UriType addProtocolElement() {//2 
+      UriType t = new UriType();
+      if (this.protocol == null)
+        this.protocol = new ArrayList<UriType>();
+      this.protocol.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #protocol} (Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.)
+     */
+    public ClinicalImpression addProtocol(String value) { //1
+      UriType t = new UriType();
+      t.setValue(value);
+      if (this.protocol == null)
+        this.protocol = new ArrayList<UriType>();
+      this.protocol.add(t);
       return this;
     }
 
     /**
-     * @return Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.
+     * @param value {@link #protocol} (Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.)
      */
-    public String getProtocol() { 
-      return this.protocol == null ? null : this.protocol.getValue();
-    }
-
-    /**
-     * @param value Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.
-     */
-    public ClinicalImpression setProtocol(String value) { 
-      if (Utilities.noString(value))
-        this.protocol = null;
-      else {
-        if (this.protocol == null)
-          this.protocol = new UriType();
-        this.protocol.setValue(value);
-      }
-      return this;
+    public boolean hasProtocol(String value) { 
+      if (this.protocol == null)
+        return false;
+      for (UriType v : this.protocol)
+        if (v.equals(value)) // uri
+          return true;
+      return false;
     }
 
     /**
@@ -1562,225 +1519,135 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #resolved} (Diagnoses/conditions resolved since the last assessment.)
+     * @return {@link #prognosisCodeableConcept} (Estimate of likely outcome.)
      */
-    public List<CodeableConcept> getResolved() { 
-      if (this.resolved == null)
-        this.resolved = new ArrayList<CodeableConcept>();
-      return this.resolved;
+    public List<CodeableConcept> getPrognosisCodeableConcept() { 
+      if (this.prognosisCodeableConcept == null)
+        this.prognosisCodeableConcept = new ArrayList<CodeableConcept>();
+      return this.prognosisCodeableConcept;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ClinicalImpression setResolved(List<CodeableConcept> theResolved) { 
-      this.resolved = theResolved;
+    public ClinicalImpression setPrognosisCodeableConcept(List<CodeableConcept> thePrognosisCodeableConcept) { 
+      this.prognosisCodeableConcept = thePrognosisCodeableConcept;
       return this;
     }
 
-    public boolean hasResolved() { 
-      if (this.resolved == null)
+    public boolean hasPrognosisCodeableConcept() { 
+      if (this.prognosisCodeableConcept == null)
         return false;
-      for (CodeableConcept item : this.resolved)
+      for (CodeableConcept item : this.prognosisCodeableConcept)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeableConcept addResolved() { //3
+    public CodeableConcept addPrognosisCodeableConcept() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.resolved == null)
-        this.resolved = new ArrayList<CodeableConcept>();
-      this.resolved.add(t);
+      if (this.prognosisCodeableConcept == null)
+        this.prognosisCodeableConcept = new ArrayList<CodeableConcept>();
+      this.prognosisCodeableConcept.add(t);
       return t;
     }
 
-    public ClinicalImpression addResolved(CodeableConcept t) { //3
+    public ClinicalImpression addPrognosisCodeableConcept(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.resolved == null)
-        this.resolved = new ArrayList<CodeableConcept>();
-      this.resolved.add(t);
+      if (this.prognosisCodeableConcept == null)
+        this.prognosisCodeableConcept = new ArrayList<CodeableConcept>();
+      this.prognosisCodeableConcept.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #resolved}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #prognosisCodeableConcept}, creating it if it does not already exist
      */
-    public CodeableConcept getResolvedFirstRep() { 
-      if (getResolved().isEmpty()) {
-        addResolved();
+    public CodeableConcept getPrognosisCodeableConceptFirstRep() { 
+      if (getPrognosisCodeableConcept().isEmpty()) {
+        addPrognosisCodeableConcept();
       }
-      return getResolved().get(0);
+      return getPrognosisCodeableConcept().get(0);
     }
 
     /**
-     * @return {@link #ruledOut} (Diagnosis considered not possible.)
+     * @return {@link #prognosisReference} (RiskAssessment expressing likely outcome.)
      */
-    public List<ClinicalImpressionRuledOutComponent> getRuledOut() { 
-      if (this.ruledOut == null)
-        this.ruledOut = new ArrayList<ClinicalImpressionRuledOutComponent>();
-      return this.ruledOut;
+    public List<Reference> getPrognosisReference() { 
+      if (this.prognosisReference == null)
+        this.prognosisReference = new ArrayList<Reference>();
+      return this.prognosisReference;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ClinicalImpression setRuledOut(List<ClinicalImpressionRuledOutComponent> theRuledOut) { 
-      this.ruledOut = theRuledOut;
+    public ClinicalImpression setPrognosisReference(List<Reference> thePrognosisReference) { 
+      this.prognosisReference = thePrognosisReference;
       return this;
     }
 
-    public boolean hasRuledOut() { 
-      if (this.ruledOut == null)
+    public boolean hasPrognosisReference() { 
+      if (this.prognosisReference == null)
         return false;
-      for (ClinicalImpressionRuledOutComponent item : this.ruledOut)
+      for (Reference item : this.prognosisReference)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ClinicalImpressionRuledOutComponent addRuledOut() { //3
-      ClinicalImpressionRuledOutComponent t = new ClinicalImpressionRuledOutComponent();
-      if (this.ruledOut == null)
-        this.ruledOut = new ArrayList<ClinicalImpressionRuledOutComponent>();
-      this.ruledOut.add(t);
-      return t;
-    }
-
-    public ClinicalImpression addRuledOut(ClinicalImpressionRuledOutComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.ruledOut == null)
-        this.ruledOut = new ArrayList<ClinicalImpressionRuledOutComponent>();
-      this.ruledOut.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #ruledOut}, creating it if it does not already exist
-     */
-    public ClinicalImpressionRuledOutComponent getRuledOutFirstRep() { 
-      if (getRuledOut().isEmpty()) {
-        addRuledOut();
-      }
-      return getRuledOut().get(0);
-    }
-
-    /**
-     * @return {@link #prognosis} (Estimate of likely outcome.). This is the underlying object with id, value and extensions. The accessor "getPrognosis" gives direct access to the value
-     */
-    public StringType getPrognosisElement() { 
-      if (this.prognosis == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ClinicalImpression.prognosis");
-        else if (Configuration.doAutoCreate())
-          this.prognosis = new StringType(); // bb
-      return this.prognosis;
-    }
-
-    public boolean hasPrognosisElement() { 
-      return this.prognosis != null && !this.prognosis.isEmpty();
-    }
-
-    public boolean hasPrognosis() { 
-      return this.prognosis != null && !this.prognosis.isEmpty();
-    }
-
-    /**
-     * @param value {@link #prognosis} (Estimate of likely outcome.). This is the underlying object with id, value and extensions. The accessor "getPrognosis" gives direct access to the value
-     */
-    public ClinicalImpression setPrognosisElement(StringType value) { 
-      this.prognosis = value;
-      return this;
-    }
-
-    /**
-     * @return Estimate of likely outcome.
-     */
-    public String getPrognosis() { 
-      return this.prognosis == null ? null : this.prognosis.getValue();
-    }
-
-    /**
-     * @param value Estimate of likely outcome.
-     */
-    public ClinicalImpression setPrognosis(String value) { 
-      if (Utilities.noString(value))
-        this.prognosis = null;
-      else {
-        if (this.prognosis == null)
-          this.prognosis = new StringType();
-        this.prognosis.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #plan} (Plan of action after assessment.)
-     */
-    public List<Reference> getPlan() { 
-      if (this.plan == null)
-        this.plan = new ArrayList<Reference>();
-      return this.plan;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ClinicalImpression setPlan(List<Reference> thePlan) { 
-      this.plan = thePlan;
-      return this;
-    }
-
-    public boolean hasPlan() { 
-      if (this.plan == null)
-        return false;
-      for (Reference item : this.plan)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public Reference addPlan() { //3
+    public Reference addPrognosisReference() { //3
       Reference t = new Reference();
-      if (this.plan == null)
-        this.plan = new ArrayList<Reference>();
-      this.plan.add(t);
+      if (this.prognosisReference == null)
+        this.prognosisReference = new ArrayList<Reference>();
+      this.prognosisReference.add(t);
       return t;
     }
 
-    public ClinicalImpression addPlan(Reference t) { //3
+    public ClinicalImpression addPrognosisReference(Reference t) { //3
       if (t == null)
         return this;
-      if (this.plan == null)
-        this.plan = new ArrayList<Reference>();
-      this.plan.add(t);
+      if (this.prognosisReference == null)
+        this.prognosisReference = new ArrayList<Reference>();
+      this.prognosisReference.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #plan}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #prognosisReference}, creating it if it does not already exist
      */
-    public Reference getPlanFirstRep() { 
-      if (getPlan().isEmpty()) {
-        addPlan();
+    public Reference getPrognosisReferenceFirstRep() { 
+      if (getPrognosisReference().isEmpty()) {
+        addPrognosisReference();
       }
-      return getPlan().get(0);
+      return getPrognosisReference().get(0);
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<Resource> getPlanTarget() { 
-      if (this.planTarget == null)
-        this.planTarget = new ArrayList<Resource>();
-      return this.planTarget;
+    public List<RiskAssessment> getPrognosisReferenceTarget() { 
+      if (this.prognosisReferenceTarget == null)
+        this.prognosisReferenceTarget = new ArrayList<RiskAssessment>();
+      return this.prognosisReferenceTarget;
     }
 
     /**
-     * @return {@link #action} (Actions taken during assessment.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public RiskAssessment addPrognosisReferenceTarget() { 
+      RiskAssessment r = new RiskAssessment();
+      if (this.prognosisReferenceTarget == null)
+        this.prognosisReferenceTarget = new ArrayList<RiskAssessment>();
+      this.prognosisReferenceTarget.add(r);
+      return r;
+    }
+
+    /**
+     * @return {@link #action} (Action taken as part of assessment procedure.)
      */
     public List<Reference> getAction() { 
       if (this.action == null)
@@ -1842,47 +1709,104 @@ public class ClinicalImpression extends DomainResource {
       return this.actionTarget;
     }
 
+    /**
+     * @return {@link #note} (Commentary about the impression, typically recorded after the impression itself was made, though supplemental notes by the original author could also appear.)
+     */
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ClinicalImpression setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    public ClinicalImpression addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient being assessed.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("assessor", "Reference(Practitioner)", "The clinician performing the assessment.", 0, java.lang.Integer.MAX_VALUE, assessor));
+        childrenList.add(new Property("identifier", "Identifier", "A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "Identifies the workflow status of the assessment.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("date", "dateTime", "The point in time at which the assessment was concluded (not when it was recorded).", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("description", "string", "A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("code", "CodeableConcept", "Categorizes the type of clinical assessment performed.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("description", "string", "A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/status prompted it.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient or group of individuals assessed as part of this record.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("assessor", "Reference(Practitioner)", "The clinician performing the assessment.", 0, java.lang.Integer.MAX_VALUE, assessor));
+        childrenList.add(new Property("date", "dateTime", "Indicates when the documentation of the assessment was complete.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("effective[x]", "dateTime|Period", "The point in time or period over which the subject was assessed.", 0, java.lang.Integer.MAX_VALUE, effective));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care this impression was created as part of.", 0, java.lang.Integer.MAX_VALUE, context));
         childrenList.add(new Property("previous", "Reference(ClinicalImpression)", "A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.", 0, java.lang.Integer.MAX_VALUE, previous));
-        childrenList.add(new Property("problem", "Reference(Condition|AllergyIntolerance)", "This a list of the general problems/conditions for a patient.", 0, java.lang.Integer.MAX_VALUE, problem));
-        childrenList.add(new Property("trigger[x]", "CodeableConcept|Reference(Any)", "The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.", 0, java.lang.Integer.MAX_VALUE, trigger));
-        childrenList.add(new Property("investigations", "", "One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.", 0, java.lang.Integer.MAX_VALUE, investigations));
+        childrenList.add(new Property("problem", "Reference(Condition|AllergyIntolerance)", "This a list of the relevant problems/conditions for a patient.", 0, java.lang.Integer.MAX_VALUE, problem));
+        childrenList.add(new Property("investigation", "", "One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.", 0, java.lang.Integer.MAX_VALUE, investigation));
         childrenList.add(new Property("protocol", "uri", "Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.", 0, java.lang.Integer.MAX_VALUE, protocol));
         childrenList.add(new Property("summary", "string", "A text summary of the investigations and the diagnosis.", 0, java.lang.Integer.MAX_VALUE, summary));
         childrenList.add(new Property("finding", "", "Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.", 0, java.lang.Integer.MAX_VALUE, finding));
-        childrenList.add(new Property("resolved", "CodeableConcept", "Diagnoses/conditions resolved since the last assessment.", 0, java.lang.Integer.MAX_VALUE, resolved));
-        childrenList.add(new Property("ruledOut", "", "Diagnosis considered not possible.", 0, java.lang.Integer.MAX_VALUE, ruledOut));
-        childrenList.add(new Property("prognosis", "string", "Estimate of likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosis));
-        childrenList.add(new Property("plan", "Reference(CarePlan|Appointment|CommunicationRequest|DeviceUseRequest|DiagnosticOrder|MedicationOrder|NutritionOrder|Order|ProcedureRequest|ProcessRequest|ReferralRequest|SupplyRequest|VisionPrescription)", "Plan of action after assessment.", 0, java.lang.Integer.MAX_VALUE, plan));
-        childrenList.add(new Property("action", "Reference(ReferralRequest|ProcedureRequest|Procedure|MedicationOrder|DiagnosticOrder|NutritionOrder|SupplyRequest|Appointment)", "Actions taken during assessment.", 0, java.lang.Integer.MAX_VALUE, action));
+        childrenList.add(new Property("prognosisCodeableConcept", "CodeableConcept", "Estimate of likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisCodeableConcept));
+        childrenList.add(new Property("prognosisReference", "Reference(RiskAssessment)", "RiskAssessment expressing likely outcome.", 0, java.lang.Integer.MAX_VALUE, prognosisReference));
+        childrenList.add(new Property("action", "Reference(ReferralRequest|ProcedureRequest|Procedure|MedicationRequest|DiagnosticRequest|Appointment)", "Action taken as part of assessment procedure.", 0, java.lang.Integer.MAX_VALUE, action));
+        childrenList.add(new Property("note", "Annotation", "Commentary about the impression, typically recorded after the impression itself was made, though supplemental notes by the original author could also appear.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
-        case -373213113: /*assessor*/ return this.assessor == null ? new Base[0] : new Base[] {this.assessor}; // Reference
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ClinicalImpressionStatus>
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case -373213113: /*assessor*/ return this.assessor == null ? new Base[0] : new Base[] {this.assessor}; // Reference
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1468651097: /*effective*/ return this.effective == null ? new Base[0] : new Base[] {this.effective}; // Type
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case -1273775369: /*previous*/ return this.previous == null ? new Base[0] : new Base[] {this.previous}; // Reference
         case -309542241: /*problem*/ return this.problem == null ? new Base[0] : this.problem.toArray(new Base[this.problem.size()]); // Reference
-        case -1059891784: /*trigger*/ return this.trigger == null ? new Base[0] : new Base[] {this.trigger}; // Type
-        case -428294735: /*investigations*/ return this.investigations == null ? new Base[0] : this.investigations.toArray(new Base[this.investigations.size()]); // ClinicalImpressionInvestigationsComponent
-        case -989163880: /*protocol*/ return this.protocol == null ? new Base[0] : new Base[] {this.protocol}; // UriType
+        case 956015362: /*investigation*/ return this.investigation == null ? new Base[0] : this.investigation.toArray(new Base[this.investigation.size()]); // ClinicalImpressionInvestigationComponent
+        case -989163880: /*protocol*/ return this.protocol == null ? new Base[0] : this.protocol.toArray(new Base[this.protocol.size()]); // UriType
         case -1857640538: /*summary*/ return this.summary == null ? new Base[0] : new Base[] {this.summary}; // StringType
         case -853173367: /*finding*/ return this.finding == null ? new Base[0] : this.finding.toArray(new Base[this.finding.size()]); // ClinicalImpressionFindingComponent
-        case -341328904: /*resolved*/ return this.resolved == null ? new Base[0] : this.resolved.toArray(new Base[this.resolved.size()]); // CodeableConcept
-        case 763913542: /*ruledOut*/ return this.ruledOut == null ? new Base[0] : this.ruledOut.toArray(new Base[this.ruledOut.size()]); // ClinicalImpressionRuledOutComponent
-        case -972050334: /*prognosis*/ return this.prognosis == null ? new Base[0] : new Base[] {this.prognosis}; // StringType
-        case 3443497: /*plan*/ return this.plan == null ? new Base[0] : this.plan.toArray(new Base[this.plan.size()]); // Reference
+        case -676337953: /*prognosisCodeableConcept*/ return this.prognosisCodeableConcept == null ? new Base[0] : this.prognosisCodeableConcept.toArray(new Base[this.prognosisCodeableConcept.size()]); // CodeableConcept
+        case -587137783: /*prognosisReference*/ return this.prognosisReference == null ? new Base[0] : this.prognosisReference.toArray(new Base[this.prognosisReference.size()]); // Reference
         case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // Reference
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1891,20 +1815,32 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -791418107: // patient
-          this.patient = castToReference(value); // Reference
-          break;
-        case -373213113: // assessor
-          this.assessor = castToReference(value); // Reference
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           break;
         case -892481550: // status
           this.status = new ClinicalImpressionStatusEnumFactory().fromType(value); // Enumeration<ClinicalImpressionStatus>
           break;
-        case 3076014: // date
-          this.date = castToDateTime(value); // DateTimeType
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
           break;
         case -1724546052: // description
           this.description = castToString(value); // StringType
+          break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case -373213113: // assessor
+          this.assessor = castToReference(value); // Reference
+          break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
+        case -1468651097: // effective
+          this.effective = castToType(value); // Type
+          break;
+        case 951530927: // context
+          this.context = castToReference(value); // Reference
           break;
         case -1273775369: // previous
           this.previous = castToReference(value); // Reference
@@ -1912,14 +1848,11 @@ public class ClinicalImpression extends DomainResource {
         case -309542241: // problem
           this.getProblem().add(castToReference(value)); // Reference
           break;
-        case -1059891784: // trigger
-          this.trigger = (Type) value; // Type
-          break;
-        case -428294735: // investigations
-          this.getInvestigations().add((ClinicalImpressionInvestigationsComponent) value); // ClinicalImpressionInvestigationsComponent
+        case 956015362: // investigation
+          this.getInvestigation().add((ClinicalImpressionInvestigationComponent) value); // ClinicalImpressionInvestigationComponent
           break;
         case -989163880: // protocol
-          this.protocol = castToUri(value); // UriType
+          this.getProtocol().add(castToUri(value)); // UriType
           break;
         case -1857640538: // summary
           this.summary = castToString(value); // StringType
@@ -1927,20 +1860,17 @@ public class ClinicalImpression extends DomainResource {
         case -853173367: // finding
           this.getFinding().add((ClinicalImpressionFindingComponent) value); // ClinicalImpressionFindingComponent
           break;
-        case -341328904: // resolved
-          this.getResolved().add(castToCodeableConcept(value)); // CodeableConcept
+        case -676337953: // prognosisCodeableConcept
+          this.getPrognosisCodeableConcept().add(castToCodeableConcept(value)); // CodeableConcept
           break;
-        case 763913542: // ruledOut
-          this.getRuledOut().add((ClinicalImpressionRuledOutComponent) value); // ClinicalImpressionRuledOutComponent
-          break;
-        case -972050334: // prognosis
-          this.prognosis = castToString(value); // StringType
-          break;
-        case 3443497: // plan
-          this.getPlan().add(castToReference(value)); // Reference
+        case -587137783: // prognosisReference
+          this.getPrognosisReference().add(castToReference(value)); // Reference
           break;
         case -1422950858: // action
           this.getAction().add(castToReference(value)); // Reference
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1949,40 +1879,44 @@ public class ClinicalImpression extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("patient"))
-          this.patient = castToReference(value); // Reference
-        else if (name.equals("assessor"))
-          this.assessor = castToReference(value); // Reference
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
         else if (name.equals("status"))
           this.status = new ClinicalImpressionStatusEnumFactory().fromType(value); // Enumeration<ClinicalImpressionStatus>
-        else if (name.equals("date"))
-          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("assessor"))
+          this.assessor = castToReference(value); // Reference
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("effective[x]"))
+          this.effective = castToType(value); // Type
+        else if (name.equals("context"))
+          this.context = castToReference(value); // Reference
         else if (name.equals("previous"))
           this.previous = castToReference(value); // Reference
         else if (name.equals("problem"))
           this.getProblem().add(castToReference(value));
-        else if (name.equals("trigger[x]"))
-          this.trigger = (Type) value; // Type
-        else if (name.equals("investigations"))
-          this.getInvestigations().add((ClinicalImpressionInvestigationsComponent) value);
+        else if (name.equals("investigation"))
+          this.getInvestigation().add((ClinicalImpressionInvestigationComponent) value);
         else if (name.equals("protocol"))
-          this.protocol = castToUri(value); // UriType
+          this.getProtocol().add(castToUri(value));
         else if (name.equals("summary"))
           this.summary = castToString(value); // StringType
         else if (name.equals("finding"))
           this.getFinding().add((ClinicalImpressionFindingComponent) value);
-        else if (name.equals("resolved"))
-          this.getResolved().add(castToCodeableConcept(value));
-        else if (name.equals("ruledOut"))
-          this.getRuledOut().add((ClinicalImpressionRuledOutComponent) value);
-        else if (name.equals("prognosis"))
-          this.prognosis = castToString(value); // StringType
-        else if (name.equals("plan"))
-          this.getPlan().add(castToReference(value));
+        else if (name.equals("prognosisCodeableConcept"))
+          this.getPrognosisCodeableConcept().add(castToCodeableConcept(value));
+        else if (name.equals("prognosisReference"))
+          this.getPrognosisReference().add(castToReference(value));
         else if (name.equals("action"))
           this.getAction().add(castToReference(value));
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
         else
           super.setProperty(name, value);
       }
@@ -1990,23 +1924,25 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -791418107:  return getPatient(); // Reference
-        case -373213113:  return getAssessor(); // Reference
+        case -1618432855:  return addIdentifier(); // Identifier
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ClinicalImpressionStatus>
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 3059181:  return getCode(); // CodeableConcept
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1867885268:  return getSubject(); // Reference
+        case -373213113:  return getAssessor(); // Reference
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case 247104889:  return getEffective(); // Type
+        case 951530927:  return getContext(); // Reference
         case -1273775369:  return getPrevious(); // Reference
         case -309542241:  return addProblem(); // Reference
-        case 1363514312:  return getTrigger(); // Type
-        case -428294735:  return addInvestigations(); // ClinicalImpressionInvestigationsComponent
+        case 956015362:  return addInvestigation(); // ClinicalImpressionInvestigationComponent
         case -989163880: throw new FHIRException("Cannot make property protocol as it is not a complex type"); // UriType
         case -1857640538: throw new FHIRException("Cannot make property summary as it is not a complex type"); // StringType
         case -853173367:  return addFinding(); // ClinicalImpressionFindingComponent
-        case -341328904:  return addResolved(); // CodeableConcept
-        case 763913542:  return addRuledOut(); // ClinicalImpressionRuledOutComponent
-        case -972050334: throw new FHIRException("Cannot make property prognosis as it is not a complex type"); // StringType
-        case 3443497:  return addPlan(); // Reference
+        case -676337953:  return addPrognosisCodeableConcept(); // CodeableConcept
+        case -587137783:  return addPrognosisReference(); // Reference
         case -1422950858:  return addAction(); // Reference
+        case 3387378:  return addNote(); // Annotation
         default: return super.makeProperty(hash, name);
         }
 
@@ -2014,22 +1950,41 @@ public class ClinicalImpression extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("patient")) {
-          this.patient = new Reference();
-          return this.patient;
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.status");
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.description");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
         }
         else if (name.equals("assessor")) {
           this.assessor = new Reference();
           return this.assessor;
         }
-        else if (name.equals("status")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.status");
-        }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.date");
         }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.description");
+        else if (name.equals("effectiveDateTime")) {
+          this.effective = new DateTimeType();
+          return this.effective;
+        }
+        else if (name.equals("effectivePeriod")) {
+          this.effective = new Period();
+          return this.effective;
+        }
+        else if (name.equals("context")) {
+          this.context = new Reference();
+          return this.context;
         }
         else if (name.equals("previous")) {
           this.previous = new Reference();
@@ -2038,16 +1993,8 @@ public class ClinicalImpression extends DomainResource {
         else if (name.equals("problem")) {
           return addProblem();
         }
-        else if (name.equals("triggerCodeableConcept")) {
-          this.trigger = new CodeableConcept();
-          return this.trigger;
-        }
-        else if (name.equals("triggerReference")) {
-          this.trigger = new Reference();
-          return this.trigger;
-        }
-        else if (name.equals("investigations")) {
-          return addInvestigations();
+        else if (name.equals("investigation")) {
+          return addInvestigation();
         }
         else if (name.equals("protocol")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.protocol");
@@ -2058,20 +2005,17 @@ public class ClinicalImpression extends DomainResource {
         else if (name.equals("finding")) {
           return addFinding();
         }
-        else if (name.equals("resolved")) {
-          return addResolved();
+        else if (name.equals("prognosisCodeableConcept")) {
+          return addPrognosisCodeableConcept();
         }
-        else if (name.equals("ruledOut")) {
-          return addRuledOut();
-        }
-        else if (name.equals("prognosis")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.prognosis");
-        }
-        else if (name.equals("plan")) {
-          return addPlan();
+        else if (name.equals("prognosisReference")) {
+          return addPrognosisReference();
         }
         else if (name.equals("action")) {
           return addAction();
+        }
+        else if (name.equals("note")) {
+          return addNote();
         }
         else
           return super.addChild(name);
@@ -2085,50 +2029,60 @@ public class ClinicalImpression extends DomainResource {
       public ClinicalImpression copy() {
         ClinicalImpression dst = new ClinicalImpression();
         copyValues(dst);
-        dst.patient = patient == null ? null : patient.copy();
-        dst.assessor = assessor == null ? null : assessor.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.status = status == null ? null : status.copy();
-        dst.date = date == null ? null : date.copy();
+        dst.code = code == null ? null : code.copy();
         dst.description = description == null ? null : description.copy();
+        dst.subject = subject == null ? null : subject.copy();
+        dst.assessor = assessor == null ? null : assessor.copy();
+        dst.date = date == null ? null : date.copy();
+        dst.effective = effective == null ? null : effective.copy();
+        dst.context = context == null ? null : context.copy();
         dst.previous = previous == null ? null : previous.copy();
         if (problem != null) {
           dst.problem = new ArrayList<Reference>();
           for (Reference i : problem)
             dst.problem.add(i.copy());
         };
-        dst.trigger = trigger == null ? null : trigger.copy();
-        if (investigations != null) {
-          dst.investigations = new ArrayList<ClinicalImpressionInvestigationsComponent>();
-          for (ClinicalImpressionInvestigationsComponent i : investigations)
-            dst.investigations.add(i.copy());
+        if (investigation != null) {
+          dst.investigation = new ArrayList<ClinicalImpressionInvestigationComponent>();
+          for (ClinicalImpressionInvestigationComponent i : investigation)
+            dst.investigation.add(i.copy());
         };
-        dst.protocol = protocol == null ? null : protocol.copy();
+        if (protocol != null) {
+          dst.protocol = new ArrayList<UriType>();
+          for (UriType i : protocol)
+            dst.protocol.add(i.copy());
+        };
         dst.summary = summary == null ? null : summary.copy();
         if (finding != null) {
           dst.finding = new ArrayList<ClinicalImpressionFindingComponent>();
           for (ClinicalImpressionFindingComponent i : finding)
             dst.finding.add(i.copy());
         };
-        if (resolved != null) {
-          dst.resolved = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : resolved)
-            dst.resolved.add(i.copy());
+        if (prognosisCodeableConcept != null) {
+          dst.prognosisCodeableConcept = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : prognosisCodeableConcept)
+            dst.prognosisCodeableConcept.add(i.copy());
         };
-        if (ruledOut != null) {
-          dst.ruledOut = new ArrayList<ClinicalImpressionRuledOutComponent>();
-          for (ClinicalImpressionRuledOutComponent i : ruledOut)
-            dst.ruledOut.add(i.copy());
-        };
-        dst.prognosis = prognosis == null ? null : prognosis.copy();
-        if (plan != null) {
-          dst.plan = new ArrayList<Reference>();
-          for (Reference i : plan)
-            dst.plan.add(i.copy());
+        if (prognosisReference != null) {
+          dst.prognosisReference = new ArrayList<Reference>();
+          for (Reference i : prognosisReference)
+            dst.prognosisReference.add(i.copy());
         };
         if (action != null) {
           dst.action = new ArrayList<Reference>();
           for (Reference i : action)
             dst.action.add(i.copy());
+        };
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
         };
         return dst;
       }
@@ -2144,12 +2098,13 @@ public class ClinicalImpression extends DomainResource {
         if (!(other instanceof ClinicalImpression))
           return false;
         ClinicalImpression o = (ClinicalImpression) other;
-        return compareDeep(patient, o.patient, true) && compareDeep(assessor, o.assessor, true) && compareDeep(status, o.status, true)
-           && compareDeep(date, o.date, true) && compareDeep(description, o.description, true) && compareDeep(previous, o.previous, true)
-           && compareDeep(problem, o.problem, true) && compareDeep(trigger, o.trigger, true) && compareDeep(investigations, o.investigations, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(code, o.code, true)
+           && compareDeep(description, o.description, true) && compareDeep(subject, o.subject, true) && compareDeep(assessor, o.assessor, true)
+           && compareDeep(date, o.date, true) && compareDeep(effective, o.effective, true) && compareDeep(context, o.context, true)
+           && compareDeep(previous, o.previous, true) && compareDeep(problem, o.problem, true) && compareDeep(investigation, o.investigation, true)
            && compareDeep(protocol, o.protocol, true) && compareDeep(summary, o.summary, true) && compareDeep(finding, o.finding, true)
-           && compareDeep(resolved, o.resolved, true) && compareDeep(ruledOut, o.ruledOut, true) && compareDeep(prognosis, o.prognosis, true)
-           && compareDeep(plan, o.plan, true) && compareDeep(action, o.action, true);
+           && compareDeep(prognosisCodeableConcept, o.prognosisCodeableConcept, true) && compareDeep(prognosisReference, o.prognosisReference, true)
+           && compareDeep(action, o.action, true) && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -2159,15 +2114,15 @@ public class ClinicalImpression extends DomainResource {
         if (!(other instanceof ClinicalImpression))
           return false;
         ClinicalImpression o = (ClinicalImpression) other;
-        return compareValues(status, o.status, true) && compareValues(date, o.date, true) && compareValues(description, o.description, true)
-           && compareValues(protocol, o.protocol, true) && compareValues(summary, o.summary, true) && compareValues(prognosis, o.prognosis, true)
-          ;
+        return compareValues(status, o.status, true) && compareValues(description, o.description, true) && compareValues(date, o.date, true)
+           && compareValues(protocol, o.protocol, true) && compareValues(summary, o.summary, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(patient, assessor, status
-          , date, description, previous, problem, trigger, investigations, protocol, summary
-          , finding, resolved, ruledOut, prognosis, plan, action);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, code
+          , description, subject, assessor, date, effective, context, previous, problem
+          , investigation, protocol, summary, finding, prognosisCodeableConcept, prognosisReference
+          , action, note);
       }
 
   @Override
@@ -2178,22 +2133,48 @@ public class ClinicalImpression extends DomainResource {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>When the assessment occurred</b><br>
+   * Description: <b>When the assessment was documented</b><br>
    * Type: <b>date</b><br>
    * Path: <b>ClinicalImpression.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date" )
+  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment was documented", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>When the assessment occurred</b><br>
+   * Description: <b>When the assessment was documented</b><br>
    * Type: <b>date</b><br>
    * Path: <b>ClinicalImpression.date</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>problem</b>
+   * <p>
+   * Description: <b>Relevant impressions of patient state</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.problem</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="Relevant impressions of patient state", type="reference", target={AllergyIntolerance.class, Condition.class } )
+  public static final String SP_PROBLEM = "problem";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>problem</b>
+   * <p>
+   * Description: <b>Relevant impressions of patient state</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.problem</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROBLEM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROBLEM);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:problem</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROBLEM = new ca.uhn.fhir.model.api.Include("ClinicalImpression:problem").toLocked();
 
  /**
    * Search parameter: <b>previous</b>
@@ -2222,6 +2203,52 @@ public class ClinicalImpression extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PREVIOUS = new ca.uhn.fhir.model.api.Include("ClinicalImpression:previous").toLocked();
 
  /**
+   * Search parameter: <b>finding-code</b>
+   * <p>
+   * Description: <b>What was found</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="finding-code", path="ClinicalImpression.finding.item.as(CodeableConcept)", description="What was found", type="token" )
+  public static final String SP_FINDING_CODE = "finding-code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>finding-code</b>
+   * <p>
+   * Description: <b>What was found</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FINDING_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FINDING_CODE);
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Patient or group assessed</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.subject</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient", path="ClinicalImpression.subject", description="Patient or group assessed", type="reference", target={Patient.class } )
+  public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Patient or group assessed</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ClinicalImpression:patient").toLocked();
+
+ /**
    * Search parameter: <b>assessor</b>
    * <p>
    * Description: <b>The clinician performing the assessment</b><br>
@@ -2248,139 +2275,73 @@ public class ClinicalImpression extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ASSESSOR = new ca.uhn.fhir.model.api.Include("ClinicalImpression:assessor").toLocked();
 
  /**
-   * Search parameter: <b>trigger</b>
+   * Search parameter: <b>subject</b>
    * <p>
-   * Description: <b>Request or event that necessitated this assessment</b><br>
+   * Description: <b>Patient or group assessed</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.triggerReference</b><br>
+   * Path: <b>ClinicalImpression.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="trigger", path="ClinicalImpression.trigger.as(Reference)", description="Request or event that necessitated this assessment", type="reference" )
-  public static final String SP_TRIGGER = "trigger";
+  @SearchParamDefinition(name="subject", path="ClinicalImpression.subject", description="Patient or group assessed", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Group.class, Patient.class } )
+  public static final String SP_SUBJECT = "subject";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>trigger</b>
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
    * <p>
-   * Description: <b>Request or event that necessitated this assessment</b><br>
+   * Description: <b>Patient or group assessed</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.triggerReference</b><br>
+   * Path: <b>ClinicalImpression.subject</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam TRIGGER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_TRIGGER);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ClinicalImpression:trigger</b>".
+   * the path value of "<b>ClinicalImpression:subject</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_TRIGGER = new ca.uhn.fhir.model.api.Include("ClinicalImpression:trigger").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("ClinicalImpression:subject").toLocked();
 
  /**
-   * Search parameter: <b>finding</b>
+   * Search parameter: <b>context</b>
    * <p>
-   * Description: <b>Specific text or code for finding</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.finding.item</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token" )
-  public static final String SP_FINDING = "finding";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>finding</b>
-   * <p>
-   * Description: <b>Specific text or code for finding</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.finding.item</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FINDING = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FINDING);
-
- /**
-   * Search parameter: <b>ruledout</b>
-   * <p>
-   * Description: <b>Specific text of code for diagnosis</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.ruledOut.item</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
-  public static final String SP_RULEDOUT = "ruledout";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>ruledout</b>
-   * <p>
-   * Description: <b>Specific text of code for diagnosis</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.ruledOut.item</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RULEDOUT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RULEDOUT);
-
- /**
-   * Search parameter: <b>problem</b>
-   * <p>
-   * Description: <b>General assessment of patient state</b><br>
+   * Description: <b>Encounter or Episode created from</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.problem</b><br>
+   * Path: <b>ClinicalImpression.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference", target={AllergyIntolerance.class, Condition.class } )
-  public static final String SP_PROBLEM = "problem";
+  @SearchParamDefinition(name="context", path="ClinicalImpression.context", description="Encounter or Episode created from", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class, EpisodeOfCare.class } )
+  public static final String SP_CONTEXT = "context";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>problem</b>
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
    * <p>
-   * Description: <b>General assessment of patient state</b><br>
+   * Description: <b>Encounter or Episode created from</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.problem</b><br>
+   * Path: <b>ClinicalImpression.context</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROBLEM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROBLEM);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ClinicalImpression:problem</b>".
+   * the path value of "<b>ClinicalImpression:context</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROBLEM = new ca.uhn.fhir.model.api.Include("ClinicalImpression:problem").toLocked();
-
- /**
-   * Search parameter: <b>patient</b>
-   * <p>
-   * Description: <b>The patient being assessed</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.patient</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
-  public static final String SP_PATIENT = "patient";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
-   * <p>
-   * Description: <b>The patient being assessed</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.patient</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ClinicalImpression:patient</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ClinicalImpression:patient").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("ClinicalImpression:context").toLocked();
 
  /**
    * Search parameter: <b>investigation</b>
    * <p>
    * Description: <b>Record of a specific investigation</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.investigations.item</b><br>
+   * Path: <b>ClinicalImpression.investigation.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference", target={DiagnosticReport.class, FamilyMemberHistory.class, Observation.class, QuestionnaireResponse.class } )
+  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigation.item", description="Record of a specific investigation", type="reference", target={DiagnosticReport.class, FamilyMemberHistory.class, ImagingStudy.class, Observation.class, QuestionnaireResponse.class, RiskAssessment.class } )
   public static final String SP_INVESTIGATION = "investigation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>investigation</b>
    * <p>
    * Description: <b>Record of a specific investigation</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.investigations.item</b><br>
+   * Path: <b>ClinicalImpression.investigation.item</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INVESTIGATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INVESTIGATION);
@@ -2394,17 +2355,17 @@ public class ClinicalImpression extends DomainResource {
  /**
    * Search parameter: <b>action</b>
    * <p>
-   * Description: <b>Actions taken during assessment</b><br>
+   * Description: <b>Action taken as part of assessment procedure</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ClinicalImpression.action</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference", target={Appointment.class, DiagnosticOrder.class, MedicationOrder.class, NutritionOrder.class, Procedure.class, ProcedureRequest.class, ReferralRequest.class, SupplyRequest.class } )
+  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Action taken as part of assessment procedure", type="reference", target={Appointment.class, DiagnosticRequest.class, MedicationRequest.class, Procedure.class, ProcedureRequest.class, ReferralRequest.class } )
   public static final String SP_ACTION = "action";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>action</b>
    * <p>
-   * Description: <b>Actions taken during assessment</b><br>
+   * Description: <b>Action taken as part of assessment procedure</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ClinicalImpression.action</b><br>
    * </p>
@@ -2418,85 +2379,45 @@ public class ClinicalImpression extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTION = new ca.uhn.fhir.model.api.Include("ClinicalImpression:action").toLocked();
 
  /**
-   * Search parameter: <b>trigger-code</b>
+   * Search parameter: <b>finding-ref</b>
    * <p>
-   * Description: <b>Request or event that necessitated this assessment</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.triggerCodeableConcept</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.trigger.as(CodeableConcept)", description="Request or event that necessitated this assessment", type="token" )
-  public static final String SP_TRIGGER_CODE = "trigger-code";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>trigger-code</b>
-   * <p>
-   * Description: <b>Request or event that necessitated this assessment</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.triggerCodeableConcept</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TRIGGER_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TRIGGER_CODE);
-
- /**
-   * Search parameter: <b>plan</b>
-   * <p>
-   * Description: <b>Plan of action after assessment</b><br>
+   * Description: <b>What was found</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.plan</b><br>
+   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference", target={Appointment.class, CarePlan.class, CommunicationRequest.class, DeviceUseRequest.class, DiagnosticOrder.class, MedicationOrder.class, NutritionOrder.class, Order.class, ProcedureRequest.class, ProcessRequest.class, ReferralRequest.class, SupplyRequest.class, VisionPrescription.class } )
-  public static final String SP_PLAN = "plan";
+  @SearchParamDefinition(name="finding-ref", path="ClinicalImpression.finding.item.as(Reference)", description="What was found", type="reference", target={Condition.class, Observation.class } )
+  public static final String SP_FINDING_REF = "finding-ref";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>plan</b>
+   * <b>Fluent Client</b> search parameter constant for <b>finding-ref</b>
    * <p>
-   * Description: <b>Plan of action after assessment</b><br>
+   * Description: <b>What was found</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.plan</b><br>
+   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PLAN = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PLAN);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam FINDING_REF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_FINDING_REF);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ClinicalImpression:plan</b>".
+   * the path value of "<b>ClinicalImpression:finding-ref</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PLAN = new ca.uhn.fhir.model.api.Include("ClinicalImpression:plan").toLocked();
-
- /**
-   * Search parameter: <b>resolved</b>
-   * <p>
-   * Description: <b>Diagnoses/conditions resolved since previous assessment</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.resolved</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnoses/conditions resolved since previous assessment", type="token" )
-  public static final String SP_RESOLVED = "resolved";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>resolved</b>
-   * <p>
-   * Description: <b>Diagnoses/conditions resolved since previous assessment</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.resolved</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RESOLVED = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RESOLVED);
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_FINDING_REF = new ca.uhn.fhir.model.api.Include("ClinicalImpression:finding-ref").toLocked();
 
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>in-progress | completed | entered-in-error</b><br>
+   * Description: <b>draft | completed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ClinicalImpression.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="draft | completed | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>in-progress | completed | entered-in-error</b><br>
+   * Description: <b>draft | completed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ClinicalImpression.status</b><br>
    * </p>

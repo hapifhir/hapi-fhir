@@ -69,6 +69,21 @@
 			</p>
 		</section>
 		
+		<section name="Examples">
+			
+			<p>
+				The following is intended to be a selection of publicly available open source
+				Android applications which use HAPI FHIR and might be useful as a reference.
+			</p>
+			<p>
+				If you know of others, please let us know!
+			</p>
+			<ul>
+				<li><a href="https://github.com/SynappzMA/FHIR-Android">https://github.com/SynappzMA/FHIR-Android</a> (Nice FHIR DSTU2 search app)</li>
+			</ul>
+			
+		</section>
+		
 	</body>
 
 </document>

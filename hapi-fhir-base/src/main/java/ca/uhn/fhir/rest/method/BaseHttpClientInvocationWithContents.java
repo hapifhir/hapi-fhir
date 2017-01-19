@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,8 +211,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private String getContentType(EncodingEnum encoding) {
 		if (myBundle != null || (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1 && ((myContents != null && myContentsIsBundle) || myResources != null))) {
 			return encoding.getBundleContentType();
-		} else {
+		} else if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+			// application/xml+fhir
 			return encoding.getResourceContentType();
+		} else {
+			// application/fhir+xml
+			return encoding.getResourceContentTypeNonLegacy();
 		}
 	}
 

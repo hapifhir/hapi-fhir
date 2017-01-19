@@ -34,7 +34,7 @@ public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 	public void testIndexContained() {
 		Patient p = new Patient();
 		p.setId("#some_patient");
-		p.addName().addFamily("MYFAMILY").addGiven("MYGIVEN");
+		p.addName().setFamily("MYFAMILY").addGiven("MYGIVEN");
 		
 		Observation o1 = new Observation();
 		o1.getCode().setText("Some Observation");
@@ -47,7 +47,7 @@ public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 		IIdType oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient p2 = new Patient();
-		p2.addName().addFamily("MYFAMILY").addGiven("MYGIVEN");
+		p2.addName().setFamily("MYFAMILY").addGiven("MYGIVEN");
 		IIdType pid2 = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
 		
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(o2));

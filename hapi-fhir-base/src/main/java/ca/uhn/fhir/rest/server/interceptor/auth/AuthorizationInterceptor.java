@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -78,8 +80,8 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		setDefaultPolicy(theDefaultPolicy);
 	}
 
-	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
-		Verdict decision = applyRulesAndReturnDecision(theOperation, theRequestDetails, theInputResource, theOutputResource);
+	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
+		Verdict decision = applyRulesAndReturnDecision(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 		
 		if (decision.getDecision() == PolicyEnum.ALLOW) {
 			return;
@@ -89,13 +91,13 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 
 	@Override
-	public Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IBaseResource theOutputResource) {
+	public Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
 		List<IAuthRule> rules = buildRuleList(theRequestDetails);
 		ourLog.trace("Applying {} rules to render an auth decision for operation {}", rules.size(), theOperation);
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
-			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theOutputResource, this);
+			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
 				break;
@@ -126,7 +128,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 
 	
-	private OperationExamineDirection determineOperationDirection(RestOperationTypeEnum theOperation) {
+	private OperationExamineDirection determineOperationDirection(RestOperationTypeEnum theOperation, IBaseResource theRequestResource) {
 		switch (theOperation) {
 		case ADD_TAGS:
 		case DELETE_TAGS:
@@ -137,6 +139,8 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		case EXTENDED_OPERATION_INSTANCE:
 		case EXTENDED_OPERATION_SERVER:
 		case EXTENDED_OPERATION_TYPE:
+			return OperationExamineDirection.BOTH;
+
 		case METADATA:
 			// Security does not apply to these operations 
 			return OperationExamineDirection.IN;
@@ -147,6 +151,13 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 			
 		case CREATE:
 		case UPDATE:
+//			if (theRequestResource != null) {
+//				if (theRequestResource.getIdElement() != null) {
+//					if (theRequestResource.getIdElement().hasIdPart() == false) {
+//						return OperationExamineDirection.IN_UNCATEGORIZED;
+//					}
+//				}
+//			}
 			return OperationExamineDirection.IN;
 
 		case META:
@@ -204,22 +215,30 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 	}
 	
 	private void handleUserOperation(RequestDetails theRequest, IBaseResource theResource, RestOperationTypeEnum operation) {
-		applyRulesAndFailIfDeny(operation, theRequest, theResource, null);
+		applyRulesAndFailIfDeny(operation, theRequest, theResource, theResource.getIdElement(), null);
 	}
 	
 	@Override
 	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest) {
-		switch (determineOperationDirection(theOperation)) {
+		IBaseResource inputResource = null;
+		IIdType inputResourceId = null;
+		
+		switch (determineOperationDirection(theOperation, theProcessedRequest.getResource())) {
 		case IN:
 		case BOTH:
+			inputResource = theProcessedRequest.getResource();
+			inputResourceId = theProcessedRequest.getId();
+			break;
+		case OUT:
+			inputResource = null;
+			inputResourceId = theProcessedRequest.getId();
 			break;
 		case NONE:
-		case OUT:
 			return;
 		}
 
 		RequestDetails requestDetails = theProcessedRequest.getRequestDetails();
-		applyRulesAndFailIfDeny(theOperation, requestDetails, theProcessedRequest.getResource(), null);
+		applyRulesAndFailIfDeny(theOperation, requestDetails, inputResource, inputResourceId, null);
 	}
 	
 	@Override
@@ -236,7 +255,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
-		switch (determineOperationDirection(theRequestDetails.getRestOperationType())) {
+		switch (determineOperationDirection(theRequestDetails.getRestOperationType(), null)) {
 		case IN:
 		case NONE:
 			return true;
@@ -246,8 +265,6 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 
 		FhirContext fhirContext = theRequestDetails.getServer().getFhirContext();
-		List<IAuthRule> rules = buildRuleList(theRequestDetails);
-		
 		List<IBaseResource> resources = Collections.emptyList();
 		
 		switch (theRequestDetails.getRestOperationType()) {
@@ -256,10 +273,18 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		case HISTORY_INSTANCE:
 		case HISTORY_SYSTEM:
 		case HISTORY_TYPE:
-		case TRANSACTION:{
+		case TRANSACTION:
+		case EXTENDED_OPERATION_SERVER:
+		case EXTENDED_OPERATION_TYPE:
+		case EXTENDED_OPERATION_INSTANCE: {
 			if (theResponseObject != null) {
-				IBaseBundle responseBundle = (IBaseBundle) theResponseObject;
-				resources = toListOfResources(fhirContext, responseBundle);
+				if (theResponseObject instanceof IBaseBundle) {
+//					IBaseBundle responseBundle = (IBaseBundle) theResponseObject;
+//					resources = toListOfResources(fhirContext, responseBundle);
+					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+				} else if (theResponseObject instanceof IBaseParameters) {
+					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+				}
 			}
 			break;
 		}
@@ -272,10 +297,22 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		}
 		
 		for (IBaseResource nextResponse : resources) {
-			applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, nextResponse);
+			applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, nextResponse);
 		}
 
 		return true;
+	}
+
+	private List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+		List<IBaseResource> resources;
+		resources = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
+		
+		// Exclude the container
+		if (resources.size() > 0 && resources.get(0) == theResponseObject) {
+			resources = resources.subList(1, resources.size());
+		}
+		
+		return resources;
 	}
 
 	@CoverageIgnore
@@ -315,18 +352,18 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		myDefaultPolicy = theDefaultPolicy;
 	}
 
-	private List<IBaseResource> toListOfResources(FhirContext fhirContext, IBaseBundle responseBundle) {
-		List<IBaseResource> retVal = BundleUtil.toListOfResources(fhirContext, responseBundle);
-		for (int i = 0; i < retVal.size(); i++) {
-			IBaseResource nextResource = retVal.get(i);
-			if (nextResource instanceof IBaseBundle) {
-				retVal.addAll(BundleUtil.toListOfResources(fhirContext, (IBaseBundle) nextResource));
-				retVal.remove(i);
-				i--;
-			}
-		}
-		return retVal;
-	}
+//	private List<IBaseResource> toListOfResources(FhirContext fhirContext, IBaseBundle responseBundle) {
+//		List<IBaseResource> retVal = BundleUtil.toListOfResources(fhirContext, responseBundle);
+//		for (int i = 0; i < retVal.size(); i++) {
+//			IBaseResource nextResource = retVal.get(i);
+//			if (nextResource instanceof IBaseBundle) {
+//				retVal.addAll(BundleUtil.toListOfResources(fhirContext, (IBaseBundle) nextResource));
+//				retVal.remove(i);
+//				i--;
+//			}
+//		}
+//		return retVal;
+//	}
 
 	private static UnsupportedOperationException failForDstu1() {
 		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");
@@ -336,7 +373,7 @@ public class AuthorizationInterceptor extends InterceptorAdapter implements ISer
 		IN,
 		NONE,
 		OUT, 
-		BOTH
+		BOTH, 
 	}
 
 	public static class Verdict {

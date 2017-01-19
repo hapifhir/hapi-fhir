@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,6 +130,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		myModifier = theModifier;
 	}
 
+	@Override
 	public ExtensionDt setUrl(String theUrl) {
 		myUrl = theUrl != null ? new StringDt(theUrl) : myUrl;
 		return this;
@@ -140,6 +141,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		return this;
 	}
 
+	@Override
 	public ExtensionDt setValue(IBaseDatatype theValue) {
 		myValue = theValue;
 		return this;

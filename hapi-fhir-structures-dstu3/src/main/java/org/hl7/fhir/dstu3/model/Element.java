@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Base definition for all elements in a resource.
  */
@@ -305,6 +305,25 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(id, extension);
       }
 
+  @Override
+  public String getIdBase() {
+    return getId();
+  }
+  
+  @Override
+  public void setIdBase(String value) {
+    setId(value);
+  }
+// added from java-adornments.txt:
+  public void addExtension(String url, Type value) {
+    Extension ex = new Extension();
+    ex.setUrl(url);
+    ex.setValue(value);
+    getExtension().add(ex);    
+  }
+
+
+// end addition
 
 }
 

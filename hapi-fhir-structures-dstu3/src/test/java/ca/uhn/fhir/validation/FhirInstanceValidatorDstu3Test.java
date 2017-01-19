@@ -29,22 +29,14 @@ import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu3.model.codesystems.ContactPointSystem;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
@@ -85,6 +77,22 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
+	/**
+	 * See #531
+	 */
+	@Test
+	public void testContactPointSystemUrlWorks() {
+		Patient p = new Patient();
+		ContactPoint t = p.addTelecom();
+		t.setSystem(org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem.URL);
+		t.setValue("http://infoway-inforoute.ca");
+		
+		ValidationResult results = myVal.validateWithResult(p);
+		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
+		assertThat(outcome, empty());
+		
+	}
+	
 	/**
 	 * See #370
 	 */
@@ -144,8 +152,16 @@ public class FhirInstanceValidatorDstu3Test {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 			ids.add(next.getId());
 
+			if (next instanceof StructureDefinition) {
+				StructureDefinition sd = (StructureDefinition)next;
+				if (sd.getKind() == StructureDefinitionKind.LOGICAL) {
+					ourLog.info("Skipping logical type: {}", next.getId());
+					continue;
+				}
+			}
+			
 			ourLog.info("Validating {}", next.getId());
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
+			ourLog.trace(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
 
 			ValidationResult output = myVal.validateWithResult(next);
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
@@ -233,7 +249,7 @@ public class FhirInstanceValidatorDstu3Test {
 				if (retVal == null) {
 					retVal = myDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
 				}
-				ourLog.info("expandValueSet({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
+				ourLog.debug("expandValueSet({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
 				return retVal;
 			}
 		});
@@ -241,7 +257,7 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
 				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
-				ourLog.info("isCodeSystemSupported({}) : {}", new Object[] { theInvocation.getArguments()[1], retVal });
+				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[] { theInvocation.getArguments()[1], retVal });
 				return retVal;
 			}
 		});
@@ -255,7 +271,7 @@ public class FhirInstanceValidatorDstu3Test {
 				} else {
 					retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1], id);
 				}
-				ourLog.info("fetchResource({}, {}) : {}", new Object[] { theInvocation.getArguments()[1], id, retVal });
+				ourLog.debug("fetchResource({}, {}) : {}", new Object[] { theInvocation.getArguments()[1], id, retVal });
 				return retVal;
 			}
 		});
@@ -271,7 +287,7 @@ public class FhirInstanceValidatorDstu3Test {
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
 				}
-				ourLog.info("validateCode({}, {}, {}) : {}", new Object[] { system, code, (String) theInvocation.getArguments()[2], retVal });
+				ourLog.debug("validateCode({}, {}, {}) : {}", new Object[] { system, code, (String) theInvocation.getArguments()[2], retVal });
 				return retVal;
 			}
 		});
@@ -279,7 +295,7 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) throws Throwable {
 				CodeSystem retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
-				ourLog.info("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
+				ourLog.debug("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
 				return retVal;
 			}
 		});
@@ -287,7 +303,7 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) throws Throwable {
 				StructureDefinition retVal = myDefaultValidationSupport.fetchStructureDefinition((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
-				ourLog.info("fetchStructureDefinition({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
+				ourLog.debug("fetchStructureDefinition({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
 				return retVal;
 			}
 		});
@@ -295,7 +311,7 @@ public class FhirInstanceValidatorDstu3Test {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) throws Throwable {
 				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[0]);
-				ourLog.info("fetchAllStructureDefinitions()", new Object[] {});
+				ourLog.debug("fetchAllStructureDefinitions()", new Object[] {});
 				return retVal;
 			}
 		});
@@ -465,17 +481,6 @@ public class FhirInstanceValidatorDstu3Test {
 				"                        <id value=\"referralToMentalHealthCare\"/>\n" + 
 				"                        <status value=\"draft\"/>\n" + 
 				"                        <description value=\"refer to primary care mental-health integrated care program for evaluation and treatment of mental health conditions now\"/>\n" + 
-				"                        <relatedResource>\n" + 
-				"                                <type value=\"citation\"/>\n" + 
-				"                                <document>\n" + 
-				"                                        <url value=\"blah blah blah\"/>\n" + 
-				"                                        <title value=\"citation title\"/>\n" + 
-				"                                </document>\n" + 
-				"                                <resource>\n" + 
-				"                                        <reference value=\"DocumentReference/123\"/> <!-- DocumentReference -->\n" + 
-				"                                        <display value=\"citation title\"/>\n" + 
-				"                                </resource>\n" + 
-				"                        </relatedResource>\n" + 
 				"                        <category value=\"referral\"/>\n" + 
 				"                        <code>\n" + 
 				"                                <coding>\n" + 
@@ -553,7 +558,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element encounter @ Observation: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Element 'Observation.encounter: max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString(""));
 	}
@@ -603,8 +608,6 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
-//	@Ignore 
-	// TODO: reenable
 	public void testValidateResourceWithDefaultValuesetBadCode() {
 		//@formatter:off
 		String input = 
@@ -617,7 +620,7 @@ public class FhirInstanceValidatorDstu3Test {
 		//@formatter:on
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set", output.getMessages().get(0).getMessage());
+		assertEquals("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set)", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -713,7 +716,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier.type", all.get(0).getLocationString());
-		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code", all.get(0).getMessage());
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)", all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

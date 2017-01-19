@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class ResourceProviderWithNoMethodsTest {
 
 	private Server ourServer;
-	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@After
 	public void after() throws Exception {

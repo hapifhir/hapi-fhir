@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -39,29 +39,29 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Specifies various attributes of the patient population for whom and/or environment of care in which a knowledge module is applicable.
+ * Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
  */
 @DatatypeDef(name="UsageContext")
 public class UsageContext extends Type implements ICompositeType {
 
     /**
-     * Specifies the focus of the usage attribute.
+     * A code that identifies the type of context being specified by this usage context.
      */
-    @Child(name = "focus", type = {Coding.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="patient-gender | patient-age-group | clinical-focus | target-user | workflow-setting | workflow-task | clinical-venue | jurisdiction", formalDefinition="Specifies the focus of the usage attribute." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/usage-context-focus")
-    protected Coding focus;
+    @Child(name = "code", type = {Coding.class}, order=0, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Type of context being specified", formalDefinition="A code that identifies the type of context being specified by this usage context." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/usage-context-type")
+    protected Coding code;
 
     /**
-     * Provides a value for the usage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.
+     * A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.
      */
-    @Child(name = "value", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Value of the usage attribute", formalDefinition="Provides a value for the usage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus." )
-    protected CodeableConcept value;
+    @Child(name = "value", type = {CodeableConcept.class, Quantity.class, Range.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Value that defines the context", formalDefinition="A value that defines the context specified in this context of use. The interpretation of the value is defined by the code." )
+    protected Type value;
 
-    private static final long serialVersionUID = 1672032668L;
+    private static final long serialVersionUID = -1092486508L;
 
   /**
    * Constructor
@@ -73,46 +73,80 @@ public class UsageContext extends Type implements ICompositeType {
   /**
    * Constructor
    */
-    public UsageContext(Coding focus, CodeableConcept value) {
+    public UsageContext(Coding code, Type value) {
       super();
-      this.focus = focus;
+      this.code = code;
       this.value = value;
     }
 
     /**
-     * @return {@link #focus} (Specifies the focus of the usage attribute.)
+     * @return {@link #code} (A code that identifies the type of context being specified by this usage context.)
      */
-    public Coding getFocus() { 
-      if (this.focus == null)
+    public Coding getCode() { 
+      if (this.code == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create UsageContext.focus");
+          throw new Error("Attempt to auto-create UsageContext.code");
         else if (Configuration.doAutoCreate())
-          this.focus = new Coding(); // cc
-      return this.focus;
+          this.code = new Coding(); // cc
+      return this.code;
     }
 
-    public boolean hasFocus() { 
-      return this.focus != null && !this.focus.isEmpty();
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
     }
 
     /**
-     * @param value {@link #focus} (Specifies the focus of the usage attribute.)
+     * @param value {@link #code} (A code that identifies the type of context being specified by this usage context.)
      */
-    public UsageContext setFocus(Coding value) { 
-      this.focus = value;
+    public UsageContext setCode(Coding value) { 
+      this.code = value;
       return this;
     }
 
     /**
-     * @return {@link #value} (Provides a value for the usage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.)
+     * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
      */
-    public CodeableConcept getValue() { 
-      if (this.value == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create UsageContext.value");
-        else if (Configuration.doAutoCreate())
-          this.value = new CodeableConcept(); // cc
+    public Type getValue() { 
       return this.value;
+    }
+
+    /**
+     * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
+     */
+    public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+      if (!(this.value instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.value;
+    }
+
+    public boolean hasValueCodeableConcept() { 
+      return this.value instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
+     */
+    public Quantity getValueQuantity() throws FHIRException { 
+      if (!(this.value instanceof Quantity))
+        throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (Quantity) this.value;
+    }
+
+    public boolean hasValueQuantity() { 
+      return this.value instanceof Quantity;
+    }
+
+    /**
+     * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
+     */
+    public Range getValueRange() throws FHIRException { 
+      if (!(this.value instanceof Range))
+        throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (Range) this.value;
+    }
+
+    public boolean hasValueRange() { 
+      return this.value instanceof Range;
     }
 
     public boolean hasValue() { 
@@ -120,24 +154,24 @@ public class UsageContext extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #value} (Provides a value for the usage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.)
+     * @param value {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
      */
-    public UsageContext setValue(CodeableConcept value) { 
+    public UsageContext setValue(Type value) { 
       this.value = value;
       return this;
     }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("focus", "Coding", "Specifies the focus of the usage attribute.", 0, java.lang.Integer.MAX_VALUE, focus));
-        childrenList.add(new Property("value", "CodeableConcept", "Provides a value for the usage attribute. Different values are appropriate in different focus areas, as specified in the description of values for focus.", 0, java.lang.Integer.MAX_VALUE, value));
+        childrenList.add(new Property("code", "Coding", "A code that identifies the type of context being specified by this usage context.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("value[x]", "CodeableConcept|Quantity|Range", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, java.lang.Integer.MAX_VALUE, value));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 97604824: /*focus*/ return this.focus == null ? new Base[0] : new Base[] {this.focus}; // Coding
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Coding
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -146,11 +180,11 @@ public class UsageContext extends Type implements ICompositeType {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 97604824: // focus
-          this.focus = castToCoding(value); // Coding
+        case 3059181: // code
+          this.code = castToCoding(value); // Coding
           break;
         case 111972721: // value
-          this.value = castToCodeableConcept(value); // CodeableConcept
+          this.value = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -159,10 +193,10 @@ public class UsageContext extends Type implements ICompositeType {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("focus"))
-          this.focus = castToCoding(value); // Coding
-        else if (name.equals("value"))
-          this.value = castToCodeableConcept(value); // CodeableConcept
+        if (name.equals("code"))
+          this.code = castToCoding(value); // Coding
+        else if (name.equals("value[x]"))
+          this.value = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -170,8 +204,8 @@ public class UsageContext extends Type implements ICompositeType {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 97604824:  return getFocus(); // Coding
-        case 111972721:  return getValue(); // CodeableConcept
+        case 3059181:  return getCode(); // Coding
+        case -1410166417:  return getValue(); // Type
         default: return super.makeProperty(hash, name);
         }
 
@@ -179,12 +213,20 @@ public class UsageContext extends Type implements ICompositeType {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("focus")) {
-          this.focus = new Coding();
-          return this.focus;
+        if (name.equals("code")) {
+          this.code = new Coding();
+          return this.code;
         }
-        else if (name.equals("value")) {
+        else if (name.equals("valueCodeableConcept")) {
           this.value = new CodeableConcept();
+          return this.value;
+        }
+        else if (name.equals("valueQuantity")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("valueRange")) {
+          this.value = new Range();
           return this.value;
         }
         else
@@ -199,7 +241,7 @@ public class UsageContext extends Type implements ICompositeType {
       public UsageContext copy() {
         UsageContext dst = new UsageContext();
         copyValues(dst);
-        dst.focus = focus == null ? null : focus.copy();
+        dst.code = code == null ? null : code.copy();
         dst.value = value == null ? null : value.copy();
         return dst;
       }
@@ -215,7 +257,7 @@ public class UsageContext extends Type implements ICompositeType {
         if (!(other instanceof UsageContext))
           return false;
         UsageContext o = (UsageContext) other;
-        return compareDeep(focus, o.focus, true) && compareDeep(value, o.value, true);
+        return compareDeep(code, o.code, true) && compareDeep(value, o.value, true);
       }
 
       @Override
@@ -229,7 +271,7 @@ public class UsageContext extends Type implements ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(focus, value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, value);
       }
 
 

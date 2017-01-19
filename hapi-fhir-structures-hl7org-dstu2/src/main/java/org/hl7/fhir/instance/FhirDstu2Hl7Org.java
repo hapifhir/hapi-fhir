@@ -39,6 +39,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -51,9 +53,24 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 	private String myId;
 
 	@Override
+  public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
+    throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
+  }
+
+	@Override
 	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
+
+	@Override
+	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
+		return new ServerProfileProvider(theRestfulServer);
+	}
+
+	@Override
+  public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
+    throw new UnsupportedOperationException("Validation support is not supported in DSTU2 contexts");
+  }
 
 	@Override
 	public StructureDefinition generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
@@ -70,14 +87,10 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 		return retVal;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer);
-	}
-
-	@Override
-	public FhirVersionEnum getVersion() {
-		return FhirVersionEnum.DSTU2_HL7ORG;
+	public Class<ArrayList> getContainedType() {
+		return ArrayList.class;
 	}
 
 	@Override
@@ -94,6 +107,11 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 	}
 
 	@Override
+	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
+		return ((Resource)theResource).getMeta().getLastUpdatedElement();
+	}
+
+	@Override
 	public String getPathToSchemaDefinitions() {
 		return "/org/hl7/fhir/instance/model/schema";
 	}
@@ -103,30 +121,26 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 		return Reference.class;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Class<ArrayList> getContainedType() {
-		return ArrayList.class;
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.DSTU2_HL7ORG;
 	}
 
-	@Override
-	public BaseCodingDt newCodingDt() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
+  
+  @Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		return new Dstu2Hl7OrgBundleFactory(theContext);
 	}
 
-	@Override
-	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
-		return ((Resource)theResource).getMeta().getLastUpdatedElement();
+  @Override
+	public BaseCodingDt newCodingDt() {
+		throw new UnsupportedOperationException();
 	}
 
   @Override
   public IIdType newIdType() {
     return new IdType();
   }
+
 
 }

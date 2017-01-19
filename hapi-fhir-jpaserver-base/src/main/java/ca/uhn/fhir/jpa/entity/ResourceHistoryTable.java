@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
 
+	public ResourceHistoryTable() {
+		super();
+	}
+	
+	
 	public void addTag(ResourceHistoryTag theTag) {
 		for (ResourceHistoryTag next : getTags()) {
 			if (next.getTag().equals(theTag)) {

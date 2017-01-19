@@ -16,6 +16,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
@@ -407,9 +411,9 @@ public class Controller extends BaseController {
 			clientCodeJsonWriter.nullValue();
 		}
 
-		if (client.getPrettyPrint() != null) {
+		if (client.isPrettyPrint()) {
 			clientCodeJsonWriter.name("pretty");
-			clientCodeJsonWriter.value(client.getPrettyPrint().toString());
+			clientCodeJsonWriter.value("true");
 		} else {
 			clientCodeJsonWriter.name("pretty");
 			clientCodeJsonWriter.nullValue();
@@ -813,6 +817,10 @@ public class Controller extends BaseController {
 	}
 
 	private boolean extractSearchParamsDstu3(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
+		if (theConformance instanceof org.hl7.fhir.dstu3.model.CapabilityStatement) {
+			return extractSearchParamsDstu3CapabilityStatement(theConformance, resourceName, includes, theRevIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+		}
+		
 		org.hl7.fhir.dstu3.model.Conformance conformance = (org.hl7.fhir.dstu3.model.Conformance) theConformance;
 		for (ConformanceRestComponent nextRest : conformance.getRest()) {
 			for (ConformanceRestResourceComponent nextRes : nextRest.getResource()) {
@@ -840,6 +848,42 @@ public class Controller extends BaseController {
 									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
 								}
 							}
+						}
+					}
+				}
+			}
+		}
+		return haveSearchParams;
+	}
+
+	private boolean extractSearchParamsDstu3CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
+		CapabilityStatement conformance = (org.hl7.fhir.dstu3.model.CapabilityStatement) theConformance;
+		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
+			for (CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (StringType next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() != org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				} else {
+					// It's a different resource from the one we're searching, so
+					// scan for revinclude candidates
+					for (CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE) {
+//							for (CodeType nextTargetType : next.getTarget()) {
+//								if (nextTargetType.getValue().equals(resourceName)) {
+//									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
+//								}
+//							}
 						}
 					}
 				}

@@ -1,0 +1,21 @@
+#parse ( "dump_templates.vm" )
+#foreach ( $d in $datatypes )
+Type: ${d.elementName}
+    Class: $d.class.name
+#dumpBaseElement ("    ", $d)
+	BaseRootType:
+		id: $!{d.id}
+		profile: $!{d.profile}
+	Composite:
+		--
+        
+Children:        
+#childVars( "    ", $d.children )
+
+Blocks
+#childResourceBlocks("    ", $d.resourceBlockChildren)
+
+================================================================================
+================================================================================
+
+#end

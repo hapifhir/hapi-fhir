@@ -107,21 +107,21 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		List<VersionIndependentConcept> concepts;
 		Set<String> codes;
 
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "active");
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "inactive");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("active", "confirmed", "unconfirmed"));
+		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
 
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "confirmed");
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "resolved");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("confirmed"));
+		assertThat(codes, containsInAnyOrder("resolved"));
 
 		// Unknown code
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status", "FOO");
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status", "FOO");
 		codes = toCodes(concepts);
 		assertThat(codes, empty());
 
 		// Unknown system
-		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-intolerance-status2222", "FOO");
+		concepts = myTermSvc.findCodesBelow("http://hl7.org/fhir/allergy-clinical-status2222", "active");
 		codes = toCodes(concepts);
 		assertThat(codes, empty());
 	}
@@ -131,21 +131,21 @@ public class TerminologySvcImplTest extends BaseJpaDstu3Test {
 		List<VersionIndependentConcept> concepts;
 		Set<String> codes;
 
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "active");
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "active");
 		codes = toCodes(concepts);
 		assertThat(codes, containsInAnyOrder("active"));
 
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "confirmed");
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "resolved");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("active", "confirmed"));
+		assertThat(codes, containsInAnyOrder("inactive", "resolved"));
 
 		// Unknown code
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status", "FOO");
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status", "FOO");
 		codes = toCodes(concepts);
 		assertThat(codes, empty());
 
 		// Unknown system
-		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-intolerance-status2222", "FOO");
+		concepts = myTermSvc.findCodesAbove("http://hl7.org/fhir/allergy-clinical-status2222", "active");
 		codes = toCodes(concepts);
 		assertThat(codes, empty());
 	}

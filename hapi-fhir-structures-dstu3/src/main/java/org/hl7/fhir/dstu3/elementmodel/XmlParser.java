@@ -1,10 +1,11 @@
 package org.hl7.fhir.dstu3.elementmodel;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -16,23 +17,22 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXSource;
 
-import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.elementmodel.Element.SpecialElement;
-import org.hl7.fhir.dstu3.exceptions.FHIRFormatError;
 import org.hl7.fhir.dstu3.formats.FormatUtilities;
 import org.hl7.fhir.dstu3.formats.IParser.OutputStyle;
 import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.PropertyRepresentation;
+import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
-import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
 import org.hl7.fhir.dstu3.utils.ToolingExtensions;
-import org.hl7.fhir.dstu3.utils.XmlLocationAnnotator;
-import org.hl7.fhir.dstu3.utils.XmlLocationData;
+import org.hl7.fhir.dstu3.utils.formats.XmlLocationAnnotator;
+import org.hl7.fhir.dstu3.utils.formats.XmlLocationData;
+import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -40,9 +40,7 @@ import org.hl7.fhir.utilities.xhtml.XhtmlParser;
 import org.hl7.fhir.utilities.xml.IXMLWriter;
 import org.hl7.fhir.utilities.xml.XMLUtil;
 import org.hl7.fhir.utilities.xml.XMLWriter;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -64,7 +62,7 @@ public class XmlParser extends ParserBase {
   }
 
 
-  public Element parse(InputStream stream) throws Exception {
+  public Element parse(InputStream stream) throws FHIRFormatError, DefinitionException, FHIRException, IOException {
 		Document doc = null;
   	try {
   		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -136,13 +134,13 @@ public class XmlParser extends ParserBase {
 		return loc == null ? 0 : loc.getStartColumn();
   }
 
-  public Element parse(Document doc) throws Exception {
+  public Element parse(Document doc) throws FHIRFormatError, DefinitionException, FHIRException, IOException {
     checkForProcessingInstruction(doc);
     org.w3c.dom.Element element = doc.getDocumentElement();
     return parse(element);
   }
   
-  public Element parse(org.w3c.dom.Element element) throws Exception {
+  public Element parse(org.w3c.dom.Element element) throws FHIRFormatError, DefinitionException, FHIRException, IOException {
     String ns = element.getNamespaceURI();
     String name = element.getLocalName();
     String path = "/"+pathPrefix(ns)+name;
@@ -215,7 +213,7 @@ public class XmlParser extends ParserBase {
     return result;
   }
 
-  private void parseChildren(String path, org.w3c.dom.Element node, Element context) throws Exception {
+  private void parseChildren(String path, org.w3c.dom.Element node, Element context) throws FHIRFormatError, FHIRException, IOException, DefinitionException {
   	// this parsing routine retains the original order in a the XML file, to support validation
   	reapComments(node, context);
     List<Property> properties = context.getProperty().getChildProperties(context.getName(), XMLUtil.getXsiType(node));
@@ -295,7 +293,16 @@ public class XmlParser extends ParserBase {
   }
 
   private Property getElementProp(List<Property> properties, String nodeName) {
-  	for (Property p : properties)
+		List<Property> propsSortedByLongestFirst = new ArrayList<Property>(properties);
+		// sort properties according to their name longest first, so .requestOrganizationReference comes first before .request[x]
+		// and therefore the longer property names get evaluated first
+		Collections.sort(propsSortedByLongestFirst, new Comparator<Property>() {
+			@Override
+			public int compare(Property o1, Property o2) {
+				return o2.getName().length() - o1.getName().length();
+			}
+		});
+  	for (Property p : propsSortedByLongestFirst)
   		if (!p.getDefinition().hasRepresentation(PropertyRepresentation.XMLATTR) && !p.getDefinition().hasRepresentation(PropertyRepresentation.XMLTEXT)) {
   		  if (p.getName().equals(nodeName)) 
 				  return p;
@@ -327,7 +334,7 @@ public class XmlParser extends ParserBase {
   		throw new FHIRException("Unknown Data format '"+fmt+"'");
 	}
 
-  private void parseResource(String string, org.w3c.dom.Element container, Element parent, Property elementProperty) throws Exception {
+  private void parseResource(String string, org.w3c.dom.Element container, Element parent, Property elementProperty) throws FHIRFormatError, DefinitionException, FHIRException, IOException {
   	org.w3c.dom.Element res = XMLUtil.getFirstChild(container);
     String name = res.getLocalName();
     StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+name);

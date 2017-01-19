@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,18 +78,18 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	}
 
 	@Override
-	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		if (isBlank(theValue)) {
-			myLeftType.setValueAsQueryToken(theQualifier, "");
-			myRightType.setValueAsQueryToken(theQualifier, "");
+			myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, "");
+			myRightType.setValueAsQueryToken(theContext, theParamName, theQualifier, "");
 		} else {
 			List<String> parts = ParameterUtil.splitParameterString(theValue, '$', false);
 			if (parts.size() > 2) {
 				throw new InvalidRequestException("Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: " + theValue);
 			}
-			myLeftType.setValueAsQueryToken(theQualifier, parts.get(0));
+			myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(0));
 			if (parts.size() > 1) {
-				myRightType.setValueAsQueryToken(theQualifier, parts.get(1));
+				myRightType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(1));
 			}
 		}
 	}

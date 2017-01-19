@@ -29,11 +29,12 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu3.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -41,22 +42,157 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
- * This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.
+ * This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.
  */
 @ResourceDef(name="PlanDefinition", profile="http://hl7.org/fhir/Profile/PlanDefinition")
-public class PlanDefinition extends DomainResource {
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "type", "status", "experimental", "date", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "publisher", "contact", "copyright", "relatedArtifact", "library", "actionDefinition"})
+public class PlanDefinition extends MetadataResource {
+
+    public enum PlanActionConditionKind {
+        /**
+         * The condition describes whether or not a given action is applicable
+         */
+        APPLICABILITY, 
+        /**
+         * The condition is a starting condition for the action
+         */
+        START, 
+        /**
+         * The condition is a stop, or exit condition for the action
+         */
+        STOP, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static PlanActionConditionKind fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("applicability".equals(codeString))
+          return APPLICABILITY;
+        if ("start".equals(codeString))
+          return START;
+        if ("stop".equals(codeString))
+          return STOP;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown PlanActionConditionKind code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case APPLICABILITY: return "applicability";
+            case START: return "start";
+            case STOP: return "stop";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case APPLICABILITY: return "http://hl7.org/fhir/action-condition-kind";
+            case START: return "http://hl7.org/fhir/action-condition-kind";
+            case STOP: return "http://hl7.org/fhir/action-condition-kind";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case APPLICABILITY: return "The condition describes whether or not a given action is applicable";
+            case START: return "The condition is a starting condition for the action";
+            case STOP: return "The condition is a stop, or exit condition for the action";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case APPLICABILITY: return "Applicability";
+            case START: return "Start";
+            case STOP: return "Stop";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PlanActionConditionKindEnumFactory implements EnumFactory<PlanActionConditionKind> {
+    public PlanActionConditionKind fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("applicability".equals(codeString))
+          return PlanActionConditionKind.APPLICABILITY;
+        if ("start".equals(codeString))
+          return PlanActionConditionKind.START;
+        if ("stop".equals(codeString))
+          return PlanActionConditionKind.STOP;
+        throw new IllegalArgumentException("Unknown PlanActionConditionKind code '"+codeString+"'");
+        }
+        public Enumeration<PlanActionConditionKind> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("applicability".equals(codeString))
+          return new Enumeration<PlanActionConditionKind>(this, PlanActionConditionKind.APPLICABILITY);
+        if ("start".equals(codeString))
+          return new Enumeration<PlanActionConditionKind>(this, PlanActionConditionKind.START);
+        if ("stop".equals(codeString))
+          return new Enumeration<PlanActionConditionKind>(this, PlanActionConditionKind.STOP);
+        throw new FHIRException("Unknown PlanActionConditionKind code '"+codeString+"'");
+        }
+    public String toCode(PlanActionConditionKind code) {
+      if (code == PlanActionConditionKind.APPLICABILITY)
+        return "applicability";
+      if (code == PlanActionConditionKind.START)
+        return "start";
+      if (code == PlanActionConditionKind.STOP)
+        return "stop";
+      return "?";
+      }
+    public String toSystem(PlanActionConditionKind code) {
+      return code.getSystem();
+      }
+    }
 
     public enum PlanActionRelationshipType {
+        /**
+         * The action must be performed before the start of the related action
+         */
+        BEFORESTART, 
         /**
          * The action must be performed before the related action
          */
         BEFORE, 
         /**
+         * The action must be performed before the end of the related action
+         */
+        BEFOREEND, 
+        /**
+         * The action must be performed concurrent with the start of the related action
+         */
+        CONCURRENTWITHSTART, 
+        /**
+         * The action must be performed concurrent with the related action
+         */
+        CONCURRENT, 
+        /**
+         * The action must be performed concurrent with the end of the related action
+         */
+        CONCURRENTWITHEND, 
+        /**
+         * The action must be performed after the start of the related action
+         */
+        AFTERSTART, 
+        /**
          * The action must be performed after the related action
          */
         AFTER, 
+        /**
+         * The action must be performed after the end of the related action
+         */
+        AFTEREND, 
         /**
          * added to help the parsers with the generic types
          */
@@ -64,10 +200,24 @@ public class PlanDefinition extends DomainResource {
         public static PlanActionRelationshipType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("before-start".equals(codeString))
+          return BEFORESTART;
         if ("before".equals(codeString))
           return BEFORE;
+        if ("before-end".equals(codeString))
+          return BEFOREEND;
+        if ("concurrent-with-start".equals(codeString))
+          return CONCURRENTWITHSTART;
+        if ("concurrent".equals(codeString))
+          return CONCURRENT;
+        if ("concurrent-with-end".equals(codeString))
+          return CONCURRENTWITHEND;
+        if ("after-start".equals(codeString))
+          return AFTERSTART;
         if ("after".equals(codeString))
           return AFTER;
+        if ("after-end".equals(codeString))
+          return AFTEREND;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -75,29 +225,57 @@ public class PlanDefinition extends DomainResource {
         }
         public String toCode() {
           switch (this) {
+            case BEFORESTART: return "before-start";
             case BEFORE: return "before";
+            case BEFOREEND: return "before-end";
+            case CONCURRENTWITHSTART: return "concurrent-with-start";
+            case CONCURRENT: return "concurrent";
+            case CONCURRENTWITHEND: return "concurrent-with-end";
+            case AFTERSTART: return "after-start";
             case AFTER: return "after";
+            case AFTEREND: return "after-end";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case BEFORE: return "http://hl7.org/fhir/planaction-relationship-type";
-            case AFTER: return "http://hl7.org/fhir/planaction-relationship-type";
+            case BEFORESTART: return "http://hl7.org/fhir/action-relationship-type";
+            case BEFORE: return "http://hl7.org/fhir/action-relationship-type";
+            case BEFOREEND: return "http://hl7.org/fhir/action-relationship-type";
+            case CONCURRENTWITHSTART: return "http://hl7.org/fhir/action-relationship-type";
+            case CONCURRENT: return "http://hl7.org/fhir/action-relationship-type";
+            case CONCURRENTWITHEND: return "http://hl7.org/fhir/action-relationship-type";
+            case AFTERSTART: return "http://hl7.org/fhir/action-relationship-type";
+            case AFTER: return "http://hl7.org/fhir/action-relationship-type";
+            case AFTEREND: return "http://hl7.org/fhir/action-relationship-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
+            case BEFORESTART: return "The action must be performed before the start of the related action";
             case BEFORE: return "The action must be performed before the related action";
+            case BEFOREEND: return "The action must be performed before the end of the related action";
+            case CONCURRENTWITHSTART: return "The action must be performed concurrent with the start of the related action";
+            case CONCURRENT: return "The action must be performed concurrent with the related action";
+            case CONCURRENTWITHEND: return "The action must be performed concurrent with the end of the related action";
+            case AFTERSTART: return "The action must be performed after the start of the related action";
             case AFTER: return "The action must be performed after the related action";
+            case AFTEREND: return "The action must be performed after the end of the related action";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
+            case BEFORESTART: return "Before Start";
             case BEFORE: return "Before";
+            case BEFOREEND: return "Before End";
+            case CONCURRENTWITHSTART: return "Concurrent With Start";
+            case CONCURRENT: return "Concurrent";
+            case CONCURRENTWITHEND: return "Concurrent With End";
+            case AFTERSTART: return "After Start";
             case AFTER: return "After";
+            case AFTEREND: return "After End";
             default: return "?";
           }
         }
@@ -108,10 +286,24 @@ public class PlanDefinition extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("before-start".equals(codeString))
+          return PlanActionRelationshipType.BEFORESTART;
         if ("before".equals(codeString))
           return PlanActionRelationshipType.BEFORE;
+        if ("before-end".equals(codeString))
+          return PlanActionRelationshipType.BEFOREEND;
+        if ("concurrent-with-start".equals(codeString))
+          return PlanActionRelationshipType.CONCURRENTWITHSTART;
+        if ("concurrent".equals(codeString))
+          return PlanActionRelationshipType.CONCURRENT;
+        if ("concurrent-with-end".equals(codeString))
+          return PlanActionRelationshipType.CONCURRENTWITHEND;
+        if ("after-start".equals(codeString))
+          return PlanActionRelationshipType.AFTERSTART;
         if ("after".equals(codeString))
           return PlanActionRelationshipType.AFTER;
+        if ("after-end".equals(codeString))
+          return PlanActionRelationshipType.AFTEREND;
         throw new IllegalArgumentException("Unknown PlanActionRelationshipType code '"+codeString+"'");
         }
         public Enumeration<PlanActionRelationshipType> fromType(Base code) throws FHIRException {
@@ -120,17 +312,45 @@ public class PlanDefinition extends DomainResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
+        if ("before-start".equals(codeString))
+          return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.BEFORESTART);
         if ("before".equals(codeString))
           return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.BEFORE);
+        if ("before-end".equals(codeString))
+          return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.BEFOREEND);
+        if ("concurrent-with-start".equals(codeString))
+          return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.CONCURRENTWITHSTART);
+        if ("concurrent".equals(codeString))
+          return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.CONCURRENT);
+        if ("concurrent-with-end".equals(codeString))
+          return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.CONCURRENTWITHEND);
+        if ("after-start".equals(codeString))
+          return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.AFTERSTART);
         if ("after".equals(codeString))
           return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.AFTER);
+        if ("after-end".equals(codeString))
+          return new Enumeration<PlanActionRelationshipType>(this, PlanActionRelationshipType.AFTEREND);
         throw new FHIRException("Unknown PlanActionRelationshipType code '"+codeString+"'");
         }
     public String toCode(PlanActionRelationshipType code) {
+      if (code == PlanActionRelationshipType.BEFORESTART)
+        return "before-start";
       if (code == PlanActionRelationshipType.BEFORE)
         return "before";
+      if (code == PlanActionRelationshipType.BEFOREEND)
+        return "before-end";
+      if (code == PlanActionRelationshipType.CONCURRENTWITHSTART)
+        return "concurrent-with-start";
+      if (code == PlanActionRelationshipType.CONCURRENT)
+        return "concurrent";
+      if (code == PlanActionRelationshipType.CONCURRENTWITHEND)
+        return "concurrent-with-end";
+      if (code == PlanActionRelationshipType.AFTERSTART)
+        return "after-start";
       if (code == PlanActionRelationshipType.AFTER)
         return "after";
+      if (code == PlanActionRelationshipType.AFTEREND)
+        return "after-end";
       return "?";
       }
     public String toSystem(PlanActionRelationshipType code) {
@@ -138,214 +358,654 @@ public class PlanDefinition extends DomainResource {
       }
     }
 
-    public enum PlanActionRelationshipAnchor {
+    public enum PlanActionParticipantType {
         /**
-         * The action relationship is anchored to the start of the related action
+         * The participant is the patient under evaluation
          */
-        START, 
+        PATIENT, 
         /**
-         * The action relationship is anchored to the end of the related action
+         * The participant is a practitioner involved in the patient's care
          */
-        END, 
+        PRACTITIONER, 
+        /**
+         * The participant is a person related to the patient
+         */
+        RELATEDPERSON, 
         /**
          * added to help the parsers with the generic types
          */
         NULL;
-        public static PlanActionRelationshipAnchor fromCode(String codeString) throws FHIRException {
+        public static PlanActionParticipantType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("start".equals(codeString))
-          return START;
-        if ("end".equals(codeString))
-          return END;
+        if ("patient".equals(codeString))
+          return PATIENT;
+        if ("practitioner".equals(codeString))
+          return PRACTITIONER;
+        if ("related-person".equals(codeString))
+          return RELATEDPERSON;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
-          throw new FHIRException("Unknown PlanActionRelationshipAnchor code '"+codeString+"'");
+          throw new FHIRException("Unknown PlanActionParticipantType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case START: return "start";
-            case END: return "end";
+            case PATIENT: return "patient";
+            case PRACTITIONER: return "practitioner";
+            case RELATEDPERSON: return "related-person";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case START: return "http://hl7.org/fhir/planaction-relationship-anchor";
-            case END: return "http://hl7.org/fhir/planaction-relationship-anchor";
+            case PATIENT: return "http://hl7.org/fhir/action-participant-type";
+            case PRACTITIONER: return "http://hl7.org/fhir/action-participant-type";
+            case RELATEDPERSON: return "http://hl7.org/fhir/action-participant-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case START: return "The action relationship is anchored to the start of the related action";
-            case END: return "The action relationship is anchored to the end of the related action";
+            case PATIENT: return "The participant is the patient under evaluation";
+            case PRACTITIONER: return "The participant is a practitioner involved in the patient's care";
+            case RELATEDPERSON: return "The participant is a person related to the patient";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case START: return "Start";
-            case END: return "End";
+            case PATIENT: return "Patient";
+            case PRACTITIONER: return "Practitioner";
+            case RELATEDPERSON: return "Related Person";
             default: return "?";
           }
         }
     }
 
-  public static class PlanActionRelationshipAnchorEnumFactory implements EnumFactory<PlanActionRelationshipAnchor> {
-    public PlanActionRelationshipAnchor fromCode(String codeString) throws IllegalArgumentException {
+  public static class PlanActionParticipantTypeEnumFactory implements EnumFactory<PlanActionParticipantType> {
+    public PlanActionParticipantType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("start".equals(codeString))
-          return PlanActionRelationshipAnchor.START;
-        if ("end".equals(codeString))
-          return PlanActionRelationshipAnchor.END;
-        throw new IllegalArgumentException("Unknown PlanActionRelationshipAnchor code '"+codeString+"'");
+        if ("patient".equals(codeString))
+          return PlanActionParticipantType.PATIENT;
+        if ("practitioner".equals(codeString))
+          return PlanActionParticipantType.PRACTITIONER;
+        if ("related-person".equals(codeString))
+          return PlanActionParticipantType.RELATEDPERSON;
+        throw new IllegalArgumentException("Unknown PlanActionParticipantType code '"+codeString+"'");
         }
-        public Enumeration<PlanActionRelationshipAnchor> fromType(Base code) throws FHIRException {
+        public Enumeration<PlanActionParticipantType> fromType(Base code) throws FHIRException {
           if (code == null || code.isEmpty())
             return null;
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("start".equals(codeString))
-          return new Enumeration<PlanActionRelationshipAnchor>(this, PlanActionRelationshipAnchor.START);
-        if ("end".equals(codeString))
-          return new Enumeration<PlanActionRelationshipAnchor>(this, PlanActionRelationshipAnchor.END);
-        throw new FHIRException("Unknown PlanActionRelationshipAnchor code '"+codeString+"'");
+        if ("patient".equals(codeString))
+          return new Enumeration<PlanActionParticipantType>(this, PlanActionParticipantType.PATIENT);
+        if ("practitioner".equals(codeString))
+          return new Enumeration<PlanActionParticipantType>(this, PlanActionParticipantType.PRACTITIONER);
+        if ("related-person".equals(codeString))
+          return new Enumeration<PlanActionParticipantType>(this, PlanActionParticipantType.RELATEDPERSON);
+        throw new FHIRException("Unknown PlanActionParticipantType code '"+codeString+"'");
         }
-    public String toCode(PlanActionRelationshipAnchor code) {
-      if (code == PlanActionRelationshipAnchor.START)
-        return "start";
-      if (code == PlanActionRelationshipAnchor.END)
-        return "end";
+    public String toCode(PlanActionParticipantType code) {
+      if (code == PlanActionParticipantType.PATIENT)
+        return "patient";
+      if (code == PlanActionParticipantType.PRACTITIONER)
+        return "practitioner";
+      if (code == PlanActionParticipantType.RELATEDPERSON)
+        return "related-person";
       return "?";
       }
-    public String toSystem(PlanActionRelationshipAnchor code) {
+    public String toSystem(PlanActionParticipantType code) {
       return code.getSystem();
       }
     }
 
-    public enum PlanActionType {
+    public enum PlanActionGroupingBehavior {
         /**
-         * The action is to create a new resource
+         * Any group marked with this behavior should be displayed as a visual group to the end user
          */
-        CREATE, 
+        VISUALGROUP, 
         /**
-         * The action is to update an existing resource
+         * A group with this behavior logically groups its sub-elements, and may be shown as a visual group to the end user, but it is not required to do so
          */
-        UPDATE, 
+        LOGICALGROUP, 
         /**
-         * The action is to remove an existing resource
+         * A group of related alternative actions is a sentence group if the target referenced by the action is the same in all the actions and each action simply constitutes a different variation on how to specify the details for the target. For example, two actions that could be in a SentenceGroup are "aspirin, 500 mg, 2 times per day" and "aspirin, 300 mg, 3 times per day". In both cases, aspirin is the target referenced by the action, and the two actions represent different options for how aspirin might be ordered for the patient. Note that a SentenceGroup would almost always have an associated selection behavior of "AtMostOne", unless it's a required action, in which case, it would be "ExactlyOne"
          */
-        REMOVE, 
-        /**
-         * The action is to fire a specific event
-         */
-        FIREEVENT, 
+        SENTENCEGROUP, 
         /**
          * added to help the parsers with the generic types
          */
         NULL;
-        public static PlanActionType fromCode(String codeString) throws FHIRException {
+        public static PlanActionGroupingBehavior fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("create".equals(codeString))
-          return CREATE;
-        if ("update".equals(codeString))
-          return UPDATE;
-        if ("remove".equals(codeString))
-          return REMOVE;
-        if ("fire-event".equals(codeString))
-          return FIREEVENT;
+        if ("visual-group".equals(codeString))
+          return VISUALGROUP;
+        if ("logical-group".equals(codeString))
+          return LOGICALGROUP;
+        if ("sentence-group".equals(codeString))
+          return SENTENCEGROUP;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
-          throw new FHIRException("Unknown PlanActionType code '"+codeString+"'");
+          throw new FHIRException("Unknown PlanActionGroupingBehavior code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case CREATE: return "create";
-            case UPDATE: return "update";
-            case REMOVE: return "remove";
-            case FIREEVENT: return "fire-event";
+            case VISUALGROUP: return "visual-group";
+            case LOGICALGROUP: return "logical-group";
+            case SENTENCEGROUP: return "sentence-group";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case CREATE: return "http://hl7.org/fhir/planaction-type";
-            case UPDATE: return "http://hl7.org/fhir/planaction-type";
-            case REMOVE: return "http://hl7.org/fhir/planaction-type";
-            case FIREEVENT: return "http://hl7.org/fhir/planaction-type";
+            case VISUALGROUP: return "http://hl7.org/fhir/action-grouping-behavior";
+            case LOGICALGROUP: return "http://hl7.org/fhir/action-grouping-behavior";
+            case SENTENCEGROUP: return "http://hl7.org/fhir/action-grouping-behavior";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case CREATE: return "The action is to create a new resource";
-            case UPDATE: return "The action is to update an existing resource";
-            case REMOVE: return "The action is to remove an existing resource";
-            case FIREEVENT: return "The action is to fire a specific event";
+            case VISUALGROUP: return "Any group marked with this behavior should be displayed as a visual group to the end user";
+            case LOGICALGROUP: return "A group with this behavior logically groups its sub-elements, and may be shown as a visual group to the end user, but it is not required to do so";
+            case SENTENCEGROUP: return "A group of related alternative actions is a sentence group if the target referenced by the action is the same in all the actions and each action simply constitutes a different variation on how to specify the details for the target. For example, two actions that could be in a SentenceGroup are \"aspirin, 500 mg, 2 times per day\" and \"aspirin, 300 mg, 3 times per day\". In both cases, aspirin is the target referenced by the action, and the two actions represent different options for how aspirin might be ordered for the patient. Note that a SentenceGroup would almost always have an associated selection behavior of \"AtMostOne\", unless it's a required action, in which case, it would be \"ExactlyOne\"";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case CREATE: return "Create";
-            case UPDATE: return "Update";
-            case REMOVE: return "Remove";
-            case FIREEVENT: return "Fire Event";
+            case VISUALGROUP: return "Visual Group";
+            case LOGICALGROUP: return "Logical Group";
+            case SENTENCEGROUP: return "Sentence Group";
             default: return "?";
           }
         }
     }
 
-  public static class PlanActionTypeEnumFactory implements EnumFactory<PlanActionType> {
-    public PlanActionType fromCode(String codeString) throws IllegalArgumentException {
+  public static class PlanActionGroupingBehaviorEnumFactory implements EnumFactory<PlanActionGroupingBehavior> {
+    public PlanActionGroupingBehavior fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("create".equals(codeString))
-          return PlanActionType.CREATE;
-        if ("update".equals(codeString))
-          return PlanActionType.UPDATE;
-        if ("remove".equals(codeString))
-          return PlanActionType.REMOVE;
-        if ("fire-event".equals(codeString))
-          return PlanActionType.FIREEVENT;
-        throw new IllegalArgumentException("Unknown PlanActionType code '"+codeString+"'");
+        if ("visual-group".equals(codeString))
+          return PlanActionGroupingBehavior.VISUALGROUP;
+        if ("logical-group".equals(codeString))
+          return PlanActionGroupingBehavior.LOGICALGROUP;
+        if ("sentence-group".equals(codeString))
+          return PlanActionGroupingBehavior.SENTENCEGROUP;
+        throw new IllegalArgumentException("Unknown PlanActionGroupingBehavior code '"+codeString+"'");
         }
-        public Enumeration<PlanActionType> fromType(Base code) throws FHIRException {
+        public Enumeration<PlanActionGroupingBehavior> fromType(Base code) throws FHIRException {
           if (code == null || code.isEmpty())
             return null;
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("create".equals(codeString))
-          return new Enumeration<PlanActionType>(this, PlanActionType.CREATE);
-        if ("update".equals(codeString))
-          return new Enumeration<PlanActionType>(this, PlanActionType.UPDATE);
-        if ("remove".equals(codeString))
-          return new Enumeration<PlanActionType>(this, PlanActionType.REMOVE);
-        if ("fire-event".equals(codeString))
-          return new Enumeration<PlanActionType>(this, PlanActionType.FIREEVENT);
-        throw new FHIRException("Unknown PlanActionType code '"+codeString+"'");
+        if ("visual-group".equals(codeString))
+          return new Enumeration<PlanActionGroupingBehavior>(this, PlanActionGroupingBehavior.VISUALGROUP);
+        if ("logical-group".equals(codeString))
+          return new Enumeration<PlanActionGroupingBehavior>(this, PlanActionGroupingBehavior.LOGICALGROUP);
+        if ("sentence-group".equals(codeString))
+          return new Enumeration<PlanActionGroupingBehavior>(this, PlanActionGroupingBehavior.SENTENCEGROUP);
+        throw new FHIRException("Unknown PlanActionGroupingBehavior code '"+codeString+"'");
         }
-    public String toCode(PlanActionType code) {
-      if (code == PlanActionType.CREATE)
-        return "create";
-      if (code == PlanActionType.UPDATE)
-        return "update";
-      if (code == PlanActionType.REMOVE)
-        return "remove";
-      if (code == PlanActionType.FIREEVENT)
-        return "fire-event";
+    public String toCode(PlanActionGroupingBehavior code) {
+      if (code == PlanActionGroupingBehavior.VISUALGROUP)
+        return "visual-group";
+      if (code == PlanActionGroupingBehavior.LOGICALGROUP)
+        return "logical-group";
+      if (code == PlanActionGroupingBehavior.SENTENCEGROUP)
+        return "sentence-group";
       return "?";
       }
-    public String toSystem(PlanActionType code) {
+    public String toSystem(PlanActionGroupingBehavior code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum PlanActionSelectionBehavior {
+        /**
+         * Any number of the actions in the group may be chosen, from zero to all
+         */
+        ANY, 
+        /**
+         * All the actions in the group must be selected as a single unit
+         */
+        ALL, 
+        /**
+         * All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected
+         */
+        ALLORNONE, 
+        /**
+         * The end user must choose one and only one of the selectable actions in the group. The user may not choose none of the actions in the group
+         */
+        EXACTLYONE, 
+        /**
+         * The end user may choose zero or at most one of the actions in the group
+         */
+        ATMOSTONE, 
+        /**
+         * The end user must choose a minimum of one, and as many additional as desired
+         */
+        ONEORMORE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static PlanActionSelectionBehavior fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("any".equals(codeString))
+          return ANY;
+        if ("all".equals(codeString))
+          return ALL;
+        if ("all-or-none".equals(codeString))
+          return ALLORNONE;
+        if ("exactly-one".equals(codeString))
+          return EXACTLYONE;
+        if ("at-most-one".equals(codeString))
+          return ATMOSTONE;
+        if ("one-or-more".equals(codeString))
+          return ONEORMORE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown PlanActionSelectionBehavior code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ANY: return "any";
+            case ALL: return "all";
+            case ALLORNONE: return "all-or-none";
+            case EXACTLYONE: return "exactly-one";
+            case ATMOSTONE: return "at-most-one";
+            case ONEORMORE: return "one-or-more";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ANY: return "http://hl7.org/fhir/action-selection-behavior";
+            case ALL: return "http://hl7.org/fhir/action-selection-behavior";
+            case ALLORNONE: return "http://hl7.org/fhir/action-selection-behavior";
+            case EXACTLYONE: return "http://hl7.org/fhir/action-selection-behavior";
+            case ATMOSTONE: return "http://hl7.org/fhir/action-selection-behavior";
+            case ONEORMORE: return "http://hl7.org/fhir/action-selection-behavior";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ANY: return "Any number of the actions in the group may be chosen, from zero to all";
+            case ALL: return "All the actions in the group must be selected as a single unit";
+            case ALLORNONE: return "All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected";
+            case EXACTLYONE: return "The end user must choose one and only one of the selectable actions in the group. The user may not choose none of the actions in the group";
+            case ATMOSTONE: return "The end user may choose zero or at most one of the actions in the group";
+            case ONEORMORE: return "The end user must choose a minimum of one, and as many additional as desired";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ANY: return "Any";
+            case ALL: return "All";
+            case ALLORNONE: return "All Or None";
+            case EXACTLYONE: return "Exactly One";
+            case ATMOSTONE: return "At Most One";
+            case ONEORMORE: return "One Or More";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PlanActionSelectionBehaviorEnumFactory implements EnumFactory<PlanActionSelectionBehavior> {
+    public PlanActionSelectionBehavior fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("any".equals(codeString))
+          return PlanActionSelectionBehavior.ANY;
+        if ("all".equals(codeString))
+          return PlanActionSelectionBehavior.ALL;
+        if ("all-or-none".equals(codeString))
+          return PlanActionSelectionBehavior.ALLORNONE;
+        if ("exactly-one".equals(codeString))
+          return PlanActionSelectionBehavior.EXACTLYONE;
+        if ("at-most-one".equals(codeString))
+          return PlanActionSelectionBehavior.ATMOSTONE;
+        if ("one-or-more".equals(codeString))
+          return PlanActionSelectionBehavior.ONEORMORE;
+        throw new IllegalArgumentException("Unknown PlanActionSelectionBehavior code '"+codeString+"'");
+        }
+        public Enumeration<PlanActionSelectionBehavior> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("any".equals(codeString))
+          return new Enumeration<PlanActionSelectionBehavior>(this, PlanActionSelectionBehavior.ANY);
+        if ("all".equals(codeString))
+          return new Enumeration<PlanActionSelectionBehavior>(this, PlanActionSelectionBehavior.ALL);
+        if ("all-or-none".equals(codeString))
+          return new Enumeration<PlanActionSelectionBehavior>(this, PlanActionSelectionBehavior.ALLORNONE);
+        if ("exactly-one".equals(codeString))
+          return new Enumeration<PlanActionSelectionBehavior>(this, PlanActionSelectionBehavior.EXACTLYONE);
+        if ("at-most-one".equals(codeString))
+          return new Enumeration<PlanActionSelectionBehavior>(this, PlanActionSelectionBehavior.ATMOSTONE);
+        if ("one-or-more".equals(codeString))
+          return new Enumeration<PlanActionSelectionBehavior>(this, PlanActionSelectionBehavior.ONEORMORE);
+        throw new FHIRException("Unknown PlanActionSelectionBehavior code '"+codeString+"'");
+        }
+    public String toCode(PlanActionSelectionBehavior code) {
+      if (code == PlanActionSelectionBehavior.ANY)
+        return "any";
+      if (code == PlanActionSelectionBehavior.ALL)
+        return "all";
+      if (code == PlanActionSelectionBehavior.ALLORNONE)
+        return "all-or-none";
+      if (code == PlanActionSelectionBehavior.EXACTLYONE)
+        return "exactly-one";
+      if (code == PlanActionSelectionBehavior.ATMOSTONE)
+        return "at-most-one";
+      if (code == PlanActionSelectionBehavior.ONEORMORE)
+        return "one-or-more";
+      return "?";
+      }
+    public String toSystem(PlanActionSelectionBehavior code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum PlanActionRequiredBehavior {
+        /**
+         * An action with this behavior must be included in the actions processed by the end user; the end user may not choose not to include this action
+         */
+        MUST, 
+        /**
+         * An action with this behavior may be included in the set of actions processed by the end user
+         */
+        COULD, 
+        /**
+         * An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included
+         */
+        MUSTUNLESSDOCUMENTED, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static PlanActionRequiredBehavior fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("must".equals(codeString))
+          return MUST;
+        if ("could".equals(codeString))
+          return COULD;
+        if ("must-unless-documented".equals(codeString))
+          return MUSTUNLESSDOCUMENTED;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown PlanActionRequiredBehavior code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case MUST: return "must";
+            case COULD: return "could";
+            case MUSTUNLESSDOCUMENTED: return "must-unless-documented";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case MUST: return "http://hl7.org/fhir/action-required-behavior";
+            case COULD: return "http://hl7.org/fhir/action-required-behavior";
+            case MUSTUNLESSDOCUMENTED: return "http://hl7.org/fhir/action-required-behavior";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case MUST: return "An action with this behavior must be included in the actions processed by the end user; the end user may not choose not to include this action";
+            case COULD: return "An action with this behavior may be included in the set of actions processed by the end user";
+            case MUSTUNLESSDOCUMENTED: return "An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case MUST: return "Must";
+            case COULD: return "Could";
+            case MUSTUNLESSDOCUMENTED: return "Must Unless Documented";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PlanActionRequiredBehaviorEnumFactory implements EnumFactory<PlanActionRequiredBehavior> {
+    public PlanActionRequiredBehavior fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("must".equals(codeString))
+          return PlanActionRequiredBehavior.MUST;
+        if ("could".equals(codeString))
+          return PlanActionRequiredBehavior.COULD;
+        if ("must-unless-documented".equals(codeString))
+          return PlanActionRequiredBehavior.MUSTUNLESSDOCUMENTED;
+        throw new IllegalArgumentException("Unknown PlanActionRequiredBehavior code '"+codeString+"'");
+        }
+        public Enumeration<PlanActionRequiredBehavior> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("must".equals(codeString))
+          return new Enumeration<PlanActionRequiredBehavior>(this, PlanActionRequiredBehavior.MUST);
+        if ("could".equals(codeString))
+          return new Enumeration<PlanActionRequiredBehavior>(this, PlanActionRequiredBehavior.COULD);
+        if ("must-unless-documented".equals(codeString))
+          return new Enumeration<PlanActionRequiredBehavior>(this, PlanActionRequiredBehavior.MUSTUNLESSDOCUMENTED);
+        throw new FHIRException("Unknown PlanActionRequiredBehavior code '"+codeString+"'");
+        }
+    public String toCode(PlanActionRequiredBehavior code) {
+      if (code == PlanActionRequiredBehavior.MUST)
+        return "must";
+      if (code == PlanActionRequiredBehavior.COULD)
+        return "could";
+      if (code == PlanActionRequiredBehavior.MUSTUNLESSDOCUMENTED)
+        return "must-unless-documented";
+      return "?";
+      }
+    public String toSystem(PlanActionRequiredBehavior code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum PlanActionPrecheckBehavior {
+        /**
+         * An action with this behavior is one of the most frequent action that is, or should be, included by an end user, for the particular context in which the action occurs. The system displaying the action to the end user should consider "pre-checking" such an action as a convenience for the user
+         */
+        YES, 
+        /**
+         * An action with this behavior is one of the less frequent actions included by the end user, for the particular context in which the action occurs. The system displaying the actions to the end user would typically not "pre-check" such an action
+         */
+        NO, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static PlanActionPrecheckBehavior fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("yes".equals(codeString))
+          return YES;
+        if ("no".equals(codeString))
+          return NO;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown PlanActionPrecheckBehavior code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case YES: return "yes";
+            case NO: return "no";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case YES: return "http://hl7.org/fhir/action-precheck-behavior";
+            case NO: return "http://hl7.org/fhir/action-precheck-behavior";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case YES: return "An action with this behavior is one of the most frequent action that is, or should be, included by an end user, for the particular context in which the action occurs. The system displaying the action to the end user should consider \"pre-checking\" such an action as a convenience for the user";
+            case NO: return "An action with this behavior is one of the less frequent actions included by the end user, for the particular context in which the action occurs. The system displaying the actions to the end user would typically not \"pre-check\" such an action";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case YES: return "Yes";
+            case NO: return "No";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PlanActionPrecheckBehaviorEnumFactory implements EnumFactory<PlanActionPrecheckBehavior> {
+    public PlanActionPrecheckBehavior fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("yes".equals(codeString))
+          return PlanActionPrecheckBehavior.YES;
+        if ("no".equals(codeString))
+          return PlanActionPrecheckBehavior.NO;
+        throw new IllegalArgumentException("Unknown PlanActionPrecheckBehavior code '"+codeString+"'");
+        }
+        public Enumeration<PlanActionPrecheckBehavior> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("yes".equals(codeString))
+          return new Enumeration<PlanActionPrecheckBehavior>(this, PlanActionPrecheckBehavior.YES);
+        if ("no".equals(codeString))
+          return new Enumeration<PlanActionPrecheckBehavior>(this, PlanActionPrecheckBehavior.NO);
+        throw new FHIRException("Unknown PlanActionPrecheckBehavior code '"+codeString+"'");
+        }
+    public String toCode(PlanActionPrecheckBehavior code) {
+      if (code == PlanActionPrecheckBehavior.YES)
+        return "yes";
+      if (code == PlanActionPrecheckBehavior.NO)
+        return "no";
+      return "?";
+      }
+    public String toSystem(PlanActionPrecheckBehavior code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum PlanActionCardinalityBehavior {
+        /**
+         * The action may only be selected one time
+         */
+        SINGLE, 
+        /**
+         * The action may be selected multiple times
+         */
+        MULTIPLE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static PlanActionCardinalityBehavior fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("single".equals(codeString))
+          return SINGLE;
+        if ("multiple".equals(codeString))
+          return MULTIPLE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown PlanActionCardinalityBehavior code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case SINGLE: return "single";
+            case MULTIPLE: return "multiple";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case SINGLE: return "http://hl7.org/fhir/action-cardinality-behavior";
+            case MULTIPLE: return "http://hl7.org/fhir/action-cardinality-behavior";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case SINGLE: return "The action may only be selected one time";
+            case MULTIPLE: return "The action may be selected multiple times";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case SINGLE: return "Single";
+            case MULTIPLE: return "Multiple";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class PlanActionCardinalityBehaviorEnumFactory implements EnumFactory<PlanActionCardinalityBehavior> {
+    public PlanActionCardinalityBehavior fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("single".equals(codeString))
+          return PlanActionCardinalityBehavior.SINGLE;
+        if ("multiple".equals(codeString))
+          return PlanActionCardinalityBehavior.MULTIPLE;
+        throw new IllegalArgumentException("Unknown PlanActionCardinalityBehavior code '"+codeString+"'");
+        }
+        public Enumeration<PlanActionCardinalityBehavior> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("single".equals(codeString))
+          return new Enumeration<PlanActionCardinalityBehavior>(this, PlanActionCardinalityBehavior.SINGLE);
+        if ("multiple".equals(codeString))
+          return new Enumeration<PlanActionCardinalityBehavior>(this, PlanActionCardinalityBehavior.MULTIPLE);
+        throw new FHIRException("Unknown PlanActionCardinalityBehavior code '"+codeString+"'");
+        }
+    public String toCode(PlanActionCardinalityBehavior code) {
+      if (code == PlanActionCardinalityBehavior.SINGLE)
+        return "single";
+      if (code == PlanActionCardinalityBehavior.MULTIPLE)
+        return "multiple";
+      return "?";
+      }
+    public String toSystem(PlanActionCardinalityBehavior code) {
       return code.getSystem();
       }
     }
@@ -390,83 +1050,131 @@ public class PlanDefinition extends DomainResource {
         /**
          * The concept represented by this action or its sub-actions.
          */
-        @Child(name = "concept", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "code", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="The meaning of the action or its sub-actions", formalDefinition="The concept represented by this action or its sub-actions." )
-        protected List<CodeableConcept> concept;
-
-        /**
-         * The evidence grade and the sources of evidence for this action.
-         */
-        @Child(name = "supportingEvidence", type = {Attachment.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Evidence that supports taking the action", formalDefinition="The evidence grade and the sources of evidence for this action." )
-        protected List<Attachment> supportingEvidence;
+        protected List<CodeableConcept> code;
 
         /**
          * Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.
          */
-        @Child(name = "documentation", type = {Attachment.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "documentation", type = {RelatedArtifact.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Supporting documentation for the intended performer of the action", formalDefinition="Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources." )
-        protected List<Attachment> documentation;
+        protected List<RelatedArtifact> documentation;
 
         /**
          * A description of when the action should be triggered.
          */
-        @Child(name = "triggerDefinition", type = {TriggerDefinition.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "triggerDefinition", type = {TriggerDefinition.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="When the action should be triggered", formalDefinition="A description of when the action should be triggered." )
-        protected TriggerDefinition triggerDefinition;
+        protected List<TriggerDefinition> triggerDefinition;
 
         /**
-         * An expression specifying whether or not the action is applicable in a given context.
+         * An expression that describes applicability criteria, or start/stop conditions for the action.
          */
-        @Child(name = "condition", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression specifying whether or not the action is applicable in a given context." )
-        protected StringType condition;
+        @Child(name = "condition", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression that describes applicability criteria, or start/stop conditions for the action." )
+        protected List<PlanDefinitionActionDefinitionConditionComponent> condition;
+
+        /**
+         * Defines input data requirements for the action.
+         */
+        @Child(name = "input", type = {DataRequirement.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Input data requirements", formalDefinition="Defines input data requirements for the action." )
+        protected List<DataRequirement> input;
+
+        /**
+         * Defines the outputs of the action, if any.
+         */
+        @Child(name = "output", type = {DataRequirement.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Output data definition", formalDefinition="Defines the outputs of the action, if any." )
+        protected List<DataRequirement> output;
 
         /**
          * A relationship to another action such as "before" or "30-60 minutes after start of".
          */
-        @Child(name = "relatedAction", type = {}, order=11, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "relatedAction", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Relationship to another action", formalDefinition="A relationship to another action such as \"before\" or \"30-60 minutes after start of\"." )
-        protected PlanDefinitionActionDefinitionRelatedActionComponent relatedAction;
+        protected List<PlanDefinitionActionDefinitionRelatedActionComponent> relatedAction;
 
         /**
          * An optional value describing when the action should be performed.
          */
-        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
         protected Type timing;
 
         /**
+         * The type of participant in the action.
+         */
+        @Child(name = "participantType", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="patient | practitioner | related-person", formalDefinition="The type of participant in the action." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-participant-type")
+        protected List<Enumeration<PlanActionParticipantType>> participantType;
+
+        /**
          * The type of action to perform (create, update, remove).
          */
-        @Child(name = "type", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {Coding.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="create | update | remove | fire-event", formalDefinition="The type of action to perform (create, update, remove)." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/planaction-type")
-        protected Enumeration<PlanActionType> type;
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-type")
+        protected Coding type;
 
         /**
-         * A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.
+         * Defines the grouping behavior for the action and its children.
          */
-        @Child(name = "behavior", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Defines behaviors such as selection and grouping", formalDefinition="A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment." )
-        protected List<PlanDefinitionActionDefinitionBehaviorComponent> behavior;
+        @Child(name = "groupingBehavior", type = {CodeType.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="visual-group | logical-group | sentence-group", formalDefinition="Defines the grouping behavior for the action and its children." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-grouping-behavior")
+        protected Enumeration<PlanActionGroupingBehavior> groupingBehavior;
 
         /**
-         * The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).
+         * Defines the selection behavior for the action and its children.
          */
-        @Child(name = "activityDefinition", type = {ActivityDefinition.class}, order=15, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Description of the activity to be performed", formalDefinition="The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition)." )
+        @Child(name = "selectionBehavior", type = {CodeType.class}, order=17, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="any | all | all-or-none | exactly-one | at-most-one | one-or-more", formalDefinition="Defines the selection behavior for the action and its children." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-selection-behavior")
+        protected Enumeration<PlanActionSelectionBehavior> selectionBehavior;
+
+        /**
+         * Defines the requiredness behavior for the action.
+         */
+        @Child(name = "requiredBehavior", type = {CodeType.class}, order=18, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="must | could | must-unless-documented", formalDefinition="Defines the requiredness behavior for the action." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-required-behavior")
+        protected Enumeration<PlanActionRequiredBehavior> requiredBehavior;
+
+        /**
+         * Defines whether the action should usually be preselected.
+         */
+        @Child(name = "precheckBehavior", type = {CodeType.class}, order=19, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="yes | no", formalDefinition="Defines whether the action should usually be preselected." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-precheck-behavior")
+        protected Enumeration<PlanActionPrecheckBehavior> precheckBehavior;
+
+        /**
+         * Defines whether the action can be selected multiple times.
+         */
+        @Child(name = "cardinalityBehavior", type = {CodeType.class}, order=20, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="single | multiple", formalDefinition="Defines whether the action can be selected multiple times." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-cardinality-behavior")
+        protected Enumeration<PlanActionCardinalityBehavior> cardinalityBehavior;
+
+        /**
+         * A reference to an ActivityDefinition that describes the action to be taken in detail.
+         */
+        @Child(name = "activityDefinition", type = {ActivityDefinition.class}, order=21, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Description of the activity to be performed", formalDefinition="A reference to an ActivityDefinition that describes the action to be taken in detail." )
         protected Reference activityDefinition;
 
         /**
-         * The actual object that is the target of the reference (The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).)
+         * The actual object that is the target of the reference (A reference to an ActivityDefinition that describes the action to be taken in detail.)
          */
         protected ActivityDefinition activityDefinitionTarget;
 
         /**
          * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
          */
-        @Child(name = "transform", type = {StructureMap.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "transform", type = {StructureMap.class}, order=22, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
         protected Reference transform;
 
@@ -478,18 +1186,18 @@ public class PlanDefinition extends DomainResource {
         /**
          * Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.
          */
-        @Child(name = "dynamicValue", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "dynamicValue", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result." )
         protected List<PlanDefinitionActionDefinitionDynamicValueComponent> dynamicValue;
 
         /**
          * Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.
          */
-        @Child(name = "actionDefinition", type = {PlanDefinitionActionDefinitionComponent.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "actionDefinition", type = {PlanDefinitionActionDefinitionComponent.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A sub-action", formalDefinition="Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition." )
         protected List<PlanDefinitionActionDefinitionComponent> actionDefinition;
 
-        private static final long serialVersionUID = -194721510L;
+        private static final long serialVersionUID = 2070255895L;
 
     /**
      * Constructor
@@ -719,124 +1427,71 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #concept} (The concept represented by this action or its sub-actions.)
+         * @return {@link #code} (The concept represented by this action or its sub-actions.)
          */
-        public List<CodeableConcept> getConcept() { 
-          if (this.concept == null)
-            this.concept = new ArrayList<CodeableConcept>();
-          return this.concept;
+        public List<CodeableConcept> getCode() { 
+          if (this.code == null)
+            this.code = new ArrayList<CodeableConcept>();
+          return this.code;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setConcept(List<CodeableConcept> theConcept) { 
-          this.concept = theConcept;
+        public PlanDefinitionActionDefinitionComponent setCode(List<CodeableConcept> theCode) { 
+          this.code = theCode;
           return this;
         }
 
-        public boolean hasConcept() { 
-          if (this.concept == null)
+        public boolean hasCode() { 
+          if (this.code == null)
             return false;
-          for (CodeableConcept item : this.concept)
+          for (CodeableConcept item : this.code)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public CodeableConcept addConcept() { //3
+        public CodeableConcept addCode() { //3
           CodeableConcept t = new CodeableConcept();
-          if (this.concept == null)
-            this.concept = new ArrayList<CodeableConcept>();
-          this.concept.add(t);
+          if (this.code == null)
+            this.code = new ArrayList<CodeableConcept>();
+          this.code.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addConcept(CodeableConcept t) { //3
+        public PlanDefinitionActionDefinitionComponent addCode(CodeableConcept t) { //3
           if (t == null)
             return this;
-          if (this.concept == null)
-            this.concept = new ArrayList<CodeableConcept>();
-          this.concept.add(t);
+          if (this.code == null)
+            this.code = new ArrayList<CodeableConcept>();
+          this.code.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
          */
-        public CodeableConcept getConceptFirstRep() { 
-          if (getConcept().isEmpty()) {
-            addConcept();
+        public CodeableConcept getCodeFirstRep() { 
+          if (getCode().isEmpty()) {
+            addCode();
           }
-          return getConcept().get(0);
-        }
-
-        /**
-         * @return {@link #supportingEvidence} (The evidence grade and the sources of evidence for this action.)
-         */
-        public List<Attachment> getSupportingEvidence() { 
-          if (this.supportingEvidence == null)
-            this.supportingEvidence = new ArrayList<Attachment>();
-          return this.supportingEvidence;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public PlanDefinitionActionDefinitionComponent setSupportingEvidence(List<Attachment> theSupportingEvidence) { 
-          this.supportingEvidence = theSupportingEvidence;
-          return this;
-        }
-
-        public boolean hasSupportingEvidence() { 
-          if (this.supportingEvidence == null)
-            return false;
-          for (Attachment item : this.supportingEvidence)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public Attachment addSupportingEvidence() { //3
-          Attachment t = new Attachment();
-          if (this.supportingEvidence == null)
-            this.supportingEvidence = new ArrayList<Attachment>();
-          this.supportingEvidence.add(t);
-          return t;
-        }
-
-        public PlanDefinitionActionDefinitionComponent addSupportingEvidence(Attachment t) { //3
-          if (t == null)
-            return this;
-          if (this.supportingEvidence == null)
-            this.supportingEvidence = new ArrayList<Attachment>();
-          this.supportingEvidence.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #supportingEvidence}, creating it if it does not already exist
-         */
-        public Attachment getSupportingEvidenceFirstRep() { 
-          if (getSupportingEvidence().isEmpty()) {
-            addSupportingEvidence();
-          }
-          return getSupportingEvidence().get(0);
+          return getCode().get(0);
         }
 
         /**
          * @return {@link #documentation} (Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.)
          */
-        public List<Attachment> getDocumentation() { 
+        public List<RelatedArtifact> getDocumentation() { 
           if (this.documentation == null)
-            this.documentation = new ArrayList<Attachment>();
+            this.documentation = new ArrayList<RelatedArtifact>();
           return this.documentation;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionDefinitionComponent setDocumentation(List<Attachment> theDocumentation) { 
+        public PlanDefinitionActionDefinitionComponent setDocumentation(List<RelatedArtifact> theDocumentation) { 
           this.documentation = theDocumentation;
           return this;
         }
@@ -844,25 +1499,25 @@ public class PlanDefinition extends DomainResource {
         public boolean hasDocumentation() { 
           if (this.documentation == null)
             return false;
-          for (Attachment item : this.documentation)
+          for (RelatedArtifact item : this.documentation)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Attachment addDocumentation() { //3
-          Attachment t = new Attachment();
+        public RelatedArtifact addDocumentation() { //3
+          RelatedArtifact t = new RelatedArtifact();
           if (this.documentation == null)
-            this.documentation = new ArrayList<Attachment>();
+            this.documentation = new ArrayList<RelatedArtifact>();
           this.documentation.add(t);
           return t;
         }
 
-        public PlanDefinitionActionDefinitionComponent addDocumentation(Attachment t) { //3
+        public PlanDefinitionActionDefinitionComponent addDocumentation(RelatedArtifact t) { //3
           if (t == null)
             return this;
           if (this.documentation == null)
-            this.documentation = new ArrayList<Attachment>();
+            this.documentation = new ArrayList<RelatedArtifact>();
           this.documentation.add(t);
           return this;
         }
@@ -870,7 +1525,7 @@ public class PlanDefinition extends DomainResource {
         /**
          * @return The first repetition of repeating field {@link #documentation}, creating it if it does not already exist
          */
-        public Attachment getDocumentationFirstRep() { 
+        public RelatedArtifact getDocumentationFirstRep() { 
           if (getDocumentation().isEmpty()) {
             addDocumentation();
           }
@@ -880,98 +1535,266 @@ public class PlanDefinition extends DomainResource {
         /**
          * @return {@link #triggerDefinition} (A description of when the action should be triggered.)
          */
-        public TriggerDefinition getTriggerDefinition() { 
+        public List<TriggerDefinition> getTriggerDefinition() { 
           if (this.triggerDefinition == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.triggerDefinition");
-            else if (Configuration.doAutoCreate())
-              this.triggerDefinition = new TriggerDefinition(); // cc
+            this.triggerDefinition = new ArrayList<TriggerDefinition>();
           return this.triggerDefinition;
         }
 
-        public boolean hasTriggerDefinition() { 
-          return this.triggerDefinition != null && !this.triggerDefinition.isEmpty();
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setTriggerDefinition(List<TriggerDefinition> theTriggerDefinition) { 
+          this.triggerDefinition = theTriggerDefinition;
+          return this;
         }
 
-        /**
-         * @param value {@link #triggerDefinition} (A description of when the action should be triggered.)
-         */
-        public PlanDefinitionActionDefinitionComponent setTriggerDefinition(TriggerDefinition value) { 
-          this.triggerDefinition = value;
+        public boolean hasTriggerDefinition() { 
+          if (this.triggerDefinition == null)
+            return false;
+          for (TriggerDefinition item : this.triggerDefinition)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public TriggerDefinition addTriggerDefinition() { //3
+          TriggerDefinition t = new TriggerDefinition();
+          if (this.triggerDefinition == null)
+            this.triggerDefinition = new ArrayList<TriggerDefinition>();
+          this.triggerDefinition.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addTriggerDefinition(TriggerDefinition t) { //3
+          if (t == null)
+            return this;
+          if (this.triggerDefinition == null)
+            this.triggerDefinition = new ArrayList<TriggerDefinition>();
+          this.triggerDefinition.add(t);
           return this;
         }
 
         /**
-         * @return {@link #condition} (An expression specifying whether or not the action is applicable in a given context.). This is the underlying object with id, value and extensions. The accessor "getCondition" gives direct access to the value
+         * @return The first repetition of repeating field {@link #triggerDefinition}, creating it if it does not already exist
          */
-        public StringType getConditionElement() { 
+        public TriggerDefinition getTriggerDefinitionFirstRep() { 
+          if (getTriggerDefinition().isEmpty()) {
+            addTriggerDefinition();
+          }
+          return getTriggerDefinition().get(0);
+        }
+
+        /**
+         * @return {@link #condition} (An expression that describes applicability criteria, or start/stop conditions for the action.)
+         */
+        public List<PlanDefinitionActionDefinitionConditionComponent> getCondition() { 
           if (this.condition == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.condition");
-            else if (Configuration.doAutoCreate())
-              this.condition = new StringType(); // bb
+            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
           return this.condition;
         }
 
-        public boolean hasConditionElement() { 
-          return this.condition != null && !this.condition.isEmpty();
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setCondition(List<PlanDefinitionActionDefinitionConditionComponent> theCondition) { 
+          this.condition = theCondition;
+          return this;
         }
 
         public boolean hasCondition() { 
-          return this.condition != null && !this.condition.isEmpty();
+          if (this.condition == null)
+            return false;
+          for (PlanDefinitionActionDefinitionConditionComponent item : this.condition)
+            if (!item.isEmpty())
+              return true;
+          return false;
         }
 
-        /**
-         * @param value {@link #condition} (An expression specifying whether or not the action is applicable in a given context.). This is the underlying object with id, value and extensions. The accessor "getCondition" gives direct access to the value
-         */
-        public PlanDefinitionActionDefinitionComponent setConditionElement(StringType value) { 
-          this.condition = value;
+        public PlanDefinitionActionDefinitionConditionComponent addCondition() { //3
+          PlanDefinitionActionDefinitionConditionComponent t = new PlanDefinitionActionDefinitionConditionComponent();
+          if (this.condition == null)
+            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+          this.condition.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addCondition(PlanDefinitionActionDefinitionConditionComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.condition == null)
+            this.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+          this.condition.add(t);
           return this;
         }
 
         /**
-         * @return An expression specifying whether or not the action is applicable in a given context.
+         * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
          */
-        public String getCondition() { 
-          return this.condition == null ? null : this.condition.getValue();
-        }
-
-        /**
-         * @param value An expression specifying whether or not the action is applicable in a given context.
-         */
-        public PlanDefinitionActionDefinitionComponent setCondition(String value) { 
-          if (Utilities.noString(value))
-            this.condition = null;
-          else {
-            if (this.condition == null)
-              this.condition = new StringType();
-            this.condition.setValue(value);
+        public PlanDefinitionActionDefinitionConditionComponent getConditionFirstRep() { 
+          if (getCondition().isEmpty()) {
+            addCondition();
           }
+          return getCondition().get(0);
+        }
+
+        /**
+         * @return {@link #input} (Defines input data requirements for the action.)
+         */
+        public List<DataRequirement> getInput() { 
+          if (this.input == null)
+            this.input = new ArrayList<DataRequirement>();
+          return this.input;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setInput(List<DataRequirement> theInput) { 
+          this.input = theInput;
           return this;
+        }
+
+        public boolean hasInput() { 
+          if (this.input == null)
+            return false;
+          for (DataRequirement item : this.input)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public DataRequirement addInput() { //3
+          DataRequirement t = new DataRequirement();
+          if (this.input == null)
+            this.input = new ArrayList<DataRequirement>();
+          this.input.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addInput(DataRequirement t) { //3
+          if (t == null)
+            return this;
+          if (this.input == null)
+            this.input = new ArrayList<DataRequirement>();
+          this.input.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #input}, creating it if it does not already exist
+         */
+        public DataRequirement getInputFirstRep() { 
+          if (getInput().isEmpty()) {
+            addInput();
+          }
+          return getInput().get(0);
+        }
+
+        /**
+         * @return {@link #output} (Defines the outputs of the action, if any.)
+         */
+        public List<DataRequirement> getOutput() { 
+          if (this.output == null)
+            this.output = new ArrayList<DataRequirement>();
+          return this.output;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setOutput(List<DataRequirement> theOutput) { 
+          this.output = theOutput;
+          return this;
+        }
+
+        public boolean hasOutput() { 
+          if (this.output == null)
+            return false;
+          for (DataRequirement item : this.output)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public DataRequirement addOutput() { //3
+          DataRequirement t = new DataRequirement();
+          if (this.output == null)
+            this.output = new ArrayList<DataRequirement>();
+          this.output.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addOutput(DataRequirement t) { //3
+          if (t == null)
+            return this;
+          if (this.output == null)
+            this.output = new ArrayList<DataRequirement>();
+          this.output.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #output}, creating it if it does not already exist
+         */
+        public DataRequirement getOutputFirstRep() { 
+          if (getOutput().isEmpty()) {
+            addOutput();
+          }
+          return getOutput().get(0);
         }
 
         /**
          * @return {@link #relatedAction} (A relationship to another action such as "before" or "30-60 minutes after start of".)
          */
-        public PlanDefinitionActionDefinitionRelatedActionComponent getRelatedAction() { 
+        public List<PlanDefinitionActionDefinitionRelatedActionComponent> getRelatedAction() { 
           if (this.relatedAction == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.relatedAction");
-            else if (Configuration.doAutoCreate())
-              this.relatedAction = new PlanDefinitionActionDefinitionRelatedActionComponent(); // cc
+            this.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
           return this.relatedAction;
         }
 
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setRelatedAction(List<PlanDefinitionActionDefinitionRelatedActionComponent> theRelatedAction) { 
+          this.relatedAction = theRelatedAction;
+          return this;
+        }
+
         public boolean hasRelatedAction() { 
-          return this.relatedAction != null && !this.relatedAction.isEmpty();
+          if (this.relatedAction == null)
+            return false;
+          for (PlanDefinitionActionDefinitionRelatedActionComponent item : this.relatedAction)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public PlanDefinitionActionDefinitionRelatedActionComponent addRelatedAction() { //3
+          PlanDefinitionActionDefinitionRelatedActionComponent t = new PlanDefinitionActionDefinitionRelatedActionComponent();
+          if (this.relatedAction == null)
+            this.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
+          this.relatedAction.add(t);
+          return t;
+        }
+
+        public PlanDefinitionActionDefinitionComponent addRelatedAction(PlanDefinitionActionDefinitionRelatedActionComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.relatedAction == null)
+            this.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
+          this.relatedAction.add(t);
+          return this;
         }
 
         /**
-         * @param value {@link #relatedAction} (A relationship to another action such as "before" or "30-60 minutes after start of".)
+         * @return The first repetition of repeating field {@link #relatedAction}, creating it if it does not already exist
          */
-        public PlanDefinitionActionDefinitionComponent setRelatedAction(PlanDefinitionActionDefinitionRelatedActionComponent value) { 
-          this.relatedAction = value;
-          return this;
+        public PlanDefinitionActionDefinitionRelatedActionComponent getRelatedActionFirstRep() { 
+          if (getRelatedAction().isEmpty()) {
+            addRelatedAction();
+          }
+          return getRelatedAction().get(0);
         }
 
         /**
@@ -1059,19 +1882,76 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #type} (The type of action to perform (create, update, remove).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @return {@link #participantType} (The type of participant in the action.)
          */
-        public Enumeration<PlanActionType> getTypeElement() { 
+        public List<Enumeration<PlanActionParticipantType>> getParticipantType() { 
+          if (this.participantType == null)
+            this.participantType = new ArrayList<Enumeration<PlanActionParticipantType>>();
+          return this.participantType;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public PlanDefinitionActionDefinitionComponent setParticipantType(List<Enumeration<PlanActionParticipantType>> theParticipantType) { 
+          this.participantType = theParticipantType;
+          return this;
+        }
+
+        public boolean hasParticipantType() { 
+          if (this.participantType == null)
+            return false;
+          for (Enumeration<PlanActionParticipantType> item : this.participantType)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #participantType} (The type of participant in the action.)
+         */
+        public Enumeration<PlanActionParticipantType> addParticipantTypeElement() {//2 
+          Enumeration<PlanActionParticipantType> t = new Enumeration<PlanActionParticipantType>(new PlanActionParticipantTypeEnumFactory());
+          if (this.participantType == null)
+            this.participantType = new ArrayList<Enumeration<PlanActionParticipantType>>();
+          this.participantType.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #participantType} (The type of participant in the action.)
+         */
+        public PlanDefinitionActionDefinitionComponent addParticipantType(PlanActionParticipantType value) { //1
+          Enumeration<PlanActionParticipantType> t = new Enumeration<PlanActionParticipantType>(new PlanActionParticipantTypeEnumFactory());
+          t.setValue(value);
+          if (this.participantType == null)
+            this.participantType = new ArrayList<Enumeration<PlanActionParticipantType>>();
+          this.participantType.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #participantType} (The type of participant in the action.)
+         */
+        public boolean hasParticipantType(PlanActionParticipantType value) { 
+          if (this.participantType == null)
+            return false;
+          for (Enumeration<PlanActionParticipantType> v : this.participantType)
+            if (v.getValue().equals(value)) // code
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #type} (The type of action to perform (create, update, remove).)
+         */
+        public Coding getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<PlanActionType>(new PlanActionTypeEnumFactory()); // bb
+              this.type = new Coding(); // cc
           return this.type;
-        }
-
-        public boolean hasTypeElement() { 
-          return this.type != null && !this.type.isEmpty();
         }
 
         public boolean hasType() { 
@@ -1079,89 +1959,260 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (The type of action to perform (create, update, remove).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @param value {@link #type} (The type of action to perform (create, update, remove).)
          */
-        public PlanDefinitionActionDefinitionComponent setTypeElement(Enumeration<PlanActionType> value) { 
+        public PlanDefinitionActionDefinitionComponent setType(Coding value) { 
           this.type = value;
           return this;
         }
 
         /**
-         * @return The type of action to perform (create, update, remove).
+         * @return {@link #groupingBehavior} (Defines the grouping behavior for the action and its children.). This is the underlying object with id, value and extensions. The accessor "getGroupingBehavior" gives direct access to the value
          */
-        public PlanActionType getType() { 
-          return this.type == null ? null : this.type.getValue();
+        public Enumeration<PlanActionGroupingBehavior> getGroupingBehaviorElement() { 
+          if (this.groupingBehavior == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.groupingBehavior");
+            else if (Configuration.doAutoCreate())
+              this.groupingBehavior = new Enumeration<PlanActionGroupingBehavior>(new PlanActionGroupingBehaviorEnumFactory()); // bb
+          return this.groupingBehavior;
+        }
+
+        public boolean hasGroupingBehaviorElement() { 
+          return this.groupingBehavior != null && !this.groupingBehavior.isEmpty();
+        }
+
+        public boolean hasGroupingBehavior() { 
+          return this.groupingBehavior != null && !this.groupingBehavior.isEmpty();
         }
 
         /**
-         * @param value The type of action to perform (create, update, remove).
+         * @param value {@link #groupingBehavior} (Defines the grouping behavior for the action and its children.). This is the underlying object with id, value and extensions. The accessor "getGroupingBehavior" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setType(PlanActionType value) { 
+        public PlanDefinitionActionDefinitionComponent setGroupingBehaviorElement(Enumeration<PlanActionGroupingBehavior> value) { 
+          this.groupingBehavior = value;
+          return this;
+        }
+
+        /**
+         * @return Defines the grouping behavior for the action and its children.
+         */
+        public PlanActionGroupingBehavior getGroupingBehavior() { 
+          return this.groupingBehavior == null ? null : this.groupingBehavior.getValue();
+        }
+
+        /**
+         * @param value Defines the grouping behavior for the action and its children.
+         */
+        public PlanDefinitionActionDefinitionComponent setGroupingBehavior(PlanActionGroupingBehavior value) { 
           if (value == null)
-            this.type = null;
+            this.groupingBehavior = null;
           else {
-            if (this.type == null)
-              this.type = new Enumeration<PlanActionType>(new PlanActionTypeEnumFactory());
-            this.type.setValue(value);
+            if (this.groupingBehavior == null)
+              this.groupingBehavior = new Enumeration<PlanActionGroupingBehavior>(new PlanActionGroupingBehaviorEnumFactory());
+            this.groupingBehavior.setValue(value);
           }
           return this;
         }
 
         /**
-         * @return {@link #behavior} (A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.)
+         * @return {@link #selectionBehavior} (Defines the selection behavior for the action and its children.). This is the underlying object with id, value and extensions. The accessor "getSelectionBehavior" gives direct access to the value
          */
-        public List<PlanDefinitionActionDefinitionBehaviorComponent> getBehavior() { 
-          if (this.behavior == null)
-            this.behavior = new ArrayList<PlanDefinitionActionDefinitionBehaviorComponent>();
-          return this.behavior;
+        public Enumeration<PlanActionSelectionBehavior> getSelectionBehaviorElement() { 
+          if (this.selectionBehavior == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.selectionBehavior");
+            else if (Configuration.doAutoCreate())
+              this.selectionBehavior = new Enumeration<PlanActionSelectionBehavior>(new PlanActionSelectionBehaviorEnumFactory()); // bb
+          return this.selectionBehavior;
+        }
+
+        public boolean hasSelectionBehaviorElement() { 
+          return this.selectionBehavior != null && !this.selectionBehavior.isEmpty();
+        }
+
+        public boolean hasSelectionBehavior() { 
+          return this.selectionBehavior != null && !this.selectionBehavior.isEmpty();
         }
 
         /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
+         * @param value {@link #selectionBehavior} (Defines the selection behavior for the action and its children.). This is the underlying object with id, value and extensions. The accessor "getSelectionBehavior" gives direct access to the value
          */
-        public PlanDefinitionActionDefinitionComponent setBehavior(List<PlanDefinitionActionDefinitionBehaviorComponent> theBehavior) { 
-          this.behavior = theBehavior;
-          return this;
-        }
-
-        public boolean hasBehavior() { 
-          if (this.behavior == null)
-            return false;
-          for (PlanDefinitionActionDefinitionBehaviorComponent item : this.behavior)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public PlanDefinitionActionDefinitionBehaviorComponent addBehavior() { //3
-          PlanDefinitionActionDefinitionBehaviorComponent t = new PlanDefinitionActionDefinitionBehaviorComponent();
-          if (this.behavior == null)
-            this.behavior = new ArrayList<PlanDefinitionActionDefinitionBehaviorComponent>();
-          this.behavior.add(t);
-          return t;
-        }
-
-        public PlanDefinitionActionDefinitionComponent addBehavior(PlanDefinitionActionDefinitionBehaviorComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.behavior == null)
-            this.behavior = new ArrayList<PlanDefinitionActionDefinitionBehaviorComponent>();
-          this.behavior.add(t);
+        public PlanDefinitionActionDefinitionComponent setSelectionBehaviorElement(Enumeration<PlanActionSelectionBehavior> value) { 
+          this.selectionBehavior = value;
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #behavior}, creating it if it does not already exist
+         * @return Defines the selection behavior for the action and its children.
          */
-        public PlanDefinitionActionDefinitionBehaviorComponent getBehaviorFirstRep() { 
-          if (getBehavior().isEmpty()) {
-            addBehavior();
+        public PlanActionSelectionBehavior getSelectionBehavior() { 
+          return this.selectionBehavior == null ? null : this.selectionBehavior.getValue();
+        }
+
+        /**
+         * @param value Defines the selection behavior for the action and its children.
+         */
+        public PlanDefinitionActionDefinitionComponent setSelectionBehavior(PlanActionSelectionBehavior value) { 
+          if (value == null)
+            this.selectionBehavior = null;
+          else {
+            if (this.selectionBehavior == null)
+              this.selectionBehavior = new Enumeration<PlanActionSelectionBehavior>(new PlanActionSelectionBehaviorEnumFactory());
+            this.selectionBehavior.setValue(value);
           }
-          return getBehavior().get(0);
+          return this;
         }
 
         /**
-         * @return {@link #activityDefinition} (The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).)
+         * @return {@link #requiredBehavior} (Defines the requiredness behavior for the action.). This is the underlying object with id, value and extensions. The accessor "getRequiredBehavior" gives direct access to the value
+         */
+        public Enumeration<PlanActionRequiredBehavior> getRequiredBehaviorElement() { 
+          if (this.requiredBehavior == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.requiredBehavior");
+            else if (Configuration.doAutoCreate())
+              this.requiredBehavior = new Enumeration<PlanActionRequiredBehavior>(new PlanActionRequiredBehaviorEnumFactory()); // bb
+          return this.requiredBehavior;
+        }
+
+        public boolean hasRequiredBehaviorElement() { 
+          return this.requiredBehavior != null && !this.requiredBehavior.isEmpty();
+        }
+
+        public boolean hasRequiredBehavior() { 
+          return this.requiredBehavior != null && !this.requiredBehavior.isEmpty();
+        }
+
+        /**
+         * @param value {@link #requiredBehavior} (Defines the requiredness behavior for the action.). This is the underlying object with id, value and extensions. The accessor "getRequiredBehavior" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionComponent setRequiredBehaviorElement(Enumeration<PlanActionRequiredBehavior> value) { 
+          this.requiredBehavior = value;
+          return this;
+        }
+
+        /**
+         * @return Defines the requiredness behavior for the action.
+         */
+        public PlanActionRequiredBehavior getRequiredBehavior() { 
+          return this.requiredBehavior == null ? null : this.requiredBehavior.getValue();
+        }
+
+        /**
+         * @param value Defines the requiredness behavior for the action.
+         */
+        public PlanDefinitionActionDefinitionComponent setRequiredBehavior(PlanActionRequiredBehavior value) { 
+          if (value == null)
+            this.requiredBehavior = null;
+          else {
+            if (this.requiredBehavior == null)
+              this.requiredBehavior = new Enumeration<PlanActionRequiredBehavior>(new PlanActionRequiredBehaviorEnumFactory());
+            this.requiredBehavior.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #precheckBehavior} (Defines whether the action should usually be preselected.). This is the underlying object with id, value and extensions. The accessor "getPrecheckBehavior" gives direct access to the value
+         */
+        public Enumeration<PlanActionPrecheckBehavior> getPrecheckBehaviorElement() { 
+          if (this.precheckBehavior == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.precheckBehavior");
+            else if (Configuration.doAutoCreate())
+              this.precheckBehavior = new Enumeration<PlanActionPrecheckBehavior>(new PlanActionPrecheckBehaviorEnumFactory()); // bb
+          return this.precheckBehavior;
+        }
+
+        public boolean hasPrecheckBehaviorElement() { 
+          return this.precheckBehavior != null && !this.precheckBehavior.isEmpty();
+        }
+
+        public boolean hasPrecheckBehavior() { 
+          return this.precheckBehavior != null && !this.precheckBehavior.isEmpty();
+        }
+
+        /**
+         * @param value {@link #precheckBehavior} (Defines whether the action should usually be preselected.). This is the underlying object with id, value and extensions. The accessor "getPrecheckBehavior" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionComponent setPrecheckBehaviorElement(Enumeration<PlanActionPrecheckBehavior> value) { 
+          this.precheckBehavior = value;
+          return this;
+        }
+
+        /**
+         * @return Defines whether the action should usually be preselected.
+         */
+        public PlanActionPrecheckBehavior getPrecheckBehavior() { 
+          return this.precheckBehavior == null ? null : this.precheckBehavior.getValue();
+        }
+
+        /**
+         * @param value Defines whether the action should usually be preselected.
+         */
+        public PlanDefinitionActionDefinitionComponent setPrecheckBehavior(PlanActionPrecheckBehavior value) { 
+          if (value == null)
+            this.precheckBehavior = null;
+          else {
+            if (this.precheckBehavior == null)
+              this.precheckBehavior = new Enumeration<PlanActionPrecheckBehavior>(new PlanActionPrecheckBehaviorEnumFactory());
+            this.precheckBehavior.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #cardinalityBehavior} (Defines whether the action can be selected multiple times.). This is the underlying object with id, value and extensions. The accessor "getCardinalityBehavior" gives direct access to the value
+         */
+        public Enumeration<PlanActionCardinalityBehavior> getCardinalityBehaviorElement() { 
+          if (this.cardinalityBehavior == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionComponent.cardinalityBehavior");
+            else if (Configuration.doAutoCreate())
+              this.cardinalityBehavior = new Enumeration<PlanActionCardinalityBehavior>(new PlanActionCardinalityBehaviorEnumFactory()); // bb
+          return this.cardinalityBehavior;
+        }
+
+        public boolean hasCardinalityBehaviorElement() { 
+          return this.cardinalityBehavior != null && !this.cardinalityBehavior.isEmpty();
+        }
+
+        public boolean hasCardinalityBehavior() { 
+          return this.cardinalityBehavior != null && !this.cardinalityBehavior.isEmpty();
+        }
+
+        /**
+         * @param value {@link #cardinalityBehavior} (Defines whether the action can be selected multiple times.). This is the underlying object with id, value and extensions. The accessor "getCardinalityBehavior" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionComponent setCardinalityBehaviorElement(Enumeration<PlanActionCardinalityBehavior> value) { 
+          this.cardinalityBehavior = value;
+          return this;
+        }
+
+        /**
+         * @return Defines whether the action can be selected multiple times.
+         */
+        public PlanActionCardinalityBehavior getCardinalityBehavior() { 
+          return this.cardinalityBehavior == null ? null : this.cardinalityBehavior.getValue();
+        }
+
+        /**
+         * @param value Defines whether the action can be selected multiple times.
+         */
+        public PlanDefinitionActionDefinitionComponent setCardinalityBehavior(PlanActionCardinalityBehavior value) { 
+          if (value == null)
+            this.cardinalityBehavior = null;
+          else {
+            if (this.cardinalityBehavior == null)
+              this.cardinalityBehavior = new Enumeration<PlanActionCardinalityBehavior>(new PlanActionCardinalityBehaviorEnumFactory());
+            this.cardinalityBehavior.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #activityDefinition} (A reference to an ActivityDefinition that describes the action to be taken in detail.)
          */
         public Reference getActivityDefinition() { 
           if (this.activityDefinition == null)
@@ -1177,7 +2228,7 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
-         * @param value {@link #activityDefinition} (The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).)
+         * @param value {@link #activityDefinition} (A reference to an ActivityDefinition that describes the action to be taken in detail.)
          */
         public PlanDefinitionActionDefinitionComponent setActivityDefinition(Reference value) { 
           this.activityDefinition = value;
@@ -1185,7 +2236,7 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #activityDefinition} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).)
+         * @return {@link #activityDefinition} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to an ActivityDefinition that describes the action to be taken in detail.)
          */
         public ActivityDefinition getActivityDefinitionTarget() { 
           if (this.activityDefinitionTarget == null)
@@ -1197,7 +2248,7 @@ public class PlanDefinition extends DomainResource {
         }
 
         /**
-         * @param value {@link #activityDefinition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).)
+         * @param value {@link #activityDefinition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to an ActivityDefinition that describes the action to be taken in detail.)
          */
         public PlanDefinitionActionDefinitionComponent setActivityDefinitionTarget(ActivityDefinition value) { 
           this.activityDefinitionTarget = value;
@@ -1361,16 +2412,22 @@ public class PlanDefinition extends DomainResource {
           childrenList.add(new Property("title", "string", "The title of the action displayed to a user.", 0, java.lang.Integer.MAX_VALUE, title));
           childrenList.add(new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, java.lang.Integer.MAX_VALUE, textEquivalent));
-          childrenList.add(new Property("concept", "CodeableConcept", "The concept represented by this action or its sub-actions.", 0, java.lang.Integer.MAX_VALUE, concept));
-          childrenList.add(new Property("supportingEvidence", "Attachment", "The evidence grade and the sources of evidence for this action.", 0, java.lang.Integer.MAX_VALUE, supportingEvidence));
-          childrenList.add(new Property("documentation", "Attachment", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
+          childrenList.add(new Property("code", "CodeableConcept", "The concept represented by this action or its sub-actions.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
           childrenList.add(new Property("triggerDefinition", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, triggerDefinition));
-          childrenList.add(new Property("condition", "string", "An expression specifying whether or not the action is applicable in a given context.", 0, java.lang.Integer.MAX_VALUE, condition));
+          childrenList.add(new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
+          childrenList.add(new Property("input", "DataRequirement", "Defines input data requirements for the action.", 0, java.lang.Integer.MAX_VALUE, input));
+          childrenList.add(new Property("output", "DataRequirement", "Defines the outputs of the action, if any.", 0, java.lang.Integer.MAX_VALUE, output));
           childrenList.add(new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction));
           childrenList.add(new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, java.lang.Integer.MAX_VALUE, timing));
-          childrenList.add(new Property("type", "code", "The type of action to perform (create, update, remove).", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("behavior", "", "A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.", 0, java.lang.Integer.MAX_VALUE, behavior));
-          childrenList.add(new Property("activityDefinition", "Reference(ActivityDefinition)", "The resource that is the target of the action (e.g. CommunicationRequest). The resource described here defines any aspects of the action that can be specified statically (i.e. are known at the time of definition).", 0, java.lang.Integer.MAX_VALUE, activityDefinition));
+          childrenList.add(new Property("participantType", "code", "The type of participant in the action.", 0, java.lang.Integer.MAX_VALUE, participantType));
+          childrenList.add(new Property("type", "Coding", "The type of action to perform (create, update, remove).", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("groupingBehavior", "code", "Defines the grouping behavior for the action and its children.", 0, java.lang.Integer.MAX_VALUE, groupingBehavior));
+          childrenList.add(new Property("selectionBehavior", "code", "Defines the selection behavior for the action and its children.", 0, java.lang.Integer.MAX_VALUE, selectionBehavior));
+          childrenList.add(new Property("requiredBehavior", "code", "Defines the requiredness behavior for the action.", 0, java.lang.Integer.MAX_VALUE, requiredBehavior));
+          childrenList.add(new Property("precheckBehavior", "code", "Defines whether the action should usually be preselected.", 0, java.lang.Integer.MAX_VALUE, precheckBehavior));
+          childrenList.add(new Property("cardinalityBehavior", "code", "Defines whether the action can be selected multiple times.", 0, java.lang.Integer.MAX_VALUE, cardinalityBehavior));
+          childrenList.add(new Property("activityDefinition", "Reference(ActivityDefinition)", "A reference to an ActivityDefinition that describes the action to be taken in detail.", 0, java.lang.Integer.MAX_VALUE, activityDefinition));
           childrenList.add(new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, java.lang.Integer.MAX_VALUE, transform));
           childrenList.add(new Property("dynamicValue", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
           childrenList.add(new Property("actionDefinition", "@PlanDefinition.actionDefinition", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, actionDefinition));
@@ -1384,15 +2441,21 @@ public class PlanDefinition extends DomainResource {
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -900391049: /*textEquivalent*/ return this.textEquivalent == null ? new Base[0] : new Base[] {this.textEquivalent}; // StringType
-        case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // CodeableConcept
-        case -1735429846: /*supportingEvidence*/ return this.supportingEvidence == null ? new Base[0] : this.supportingEvidence.toArray(new Base[this.supportingEvidence.size()]); // Attachment
-        case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // Attachment
-        case 1126736171: /*triggerDefinition*/ return this.triggerDefinition == null ? new Base[0] : new Base[] {this.triggerDefinition}; // TriggerDefinition
-        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // StringType
-        case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : new Base[] {this.relatedAction}; // PlanDefinitionActionDefinitionRelatedActionComponent
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // CodeableConcept
+        case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // RelatedArtifact
+        case 1126736171: /*triggerDefinition*/ return this.triggerDefinition == null ? new Base[0] : this.triggerDefinition.toArray(new Base[this.triggerDefinition.size()]); // TriggerDefinition
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // PlanDefinitionActionDefinitionConditionComponent
+        case 100358090: /*input*/ return this.input == null ? new Base[0] : this.input.toArray(new Base[this.input.size()]); // DataRequirement
+        case -1005512447: /*output*/ return this.output == null ? new Base[0] : this.output.toArray(new Base[this.output.size()]); // DataRequirement
+        case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : this.relatedAction.toArray(new Base[this.relatedAction.size()]); // PlanDefinitionActionDefinitionRelatedActionComponent
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<PlanActionType>
-        case 1510912594: /*behavior*/ return this.behavior == null ? new Base[0] : this.behavior.toArray(new Base[this.behavior.size()]); // PlanDefinitionActionDefinitionBehaviorComponent
+        case 841294093: /*participantType*/ return this.participantType == null ? new Base[0] : this.participantType.toArray(new Base[this.participantType.size()]); // Enumeration<PlanActionParticipantType>
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 586678389: /*groupingBehavior*/ return this.groupingBehavior == null ? new Base[0] : new Base[] {this.groupingBehavior}; // Enumeration<PlanActionGroupingBehavior>
+        case 168639486: /*selectionBehavior*/ return this.selectionBehavior == null ? new Base[0] : new Base[] {this.selectionBehavior}; // Enumeration<PlanActionSelectionBehavior>
+        case -1163906287: /*requiredBehavior*/ return this.requiredBehavior == null ? new Base[0] : new Base[] {this.requiredBehavior}; // Enumeration<PlanActionRequiredBehavior>
+        case -1174249033: /*precheckBehavior*/ return this.precheckBehavior == null ? new Base[0] : new Base[] {this.precheckBehavior}; // Enumeration<PlanActionPrecheckBehavior>
+        case -922577408: /*cardinalityBehavior*/ return this.cardinalityBehavior == null ? new Base[0] : new Base[] {this.cardinalityBehavior}; // Enumeration<PlanActionCardinalityBehavior>
         case -990265918: /*activityDefinition*/ return this.activityDefinition == null ? new Base[0] : new Base[] {this.activityDefinition}; // Reference
         case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // Reference
         case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // PlanDefinitionActionDefinitionDynamicValueComponent
@@ -1420,32 +2483,50 @@ public class PlanDefinition extends DomainResource {
         case -900391049: // textEquivalent
           this.textEquivalent = castToString(value); // StringType
           break;
-        case 951024232: // concept
-          this.getConcept().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case -1735429846: // supportingEvidence
-          this.getSupportingEvidence().add(castToAttachment(value)); // Attachment
+        case 3059181: // code
+          this.getCode().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case 1587405498: // documentation
-          this.getDocumentation().add(castToAttachment(value)); // Attachment
+          this.getDocumentation().add(castToRelatedArtifact(value)); // RelatedArtifact
           break;
         case 1126736171: // triggerDefinition
-          this.triggerDefinition = castToTriggerDefinition(value); // TriggerDefinition
+          this.getTriggerDefinition().add(castToTriggerDefinition(value)); // TriggerDefinition
           break;
         case -861311717: // condition
-          this.condition = castToString(value); // StringType
+          this.getCondition().add((PlanDefinitionActionDefinitionConditionComponent) value); // PlanDefinitionActionDefinitionConditionComponent
+          break;
+        case 100358090: // input
+          this.getInput().add(castToDataRequirement(value)); // DataRequirement
+          break;
+        case -1005512447: // output
+          this.getOutput().add(castToDataRequirement(value)); // DataRequirement
           break;
         case -384107967: // relatedAction
-          this.relatedAction = (PlanDefinitionActionDefinitionRelatedActionComponent) value; // PlanDefinitionActionDefinitionRelatedActionComponent
+          this.getRelatedAction().add((PlanDefinitionActionDefinitionRelatedActionComponent) value); // PlanDefinitionActionDefinitionRelatedActionComponent
           break;
         case -873664438: // timing
-          this.timing = (Type) value; // Type
+          this.timing = castToType(value); // Type
+          break;
+        case 841294093: // participantType
+          this.getParticipantType().add(new PlanActionParticipantTypeEnumFactory().fromType(value)); // Enumeration<PlanActionParticipantType>
           break;
         case 3575610: // type
-          this.type = new PlanActionTypeEnumFactory().fromType(value); // Enumeration<PlanActionType>
+          this.type = castToCoding(value); // Coding
           break;
-        case 1510912594: // behavior
-          this.getBehavior().add((PlanDefinitionActionDefinitionBehaviorComponent) value); // PlanDefinitionActionDefinitionBehaviorComponent
+        case 586678389: // groupingBehavior
+          this.groupingBehavior = new PlanActionGroupingBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionGroupingBehavior>
+          break;
+        case 168639486: // selectionBehavior
+          this.selectionBehavior = new PlanActionSelectionBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionSelectionBehavior>
+          break;
+        case -1163906287: // requiredBehavior
+          this.requiredBehavior = new PlanActionRequiredBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionRequiredBehavior>
+          break;
+        case -1174249033: // precheckBehavior
+          this.precheckBehavior = new PlanActionPrecheckBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionPrecheckBehavior>
+          break;
+        case -922577408: // cardinalityBehavior
+          this.cardinalityBehavior = new PlanActionCardinalityBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionCardinalityBehavior>
           break;
         case -990265918: // activityDefinition
           this.activityDefinition = castToReference(value); // Reference
@@ -1476,24 +2557,36 @@ public class PlanDefinition extends DomainResource {
           this.description = castToString(value); // StringType
         else if (name.equals("textEquivalent"))
           this.textEquivalent = castToString(value); // StringType
-        else if (name.equals("concept"))
-          this.getConcept().add(castToCodeableConcept(value));
-        else if (name.equals("supportingEvidence"))
-          this.getSupportingEvidence().add(castToAttachment(value));
+        else if (name.equals("code"))
+          this.getCode().add(castToCodeableConcept(value));
         else if (name.equals("documentation"))
-          this.getDocumentation().add(castToAttachment(value));
+          this.getDocumentation().add(castToRelatedArtifact(value));
         else if (name.equals("triggerDefinition"))
-          this.triggerDefinition = castToTriggerDefinition(value); // TriggerDefinition
+          this.getTriggerDefinition().add(castToTriggerDefinition(value));
         else if (name.equals("condition"))
-          this.condition = castToString(value); // StringType
+          this.getCondition().add((PlanDefinitionActionDefinitionConditionComponent) value);
+        else if (name.equals("input"))
+          this.getInput().add(castToDataRequirement(value));
+        else if (name.equals("output"))
+          this.getOutput().add(castToDataRequirement(value));
         else if (name.equals("relatedAction"))
-          this.relatedAction = (PlanDefinitionActionDefinitionRelatedActionComponent) value; // PlanDefinitionActionDefinitionRelatedActionComponent
+          this.getRelatedAction().add((PlanDefinitionActionDefinitionRelatedActionComponent) value);
         else if (name.equals("timing[x]"))
-          this.timing = (Type) value; // Type
+          this.timing = castToType(value); // Type
+        else if (name.equals("participantType"))
+          this.getParticipantType().add(new PlanActionParticipantTypeEnumFactory().fromType(value));
         else if (name.equals("type"))
-          this.type = new PlanActionTypeEnumFactory().fromType(value); // Enumeration<PlanActionType>
-        else if (name.equals("behavior"))
-          this.getBehavior().add((PlanDefinitionActionDefinitionBehaviorComponent) value);
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("groupingBehavior"))
+          this.groupingBehavior = new PlanActionGroupingBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionGroupingBehavior>
+        else if (name.equals("selectionBehavior"))
+          this.selectionBehavior = new PlanActionSelectionBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionSelectionBehavior>
+        else if (name.equals("requiredBehavior"))
+          this.requiredBehavior = new PlanActionRequiredBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionRequiredBehavior>
+        else if (name.equals("precheckBehavior"))
+          this.precheckBehavior = new PlanActionPrecheckBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionPrecheckBehavior>
+        else if (name.equals("cardinalityBehavior"))
+          this.cardinalityBehavior = new PlanActionCardinalityBehaviorEnumFactory().fromType(value); // Enumeration<PlanActionCardinalityBehavior>
         else if (name.equals("activityDefinition"))
           this.activityDefinition = castToReference(value); // Reference
         else if (name.equals("transform"))
@@ -1514,15 +2607,21 @@ public class PlanDefinition extends DomainResource {
         case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
         case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
         case -900391049: throw new FHIRException("Cannot make property textEquivalent as it is not a complex type"); // StringType
-        case 951024232:  return addConcept(); // CodeableConcept
-        case -1735429846:  return addSupportingEvidence(); // Attachment
-        case 1587405498:  return addDocumentation(); // Attachment
-        case 1126736171:  return getTriggerDefinition(); // TriggerDefinition
-        case -861311717: throw new FHIRException("Cannot make property condition as it is not a complex type"); // StringType
-        case -384107967:  return getRelatedAction(); // PlanDefinitionActionDefinitionRelatedActionComponent
+        case 3059181:  return addCode(); // CodeableConcept
+        case 1587405498:  return addDocumentation(); // RelatedArtifact
+        case 1126736171:  return addTriggerDefinition(); // TriggerDefinition
+        case -861311717:  return addCondition(); // PlanDefinitionActionDefinitionConditionComponent
+        case 100358090:  return addInput(); // DataRequirement
+        case -1005512447:  return addOutput(); // DataRequirement
+        case -384107967:  return addRelatedAction(); // PlanDefinitionActionDefinitionRelatedActionComponent
         case 164632566:  return getTiming(); // Type
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<PlanActionType>
-        case 1510912594:  return addBehavior(); // PlanDefinitionActionDefinitionBehaviorComponent
+        case 841294093: throw new FHIRException("Cannot make property participantType as it is not a complex type"); // Enumeration<PlanActionParticipantType>
+        case 3575610:  return getType(); // Coding
+        case 586678389: throw new FHIRException("Cannot make property groupingBehavior as it is not a complex type"); // Enumeration<PlanActionGroupingBehavior>
+        case 168639486: throw new FHIRException("Cannot make property selectionBehavior as it is not a complex type"); // Enumeration<PlanActionSelectionBehavior>
+        case -1163906287: throw new FHIRException("Cannot make property requiredBehavior as it is not a complex type"); // Enumeration<PlanActionRequiredBehavior>
+        case -1174249033: throw new FHIRException("Cannot make property precheckBehavior as it is not a complex type"); // Enumeration<PlanActionPrecheckBehavior>
+        case -922577408: throw new FHIRException("Cannot make property cardinalityBehavior as it is not a complex type"); // Enumeration<PlanActionCardinalityBehavior>
         case -990265918:  return getActivityDefinition(); // Reference
         case 1052666732:  return getTransform(); // Reference
         case 572625010:  return addDynamicValue(); // PlanDefinitionActionDefinitionDynamicValueComponent
@@ -1550,25 +2649,26 @@ public class PlanDefinition extends DomainResource {
         else if (name.equals("textEquivalent")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.textEquivalent");
         }
-        else if (name.equals("concept")) {
-          return addConcept();
-        }
-        else if (name.equals("supportingEvidence")) {
-          return addSupportingEvidence();
+        else if (name.equals("code")) {
+          return addCode();
         }
         else if (name.equals("documentation")) {
           return addDocumentation();
         }
         else if (name.equals("triggerDefinition")) {
-          this.triggerDefinition = new TriggerDefinition();
-          return this.triggerDefinition;
+          return addTriggerDefinition();
         }
         else if (name.equals("condition")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.condition");
+          return addCondition();
+        }
+        else if (name.equals("input")) {
+          return addInput();
+        }
+        else if (name.equals("output")) {
+          return addOutput();
         }
         else if (name.equals("relatedAction")) {
-          this.relatedAction = new PlanDefinitionActionDefinitionRelatedActionComponent();
-          return this.relatedAction;
+          return addRelatedAction();
         }
         else if (name.equals("timingDateTime")) {
           this.timing = new DateTimeType();
@@ -1590,11 +2690,27 @@ public class PlanDefinition extends DomainResource {
           this.timing = new Timing();
           return this.timing;
         }
-        else if (name.equals("type")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.type");
+        else if (name.equals("participantType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.participantType");
         }
-        else if (name.equals("behavior")) {
-          return addBehavior();
+        else if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("groupingBehavior")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.groupingBehavior");
+        }
+        else if (name.equals("selectionBehavior")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.selectionBehavior");
+        }
+        else if (name.equals("requiredBehavior")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.requiredBehavior");
+        }
+        else if (name.equals("precheckBehavior")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.precheckBehavior");
+        }
+        else if (name.equals("cardinalityBehavior")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.cardinalityBehavior");
         }
         else if (name.equals("activityDefinition")) {
           this.activityDefinition = new Reference();
@@ -1622,31 +2738,53 @@ public class PlanDefinition extends DomainResource {
         dst.title = title == null ? null : title.copy();
         dst.description = description == null ? null : description.copy();
         dst.textEquivalent = textEquivalent == null ? null : textEquivalent.copy();
-        if (concept != null) {
-          dst.concept = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : concept)
-            dst.concept.add(i.copy());
-        };
-        if (supportingEvidence != null) {
-          dst.supportingEvidence = new ArrayList<Attachment>();
-          for (Attachment i : supportingEvidence)
-            dst.supportingEvidence.add(i.copy());
+        if (code != null) {
+          dst.code = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : code)
+            dst.code.add(i.copy());
         };
         if (documentation != null) {
-          dst.documentation = new ArrayList<Attachment>();
-          for (Attachment i : documentation)
+          dst.documentation = new ArrayList<RelatedArtifact>();
+          for (RelatedArtifact i : documentation)
             dst.documentation.add(i.copy());
         };
-        dst.triggerDefinition = triggerDefinition == null ? null : triggerDefinition.copy();
-        dst.condition = condition == null ? null : condition.copy();
-        dst.relatedAction = relatedAction == null ? null : relatedAction.copy();
-        dst.timing = timing == null ? null : timing.copy();
-        dst.type = type == null ? null : type.copy();
-        if (behavior != null) {
-          dst.behavior = new ArrayList<PlanDefinitionActionDefinitionBehaviorComponent>();
-          for (PlanDefinitionActionDefinitionBehaviorComponent i : behavior)
-            dst.behavior.add(i.copy());
+        if (triggerDefinition != null) {
+          dst.triggerDefinition = new ArrayList<TriggerDefinition>();
+          for (TriggerDefinition i : triggerDefinition)
+            dst.triggerDefinition.add(i.copy());
         };
+        if (condition != null) {
+          dst.condition = new ArrayList<PlanDefinitionActionDefinitionConditionComponent>();
+          for (PlanDefinitionActionDefinitionConditionComponent i : condition)
+            dst.condition.add(i.copy());
+        };
+        if (input != null) {
+          dst.input = new ArrayList<DataRequirement>();
+          for (DataRequirement i : input)
+            dst.input.add(i.copy());
+        };
+        if (output != null) {
+          dst.output = new ArrayList<DataRequirement>();
+          for (DataRequirement i : output)
+            dst.output.add(i.copy());
+        };
+        if (relatedAction != null) {
+          dst.relatedAction = new ArrayList<PlanDefinitionActionDefinitionRelatedActionComponent>();
+          for (PlanDefinitionActionDefinitionRelatedActionComponent i : relatedAction)
+            dst.relatedAction.add(i.copy());
+        };
+        dst.timing = timing == null ? null : timing.copy();
+        if (participantType != null) {
+          dst.participantType = new ArrayList<Enumeration<PlanActionParticipantType>>();
+          for (Enumeration<PlanActionParticipantType> i : participantType)
+            dst.participantType.add(i.copy());
+        };
+        dst.type = type == null ? null : type.copy();
+        dst.groupingBehavior = groupingBehavior == null ? null : groupingBehavior.copy();
+        dst.selectionBehavior = selectionBehavior == null ? null : selectionBehavior.copy();
+        dst.requiredBehavior = requiredBehavior == null ? null : requiredBehavior.copy();
+        dst.precheckBehavior = precheckBehavior == null ? null : precheckBehavior.copy();
+        dst.cardinalityBehavior = cardinalityBehavior == null ? null : cardinalityBehavior.copy();
         dst.activityDefinition = activityDefinition == null ? null : activityDefinition.copy();
         dst.transform = transform == null ? null : transform.copy();
         if (dynamicValue != null) {
@@ -1671,13 +2809,14 @@ public class PlanDefinition extends DomainResource {
         PlanDefinitionActionDefinitionComponent o = (PlanDefinitionActionDefinitionComponent) other;
         return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(label, o.label, true)
            && compareDeep(title, o.title, true) && compareDeep(description, o.description, true) && compareDeep(textEquivalent, o.textEquivalent, true)
-           && compareDeep(concept, o.concept, true) && compareDeep(supportingEvidence, o.supportingEvidence, true)
-           && compareDeep(documentation, o.documentation, true) && compareDeep(triggerDefinition, o.triggerDefinition, true)
-           && compareDeep(condition, o.condition, true) && compareDeep(relatedAction, o.relatedAction, true)
-           && compareDeep(timing, o.timing, true) && compareDeep(type, o.type, true) && compareDeep(behavior, o.behavior, true)
-           && compareDeep(activityDefinition, o.activityDefinition, true) && compareDeep(transform, o.transform, true)
-           && compareDeep(dynamicValue, o.dynamicValue, true) && compareDeep(actionDefinition, o.actionDefinition, true)
-          ;
+           && compareDeep(code, o.code, true) && compareDeep(documentation, o.documentation, true) && compareDeep(triggerDefinition, o.triggerDefinition, true)
+           && compareDeep(condition, o.condition, true) && compareDeep(input, o.input, true) && compareDeep(output, o.output, true)
+           && compareDeep(relatedAction, o.relatedAction, true) && compareDeep(timing, o.timing, true) && compareDeep(participantType, o.participantType, true)
+           && compareDeep(type, o.type, true) && compareDeep(groupingBehavior, o.groupingBehavior, true) && compareDeep(selectionBehavior, o.selectionBehavior, true)
+           && compareDeep(requiredBehavior, o.requiredBehavior, true) && compareDeep(precheckBehavior, o.precheckBehavior, true)
+           && compareDeep(cardinalityBehavior, o.cardinalityBehavior, true) && compareDeep(activityDefinition, o.activityDefinition, true)
+           && compareDeep(transform, o.transform, true) && compareDeep(dynamicValue, o.dynamicValue, true)
+           && compareDeep(actionDefinition, o.actionDefinition, true);
       }
 
       @Override
@@ -1688,19 +2827,390 @@ public class PlanDefinition extends DomainResource {
           return false;
         PlanDefinitionActionDefinitionComponent o = (PlanDefinitionActionDefinitionComponent) other;
         return compareValues(label, o.label, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
-           && compareValues(textEquivalent, o.textEquivalent, true) && compareValues(condition, o.condition, true)
-           && compareValues(type, o.type, true);
+           && compareValues(textEquivalent, o.textEquivalent, true) && compareValues(participantType, o.participantType, true)
+           && compareValues(groupingBehavior, o.groupingBehavior, true) && compareValues(selectionBehavior, o.selectionBehavior, true)
+           && compareValues(requiredBehavior, o.requiredBehavior, true) && compareValues(precheckBehavior, o.precheckBehavior, true)
+           && compareValues(cardinalityBehavior, o.cardinalityBehavior, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, label, title
-          , description, textEquivalent, concept, supportingEvidence, documentation, triggerDefinition
-          , condition, relatedAction, timing, type, behavior, activityDefinition, transform
-          , dynamicValue, actionDefinition);
+          , description, textEquivalent, code, documentation, triggerDefinition, condition
+          , input, output, relatedAction, timing, participantType, type, groupingBehavior
+          , selectionBehavior, requiredBehavior, precheckBehavior, cardinalityBehavior, activityDefinition
+          , transform, dynamicValue, actionDefinition);
       }
 
   public String fhirType() {
     return "PlanDefinition.actionDefinition";
+
+  }
+
+  }
+
+    @Block()
+    public static class PlanDefinitionActionDefinitionConditionComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The kind of condition.
+         */
+        @Child(name = "kind", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="applicability | start | stop", formalDefinition="The kind of condition." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-condition-kind")
+        protected Enumeration<PlanActionConditionKind> kind;
+
+        /**
+         * A brief, natural language description of the condition that effectively communicates the intended semantics.
+         */
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Natural language description of the condition", formalDefinition="A brief, natural language description of the condition that effectively communicates the intended semantics." )
+        protected StringType description;
+
+        /**
+         * The media type of the language for the expression.
+         */
+        @Child(name = "language", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Language of the expression", formalDefinition="The media type of the language for the expression." )
+        protected StringType language;
+
+        /**
+         * An expression that returns true or false, indicating whether or not the condition is satisfied.
+         */
+        @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Boolean-valued expression", formalDefinition="An expression that returns true or false, indicating whether or not the condition is satisfied." )
+        protected StringType expression;
+
+        private static final long serialVersionUID = 1111982240L;
+
+    /**
+     * Constructor
+     */
+      public PlanDefinitionActionDefinitionConditionComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public PlanDefinitionActionDefinitionConditionComponent(Enumeration<PlanActionConditionKind> kind) {
+        super();
+        this.kind = kind;
+      }
+
+        /**
+         * @return {@link #kind} (The kind of condition.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+         */
+        public Enumeration<PlanActionConditionKind> getKindElement() { 
+          if (this.kind == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.kind");
+            else if (Configuration.doAutoCreate())
+              this.kind = new Enumeration<PlanActionConditionKind>(new PlanActionConditionKindEnumFactory()); // bb
+          return this.kind;
+        }
+
+        public boolean hasKindElement() { 
+          return this.kind != null && !this.kind.isEmpty();
+        }
+
+        public boolean hasKind() { 
+          return this.kind != null && !this.kind.isEmpty();
+        }
+
+        /**
+         * @param value {@link #kind} (The kind of condition.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setKindElement(Enumeration<PlanActionConditionKind> value) { 
+          this.kind = value;
+          return this;
+        }
+
+        /**
+         * @return The kind of condition.
+         */
+        public PlanActionConditionKind getKind() { 
+          return this.kind == null ? null : this.kind.getValue();
+        }
+
+        /**
+         * @param value The kind of condition.
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setKind(PlanActionConditionKind value) { 
+            if (this.kind == null)
+              this.kind = new Enumeration<PlanActionConditionKind>(new PlanActionConditionKindEnumFactory());
+            this.kind.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #description} (A brief, natural language description of the condition that effectively communicates the intended semantics.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public StringType getDescriptionElement() { 
+          if (this.description == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.description");
+            else if (Configuration.doAutoCreate())
+              this.description = new StringType(); // bb
+          return this.description;
+        }
+
+        public boolean hasDescriptionElement() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        public boolean hasDescription() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        /**
+         * @param value {@link #description} (A brief, natural language description of the condition that effectively communicates the intended semantics.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setDescriptionElement(StringType value) { 
+          this.description = value;
+          return this;
+        }
+
+        /**
+         * @return A brief, natural language description of the condition that effectively communicates the intended semantics.
+         */
+        public String getDescription() { 
+          return this.description == null ? null : this.description.getValue();
+        }
+
+        /**
+         * @param value A brief, natural language description of the condition that effectively communicates the intended semantics.
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setDescription(String value) { 
+          if (Utilities.noString(value))
+            this.description = null;
+          else {
+            if (this.description == null)
+              this.description = new StringType();
+            this.description.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public StringType getLanguageElement() { 
+          if (this.language == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.language");
+            else if (Configuration.doAutoCreate())
+              this.language = new StringType(); // bb
+          return this.language;
+        }
+
+        public boolean hasLanguageElement() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        public boolean hasLanguage() { 
+          return this.language != null && !this.language.isEmpty();
+        }
+
+        /**
+         * @param value {@link #language} (The media type of the language for the expression.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setLanguageElement(StringType value) { 
+          this.language = value;
+          return this;
+        }
+
+        /**
+         * @return The media type of the language for the expression.
+         */
+        public String getLanguage() { 
+          return this.language == null ? null : this.language.getValue();
+        }
+
+        /**
+         * @param value The media type of the language for the expression.
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setLanguage(String value) { 
+          if (Utilities.noString(value))
+            this.language = null;
+          else {
+            if (this.language == null)
+              this.language = new StringType();
+            this.language.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #expression} (An expression that returns true or false, indicating whether or not the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public StringType getExpressionElement() { 
+          if (this.expression == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionConditionComponent.expression");
+            else if (Configuration.doAutoCreate())
+              this.expression = new StringType(); // bb
+          return this.expression;
+        }
+
+        public boolean hasExpressionElement() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        public boolean hasExpression() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        /**
+         * @param value {@link #expression} (An expression that returns true or false, indicating whether or not the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setExpressionElement(StringType value) { 
+          this.expression = value;
+          return this;
+        }
+
+        /**
+         * @return An expression that returns true or false, indicating whether or not the condition is satisfied.
+         */
+        public String getExpression() { 
+          return this.expression == null ? null : this.expression.getValue();
+        }
+
+        /**
+         * @param value An expression that returns true or false, indicating whether or not the condition is satisfied.
+         */
+        public PlanDefinitionActionDefinitionConditionComponent setExpression(String value) { 
+          if (Utilities.noString(value))
+            this.expression = null;
+          else {
+            if (this.expression == null)
+              this.expression = new StringType();
+            this.expression.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("kind", "code", "The kind of condition.", 0, java.lang.Integer.MAX_VALUE, kind));
+          childrenList.add(new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, java.lang.Integer.MAX_VALUE, description));
+          childrenList.add(new Property("language", "string", "The media type of the language for the expression.", 0, java.lang.Integer.MAX_VALUE, language));
+          childrenList.add(new Property("expression", "string", "An expression that returns true or false, indicating whether or not the condition is satisfied.", 0, java.lang.Integer.MAX_VALUE, expression));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<PlanActionConditionKind>
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // StringType
+        case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public void setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3292052: // kind
+          this.kind = new PlanActionConditionKindEnumFactory().fromType(value); // Enumeration<PlanActionConditionKind>
+          break;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
+        case -1613589672: // language
+          this.language = castToString(value); // StringType
+          break;
+        case -1795452264: // expression
+          this.expression = castToString(value); // StringType
+          break;
+        default: super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("kind"))
+          this.kind = new PlanActionConditionKindEnumFactory().fromType(value); // Enumeration<PlanActionConditionKind>
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("language"))
+          this.language = castToString(value); // StringType
+        else if (name.equals("expression"))
+          this.expression = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<PlanActionConditionKind>
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
+        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // StringType
+        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("kind")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.kind");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.description");
+        }
+        else if (name.equals("language")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.language");
+        }
+        else if (name.equals("expression")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.expression");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public PlanDefinitionActionDefinitionConditionComponent copy() {
+        PlanDefinitionActionDefinitionConditionComponent dst = new PlanDefinitionActionDefinitionConditionComponent();
+        copyValues(dst);
+        dst.kind = kind == null ? null : kind.copy();
+        dst.description = description == null ? null : description.copy();
+        dst.language = language == null ? null : language.copy();
+        dst.expression = expression == null ? null : expression.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof PlanDefinitionActionDefinitionConditionComponent))
+          return false;
+        PlanDefinitionActionDefinitionConditionComponent o = (PlanDefinitionActionDefinitionConditionComponent) other;
+        return compareDeep(kind, o.kind, true) && compareDeep(description, o.description, true) && compareDeep(language, o.language, true)
+           && compareDeep(expression, o.expression, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof PlanDefinitionActionDefinitionConditionComponent))
+          return false;
+        PlanDefinitionActionDefinitionConditionComponent o = (PlanDefinitionActionDefinitionConditionComponent) other;
+        return compareValues(kind, o.kind, true) && compareValues(description, o.description, true) && compareValues(language, o.language, true)
+           && compareValues(expression, o.expression, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, description, language
+          , expression);
+      }
+
+  public String fhirType() {
+    return "PlanDefinition.actionDefinition.condition";
 
   }
 
@@ -1719,8 +3229,8 @@ public class PlanDefinition extends DomainResource {
          * The relationship of this action to the related action.
          */
         @Child(name = "relationship", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="before | after", formalDefinition="The relationship of this action to the related action." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/planaction-relationship-type")
+        @Description(shortDefinition="before-start | before | before-end | concurrent-with-start | concurrent | concurrent-with-end | after-start | after | after-end", formalDefinition="The relationship of this action to the related action." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-relationship-type")
         protected Enumeration<PlanActionRelationshipType> relationship;
 
         /**
@@ -1730,15 +3240,7 @@ public class PlanDefinition extends DomainResource {
         @Description(shortDefinition="Time offset for the relationship", formalDefinition="A duration or range of durations to apply to the relationship. For example, 30-60 minutes before." )
         protected Type offset;
 
-        /**
-         * An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.
-         */
-        @Child(name = "anchor", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="start | end", formalDefinition="An optional indicator for how the relationship is anchored to the related action. For example \"before the start\" or \"before the end\" of the related action." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/planaction-relationship-anchor")
-        protected Enumeration<PlanActionRelationshipAnchor> anchor;
-
-        private static final long serialVersionUID = -2079568789L;
+        private static final long serialVersionUID = -2131606397L;
 
     /**
      * Constructor
@@ -1870,61 +3372,11 @@ public class PlanDefinition extends DomainResource {
           return this;
         }
 
-        /**
-         * @return {@link #anchor} (An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.). This is the underlying object with id, value and extensions. The accessor "getAnchor" gives direct access to the value
-         */
-        public Enumeration<PlanActionRelationshipAnchor> getAnchorElement() { 
-          if (this.anchor == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionRelatedActionComponent.anchor");
-            else if (Configuration.doAutoCreate())
-              this.anchor = new Enumeration<PlanActionRelationshipAnchor>(new PlanActionRelationshipAnchorEnumFactory()); // bb
-          return this.anchor;
-        }
-
-        public boolean hasAnchorElement() { 
-          return this.anchor != null && !this.anchor.isEmpty();
-        }
-
-        public boolean hasAnchor() { 
-          return this.anchor != null && !this.anchor.isEmpty();
-        }
-
-        /**
-         * @param value {@link #anchor} (An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.). This is the underlying object with id, value and extensions. The accessor "getAnchor" gives direct access to the value
-         */
-        public PlanDefinitionActionDefinitionRelatedActionComponent setAnchorElement(Enumeration<PlanActionRelationshipAnchor> value) { 
-          this.anchor = value;
-          return this;
-        }
-
-        /**
-         * @return An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.
-         */
-        public PlanActionRelationshipAnchor getAnchor() { 
-          return this.anchor == null ? null : this.anchor.getValue();
-        }
-
-        /**
-         * @param value An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.
-         */
-        public PlanDefinitionActionDefinitionRelatedActionComponent setAnchor(PlanActionRelationshipAnchor value) { 
-          if (value == null)
-            this.anchor = null;
-          else {
-            if (this.anchor == null)
-              this.anchor = new Enumeration<PlanActionRelationshipAnchor>(new PlanActionRelationshipAnchorEnumFactory());
-            this.anchor.setValue(value);
-          }
-          return this;
-        }
-
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("actionIdentifier", "Identifier", "The unique identifier of the related action.", 0, java.lang.Integer.MAX_VALUE, actionIdentifier));
           childrenList.add(new Property("relationship", "code", "The relationship of this action to the related action.", 0, java.lang.Integer.MAX_VALUE, relationship));
           childrenList.add(new Property("offset[x]", "Duration|Range", "A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.", 0, java.lang.Integer.MAX_VALUE, offset));
-          childrenList.add(new Property("anchor", "code", "An optional indicator for how the relationship is anchored to the related action. For example \"before the start\" or \"before the end\" of the related action.", 0, java.lang.Integer.MAX_VALUE, anchor));
         }
 
       @Override
@@ -1933,7 +3385,6 @@ public class PlanDefinition extends DomainResource {
         case -889046145: /*actionIdentifier*/ return this.actionIdentifier == null ? new Base[0] : new Base[] {this.actionIdentifier}; // Identifier
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // Enumeration<PlanActionRelationshipType>
         case -1019779949: /*offset*/ return this.offset == null ? new Base[0] : new Base[] {this.offset}; // Type
-        case -1413299531: /*anchor*/ return this.anchor == null ? new Base[0] : new Base[] {this.anchor}; // Enumeration<PlanActionRelationshipAnchor>
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1949,10 +3400,7 @@ public class PlanDefinition extends DomainResource {
           this.relationship = new PlanActionRelationshipTypeEnumFactory().fromType(value); // Enumeration<PlanActionRelationshipType>
           break;
         case -1019779949: // offset
-          this.offset = (Type) value; // Type
-          break;
-        case -1413299531: // anchor
-          this.anchor = new PlanActionRelationshipAnchorEnumFactory().fromType(value); // Enumeration<PlanActionRelationshipAnchor>
+          this.offset = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -1966,9 +3414,7 @@ public class PlanDefinition extends DomainResource {
         else if (name.equals("relationship"))
           this.relationship = new PlanActionRelationshipTypeEnumFactory().fromType(value); // Enumeration<PlanActionRelationshipType>
         else if (name.equals("offset[x]"))
-          this.offset = (Type) value; // Type
-        else if (name.equals("anchor"))
-          this.anchor = new PlanActionRelationshipAnchorEnumFactory().fromType(value); // Enumeration<PlanActionRelationshipAnchor>
+          this.offset = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -1979,7 +3425,6 @@ public class PlanDefinition extends DomainResource {
         case -889046145:  return getActionIdentifier(); // Identifier
         case -261851592: throw new FHIRException("Cannot make property relationship as it is not a complex type"); // Enumeration<PlanActionRelationshipType>
         case -1960684787:  return getOffset(); // Type
-        case -1413299531: throw new FHIRException("Cannot make property anchor as it is not a complex type"); // Enumeration<PlanActionRelationshipAnchor>
         default: return super.makeProperty(hash, name);
         }
 
@@ -2002,9 +3447,6 @@ public class PlanDefinition extends DomainResource {
           this.offset = new Range();
           return this.offset;
         }
-        else if (name.equals("anchor")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.anchor");
-        }
         else
           return super.addChild(name);
       }
@@ -2015,7 +3457,6 @@ public class PlanDefinition extends DomainResource {
         dst.actionIdentifier = actionIdentifier == null ? null : actionIdentifier.copy();
         dst.relationship = relationship == null ? null : relationship.copy();
         dst.offset = offset == null ? null : offset.copy();
-        dst.anchor = anchor == null ? null : anchor.copy();
         return dst;
       }
 
@@ -2027,7 +3468,7 @@ public class PlanDefinition extends DomainResource {
           return false;
         PlanDefinitionActionDefinitionRelatedActionComponent o = (PlanDefinitionActionDefinitionRelatedActionComponent) other;
         return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(offset, o.offset, true) && compareDeep(anchor, o.anchor, true);
+           && compareDeep(offset, o.offset, true);
       }
 
       @Override
@@ -2037,12 +3478,12 @@ public class PlanDefinition extends DomainResource {
         if (!(other instanceof PlanDefinitionActionDefinitionRelatedActionComponent))
           return false;
         PlanDefinitionActionDefinitionRelatedActionComponent o = (PlanDefinitionActionDefinitionRelatedActionComponent) other;
-        return compareValues(relationship, o.relationship, true) && compareValues(anchor, o.anchor, true);
+        return compareValues(relationship, o.relationship, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, relationship
-          , offset, anchor);
+          , offset);
       }
 
   public String fhirType() {
@@ -2053,215 +3494,36 @@ public class PlanDefinition extends DomainResource {
   }
 
     @Block()
-    public static class PlanDefinitionActionDefinitionBehaviorComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The type of the behavior to be described, such as grouping, visual, or selection behaviors.
-         */
-        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The type of behavior (grouping, precheck, selection, cardinality, etc)", formalDefinition="The type of the behavior to be described, such as grouping, visual, or selection behaviors." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/planaction-behavior-type")
-        protected Coding type;
-
-        /**
-         * The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.
-         */
-        @Child(name = "value", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Specific behavior (e.g. required, at-most-one, single, etc)", formalDefinition="The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset." )
-        protected Coding value;
-
-        private static final long serialVersionUID = -1054119695L;
-
-    /**
-     * Constructor
-     */
-      public PlanDefinitionActionDefinitionBehaviorComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public PlanDefinitionActionDefinitionBehaviorComponent(Coding type, Coding value) {
-        super();
-        this.type = type;
-        this.value = value;
-      }
-
-        /**
-         * @return {@link #type} (The type of the behavior to be described, such as grouping, visual, or selection behaviors.)
-         */
-        public Coding getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionBehaviorComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of the behavior to be described, such as grouping, visual, or selection behaviors.)
-         */
-        public PlanDefinitionActionDefinitionBehaviorComponent setType(Coding value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.)
-         */
-        public Coding getValue() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionBehaviorComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new Coding(); // cc
-          return this.value;
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.)
-         */
-        public PlanDefinitionActionDefinitionBehaviorComponent setValue(Coding value) { 
-          this.value = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "The type of the behavior to be described, such as grouping, visual, or selection behaviors.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("value", "Coding", "The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.", 0, java.lang.Integer.MAX_VALUE, value));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Coding
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = castToCoding(value); // Coding
-          break;
-        case 111972721: // value
-          this.value = castToCoding(value); // Coding
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = castToCoding(value); // Coding
-        else if (name.equals("value"))
-          this.value = castToCoding(value); // Coding
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getType(); // Coding
-        case 111972721:  return getValue(); // Coding
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new Coding();
-          return this.type;
-        }
-        else if (name.equals("value")) {
-          this.value = new Coding();
-          return this.value;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public PlanDefinitionActionDefinitionBehaviorComponent copy() {
-        PlanDefinitionActionDefinitionBehaviorComponent dst = new PlanDefinitionActionDefinitionBehaviorComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionBehaviorComponent))
-          return false;
-        PlanDefinitionActionDefinitionBehaviorComponent o = (PlanDefinitionActionDefinitionBehaviorComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof PlanDefinitionActionDefinitionBehaviorComponent))
-          return false;
-        PlanDefinitionActionDefinitionBehaviorComponent o = (PlanDefinitionActionDefinitionBehaviorComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value);
-      }
-
-  public String fhirType() {
-    return "PlanDefinition.actionDefinition.behavior";
-
-  }
-
-  }
-
-    @Block()
     public static class PlanDefinitionActionDefinitionDynamicValueComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * A brief, natural language description of the intended semantics of the dynamic value.
+         */
+        @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Natural language description of the dynamic value", formalDefinition="A brief, natural language description of the intended semantics of the dynamic value." )
+        protected StringType description;
+
         /**
          * The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
          */
-        @Child(name = "path", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "path", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The path to the element to be set dynamically", formalDefinition="The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression." )
         protected StringType path;
 
         /**
          * The media type of the language for the expression.
          */
-        @Child(name = "language", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "language", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Language of the expression", formalDefinition="The media type of the language for the expression." )
         protected StringType language;
 
         /**
          * An expression specifying the value of the customized element.
          */
-        @Child(name = "expression", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="An expression that provides the dynamic value for the customization", formalDefinition="An expression specifying the value of the customized element." )
         protected StringType expression;
 
-        private static final long serialVersionUID = -1704320150L;
+        private static final long serialVersionUID = 448404361L;
 
     /**
      * Constructor
@@ -2270,14 +3532,54 @@ public class PlanDefinition extends DomainResource {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public PlanDefinitionActionDefinitionDynamicValueComponent(StringType path, StringType expression) {
-        super();
-        this.path = path;
-        this.expression = expression;
-      }
+        /**
+         * @return {@link #description} (A brief, natural language description of the intended semantics of the dynamic value.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public StringType getDescriptionElement() { 
+          if (this.description == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create PlanDefinitionActionDefinitionDynamicValueComponent.description");
+            else if (Configuration.doAutoCreate())
+              this.description = new StringType(); // bb
+          return this.description;
+        }
+
+        public boolean hasDescriptionElement() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        public boolean hasDescription() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        /**
+         * @param value {@link #description} (A brief, natural language description of the intended semantics of the dynamic value.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public PlanDefinitionActionDefinitionDynamicValueComponent setDescriptionElement(StringType value) { 
+          this.description = value;
+          return this;
+        }
+
+        /**
+         * @return A brief, natural language description of the intended semantics of the dynamic value.
+         */
+        public String getDescription() { 
+          return this.description == null ? null : this.description.getValue();
+        }
+
+        /**
+         * @param value A brief, natural language description of the intended semantics of the dynamic value.
+         */
+        public PlanDefinitionActionDefinitionDynamicValueComponent setDescription(String value) { 
+          if (Utilities.noString(value))
+            this.description = null;
+          else {
+            if (this.description == null)
+              this.description = new StringType();
+            this.description.setValue(value);
+          }
+          return this;
+        }
 
         /**
          * @return {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
@@ -2318,9 +3620,13 @@ public class PlanDefinition extends DomainResource {
          * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
          */
         public PlanDefinitionActionDefinitionDynamicValueComponent setPath(String value) { 
+          if (Utilities.noString(value))
+            this.path = null;
+          else {
             if (this.path == null)
               this.path = new StringType();
             this.path.setValue(value);
+          }
           return this;
         }
 
@@ -2412,14 +3718,19 @@ public class PlanDefinition extends DomainResource {
          * @param value An expression specifying the value of the customized element.
          */
         public PlanDefinitionActionDefinitionDynamicValueComponent setExpression(String value) { 
+          if (Utilities.noString(value))
+            this.expression = null;
+          else {
             if (this.expression == null)
               this.expression = new StringType();
             this.expression.setValue(value);
+          }
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
+          childrenList.add(new Property("description", "string", "A brief, natural language description of the intended semantics of the dynamic value.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.", 0, java.lang.Integer.MAX_VALUE, path));
           childrenList.add(new Property("language", "string", "The media type of the language for the expression.", 0, java.lang.Integer.MAX_VALUE, language));
           childrenList.add(new Property("expression", "string", "An expression specifying the value of the customized element.", 0, java.lang.Integer.MAX_VALUE, expression));
@@ -2428,6 +3739,7 @@ public class PlanDefinition extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
         case -1613589672: /*language*/ return this.language == null ? new Base[0] : new Base[] {this.language}; // StringType
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
@@ -2439,6 +3751,9 @@ public class PlanDefinition extends DomainResource {
       @Override
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          break;
         case 3433509: // path
           this.path = castToString(value); // StringType
           break;
@@ -2455,7 +3770,9 @@ public class PlanDefinition extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("path"))
+        if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("path"))
           this.path = castToString(value); // StringType
         else if (name.equals("language"))
           this.language = castToString(value); // StringType
@@ -2468,6 +3785,7 @@ public class PlanDefinition extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
         case 3433509: throw new FHIRException("Cannot make property path as it is not a complex type"); // StringType
         case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // StringType
         case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
@@ -2478,7 +3796,10 @@ public class PlanDefinition extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("path")) {
+        if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.description");
+        }
+        else if (name.equals("path")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.path");
         }
         else if (name.equals("language")) {
@@ -2494,6 +3815,7 @@ public class PlanDefinition extends DomainResource {
       public PlanDefinitionActionDefinitionDynamicValueComponent copy() {
         PlanDefinitionActionDefinitionDynamicValueComponent dst = new PlanDefinitionActionDefinitionDynamicValueComponent();
         copyValues(dst);
+        dst.description = description == null ? null : description.copy();
         dst.path = path == null ? null : path.copy();
         dst.language = language == null ? null : language.copy();
         dst.expression = expression == null ? null : expression.copy();
@@ -2507,8 +3829,8 @@ public class PlanDefinition extends DomainResource {
         if (!(other instanceof PlanDefinitionActionDefinitionDynamicValueComponent))
           return false;
         PlanDefinitionActionDefinitionDynamicValueComponent o = (PlanDefinitionActionDefinitionDynamicValueComponent) other;
-        return compareDeep(path, o.path, true) && compareDeep(language, o.language, true) && compareDeep(expression, o.expression, true)
-          ;
+        return compareDeep(description, o.description, true) && compareDeep(path, o.path, true) && compareDeep(language, o.language, true)
+           && compareDeep(expression, o.expression, true);
       }
 
       @Override
@@ -2518,13 +3840,13 @@ public class PlanDefinition extends DomainResource {
         if (!(other instanceof PlanDefinitionActionDefinitionDynamicValueComponent))
           return false;
         PlanDefinitionActionDefinitionDynamicValueComponent o = (PlanDefinitionActionDefinitionDynamicValueComponent) other;
-        return compareValues(path, o.path, true) && compareValues(language, o.language, true) && compareValues(expression, o.expression, true)
-          ;
+        return compareValues(description, o.description, true) && compareValues(path, o.path, true) && compareValues(language, o.language, true)
+           && compareValues(expression, o.expression, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, language, expression
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(description, path, language
+          , expression);
       }
 
   public String fhirType() {
@@ -2535,154 +3857,91 @@ public class PlanDefinition extends DomainResource {
   }
 
     /**
-     * An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.
+     * A formal identifier that is used to identify this plan definition when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical URL to reference this module", formalDefinition="An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published." )
-    protected UriType url;
-
-    /**
-     * A logical identifier for the module such as the CMS or NQF identifiers for a measure artifact.
-     */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Logical identifier(s) for the module", formalDefinition="A logical identifier for the module such as the CMS or NQF identifiers for a measure artifact." )
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Additional identifier for the plan definition", formalDefinition="A formal identifier that is used to identify this plan definition when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected List<Identifier> identifier;
 
     /**
-     * The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification. Note that the version is required for non-experimental published artifact.
+     * The type of asset the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.
      */
-    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The version of the module, if any", formalDefinition="The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification. Note that the version is required for non-experimental published artifact." )
-    protected StringType version;
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="order-set | protocol | eca-rule", formalDefinition="The type of asset the plan definition represents, e.g. an order set, protocol, or event-condition-action rule." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/plan-definition-type")
+    protected CodeableConcept type;
 
     /**
-     * A machine-friendly name for the module. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     * Explains why this plan definition is needed and why it has been designed as it has.
      */
-    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A machine-friendly name for the module", formalDefinition="A machine-friendly name for the module. This name should be usable as an identifier for the module by machine processing applications such as code generation." )
-    protected StringType name;
+    @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this plan definition is defined", formalDefinition="Explains why this plan definition is needed and why it has been designed as it has." )
+    protected MarkdownType purpose;
 
     /**
-     * A short, descriptive, user-friendly title for the module.
+     * A detailed description of how the asset is used from a clinical perspective.
      */
-    @Child(name = "title", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A user-friendly title for the module", formalDefinition="A short, descriptive, user-friendly title for the module." )
-    protected StringType title;
-
-    /**
-     * The status of the module.
-     */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | active | inactive", formalDefinition="The status of the module." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/module-metadata-status")
-    protected CodeType status;
-
-    /**
-     * Determines whether the module was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.
-     */
-    @Child(name = "experimental", type = {BooleanType.class}, order=6, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="Determines whether the module was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments." )
-    protected BooleanType experimental;
-
-    /**
-     * A free text natural language description of the module from the consumer's perspective.
-     */
-    @Child(name = "description", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Natural language description of the module", formalDefinition="A free text natural language description of the module from the consumer's perspective." )
-    protected StringType description;
-
-    /**
-     * A brief description of the purpose of the module.
-     */
-    @Child(name = "purpose", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the purpose of the module", formalDefinition="A brief description of the purpose of the module." )
-    protected StringType purpose;
-
-    /**
-     * A detailed description of how the module is used from a clinical perspective.
-     */
-    @Child(name = "usage", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the clinical usage of the module", formalDefinition="A detailed description of how the module is used from a clinical perspective." )
+    @Child(name = "usage", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Describes the clinical usage of the asset", formalDefinition="A detailed description of how the asset is used from a clinical perspective." )
     protected StringType usage;
 
     /**
-     * The date on which the module was published.
+     * The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    @Child(name = "publicationDate", type = {DateType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Publication date for this version of the module", formalDefinition="The date on which the module was published." )
-    protected DateType publicationDate;
+    @Child(name = "approvalDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="When plan definition approved by publisher", formalDefinition="The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
+    protected DateType approvalDate;
 
     /**
-     * The date on which the module content was last reviewed.
+     * The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
      */
-    @Child(name = "lastReviewDate", type = {DateType.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Last review date for the module", formalDefinition="The date on which the module content was last reviewed." )
+    @Child(name = "lastReviewDate", type = {DateType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Last review date for the plan definition", formalDefinition="The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
-     * The period during which the module content is effective.
+     * The period during which the plan definition content was or is planned to be effective.
      */
-    @Child(name = "effectivePeriod", type = {Period.class}, order=12, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The effective date range for the module", formalDefinition="The period during which the module content is effective." )
+    @Child(name = "effectivePeriod", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The effective date range for the plan definition", formalDefinition="The period during which the plan definition content was or is planned to be effective." )
     protected Period effectivePeriod;
 
     /**
-     * Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.
+     * Clinical topics related to the content of the asset.
      */
-    @Child(name = "coverage", type = {UsageContext.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the context of use for this module", formalDefinition="Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable." )
-    protected List<UsageContext> coverage;
-
-    /**
-     * Clinical topics related to the content of the module.
-     */
-    @Child(name = "topic", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Descriptional topics for the module", formalDefinition="Clinical topics related to the content of the module." )
+    @Child(name = "topic", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Descriptional topics for the asset", formalDefinition="Clinical topics related to the content of the asset." )
     protected List<CodeableConcept> topic;
 
     /**
-     * A contributor to the content of the module, including authors, editors, reviewers, and endorsers.
+     * A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.
      */
-    @Child(name = "contributor", type = {Contributor.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the module, including authors, editors, reviewers, and endorsers." )
+    @Child(name = "contributor", type = {Contributor.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the asset, including authors, editors, reviewers, and endorsers." )
     protected List<Contributor> contributor;
 
     /**
-     * The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.
+     * A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts." )
-    protected StringType publisher;
+    @Child(name = "copyright", type = {MarkdownType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition." )
+    protected MarkdownType copyright;
 
     /**
-     * Contact details to assist a user in finding and communicating with the publisher.
+     * Related artifacts such as additional documentation, justification, or bibliographic references.
      */
-    @Child(name = "contact", type = {ContactDetail.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
-    protected List<ContactDetail> contact;
+    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Related artifacts for the asset", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    protected List<RelatedArtifact> relatedArtifact;
 
     /**
-     * A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.
+     * A reference to a Library resource containing any formal logic used by the plan definition.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module." )
-    protected StringType copyright;
-
-    /**
-     * Related resources such as additional documentation, justification, or bibliographic references.
-     */
-    @Child(name = "relatedResource", type = {RelatedResource.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Related resources for the module", formalDefinition="Related resources such as additional documentation, justification, or bibliographic references." )
-    protected List<RelatedResource> relatedResource;
-
-    /**
-     * A reference to a Library resource containing any formal logic used by the orderset.
-     */
-    @Child(name = "library", type = {Library.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Logic used by the plan definition", formalDefinition="A reference to a Library resource containing any formal logic used by the orderset." )
+    @Child(name = "library", type = {Library.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Logic used by the plan definition", formalDefinition="A reference to a Library resource containing any formal logic used by the plan definition." )
     protected List<Reference> library;
     /**
-     * The actual objects that are the target of the reference (A reference to a Library resource containing any formal logic used by the orderset.)
+     * The actual objects that are the target of the reference (A reference to a Library resource containing any formal logic used by the plan definition.)
      */
     protected List<Library> libraryTarget;
 
@@ -2690,11 +3949,11 @@ public class PlanDefinition extends DomainResource {
     /**
      * An action to be taken as part of the plan.
      */
-    @Child(name = "actionDefinition", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "actionDefinition", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Action defined by the plan", formalDefinition="An action to be taken as part of the plan." )
     protected List<PlanDefinitionActionDefinitionComponent> actionDefinition;
 
-    private static final long serialVersionUID = -909451233L;
+    private static final long serialVersionUID = 1345665574L;
 
   /**
    * Constructor
@@ -2706,13 +3965,13 @@ public class PlanDefinition extends DomainResource {
   /**
    * Constructor
    */
-    public PlanDefinition(CodeType status) {
+    public PlanDefinition(Enumeration<PublicationStatus> status) {
       super();
       this.status = status;
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2732,7 +3991,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public PlanDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -2740,14 +3999,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.
+     * @return An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.
+     * @param value An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public PlanDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2761,7 +4020,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (A logical identifier for the module such as the CMS or NQF identifiers for a measure artifact.)
+     * @return {@link #identifier} (A formal identifier that is used to identify this plan definition when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -2814,7 +4073,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #version} (The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification. Note that the version is required for non-experimental published artifact.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -2834,7 +4093,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #version} (The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification. Note that the version is required for non-experimental published artifact.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public PlanDefinition setVersionElement(StringType value) { 
       this.version = value;
@@ -2842,14 +4101,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification. Note that the version is required for non-experimental published artifact.
+     * @return The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification. Note that the version is required for non-experimental published artifact.
+     * @param value The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.
      */
     public PlanDefinition setVersion(String value) { 
       if (Utilities.noString(value))
@@ -2863,7 +4122,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (A machine-friendly name for the module. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -2883,7 +4142,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #name} (A machine-friendly name for the module. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public PlanDefinition setNameElement(StringType value) { 
       this.name = value;
@@ -2891,14 +4150,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return A machine-friendly name for the module. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     * @return A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value A machine-friendly name for the module. This name should be usable as an identifier for the module by machine processing applications such as code generation.
+     * @param value A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.
      */
     public PlanDefinition setName(String value) { 
       if (Utilities.noString(value))
@@ -2912,7 +4171,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #title} (A short, descriptive, user-friendly title for the module.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
+     * @return {@link #title} (A short, descriptive, user-friendly title for the plan definition.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
      */
     public StringType getTitleElement() { 
       if (this.title == null)
@@ -2932,7 +4191,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #title} (A short, descriptive, user-friendly title for the module.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
+     * @param value {@link #title} (A short, descriptive, user-friendly title for the plan definition.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
      */
     public PlanDefinition setTitleElement(StringType value) { 
       this.title = value;
@@ -2940,14 +4199,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return A short, descriptive, user-friendly title for the module.
+     * @return A short, descriptive, user-friendly title for the plan definition.
      */
     public String getTitle() { 
       return this.title == null ? null : this.title.getValue();
     }
 
     /**
-     * @param value A short, descriptive, user-friendly title for the module.
+     * @param value A short, descriptive, user-friendly title for the plan definition.
      */
     public PlanDefinition setTitle(String value) { 
       if (Utilities.noString(value))
@@ -2961,14 +4220,38 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The status of the module.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #type} (The type of asset the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.)
      */
-    public CodeType getStatusElement() { 
+    public CodeableConcept getType() { 
+      if (this.type == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.type");
+        else if (Configuration.doAutoCreate())
+          this.type = new CodeableConcept(); // cc
+      return this.type;
+    }
+
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
+    }
+
+    /**
+     * @param value {@link #type} (The type of asset the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.)
+     */
+    public PlanDefinition setType(CodeableConcept value) { 
+      this.type = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The status of this plan definition. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<PublicationStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create PlanDefinition.status");
         else if (Configuration.doAutoCreate())
-          this.status = new CodeType(); // bb
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -2981,32 +4264,32 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (The status of the module.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The status of this plan definition. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public PlanDefinition setStatusElement(CodeType value) { 
+    public PlanDefinition setStatusElement(Enumeration<PublicationStatus> value) { 
       this.status = value;
       return this;
     }
 
     /**
-     * @return The status of the module.
+     * @return The status of this plan definition. Enables tracking the life-cycle of the content.
      */
-    public String getStatus() { 
+    public PublicationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value The status of the module.
+     * @param value The status of this plan definition. Enables tracking the life-cycle of the content.
      */
-    public PlanDefinition setStatus(String value) { 
+    public PlanDefinition setStatus(PublicationStatus value) { 
         if (this.status == null)
-          this.status = new CodeType();
+          this.status = new Enumeration<PublicationStatus>(new PublicationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #experimental} (Determines whether the module was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -3026,7 +4309,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #experimental} (Determines whether the module was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public PlanDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -3034,14 +4317,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return Determines whether the module was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.
+     * @return A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value Determines whether the module was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.
+     * @param value A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public PlanDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -3051,14 +4334,63 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the module from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
-    public StringType getDescriptionElement() { 
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public PlanDefinition setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
+     */
+    public PlanDefinition setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #description} (A free text natural language description of the plan definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public MarkdownType getDescriptionElement() { 
       if (this.description == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create PlanDefinition.description");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
+          this.description = new MarkdownType(); // bb
       return this.description;
     }
 
@@ -3071,43 +4403,43 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the module from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the plan definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public PlanDefinition setDescriptionElement(StringType value) { 
+    public PlanDefinition setDescriptionElement(MarkdownType value) { 
       this.description = value;
       return this;
     }
 
     /**
-     * @return A free text natural language description of the module from the consumer's perspective.
+     * @return A free text natural language description of the plan definition from the consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the module from the consumer's perspective.
+     * @param value A free text natural language description of the plan definition from the consumer's perspective.
      */
     public PlanDefinition setDescription(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.description = null;
       else {
         if (this.description == null)
-          this.description = new StringType();
+          this.description = new MarkdownType();
         this.description.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #purpose} (A brief description of the purpose of the module.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explains why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
-    public StringType getPurposeElement() { 
+    public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create PlanDefinition.purpose");
         else if (Configuration.doAutoCreate())
-          this.purpose = new StringType(); // bb
+          this.purpose = new MarkdownType(); // bb
       return this.purpose;
     }
 
@@ -3120,36 +4452,36 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #purpose} (A brief description of the purpose of the module.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explains why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
-    public PlanDefinition setPurposeElement(StringType value) { 
+    public PlanDefinition setPurposeElement(MarkdownType value) { 
       this.purpose = value;
       return this;
     }
 
     /**
-     * @return A brief description of the purpose of the module.
+     * @return Explains why this plan definition is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value A brief description of the purpose of the module.
+     * @param value Explains why this plan definition is needed and why it has been designed as it has.
      */
     public PlanDefinition setPurpose(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.purpose = null;
       else {
         if (this.purpose == null)
-          this.purpose = new StringType();
+          this.purpose = new MarkdownType();
         this.purpose.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #usage} (A detailed description of how the module is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     * @return {@link #usage} (A detailed description of how the asset is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
      */
     public StringType getUsageElement() { 
       if (this.usage == null)
@@ -3169,7 +4501,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #usage} (A detailed description of how the module is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     * @param value {@link #usage} (A detailed description of how the asset is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
      */
     public PlanDefinition setUsageElement(StringType value) { 
       this.usage = value;
@@ -3177,14 +4509,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return A detailed description of how the module is used from a clinical perspective.
+     * @return A detailed description of how the asset is used from a clinical perspective.
      */
     public String getUsage() { 
       return this.usage == null ? null : this.usage.getValue();
     }
 
     /**
-     * @param value A detailed description of how the module is used from a clinical perspective.
+     * @param value A detailed description of how the asset is used from a clinical perspective.
      */
     public PlanDefinition setUsage(String value) { 
       if (Utilities.noString(value))
@@ -3198,56 +4530,56 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #publicationDate} (The date on which the module was published.). This is the underlying object with id, value and extensions. The accessor "getPublicationDate" gives direct access to the value
+     * @return {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
-    public DateType getPublicationDateElement() { 
-      if (this.publicationDate == null)
+    public DateType getApprovalDateElement() { 
+      if (this.approvalDate == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PlanDefinition.publicationDate");
+          throw new Error("Attempt to auto-create PlanDefinition.approvalDate");
         else if (Configuration.doAutoCreate())
-          this.publicationDate = new DateType(); // bb
-      return this.publicationDate;
+          this.approvalDate = new DateType(); // bb
+      return this.approvalDate;
     }
 
-    public boolean hasPublicationDateElement() { 
-      return this.publicationDate != null && !this.publicationDate.isEmpty();
+    public boolean hasApprovalDateElement() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
     }
 
-    public boolean hasPublicationDate() { 
-      return this.publicationDate != null && !this.publicationDate.isEmpty();
+    public boolean hasApprovalDate() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
     }
 
     /**
-     * @param value {@link #publicationDate} (The date on which the module was published.). This is the underlying object with id, value and extensions. The accessor "getPublicationDate" gives direct access to the value
+     * @param value {@link #approvalDate} (The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
      */
-    public PlanDefinition setPublicationDateElement(DateType value) { 
-      this.publicationDate = value;
+    public PlanDefinition setApprovalDateElement(DateType value) { 
+      this.approvalDate = value;
       return this;
     }
 
     /**
-     * @return The date on which the module was published.
+     * @return The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    public Date getPublicationDate() { 
-      return this.publicationDate == null ? null : this.publicationDate.getValue();
+    public Date getApprovalDate() { 
+      return this.approvalDate == null ? null : this.approvalDate.getValue();
     }
 
     /**
-     * @param value The date on which the module was published.
+     * @param value The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    public PlanDefinition setPublicationDate(Date value) { 
+    public PlanDefinition setApprovalDate(Date value) { 
       if (value == null)
-        this.publicationDate = null;
+        this.approvalDate = null;
       else {
-        if (this.publicationDate == null)
-          this.publicationDate = new DateType();
-        this.publicationDate.setValue(value);
+        if (this.approvalDate == null)
+          this.approvalDate = new DateType();
+        this.approvalDate.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #lastReviewDate} (The date on which the module content was last reviewed.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @return {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public DateType getLastReviewDateElement() { 
       if (this.lastReviewDate == null)
@@ -3267,7 +4599,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #lastReviewDate} (The date on which the module content was last reviewed.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     * @param value {@link #lastReviewDate} (The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
      */
     public PlanDefinition setLastReviewDateElement(DateType value) { 
       this.lastReviewDate = value;
@@ -3275,14 +4607,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return The date on which the module content was last reviewed.
+     * @return The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
      */
     public Date getLastReviewDate() { 
       return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
     }
 
     /**
-     * @param value The date on which the module content was last reviewed.
+     * @param value The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.
      */
     public PlanDefinition setLastReviewDate(Date value) { 
       if (value == null)
@@ -3296,7 +4628,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #effectivePeriod} (The period during which the module content is effective.)
+     * @return {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be effective.)
      */
     public Period getEffectivePeriod() { 
       if (this.effectivePeriod == null)
@@ -3312,7 +4644,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #effectivePeriod} (The period during which the module content is effective.)
+     * @param value {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be effective.)
      */
     public PlanDefinition setEffectivePeriod(Period value) { 
       this.effectivePeriod = value;
@@ -3320,60 +4652,113 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #coverage} (Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
      */
-    public List<UsageContext> getCoverage() { 
-      if (this.coverage == null)
-        this.coverage = new ArrayList<UsageContext>();
-      return this.coverage;
+    public List<UsageContext> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      return this.useContext;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public PlanDefinition setCoverage(List<UsageContext> theCoverage) { 
-      this.coverage = theCoverage;
+    public PlanDefinition setUseContext(List<UsageContext> theUseContext) { 
+      this.useContext = theUseContext;
       return this;
     }
 
-    public boolean hasCoverage() { 
-      if (this.coverage == null)
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
         return false;
-      for (UsageContext item : this.coverage)
+      for (UsageContext item : this.useContext)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public UsageContext addCoverage() { //3
+    public UsageContext addUseContext() { //3
       UsageContext t = new UsageContext();
-      if (this.coverage == null)
-        this.coverage = new ArrayList<UsageContext>();
-      this.coverage.add(t);
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
       return t;
     }
 
-    public PlanDefinition addCoverage(UsageContext t) { //3
+    public PlanDefinition addUseContext(UsageContext t) { //3
       if (t == null)
         return this;
-      if (this.coverage == null)
-        this.coverage = new ArrayList<UsageContext>();
-      this.coverage.add(t);
+      if (this.useContext == null)
+        this.useContext = new ArrayList<UsageContext>();
+      this.useContext.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #coverage}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #useContext}, creating it if it does not already exist
      */
-    public UsageContext getCoverageFirstRep() { 
-      if (getCoverage().isEmpty()) {
-        addCoverage();
+    public UsageContext getUseContextFirstRep() { 
+      if (getUseContext().isEmpty()) {
+        addUseContext();
       }
-      return getCoverage().get(0);
+      return getUseContext().get(0);
     }
 
     /**
-     * @return {@link #topic} (Clinical topics related to the content of the module.)
+     * @return {@link #jurisdiction} (A jurisdiction in which the plan definition is intended to be used.)
+     */
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public PlanDefinition setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public PlanDefinition addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
+    }
+
+    /**
+     * @return {@link #topic} (Clinical topics related to the content of the asset.)
      */
     public List<CodeableConcept> getTopic() { 
       if (this.topic == null)
@@ -3426,7 +4811,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #contributor} (A contributor to the content of the module, including authors, editors, reviewers, and endorsers.)
+     * @return {@link #contributor} (A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.)
      */
     public List<Contributor> getContributor() { 
       if (this.contributor == null)
@@ -3479,7 +4864,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the individual or organization that published the plan definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -3499,7 +4884,7 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the individual or organization that published the plan definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public PlanDefinition setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -3507,14 +4892,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.
+     * @return The name of the individual or organization that published the plan definition.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.
+     * @param value The name of the individual or organization that published the plan definition.
      */
     public PlanDefinition setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -3581,14 +4966,14 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #copyright} (A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     * @return {@link #copyright} (A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
-    public StringType getCopyrightElement() { 
+    public MarkdownType getCopyrightElement() { 
       if (this.copyright == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create PlanDefinition.copyright");
         else if (Configuration.doAutoCreate())
-          this.copyright = new StringType(); // bb
+          this.copyright = new MarkdownType(); // bb
       return this.copyright;
     }
 
@@ -3601,89 +4986,89 @@ public class PlanDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #copyright} (A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     * @param value {@link #copyright} (A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
-    public PlanDefinition setCopyrightElement(StringType value) { 
+    public PlanDefinition setCopyrightElement(MarkdownType value) { 
       this.copyright = value;
       return this;
     }
 
     /**
-     * @return A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.
+     * @return A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
      */
     public String getCopyright() { 
       return this.copyright == null ? null : this.copyright.getValue();
     }
 
     /**
-     * @param value A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.
+     * @param value A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
      */
     public PlanDefinition setCopyright(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.copyright = null;
       else {
         if (this.copyright == null)
-          this.copyright = new StringType();
+          this.copyright = new MarkdownType();
         this.copyright.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #relatedResource} (Related resources such as additional documentation, justification, or bibliographic references.)
+     * @return {@link #relatedArtifact} (Related artifacts such as additional documentation, justification, or bibliographic references.)
      */
-    public List<RelatedResource> getRelatedResource() { 
-      if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<RelatedResource>();
-      return this.relatedResource;
+    public List<RelatedArtifact> getRelatedArtifact() { 
+      if (this.relatedArtifact == null)
+        this.relatedArtifact = new ArrayList<RelatedArtifact>();
+      return this.relatedArtifact;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public PlanDefinition setRelatedResource(List<RelatedResource> theRelatedResource) { 
-      this.relatedResource = theRelatedResource;
+    public PlanDefinition setRelatedArtifact(List<RelatedArtifact> theRelatedArtifact) { 
+      this.relatedArtifact = theRelatedArtifact;
       return this;
     }
 
-    public boolean hasRelatedResource() { 
-      if (this.relatedResource == null)
+    public boolean hasRelatedArtifact() { 
+      if (this.relatedArtifact == null)
         return false;
-      for (RelatedResource item : this.relatedResource)
+      for (RelatedArtifact item : this.relatedArtifact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public RelatedResource addRelatedResource() { //3
-      RelatedResource t = new RelatedResource();
-      if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<RelatedResource>();
-      this.relatedResource.add(t);
+    public RelatedArtifact addRelatedArtifact() { //3
+      RelatedArtifact t = new RelatedArtifact();
+      if (this.relatedArtifact == null)
+        this.relatedArtifact = new ArrayList<RelatedArtifact>();
+      this.relatedArtifact.add(t);
       return t;
     }
 
-    public PlanDefinition addRelatedResource(RelatedResource t) { //3
+    public PlanDefinition addRelatedArtifact(RelatedArtifact t) { //3
       if (t == null)
         return this;
-      if (this.relatedResource == null)
-        this.relatedResource = new ArrayList<RelatedResource>();
-      this.relatedResource.add(t);
+      if (this.relatedArtifact == null)
+        this.relatedArtifact = new ArrayList<RelatedArtifact>();
+      this.relatedArtifact.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #relatedResource}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #relatedArtifact}, creating it if it does not already exist
      */
-    public RelatedResource getRelatedResourceFirstRep() { 
-      if (getRelatedResource().isEmpty()) {
-        addRelatedResource();
+    public RelatedArtifact getRelatedArtifactFirstRep() { 
+      if (getRelatedArtifact().isEmpty()) {
+        addRelatedArtifact();
       }
-      return getRelatedResource().get(0);
+      return getRelatedArtifact().get(0);
     }
 
     /**
-     * @return {@link #library} (A reference to a Library resource containing any formal logic used by the orderset.)
+     * @return {@link #library} (A reference to a Library resource containing any formal logic used by the plan definition.)
      */
     public List<Reference> getLibrary() { 
       if (this.library == null)
@@ -3812,27 +5197,30 @@ public class PlanDefinition extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this module when it is referenced. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this module definition is (or will be) published.", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("identifier", "Identifier", "A logical identifier for the module such as the CMS or NQF identifiers for a measure artifact.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification. Note that the version is required for non-experimental published artifact.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A machine-friendly name for the module. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the module.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("status", "code", "The status of the module.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "Determines whether the module was developed for testing purposes (or education/evaluation/marketing), and is not intended to be used in production environments.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the module from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("purpose", "string", "A brief description of the purpose of the module.", 0, java.lang.Integer.MAX_VALUE, purpose));
-        childrenList.add(new Property("usage", "string", "A detailed description of how the module is used from a clinical perspective.", 0, java.lang.Integer.MAX_VALUE, usage));
-        childrenList.add(new Property("publicationDate", "date", "The date on which the module was published.", 0, java.lang.Integer.MAX_VALUE, publicationDate));
-        childrenList.add(new Property("lastReviewDate", "date", "The date on which the module content was last reviewed.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
-        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the module content is effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
-        childrenList.add(new Property("coverage", "UsageContext", "Specifies various attributes of the patient population for whom and/or environment of care in which, the knowledge module is applicable.", 0, java.lang.Integer.MAX_VALUE, coverage));
-        childrenList.add(new Property("topic", "CodeableConcept", "Clinical topics related to the content of the module.", 0, java.lang.Integer.MAX_VALUE, topic));
-        childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the module, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the module (also known as the steward for the module). This information is required for non-experimental published artifacts.", 0, java.lang.Integer.MAX_VALUE, publisher));
+        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this plan definition is (or will be) published. The URL SHOULD include the major version of the plan definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this plan definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the plan definition.", 0, java.lang.Integer.MAX_VALUE, title));
+        childrenList.add(new Property("type", "CodeableConcept", "The type of asset the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("status", "code", "The status of this plan definition. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the plan definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the plan definition from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("purpose", "markdown", "Explains why this plan definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("usage", "string", "A detailed description of how the asset is used from a clinical perspective.", 0, java.lang.Integer.MAX_VALUE, usage));
+        childrenList.add(new Property("approvalDate", "date", "The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
+        childrenList.add(new Property("lastReviewDate", "date", "The date on which the asset content was last reviewed. Review happens periodically after that, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
+        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the plan definition content was or is planned to be effective.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the plan definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("topic", "CodeableConcept", "Clinical topics related to the content of the asset.", 0, java.lang.Integer.MAX_VALUE, topic));
+        childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the asset, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
+        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the plan definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("copyright", "string", "A copyright statement relating to the module and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the module.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("relatedResource", "RelatedResource", "Related resources such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedResource));
-        childrenList.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the orderset.", 0, java.lang.Integer.MAX_VALUE, library));
+        childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.", 0, java.lang.Integer.MAX_VALUE, copyright));
+        childrenList.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
+        childrenList.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the plan definition.", 0, java.lang.Integer.MAX_VALUE, library));
         childrenList.add(new Property("actionDefinition", "", "An action to be taken as part of the plan.", 0, java.lang.Integer.MAX_VALUE, actionDefinition));
       }
 
@@ -3844,21 +5232,24 @@ public class PlanDefinition extends DomainResource {
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
-        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // StringType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
-        case 1470566394: /*publicationDate*/ return this.publicationDate == null ? new Base[0] : new Base[] {this.publicationDate}; // DateType
+        case 223539345: /*approvalDate*/ return this.approvalDate == null ? new Base[0] : new Base[] {this.approvalDate}; // DateType
         case -1687512484: /*lastReviewDate*/ return this.lastReviewDate == null ? new Base[0] : new Base[] {this.lastReviewDate}; // DateType
         case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
-        case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // UsageContext
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
         case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // StringType
-        case 1554540889: /*relatedResource*/ return this.relatedResource == null ? new Base[0] : this.relatedResource.toArray(new Base[this.relatedResource.size()]); // RelatedResource
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
+        case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
         case -285031383: /*actionDefinition*/ return this.actionDefinition == null ? new Base[0] : this.actionDefinition.toArray(new Base[this.actionDefinition.size()]); // PlanDefinitionActionDefinitionComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -3884,23 +5275,29 @@ public class PlanDefinition extends DomainResource {
         case 110371416: // title
           this.title = castToString(value); // StringType
           break;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          break;
         case -892481550: // status
-          this.status = castToCode(value); // CodeType
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
           break;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
           break;
+        case 3076014: // date
+          this.date = castToDateTime(value); // DateTimeType
+          break;
         case -1724546052: // description
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
           break;
         case -220463842: // purpose
-          this.purpose = castToString(value); // StringType
+          this.purpose = castToMarkdown(value); // MarkdownType
           break;
         case 111574433: // usage
           this.usage = castToString(value); // StringType
           break;
-        case 1470566394: // publicationDate
-          this.publicationDate = castToDate(value); // DateType
+        case 223539345: // approvalDate
+          this.approvalDate = castToDate(value); // DateType
           break;
         case -1687512484: // lastReviewDate
           this.lastReviewDate = castToDate(value); // DateType
@@ -3908,8 +5305,11 @@ public class PlanDefinition extends DomainResource {
         case -403934648: // effectivePeriod
           this.effectivePeriod = castToPeriod(value); // Period
           break;
-        case -351767064: // coverage
-          this.getCoverage().add(castToUsageContext(value)); // UsageContext
+        case -669707736: // useContext
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          break;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           break;
         case 110546223: // topic
           this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
@@ -3924,10 +5324,10 @@ public class PlanDefinition extends DomainResource {
           this.getContact().add(castToContactDetail(value)); // ContactDetail
           break;
         case 1522889671: // copyright
-          this.copyright = castToString(value); // StringType
+          this.copyright = castToMarkdown(value); // MarkdownType
           break;
-        case 1554540889: // relatedResource
-          this.getRelatedResource().add(castToRelatedResource(value)); // RelatedResource
+        case 666807069: // relatedArtifact
+          this.getRelatedArtifact().add(castToRelatedArtifact(value)); // RelatedArtifact
           break;
         case 166208699: // library
           this.getLibrary().add(castToReference(value)); // Reference
@@ -3952,24 +5352,30 @@ public class PlanDefinition extends DomainResource {
           this.name = castToString(value); // StringType
         else if (name.equals("title"))
           this.title = castToString(value); // StringType
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("status"))
-          this.status = castToCode(value); // CodeType
+          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
         else if (name.equals("experimental"))
           this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
-          this.description = castToString(value); // StringType
+          this.description = castToMarkdown(value); // MarkdownType
         else if (name.equals("purpose"))
-          this.purpose = castToString(value); // StringType
+          this.purpose = castToMarkdown(value); // MarkdownType
         else if (name.equals("usage"))
           this.usage = castToString(value); // StringType
-        else if (name.equals("publicationDate"))
-          this.publicationDate = castToDate(value); // DateType
+        else if (name.equals("approvalDate"))
+          this.approvalDate = castToDate(value); // DateType
         else if (name.equals("lastReviewDate"))
           this.lastReviewDate = castToDate(value); // DateType
         else if (name.equals("effectivePeriod"))
           this.effectivePeriod = castToPeriod(value); // Period
-        else if (name.equals("coverage"))
-          this.getCoverage().add(castToUsageContext(value));
+        else if (name.equals("useContext"))
+          this.getUseContext().add(castToUsageContext(value));
+        else if (name.equals("jurisdiction"))
+          this.getJurisdiction().add(castToCodeableConcept(value));
         else if (name.equals("topic"))
           this.getTopic().add(castToCodeableConcept(value));
         else if (name.equals("contributor"))
@@ -3979,9 +5385,9 @@ public class PlanDefinition extends DomainResource {
         else if (name.equals("contact"))
           this.getContact().add(castToContactDetail(value));
         else if (name.equals("copyright"))
-          this.copyright = castToString(value); // StringType
-        else if (name.equals("relatedResource"))
-          this.getRelatedResource().add(castToRelatedResource(value));
+          this.copyright = castToMarkdown(value); // MarkdownType
+        else if (name.equals("relatedArtifact"))
+          this.getRelatedArtifact().add(castToRelatedArtifact(value));
         else if (name.equals("library"))
           this.getLibrary().add(castToReference(value));
         else if (name.equals("actionDefinition"))
@@ -3998,21 +5404,24 @@ public class PlanDefinition extends DomainResource {
         case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
         case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
         case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // CodeType
+        case 3575610:  return getType(); // CodeableConcept
+        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
         case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // StringType
+        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
+        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
+        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
         case 111574433: throw new FHIRException("Cannot make property usage as it is not a complex type"); // StringType
-        case 1470566394: throw new FHIRException("Cannot make property publicationDate as it is not a complex type"); // DateType
+        case 223539345: throw new FHIRException("Cannot make property approvalDate as it is not a complex type"); // DateType
         case -1687512484: throw new FHIRException("Cannot make property lastReviewDate as it is not a complex type"); // DateType
         case -403934648:  return getEffectivePeriod(); // Period
-        case -351767064:  return addCoverage(); // UsageContext
+        case -669707736:  return addUseContext(); // UsageContext
+        case -507075711:  return addJurisdiction(); // CodeableConcept
         case 110546223:  return addTopic(); // CodeableConcept
         case -1895276325:  return addContributor(); // Contributor
         case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
         case 951526432:  return addContact(); // ContactDetail
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // StringType
-        case 1554540889:  return addRelatedResource(); // RelatedResource
+        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
+        case 666807069:  return addRelatedArtifact(); // RelatedArtifact
         case 166208699:  return addLibrary(); // Reference
         case -285031383:  return addActionDefinition(); // PlanDefinitionActionDefinitionComponent
         default: return super.makeProperty(hash, name);
@@ -4037,11 +5446,18 @@ public class PlanDefinition extends DomainResource {
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.title");
         }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.status");
         }
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.experimental");
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.date");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.description");
@@ -4052,8 +5468,8 @@ public class PlanDefinition extends DomainResource {
         else if (name.equals("usage")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.usage");
         }
-        else if (name.equals("publicationDate")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.publicationDate");
+        else if (name.equals("approvalDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.approvalDate");
         }
         else if (name.equals("lastReviewDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.lastReviewDate");
@@ -4062,8 +5478,11 @@ public class PlanDefinition extends DomainResource {
           this.effectivePeriod = new Period();
           return this.effectivePeriod;
         }
-        else if (name.equals("coverage")) {
-          return addCoverage();
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
         }
         else if (name.equals("topic")) {
           return addTopic();
@@ -4080,8 +5499,8 @@ public class PlanDefinition extends DomainResource {
         else if (name.equals("copyright")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.copyright");
         }
-        else if (name.equals("relatedResource")) {
-          return addRelatedResource();
+        else if (name.equals("relatedArtifact")) {
+          return addRelatedArtifact();
         }
         else if (name.equals("library")) {
           return addLibrary();
@@ -4110,18 +5529,25 @@ public class PlanDefinition extends DomainResource {
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
+        dst.type = type == null ? null : type.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.usage = usage == null ? null : usage.copy();
-        dst.publicationDate = publicationDate == null ? null : publicationDate.copy();
+        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
         dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
         dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
-        if (coverage != null) {
-          dst.coverage = new ArrayList<UsageContext>();
-          for (UsageContext i : coverage)
-            dst.coverage.add(i.copy());
+        if (useContext != null) {
+          dst.useContext = new ArrayList<UsageContext>();
+          for (UsageContext i : useContext)
+            dst.useContext.add(i.copy());
+        };
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
         };
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
@@ -4140,10 +5566,10 @@ public class PlanDefinition extends DomainResource {
             dst.contact.add(i.copy());
         };
         dst.copyright = copyright == null ? null : copyright.copy();
-        if (relatedResource != null) {
-          dst.relatedResource = new ArrayList<RelatedResource>();
-          for (RelatedResource i : relatedResource)
-            dst.relatedResource.add(i.copy());
+        if (relatedArtifact != null) {
+          dst.relatedArtifact = new ArrayList<RelatedArtifact>();
+          for (RelatedArtifact i : relatedArtifact)
+            dst.relatedArtifact.add(i.copy());
         };
         if (library != null) {
           dst.library = new ArrayList<Reference>();
@@ -4169,15 +5595,12 @@ public class PlanDefinition extends DomainResource {
         if (!(other instanceof PlanDefinition))
           return false;
         PlanDefinition o = (PlanDefinition) other;
-        return compareDeep(url, o.url, true) && compareDeep(identifier, o.identifier, true) && compareDeep(version, o.version, true)
-           && compareDeep(name, o.name, true) && compareDeep(title, o.title, true) && compareDeep(status, o.status, true)
-           && compareDeep(experimental, o.experimental, true) && compareDeep(description, o.description, true)
-           && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true) && compareDeep(publicationDate, o.publicationDate, true)
-           && compareDeep(lastReviewDate, o.lastReviewDate, true) && compareDeep(effectivePeriod, o.effectivePeriod, true)
-           && compareDeep(coverage, o.coverage, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
-           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(copyright, o.copyright, true)
-           && compareDeep(relatedResource, o.relatedResource, true) && compareDeep(library, o.library, true)
-           && compareDeep(actionDefinition, o.actionDefinition, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(purpose, o.purpose, true)
+           && compareDeep(usage, o.usage, true) && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
+           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
+           && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
+           && compareDeep(library, o.library, true) && compareDeep(actionDefinition, o.actionDefinition, true)
+          ;
       }
 
       @Override
@@ -4187,18 +5610,15 @@ public class PlanDefinition extends DomainResource {
         if (!(other instanceof PlanDefinition))
           return false;
         PlanDefinition o = (PlanDefinition) other;
-        return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
-           && compareValues(title, o.title, true) && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true)
-           && compareValues(description, o.description, true) && compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true)
-           && compareValues(publicationDate, o.publicationDate, true) && compareValues(lastReviewDate, o.lastReviewDate, true)
-           && compareValues(publisher, o.publisher, true) && compareValues(copyright, o.copyright, true);
+        return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
+           && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(url, identifier, version
-          , name, title, status, experimental, description, purpose, usage, publicationDate
-          , lastReviewDate, effectivePeriod, coverage, topic, contributor, publisher, contact
-          , copyright, relatedResource, library, actionDefinition);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, purpose
+          , usage, approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright
+          , relatedArtifact, library, actionDefinition);
       }
 
   @Override
@@ -4207,24 +5627,144 @@ public class PlanDefinition extends DomainResource {
    }
 
  /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The plan definition publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PlanDefinition.date</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="date", path="PlanDefinition.date", description="The plan definition publication date", type="date" )
+  public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The plan definition publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PlanDefinition.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>Logical identifier for the module (e.g. CMS-143)</b><br>
+   * Description: <b>External identifiers for the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="PlanDefinition.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
+  @SearchParamDefinition(name="identifier", path="PlanDefinition.identifier", description="External identifiers for the plan definition", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>Logical identifier for the module (e.g. CMS-143)</b><br>
+   * Description: <b>External identifiers for the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.identifier</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>effective</b>
+   * <p>
+   * Description: <b>Effective time associated with the plan definition</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PlanDefinition.effectivePeriod</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="effective", path="PlanDefinition.effectivePeriod", description="Effective time associated with the plan definition", type="date" )
+  public static final String SP_EFFECTIVE = "effective";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>effective</b>
+   * <p>
+   * Description: <b>Effective time associated with the plan definition</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>PlanDefinition.effectivePeriod</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam EFFECTIVE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EFFECTIVE);
+
+ /**
+   * Search parameter: <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for plan definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PlanDefinition.jurisdiction</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="jurisdiction", path="PlanDefinition.jurisdiction", description="Intended jurisdiction for plan definition", type="token" )
+  public static final String SP_JURISDICTION = "jurisdiction";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
+   * <p>
+   * Description: <b>Intended jurisdiction for plan definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>PlanDefinition.jurisdiction</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Name of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.name</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="name", path="PlanDefinition.name", description="Name of the plan definition", type="string" )
+  public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Name of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.description</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="description", path="PlanDefinition.description", description="Text search against the description of the plan definition", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.publisher</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="publisher", path="PlanDefinition.publisher", description="Name of the publisher of the plan definition", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the plan definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>PlanDefinition.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
 
  /**
    * Search parameter: <b>topic</b>
@@ -4247,39 +5787,19 @@ public class PlanDefinition extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
 
  /**
-   * Search parameter: <b>description</b>
-   * <p>
-   * Description: <b>Text search against the description</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>PlanDefinition.description</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="description", path="PlanDefinition.description", description="Text search against the description", type="string" )
-  public static final String SP_DESCRIPTION = "description";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>description</b>
-   * <p>
-   * Description: <b>Text search against the description</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>PlanDefinition.description</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
-
- /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title</b><br>
+   * Description: <b>Text search against the title of the plan definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>PlanDefinition.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="PlanDefinition.title", description="Text search against the title", type="string" )
+  @SearchParamDefinition(name="title", path="PlanDefinition.title", description="Text search against the title of the plan definition", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title</b><br>
+   * Description: <b>Text search against the title of the plan definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>PlanDefinition.title</b><br>
    * </p>
@@ -4289,37 +5809,57 @@ public class PlanDefinition extends DomainResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>Version of the module (e.g. 1.0.0)</b><br>
-   * Type: <b>string</b><br>
+   * Description: <b>The version identifier of the plan definition</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="PlanDefinition.version", description="Version of the module (e.g. 1.0.0)", type="string" )
+  @SearchParamDefinition(name="version", path="PlanDefinition.version", description="The version identifier of the plan definition", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>Version of the module (e.g. 1.0.0)</b><br>
-   * Type: <b>string</b><br>
+   * Description: <b>The version identifier of the plan definition</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.version</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam VERSION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VERSION);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the plan definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>PlanDefinition.url</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="url", path="PlanDefinition.url", description="The uri that identifies the plan definition", type="uri" )
+  public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the plan definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>PlanDefinition.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
 
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>Status of the module</b><br>
+   * Description: <b>The current status of the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="PlanDefinition.status", description="Status of the module", type="token" )
+  @SearchParamDefinition(name="status", path="PlanDefinition.status", description="The current status of the plan definition", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>Status of the module</b><br>
+   * Description: <b>The current status of the plan definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PlanDefinition.status</b><br>
    * </p>

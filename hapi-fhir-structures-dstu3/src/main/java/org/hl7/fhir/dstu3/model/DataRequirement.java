@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.
  */
@@ -388,7 +388,7 @@ public class DataRequirement extends Type implements ICompositeType {
           this.path = castToString(value); // StringType
           break;
         case -1410174671: // valueSet
-          this.valueSet = (Type) value; // Type
+          this.valueSet = castToType(value); // Type
           break;
         case -766209282: // valueCode
           this.getValueCode().add(castToCode(value)); // CodeType
@@ -409,7 +409,7 @@ public class DataRequirement extends Type implements ICompositeType {
         if (name.equals("path"))
           this.path = castToString(value); // StringType
         else if (name.equals("valueSet[x]"))
-          this.valueSet = (Type) value; // Type
+          this.valueSet = castToType(value); // Type
         else if (name.equals("valueCode"))
           this.getValueCode().add(castToCode(value));
         else if (name.equals("valueCoding"))
@@ -526,10 +526,10 @@ public class DataRequirement extends Type implements ICompositeType {
         protected StringType path;
 
         /**
-         * The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime.
+         * The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.
          */
-        @Child(name = "value", type = {DateTimeType.class, Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The value of the filter, as a Period or dateTime value", formalDefinition="The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime." )
+        @Child(name = "value", type = {DateTimeType.class, Period.class, Duration.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The value of the filter, as a Period, DateTime, or Duration value", formalDefinition="The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now." )
         protected Type value;
 
         private static final long serialVersionUID = 1791957163L;
@@ -595,14 +595,14 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime.)
+         * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
         public Type getValue() { 
           return this.value;
         }
 
         /**
-         * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime.)
+         * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
           if (!(this.value instanceof DateTimeType))
@@ -615,7 +615,7 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime.)
+         * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
         public Period getValuePeriod() throws FHIRException { 
           if (!(this.value instanceof Period))
@@ -627,12 +627,25 @@ public class DataRequirement extends Type implements ICompositeType {
           return this.value instanceof Period;
         }
 
+        /**
+         * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
+         */
+        public Duration getValueDuration() throws FHIRException { 
+          if (!(this.value instanceof Duration))
+            throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.value.getClass().getName()+" was encountered");
+          return (Duration) this.value;
+        }
+
+        public boolean hasValueDuration() { 
+          return this.value instanceof Duration;
+        }
+
         public boolean hasValue() { 
           return this.value != null && !this.value.isEmpty();
         }
 
         /**
-         * @param value {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime.)
+         * @param value {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
         public DataRequirementDateFilterComponent setValue(Type value) { 
           this.value = value;
@@ -642,7 +655,7 @@ public class DataRequirement extends Type implements ICompositeType {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("path", "string", "The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("value[x]", "dateTime|Period", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       @Override
@@ -662,7 +675,7 @@ public class DataRequirement extends Type implements ICompositeType {
           this.path = castToString(value); // StringType
           break;
         case 111972721: // value
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
           break;
         default: super.setProperty(hash, name, value);
         }
@@ -674,7 +687,7 @@ public class DataRequirement extends Type implements ICompositeType {
         if (name.equals("path"))
           this.path = castToString(value); // StringType
         else if (name.equals("value[x]"))
-          this.value = (Type) value; // Type
+          this.value = castToType(value); // Type
         else
           super.setProperty(name, value);
       }
@@ -700,6 +713,10 @@ public class DataRequirement extends Type implements ICompositeType {
         }
         else if (name.equals("valuePeriod")) {
           this.value = new Period();
+          return this.value;
+        }
+        else if (name.equals("valueDuration")) {
+          this.value = new Duration();
           return this.value;
         }
         else
@@ -756,14 +773,9 @@ public class DataRequirement extends Type implements ICompositeType {
     /**
      * The profile of the required data, specified as the uri of the profile definition.
      */
-    @Child(name = "profile", type = {StructureDefinition.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "profile", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The profile of the required data", formalDefinition="The profile of the required data, specified as the uri of the profile definition." )
-    protected Reference profile;
-
-    /**
-     * The actual object that is the target of the reference (The profile of the required data, specified as the uri of the profile definition.)
-     */
-    protected StructureDefinition profileTarget;
+    protected List<UriType> profile;
 
     /**
      * Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.
@@ -786,7 +798,7 @@ public class DataRequirement extends Type implements ICompositeType {
     @Description(shortDefinition="Date filters for the data", formalDefinition="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements." )
     protected List<DataRequirementDateFilterComponent> dateFilter;
 
-    private static final long serialVersionUID = 1768899744L;
+    private static final long serialVersionUID = 274786645L;
 
   /**
    * Constructor
@@ -851,45 +863,62 @@ public class DataRequirement extends Type implements ICompositeType {
     /**
      * @return {@link #profile} (The profile of the required data, specified as the uri of the profile definition.)
      */
-    public Reference getProfile() { 
+    public List<UriType> getProfile() { 
       if (this.profile == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DataRequirement.profile");
-        else if (Configuration.doAutoCreate())
-          this.profile = new Reference(); // cc
+        this.profile = new ArrayList<UriType>();
       return this.profile;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataRequirement setProfile(List<UriType> theProfile) { 
+      this.profile = theProfile;
+      return this;
+    }
+
     public boolean hasProfile() { 
-      return this.profile != null && !this.profile.isEmpty();
+      if (this.profile == null)
+        return false;
+      for (UriType item : this.profile)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #profile} (The profile of the required data, specified as the uri of the profile definition.)
+     */
+    public UriType addProfileElement() {//2 
+      UriType t = new UriType();
+      if (this.profile == null)
+        this.profile = new ArrayList<UriType>();
+      this.profile.add(t);
+      return t;
     }
 
     /**
      * @param value {@link #profile} (The profile of the required data, specified as the uri of the profile definition.)
      */
-    public DataRequirement setProfile(Reference value) { 
-      this.profile = value;
+    public DataRequirement addProfile(String value) { //1
+      UriType t = new UriType();
+      t.setValue(value);
+      if (this.profile == null)
+        this.profile = new ArrayList<UriType>();
+      this.profile.add(t);
       return this;
     }
 
     /**
-     * @return {@link #profile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The profile of the required data, specified as the uri of the profile definition.)
+     * @param value {@link #profile} (The profile of the required data, specified as the uri of the profile definition.)
      */
-    public StructureDefinition getProfileTarget() { 
-      if (this.profileTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DataRequirement.profile");
-        else if (Configuration.doAutoCreate())
-          this.profileTarget = new StructureDefinition(); // aa
-      return this.profileTarget;
-    }
-
-    /**
-     * @param value {@link #profile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The profile of the required data, specified as the uri of the profile definition.)
-     */
-    public DataRequirement setProfileTarget(StructureDefinition value) { 
-      this.profileTarget = value;
-      return this;
+    public boolean hasProfile(String value) { 
+      if (this.profile == null)
+        return false;
+      for (UriType v : this.profile)
+        if (v.equals(value)) // uri
+          return true;
+      return false;
     }
 
     /**
@@ -1062,7 +1091,7 @@ public class DataRequirement extends Type implements ICompositeType {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("profile", "Reference(StructureDefinition)", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
+        childrenList.add(new Property("profile", "uri", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
         childrenList.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
         childrenList.add(new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data.", 0, java.lang.Integer.MAX_VALUE, codeFilter));
         childrenList.add(new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements.", 0, java.lang.Integer.MAX_VALUE, dateFilter));
@@ -1072,7 +1101,7 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
-        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Reference
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // UriType
         case -1402857082: /*mustSupport*/ return this.mustSupport == null ? new Base[0] : this.mustSupport.toArray(new Base[this.mustSupport.size()]); // StringType
         case -1303674939: /*codeFilter*/ return this.codeFilter == null ? new Base[0] : this.codeFilter.toArray(new Base[this.codeFilter.size()]); // DataRequirementCodeFilterComponent
         case 149531846: /*dateFilter*/ return this.dateFilter == null ? new Base[0] : this.dateFilter.toArray(new Base[this.dateFilter.size()]); // DataRequirementDateFilterComponent
@@ -1088,7 +1117,7 @@ public class DataRequirement extends Type implements ICompositeType {
           this.type = castToCode(value); // CodeType
           break;
         case -309425751: // profile
-          this.profile = castToReference(value); // Reference
+          this.getProfile().add(castToUri(value)); // UriType
           break;
         case -1402857082: // mustSupport
           this.getMustSupport().add(castToString(value)); // StringType
@@ -1109,7 +1138,7 @@ public class DataRequirement extends Type implements ICompositeType {
         if (name.equals("type"))
           this.type = castToCode(value); // CodeType
         else if (name.equals("profile"))
-          this.profile = castToReference(value); // Reference
+          this.getProfile().add(castToUri(value));
         else if (name.equals("mustSupport"))
           this.getMustSupport().add(castToString(value));
         else if (name.equals("codeFilter"))
@@ -1124,7 +1153,7 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case -309425751:  return getProfile(); // Reference
+        case -309425751: throw new FHIRException("Cannot make property profile as it is not a complex type"); // UriType
         case -1402857082: throw new FHIRException("Cannot make property mustSupport as it is not a complex type"); // StringType
         case -1303674939:  return addCodeFilter(); // DataRequirementCodeFilterComponent
         case 149531846:  return addDateFilter(); // DataRequirementDateFilterComponent
@@ -1139,8 +1168,7 @@ public class DataRequirement extends Type implements ICompositeType {
           throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.type");
         }
         else if (name.equals("profile")) {
-          this.profile = new Reference();
-          return this.profile;
+          throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.profile");
         }
         else if (name.equals("mustSupport")) {
           throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.mustSupport");
@@ -1164,7 +1192,11 @@ public class DataRequirement extends Type implements ICompositeType {
         DataRequirement dst = new DataRequirement();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        dst.profile = profile == null ? null : profile.copy();
+        if (profile != null) {
+          dst.profile = new ArrayList<UriType>();
+          for (UriType i : profile)
+            dst.profile.add(i.copy());
+        };
         if (mustSupport != null) {
           dst.mustSupport = new ArrayList<StringType>();
           for (StringType i : mustSupport)
@@ -1205,7 +1237,8 @@ public class DataRequirement extends Type implements ICompositeType {
         if (!(other instanceof DataRequirement))
           return false;
         DataRequirement o = (DataRequirement) other;
-        return compareValues(type, o.type, true) && compareValues(mustSupport, o.mustSupport, true);
+        return compareValues(type, o.type, true) && compareValues(profile, o.profile, true) && compareValues(mustSupport, o.mustSupport, true)
+          ;
       }
 
       public boolean isEmpty() {

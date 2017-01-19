@@ -40,6 +40,7 @@
                 </valueCoding>
             </option>
             <item>
+                <linkId value="q2.1.1"/>
                 <type value="date"/>
                 <enableWhen><!-- changed from enableWhen extension, match to Lloyd's transform for STU 3-->
                     <question value="q2.1"/>
@@ -49,6 +50,7 @@
                 </enableWhen>
                 <repeats value="true"/>
                 <item>
+                    <linkId value="q2.1.2"/>
                     <text value="(dates)"/>
                     <type value="display"/>
                 </item>
@@ -123,6 +125,7 @@
             <type value="group"/>
             <required value="true"/>
             <item>
+                <linkId value="g4.1.1"/>
                 <text value="The 10 most dominant nodules (≥ 4 mm) need to be measured."/>
                 <type value="display"/>
             </item>
@@ -257,7 +260,8 @@
                             <linkId value="q4.1.iva.Mean Size"/>
                             <text value="Mean Size:"/>
                             <type value="integer"/>
-                            <item> 
+                            <item>
+                                <linkId value="q4.1.iva.Mean Size.1"/> 
                                 <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                     <valueCodeableConcept>
                                         <coding>
@@ -276,6 +280,7 @@
                             <text value="length:"/>
                             <type value="integer"/>
                             <item> 
+                                <linkId value="q4.1.iva.length.1"/>
                                 <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                     <valueCodeableConcept>
                                         <coding>
@@ -293,7 +298,8 @@
                             <linkId value="q4.1.iva.width"/>
                             <text value="width:"/>
                             <type value="integer"/>
-                            <item> 
+                            <item>
+                                 <linkId value="q4.1.iva.width.1"/>
                                 <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                     <valueCodeableConcept>
                                         <coding>
@@ -326,6 +332,7 @@
                                 <text value="Mean:"/>
                                 <type value="integer"/>
                                 <item> 
+                                    <linkId value="q4.1.ivb.i.Mean.1"/>
                                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                         <valueCodeableConcept>
                                             <coding>
@@ -343,7 +350,8 @@
                                 <linkId value="q4.1.ivb.i.length"/>
                                 <text value="length:"/>
                                 <type value="integer"/>
-                                <item> 
+                                <item>
+                                    <linkId value="q4.1.ivb.i.length.1"/> 
                                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                         <valueCodeableConcept>
                                             <coding>
@@ -361,7 +369,8 @@
                                 <linkId value="q4.1.ivb.i.width"/>
                                 <text value="width:"/>
                                 <type value="integer"/>
-                                <item> 
+                                <item>
+                                    <linkId value="q4.1.ivb.i.width.1"/> 
                                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                         <valueCodeableConcept>
                                             <coding>
@@ -384,7 +393,8 @@
                                 <linkId value="q4.1.ivb.ii.Mean"/>
                                 <text value="Mean:"/>
                                 <type value="integer"/>
-                                <item> 
+                                <item>
+                                    <linkId value="q4.1.ivb.ii.Mean.1"/>
                                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                         <valueCodeableConcept>
                                             <coding>
@@ -402,7 +412,8 @@
                                 <linkId value="q4.1.ivb.ii.length"/>
                                 <text value="length:"/>
                                 <type value="integer"/>
-                                <item> 
+                                <item>
+                                    <linkId value="q4.1.ivb.ii.length.1"/> 
                                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                         <valueCodeableConcept>
                                             <coding>
@@ -420,7 +431,8 @@
                                 <linkId value="q4.1.ivb.ii.width"/>
                                 <text value="width:"/>
                                 <type value="integer"/>
-                                <item> 
+                                <item>
+                                    <linkId value="q4.1.ivb.ii.width.1"/> 
                                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                         <valueCodeableConcept>
                                             <coding>
@@ -450,6 +462,7 @@
                             <text value="Mean Size:"/>
                             <type value="integer"/>
                             <item> 
+                                <linkId value="q4.1.ivc.Mean Size.1"/>
                                 <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                     <valueCodeableConcept>
                                         <coding>
@@ -467,7 +480,8 @@
                             <linkId value="q4.1.ivc.length"/>
                             <text value="length:"/>
                             <type value="integer"/>
-                            <item> 
+                            <item>
+                                <linkId value="q4.1.ivc.length.1"/> 
                                 <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                     <valueCodeableConcept>
                                         <coding>
@@ -486,6 +500,7 @@
                             <text value="width:"/>
                             <type value="integer"/>
                             <item> 
+                                <linkId value="q4.1.ivc.width.1"/> 
                                 <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                     <valueCodeableConcept>
                                         <coding>
@@ -558,7 +573,8 @@
                                 <linkId value="q4.1.vc.i"/>
                                 <text value="previous mean:"/>
                                 <type value="integer"/>
-                                <item> 
+                                <item>
+                                <linkId value="q4.1.vc.i.1"/> 
                                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                                         <valueCodeableConcept>
                                             <coding>
@@ -587,6 +603,7 @@
                                     </valueCoding>
                                 </option>
                                 <item>
+                                    <linkId value="q4.1.vc.ii.1"/>
                                     <type value="date"/>
                                     <enableWhen>
                                         <question value="q4.1.vc.ii"/>
@@ -596,6 +613,7 @@
                                     </enableWhen>
                                     <repeats value="true"/>
                                     <item>
+                                        <linkId value="q4.1.vc.ii.1.1"/>
                                         <text value="(dates)"/>
                                         <type value="display"/>
                                     </item>
@@ -713,10 +731,6 @@
                 </item>
             </item><!-- Above is a Repeating section to describe nodule. -->
             <item>
-                <text value="If there are additional nodules, please repeat Section A for nodules 2-10"/>
-                <type value="display"/>
-            </item>
-            <item>
                 <linkId value="q4.1.1"/>
                 <prefix value="1."/>
                 <text value="Number of lung nodules present in total:"/>
@@ -738,6 +752,7 @@
             <type value="group"/>
             <required value="true"/>
             <item>
+                <linkId value="g4.2.1"/>
                 <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl">
                     <valueCodeableConcept>
                         <coding>
@@ -939,10 +954,6 @@
                     </enableWhen>
                 </item>
             </item>
-            <item>
-                <text value="(describe the enlarged nodes)"/>
-                <type value="display"/>
-            </item>
         </item>
         <item>
             <linkId value="g4.4"/>
@@ -967,6 +978,7 @@
                     </valueCoding>
                 </option>
                 <item>
+                    <linkId value="q4.4.1.1"/>
                     <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory">
                         <valueCodeableConcept>
                             <coding>
@@ -986,10 +998,10 @@
                         <answerString value="4.4.1.b"/>
                     </enableWhen>
                     <item>
+                        <linkId value="g4.4.1.b.1"/>
                         <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
                             <valueCode value="vertical"/>
                         </extension>
-                        <linkId value="q4.4.1.b"/>
                         <type value="choice"/>
                         <repeats value="true"/>
                         <option>
@@ -1022,7 +1034,7 @@
                                 <display value="Other"/>
                             </valueCoding>
                         </option>
-                        <item> <!-- REPEAT THESE  - Conditional, LEFT and/or RIGHT, for each list item above. -->
+                        <item>
                             <extension url="http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation">
                                 <valueCode value="horizontal"/>
                             </extension>

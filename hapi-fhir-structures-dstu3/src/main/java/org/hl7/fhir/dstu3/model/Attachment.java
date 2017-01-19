@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * For referring to data content defined in other formats.
  */
@@ -60,6 +60,7 @@ public class Attachment extends Type implements ICompositeType {
      */
     @Child(name = "language", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human language of the content (BCP-47)", formalDefinition="The human language of the content. The value can be any valid value according to BCP 47." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected CodeType language;
 
     /**
@@ -77,10 +78,10 @@ public class Attachment extends Type implements ICompositeType {
     protected UriType url;
 
     /**
-     * The number of bytes of data that make up this attachment.
+     * The number of bytes of data that make up this attachment (before base64 encoding, if that is done).
      */
     @Child(name = "size", type = {UnsignedIntType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Number of bytes of content (if url provided)", formalDefinition="The number of bytes of data that make up this attachment." )
+    @Description(shortDefinition="Number of bytes of content (if url provided)", formalDefinition="The number of bytes of data that make up this attachment (before base64 encoding, if that is done)." )
     protected UnsignedIntType size;
 
     /**
@@ -310,7 +311,7 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #size} (The number of bytes of data that make up this attachment.). This is the underlying object with id, value and extensions. The accessor "getSize" gives direct access to the value
+     * @return {@link #size} (The number of bytes of data that make up this attachment (before base64 encoding, if that is done).). This is the underlying object with id, value and extensions. The accessor "getSize" gives direct access to the value
      */
     public UnsignedIntType getSizeElement() { 
       if (this.size == null)
@@ -330,7 +331,7 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #size} (The number of bytes of data that make up this attachment.). This is the underlying object with id, value and extensions. The accessor "getSize" gives direct access to the value
+     * @param value {@link #size} (The number of bytes of data that make up this attachment (before base64 encoding, if that is done).). This is the underlying object with id, value and extensions. The accessor "getSize" gives direct access to the value
      */
     public Attachment setSizeElement(UnsignedIntType value) { 
       this.size = value;
@@ -338,14 +339,14 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @return The number of bytes of data that make up this attachment.
+     * @return The number of bytes of data that make up this attachment (before base64 encoding, if that is done).
      */
     public int getSize() { 
       return this.size == null || this.size.isEmpty() ? 0 : this.size.getValue();
     }
 
     /**
-     * @param value The number of bytes of data that make up this attachment.
+     * @param value The number of bytes of data that make up this attachment (before base64 encoding, if that is done).
      */
     public Attachment setSize(int value) { 
         if (this.size == null)
@@ -507,7 +508,7 @@ public class Attachment extends Type implements ICompositeType {
         childrenList.add(new Property("language", "code", "The human language of the content. The value can be any valid value according to BCP 47.", 0, java.lang.Integer.MAX_VALUE, language));
         childrenList.add(new Property("data", "base64Binary", "The actual data of the attachment - a sequence of bytes. In XML, represented using base64.", 0, java.lang.Integer.MAX_VALUE, data));
         childrenList.add(new Property("url", "uri", "An alternative location where the data can be accessed.", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("size", "unsignedInt", "The number of bytes of data that make up this attachment.", 0, java.lang.Integer.MAX_VALUE, size));
+        childrenList.add(new Property("size", "unsignedInt", "The number of bytes of data that make up this attachment (before base64 encoding, if that is done).", 0, java.lang.Integer.MAX_VALUE, size));
         childrenList.add(new Property("hash", "base64Binary", "The calculated hash of the data using SHA-1. Represented using base64.", 0, java.lang.Integer.MAX_VALUE, hash));
         childrenList.add(new Property("title", "string", "A label or set of text to display in place of the data.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("creation", "dateTime", "The date that the attachment was first created.", 0, java.lang.Integer.MAX_VALUE, creation));

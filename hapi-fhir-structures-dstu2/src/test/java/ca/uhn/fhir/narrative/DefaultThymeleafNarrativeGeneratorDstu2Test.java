@@ -1,6 +1,7 @@
 package ca.uhn.fhir.narrative;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +28,7 @@ import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
@@ -73,8 +75,34 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.generateNarrative(ourCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
 
+	}
+
+	@Test
+	public void testUnsupportedType() throws DataFormatException {
+		myGen.setIgnoreMissingTemplates(true);
+		
+		Parameters value = new Parameters();
+		value.setId("123");
+
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative(ourCtx, value, narrative);
+		String output = narrative.getDiv().getValueAsString();
+		ourLog.info(output);
+		assertThat(output, not(containsString("narrative")));
+
+	}
+
+	@Test(expected=DataFormatException.class)
+	public void testUnsupportedTypeDontIgnore() throws DataFormatException {
+		myGen.setIgnoreMissingTemplates(false);
+		
+		Parameters value = new Parameters();
+		value.setId("123");
+
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative(ourCtx, value, narrative);
 	}
 
 	@Test

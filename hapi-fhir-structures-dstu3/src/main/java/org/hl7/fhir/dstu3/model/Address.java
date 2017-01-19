@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.
  */
@@ -337,7 +337,7 @@ public class Address extends Type implements ICompositeType {
      * Country - a nation as commonly understood or generally accepted.
      */
     @Child(name = "country", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Country (can be ISO 3166 3 letter code)", formalDefinition="Country - a nation as commonly understood or generally accepted." )
+    @Description(shortDefinition="Country (e.g. can be ISO 3166 2 or 3 letter code)", formalDefinition="Country - a nation as commonly understood or generally accepted." )
     protected StringType country;
 
     /**

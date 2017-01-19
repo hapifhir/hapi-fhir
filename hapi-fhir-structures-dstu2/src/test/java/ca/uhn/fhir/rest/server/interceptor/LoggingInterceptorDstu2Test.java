@@ -1,9 +1,12 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -59,17 +62,15 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class LoggingInterceptorDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
+	private static int ourDelayMs;
 	private static Exception ourThrowException;
 
 	@Before
@@ -77,6 +78,7 @@ public class LoggingInterceptorDstu2Test {
 		myInterceptor = mock(IServerInterceptor.class);
 		servlet.setInterceptors(Collections.singletonList(myInterceptor));
 		ourThrowException = null;
+		ourDelayMs=0;
 	}
 
 	@Test
@@ -98,9 +100,8 @@ public class LoggingInterceptorDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(2)).info(captor.capture());
-		assertThat(captor.getAllValues().get(0), StringContains.containsString("read - Patient/EX"));
-		assertThat(captor.getAllValues().get(1), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
+		assertThat(captor.getAllValues().get(0), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
 	}
 
 	@Test
@@ -115,9 +116,11 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
+		
+		
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertThat(captor.getValue(), StringContains.containsString("metadata - "));
 	}
 
@@ -135,10 +138,13 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("extended-operation-instance - $everything - Patient/123", captor.getValue());
 	}
+
 
 	@Test
 	public void testRequestBodyRead() throws Exception {
@@ -156,8 +162,31 @@ public class LoggingInterceptorDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("read -  - Patient/1 - ", captor.getValue());
+	}
+
+	@Test
+	public void testProcessingTime() throws Exception {
+		ourDelayMs = 110;
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${processingTimeMillis}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
+		assertThat(captor.getValue(), matchesPattern("[0-9]{3}"));
 	}
 
 	@Test
@@ -177,7 +206,7 @@ public class LoggingInterceptorDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("read -  - Patient/1 - ", captor.getValue());
 	}
 
@@ -201,8 +230,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+
+		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
 	}
 
@@ -211,6 +242,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		interceptor.setErrorMessageFormat("ERROR - ${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
 		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
 
 		Logger logger = mock(Logger.class);
@@ -228,9 +260,11 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
-		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
+		assertEquals("ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
 	}
 
 	@Test
@@ -247,8 +281,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("extended-operation-server - $everything - ", captor.getValue());
 	}
 
@@ -265,9 +301,11 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-
+		
+		
+		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("extended-operation-type - $everything - Patient", captor.getValue());
 	}
 
@@ -284,8 +322,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
 	}
 
@@ -303,8 +343,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		
+		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(logger, times(1)).info(captor.capture());
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
 	}
 
@@ -386,7 +428,11 @@ public class LoggingInterceptorDstu2Test {
 		 * @return The resource
 		 */
 		@Read()
-		public Patient getResourceById(@IdParam IdDt theId) {
+		public Patient getResourceById(@IdParam IdDt theId) throws InterruptedException {
+			if (ourDelayMs>0) {
+				Thread.sleep(ourDelayMs);
+			}
+			
 			if (theId.getIdPart().equals("EX")) {
 				throw new InvalidRequestException("FOO");
 			}

@@ -13,6 +13,13 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class FhirContextDstu1Test {
 
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testAutoDetectVersion() {
+		FhirContext ctx = new FhirContext();
+		assertEquals(FhirVersionEnum.DSTU1, ctx.getVersion().getVersion());
+	}
+	
 	@Test
 	public void testIncrementalScan() {
 		FhirContext ctx = FhirContext.forDstu1();

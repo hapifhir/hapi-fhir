@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -35,11 +36,12 @@ import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu3;
 
 @Configuration
 @EnableWebSocket()
+@Controller
 public class WebsocketDstu3Config implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu3");
+		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu3").setAllowedOrigins("*");
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -49,7 +51,7 @@ public class WebsocketDstu3Config implements WebSocketConfigurer {
 	}
 
 	@Bean(destroyMethod="destroy")
-	public TaskScheduler websocketTaskScheduler() {
+	public TaskScheduler websocketTaskSchedulerDstu3() {
 		final ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler() {
 			private static final long serialVersionUID = 1L;
 

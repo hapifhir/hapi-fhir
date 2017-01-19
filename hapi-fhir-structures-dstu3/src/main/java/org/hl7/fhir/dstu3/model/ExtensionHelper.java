@@ -1,6 +1,6 @@
 package org.hl7.fhir.dstu3.model;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 /**
  * in a language with helper classes, this would be a helper class (at least, the base exgtension helpers would be)

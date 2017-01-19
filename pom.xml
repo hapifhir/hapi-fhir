@@ -11,9 +11,9 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>2.0-SNAPSHOT</version>
+	<version>2.3-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
-	<url>https://github.com/jamesagnew/hapi-fhir</url>
+	<url>https://hapifhir.io</url>
 
 	<organization>
 		<name>University Health Network</name>
@@ -40,6 +40,21 @@
 		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
 	</scm>
 
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>bintray-dnault-maven</id>
+			<name>bintray</name>
+			<url>http://dl.bintray.com/dnault/maven</url>
+		</repository>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
 	<description>
 	</description>
 
@@ -50,7 +65,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -62,13 +76,11 @@
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>java-hamcrest</artifactId>
-			<version>2.0.0.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.10.19</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -232,6 +244,50 @@
 			<id>subhrajyotim</id>
 			<name>Subhro</name>
 		</developer>
+		<developer>
+			<id>mion00</id>
+			<name>Carlo Mion</name>
+		</developer>
+		<developer>
+			<id>kiwiandroiddev</id>
+			<name>Matt Clarke</name>
+			<organization>Orion Health</organization>
+		</developer>
+		<developer>
+			<id>FilipDomazet</id>
+			<name>Filip Domazet</name>
+		</developer>
+		<developer>
+			<id>bdenton</id>
+			<name>Bill Denton</name>
+			<organization>Akana, Inc</organization>
+		</developer>
+		<developer>
+			<id>hnnesv</id>
+			<name>Hannes Venter</name>
+			<organization>Jembi Health Systems</organization>
+		</developer>
+		<developer>
+			<id>vadi2</id>
+			<name>Vadim Peretokin</name>
+		</developer>
+		<developer>
+			<id>lawley</id>
+			<name>Michael Lawley</name>
+			<organization>CSIRO</organization>
+		</developer>
+		<developer>
+			<id>CarthageKing</id>
+			<name>CarthageKing</name>
+		</developer>
+		<developer>
+			<id>gijsbert802</id>
+			<name>Gijsbert van den Brink</name>
+		</developer>
+		<developer>
+			<id>rqg0717</id>
+			<name>James Ren</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -245,9 +301,6 @@
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-		<!-- This property is used in some of the site documentation where the version is shown, so that we can deploy the site even if the project is on a snapshot version. -->
-		<hapi_stable_version>1.4</hapi_stable_version>
-
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- For site-deploy -->
@@ -255,9 +308,9 @@
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
 		<!-- Dependency Versions -->
-		<derby_version>10.12.1.1</derby_version>
-		<jersey_version>2.22.2</jersey_version>
-		<jetty_version>9.3.10.v20160621</jetty_version>
+		<derby_version>10.13.1.1</derby_version>
+		<jersey_version>2.24</jersey_version>
+		<jetty_version>9.3.14.v20161028</jetty_version>
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
 			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
 		<!-- 5.2.0 has issues with hibernate-search 5.5.3 -->
@@ -267,10 +320,9 @@
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
-		<phloc_commons_version>4.4.4</phloc_commons_version>
-		<spring_version>4.3.0.RELEASE</spring_version>
-		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
-		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
+		<phloc_commons_version>4.4.6</phloc_commons_version>
+		<spring_version>4.3.1.RELEASE</spring_version>
+		<thymeleaf-version>3.0.1.RELEASE</thymeleaf-version>
 		<xmlunit_version>1.6</xmlunit_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -289,7 +341,17 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.1.5</version>
+				<version>1.1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.bkiers</groupId>
+				<artifactId>Liqp</artifactId>
+				<version>0.6.4</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.dnault</groupId>
+				<artifactId>xml-patch</artifactId>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -319,7 +381,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.4</version>
+				<version>2.5</version>
 			</dependency>
 			<dependency>
 				<groupId>directory-naming</groupId>
@@ -351,7 +413,7 @@
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>javax.mail-api</artifactId>
-				<version>1.5.5</version>
+				<version>1.5.6</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -374,9 +436,19 @@
 				<version>2.0.1</version>
 			</dependency>
 			<dependency>
+	         <groupId>junit</groupId>
+	         <artifactId>junit</artifactId>
+	         <version>4.12</version>
+			</dependency>
+			<dependency>
 				<groupId>lt.velykis.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
 				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.riotopsys</groupId>
+				<artifactId>json_patch</artifactId>
+				<version>0.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -424,7 +496,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.1</version>
+				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -434,7 +506,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.4</version>
+				<version>4.4.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
@@ -454,17 +526,17 @@
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-api</artifactId>
-				<version>1.9.4</version>
+				<version>1.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-manager-plexus</artifactId>
-				<version>1.9.4</version>
+				<version>1.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-provider-gitexe</artifactId>
-				<version>1.9.4</version>
+				<version>1.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -485,11 +557,6 @@
 				<groupId>org.codehaus.woodstox</groupId>
 				<artifactId>woodstox-core-asl</artifactId>
 				<version>4.4.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ebaysf.web</groupId>
-				<artifactId>cors-filter</artifactId>
-				<version>${ebay_cors_filter_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -539,7 +606,7 @@
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
-				<version>1.11</version>
+				<version>1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
@@ -577,6 +644,11 @@
 				<version>4.3.1</version>
 			</dependency>
 			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>java-hamcrest</artifactId>
+				<version>2.0.0.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate_version}</version>
@@ -599,12 +671,17 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-search-orm</artifactId>
-				<version>5.5.3.Final</version>
+				<version>5.5.4.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
 				<artifactId>javassist</artifactId>
 				<version>3.20.0-GA</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.10.19</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -644,7 +721,7 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.10.2.RELEASE</version>
+				<version>1.10.4.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -704,8 +781,16 @@
 			<plugins>
 				<plugin>
 					<groupId>de.juplo</groupId>
-					<artifactId>hibernate4-maven-plugin</artifactId>
-					<version>1.1.0</version>
+					<artifactId>hibernate-maven-plugin</artifactId>
+					<version>2.0.0</version>
+					<configuration>
+						<export>false</export>
+						<skip>false</skip>
+						<scanDependencies>false</scanDependencies>
+						<scanTestClasses>false</scanTestClasses>
+						<scanClasses>true</scanClasses>
+						<force>true</force>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
@@ -720,10 +805,17 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.5.1</version>
+					<version>3.6.0</version>
 					<configuration>
 						<source>1.6</source>
 						<target>1.6</target>
+						<!-- 
+						We compile the unit tests at Java 8. Might as well since they
+						need Java 8 in order to run (Jetty needs 8) so this way we can
+						use nice java 8 features in tests at least
+						-->
+						<testSource>1.8</testSource>
+						<testTarget>1.8</testTarget>
 						<compilerId>javac-with-errorprone</compilerId>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
@@ -737,12 +829,12 @@
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
 							<artifactId>plexus-compiler-javac</artifactId>
-							<version>2.7</version>
+							<version>2.8.1</version>
 						</dependency>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
 							<artifactId>plexus-compiler-javac-errorprone</artifactId>
-							<version>2.7</version>
+							<version>2.8.1</version>
 						</dependency>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
@@ -805,8 +897,8 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
-						<argLine>-Dfile.encoding=UTF-8 -Xmx712m</argLine>
-						<forkCount>1</forkCount>
+						<argLine>-Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+						<forkCount>1.0C</forkCount>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -854,7 +946,7 @@
 				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
 					<artifactId>coveralls-maven-plugin</artifactId>
-					<version>4.2.0</version>
+					<version>4.3.0</version>
 					<configuration>
 						<coberturaReports>
 						</coberturaReports>
@@ -876,6 +968,7 @@
 						<skipDeploy>true</skipDeploy>
 						<inputEncoding>UTF-8</inputEncoding>
 						<outputEncoding>UTF-8</outputEncoding>
+						<relativizeDecorationLinks>false</relativizeDecorationLinks>
 					</configuration>
 					<dependencies>
 						<dependency>
@@ -1286,18 +1379,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>animal-sniffer-maven-plugin</artifactId>
-				<inherited>true</inherited>
-				<configuration>
-					<signature>
-						<groupId>org.codehaus.mojo.signature</groupId>
-						<artifactId>java16</artifactId>
-						<version>1.1</version>
-					</signature>
-				</configuration>
-			</plugin>
-			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
 				<inherited>false</inherited>
 				<executions>
@@ -1387,7 +1468,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
-				<version>2.12</version>
+				<version>2.12.1</version>
 				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
@@ -1465,7 +1546,6 @@
 						<configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> </descriptors> </configuration> </execution> </executions> </plugin> -->
 				</plugins>
 			</build>
-
 		</profile>
 		<profile>
 			<id>SIGN_ARTIFACTS</id>
@@ -1536,11 +1616,14 @@
 				<module>hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
-				<module>hapi-fhir-structures-dstu</module>
+				<!--<module>hapi-fhir-narrativegenerator</module>-->
 				<module>hapi-fhir-validation-resources-dstu2</module>
+				<module>hapi-fhir-validation-resources-dstu2.1</module>
+				<module>hapi-fhir-validation-resources-dstu3</module>
+				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
-				<module>hapi-fhir-validation-resources-dstu3</module>
+				<module>hapi-fhir-structures-dstu2.1</module>
 				<module>hapi-fhir-structures-dstu3</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
@@ -1550,6 +1633,7 @@
 				<module>restful-server-example-test</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
+				<module>hapi-fhir-client-okhttp</module>
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
@@ -1559,10 +1643,18 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>COBERTURA</id>
-			<modules>
-				<module>hapi-fhir-cobertura</module>
-			</modules>
+			<id>NOPARALLEL</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<forkCount>1</forkCount>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

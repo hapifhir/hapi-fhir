@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Jul 12, 2016 12:04-0400 for FHIR v1.5.0
+// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.
  */
@@ -186,1733 +186,101 @@ public class GuidanceResponse extends DomainResource {
       }
     }
 
-    @Block()
-    public static class GuidanceResponseActionComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.
-         */
-        @Child(name = "actionIdentifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Unique identifier", formalDefinition="A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique." )
-        protected Identifier actionIdentifier;
-
-        /**
-         * A user-visible label for the action.
-         */
-        @Child(name = "label", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="User-visible label for the action (e.g. 1. or A.)", formalDefinition="A user-visible label for the action." )
-        protected StringType label;
-
-        /**
-         * The title of the action displayed to a user.
-         */
-        @Child(name = "title", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="User-visible title", formalDefinition="The title of the action displayed to a user." )
-        protected StringType title;
-
-        /**
-         * A short description of the action used to provide a summary to display to the user.
-         */
-        @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Short description of the action", formalDefinition="A short description of the action used to provide a summary to display to the user." )
-        protected StringType description;
-
-        /**
-         * A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
-         */
-        @Child(name = "textEquivalent", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Static text equivalent of the action, used if the dynamic aspects cannot be interpreted by the receiving system", formalDefinition="A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically." )
-        protected StringType textEquivalent;
-
-        /**
-         * The concept represented by this action or its sub-actions.
-         */
-        @Child(name = "concept", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="The meaning of the action or its sub-actions", formalDefinition="The concept represented by this action or its sub-actions." )
-        protected List<CodeableConcept> concept;
-
-        /**
-         * The evidence grade and the sources of evidence for this action.
-         */
-        @Child(name = "supportingEvidence", type = {Attachment.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Evidence that supports taking the action", formalDefinition="The evidence grade and the sources of evidence for this action." )
-        protected List<Attachment> supportingEvidence;
-
-        /**
-         * A relationship to another action such as "before" or "30-60 minutes after start of".
-         */
-        @Child(name = "relatedAction", type = {}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Relationship to another action", formalDefinition="A relationship to another action such as \"before\" or \"30-60 minutes after start of\"." )
-        protected GuidanceResponseActionRelatedActionComponent relatedAction;
-
-        /**
-         * Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.
-         */
-        @Child(name = "documentation", type = {Attachment.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Supporting documentation for the intended performer of the action", formalDefinition="Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources." )
-        protected List<Attachment> documentation;
-
-        /**
-         * The participant in the action.
-         */
-        @Child(name = "participant", type = {Patient.class, Person.class, Practitioner.class, RelatedPerson.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Participant", formalDefinition="The participant in the action." )
-        protected List<Reference> participant;
-        /**
-         * The actual objects that are the target of the reference (The participant in the action.)
-         */
-        protected List<Resource> participantTarget;
-
-
-        /**
-         * The type of action to perform (create, update, remove).
-         */
-        @Child(name = "type", type = {CodeType.class}, order=11, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="create | update | remove | fire-event", formalDefinition="The type of action to perform (create, update, remove)." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-type")
-        protected CodeType type;
-
-        /**
-         * A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.
-         */
-        @Child(name = "behavior", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Defines behaviors such as selection and grouping", formalDefinition="A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment." )
-        protected List<GuidanceResponseActionBehaviorComponent> behavior;
-
-        /**
-         * The resource that is the target of the action (e.g. CommunicationRequest).
-         */
-        @Child(name = "resource", type = {Reference.class}, order=13, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The target of the action", formalDefinition="The resource that is the target of the action (e.g. CommunicationRequest)." )
-        protected Reference resource;
-
-        /**
-         * The actual object that is the target of the reference (The resource that is the target of the action (e.g. CommunicationRequest).)
-         */
-        protected Resource resourceTarget;
-
-        /**
-         * Sub actions.
-         */
-        @Child(name = "action", type = {GuidanceResponseActionComponent.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Sub action", formalDefinition="Sub actions." )
-        protected List<GuidanceResponseActionComponent> action;
-
-        private static final long serialVersionUID = -1602697381L;
-
-    /**
-     * Constructor
-     */
-      public GuidanceResponseActionComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #actionIdentifier} (A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.)
-         */
-        public Identifier getActionIdentifier() { 
-          if (this.actionIdentifier == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.actionIdentifier");
-            else if (Configuration.doAutoCreate())
-              this.actionIdentifier = new Identifier(); // cc
-          return this.actionIdentifier;
-        }
-
-        public boolean hasActionIdentifier() { 
-          return this.actionIdentifier != null && !this.actionIdentifier.isEmpty();
-        }
-
-        /**
-         * @param value {@link #actionIdentifier} (A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.)
-         */
-        public GuidanceResponseActionComponent setActionIdentifier(Identifier value) { 
-          this.actionIdentifier = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
-         */
-        public StringType getLabelElement() { 
-          if (this.label == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.label");
-            else if (Configuration.doAutoCreate())
-              this.label = new StringType(); // bb
-          return this.label;
-        }
-
-        public boolean hasLabelElement() { 
-          return this.label != null && !this.label.isEmpty();
-        }
-
-        public boolean hasLabel() { 
-          return this.label != null && !this.label.isEmpty();
-        }
-
-        /**
-         * @param value {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
-         */
-        public GuidanceResponseActionComponent setLabelElement(StringType value) { 
-          this.label = value;
-          return this;
-        }
-
-        /**
-         * @return A user-visible label for the action.
-         */
-        public String getLabel() { 
-          return this.label == null ? null : this.label.getValue();
-        }
-
-        /**
-         * @param value A user-visible label for the action.
-         */
-        public GuidanceResponseActionComponent setLabel(String value) { 
-          if (Utilities.noString(value))
-            this.label = null;
-          else {
-            if (this.label == null)
-              this.label = new StringType();
-            this.label.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #title} (The title of the action displayed to a user.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
-         */
-        public StringType getTitleElement() { 
-          if (this.title == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.title");
-            else if (Configuration.doAutoCreate())
-              this.title = new StringType(); // bb
-          return this.title;
-        }
-
-        public boolean hasTitleElement() { 
-          return this.title != null && !this.title.isEmpty();
-        }
-
-        public boolean hasTitle() { 
-          return this.title != null && !this.title.isEmpty();
-        }
-
-        /**
-         * @param value {@link #title} (The title of the action displayed to a user.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
-         */
-        public GuidanceResponseActionComponent setTitleElement(StringType value) { 
-          this.title = value;
-          return this;
-        }
-
-        /**
-         * @return The title of the action displayed to a user.
-         */
-        public String getTitle() { 
-          return this.title == null ? null : this.title.getValue();
-        }
-
-        /**
-         * @param value The title of the action displayed to a user.
-         */
-        public GuidanceResponseActionComponent setTitle(String value) { 
-          if (Utilities.noString(value))
-            this.title = null;
-          else {
-            if (this.title == null)
-              this.title = new StringType();
-            this.title.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #description} (A short description of the action used to provide a summary to display to the user.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public StringType getDescriptionElement() { 
-          if (this.description == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.description");
-            else if (Configuration.doAutoCreate())
-              this.description = new StringType(); // bb
-          return this.description;
-        }
-
-        public boolean hasDescriptionElement() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        public boolean hasDescription() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        /**
-         * @param value {@link #description} (A short description of the action used to provide a summary to display to the user.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public GuidanceResponseActionComponent setDescriptionElement(StringType value) { 
-          this.description = value;
-          return this;
-        }
-
-        /**
-         * @return A short description of the action used to provide a summary to display to the user.
-         */
-        public String getDescription() { 
-          return this.description == null ? null : this.description.getValue();
-        }
-
-        /**
-         * @param value A short description of the action used to provide a summary to display to the user.
-         */
-        public GuidanceResponseActionComponent setDescription(String value) { 
-          if (Utilities.noString(value))
-            this.description = null;
-          else {
-            if (this.description == null)
-              this.description = new StringType();
-            this.description.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #textEquivalent} (A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.). This is the underlying object with id, value and extensions. The accessor "getTextEquivalent" gives direct access to the value
-         */
-        public StringType getTextEquivalentElement() { 
-          if (this.textEquivalent == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.textEquivalent");
-            else if (Configuration.doAutoCreate())
-              this.textEquivalent = new StringType(); // bb
-          return this.textEquivalent;
-        }
-
-        public boolean hasTextEquivalentElement() { 
-          return this.textEquivalent != null && !this.textEquivalent.isEmpty();
-        }
-
-        public boolean hasTextEquivalent() { 
-          return this.textEquivalent != null && !this.textEquivalent.isEmpty();
-        }
-
-        /**
-         * @param value {@link #textEquivalent} (A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.). This is the underlying object with id, value and extensions. The accessor "getTextEquivalent" gives direct access to the value
-         */
-        public GuidanceResponseActionComponent setTextEquivalentElement(StringType value) { 
-          this.textEquivalent = value;
-          return this;
-        }
-
-        /**
-         * @return A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
-         */
-        public String getTextEquivalent() { 
-          return this.textEquivalent == null ? null : this.textEquivalent.getValue();
-        }
-
-        /**
-         * @param value A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
-         */
-        public GuidanceResponseActionComponent setTextEquivalent(String value) { 
-          if (Utilities.noString(value))
-            this.textEquivalent = null;
-          else {
-            if (this.textEquivalent == null)
-              this.textEquivalent = new StringType();
-            this.textEquivalent.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #concept} (The concept represented by this action or its sub-actions.)
-         */
-        public List<CodeableConcept> getConcept() { 
-          if (this.concept == null)
-            this.concept = new ArrayList<CodeableConcept>();
-          return this.concept;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public GuidanceResponseActionComponent setConcept(List<CodeableConcept> theConcept) { 
-          this.concept = theConcept;
-          return this;
-        }
-
-        public boolean hasConcept() { 
-          if (this.concept == null)
-            return false;
-          for (CodeableConcept item : this.concept)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public CodeableConcept addConcept() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.concept == null)
-            this.concept = new ArrayList<CodeableConcept>();
-          this.concept.add(t);
-          return t;
-        }
-
-        public GuidanceResponseActionComponent addConcept(CodeableConcept t) { //3
-          if (t == null)
-            return this;
-          if (this.concept == null)
-            this.concept = new ArrayList<CodeableConcept>();
-          this.concept.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #concept}, creating it if it does not already exist
-         */
-        public CodeableConcept getConceptFirstRep() { 
-          if (getConcept().isEmpty()) {
-            addConcept();
-          }
-          return getConcept().get(0);
-        }
-
-        /**
-         * @return {@link #supportingEvidence} (The evidence grade and the sources of evidence for this action.)
-         */
-        public List<Attachment> getSupportingEvidence() { 
-          if (this.supportingEvidence == null)
-            this.supportingEvidence = new ArrayList<Attachment>();
-          return this.supportingEvidence;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public GuidanceResponseActionComponent setSupportingEvidence(List<Attachment> theSupportingEvidence) { 
-          this.supportingEvidence = theSupportingEvidence;
-          return this;
-        }
-
-        public boolean hasSupportingEvidence() { 
-          if (this.supportingEvidence == null)
-            return false;
-          for (Attachment item : this.supportingEvidence)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public Attachment addSupportingEvidence() { //3
-          Attachment t = new Attachment();
-          if (this.supportingEvidence == null)
-            this.supportingEvidence = new ArrayList<Attachment>();
-          this.supportingEvidence.add(t);
-          return t;
-        }
-
-        public GuidanceResponseActionComponent addSupportingEvidence(Attachment t) { //3
-          if (t == null)
-            return this;
-          if (this.supportingEvidence == null)
-            this.supportingEvidence = new ArrayList<Attachment>();
-          this.supportingEvidence.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #supportingEvidence}, creating it if it does not already exist
-         */
-        public Attachment getSupportingEvidenceFirstRep() { 
-          if (getSupportingEvidence().isEmpty()) {
-            addSupportingEvidence();
-          }
-          return getSupportingEvidence().get(0);
-        }
-
-        /**
-         * @return {@link #relatedAction} (A relationship to another action such as "before" or "30-60 minutes after start of".)
-         */
-        public GuidanceResponseActionRelatedActionComponent getRelatedAction() { 
-          if (this.relatedAction == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.relatedAction");
-            else if (Configuration.doAutoCreate())
-              this.relatedAction = new GuidanceResponseActionRelatedActionComponent(); // cc
-          return this.relatedAction;
-        }
-
-        public boolean hasRelatedAction() { 
-          return this.relatedAction != null && !this.relatedAction.isEmpty();
-        }
-
-        /**
-         * @param value {@link #relatedAction} (A relationship to another action such as "before" or "30-60 minutes after start of".)
-         */
-        public GuidanceResponseActionComponent setRelatedAction(GuidanceResponseActionRelatedActionComponent value) { 
-          this.relatedAction = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #documentation} (Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.)
-         */
-        public List<Attachment> getDocumentation() { 
-          if (this.documentation == null)
-            this.documentation = new ArrayList<Attachment>();
-          return this.documentation;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public GuidanceResponseActionComponent setDocumentation(List<Attachment> theDocumentation) { 
-          this.documentation = theDocumentation;
-          return this;
-        }
-
-        public boolean hasDocumentation() { 
-          if (this.documentation == null)
-            return false;
-          for (Attachment item : this.documentation)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public Attachment addDocumentation() { //3
-          Attachment t = new Attachment();
-          if (this.documentation == null)
-            this.documentation = new ArrayList<Attachment>();
-          this.documentation.add(t);
-          return t;
-        }
-
-        public GuidanceResponseActionComponent addDocumentation(Attachment t) { //3
-          if (t == null)
-            return this;
-          if (this.documentation == null)
-            this.documentation = new ArrayList<Attachment>();
-          this.documentation.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #documentation}, creating it if it does not already exist
-         */
-        public Attachment getDocumentationFirstRep() { 
-          if (getDocumentation().isEmpty()) {
-            addDocumentation();
-          }
-          return getDocumentation().get(0);
-        }
-
-        /**
-         * @return {@link #participant} (The participant in the action.)
-         */
-        public List<Reference> getParticipant() { 
-          if (this.participant == null)
-            this.participant = new ArrayList<Reference>();
-          return this.participant;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public GuidanceResponseActionComponent setParticipant(List<Reference> theParticipant) { 
-          this.participant = theParticipant;
-          return this;
-        }
-
-        public boolean hasParticipant() { 
-          if (this.participant == null)
-            return false;
-          for (Reference item : this.participant)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public Reference addParticipant() { //3
-          Reference t = new Reference();
-          if (this.participant == null)
-            this.participant = new ArrayList<Reference>();
-          this.participant.add(t);
-          return t;
-        }
-
-        public GuidanceResponseActionComponent addParticipant(Reference t) { //3
-          if (t == null)
-            return this;
-          if (this.participant == null)
-            this.participant = new ArrayList<Reference>();
-          this.participant.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
-         */
-        public Reference getParticipantFirstRep() { 
-          if (getParticipant().isEmpty()) {
-            addParticipant();
-          }
-          return getParticipant().get(0);
-        }
-
-        /**
-         * @deprecated Use Reference#setResource(IBaseResource) instead
-         */
-        @Deprecated
-        public List<Resource> getParticipantTarget() { 
-          if (this.participantTarget == null)
-            this.participantTarget = new ArrayList<Resource>();
-          return this.participantTarget;
-        }
-
-        /**
-         * @return {@link #type} (The type of action to perform (create, update, remove).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public CodeType getTypeElement() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new CodeType(); // bb
-          return this.type;
-        }
-
-        public boolean hasTypeElement() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of action to perform (create, update, remove).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-         */
-        public GuidanceResponseActionComponent setTypeElement(CodeType value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return The type of action to perform (create, update, remove).
-         */
-        public String getType() { 
-          return this.type == null ? null : this.type.getValue();
-        }
-
-        /**
-         * @param value The type of action to perform (create, update, remove).
-         */
-        public GuidanceResponseActionComponent setType(String value) { 
-          if (Utilities.noString(value))
-            this.type = null;
-          else {
-            if (this.type == null)
-              this.type = new CodeType();
-            this.type.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #behavior} (A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.)
-         */
-        public List<GuidanceResponseActionBehaviorComponent> getBehavior() { 
-          if (this.behavior == null)
-            this.behavior = new ArrayList<GuidanceResponseActionBehaviorComponent>();
-          return this.behavior;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public GuidanceResponseActionComponent setBehavior(List<GuidanceResponseActionBehaviorComponent> theBehavior) { 
-          this.behavior = theBehavior;
-          return this;
-        }
-
-        public boolean hasBehavior() { 
-          if (this.behavior == null)
-            return false;
-          for (GuidanceResponseActionBehaviorComponent item : this.behavior)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public GuidanceResponseActionBehaviorComponent addBehavior() { //3
-          GuidanceResponseActionBehaviorComponent t = new GuidanceResponseActionBehaviorComponent();
-          if (this.behavior == null)
-            this.behavior = new ArrayList<GuidanceResponseActionBehaviorComponent>();
-          this.behavior.add(t);
-          return t;
-        }
-
-        public GuidanceResponseActionComponent addBehavior(GuidanceResponseActionBehaviorComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.behavior == null)
-            this.behavior = new ArrayList<GuidanceResponseActionBehaviorComponent>();
-          this.behavior.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #behavior}, creating it if it does not already exist
-         */
-        public GuidanceResponseActionBehaviorComponent getBehaviorFirstRep() { 
-          if (getBehavior().isEmpty()) {
-            addBehavior();
-          }
-          return getBehavior().get(0);
-        }
-
-        /**
-         * @return {@link #resource} (The resource that is the target of the action (e.g. CommunicationRequest).)
-         */
-        public Reference getResource() { 
-          if (this.resource == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionComponent.resource");
-            else if (Configuration.doAutoCreate())
-              this.resource = new Reference(); // cc
-          return this.resource;
-        }
-
-        public boolean hasResource() { 
-          return this.resource != null && !this.resource.isEmpty();
-        }
-
-        /**
-         * @param value {@link #resource} (The resource that is the target of the action (e.g. CommunicationRequest).)
-         */
-        public GuidanceResponseActionComponent setResource(Reference value) { 
-          this.resource = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The resource that is the target of the action (e.g. CommunicationRequest).)
-         */
-        public Resource getResourceTarget() { 
-          return this.resourceTarget;
-        }
-
-        /**
-         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The resource that is the target of the action (e.g. CommunicationRequest).)
-         */
-        public GuidanceResponseActionComponent setResourceTarget(Resource value) { 
-          this.resourceTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #action} (Sub actions.)
-         */
-        public List<GuidanceResponseActionComponent> getAction() { 
-          if (this.action == null)
-            this.action = new ArrayList<GuidanceResponseActionComponent>();
-          return this.action;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public GuidanceResponseActionComponent setAction(List<GuidanceResponseActionComponent> theAction) { 
-          this.action = theAction;
-          return this;
-        }
-
-        public boolean hasAction() { 
-          if (this.action == null)
-            return false;
-          for (GuidanceResponseActionComponent item : this.action)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public GuidanceResponseActionComponent addAction() { //3
-          GuidanceResponseActionComponent t = new GuidanceResponseActionComponent();
-          if (this.action == null)
-            this.action = new ArrayList<GuidanceResponseActionComponent>();
-          this.action.add(t);
-          return t;
-        }
-
-        public GuidanceResponseActionComponent addAction(GuidanceResponseActionComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.action == null)
-            this.action = new ArrayList<GuidanceResponseActionComponent>();
-          this.action.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
-         */
-        public GuidanceResponseActionComponent getActionFirstRep() { 
-          if (getAction().isEmpty()) {
-            addAction();
-          }
-          return getAction().get(0);
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("actionIdentifier", "Identifier", "A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.", 0, java.lang.Integer.MAX_VALUE, actionIdentifier));
-          childrenList.add(new Property("label", "string", "A user-visible label for the action.", 0, java.lang.Integer.MAX_VALUE, label));
-          childrenList.add(new Property("title", "string", "The title of the action displayed to a user.", 0, java.lang.Integer.MAX_VALUE, title));
-          childrenList.add(new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, java.lang.Integer.MAX_VALUE, textEquivalent));
-          childrenList.add(new Property("concept", "CodeableConcept", "The concept represented by this action or its sub-actions.", 0, java.lang.Integer.MAX_VALUE, concept));
-          childrenList.add(new Property("supportingEvidence", "Attachment", "The evidence grade and the sources of evidence for this action.", 0, java.lang.Integer.MAX_VALUE, supportingEvidence));
-          childrenList.add(new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction));
-          childrenList.add(new Property("documentation", "Attachment", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
-          childrenList.add(new Property("participant", "Reference(Patient|Person|Practitioner|RelatedPerson)", "The participant in the action.", 0, java.lang.Integer.MAX_VALUE, participant));
-          childrenList.add(new Property("type", "code", "The type of action to perform (create, update, remove).", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("behavior", "", "A behavior associated with the action. Behaviors define how the action is to be presented and/or executed within the receiving environment.", 0, java.lang.Integer.MAX_VALUE, behavior));
-          childrenList.add(new Property("resource", "Reference(Any)", "The resource that is the target of the action (e.g. CommunicationRequest).", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("action", "@GuidanceResponse.action", "Sub actions.", 0, java.lang.Integer.MAX_VALUE, action));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -889046145: /*actionIdentifier*/ return this.actionIdentifier == null ? new Base[0] : new Base[] {this.actionIdentifier}; // Identifier
-        case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
-        case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -900391049: /*textEquivalent*/ return this.textEquivalent == null ? new Base[0] : new Base[] {this.textEquivalent}; // StringType
-        case 951024232: /*concept*/ return this.concept == null ? new Base[0] : this.concept.toArray(new Base[this.concept.size()]); // CodeableConcept
-        case -1735429846: /*supportingEvidence*/ return this.supportingEvidence == null ? new Base[0] : this.supportingEvidence.toArray(new Base[this.supportingEvidence.size()]); // Attachment
-        case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : new Base[] {this.relatedAction}; // GuidanceResponseActionRelatedActionComponent
-        case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // Attachment
-        case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // Reference
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
-        case 1510912594: /*behavior*/ return this.behavior == null ? new Base[0] : this.behavior.toArray(new Base[this.behavior.size()]); // GuidanceResponseActionBehaviorComponent
-        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
-        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // GuidanceResponseActionComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -889046145: // actionIdentifier
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-          break;
-        case 102727412: // label
-          this.label = castToString(value); // StringType
-          break;
-        case 110371416: // title
-          this.title = castToString(value); // StringType
-          break;
-        case -1724546052: // description
-          this.description = castToString(value); // StringType
-          break;
-        case -900391049: // textEquivalent
-          this.textEquivalent = castToString(value); // StringType
-          break;
-        case 951024232: // concept
-          this.getConcept().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
-        case -1735429846: // supportingEvidence
-          this.getSupportingEvidence().add(castToAttachment(value)); // Attachment
-          break;
-        case -384107967: // relatedAction
-          this.relatedAction = (GuidanceResponseActionRelatedActionComponent) value; // GuidanceResponseActionRelatedActionComponent
-          break;
-        case 1587405498: // documentation
-          this.getDocumentation().add(castToAttachment(value)); // Attachment
-          break;
-        case 767422259: // participant
-          this.getParticipant().add(castToReference(value)); // Reference
-          break;
-        case 3575610: // type
-          this.type = castToCode(value); // CodeType
-          break;
-        case 1510912594: // behavior
-          this.getBehavior().add((GuidanceResponseActionBehaviorComponent) value); // GuidanceResponseActionBehaviorComponent
-          break;
-        case -341064690: // resource
-          this.resource = castToReference(value); // Reference
-          break;
-        case -1422950858: // action
-          this.getAction().add((GuidanceResponseActionComponent) value); // GuidanceResponseActionComponent
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("actionIdentifier"))
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-        else if (name.equals("label"))
-          this.label = castToString(value); // StringType
-        else if (name.equals("title"))
-          this.title = castToString(value); // StringType
-        else if (name.equals("description"))
-          this.description = castToString(value); // StringType
-        else if (name.equals("textEquivalent"))
-          this.textEquivalent = castToString(value); // StringType
-        else if (name.equals("concept"))
-          this.getConcept().add(castToCodeableConcept(value));
-        else if (name.equals("supportingEvidence"))
-          this.getSupportingEvidence().add(castToAttachment(value));
-        else if (name.equals("relatedAction"))
-          this.relatedAction = (GuidanceResponseActionRelatedActionComponent) value; // GuidanceResponseActionRelatedActionComponent
-        else if (name.equals("documentation"))
-          this.getDocumentation().add(castToAttachment(value));
-        else if (name.equals("participant"))
-          this.getParticipant().add(castToReference(value));
-        else if (name.equals("type"))
-          this.type = castToCode(value); // CodeType
-        else if (name.equals("behavior"))
-          this.getBehavior().add((GuidanceResponseActionBehaviorComponent) value);
-        else if (name.equals("resource"))
-          this.resource = castToReference(value); // Reference
-        else if (name.equals("action"))
-          this.getAction().add((GuidanceResponseActionComponent) value);
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -889046145:  return getActionIdentifier(); // Identifier
-        case 102727412: throw new FHIRException("Cannot make property label as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -900391049: throw new FHIRException("Cannot make property textEquivalent as it is not a complex type"); // StringType
-        case 951024232:  return addConcept(); // CodeableConcept
-        case -1735429846:  return addSupportingEvidence(); // Attachment
-        case -384107967:  return getRelatedAction(); // GuidanceResponseActionRelatedActionComponent
-        case 1587405498:  return addDocumentation(); // Attachment
-        case 767422259:  return addParticipant(); // Reference
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case 1510912594:  return addBehavior(); // GuidanceResponseActionBehaviorComponent
-        case -341064690:  return getResource(); // Reference
-        case -1422950858:  return addAction(); // GuidanceResponseActionComponent
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("actionIdentifier")) {
-          this.actionIdentifier = new Identifier();
-          return this.actionIdentifier;
-        }
-        else if (name.equals("label")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.label");
-        }
-        else if (name.equals("title")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.title");
-        }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.description");
-        }
-        else if (name.equals("textEquivalent")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.textEquivalent");
-        }
-        else if (name.equals("concept")) {
-          return addConcept();
-        }
-        else if (name.equals("supportingEvidence")) {
-          return addSupportingEvidence();
-        }
-        else if (name.equals("relatedAction")) {
-          this.relatedAction = new GuidanceResponseActionRelatedActionComponent();
-          return this.relatedAction;
-        }
-        else if (name.equals("documentation")) {
-          return addDocumentation();
-        }
-        else if (name.equals("participant")) {
-          return addParticipant();
-        }
-        else if (name.equals("type")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.type");
-        }
-        else if (name.equals("behavior")) {
-          return addBehavior();
-        }
-        else if (name.equals("resource")) {
-          this.resource = new Reference();
-          return this.resource;
-        }
-        else if (name.equals("action")) {
-          return addAction();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public GuidanceResponseActionComponent copy() {
-        GuidanceResponseActionComponent dst = new GuidanceResponseActionComponent();
-        copyValues(dst);
-        dst.actionIdentifier = actionIdentifier == null ? null : actionIdentifier.copy();
-        dst.label = label == null ? null : label.copy();
-        dst.title = title == null ? null : title.copy();
-        dst.description = description == null ? null : description.copy();
-        dst.textEquivalent = textEquivalent == null ? null : textEquivalent.copy();
-        if (concept != null) {
-          dst.concept = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : concept)
-            dst.concept.add(i.copy());
-        };
-        if (supportingEvidence != null) {
-          dst.supportingEvidence = new ArrayList<Attachment>();
-          for (Attachment i : supportingEvidence)
-            dst.supportingEvidence.add(i.copy());
-        };
-        dst.relatedAction = relatedAction == null ? null : relatedAction.copy();
-        if (documentation != null) {
-          dst.documentation = new ArrayList<Attachment>();
-          for (Attachment i : documentation)
-            dst.documentation.add(i.copy());
-        };
-        if (participant != null) {
-          dst.participant = new ArrayList<Reference>();
-          for (Reference i : participant)
-            dst.participant.add(i.copy());
-        };
-        dst.type = type == null ? null : type.copy();
-        if (behavior != null) {
-          dst.behavior = new ArrayList<GuidanceResponseActionBehaviorComponent>();
-          for (GuidanceResponseActionBehaviorComponent i : behavior)
-            dst.behavior.add(i.copy());
-        };
-        dst.resource = resource == null ? null : resource.copy();
-        if (action != null) {
-          dst.action = new ArrayList<GuidanceResponseActionComponent>();
-          for (GuidanceResponseActionComponent i : action)
-            dst.action.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof GuidanceResponseActionComponent))
-          return false;
-        GuidanceResponseActionComponent o = (GuidanceResponseActionComponent) other;
-        return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(label, o.label, true)
-           && compareDeep(title, o.title, true) && compareDeep(description, o.description, true) && compareDeep(textEquivalent, o.textEquivalent, true)
-           && compareDeep(concept, o.concept, true) && compareDeep(supportingEvidence, o.supportingEvidence, true)
-           && compareDeep(relatedAction, o.relatedAction, true) && compareDeep(documentation, o.documentation, true)
-           && compareDeep(participant, o.participant, true) && compareDeep(type, o.type, true) && compareDeep(behavior, o.behavior, true)
-           && compareDeep(resource, o.resource, true) && compareDeep(action, o.action, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof GuidanceResponseActionComponent))
-          return false;
-        GuidanceResponseActionComponent o = (GuidanceResponseActionComponent) other;
-        return compareValues(label, o.label, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
-           && compareValues(textEquivalent, o.textEquivalent, true) && compareValues(type, o.type, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, label, title
-          , description, textEquivalent, concept, supportingEvidence, relatedAction, documentation
-          , participant, type, behavior, resource, action);
-      }
-
-  public String fhirType() {
-    return "GuidanceResponse.action";
-
-  }
-
-  }
-
-    @Block()
-    public static class GuidanceResponseActionRelatedActionComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The unique identifier of the related action.
-         */
-        @Child(name = "actionIdentifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Identifier of the related action", formalDefinition="The unique identifier of the related action." )
-        protected Identifier actionIdentifier;
-
-        /**
-         * The relationship of this action to the related action.
-         */
-        @Child(name = "relationship", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="before | after", formalDefinition="The relationship of this action to the related action." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-relationship-type")
-        protected CodeType relationship;
-
-        /**
-         * A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.
-         */
-        @Child(name = "offset", type = {Duration.class, Range.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Time offset for the relationship", formalDefinition="A duration or range of durations to apply to the relationship. For example, 30-60 minutes before." )
-        protected Type offset;
-
-        /**
-         * An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.
-         */
-        @Child(name = "anchor", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="start | end", formalDefinition="An optional indicator for how the relationship is anchored to the related action. For example \"before the start\" or \"before the end\" of the related action." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-relationship-anchor")
-        protected CodeType anchor;
-
-        /**
-         * An optional value describing when the action should be performed.
-         */
-        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
-        protected Type timing;
-
-        private static final long serialVersionUID = -1577269772L;
-
-    /**
-     * Constructor
-     */
-      public GuidanceResponseActionRelatedActionComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public GuidanceResponseActionRelatedActionComponent(Identifier actionIdentifier, CodeType relationship) {
-        super();
-        this.actionIdentifier = actionIdentifier;
-        this.relationship = relationship;
-      }
-
-        /**
-         * @return {@link #actionIdentifier} (The unique identifier of the related action.)
-         */
-        public Identifier getActionIdentifier() { 
-          if (this.actionIdentifier == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionRelatedActionComponent.actionIdentifier");
-            else if (Configuration.doAutoCreate())
-              this.actionIdentifier = new Identifier(); // cc
-          return this.actionIdentifier;
-        }
-
-        public boolean hasActionIdentifier() { 
-          return this.actionIdentifier != null && !this.actionIdentifier.isEmpty();
-        }
-
-        /**
-         * @param value {@link #actionIdentifier} (The unique identifier of the related action.)
-         */
-        public GuidanceResponseActionRelatedActionComponent setActionIdentifier(Identifier value) { 
-          this.actionIdentifier = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #relationship} (The relationship of this action to the related action.). This is the underlying object with id, value and extensions. The accessor "getRelationship" gives direct access to the value
-         */
-        public CodeType getRelationshipElement() { 
-          if (this.relationship == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionRelatedActionComponent.relationship");
-            else if (Configuration.doAutoCreate())
-              this.relationship = new CodeType(); // bb
-          return this.relationship;
-        }
-
-        public boolean hasRelationshipElement() { 
-          return this.relationship != null && !this.relationship.isEmpty();
-        }
-
-        public boolean hasRelationship() { 
-          return this.relationship != null && !this.relationship.isEmpty();
-        }
-
-        /**
-         * @param value {@link #relationship} (The relationship of this action to the related action.). This is the underlying object with id, value and extensions. The accessor "getRelationship" gives direct access to the value
-         */
-        public GuidanceResponseActionRelatedActionComponent setRelationshipElement(CodeType value) { 
-          this.relationship = value;
-          return this;
-        }
-
-        /**
-         * @return The relationship of this action to the related action.
-         */
-        public String getRelationship() { 
-          return this.relationship == null ? null : this.relationship.getValue();
-        }
-
-        /**
-         * @param value The relationship of this action to the related action.
-         */
-        public GuidanceResponseActionRelatedActionComponent setRelationship(String value) { 
-            if (this.relationship == null)
-              this.relationship = new CodeType();
-            this.relationship.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
-         */
-        public Type getOffset() { 
-          return this.offset;
-        }
-
-        /**
-         * @return {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
-         */
-        public Duration getOffsetDuration() throws FHIRException { 
-          if (!(this.offset instanceof Duration))
-            throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.offset.getClass().getName()+" was encountered");
-          return (Duration) this.offset;
-        }
-
-        public boolean hasOffsetDuration() { 
-          return this.offset instanceof Duration;
-        }
-
-        /**
-         * @return {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
-         */
-        public Range getOffsetRange() throws FHIRException { 
-          if (!(this.offset instanceof Range))
-            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.offset.getClass().getName()+" was encountered");
-          return (Range) this.offset;
-        }
-
-        public boolean hasOffsetRange() { 
-          return this.offset instanceof Range;
-        }
-
-        public boolean hasOffset() { 
-          return this.offset != null && !this.offset.isEmpty();
-        }
-
-        /**
-         * @param value {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
-         */
-        public GuidanceResponseActionRelatedActionComponent setOffset(Type value) { 
-          this.offset = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #anchor} (An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.). This is the underlying object with id, value and extensions. The accessor "getAnchor" gives direct access to the value
-         */
-        public CodeType getAnchorElement() { 
-          if (this.anchor == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionRelatedActionComponent.anchor");
-            else if (Configuration.doAutoCreate())
-              this.anchor = new CodeType(); // bb
-          return this.anchor;
-        }
-
-        public boolean hasAnchorElement() { 
-          return this.anchor != null && !this.anchor.isEmpty();
-        }
-
-        public boolean hasAnchor() { 
-          return this.anchor != null && !this.anchor.isEmpty();
-        }
-
-        /**
-         * @param value {@link #anchor} (An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.). This is the underlying object with id, value and extensions. The accessor "getAnchor" gives direct access to the value
-         */
-        public GuidanceResponseActionRelatedActionComponent setAnchorElement(CodeType value) { 
-          this.anchor = value;
-          return this;
-        }
-
-        /**
-         * @return An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.
-         */
-        public String getAnchor() { 
-          return this.anchor == null ? null : this.anchor.getValue();
-        }
-
-        /**
-         * @param value An optional indicator for how the relationship is anchored to the related action. For example "before the start" or "before the end" of the related action.
-         */
-        public GuidanceResponseActionRelatedActionComponent setAnchor(String value) { 
-          if (Utilities.noString(value))
-            this.anchor = null;
-          else {
-            if (this.anchor == null)
-              this.anchor = new CodeType();
-            this.anchor.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #timing} (An optional value describing when the action should be performed.)
-         */
-        public Type getTiming() { 
-          return this.timing;
-        }
-
-        /**
-         * @return {@link #timing} (An optional value describing when the action should be performed.)
-         */
-        public DateTimeType getTimingDateTimeType() throws FHIRException { 
-          if (!(this.timing instanceof DateTimeType))
-            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
-          return (DateTimeType) this.timing;
-        }
-
-        public boolean hasTimingDateTimeType() { 
-          return this.timing instanceof DateTimeType;
-        }
-
-        /**
-         * @return {@link #timing} (An optional value describing when the action should be performed.)
-         */
-        public Period getTimingPeriod() throws FHIRException { 
-          if (!(this.timing instanceof Period))
-            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
-          return (Period) this.timing;
-        }
-
-        public boolean hasTimingPeriod() { 
-          return this.timing instanceof Period;
-        }
-
-        /**
-         * @return {@link #timing} (An optional value describing when the action should be performed.)
-         */
-        public Duration getTimingDuration() throws FHIRException { 
-          if (!(this.timing instanceof Duration))
-            throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.timing.getClass().getName()+" was encountered");
-          return (Duration) this.timing;
-        }
-
-        public boolean hasTimingDuration() { 
-          return this.timing instanceof Duration;
-        }
-
-        /**
-         * @return {@link #timing} (An optional value describing when the action should be performed.)
-         */
-        public Range getTimingRange() throws FHIRException { 
-          if (!(this.timing instanceof Range))
-            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.timing.getClass().getName()+" was encountered");
-          return (Range) this.timing;
-        }
-
-        public boolean hasTimingRange() { 
-          return this.timing instanceof Range;
-        }
-
-        public boolean hasTiming() { 
-          return this.timing != null && !this.timing.isEmpty();
-        }
-
-        /**
-         * @param value {@link #timing} (An optional value describing when the action should be performed.)
-         */
-        public GuidanceResponseActionRelatedActionComponent setTiming(Type value) { 
-          this.timing = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("actionIdentifier", "Identifier", "The unique identifier of the related action.", 0, java.lang.Integer.MAX_VALUE, actionIdentifier));
-          childrenList.add(new Property("relationship", "code", "The relationship of this action to the related action.", 0, java.lang.Integer.MAX_VALUE, relationship));
-          childrenList.add(new Property("offset[x]", "Duration|Range", "A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.", 0, java.lang.Integer.MAX_VALUE, offset));
-          childrenList.add(new Property("anchor", "code", "An optional indicator for how the relationship is anchored to the related action. For example \"before the start\" or \"before the end\" of the related action.", 0, java.lang.Integer.MAX_VALUE, anchor));
-          childrenList.add(new Property("timing[x]", "dateTime|Period|Duration|Range", "An optional value describing when the action should be performed.", 0, java.lang.Integer.MAX_VALUE, timing));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -889046145: /*actionIdentifier*/ return this.actionIdentifier == null ? new Base[0] : new Base[] {this.actionIdentifier}; // Identifier
-        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeType
-        case -1019779949: /*offset*/ return this.offset == null ? new Base[0] : new Base[] {this.offset}; // Type
-        case -1413299531: /*anchor*/ return this.anchor == null ? new Base[0] : new Base[] {this.anchor}; // CodeType
-        case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -889046145: // actionIdentifier
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-          break;
-        case -261851592: // relationship
-          this.relationship = castToCode(value); // CodeType
-          break;
-        case -1019779949: // offset
-          this.offset = (Type) value; // Type
-          break;
-        case -1413299531: // anchor
-          this.anchor = castToCode(value); // CodeType
-          break;
-        case -873664438: // timing
-          this.timing = (Type) value; // Type
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("actionIdentifier"))
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-        else if (name.equals("relationship"))
-          this.relationship = castToCode(value); // CodeType
-        else if (name.equals("offset[x]"))
-          this.offset = (Type) value; // Type
-        else if (name.equals("anchor"))
-          this.anchor = castToCode(value); // CodeType
-        else if (name.equals("timing[x]"))
-          this.timing = (Type) value; // Type
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -889046145:  return getActionIdentifier(); // Identifier
-        case -261851592: throw new FHIRException("Cannot make property relationship as it is not a complex type"); // CodeType
-        case -1960684787:  return getOffset(); // Type
-        case -1413299531: throw new FHIRException("Cannot make property anchor as it is not a complex type"); // CodeType
-        case 164632566:  return getTiming(); // Type
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("actionIdentifier")) {
-          this.actionIdentifier = new Identifier();
-          return this.actionIdentifier;
-        }
-        else if (name.equals("relationship")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.relationship");
-        }
-        else if (name.equals("offsetDuration")) {
-          this.offset = new Duration();
-          return this.offset;
-        }
-        else if (name.equals("offsetRange")) {
-          this.offset = new Range();
-          return this.offset;
-        }
-        else if (name.equals("anchor")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.anchor");
-        }
-        else if (name.equals("timingDateTime")) {
-          this.timing = new DateTimeType();
-          return this.timing;
-        }
-        else if (name.equals("timingPeriod")) {
-          this.timing = new Period();
-          return this.timing;
-        }
-        else if (name.equals("timingDuration")) {
-          this.timing = new Duration();
-          return this.timing;
-        }
-        else if (name.equals("timingRange")) {
-          this.timing = new Range();
-          return this.timing;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public GuidanceResponseActionRelatedActionComponent copy() {
-        GuidanceResponseActionRelatedActionComponent dst = new GuidanceResponseActionRelatedActionComponent();
-        copyValues(dst);
-        dst.actionIdentifier = actionIdentifier == null ? null : actionIdentifier.copy();
-        dst.relationship = relationship == null ? null : relationship.copy();
-        dst.offset = offset == null ? null : offset.copy();
-        dst.anchor = anchor == null ? null : anchor.copy();
-        dst.timing = timing == null ? null : timing.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof GuidanceResponseActionRelatedActionComponent))
-          return false;
-        GuidanceResponseActionRelatedActionComponent o = (GuidanceResponseActionRelatedActionComponent) other;
-        return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(offset, o.offset, true) && compareDeep(anchor, o.anchor, true) && compareDeep(timing, o.timing, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof GuidanceResponseActionRelatedActionComponent))
-          return false;
-        GuidanceResponseActionRelatedActionComponent o = (GuidanceResponseActionRelatedActionComponent) other;
-        return compareValues(relationship, o.relationship, true) && compareValues(anchor, o.anchor, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, relationship
-          , offset, anchor, timing);
-      }
-
-  public String fhirType() {
-    return "GuidanceResponse.action.relatedAction";
-
-  }
-
-  }
-
-    @Block()
-    public static class GuidanceResponseActionBehaviorComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The type of the behavior to be described, such as grouping, visual, or selection behaviors.
-         */
-        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The type of behavior (grouping, precheck, selection, cardinality, etc)", formalDefinition="The type of the behavior to be described, such as grouping, visual, or selection behaviors." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-behavior-type")
-        protected Coding type;
-
-        /**
-         * The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.
-         */
-        @Child(name = "value", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Specific behavior (e.g. required, at-most-one, single, etc)", formalDefinition="The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset." )
-        protected Coding value;
-
-        private static final long serialVersionUID = -1054119695L;
-
-    /**
-     * Constructor
-     */
-      public GuidanceResponseActionBehaviorComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public GuidanceResponseActionBehaviorComponent(Coding type, Coding value) {
-        super();
-        this.type = type;
-        this.value = value;
-      }
-
-        /**
-         * @return {@link #type} (The type of the behavior to be described, such as grouping, visual, or selection behaviors.)
-         */
-        public Coding getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionBehaviorComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of the behavior to be described, such as grouping, visual, or selection behaviors.)
-         */
-        public GuidanceResponseActionBehaviorComponent setType(Coding value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.)
-         */
-        public Coding getValue() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create GuidanceResponseActionBehaviorComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new Coding(); // cc
-          return this.value;
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.)
-         */
-        public GuidanceResponseActionBehaviorComponent setValue(Coding value) { 
-          this.value = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "The type of the behavior to be described, such as grouping, visual, or selection behaviors.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("value", "Coding", "The specific behavior. The code used here is determined by the type of behavior being described. For example, the grouping behavior uses the grouping-behavior-type valueset.", 0, java.lang.Integer.MAX_VALUE, value));
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Coding
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = castToCoding(value); // Coding
-          break;
-        case 111972721: // value
-          this.value = castToCoding(value); // Coding
-          break;
-        default: super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = castToCoding(value); // Coding
-        else if (name.equals("value"))
-          this.value = castToCoding(value); // Coding
-        else
-          super.setProperty(name, value);
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getType(); // Coding
-        case 111972721:  return getValue(); // Coding
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new Coding();
-          return this.type;
-        }
-        else if (name.equals("value")) {
-          this.value = new Coding();
-          return this.value;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public GuidanceResponseActionBehaviorComponent copy() {
-        GuidanceResponseActionBehaviorComponent dst = new GuidanceResponseActionBehaviorComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof GuidanceResponseActionBehaviorComponent))
-          return false;
-        GuidanceResponseActionBehaviorComponent o = (GuidanceResponseActionBehaviorComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof GuidanceResponseActionBehaviorComponent))
-          return false;
-        GuidanceResponseActionBehaviorComponent o = (GuidanceResponseActionBehaviorComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, value);
-      }
-
-  public String fhirType() {
-    return "GuidanceResponse.action.behavior";
-
-  }
-
-  }
-
     /**
      * The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.
      */
-    @Child(name = "requestId", type = {StringType.class}, order=0, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestId", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The id of the request associated with this response, if any", formalDefinition="The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario." )
-    protected StringType requestId;
+    protected IdType requestId;
+
+    /**
+     * Allows a service to provide a unique, business identifier for the response.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Business identifier", formalDefinition="Allows a service to provide a unique, business identifier for the response." )
+    protected Identifier identifier;
 
     /**
      * A reference to the knowledge module that was invoked.
      */
-    @Child(name = "module", type = {DecisionSupportServiceModule.class, DecisionSupportRule.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "module", type = {ServiceDefinition.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="A reference to a knowledge module", formalDefinition="A reference to the knowledge module that was invoked." )
     protected Reference module;
 
     /**
      * The actual object that is the target of the reference (A reference to the knowledge module that was invoked.)
      */
-    protected Resource moduleTarget;
+    protected ServiceDefinition moduleTarget;
 
     /**
      * The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="success | data-requested | data-required | in-progress | failure", formalDefinition="The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/guidance-response-status")
     protected Enumeration<GuidanceResponseStatus> status;
 
     /**
+     * The patient for which the request was processed.
+     */
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Patient the request was performed for", formalDefinition="The patient for which the request was processed." )
+    protected Reference subject;
+
+    /**
+     * The actual object that is the target of the reference (The patient for which the request was processed.)
+     */
+    protected Resource subjectTarget;
+
+    /**
+     * Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.
+     */
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Encounter or Episode during which the response was returned", formalDefinition="Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable." )
+    protected Reference context;
+
+    /**
+     * The actual object that is the target of the reference (Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.)
+     */
+    protected Resource contextTarget;
+
+    /**
+     * Indicates when the guidance response was processed.
+     */
+    @Child(name = "occurrenceDateTime", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="When the guidance response was processed", formalDefinition="Indicates when the guidance response was processed." )
+    protected DateTimeType occurrenceDateTime;
+
+    /**
+     * Provides a reference to the device that performed the guidance.
+     */
+    @Child(name = "performer", type = {Device.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Device returning the guidance", formalDefinition="Provides a reference to the device that performed the guidance." )
+    protected Reference performer;
+
+    /**
+     * The actual object that is the target of the reference (Provides a reference to the device that performed the guidance.)
+     */
+    protected Device performerTarget;
+
+    /**
+     * Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.
+     */
+    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Reason for the response", formalDefinition="Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response." )
+    protected Type reason;
+
+    /**
+     * Provides a mechanism to communicate additional information about the response.
+     */
+    @Child(name = "note", type = {Annotation.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Additional notes about the response", formalDefinition="Provides a mechanism to communicate additional information about the response." )
+    protected List<Annotation> note;
+
+    /**
      * Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.
      */
-    @Child(name = "evaluationMessage", type = {OperationOutcome.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "evaluationMessage", type = {OperationOutcome.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Messages resulting from the evaluation of the artifact or artifacts", formalDefinition="Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element." )
     protected List<Reference> evaluationMessage;
     /**
@@ -1924,7 +292,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.
      */
-    @Child(name = "outputParameters", type = {Parameters.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "outputParameters", type = {Parameters.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The output parameters of the evaluation, if any", formalDefinition="The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element." )
     protected Reference outputParameters;
 
@@ -1936,18 +304,23 @@ public class GuidanceResponse extends DomainResource {
     /**
      * The actions, if any, produced by the evaluation of the artifact.
      */
-    @Child(name = "action", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "result", type = {CarePlan.class, RequestGroup.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Proposed actions, if any", formalDefinition="The actions, if any, produced by the evaluation of the artifact." )
-    protected List<GuidanceResponseActionComponent> action;
+    protected Reference result;
+
+    /**
+     * The actual object that is the target of the reference (The actions, if any, produced by the evaluation of the artifact.)
+     */
+    protected Resource resultTarget;
 
     /**
      * If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.
      */
-    @Child(name = "dataRequirement", type = {DataRequirement.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dataRequirement", type = {DataRequirement.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional required data", formalDefinition="If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data." )
     protected List<DataRequirement> dataRequirement;
 
-    private static final long serialVersionUID = -918912174L;
+    private static final long serialVersionUID = -2107029772L;
 
   /**
    * Constructor
@@ -1968,12 +341,12 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @return {@link #requestId} (The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.). This is the underlying object with id, value and extensions. The accessor "getRequestId" gives direct access to the value
      */
-    public StringType getRequestIdElement() { 
+    public IdType getRequestIdElement() { 
       if (this.requestId == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create GuidanceResponse.requestId");
         else if (Configuration.doAutoCreate())
-          this.requestId = new StringType(); // bb
+          this.requestId = new IdType(); // bb
       return this.requestId;
     }
 
@@ -1988,7 +361,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #requestId} (The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.). This is the underlying object with id, value and extensions. The accessor "getRequestId" gives direct access to the value
      */
-    public GuidanceResponse setRequestIdElement(StringType value) { 
+    public GuidanceResponse setRequestIdElement(IdType value) { 
       this.requestId = value;
       return this;
     }
@@ -2008,9 +381,33 @@ public class GuidanceResponse extends DomainResource {
         this.requestId = null;
       else {
         if (this.requestId == null)
-          this.requestId = new StringType();
+          this.requestId = new IdType();
         this.requestId.setValue(value);
       }
+      return this;
+    }
+
+    /**
+     * @return {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
+     */
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.identifier");
+        else if (Configuration.doAutoCreate())
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
+     */
+    public GuidanceResponse setIdentifier(Identifier value) { 
+      this.identifier = value;
       return this;
     }
 
@@ -2041,14 +438,19 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @return {@link #module} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the knowledge module that was invoked.)
      */
-    public Resource getModuleTarget() { 
+    public ServiceDefinition getModuleTarget() { 
+      if (this.moduleTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.module");
+        else if (Configuration.doAutoCreate())
+          this.moduleTarget = new ServiceDefinition(); // aa
       return this.moduleTarget;
     }
 
     /**
      * @param value {@link #module} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the knowledge module that was invoked.)
      */
-    public GuidanceResponse setModuleTarget(Resource value) { 
+    public GuidanceResponse setModuleTarget(ServiceDefinition value) { 
       this.moduleTarget = value;
       return this;
     }
@@ -2096,6 +498,275 @@ public class GuidanceResponse extends DomainResource {
           this.status = new Enumeration<GuidanceResponseStatus>(new GuidanceResponseStatusEnumFactory());
         this.status.setValue(value);
       return this;
+    }
+
+    /**
+     * @return {@link #subject} (The patient for which the request was processed.)
+     */
+    public Reference getSubject() { 
+      if (this.subject == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.subject");
+        else if (Configuration.doAutoCreate())
+          this.subject = new Reference(); // cc
+      return this.subject;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (The patient for which the request was processed.)
+     */
+    public GuidanceResponse setSubject(Reference value) { 
+      this.subject = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient for which the request was processed.)
+     */
+    public Resource getSubjectTarget() { 
+      return this.subjectTarget;
+    }
+
+    /**
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient for which the request was processed.)
+     */
+    public GuidanceResponse setSubjectTarget(Resource value) { 
+      this.subjectTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #context} (Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.)
+     */
+    public Reference getContext() { 
+      if (this.context == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.context");
+        else if (Configuration.doAutoCreate())
+          this.context = new Reference(); // cc
+      return this.context;
+    }
+
+    public boolean hasContext() { 
+      return this.context != null && !this.context.isEmpty();
+    }
+
+    /**
+     * @param value {@link #context} (Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.)
+     */
+    public GuidanceResponse setContext(Reference value) { 
+      this.context = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.)
+     */
+    public Resource getContextTarget() { 
+      return this.contextTarget;
+    }
+
+    /**
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.)
+     */
+    public GuidanceResponse setContextTarget(Resource value) { 
+      this.contextTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #occurrenceDateTime} (Indicates when the guidance response was processed.). This is the underlying object with id, value and extensions. The accessor "getOccurrenceDateTime" gives direct access to the value
+     */
+    public DateTimeType getOccurrenceDateTimeElement() { 
+      if (this.occurrenceDateTime == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.occurrenceDateTime");
+        else if (Configuration.doAutoCreate())
+          this.occurrenceDateTime = new DateTimeType(); // bb
+      return this.occurrenceDateTime;
+    }
+
+    public boolean hasOccurrenceDateTimeElement() { 
+      return this.occurrenceDateTime != null && !this.occurrenceDateTime.isEmpty();
+    }
+
+    public boolean hasOccurrenceDateTime() { 
+      return this.occurrenceDateTime != null && !this.occurrenceDateTime.isEmpty();
+    }
+
+    /**
+     * @param value {@link #occurrenceDateTime} (Indicates when the guidance response was processed.). This is the underlying object with id, value and extensions. The accessor "getOccurrenceDateTime" gives direct access to the value
+     */
+    public GuidanceResponse setOccurrenceDateTimeElement(DateTimeType value) { 
+      this.occurrenceDateTime = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates when the guidance response was processed.
+     */
+    public Date getOccurrenceDateTime() { 
+      return this.occurrenceDateTime == null ? null : this.occurrenceDateTime.getValue();
+    }
+
+    /**
+     * @param value Indicates when the guidance response was processed.
+     */
+    public GuidanceResponse setOccurrenceDateTime(Date value) { 
+      if (value == null)
+        this.occurrenceDateTime = null;
+      else {
+        if (this.occurrenceDateTime == null)
+          this.occurrenceDateTime = new DateTimeType();
+        this.occurrenceDateTime.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #performer} (Provides a reference to the device that performed the guidance.)
+     */
+    public Reference getPerformer() { 
+      if (this.performer == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.performer");
+        else if (Configuration.doAutoCreate())
+          this.performer = new Reference(); // cc
+      return this.performer;
+    }
+
+    public boolean hasPerformer() { 
+      return this.performer != null && !this.performer.isEmpty();
+    }
+
+    /**
+     * @param value {@link #performer} (Provides a reference to the device that performed the guidance.)
+     */
+    public GuidanceResponse setPerformer(Reference value) { 
+      this.performer = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #performer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Provides a reference to the device that performed the guidance.)
+     */
+    public Device getPerformerTarget() { 
+      if (this.performerTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.performer");
+        else if (Configuration.doAutoCreate())
+          this.performerTarget = new Device(); // aa
+      return this.performerTarget;
+    }
+
+    /**
+     * @param value {@link #performer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Provides a reference to the device that performed the guidance.)
+     */
+    public GuidanceResponse setPerformerTarget(Device value) { 
+      this.performerTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     */
+    public Type getReason() { 
+      return this.reason;
+    }
+
+    /**
+     * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     */
+    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
+      if (!(this.reason instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.reason;
+    }
+
+    public boolean hasReasonCodeableConcept() { 
+      return this.reason instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     */
+    public Reference getReasonReference() throws FHIRException { 
+      if (!(this.reason instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (Reference) this.reason;
+    }
+
+    public boolean hasReasonReference() { 
+      return this.reason instanceof Reference;
+    }
+
+    public boolean hasReason() { 
+      return this.reason != null && !this.reason.isEmpty();
+    }
+
+    /**
+     * @param value {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     */
+    public GuidanceResponse setReason(Type value) { 
+      this.reason = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #note} (Provides a mechanism to communicate additional information about the response.)
+     */
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public GuidanceResponse setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    public GuidanceResponse addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
     }
 
     /**
@@ -2218,56 +889,42 @@ public class GuidanceResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #action} (The actions, if any, produced by the evaluation of the artifact.)
+     * @return {@link #result} (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public List<GuidanceResponseActionComponent> getAction() { 
-      if (this.action == null)
-        this.action = new ArrayList<GuidanceResponseActionComponent>();
-      return this.action;
+    public Reference getResult() { 
+      if (this.result == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create GuidanceResponse.result");
+        else if (Configuration.doAutoCreate())
+          this.result = new Reference(); // cc
+      return this.result;
+    }
+
+    public boolean hasResult() { 
+      return this.result != null && !this.result.isEmpty();
     }
 
     /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
+     * @param value {@link #result} (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public GuidanceResponse setAction(List<GuidanceResponseActionComponent> theAction) { 
-      this.action = theAction;
-      return this;
-    }
-
-    public boolean hasAction() { 
-      if (this.action == null)
-        return false;
-      for (GuidanceResponseActionComponent item : this.action)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public GuidanceResponseActionComponent addAction() { //3
-      GuidanceResponseActionComponent t = new GuidanceResponseActionComponent();
-      if (this.action == null)
-        this.action = new ArrayList<GuidanceResponseActionComponent>();
-      this.action.add(t);
-      return t;
-    }
-
-    public GuidanceResponse addAction(GuidanceResponseActionComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.action == null)
-        this.action = new ArrayList<GuidanceResponseActionComponent>();
-      this.action.add(t);
+    public GuidanceResponse setResult(Reference value) { 
+      this.result = value;
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #action}, creating it if it does not already exist
+     * @return {@link #result} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public GuidanceResponseActionComponent getActionFirstRep() { 
-      if (getAction().isEmpty()) {
-        addAction();
-      }
-      return getAction().get(0);
+    public Resource getResultTarget() { 
+      return this.resultTarget;
+    }
+
+    /**
+     * @param value {@link #result} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The actions, if any, produced by the evaluation of the artifact.)
+     */
+    public GuidanceResponse setResultTarget(Resource value) { 
+      this.resultTarget = value;
+      return this;
     }
 
     /**
@@ -2325,24 +982,38 @@ public class GuidanceResponse extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("requestId", "string", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, java.lang.Integer.MAX_VALUE, requestId));
-        childrenList.add(new Property("module", "Reference(DecisionSupportServiceModule|DecisionSupportRule)", "A reference to the knowledge module that was invoked.", 0, java.lang.Integer.MAX_VALUE, module));
+        childrenList.add(new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, java.lang.Integer.MAX_VALUE, requestId));
+        childrenList.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("module", "Reference(ServiceDefinition)", "A reference to the knowledge module that was invoked.", 0, java.lang.Integer.MAX_VALUE, module));
         childrenList.add(new Property("status", "code", "The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient for which the request was processed.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.", 0, java.lang.Integer.MAX_VALUE, context));
+        childrenList.add(new Property("occurrenceDateTime", "dateTime", "Indicates when the guidance response was processed.", 0, java.lang.Integer.MAX_VALUE, occurrenceDateTime));
+        childrenList.add(new Property("performer", "Reference(Device)", "Provides a reference to the device that performed the guidance.", 0, java.lang.Integer.MAX_VALUE, performer));
+        childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("evaluationMessage", "Reference(OperationOutcome)", "Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.", 0, java.lang.Integer.MAX_VALUE, evaluationMessage));
         childrenList.add(new Property("outputParameters", "Reference(Parameters)", "The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.", 0, java.lang.Integer.MAX_VALUE, outputParameters));
-        childrenList.add(new Property("action", "", "The actions, if any, produced by the evaluation of the artifact.", 0, java.lang.Integer.MAX_VALUE, action));
+        childrenList.add(new Property("result", "Reference(CarePlan|RequestGroup)", "The actions, if any, produced by the evaluation of the artifact.", 0, java.lang.Integer.MAX_VALUE, result));
         childrenList.add(new Property("dataRequirement", "DataRequirement", "If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.", 0, java.lang.Integer.MAX_VALUE, dataRequirement));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 693933066: /*requestId*/ return this.requestId == null ? new Base[0] : new Base[] {this.requestId}; // StringType
+        case 693933066: /*requestId*/ return this.requestId == null ? new Base[0] : new Base[] {this.requestId}; // IdType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case -1068784020: /*module*/ return this.module == null ? new Base[0] : new Base[] {this.module}; // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<GuidanceResponseStatus>
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case -298443636: /*occurrenceDateTime*/ return this.occurrenceDateTime == null ? new Base[0] : new Base[] {this.occurrenceDateTime}; // DateTimeType
+        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
+        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case 1081619755: /*evaluationMessage*/ return this.evaluationMessage == null ? new Base[0] : this.evaluationMessage.toArray(new Base[this.evaluationMessage.size()]); // Reference
         case 525609419: /*outputParameters*/ return this.outputParameters == null ? new Base[0] : new Base[] {this.outputParameters}; // Reference
-        case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // GuidanceResponseActionComponent
+        case -934426595: /*result*/ return this.result == null ? new Base[0] : new Base[] {this.result}; // Reference
         case 629147193: /*dataRequirement*/ return this.dataRequirement == null ? new Base[0] : this.dataRequirement.toArray(new Base[this.dataRequirement.size()]); // DataRequirement
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2353,7 +1024,10 @@ public class GuidanceResponse extends DomainResource {
       public void setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 693933066: // requestId
-          this.requestId = castToString(value); // StringType
+          this.requestId = castToId(value); // IdType
+          break;
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           break;
         case -1068784020: // module
           this.module = castToReference(value); // Reference
@@ -2361,14 +1035,32 @@ public class GuidanceResponse extends DomainResource {
         case -892481550: // status
           this.status = new GuidanceResponseStatusEnumFactory().fromType(value); // Enumeration<GuidanceResponseStatus>
           break;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
+          break;
+        case 951530927: // context
+          this.context = castToReference(value); // Reference
+          break;
+        case -298443636: // occurrenceDateTime
+          this.occurrenceDateTime = castToDateTime(value); // DateTimeType
+          break;
+        case 481140686: // performer
+          this.performer = castToReference(value); // Reference
+          break;
+        case -934964668: // reason
+          this.reason = castToType(value); // Type
+          break;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
+          break;
         case 1081619755: // evaluationMessage
           this.getEvaluationMessage().add(castToReference(value)); // Reference
           break;
         case 525609419: // outputParameters
           this.outputParameters = castToReference(value); // Reference
           break;
-        case -1422950858: // action
-          this.getAction().add((GuidanceResponseActionComponent) value); // GuidanceResponseActionComponent
+        case -934426595: // result
+          this.result = castToReference(value); // Reference
           break;
         case 629147193: // dataRequirement
           this.getDataRequirement().add(castToDataRequirement(value)); // DataRequirement
@@ -2381,17 +1073,31 @@ public class GuidanceResponse extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("requestId"))
-          this.requestId = castToString(value); // StringType
+          this.requestId = castToId(value); // IdType
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
         else if (name.equals("module"))
           this.module = castToReference(value); // Reference
         else if (name.equals("status"))
           this.status = new GuidanceResponseStatusEnumFactory().fromType(value); // Enumeration<GuidanceResponseStatus>
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("context"))
+          this.context = castToReference(value); // Reference
+        else if (name.equals("occurrenceDateTime"))
+          this.occurrenceDateTime = castToDateTime(value); // DateTimeType
+        else if (name.equals("performer"))
+          this.performer = castToReference(value); // Reference
+        else if (name.equals("reason[x]"))
+          this.reason = castToType(value); // Type
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
         else if (name.equals("evaluationMessage"))
           this.getEvaluationMessage().add(castToReference(value));
         else if (name.equals("outputParameters"))
           this.outputParameters = castToReference(value); // Reference
-        else if (name.equals("action"))
-          this.getAction().add((GuidanceResponseActionComponent) value);
+        else if (name.equals("result"))
+          this.result = castToReference(value); // Reference
         else if (name.equals("dataRequirement"))
           this.getDataRequirement().add(castToDataRequirement(value));
         else
@@ -2401,12 +1107,19 @@ public class GuidanceResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 693933066: throw new FHIRException("Cannot make property requestId as it is not a complex type"); // StringType
+        case 693933066: throw new FHIRException("Cannot make property requestId as it is not a complex type"); // IdType
+        case -1618432855:  return getIdentifier(); // Identifier
         case -1068784020:  return getModule(); // Reference
         case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<GuidanceResponseStatus>
+        case -1867885268:  return getSubject(); // Reference
+        case 951530927:  return getContext(); // Reference
+        case -298443636: throw new FHIRException("Cannot make property occurrenceDateTime as it is not a complex type"); // DateTimeType
+        case 481140686:  return getPerformer(); // Reference
+        case -669418564:  return getReason(); // Type
+        case 3387378:  return addNote(); // Annotation
         case 1081619755:  return addEvaluationMessage(); // Reference
         case 525609419:  return getOutputParameters(); // Reference
-        case -1422950858:  return addAction(); // GuidanceResponseActionComponent
+        case -934426595:  return getResult(); // Reference
         case 629147193:  return addDataRequirement(); // DataRequirement
         default: return super.makeProperty(hash, name);
         }
@@ -2418,12 +1131,42 @@ public class GuidanceResponse extends DomainResource {
         if (name.equals("requestId")) {
           throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.requestId");
         }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
         else if (name.equals("module")) {
           this.module = new Reference();
           return this.module;
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.status");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("context")) {
+          this.context = new Reference();
+          return this.context;
+        }
+        else if (name.equals("occurrenceDateTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.occurrenceDateTime");
+        }
+        else if (name.equals("performer")) {
+          this.performer = new Reference();
+          return this.performer;
+        }
+        else if (name.equals("reasonCodeableConcept")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("reasonReference")) {
+          this.reason = new Reference();
+          return this.reason;
+        }
+        else if (name.equals("note")) {
+          return addNote();
         }
         else if (name.equals("evaluationMessage")) {
           return addEvaluationMessage();
@@ -2432,8 +1175,9 @@ public class GuidanceResponse extends DomainResource {
           this.outputParameters = new Reference();
           return this.outputParameters;
         }
-        else if (name.equals("action")) {
-          return addAction();
+        else if (name.equals("result")) {
+          this.result = new Reference();
+          return this.result;
         }
         else if (name.equals("dataRequirement")) {
           return addDataRequirement();
@@ -2451,19 +1195,26 @@ public class GuidanceResponse extends DomainResource {
         GuidanceResponse dst = new GuidanceResponse();
         copyValues(dst);
         dst.requestId = requestId == null ? null : requestId.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.module = module == null ? null : module.copy();
         dst.status = status == null ? null : status.copy();
+        dst.subject = subject == null ? null : subject.copy();
+        dst.context = context == null ? null : context.copy();
+        dst.occurrenceDateTime = occurrenceDateTime == null ? null : occurrenceDateTime.copy();
+        dst.performer = performer == null ? null : performer.copy();
+        dst.reason = reason == null ? null : reason.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         if (evaluationMessage != null) {
           dst.evaluationMessage = new ArrayList<Reference>();
           for (Reference i : evaluationMessage)
             dst.evaluationMessage.add(i.copy());
         };
         dst.outputParameters = outputParameters == null ? null : outputParameters.copy();
-        if (action != null) {
-          dst.action = new ArrayList<GuidanceResponseActionComponent>();
-          for (GuidanceResponseActionComponent i : action)
-            dst.action.add(i.copy());
-        };
+        dst.result = result == null ? null : result.copy();
         if (dataRequirement != null) {
           dst.dataRequirement = new ArrayList<DataRequirement>();
           for (DataRequirement i : dataRequirement)
@@ -2483,9 +1234,12 @@ public class GuidanceResponse extends DomainResource {
         if (!(other instanceof GuidanceResponse))
           return false;
         GuidanceResponse o = (GuidanceResponse) other;
-        return compareDeep(requestId, o.requestId, true) && compareDeep(module, o.module, true) && compareDeep(status, o.status, true)
+        return compareDeep(requestId, o.requestId, true) && compareDeep(identifier, o.identifier, true)
+           && compareDeep(module, o.module, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(context, o.context, true) && compareDeep(occurrenceDateTime, o.occurrenceDateTime, true)
+           && compareDeep(performer, o.performer, true) && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true)
            && compareDeep(evaluationMessage, o.evaluationMessage, true) && compareDeep(outputParameters, o.outputParameters, true)
-           && compareDeep(action, o.action, true) && compareDeep(dataRequirement, o.dataRequirement, true)
+           && compareDeep(result, o.result, true) && compareDeep(dataRequirement, o.dataRequirement, true)
           ;
       }
 
@@ -2496,18 +1250,72 @@ public class GuidanceResponse extends DomainResource {
         if (!(other instanceof GuidanceResponse))
           return false;
         GuidanceResponse o = (GuidanceResponse) other;
-        return compareValues(requestId, o.requestId, true) && compareValues(status, o.status, true);
+        return compareValues(requestId, o.requestId, true) && compareValues(status, o.status, true) && compareValues(occurrenceDateTime, o.occurrenceDateTime, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(requestId, module, status
-          , evaluationMessage, outputParameters, action, dataRequirement);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(requestId, identifier, module
+          , status, subject, context, occurrenceDateTime, performer, reason, note, evaluationMessage
+          , outputParameters, result, dataRequirement);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.GuidanceResponse;
    }
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to search for guidance response results</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>GuidanceResponse.subject</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient", path="GuidanceResponse.subject", description="The identity of a patient to search for guidance response results", type="reference", target={Patient.class } )
+  public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to search for guidance response results</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>GuidanceResponse.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>GuidanceResponse:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("GuidanceResponse:patient").toLocked();
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>The subject that the guidance response is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>GuidanceResponse.subject</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="subject", path="GuidanceResponse.subject", description="The subject that the guidance response is about", type="reference", target={Group.class, Patient.class } )
+  public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>The subject that the guidance response is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>GuidanceResponse.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>GuidanceResponse:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("GuidanceResponse:subject").toLocked();
 
 
 }

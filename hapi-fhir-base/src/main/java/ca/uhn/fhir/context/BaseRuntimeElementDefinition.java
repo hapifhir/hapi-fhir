@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,7 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -134,6 +130,11 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	 */
 	public String getName() {
 		return myName;
+	}
+
+	public boolean hasExtensions() {
+		validateSealed();
+		return myExtensions.size() > 0;
 	}
 
 	public boolean isStandardType() {

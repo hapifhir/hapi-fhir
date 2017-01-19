@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,20 +46,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.AddTags;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.DeleteTags;
-import ca.uhn.fhir.rest.annotation.GetPage;
-import ca.uhn.fhir.rest.annotation.GetTags;
-import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.annotation.Metadata;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
@@ -116,7 +103,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	}
 
-	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) {
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
 		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
 		if (encoding == null) {
 			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -125,6 +112,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		}
 
 		IParser parser = encoding.newParser(getContext());
+		
+		parser.setPreferTypes(thePreferTypes);
+		
 		return parser;
 	}
 
@@ -325,7 +315,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			ex = new PreconditionFailedException("Server responded with HTTP 412");
 			break;
 		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode);
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode, null);
 			// TODO: handle if something other than OO comes back
 			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseReader);
 			ex = new UnprocessableEntityException(myContext, operationOutcome);
@@ -384,9 +374,10 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		Transaction transaction = theMethod.getAnnotation(Transaction.class);
 		Operation operation = theMethod.getAnnotation(Operation.class);
 		GetPage getPage = theMethod.getAnnotation(GetPage.class);
+		Patch patch = theMethod.getAnnotation(Patch.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction, operation, getPage)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction, operation, getPage, patch)) {
 			return null;
 		}
 
@@ -411,7 +402,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from type " + theMethod.getDeclaringClass().getCanonicalName() + " is annotated with @"
 						+ GetTags.class.getSimpleName() + " but does not return type " + TagList.class.getName());
 			}
-		} else if (MethodOutcome.class.equals(returnTypeFromMethod)) {
+		} else if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a method outcome
 		} else if (IBundleProvider.class.equals(returnTypeFromMethod)) {
 			// returns a bundle provider
@@ -445,6 +436,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			returnTypeFromAnnotation = history.type();
 		} else if (delete != null) {
 			returnTypeFromAnnotation = delete.type();
+		} else if (patch != null) {
+			returnTypeFromAnnotation = patch.type();
 		} else if (create != null) {
 			returnTypeFromAnnotation = create.type();
 		} else if (update != null) {
@@ -510,6 +503,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return new UpdateMethodBinding(theMethod, theContext, theProvider);
 		} else if (delete != null) {
 			return new DeleteMethodBinding(theMethod, theContext, theProvider);
+		} else if (patch != null) {
+			return new PatchMethodBinding(theMethod, theContext, theProvider);
 		} else if (history != null) {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {

@@ -6,12 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.elementmodel.Element.SpecialElement;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
@@ -191,8 +190,22 @@ public class Element extends Base {
   	return null;
 	}
 
+  public void setChildValue(String name, String value) {
+    if (children == null)
+      children = new ArrayList<Element>();
+    for (Element child : children) {
+      if (name.equals(child.getName())) {
+        if (!child.isPrimitive())
+          throw new Error("Cannot set a value of a non-primitive type ("+name+" on "+this.getName()+")");
+        child.setValue(value);
+      }
+    }
+    throw new Error("not done yet");
+  }
+
 	public List<Element> getChildren(String name) {
 		List<Element> res = new ArrayList<Element>(); 
+		if (children != null)
 		for (Element child : children) {
 			if (name.equals(child.getName()))
 				res.add(child);
@@ -220,11 +233,13 @@ public class Element extends Base {
   	}
   		
   	List<Base> result = new ArrayList<Base>();
+  	if (children != null) {
   	for (Element child : children) {
   		if (child.getName().equals(name))
   			result.add(child);
   		if (child.getName().startsWith(name) && child.getProperty().isChoice() && child.getProperty().getName().equals(name+"[x]"))
   			result.add(child);
+  	}
   	}
   	if (result.isEmpty() && checkValid) {
 //  		throw new FHIRException("not determined yet");
@@ -233,10 +248,29 @@ public class Element extends Base {
 	}
 
 	@Override
-	protected void listChildren(
-	    List<org.hl7.fhir.dstu3.model.Property> result) {
-	// TODO Auto-generated method stub
+	protected void listChildren(List<org.hl7.fhir.dstu3.model.Property> childProps) {
+	  if (children != null) {
+	    for (Element c : children) {
+	      childProps.add(new org.hl7.fhir.dstu3.model.Property(c.getName(), c.fhirType(), c.getProperty().getDefinition().getDefinition(), c.getProperty().getDefinition().getMin(), maxToInt(c.getProperty().getDefinition().getMax()), c));
+	    }
+	  }
+	}
 	
+  @Override
+  public void setProperty(int hash, String name, Base value) throws FHIRException {
+    throw new Error("not done yet"); 
+  }
+
+  @Override
+  public Base makeProperty(int hash, String name) throws FHIRException {
+    throw new Error("not done yet"); 
+  }
+  
+	private int maxToInt(String max) {
+    if (max.equals("*"))
+      return Integer.MAX_VALUE;
+    else
+      return Integer.parseInt(max);
 	}
 
 	@Override
@@ -244,10 +278,15 @@ public class Element extends Base {
 		return type != null ? property.isPrimitive(type) : property.isPrimitive(property.getType(name));
 	}
 	
+  @Override
+  public boolean isResource() {
+    return property.isResource();
+  }
+  
 
 	@Override
 	public boolean hasPrimitiveValue() {
-		return property.isPrimitive(name) || property.IsLogicalAndHasPrimitiveValue(name);
+		return property.isPrimitiveName(name) || property.IsLogicalAndHasPrimitiveValue(name);
 	}
 	
 
@@ -359,6 +398,22 @@ public class Element extends Base {
     return getNamedChild(name) != null;
   }
 
+  @Override
+  public String toString() {
+    return name+"="+fhirType() + "["+(children == null || hasValue() ? value : Integer.toString(children.size())+" children")+"]";
+  }
+
+  @Override
+  public String getIdBase() {
+    return getChildValue("id");
+  }
+
+  @Override
+  public void setIdBase(String value) {
+    setChildValue("id", value);
+  }
+
+
 //  @Override
 //  public boolean equalsDeep(Base other) {
 //    if (!super.equalsDeep(other))
@@ -372,5 +427,19 @@ public class Element extends Base {
 //      return false;
 //  }
 
+  public Type asType() throws FHIRException {
+    return new ObjectConverter(property.getContext()).convertToType(this);
+  }
 
+  @Override
+  public boolean isMetadataBased() {
+    return true;
+  }
+
+  public boolean isList() {
+    if (elementProperty != null)
+      return elementProperty.isList();
+    else
+      return property.isList();
+  }
 }

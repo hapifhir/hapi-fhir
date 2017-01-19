@@ -3,7 +3,7 @@
 
 	<properties>
 		<title>The Open Source HL7 API for Java</title>
-		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+		<author email="jamesagnew@gmail.com">James Agnew</author>
 	</properties>
 
 	<body>
@@ -61,6 +61,129 @@
 
 		<section name="Announcements">
 			<p>
+				<b>December 20, 2016 - HAPI FHIR 2.2 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release is mainly to bring the STU3 definitions up to the  
+				latest definitions (FHIR 1.8.0 - SVN 10528) and is the version that
+				should be used for the upcoming San Antonio Connectathon.
+			</p>
+			<p>
+				This release also introduces a new JAR (and associated Maven dependency library)
+				called <![CDATA[<code>hapi-fhir-structures-dstu2.1</code>]]>. This module
+				provides the structure classes for FHIR 1.4.0 (Montreal spanshot, sometimes
+				referred to as DSTU2.1)
+				which is used by a number of projects.
+			</p>
+			<p>
+				This release also brings a few miscellaneous bug fixes, and a few
+				validation enhancements. 
+				As always, the <a href="./changes-report.html">changelog</a> has the full list.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+	
+			<p>
+				<b>November 11, 2016 - HAPI FHIR 2.1 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings several primary changes:
+				<ul>
+					<li>
+						STU3 definitions have been updated to the 
+						latest definitions (FHIR 1.7.0 - SVN 10129)
+					</li>
+					<li>
+						Add support for FHIR Patch operation (thanks to
+						Peter Girard of McKesson for his help on this!)
+					</li>
+					<li>
+						Android library has been streamlined to use the
+						OkHttp client by default (no more fighting with
+						out-of-date Apache HttpClient. Thanks to Matt Clarke of Orion Health
+						for his help on this!)
+					</li>
+					<li>
+						The STU3 client now supports both the Conformance resource
+						(which is going away) and the new CapabilityStatement
+						(which replaces it). This should allow for a bridge 
+						while servers are migrated to the new resource type
+						being returned by the <![CDATA[<code>/metadata</code>]]> endpoint.
+					</li>
+				</ul>
+			</p>
+			<p>
+				This release also brings a number of bugfixes and also quite a few enhancements.
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version. Among the enhancements in this release are:
+			</p>
+			<p>
+				As always, we welcome new contributions and contributors! Please feel free to get 
+				in touch if you are interested in getting involved with HAPI but don't know
+				where to start.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+
+
+			<!--
+			<p>
+				<b>August 30, 2016 - HAPI FHIR 2.0 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings several primary changes:
+				<ul>
+					<li>
+						The JSON parser used by HAPI's parser module has been switched
+						from <a href="https://jsonp.java.net/">JSR353/JSONP</a> to 
+						<a href="https://github.com/google/gson">Google GSON</a>. This
+						should be an invisible change for most users (the only thing that
+						broke for us was that a few extra spaces are inserted in pretty-printed
+						encoding and this broke some overly sensitive unit tests). Gson is
+						a much more active project than JSONP and should be better
+						supported in the future.
+					</li>
+					<li>
+						STU3 definitions have been updated to the FHIR 1.6.0
+						2016 September Ballot Candidate definitions
+						 (aka the 2016 Baltimore Connectathon version). 
+					</li>
+					<li>
+						Content-Types emitted by the library have been updated to use
+						the new content type strings proposed for use as of STU3 (when using
+						HAPI in STU3 mode). E.g. <code>application/fhir+xml</code> insead
+						of the previous <code>application/xml+fhir</code>
+					</li>
+				</ul>
+			</p>
+			<p>
+				This release also brings a number of bugfixes and also quite a few enhancements.
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version. Among the enhancements in this release are:
+			</p>
+			<p>
+				As always, we welcome new contributions and contributors! Please feel free to get 
+				in touch if you are interested in getting involved with HAPI but don't know
+				where to start.
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+-->
+			<!--
+			<br/><br/>
+			<p>
 				<b>July 7, 2016 - HAPI FHIR 1.6 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
 				GitHub's releases section.
@@ -111,7 +234,7 @@
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
-
+-->
 			<!--
 			<p>
 				<b>April 20, 2016 - HAPI FHIR 1.5 Released</b> -
@@ -535,8 +658,7 @@ patient.setGender(AdministrativeGenderEnum.MALE);]]></source>
 					Both XML and JSON encoding are suported natively using a simple API
 					to pick between them. XML support is built on top of the lightning-fast 
 					<a href="http://docs.oracle.com/javase/tutorial/jaxp/stax/why.html">STaX/JSR 173</a> 
-					API, and JSON support is provided using the new
-					<a href="https://jcp.org/en/jsr/detail?id=353">javax.json/JSR-353</a> API. 
+					API, and JSON support is provided using <a href="https://github.com/google/gson">Google Gson</a>. 
 				</p>
 	
 				<source><![CDATA[FhirContext ctx = FhirContext.forDstu2();

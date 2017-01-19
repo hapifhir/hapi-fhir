@@ -1,6 +1,23 @@
-<div>
-	<th:block th:each="prefix : ${resource.prefix}"   th:if="${!prefix.empty}"     th:text="${prefix.value} + ' '">Dr</th:block>
-	<th:block th:each="givenName : ${resource.given}" th:if="${!givenName.empty}"  th:text="${givenName.value} + ' '">John</th:block>
-	<b th:each="familyName : ${resource.family}"      th:if="${!familyName.empty}" th:text="${#strings.toUpperCase(familyName.value)} + ' '">SMITH</b>
-	<th:block th:each="suffix : ${resource.suffix}"   th:if="${!suffix.empty}"     th:text="${suffix.value} + ' '">Jr</th:block>
-</div>
+<th:block th:each="prefix : ${resource.prefix}"   th:if="${!prefix.empty}"     th:text="${prefix.value} + ' '">Dr</th:block>
+<th:block th:each="givenName : ${resource.given}" th:if="${!givenName.empty}"  th:text="${givenName.value} + ' '">John</th:block>
+
+<th:block th:switch="${fhirVersion}">
+	<th:block th:case="'DSTU1'">
+		<b th:each="familyName : ${resource.family}"      th:if="${!familyName.empty}" th:text="${#strings.toUpperCase(familyName.value)} + ' '">SMITH</b>
+	</th:block>
+	<th:block th:case="'DSTU2'">
+		<b th:each="familyName : ${resource.family}"      th:if="${!familyName.empty}" th:text="${#strings.toUpperCase(familyName.value)} + ' '">SMITH</b>
+	</th:block>
+	<th:block th:case="'DSTU2_1'">
+		<b th:each="familyName : ${resource.family}"      th:if="${!familyName.empty}" th:text="${#strings.toUpperCase(familyName.value)} + ' '">SMITH</b>
+	</th:block>
+	<th:block th:case="'DSTU2_HL7ORG'">
+		<b th:each="familyName : ${resource.family}"      th:if="${!familyName.empty}" th:text="${#strings.toUpperCase(familyName.value)} + ' '">SMITH</b>
+	</th:block>
+	<th:block th:case="*">
+		<b th:if="${!resource.familyElement.empty}" th:text="${#strings.toUpperCase(resource.family)} + ' '">SMITH</b>
+	</th:block>
+</th:block>
+
+
+<th:block th:each="suffix : ${resource.suffix}"   th:if="${!suffix.empty}"     th:text="${suffix.value} + ' '">Jr</th:block>

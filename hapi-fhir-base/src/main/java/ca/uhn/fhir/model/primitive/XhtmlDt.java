@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.primitive;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,10 +162,13 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		int firstTagIndex = value.indexOf("<", hasProcessingInstruction ? 1 : 0);
 		if (firstTagIndex != -1) {
 			int firstTagEnd = value.indexOf(">", firstTagIndex);
+			int firstSlash = value.indexOf("/", firstTagIndex);
 			if (firstTagEnd != -1) {
-				String firstTag = value.substring(firstTagIndex, firstTagEnd);
-				if (!firstTag.contains(" xmlns")) {
-					value = value.substring(0, firstTagEnd) + DECL_XMLNS + value.substring(firstTagEnd);
+				if (firstSlash > firstTagEnd) {
+					String firstTag = value.substring(firstTagIndex, firstTagEnd);
+					if (!firstTag.contains(" xmlns")) {
+						value = value.substring(0, firstTagEnd) + DECL_XMLNS + value.substring(firstTagEnd);
+					}
 				}
 			}
 		}

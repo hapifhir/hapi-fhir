@@ -158,7 +158,7 @@ public class SearchCountParamDstu3Test {
 			ourLastParam = theParam;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
+				retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("" + i));
 			}
 			return retVal;
 		}
@@ -172,7 +172,7 @@ public class SearchCountParamDstu3Test {
 			ourLastParam = null;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
+				retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("" + i));
 			}
 			return retVal;
 		}

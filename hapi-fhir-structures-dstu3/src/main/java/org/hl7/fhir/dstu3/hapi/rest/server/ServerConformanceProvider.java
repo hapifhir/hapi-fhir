@@ -39,7 +39,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
@@ -52,7 +51,7 @@ import org.hl7.fhir.dstu3.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.dstu3.model.Conformance.TypeRestfulInteraction;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
 import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
@@ -60,6 +59,7 @@ import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -93,7 +93,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
  * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
  * </p>
+ * 
+ * @deprecated Use {@link ServerCapabilityStatementProvider} instead
  */
+@Deprecated
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProvider.class);
@@ -102,7 +105,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-
 	private RestulfulServerConfiguration myServerConfiguration;
 
 	/*
@@ -223,9 +225,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setKind(ConformanceStatementKind.INSTANCE);
 		retVal.getSoftware().setName(myServerConfiguration.getServerName());
 		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
-		retVal.addFormat(Constants.CT_FHIR_XML);
-		retVal.addFormat(Constants.CT_FHIR_JSON);
-		retVal.setStatus(ConformanceResourceStatus.ACTIVE);
+		retVal.addFormat(Constants.CT_FHIR_XML_NEW);
+		retVal.addFormat(Constants.CT_FHIR_JSON_NEW);
+		retVal.setStatus(PublicationStatus.ACTIVE);
 
 		ConformanceRestComponent rest = retVal.addRest();
 		rest.setMode(RestfulConformanceMode.SERVER);
@@ -342,7 +344,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
-							ourLog.info("Found bound operation: {}", opName);
+							ourLog.debug("Found bound operation: {}", opName);
 							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
 						}
 					}
@@ -500,7 +502,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					}
 
 					String name = createOperationName(methodBinding);
-					ourLog.info("Detected operation: {}", name);
+					ourLog.debug("Detected operation: {}", name);
 
 					myOperationBindingToName.put(methodBinding, name);
 					if (myOperationNameToBindings.containsKey(name) == false) {
@@ -523,9 +525,12 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		}
 
 		OperationDefinition op = new OperationDefinition();
-		op.setStatus(ConformanceResourceStatus.ACTIVE);
+		op.setStatus(PublicationStatus.ACTIVE);
 		op.setKind(OperationKind.OPERATION);
 		op.setIdempotent(true);
+		op.setType(false);
+		op.setInstance(false);
+		op.setSystem(false);
 
 		Set<String> inParams = new HashSet<String>();
 		Set<String> outParams = new HashSet<String>();
@@ -540,6 +545,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			if (sharedDescription.isCanOperateAtServerLevel()) {
 				op.setSystem(true);
 			}
+			if (sharedDescription.isCanOperateAtTypeLevel()) {
+				op.setType(true);
+			}
 			if (!sharedDescription.isIdempotent()) {
 				op.setIdempotent(sharedDescription.isIdempotent());
 			}
@@ -551,7 +559,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				op.setSystem(sharedDescription.isCanOperateAtServerLevel());
 			}
 			if (isNotBlank(sharedDescription.getResourceName())) {
-				op.addTypeElement().setValue(sharedDescription.getResourceName());
+				op.addResourceElement().setValue(sharedDescription.getResourceName());
 			}
 
 			for (IParameter nextParamUntyped : sharedDescription.getParameters()) {
@@ -625,8 +633,13 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		myPublisher = thePublisher;
 	}
 
+	@Override
 	public void setRestfulServer(RestfulServer theRestfulServer) {
 		myServerConfiguration = theRestfulServer.createConfiguration();
+	}
+
+	RestulfulServerConfiguration getServerConfiguration() {
+		return myServerConfiguration;
 	}
 
 	private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {

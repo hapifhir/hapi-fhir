@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -48,7 +50,7 @@ public class ServerFeaturesDstu2Test {
 	public void testOptions() throws Exception {
 		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -60,7 +62,7 @@ public class ServerFeaturesDstu2Test {
 
 		httpGet = new HttpOptions("http://localhost:" + ourPort + "/");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -76,7 +78,7 @@ public class ServerFeaturesDstu2Test {
 	public void testOptionsForNonBasePath1() throws Exception {
 		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/Foo");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
@@ -90,7 +92,7 @@ public class ServerFeaturesDstu2Test {
 	public void testOptionsForNonBasePath2() throws Exception {
 		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
@@ -104,7 +106,7 @@ public class ServerFeaturesDstu2Test {
 	public void testOptionsForNonBasePath3() throws Exception {
 		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "/metadata");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
@@ -115,7 +117,7 @@ public class ServerFeaturesDstu2Test {
 	public void testOptionsJson() throws Exception {
 		HttpOptions httpGet = new HttpOptions("http://localhost:" + ourPort + "?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -123,10 +125,22 @@ public class ServerFeaturesDstu2Test {
 	}
 
 	@Test
+	public void testHeadJson() throws Exception {
+		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");
+		HttpResponse status = ourClient.execute(httpGet);
+		assertEquals(null, status.getEntity());
+
+		ourLog.info(status.toString());
+		
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
+	}
+
+	@Test
 	public void testRegisterAndUnregisterResourceProviders() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("PRP1"));
@@ -140,7 +154,7 @@ public class ServerFeaturesDstu2Test {
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("PRP2"));

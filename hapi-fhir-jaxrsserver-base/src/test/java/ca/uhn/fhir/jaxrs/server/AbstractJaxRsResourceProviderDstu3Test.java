@@ -32,6 +32,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -64,6 +65,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.TestUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderDstu3Test {
@@ -72,7 +74,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	private static IGenericClient client;
 	
 
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final String PATIENT_NAME = "Van Houte";
 
 	private static int ourPort;
@@ -85,6 +87,11 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 	private void compareResultId(int id, IBaseResource resource) {
 		assertEquals(id, Integer.parseInt(resource.getIdElement().getIdPart()));
+	}
+	
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	private void compareResultUrl(String url, IBaseResource resource) {
@@ -184,7 +191,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final BaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
+		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 	
@@ -379,9 +386,9 @@ public class AbstractJaxRsResourceProviderDstu3Test {
         when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
         client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-        compareResultId(1, patientCaptor.getValue());
+        assertEquals(null, patientCaptor.getValue().getIdElement().getIdPart());
+        assertEquals(null, patientCaptor.getValue().getIdElement().getVersionIdPart());
         assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
-        compareResultId(1, patientCaptor.getValue());
     }	
 	
 	@SuppressWarnings("unchecked")

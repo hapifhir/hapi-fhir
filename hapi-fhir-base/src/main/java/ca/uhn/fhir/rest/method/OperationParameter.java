@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -304,7 +304,8 @@ public class OperationParameter implements IParameter {
 							parameters.add(QualifiedParamList.singleton(paramValues[1]));
 						}
 						DateRangeParam dateRangeParam = new DateRangeParam();
-						dateRangeParam.setValuesAsQueryTokens(parameters);
+						FhirContext ctx = theRequest.getServer().getFhirContext();
+						dateRangeParam.setValuesAsQueryTokens(ctx, myName, parameters);
 						matchingParamValues.add(dateRangeParam);
 					} else if (String.class.isAssignableFrom(myParameterType)) {
 

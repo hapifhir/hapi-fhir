@@ -7,14 +7,12 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.dialect.DerbyTenSevenDialect;
+import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -22,11 +20,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 
@@ -36,10 +33,12 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
-	public static final String FHIR_DB_LOCATION_DSTU3 = "${fhir.db.location.dstu3}";
 
-	@Value(FHIR_DB_LOCATION_DSTU3)
-	private String myFhirDbLocation;
+	@Value(TestDstu1Config.FHIR_DB_USERNAME)
+	private String myDbUsername;
+
+	@Value(TestDstu1Config.FHIR_DB_PASSWORD)
+	private String myDbPassword;
 
 	@Value(FHIR_LUCENE_LOCATION_DSTU3)
 	private String myFhirLuceneLocation;
@@ -55,9 +54,20 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
+		retVal.setHardSearchLimit(500);
 		return retVal;
 	}
 
+	@Override
+	@Bean(autowire = Autowire.BY_TYPE)
+	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
+		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
+		retVal.setDefaultPageSize(20);
+		retVal.setMaximumPageSize(500);
+		return retVal;
+	}
+
+	
 	@Bean 
 	public IServerInterceptor securityInterceptor() {
 		return new PublicSecurityInterceptor();
@@ -67,11 +77,10 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	@DependsOn("dbServer")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.ClientDriver());
-		// retVal.setUrl("jdbc:derby:directory:" + myFhirDbLocation + ";create=true");
-		retVal.setUrl("jdbc:derby://localhost:1527/" + myFhirDbLocation + ";create=true");
-		retVal.setUsername("SA");
-		retVal.setPassword("SA");
+		retVal.setDriver(new org.postgresql.Driver());
+		retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu3");
+		retVal.setUsername(myDbUsername);
+		retVal.setPassword(myDbPassword);
 		return retVal;
 	}
 
@@ -88,6 +97,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
+		extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
@@ -118,37 +128,10 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return requestValidator;
 	}
 
-	/**
-	 * Bean which validates outgoing responses
-	 */
-	@Bean
-	@Lazy
-	public ResponseValidatingInterceptor responseValidatingInterceptor() {
-		ResponseValidatingInterceptor responseValidator = new ResponseValidatingInterceptor();
-		responseValidator.setResponseHeaderValueNoIssues("Validation did not detect any issues");
-		responseValidator.setFailOnSeverity(null);
-		responseValidator.setAddResponseHeaderOnSeverity(null);
-		responseValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.METADATA);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.GET_PAGE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_INSTANCE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_SYSTEM);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_TYPE);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_SYSTEM);
-		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_TYPE);
-		responseValidator.addValidatorModule(instanceValidatorDstu3());
-		responseValidator.setIgnoreValidatorExceptions(true);
-		
-		return responseValidator;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor subscriptionSecurityInterceptor() {
-		return new SubscriptionsRequireManualActivationInterceptorDstu3();
-	}
+//	@Bean(autowire = Autowire.BY_TYPE)
+//	public IServerInterceptor subscriptionSecurityInterceptor() {
+//		return new SubscriptionsRequireManualActivationInterceptorDstu3();
+//	}
 
 	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {

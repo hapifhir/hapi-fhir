@@ -1,9 +1,8 @@
 package ca.uhn.fhir.parser;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.MessageHeader;
-import org.hl7.fhir.dstu3.model.MessageHeader.MessageSourceComponent;
 
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -11,7 +10,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-@ResourceDef(name = "FooMessageHeader")
+@ResourceDef(name = "MessageHeader")
 public class FooMessageHeader extends MessageHeader {
 
 	private static final long serialVersionUID = 1L;

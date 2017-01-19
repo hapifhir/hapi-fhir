@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ abstract class BaseRule implements IAuthRule {
 		return myName;
 	}
 	
-	public void setMode(PolicyEnum theRuleMode) {
+	void setMode(PolicyEnum theRuleMode) {
 		myMode = theRuleMode;
 	}
 
@@ -43,7 +43,7 @@ abstract class BaseRule implements IAuthRule {
 		return new Verdict(myMode, this);
 	}
 
-	public PolicyEnum getMode() {
+	PolicyEnum getMode() {
 		return myMode;
 	}
 

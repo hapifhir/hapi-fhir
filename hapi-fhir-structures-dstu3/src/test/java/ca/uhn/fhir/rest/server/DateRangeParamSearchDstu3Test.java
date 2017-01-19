@@ -36,7 +36,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class DateRangeParamSearchDstu3Test {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static DateRangeParam ourLastDateRange;
 	private static int ourPort;
 	

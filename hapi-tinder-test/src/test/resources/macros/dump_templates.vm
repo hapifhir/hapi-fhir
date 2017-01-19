@@ -1,0 +1,86 @@
+##################################################################
+## dumpBaseElement
+##################################################################
+#macro ( dumpBaseElement $lead, $elem )
+${lead}BaseElement:
+${lead}    binding: $!{elem.binding}
+${lead}    bindingUri: $!{elem.bindingUrl}
+${lead}    bindingClass: $!{elem.bindingClass}
+${lead}    cardMax: $!{elem.cardMax}
+${lead}    cardMin: $!{elem.cardMin}
+${lead}    comments: $!{elem.comments}       
+${lead}    declaringClassNameComplete: $!{elem.declaringClassNameComplete}
+${lead}    declaringClassNameCompleteForChildren: $!{elem.declaringClassNameCompleteForChildren}
+${lead}    definition: $!{elem.definition}
+${lead}    elementName: $!{elem.elementName}
+${lead}    elementParentName: $!{elem.elementParentName}
+${lead}    extensionUrl: $!{elem.extensionUrl}
+${lead}    name: $!{elem.name}
+${lead}    requirement: $!{elem.requirement}
+${lead}    shortName: $!{elem.shortName}
+${lead}    type: [#{foreach}(${t} in $!{elem.type})${t}#{if}($foreach.hasNext),#{end}#{end}]
+${lead}    v2Mapping: $!{elem.v2Mapping}
+${lead}    isExtensionLocal: $!{elem.extensionLocal}
+${lead}    isExtensionModifier: $!{elem.extensionModifier}
+${lead}    isHasExtensionUrl: $!{elem.hasExtensionUrl}
+${lead}    isHasMultipleTypes: $!{elem.hasMultipleTypes}
+${lead}    isModifier: $!{elem.modifier}
+${lead}    isResourceRef: $!{elem.resourceRef}
+${lead}    isSummary: $!{elem.summary}
+#end
+##################################################################
+## dumpChild
+##################################################################
+#macro ( dumpChild $lead, $child )
+${lead}Child:
+${lead}    annotationType: $!{child.annotationType}
+#set ( $st = $!{child.singleType} )
+${lead}    boundDatatype: #{if}(${st}=="CodeDt"||${st}=="CodeableConceptDt")$!{child.boundDatatype}#{end} .
+${lead}    cardMaxForChildAnnotation: $!{child.cardMaxForChildAnnotation}
+${lead}    elementNameSimplified: $!{child.elementNameSimplified}
+${lead}    methodName: $!{child.methodName}
+${lead}    referenceType: $!{child.referenceType}
+${lead}    referenceTypeForConstructor: $!{child.referenceTypeForConstructor}
+${lead}    referenceTypesForMultiple: $!{child.referenceTypesForMultiple}
+${lead}    singleType: $!{child.singleType}
+${lead}    variableName: $!{child.variableName}
+${lead}    isBlock: $!{child.block}
+${lead}    isBlockRef: $!{child.blockRef}
+${lead}    isPrimitive: $!{child.primitive}
+${lead}    primitiveType: #{if}(${child.primitive})$!{child.primitiveType}#{end} .
+${lead}    isBoundCode: $!{child.boundCode}
+${lead}    isRepeatable: $!{child.repeatable}
+${lead}    isSingleChildInstantiable: $!{child.singleChildInstantiable}
+#end ## of macro
+##################################################################
+## childVars
+##################################################################
+#macro ( childVars $lead, $childElements )
+#foreach ( $child in $childElements )
+
+${lead}Child: $!{child.elementName}
+${lead}    Class: $child.class.name
+#dumpBaseElement ("${lead}    ", $child )
+#dumpChild ("${lead}    ", $child )
+#end ## end for-each on child
+#end ## of macro
+##################################################################
+## childResourceBlocks
+##################################################################
+#macro ( childResourceBlocks $lead, $resourceBlockChildren )
+#foreach ( $blockChild in $resourceBlockChildren )
+
+${lead}Block: $!{blockChild.name}
+${lead}    Class: $blockChild.class.name
+#dumpBaseElement ("${lead}    ", $blockChild )
+#dumpChild ("${lead}    ", $blockChild )
+${lead}    ResourceBlock:
+${lead}        className: $!{blockChild.className}
+
+${lead}    Children:                               
+#childVars( "${lead}    ", $blockChild.children )
+
+${lead}    Blocks:                               
+#childResourceBlocks( "${lead}    ", $blockChild.resourceBlockChildren )
+#end
+#end

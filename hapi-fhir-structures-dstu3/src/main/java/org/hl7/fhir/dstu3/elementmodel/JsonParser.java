@@ -12,30 +12,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.dstu3.formats.IParser.OutputStyle;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.elementmodel.Element.SpecialElement;
-import org.hl7.fhir.dstu3.elementmodel.ParserBase.ValidationPolicy;
-import org.hl7.fhir.dstu3.exceptions.DefinitionException;
-import org.hl7.fhir.dstu3.exceptions.FHIRFormatError;
+import org.hl7.fhir.dstu3.formats.IParser.OutputStyle;
 import org.hl7.fhir.dstu3.formats.FormatUtilities;
 import org.hl7.fhir.dstu3.formats.JsonCreator;
 import org.hl7.fhir.dstu3.formats.JsonCreatorCanonical;
 import org.hl7.fhir.dstu3.formats.JsonCreatorGson;
-import org.hl7.fhir.dstu3.utils.IWorkerContext;
-import org.hl7.fhir.dstu3.utils.JsonTrackingParser;
-import org.hl7.fhir.dstu3.utils.ToolingExtensions;
-import org.hl7.fhir.dstu3.utils.JsonTrackingParser.LocationData;
+import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.utils.formats.JsonTrackingParser;
+import org.hl7.fhir.dstu3.utils.formats.JsonTrackingParser.LocationData;
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.hl7.fhir.utilities.xhtml.XhtmlParser;
-import org.hl7.fhir.utilities.xml.XMLUtil;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -52,8 +46,24 @@ public class JsonParser extends ParserBase {
 		super(context);
 	}
 
+	public Element parse(String source, String type) throws Exception {
+	  JsonObject obj = (JsonObject) new com.google.gson.JsonParser().parse(source);
+    String path = "/"+type;
+    StructureDefinition sd = getDefinition(-1, -1, type);
+    if (sd == null)
+      return null;
+
+    Element result = new Element(type, new Property(context, sd.getSnapshot().getElement().get(0), sd));
+    checkObject(obj, path);
+    result.setType(type);
+    parseChildren(path, obj, result, true);
+    result.numberChildren();
+    return result;
+  }
+
+
 	@Override
-	public Element parse(InputStream stream) throws Exception {
+	public Element parse(InputStream stream) throws IOException, FHIRFormatError, DefinitionException {
 		// if we're parsing at this point, then we're going to use the custom parser
 		map = new HashMap<JsonElement, LocationData>();
 		String source = TextFile.streamToString(stream);
@@ -74,12 +84,12 @@ public class JsonParser extends ParserBase {
 		} 
 	}
 
-	public Element parse(JsonObject object, Map<JsonElement, LocationData> map) throws Exception {
+	public Element parse(JsonObject object, Map<JsonElement, LocationData> map) throws FHIRFormatError, DefinitionException {
 		this.map = map;
 		return parse(object);
 	}
 
-	public Element parse(JsonObject object) throws Exception {
+  public Element parse(JsonObject object) throws FHIRFormatError, DefinitionException {
 		JsonElement rt = object.get("resourceType");
 		if (rt == null) {
 			logError(line(object), col(object), "$", IssueType.INVALID, "Unable to find resourceType property", IssueSeverity.FATAL);
@@ -343,7 +353,7 @@ public class JsonParser extends ParserBase {
     this.json = json;
     json.beginObject();
     
-    prop("resourceType", e.getType(), linkResolver == null ? null : linkResolver.resolveType(e.getType()));
+    prop("resourceType", e.getType(), linkResolver == null ? null : linkResolver.resolveProperty(e.getProperty()));
     Set<String> done = new HashSet<String>();
     for (Element child : e.getChildren()) {
       compose(e.getName(), e, done, child);

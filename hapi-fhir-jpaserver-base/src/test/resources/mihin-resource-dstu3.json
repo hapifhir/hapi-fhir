@@ -1,0 +1,129 @@
+{
+	"resourceType": "Patient",
+	"id": "Patient-66468",
+	"meta": {
+		"versionId": "5",
+		"lastUpdated": "2016-08-14T19:18:18.000-04:00"
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> <div class=\"hapiHeaderText\"> Shawn Freeman <b>MACK </b> </div> <table class=\"hapiPropertyTable\"> <tbody> <tr> <td>Identifier</td> <td>000066468</td> </tr> <tr> <td>Address</td> <td> <span>170 NE Cherry Circle </span> <br/> <span>Detroit </span> <span>MI </span> </td> </tr> <tr> <td>Date of birth</td> <td> <span>12 April 2036</span> </td> </tr> </tbody> </table> </div>"
+	},
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/us-core-race",
+			"valueCodeableConcept": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/v3/Race",
+						"code": "2056-0",
+						"display": "Black"
+					}
+				]
+			}
+		},
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/us-core-ethnicity",
+			"valueCodeableConcept": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/v3/Ethnicity",
+						"code": "2186-5",
+						"display": "Not Hispanic or Latino"
+					}
+				]
+			}
+		},
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/us-core-religion",
+			"valueCodeableConcept": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/v3/ReligiousAffiliation",
+						"code": "1013",
+						"display": "Christian (non-Catholic, non-specific) "
+					}
+				]
+			}
+		}
+	],
+	"identifier": [
+		{
+			"use": "official",
+			"type": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/identifier-type",
+						"code": "SB",
+						"display": "Social Beneficiary Identifier"
+					}
+				],
+				"text": "US Social Security Number"
+			},
+			"system": "http://hl7.org/fhir/sid/us-ssn",
+			"value": "000066468"
+		},
+		{
+			"use": "official",
+			"type": {
+				"coding": [
+					{
+						"system": "http://hl7.org/fhir/identifier-type",
+						"code": "SB",
+						"display": "Social Beneficiary Identifier"
+					}
+				],
+				"text": "Michigan Common Key Service Identifier"
+			},
+			"system": "http://mihin.org/fhir/cks",
+			"value": "31d50ab72d5a4239b36594f8f67eb3ab"
+		}
+	],
+	"active": false,
+	"name": [
+		{
+			"family": [
+				"Mack"
+			],
+			"given": [
+				"Shawn",
+				"Freeman"
+			]
+		}
+	],
+	"telecom": [
+		{
+			"system": "phone",
+			"value": "313.555.0956",
+			"use": "home"
+		},
+		{
+			"system": "phone",
+			"value": "313.555.8028",
+			"use": "work"
+		},
+		{
+			"extension": [
+				{
+					"url": "http://hl7.org/fhir/StructureDefinition/us-core-direct",
+					"valueBoolean": true
+				}
+			],
+			"system": "email",
+			"value": "Shawn.F.Mack@direct.mihintest.org",
+			"use": "home"
+		}
+	],
+	"gender": "male",
+	"birthDate": "2036-04-12",
+	"address": [
+		{
+			"line": [
+				"170 NE Cherry Circle"
+			],
+			"city": "Detroit",
+			"state": "MI",
+			"postalCode": "48227"
+		}
+	]
+}

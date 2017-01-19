@@ -10,15 +10,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -75,6 +76,10 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
+import ca.uhn.fhir.parser.json.JsonLikeValue;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.util.TestUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
@@ -84,7 +89,7 @@ public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
 
 	private void parseAndEncode(String name) throws IOException {
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream(name));
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream(name), StandardCharsets.UTF_8);
 		// ourLog.info(msg);
 
 		msg = msg.replace("\"div\": \"<div>", "\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
@@ -107,6 +112,7 @@ public class JsonParserTest {
 		assertEquals(exp, act);
 	}
 
+	
 	@Test
 	public void testDecimalPrecisionPreserved() {
 		String number = "52.3779939997090374535378485873776474764643249869328698436986235758587";

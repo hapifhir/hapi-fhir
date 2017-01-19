@@ -19,7 +19,7 @@ import ca.uhn.fhir.util.TestUtil;
 
 public class SearchParamExtractorDstu3Test {
 
-	private static final FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static IValidationSupport ourValidationSupport;
 
 	@AfterClass

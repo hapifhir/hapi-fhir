@@ -56,7 +56,7 @@ import ca.uhn.fhir.util.TestUtil;
 public class ServerActionInterceptorTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static int ourPort;
 	private static Server ourServer;
 	private static IServerInterceptor ourInterceptor;
