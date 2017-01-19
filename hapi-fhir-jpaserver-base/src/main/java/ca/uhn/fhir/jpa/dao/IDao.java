@@ -16,7 +16,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupporti
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
