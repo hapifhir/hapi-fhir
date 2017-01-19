@@ -10,6 +10,7 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
@@ -142,7 +143,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 		CodeSystem cs = fetchCodeSystem(theContext, theSystem);
-		return cs != null;
+		return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
 	}
 
 	private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {

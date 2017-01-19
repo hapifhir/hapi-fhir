@@ -74,7 +74,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	}
 
 	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")
-	@DependsOn("dbServer")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.postgresql.Driver());
