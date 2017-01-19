@@ -1405,7 +1405,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				getErrorHandler().missingRequiredElement(new ParseLocation(parentElementName), "url");
 				url = null;
 			} else {
-				url = jsonElement.getAsString();
+				url = getExtensionUrl(jsonElement.getAsString());
 			}
 			theState.enteringNewElementExtension(null, url, theIsModifier);
 			for (String next : nextExtObj.keySet()) {
@@ -1758,8 +1758,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		public int compareTo(HeldExtension theArg0) {
 			String url1 = myDef != null ? myDef.getExtensionUrl() : myUndeclaredExtension.getUrl();
 			String url2 = theArg0.myDef != null ? theArg0.myDef.getExtensionUrl() : theArg0.myUndeclaredExtension.getUrl();
-			url1 = defaultString(url1);
-			url2 = defaultString(url2);
+			url1 = defaultString(getExtensionUrl(url1));
+			url2 = defaultString(getExtensionUrl(url2));
 			return url1.compareTo(url2);
 		}
 
@@ -1771,7 +1771,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 				writeCommentsPreAndPost(myValue, theEventWriter);
 
-				JsonParser.write(theEventWriter, "url", myDef.getExtensionUrl());
+				JsonParser.write(theEventWriter, "url", getExtensionUrl(myDef.getExtensionUrl()));
 
 				/*
 				 * This makes sure that even if the extension contains a reference to a contained
@@ -1797,7 +1797,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		
 		private void writeUndeclaredExtension(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, IBaseExtension<?, ?> ext) throws IOException {
 			IBase value = ext.getValue();
-			String extensionUrl = ext.getUrl();
+			final String extensionUrl = getExtensionUrl(ext.getUrl());
 
 			theEventWriter.beginObject();
 

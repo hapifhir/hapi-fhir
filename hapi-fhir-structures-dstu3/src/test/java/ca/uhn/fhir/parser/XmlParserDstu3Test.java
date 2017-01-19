@@ -3139,6 +3139,23 @@ public class XmlParserDstu3Test {
 
 	}
 
+	/**
+	 * Test for the url generated based on the server config
+	 */
+	@Test
+	public void testGeneratedUrls() {
+		final IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+		xmlParser.setServerBaseUrl("http://myserver.com");
+
+		final CustomPatientDstu3 patient = new CustomPatientDstu3();
+		patient.setHomeless(new BooleanType(true));
+
+		final String parsedPatient = xmlParser.encodeResourceToString(patient);
+
+		assertTrue(parsedPatient.contains("<profile value=\"http://myserver.com/StructureDefinition/Patient\"/>"));
+		assertTrue(parsedPatient.contains("<extension url=\"http://myserver.com/StructureDefinition/homeless\">"));
+	}
+  
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

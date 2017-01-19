@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -48,6 +49,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -1871,5 +1873,21 @@ public class JsonParserDstu2Test {
 		
 		assertEquals("2011-01-01", condition.getDateRecordedElement().getValueAsString());
 	}
-	
+
+	/**
+	 * Test for the url generated based on the server config
+	 */
+	@Test
+	public void testGeneratedUrls() {
+		final IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		jsonParser.setServerBaseUrl("http://myserver.com");
+
+		final CustomPatientDstu2 patient = new CustomPatientDstu2();
+		patient.setHomeless(new BooleanDt(true));
+
+		final String parsedPatient = jsonParser.encodeResourceToString(patient);
+
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/Patient"));
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/homeless"));
+	}	
 }

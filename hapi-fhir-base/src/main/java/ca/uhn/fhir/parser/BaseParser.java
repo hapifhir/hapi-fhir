@@ -931,6 +931,10 @@ public abstract class BaseParser implements IParser {
 		return retVal;
 	}
 
+	protected String getExtensionUrl(final String extensionUrl) {
+		return StringUtils.isNotBlank(extensionUrl) && StringUtils.isNotBlank(myServerBaseUrl) ? extensionUrl.replace("%BASE_SERVER_URL%", myServerBaseUrl) : extensionUrl;
+	}
+
 	/**
 	 * Used for DSTU2 only
 	 */

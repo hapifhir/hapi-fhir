@@ -655,11 +655,11 @@ public class XmlParser extends BaseParser implements IParser {
 					
 					String childName = childNameAndDef.getChildName();
 					BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
-					String extensionUrl = nextChild.getExtensionUrl();
+					String extensionUrl = getExtensionUrl(nextChild.getExtensionUrl());
 					
 					if (nextValue instanceof IBaseExtension && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						// This is called for the Query resource in DSTU1 only
-						extensionUrl = ((IBaseExtension<?, ?>) nextValue).getUrl();
+						extensionUrl = getExtensionUrl(((IBaseExtension<?, ?>) nextValue).getUrl());
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem);
 
 					} else if (extensionUrl != null && childName.equals("extension") == false) {
@@ -671,7 +671,7 @@ public class XmlParser extends BaseParser implements IParser {
 								continue;
 							}
 						}
-						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extension.getUrl(), theContainedResource, nextChildElem);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, getExtensionUrl(extension.getUrl()), theContainedResource, nextChildElem);
 					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
 						// suppress narratives from contained resources
 					} else {
@@ -902,7 +902,7 @@ public class XmlParser extends BaseParser implements IParser {
 				theEventWriter.writeAttribute("id", elementId);
 			}
 
-			String url = next.getUrl();
+			String url = getExtensionUrl(next.getUrl());
 			theEventWriter.writeAttribute("url", url);
 
 			if (next.getValue() != null) {

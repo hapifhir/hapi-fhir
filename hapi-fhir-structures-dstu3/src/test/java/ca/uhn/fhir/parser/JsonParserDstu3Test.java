@@ -40,6 +40,7 @@ import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Basic;
 import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
@@ -2174,6 +2175,23 @@ public class JsonParserDstu3Test {
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
+	}
+
+ 	/**
+	 * Test for the url generated based on the server config
+  */
+	@Test
+	public void testGeneratedUrls() {
+		final IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		jsonParser.setServerBaseUrl("http://myserver.com");
+
+		final CustomPatientDstu3 patient = new CustomPatientDstu3();
+		patient.setHomeless(new BooleanType(true));
+
+		final String parsedPatient = jsonParser.encodeResourceToString(patient);
+
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/Patient"));
+		assertTrue(parsedPatient.contains("http://myserver.com/StructureDefinition/homeless"));
 	}
 
 	@AfterClass
