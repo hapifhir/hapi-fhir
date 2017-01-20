@@ -11,15 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.hl7.fhir.dstu3.model.AllergyIntolerance;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
-import org.hl7.fhir.dstu3.model.AuditEvent;
-import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent;
@@ -32,6 +28,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -157,6 +154,28 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
+	}
+
+	@Test
+	public void testLookupSnomed() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://snomed.info/sct");
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+		cs.setResourceVersionId(table.getVersion());
+		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
+		cs.getConcepts().add(parentA);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://snomed.info/sct", cs);
+
+		StringType code = new StringType("ParentA");
+		StringType system = new StringType("http://snomed.info/sct");
+		LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
+		assertEquals(true, outcome.isFound());
 	}
 
 	@Test

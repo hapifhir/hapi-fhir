@@ -119,21 +119,12 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 			system = theSystem.getValue();
 		}
 
-		// CodeValidationResult validateOutcome = myJpaValidationSupport.validateCode(getContext(), system, code, null);
-		//
-		// LookupCodeResult result = new LookupCodeResult();
-		// result.setSearchedForCode(code);
-		// result.setSearchedForSystem(system);
-		// result.setFound(false);
-		// if (validateOutcome.isOk()) {
-		// result.setFound(true);
-		// result.setCodeIsAbstract(validateOutcome.asConceptDefinition().getAbstract());
-		// result.setCodeDisplay(validateOutcome.asConceptDefinition().getDisplay());
-		// }
-		// return result;
-
+		ourLog.info("Looking up {} / {}", system, code);
+		
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
-			
+
+			ourLog.info("Code system {} is supported", system);
+
 			CodeValidationResult result = myValidationSupport.validateCode(getContext(), system, code, null);
 			if (result != null) {
 				if (result.isOk()) {
