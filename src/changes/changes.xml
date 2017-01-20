@@ -217,6 +217,11 @@
 				JPA server terminology service was not correctly validating or expanding codes 
 				in SNOMED CT or LOINC code systems. Thanks to David Hay for reporting!
 			</action>
+			<action type="fix" issue="539">
+				Attempting to search for an invalid resource type (e.g. GET base/FooResource) should 
+				return an HTTP 404 and not a 400, per the HTTP spec. Thanks to 
+				GitHub user @CarthageKing for the pull request!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
