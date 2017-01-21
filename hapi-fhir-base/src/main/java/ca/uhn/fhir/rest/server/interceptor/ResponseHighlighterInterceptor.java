@@ -13,7 +13,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,8 +67,9 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	public static final String PARAM_RAW = "_raw";
 
 	public static final String PARAM_RAW_TRUE = "true";
-	
+
 	public static final String PARAM_TRUE = "true";
+
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
 		if (str == null || theEncodingEnum == null) {
@@ -181,7 +182,8 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws ServletException, IOException {
 		/*
 		 * It's not a browser...
 		 */
@@ -209,13 +211,14 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest);
+		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest, theException.getStatusCode());
 
 		return false;
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 
 		/*
 		 * Request for _raw
@@ -225,7 +228,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			ourLog.warn("Client is using non-standard/legacy  _raw parameter - Use _format=json or _format=xml instead, as this parmameter will be removed at some point");
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
-		
+
 		boolean force = false;
 		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
 		if (formatParams != null && formatParams.length > 0) {
@@ -242,7 +245,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 			}
 		}
-		
+
 		/*
 		 * It's not a browser...
 		 */
@@ -263,7 +266,6 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
-		
 
 		/*
 		 * Not a GET
@@ -279,12 +281,12 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theResponseObject, theServletRequest);
+		streamResponse(theRequestDetails, theServletResponse, theResponseObject, theServletRequest, 200);
 
 		return false;
 	}
 
-	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource, ServletRequest theServletRequest) {
+	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource, ServletRequest theServletRequest, int theStatusCode) {
 		IParser p;
 		Map<String, String[]> parameters = theRequestDetails.getParameters();
 		if (parameters.containsKey(Constants.PARAM_FORMAT)) {
@@ -307,110 +309,112 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		if (prettyPrintResponse) {
 			p.setPrettyPrint(prettyPrintResponse);
 		}
-		
-		
+
 		EncodingEnum encoding = p.getEncoding();
 		String encoded = p.encodeResourceToString(resource);
 
-		theServletResponse.setContentType(Constants.CT_HTML_WITH_UTF8);
+		try {
 
-		StringBuilder b = new StringBuilder();
-		b.append("<html lang=\"en\">\n");
-		b.append("	<head>\n");
-		b.append("		<meta charset=\"utf-8\" />\n");
-		b.append("       <style>\n");
-		b.append(".hlQuot {\n");
-		b.append("  color: #88F;\n");
-		b.append("}\n");
-		b.append(".hlAttr {\n");
-		b.append("  color: #888;\n");
-		b.append("}\n");
-		b.append(".hlTagName {\n");
-		b.append("  color: #006699;\n");
-		b.append("}\n");
-		b.append(".hlControl {\n");
-		b.append("  color: #660000;\n");
-		b.append("}\n");
-		b.append(".hlText {\n");
-		b.append("  color: #000000;\n");
-		b.append("}\n");
-		b.append(".hlUrlBase {\n");
-		b.append("}");
-		b.append(".headersDiv {\n");
-		b.append("  background: #EEE;");
-		b.append("}");
-		b.append(".headerName {\n");
-		b.append("  color: #888;\n");
-		b.append("  font-family: monospace;\n");
-		b.append("}");
-		b.append(".headerValue {\n");
-		b.append("  color: #88F;\n");
-		b.append("  font-family: monospace;\n");
-		b.append("}");
-		b.append("BODY {\n");
-		b.append("  font-family: Arial;\n");
-		b.append("}");
-		b.append("       </style>\n");
-		b.append("	</head>\n");
-		b.append("\n");
-		b.append("	<body>");
-		
-		b.append("<p>");
-		b.append("This result is being rendered in HTML for easy viewing. ");
-		b.append("You may access this content as ");
-		
-		b.append("<a href=\"");
-		b.append(createLinkHref(parameters, Constants.FORMAT_JSON));
-		b.append("\">Raw JSON</a> or ");
+			if (theStatusCode > 299) {
+				theServletResponse.setStatus(theStatusCode);
+			}
+			theServletResponse.setContentType(Constants.CT_HTML_WITH_UTF8);
 
-		b.append("<a href=\"");
-		b.append(createLinkHref(parameters, Constants.FORMAT_XML));
-		b.append("\">Raw XML</a>, ");
+			StringBuilder b = new StringBuilder();
+			b.append("<html lang=\"en\">\n");
+			b.append("	<head>\n");
+			b.append("		<meta charset=\"utf-8\" />\n");
+			b.append("       <style>\n");
+			b.append(".hlQuot {\n");
+			b.append("  color: #88F;\n");
+			b.append("}\n");
+			b.append(".hlAttr {\n");
+			b.append("  color: #888;\n");
+			b.append("}\n");
+			b.append(".hlTagName {\n");
+			b.append("  color: #006699;\n");
+			b.append("}\n");
+			b.append(".hlControl {\n");
+			b.append("  color: #660000;\n");
+			b.append("}\n");
+			b.append(".hlText {\n");
+			b.append("  color: #000000;\n");
+			b.append("}\n");
+			b.append(".hlUrlBase {\n");
+			b.append("}");
+			b.append(".headersDiv {\n");
+			b.append("  background: #EEE;");
+			b.append("}");
+			b.append(".headerName {\n");
+			b.append("  color: #888;\n");
+			b.append("  font-family: monospace;\n");
+			b.append("}");
+			b.append(".headerValue {\n");
+			b.append("  color: #88F;\n");
+			b.append("  font-family: monospace;\n");
+			b.append("}");
+			b.append("BODY {\n");
+			b.append("  font-family: Arial;\n");
+			b.append("}");
+			b.append("       </style>\n");
+			b.append("	</head>\n");
+			b.append("\n");
+			b.append("	<body>");
 
-		b.append(" or view this content in ");
-		
-		b.append("<a href=\"");
-		b.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
-		b.append("\">HTML JSON</a> ");
+			b.append("<p>");
+			b.append("This result is being rendered in HTML for easy viewing. ");
+			b.append("You may access this content as ");
 
-		b.append("or ");
-		b.append("<a href=\"");
-		b.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
-		b.append("\">HTML XML</a>.");
-		
-		Date startTime = (Date) theServletRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
-		if (startTime != null) {
-			long time = System.currentTimeMillis() - startTime.getTime();
-			b.append(" Response generated in ");
-			b.append(time);
-			b.append("ms.");
-		}
+			b.append("<a href=\"");
+			b.append(createLinkHref(parameters, Constants.FORMAT_JSON));
+			b.append("\">Raw JSON</a> or ");
 
-		
-		b.append("</p>");
-		
-		b.append("\n");
-		
-		//		if (isEncodeHeaders()) {
-		//			b.append("<h1>Request Headers</h1>");
-		//			b.append("<div class=\"headersDiv\">");
-		//			for (int next : theRequestDetails.get)
-		//			b.append("</div>");
-		//			b.append("<h1>Response Headers</h1>");
-		//			b.append("<div class=\"headersDiv\">");
-		//			b.append("</div>");
-		//			b.append("<h1>Response Body</h1>");
-		//		}
-		b.append("<pre>");
-		b.append(format(encoded, encoding));
-		b.append("</pre>");
-		b.append("   </body>");
-		b.append("</html>");
+			b.append("<a href=\"");
+			b.append(createLinkHref(parameters, Constants.FORMAT_XML));
+			b.append("\">Raw XML</a>, ");
+
+			b.append(" or view this content in ");
+
+			b.append("<a href=\"");
+			b.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
+			b.append("\">HTML JSON</a> ");
+
+			b.append("or ");
+			b.append("<a href=\"");
+			b.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
+			b.append("\">HTML XML</a>.");
+
+			Date startTime = (Date) theServletRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
+			if (startTime != null) {
+				long time = System.currentTimeMillis() - startTime.getTime();
+				b.append(" Response generated in ");
+				b.append(time);
+				b.append("ms.");
+			}
+
+			b.append("</p>");
+
+			b.append("\n");
+
+			// if (isEncodeHeaders()) {
+			// b.append("<h1>Request Headers</h1>");
+			// b.append("<div class=\"headersDiv\">");
+			// for (int next : theRequestDetails.get)
+			// b.append("</div>");
+			// b.append("<h1>Response Headers</h1>");
+			// b.append("<div class=\"headersDiv\">");
+			// b.append("</div>");
+			// b.append("<h1>Response Body</h1>");
+			// }
+			b.append("<pre>");
+			b.append(format(encoded, encoding));
+			b.append("</pre>");
+			b.append("   </body>");
+			b.append("</html>");
 		//@formatter:off
 		String out = b.toString();
 		//@formatter:on
 
-		try {
 			theServletResponse.getWriter().append(out);
 			theServletResponse.getWriter().close();
 		} catch (IOException e) {
