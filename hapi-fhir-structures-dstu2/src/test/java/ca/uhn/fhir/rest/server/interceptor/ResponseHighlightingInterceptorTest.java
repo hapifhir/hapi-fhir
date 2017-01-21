@@ -171,7 +171,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertEquals(404, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, not(stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle")));
 		assertThat(responseContent, (stringContainsInOrder("Unknown resource type 'Foobar'")));
