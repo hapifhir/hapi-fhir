@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.Quota.Resource;
 
@@ -55,9 +56,11 @@ import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.*;
@@ -630,27 +633,85 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	 * See #467
 	 */
 	@Test
-	public void testTransactionWithLink() {
-		String methodName = "testTransactionWithLink";
+	public void testTransactionWithSelfReferentialLink() {
+		/*
+		 * Link to each other
+		 */
 		Bundle request = new Bundle();
 
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+		Organization o1 = new Organization();
+		o1.setId(IdType.newRandomUuid());
+		o1.setName("ORG1");
+		request.addEntry().setResource(o1).getRequest().setMethod(HTTPVerb.POST);
 
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient/" + methodName);
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+		Organization o2 = new Organization();
+		o2.setName("ORG2");
+		o2.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(o2).getRequest().setMethod(HTTPVerb.POST);
 
+		o1.getPartOf().setReference(o2.getId());
+		o2.getPartOf().setReference(o1.getId());
+		
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
 		assertEquals(2, resp.getEntry().size());
 
-//		o = (Observation) myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
-//		assertEquals(new IdType(patientId).toUnqualifiedVersionless().getValue(), o.getSubject().getReference());
+		IdType id1 = new IdType(resp.getEntry().get(0).getResponse().getLocation());
+		IdType id2 = new IdType(resp.getEntry().get(1).getResponse().getLocation());
+		
+		ourLog.info("ID1: {}", id1);
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Organization.SP_PARTOF, new ReferenceParam(id1.toUnqualifiedVersionless().getValue()));
+		IBundleProvider res = myOrganizationDao.search(map);
+		assertEquals(1, res.size());
+		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
+
+		map = new SearchParameterMap();
+		map.add(Organization.SP_PARTOF, new ReferenceParam(id2.toUnqualifiedVersionless().getValue()));
+		res = myOrganizationDao.search(map);
+		assertEquals(1, res.size());
+		assertEquals(id1.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
+
+		/*
+		 * Link to self
+		 */
+		request = new Bundle();
+
+		o1 = new Organization();
+		o1.setId(id1);
+		o1.setName("ORG1");
+		request.addEntry().setResource(o1).getRequest().setMethod(HTTPVerb.PUT).setUrl(id1.toUnqualifiedVersionless().getValue());
+
+		o2 = new Organization();
+		o2.setName("ORG2");
+		o2.setId(id2);
+		request.addEntry().setResource(o2).getRequest().setMethod(HTTPVerb.PUT).setUrl(id2.toUnqualifiedVersionless().getValue());
+
+		o1.getPartOf().setReference(o1.getId());
+		o2.getPartOf().setReference(o2.getId());
+		
+		resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
+		assertEquals(2, resp.getEntry().size());
+
+		id1 = new IdType(resp.getEntry().get(0).getResponse().getLocation());
+		id2 = new IdType(resp.getEntry().get(1).getResponse().getLocation());
+		
+		ourLog.info("ID1: {}", id1);
+		
+		map = new SearchParameterMap();
+		map.add(Organization.SP_PARTOF, new ReferenceParam(id1.toUnqualifiedVersionless().getValue()));
+		res = myOrganizationDao.search(map);
+		assertEquals(1, res.size());
+		assertEquals(id1.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
+
+		map = new SearchParameterMap();
+		map.add(Organization.SP_PARTOF, new ReferenceParam(id2.toUnqualifiedVersionless().getValue()));
+		res = myOrganizationDao.search(map);
+		assertEquals(1, res.size());
+		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
+
 	}
 
 	@Test
