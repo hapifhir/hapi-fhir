@@ -89,6 +89,21 @@ public class JsonParserDstu2Test {
 		assertEquals("ORG", o.getName());
 	}
 
+	@Test
+	public void testEncodeBundleOldStyleContainingResourceWithUuidBase() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+
+		Bundle b = new Bundle();
+		b.addEntry().setResource(p);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder("fullUrl", p.getId().getValue(), "Patient"));
+	}
+
+	
 	/**
 	 * See #308
 	 */
@@ -1242,8 +1257,8 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getValue());
-		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getId().getBaseUrl());
-		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
+		assertEquals(null, parsed.getEntry().get(0).getResource().getId().getBaseUrl());
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
 		assertThat(encoded, not(containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"")));
 	}
 

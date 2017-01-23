@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu2016may.model;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -242,34 +244,6 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     return new IdType(getValue());
   }
 
-  private String determineLocalPrefix(String theValue) {
-    if (theValue == null || theValue.isEmpty()) {
-      return null;
-    }
-    if (theValue.startsWith("#")) {
-      return "#";
-    }
-    int lastPrefix = -1;
-    for (int i = 0; i < theValue.length(); i++) {
-      char nextChar = theValue.charAt(i);
-      if (nextChar == ':') {
-        lastPrefix = i;
-      } else if (!Character.isLetter(nextChar) || !Character.isLowerCase(nextChar)) {
-        break;
-      }
-    }
-    if (lastPrefix != -1) {
-      String candidate = theValue.substring(0, lastPrefix + 1);
-      if (candidate.startsWith("cid:") || candidate.startsWith("urn:")) {
-        return candidate;
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  }
-
   @Override
   public boolean equals(Object theArg0) {
     if (!(theArg0 instanceof IdType)) {
@@ -368,8 +342,8 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     String retVal = super.getValue();
     if (retVal == null && myHaveComponentParts) {
 
-      if (determineLocalPrefix(myBaseUrl) != null && myResourceType == null && myUnqualifiedVersionId == null) {
-        return myBaseUrl + myUnqualifiedId;
+      if (isLocal() || isUrn()) {
+        return myUnqualifiedId;
       }
 
       StringBuilder b = new StringBuilder();
@@ -510,7 +484,11 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    */
   @Override
   public boolean isLocal() {
-    return "#".equals(myBaseUrl);
+    return defaultString(myUnqualifiedId).startsWith("#");
+  }
+
+  private boolean isUrn() {
+    return defaultString(myUnqualifiedId).startsWith("urn:");
   }
 
   @Override
@@ -536,8 +514,6 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     super.setValue(theValue);
     myHaveComponentParts = false;
 
-    String localPrefix = determineLocalPrefix(theValue);
-
     if (StringUtils.isBlank(theValue)) {
       myBaseUrl = null;
       super.setValue(null);
@@ -545,15 +521,18 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
       myUnqualifiedVersionId = null;
       myResourceType = null;
     } else if (theValue.charAt(0) == '#' && theValue.length() > 1) {
-      super.setValue(theValue);
-      myBaseUrl = "#";
-      myUnqualifiedId = theValue.substring(1);
-      myUnqualifiedVersionId = null;
-      myResourceType = null;
-      myHaveComponentParts = true;
-    } else if (localPrefix != null) {
-      myBaseUrl = localPrefix;
-      myUnqualifiedId = theValue.substring(localPrefix.length());
+       super.setValue(theValue);
+       myBaseUrl = null;
+       myUnqualifiedId = theValue;
+       myUnqualifiedVersionId = null;
+       myResourceType = null;
+       myHaveComponentParts = true;
+     } else if (theValue.startsWith("urn:")) {
+       myBaseUrl = null;
+       myUnqualifiedId = theValue;
+       myUnqualifiedVersionId = null;
+       myResourceType = null;
+       myHaveComponentParts = true;
     } else {
       int vidIndex = theValue.indexOf("/_history/");
       int idIndex;
@@ -618,21 +597,33 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    */
   @Override
   public IdType toUnqualified() {
+    if (isLocal() || isUrn()) {
+       return new IdType(getValueAsString());
+    }
     return new IdType(getResourceType(), getIdPart(), getVersionIdPart());
   }
 
   @Override
   public IdType toUnqualifiedVersionless() {
+    if (isLocal() || isUrn()) {
+       return new IdType(getValueAsString());
+    }
     return new IdType(getResourceType(), getIdPart());
   }
 
   @Override
   public IdType toVersionless() {
+    if (isLocal() || isUrn()) {
+       return new IdType(getValueAsString());
+    }
     return new IdType(getBaseUrl(), getResourceType(), getIdPart(), null);
   }
 
   @Override
   public IdType withResourceType(String theResourceName) {
+    if (isLocal() || isUrn()) {
+       return new IdType(getValueAsString());
+    }
     return new IdType(theResourceName, getIdPart(), getVersionIdPart());
   }
 
@@ -652,6 +643,9 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    */
   @Override
   public IdType withServerBase(String theServerBase, String theResourceType) {
+    if (isLocal() || isUrn()) {
+       return new IdType(getValueAsString());
+    }
     return new IdType(theServerBase, theResourceType, getIdPart(), getVersionIdPart());
   }
 
@@ -666,6 +660,10 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    */
   public IdType withVersion(String theVersion) {
     Validate.notBlank(theVersion, "Version may not be null or empty");
+
+    if (isLocal() || isUrn()) {
+       return new IdType(getValueAsString());
+    }
 
     String existingValue = getValue();
 

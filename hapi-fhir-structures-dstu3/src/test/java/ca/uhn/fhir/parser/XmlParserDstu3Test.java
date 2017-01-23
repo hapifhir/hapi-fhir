@@ -77,6 +77,22 @@ public class XmlParserDstu3Test {
 	}
 
 	/**
+	 * See #544
+	 */
+	@Test
+	public void testBundleStitchReferencesByUuid() throws Exception {
+		String body = IOUtils.toString(XmlParserDstu3Test.class.getResourceAsStream("/bundle_ref_by_uuid_544.xml"), StandardCharsets.UTF_8);
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, body);
+		
+		DocumentManifest dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
+		
+		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference());
+		
+		Patient subject = (Patient) dm.getSubject().getResource();
+		assertNotNull(subject);
+	}
+	
+	/**
 	 * See #414
 	 */
 	@Test
