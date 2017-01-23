@@ -1431,6 +1431,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			for (ResourceLink next : links) {
 				myEntityManager.persist(next);
 			}
+			// make sure links are indexed
+			theEntity.setResourceLinks(links);
 
 			theEntity.toString();
 			
