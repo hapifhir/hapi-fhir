@@ -627,8 +627,10 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	}
 
 	private static boolean isPlaceholder(IdType theId) {
-		if ("urn:oid:".equals(theId.getBaseUrl()) || "urn:uuid:".equals(theId.getBaseUrl())) {
-			return true;
+		if (theId.getValue() != null) {
+			if (theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:")) {
+				return true;
+			}
 		}
 		return false;
 	}
