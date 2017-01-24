@@ -222,6 +222,17 @@
 				return an HTTP 404 and not a 400, per the HTTP spec. Thanks to 
 				GitHub user @CarthageKing for the pull request!
 			</action>
+			<action type="fix" issue="544">
+				When parsing a Bundle containing placeholder fullUrls and references
+				(e.g. "urn:uuid:0000-0000") the resource reference targets did not get
+				populated with the given resources. Note that as a part of this
+				change, <![CDATA[<code>IdType</code> and <code>IdDt</code>]]> have been modified
+				so that when parsing a placeholder ID, the complete placeholder including the
+				"urn:uuid:" or "urn:oid:" prefix will be placed into the ID part. Previously,
+				the prefix was treated as the base URL, which led to strange behaviour
+				like the placeholder being treated as a real IDs. Thanks to GitHub
+				user @jodue for reporting!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

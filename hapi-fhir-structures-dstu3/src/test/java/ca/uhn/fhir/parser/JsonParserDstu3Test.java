@@ -34,52 +34,16 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Address.AddressUse;
 import org.hl7.fhir.dstu3.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.AuditEvent;
-import org.hl7.fhir.dstu3.model.Basic;
-import org.hl7.fhir.dstu3.model.Binary;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Claim;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Communication;
-import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
-import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.Coverage;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.DiagnosticReport;
-import org.hl7.fhir.dstu3.model.EnumFactory;
-import org.hl7.fhir.dstu3.model.Enumeration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
-import org.hl7.fhir.dstu3.model.Linkage;
-import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationRequest;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.PrimitiveType;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
-import org.hl7.fhir.dstu3.model.SampledData;
-import org.hl7.fhir.dstu3.model.SimpleQuantity;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -115,6 +79,35 @@ public class JsonParserDstu3Test {
 		ourCtx.setNarrativeGenerator(null);
 	}
 
+	/**
+	 * See #544
+	 */
+	@Test
+	public void testBundleStitchReferencesByUuid() throws Exception {
+		Bundle bundle = new Bundle();
+		
+		DocumentManifest dm = new DocumentManifest();
+		dm.getSubject().setReference("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		bundle.addEntry().setResource(dm);
+		
+		Patient patient = new Patient();
+		patient.addName().setFamily("FAMILY");
+		bundle.addEntry().setResource(patient).setFullUrl("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(encoded);
+		
+		bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
+		
+		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference());
+		
+		Patient subject = (Patient) dm.getSubject().getResource();
+		assertNotNull(subject);
+		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
+	}
+
+	
 	@Test
 	public void testIncorrectJsonTypesIdAndArray() {
 		
