@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -28,11 +27,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
@@ -45,6 +40,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -59,6 +55,13 @@ public class InterceptorDstu3Test {
 	private IServerInterceptor myInterceptor1;
 	private IServerInterceptor myInterceptor2;
 
+	@After
+	public void after() {
+		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourServlet.getInterceptors())) {
+			ourServlet.unregisterInterceptor(next);
+		}
+	}
+
 	@Before
 	public void before() {
 		myInterceptor1 = mock(IServerInterceptor.class);
@@ -66,6 +69,13 @@ public class InterceptorDstu3Test {
 		ourServlet.setInterceptors(myInterceptor1, myInterceptor2);
 	}
 
+	@Test
+	public void testServerOperationInterceptorAdapterMethods() {
+		ServerOperationInterceptorAdapter i = new ServerOperationInterceptorAdapter();
+		i.resourceCreated(null, null);
+		i.resourceDeleted(null, null);
+		i.resourceUpdated(null, null);
+	}
 
 	@Test
 	public void testValidate() throws Exception {
@@ -75,7 +85,7 @@ public class InterceptorDstu3Test {
 		when(myInterceptor2.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
-		
+
 		//@formatter:off
 		String input = 
 				"{\n" + 
@@ -114,15 +124,15 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
 		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
-		
+
 		// Avoid concurrency issues
 		Thread.sleep(500);
-		
+
 		order.verify(myInterceptor2, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
 		order.verify(myInterceptor1, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
 		verifyNoMoreInteractions(myInterceptor1);
 		verifyNoMoreInteractions(myInterceptor2);
-		
+
 		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, opTypeCapt.getValue());
 		assertNotNull(arTypeCapt.getValue().getResource());
 	}
@@ -131,13 +141,6 @@ public class InterceptorDstu3Test {
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-	
-	@After
-	public void after() {
-		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
 	}
 
 	@BeforeClass
@@ -169,6 +172,7 @@ public class InterceptorDstu3Test {
 			return Patient.class;
 		}
 
+		@SuppressWarnings("unused")
 		@Validate()
 		public MethodOutcome validate(@ResourceParam Patient theResource) {
 			return new MethodOutcome();
