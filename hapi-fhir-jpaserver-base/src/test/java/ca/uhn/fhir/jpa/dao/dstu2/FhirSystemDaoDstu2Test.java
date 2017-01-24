@@ -1615,13 +1615,11 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		res.addEntry().setResource(p1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Patient");
 
 		Observation o1 = new Observation();
-		o1.setId("cid:observation1");
 		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
 		o1.setSubject(new ResourceReferenceDt("urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
 
 		Observation o2 = new Observation();
-		o2.setId("cid:observation2");
 		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
 		o2.setSubject(new ResourceReferenceDt("urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o2).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
@@ -1760,13 +1758,11 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		res.addEntry().setResource(p1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Patient");
 
 		Observation o1 = new Observation();
-		o1.setId("cid:observation1");
 		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
 		o1.setSubject(new ResourceReferenceDt("Patient/urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o1).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
 
 		Observation o2 = new Observation();
-		o2.setId("cid:observation2");
 		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
 		o2.setSubject(new ResourceReferenceDt("Patient/urn:oid:0.1.2.3"));
 		res.addEntry().setResource(o2).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
