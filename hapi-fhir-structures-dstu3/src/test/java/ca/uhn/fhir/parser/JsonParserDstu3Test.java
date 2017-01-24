@@ -1660,8 +1660,8 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getIdElement().getValue());
-		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getIdElement().getBaseUrl());
-		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertEquals(null, parsed.getEntry().get(0).getResource().getIdElement().getBaseUrl());
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getIdElement().getIdPart());
 		assertThat(encoded, not(containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"")));
 	}
 
