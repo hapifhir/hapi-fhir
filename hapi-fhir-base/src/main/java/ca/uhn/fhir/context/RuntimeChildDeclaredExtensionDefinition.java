@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceDefinition {
 
@@ -137,7 +138,8 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 //			return null;
 //		}
 		
-		if ("extension".equals(theName)||"modifierExtension".equals(theName)) {
+		String name = theName;
+		if ("extension".equals(name)||"modifierExtension".equals(name)) {
 			if (myChildResourceBlock != null) {
 				return myChildResourceBlock;
 			}
@@ -145,8 +147,16 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 				return myChildDef;
 			}
 		}
+//		
+//		if ("valueResourceReference".equals(name)) {
+//			name = "valueReference";
+//		}
 		
-		return null;
+		if (myChildResourceBlock != null) {
+			return myChildResourceBlock;
+		}
+		
+		return super.getChildByName(name);
 //		
 //		
 //		return super.getChildByName(theName);
@@ -229,6 +239,14 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 		myUrlToChildExtension = Collections.unmodifiableMap(myUrlToChildExtension);
 
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
+	}
+
+	public IBase newInstance() {
+		return ReflectionUtil.newInstance(myChildType);
+	}
+
+	public Class<? extends IBase> getChildType() {
+		return myChildType;
 	}
 
 }

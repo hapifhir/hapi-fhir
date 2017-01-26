@@ -1487,8 +1487,7 @@ class ParserState<T> {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
 			if (declaredExtension != null) {
 				if (myChildInstance == null) {
-					BaseRuntimeElementDefinition<?> child = declaredExtension.getChildByName(theElement.getName().getLocalPart());
-					myChildInstance = child.newInstance();
+					myChildInstance = myDefinition.newInstance();
 					myDefinition.getMutator().addValue(myParentInstance, myChildInstance);
 				}
 				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myChildInstance);

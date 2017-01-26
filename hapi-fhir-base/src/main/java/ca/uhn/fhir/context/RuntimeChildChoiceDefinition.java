@@ -148,6 +148,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			if (IBaseResource.class.isAssignableFrom(next) || IBaseReference.class.isAssignableFrom(next)) {
 				next = theContext.getVersion().getResourceReferenceType();
 				elementName = getElementName() + myReferenceSuffix;
+				myNameToChildDefinition.put(elementName, nextDef);
 			}
 
 			myDatatypeToElementDefinition.put(next, nextDef);
