@@ -23,14 +23,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -54,7 +56,6 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 	 * @param theDefinedLocally
 	 *           See {@link Extension#definedLocally()}
 	 */
-	@SuppressWarnings("unchecked")
 	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl,
 			Class<? extends IBase> theChildType, Object theBoundTypeBinder)
 			throws ConfigurationException {
@@ -75,12 +76,6 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 			choiceTypes.add(theChildType);
 		}
 
-		// if (Modifier.isAbstract(theField.getType().getModifiers()) == false) {
-		// Class<?> type = theField.getType();
-		// if (type.getAnnotation(DatatypeDef.class) != null) {
-		// choiceTypes.add((Class<? extends IBase>) type);
-		// }
-		// }
 		setChoiceTypes(choiceTypes);
 	}
 
@@ -128,16 +123,6 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-//		if (myDatatypeChildName != null) {
-//			if (myDatatypeChildName.equals(theName)) {
-//				return myChildDef;
-//			} else {
-//				return null;
-//			}
-//		} else {
-//			return null;
-//		}
-		
 		String name = theName;
 		if ("extension".equals(name)||"modifierExtension".equals(name)) {
 			if (myChildResourceBlock != null) {
@@ -147,19 +132,12 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 				return myChildDef;
 			}
 		}
-//		
-//		if ("valueResourceReference".equals(name)) {
-//			name = "valueReference";
-//		}
-		
-		if (myChildResourceBlock != null) {
-			return myChildResourceBlock;
+
+		if (getValidChildNames().contains(name) == false) {
+			return null;
 		}
 		
 		return super.getChildByName(name);
-//		
-//		
-//		return super.getChildByName(theName);
 	}
 
 	@Override
@@ -175,17 +153,6 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 	public RuntimeChildDeclaredExtensionDefinition getChildExtensionForUrl(String theUrl) {
 		return myUrlToChildExtension.get(theUrl);
 	}
-
-	// @Override
-	// public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-	// String retVal = super.getChildNameByDatatype(theDatatype);
-	// if (retVal )
-	// if (myChildType.equals(theDatatype) && myDatatypeChildName != null) {
-	// return myDatatypeChildName;
-	// } else {
-	// return "extension";
-	// }
-	// }
 
 	@Override
 	public String getExtensionUrl() {
