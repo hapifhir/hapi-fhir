@@ -28,7 +28,18 @@ public class TestOutcomeTest {
 		outcome.element2 = nameDt;
 
 		IParser parser = FhirContext.forDstu2().newXmlParser();
-		String outcomeString = parser.setPrettyPrint(true).encodeResourceToString(outcome);
+		String outcomeString = parser.setPrettyPrint(true).encodeResourceToString(outcome);		
+		ourLog.info(outcomeString);
+		
+		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\">" + 
+				"<meta>" + 
+				"<profile value=\"http://hl7.org/fhir/profiles/custom-operation-outcome\"/>" + 
+				"</meta>" + 
+				"<extension url=\"#someElement2\">" + 
+				"<valueString value=\"testText\"/>" + 
+				"</extension>" + 
+				"</OperationOutcome>", parser.setPrettyPrint(false).encodeResourceToString(outcome));
+		
 		CustomOperationOutcome parsedOutcome = parser.parseResource(CustomOperationOutcome.class, outcomeString);
 		ourLog.info(outcomeString);
 

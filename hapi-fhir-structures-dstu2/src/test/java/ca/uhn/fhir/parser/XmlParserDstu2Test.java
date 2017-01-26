@@ -919,7 +919,7 @@ public class XmlParserDstu2Test {
 	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
 		IParser xmlParser = ourCtx.newXmlParser();
 
-		String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
+		String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"), StandardCharsets.UTF_8);
 		MedicationStatement ms = xmlParser.parseResource(MedicationStatement.class, input);
 		SimpleQuantityDt q = (SimpleQuantityDt) ms.getDosage().get(0).getQuantity();
 		assertEquals("1", q.getValueElement().getValueAsString());
@@ -1869,7 +1869,7 @@ public class XmlParserDstu2Test {
 
 	@Test
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"));
+		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
 		Bundle parsed = ourCtx.newXmlParser().parseBundle(content);
 		assertEquals("Bundle/example/_history/1", parsed.getId().getValue());
@@ -1904,7 +1904,7 @@ public class XmlParserDstu2Test {
 
 	@Test
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"));
+		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"), StandardCharsets.UTF_8);
 
 		IParser newXmlParser = ourCtx.newXmlParser();
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
@@ -2411,12 +2411,14 @@ public class XmlParserDstu2Test {
 		// TODO: implement this test, make sure we handle ID and meta correctly in Binary
 	}
 
+	
+	
 	/**
 	 * See #191
 	 */
 	@Test
 	public void testParseBundleWithLinksOfUnknownRelation() throws Exception {
-		String input = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle_orion.xml"));
+		String input = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle_orion.xml"), StandardCharsets.UTF_8);
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
 
 		Link link = parsed.getLink().get(0);

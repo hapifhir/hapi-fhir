@@ -1,5 +1,14 @@
 package ca.uhn.fhir.context;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
@@ -9,14 +18,6 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureElement;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
-
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class RuntimeResourceDefinitionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinitionTest.class);
@@ -32,6 +33,7 @@ public class RuntimeResourceDefinitionTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testToProfileExtensions() throws Exception {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class, Profile.class);
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsA.class);

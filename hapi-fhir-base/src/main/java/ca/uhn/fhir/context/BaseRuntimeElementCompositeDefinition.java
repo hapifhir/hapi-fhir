@@ -216,18 +216,6 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			orderToElementDef = newOrderToExtensionDef;
 		}
 		
-		// while (orderToElementDef.size() > 0 && orderToElementDef.firstKey() <
-		// 0) {
-		// BaseRuntimeDeclaredChildDefinition elementDef =
-		// orderToElementDef.remove(orderToElementDef.firstKey());
-		// if (elementDef.getElementName().equals("identifier")) {
-		// orderToElementDef.put(theIdentifierOrder, elementDef);
-		// } else {
-		// throw new ConfigurationException("Don't know how to handle element: "
-		// + elementDef.getElementName());
-		// }
-		// }
-
 		TreeSet<Integer> orders = new TreeSet<Integer>();
 		orders.addAll(orderToElementDef.keySet());
 		orders.addAll(orderToExtensionDef.keySet());
@@ -372,7 +360,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 				def = new RuntimeChildDirectResource(nextField, childAnnotation, descriptionAnnotation, elementName);
 			} else {
 				childIsChoiceType |= choiceTypes.size() > 1;
-				if (childIsChoiceType && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
+				if (extensionAttr == null && childIsChoiceType && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
 					def = new RuntimeChildChoiceDefinition(nextField, elementName, childAnnotation, descriptionAnnotation, choiceTypes);
 				} else if (extensionAttr != null) {
 					/*
