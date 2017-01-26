@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 
@@ -66,9 +67,17 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 			choiceTypes.add(next);
 		}
 		if (Modifier.isAbstract(theField.getType().getModifiers()) == false) {
-			choiceTypes.add((Class<? extends IBase>) theField.getType());
+			Class<?> type = theField.getType();
+			if (type.getAnnotation(DatatypeDef.class) != null) {
+				choiceTypes.add((Class<? extends IBase>) type);
+			}
 		}
 		setChoiceTypes(choiceTypes);
+	}
+
+	@Override
+	public String getElementName() {
+		return "value";
 	}
 
 	@Override
