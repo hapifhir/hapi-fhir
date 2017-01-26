@@ -38,6 +38,9 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	private String myReferenceSuffix;
 	private List<Class<? extends IBaseResource>> myResourceTypes;
 
+	/**
+	 * Constructor
+	 */
 	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBase>> theChoiceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 
@@ -45,6 +48,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	}
 
 	/**
+	 * Constructor
+	 * 
 	 * For extension, if myChoiceTypes will be set some other way
 	 */
 	RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {

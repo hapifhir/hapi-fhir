@@ -53,8 +53,6 @@ public class DaoConfig {
 	// ***
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
 	
-	private int myHardSearchLimit = 1000;
-	
 	private int myHardTagListLimit = 1000;
 	
 	private int myIncludeLimit = 2000;
@@ -325,8 +323,17 @@ public class DaoConfig {
 		myExpireSearchResultsAfterMillis = theExpireSearchResultsAfterMillis;
 	}
 
-	public void setHardSearchLimit(int theHardSearchLimit) {
-		myHardSearchLimit = theHardSearchLimit;
+	/**
+	 * Do not call this method, it exists only for legacy reasons. It
+	 * will be removed in a future version. Configure the page size on your
+	 * paging provider instead.
+	 * 
+	 * @deprecated This method does not do anything. Configure the page size on your
+	 * paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017) 
+	 */
+	@Deprecated
+	public void setHardSearchLimit(@SuppressWarnings("unused") int theHardSearchLimit) {
+		// this method does nothing
 	}
 
 	/**
