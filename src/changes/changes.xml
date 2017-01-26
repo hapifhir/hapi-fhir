@@ -233,6 +233,10 @@
 				like the placeholder being treated as a real IDs. Thanks to GitHub
 				user @jodue for reporting!
 			</action>
+			<action type="add">
+				Declared extensions with multiple type() options listed in the @Child
+				annotation caused a crash on startup. Now this is supported.
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
