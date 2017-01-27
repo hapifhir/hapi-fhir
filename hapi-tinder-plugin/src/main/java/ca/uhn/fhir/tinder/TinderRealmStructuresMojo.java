@@ -104,7 +104,7 @@ public class TinderRealmStructuresMojo extends AbstractMojo {
 			} catch (Exception e) {
 				throw new MojoFailureException("Failed to load datatypes", e);
 			}
-			dtp.bindValueSets(vsp);
+//			dtp.bindValueSets(vsp);
 
 			datatypeLocalImports = dtp.getLocalImports();
 		}
@@ -121,7 +121,7 @@ public class TinderRealmStructuresMojo extends AbstractMojo {
 				throw new MojoFailureException("Failed to load resources", e);
 			}
 
-			rp.bindValueSets(vsp);
+//			rp.bindValueSets(vsp);
 			rp.getLocalImports().putAll(datatypeLocalImports);
 			datatypeLocalImports.putAll(rp.getLocalImports());
 
@@ -142,7 +142,7 @@ public class TinderRealmStructuresMojo extends AbstractMojo {
 				pp.parseSingleProfile(new File(next.profileFile), next.profileSourceUrl);
 			}
 
-			pp.bindValueSets(vsp);
+//			pp.bindValueSets(vsp);
 			pp.markResourcesForImports();
 			pp.getLocalImports().putAll(datatypeLocalImports);
 			datatypeLocalImports.putAll(pp.getLocalImports());
@@ -229,7 +229,7 @@ public class TinderRealmStructuresMojo extends AbstractMojo {
 		
 		dtp.parse();
 		dtp.markResourcesForImports();
-		dtp.bindValueSets(vsp);
+//		dtp.bindValueSets(vsp);
 		Map<String, String> datatypeLocalImports = dtp.getLocalImports();
 
 		String dtOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/composite";
@@ -246,11 +246,9 @@ public class TinderRealmStructuresMojo extends AbstractMojo {
 //				,"device", "valueset"
 				));
 		rp.parse();
-		rp.bindValueSets(vsp);
+//		rp.bindValueSets(vsp);
 		rp.markResourcesForImports();
 		
-		rp.bindValueSets(vsp);
-
 		String rpOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/resource";
 		String rpSOutputDir = "target/generated-resources/tinder/ca/uhn/fhir/model/dev";
 
