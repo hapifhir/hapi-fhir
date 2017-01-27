@@ -226,7 +226,7 @@
 								<baseResourceName>valueset</baseResourceName>
 								<baseResourceName>visionprescription</baseResourceName>
 							</baseResourceNames>
-							<package>ca.uhn.fhir.model.dstu2</package>
+							<package>ca.uhn.fhir.android.realm.dstu2</package>
 							<version>dstu2</version>
 							<buildDatatypes>true</buildDatatypes>
 						</configuration>

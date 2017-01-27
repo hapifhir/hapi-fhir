@@ -45,14 +45,9 @@
 
 	@Override
 	public boolean isEmpty() {
-		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( #{foreach}($child in $childElements) ${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
+		return ca.uhn.fhir.util.ElementUtil.isEmpty( #{foreach}($child in $childElements) ${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
 	}
 	
-	@Override
-	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, #{foreach}($child in $childElements)${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
-	}
-
 #foreach ( $child in $childElements )
 #if ( $child.referenceType == 'IResource' )
 	/**
@@ -390,33 +385,56 @@
      * </p> 
 	 */
 	@Block()	
-	public static class ${blockChild.className} 
-	    extends #{if}( ${className}=="OperationOutcome" && ${blockChild.className}=="Issue" ) Base${blockChild.className} #{else} BaseIdentifiableElement #{end} 
+	public static class ${blockChild.className}
+	    extends RealmObject 
 	    implements IResourceBlock {
 	
 #childVars( $blockChild.children )
 #childAccessors( $blockChild.children )
 
-#if ( ${className} == "OperationOutcome" && ${blockChild.className} == "Issue" )
-	/**
-	 * @deprecated Use {@link ${hash}getDiagnosticsElement()} instead - OperationOutcome.details was renamed to OperationOutcome.diagnostics in DSTU2 and a new OperationOutcome.details codeableconcept element was introduced
-	 */
-	@Deprecated
 	@Override
-	public StringDt getDetailsElement() {
-		return getDiagnosticsElement();
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return null;
 	}
 
-	/**
-	 * @deprecated Use {@link ${hash}setDetails(String)} instead - OperationOutcome.details was renamed to OperationOutcome.diagnostics in DSTU2 and a new OperationOutcome.details codeableconcept element was introduced
-	 */
-	@Deprecated
 	@Override
-	public BaseIssue setDetails(String theString) {
-		setDiagnostics(theString);
-		return this;
+	public boolean hasFormatComment() {
+		return false;
 	}
-#end
+
+	@Override
+	public List<String> getFormatCommentsPre() {
+		return null;
+	}
+
+	@Override
+	public List<String> getFormatCommentsPost() {
+		return null;
+	}
+
+	@Override
+	public String getElementSpecificId() {
+		return null;
+	}
+
+	@Override
+	public IdDt getId() {
+		return null;
+	}
+
+	@Override
+	public void setElementSpecificId(String theElementSpecificId) {
+	}
+
+	@Override
+	public void setId(IdDt theId) {
+	}
+
+	@Override
+	public void setId(String theId) {
+	}
+	
+
 
 	}
 

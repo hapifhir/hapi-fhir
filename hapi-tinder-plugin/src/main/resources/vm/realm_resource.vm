@@ -10,10 +10,18 @@ import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
 
 import io.realm.RealmObject;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 #foreach ( $import in $imports )
 import ${import};
 #end
+
+import ca.uhn.fhir.android.realm.dstu2.composite.*;
 
 ##import ${packageBase}.composite.*;
 ##import ${packageBase}.valueset.*;
@@ -36,11 +44,33 @@ import ${import};
 @ResourceDef(name="${elementName}", profile="${profile}", id="${id}")
 public class ${className}
     extends RealmObject 
-    implements #{if}( ${className}=="OperationOutcome" || ${className}=="Conformance" || ${className}=="SecurityEvent" ) ca.uhn.fhir.model.base.resource.Base${className} #{else} IResource #{end}
-#if ( ${className} == "Bundle" || ${className} == "Parameters" || ${className} == "Binary" )
-    , org.hl7.fhir.instance.model.api.IBase${className}
-#end
+    implements org.hl7.fhir.instance.model.api.IBaseResource
     {
+
+ 	@Child(name = "contained", order = 2, min = 0, max = 1)
+ 	private ContainedDt myContained;
+
+ 	private IdDt myId;
+
+ 	@Child(name = "language", order = 0, min = 0, max = 1)
+ 	private CodeDt myLanguage;
+
+ 	@Child(name = "text", order = 1, min = 0, max = 1)
+ 	private NarrativeDt myText;
+
+	private List<String> myFormatCommentsPost;
+	private List<String> myFormatCommentsPre;
+	
+   @Child(name = "extension", type = {ExtensionDt.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+   @Description(shortDefinition="Additional Content defined by implementations", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension." )
+	private List<ExtensionDt> myUndeclaredExtensions;
+	
+   /**
+    * May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.
+    */
+   @Child(name = "modifierExtension", type = {ExtensionDt.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=false)
+   @Description(shortDefinition="Extensions that cannot be ignored", formalDefinition="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions." )
+	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 #childExtensionFields( $childExtensionTypes )
 #childVars( $children )
@@ -49,7 +79,6 @@ public class ${className}
 
 #childExtensionTypes( $childExtensionTypes )
 
-    @Override
     public String getResourceName() {
         return "${className.replaceAll("Resource", "")}";
     }
@@ -60,12 +89,10 @@ public class ${className}
 
 #if ( ${className}=="Binary" ) 
 
-	@Override
 	public String getContentAsBase64() {
 		return getContentElement().getValueAsString();
 	}
 
-	@Override
 	public Binary setContentAsBase64(String theContent) {
 		getContentElement().setValueAsString(theContent);
 		return this;
@@ -121,5 +148,173 @@ public class ${className}
 		return retVal;
 	}
 #end
+
+
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl) {
+		Validate.notEmpty(theUrl, "URL must be populated");
+
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
+		if (theIsModifier) {
+			getUndeclaredModifierExtensions();
+			myUndeclaredModifierExtensions.add(retVal);
+		} else {
+			getUndeclaredExtensions();
+			myUndeclaredExtensions.add(retVal);
+		}
+		return retVal;
+	}
+
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue) {
+		Validate.notEmpty(theUrl, "URL must be populated");
+		Validate.notNull(theValue, "Value must not be null");
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);
+		if (theIsModifier) {
+			getUndeclaredModifierExtensions();
+			myUndeclaredModifierExtensions.add(retVal);
+		} else {
+			getUndeclaredExtensions();
+			myUndeclaredExtensions.add(retVal);
+		}
+		return retVal;
+	}
+
+	public void addUndeclaredExtension(ExtensionDt theExtension) {
+		Validate.notNull(theExtension, "Extension can not be null");
+		if (theExtension.isModifier()) {
+			getUndeclaredModifierExtensions();
+			myUndeclaredModifierExtensions.add(theExtension);
+		} else {
+			getUndeclaredExtensions();
+			myUndeclaredExtensions.add(theExtension);
+		}
+	}
+
+	public List<ExtensionDt> getAllUndeclaredExtensions() {
+		ArrayList<ExtensionDt> retVal = new ArrayList<ExtensionDt>();
+		if (myUndeclaredExtensions != null) {
+			retVal.addAll(myUndeclaredExtensions);
+		}
+		if (myUndeclaredModifierExtensions != null) {
+			retVal.addAll(myUndeclaredModifierExtensions);
+		}
+		return Collections.unmodifiableList(retVal);
+	}
+
+	@Override
+	public List<String> getFormatCommentsPost() {
+		if (myFormatCommentsPost == null)
+			myFormatCommentsPost = new ArrayList<String>();
+		return myFormatCommentsPost;
+	}
+
+	@Override
+	public List<String> getFormatCommentsPre() {
+		if (myFormatCommentsPre == null)
+			myFormatCommentsPre = new ArrayList<String>();
+		return myFormatCommentsPre;
+	}
+
+	public List<ExtensionDt> getUndeclaredExtensions() {
+		if (myUndeclaredExtensions == null) {
+			myUndeclaredExtensions = new ArrayList<ExtensionDt>();
+		}
+		return (myUndeclaredExtensions);
+	}
+
+	public List<ExtensionDt> getUndeclaredExtensionsByUrl(String theUrl) {
+		org.apache.commons.lang3.Validate.notNull(theUrl, "URL can not be null");
+		ArrayList<ExtensionDt> retVal = new ArrayList<ExtensionDt>();
+		for (ExtensionDt next : getAllUndeclaredExtensions()) {
+			if (theUrl.equals(next.getUrlAsString())) {
+				retVal.add(next);
+			}
+		}
+		return Collections.unmodifiableList(retVal);
+	}
+
+	public List<ExtensionDt> getUndeclaredModifierExtensions() {
+		if (myUndeclaredModifierExtensions == null) {
+			myUndeclaredModifierExtensions = new ArrayList<ExtensionDt>();
+		}
+		return (myUndeclaredModifierExtensions);
+	}
+
+	@Override
+	public boolean hasFormatComment() {
+		return (myFormatCommentsPre != null && !myFormatCommentsPre.isEmpty()) || (myFormatCommentsPost != null && !myFormatCommentsPost.isEmpty());
+	}
+
+	public ContainedDt getContained() {
+		if (myContained == null) {
+			myContained = new ContainedDt();
+		}
+		return myContained;
+	}
+
+	public IdDt getId() {
+		if (myId == null) {
+			myId = new IdDt();
+		}
+		return myId;
+	}
+
+	@Override
+	public IIdType getIdElement() {
+		return getId();
+	}
+
+	@Override
+	public IBaseMetaType getMeta() {
+		return null; // TODO implement
+	}
+
+	public NarrativeDt getText() {
+		if (myText == null) {
+			myText = new NarrativeDt();
+		}
+		return myText;
+	}
+
+	public void setContained(ContainedDt theContained) {
+		myContained = theContained;
+	}
+	
+	public void setId(IdDt theId) {
+		myId = theId;
+	}
+
+	public ${className} setId(IIdType theId) {
+		if (theId instanceof IdDt) {
+			myId = (IdDt) theId;
+		} else if (theId != null) {
+			myId = new IdDt(theId.getValue());
+		} else {
+			myId = null;
+		}
+		return this;
+	}
+
+	public ${className} setId(String theId) {
+		if (theId == null) {
+			myId = null;
+		} else {
+			myId = new IdDt(theId);
+		}
+		return this;
+	}
+
+	public void setText(NarrativeDt theText) {
+		myText = theText;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("id", getId().toUnqualified());
+		return b.toString();
+	}
+
+
+
 
 }
