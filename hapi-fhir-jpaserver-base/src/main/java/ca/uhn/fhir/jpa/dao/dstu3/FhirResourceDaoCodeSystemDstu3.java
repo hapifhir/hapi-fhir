@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,21 +119,12 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 			system = theSystem.getValue();
 		}
 
-		// CodeValidationResult validateOutcome = myJpaValidationSupport.validateCode(getContext(), system, code, null);
-		//
-		// LookupCodeResult result = new LookupCodeResult();
-		// result.setSearchedForCode(code);
-		// result.setSearchedForSystem(system);
-		// result.setFound(false);
-		// if (validateOutcome.isOk()) {
-		// result.setFound(true);
-		// result.setCodeIsAbstract(validateOutcome.asConceptDefinition().getAbstract());
-		// result.setCodeDisplay(validateOutcome.asConceptDefinition().getDisplay());
-		// }
-		// return result;
-
+		ourLog.info("Looking up {} / {}", system, code);
+		
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
-			
+
+			ourLog.info("Code system {} is supported", system);
+
 			CodeValidationResult result = myValidationSupport.validateCode(getContext(), system, code, null);
 			if (result != null) {
 				if (result.isOk()) {

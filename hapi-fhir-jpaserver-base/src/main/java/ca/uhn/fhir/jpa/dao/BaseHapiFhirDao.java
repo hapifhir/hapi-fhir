@@ -5,7 +5,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -667,11 +667,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
-		theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+		}
 	}
 
 	protected void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
-		theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
+		}
 	}
 	
 	public String parseContentTextIntoWords(IBaseResource theResource) {
@@ -1427,6 +1431,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			for (ResourceLink next : links) {
 				myEntityManager.persist(next);
 			}
+			// make sure links are indexed
+			theEntity.setResourceLinks(links);
 
 			theEntity.toString();
 			

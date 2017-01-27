@@ -77,155 +77,33 @@ public class XmlParserDstu3Test {
 	}
 
 	/**
-	 * See #414
+	 * See #544
 	 */
 	@Test
-	public void testParseXmlExtensionWithoutUrl() {
-		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"        <extension>\n" + 
-			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
-			"        </extension>\n" + 
-			"</Patient>";
-		//@formatter:on
-
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new LenientErrorHandler());
-		Patient parsed = (Patient) parser.parseResource(input);
-		assertEquals(1, parsed.getExtension().size());
-		assertEquals(null, parsed.getExtension().get(0).getUrl());
-		assertEquals("2011-01-02T11:13:15", parsed.getExtension().get(0).getValueAsPrimitive().getValueAsString());
-
-		try {
-			parser = ourCtx.newXmlParser();
-			parser.setParserErrorHandler(new StrictErrorHandler());
-			parser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
-		}
+	public void testBundleStitchReferencesByUuid() throws Exception {
+		Bundle bundle = new Bundle();
 		
-	}
-
-	
-	/**
-	 * See #414
-	 */
-	@Test
-	public void testParseXmlModifierExtensionWithoutUrl() {
-		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
-			"        <modifierExtension>\n" + 
-			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
-			"        </modifierExtension>\n" + 
-			"</Patient>";
-		//@formatter:on
-
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new LenientErrorHandler());
-		Patient parsed = (Patient) parser.parseResource(input);
-		assertEquals(1, parsed.getModifierExtension().size());
-		assertEquals(null, parsed.getModifierExtension().get(0).getUrl());
-		assertEquals("2011-01-02T11:13:15", parsed.getModifierExtension().get(0).getValueAsPrimitive().getValueAsString());
-
-		try {
-			parser = ourCtx.newXmlParser();
-			parser.setParserErrorHandler(new StrictErrorHandler());
-			parser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
-		}
+		DocumentManifest dm = new DocumentManifest();
+		dm.getSubject().setReference("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		bundle.addEntry().setResource(dm);
 		
-	}
-
-	@Test
-	public void testEncodeChainedContainedResourcer() {
-		Organization gp = new Organization();
-		gp.setName("grandparent");
-
-		Organization parent = new Organization();
-		parent.setName("parent");
-		parent.getPartOf().setResource(gp);
-
-		Organization child = new Organization();
-		child.setName("child");
-		child.getPartOf().setResource(parent);
-
 		Patient patient = new Patient();
-		patient.getManagingOrganization().setResource(child);
-
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		patient.addName().setFamily("FAMILY");
+		bundle.addEntry().setResource(patient).setFullUrl("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(encoded);
-
-		patient = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
-
-		child = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("child", child.getName());
-
-		parent = (Organization) child.getPartOf().getResource();
-		assertEquals("parent", parent.getName());
-
-		gp = (Organization) parent.getPartOf().getResource();
-		assertEquals("grandparent", gp.getName());
+		
+		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
+		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
+		
+		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference());
+		
+		Patient subject = (Patient) dm.getSubject().getResource();
+		assertNotNull(subject);
+		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
 	}
-
-	/**
-	 * If a contained resource refers to a contained resource that comes after it, it should still be successfully
-	 * woven together.
-	 */
-	@Test
-	public void testParseWovenContainedResources() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_woven_obs.xml"), StandardCharsets.UTF_8);
-
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		org.hl7.fhir.dstu3.model.Bundle bundle = parser.parseResource(Bundle.class, string);
-
-		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
-		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId());
-		Reference performerFirstRep = obs.getPerformerFirstRep();
-		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId());
-	}
-
-	@Test(expected = DataFormatException.class)
-	public void testContainedResourceWithNoId() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
-
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(Bundle.class, string);
-	}
-
-	@Test()
-	public void testContainedResourceWithNoIdLenient() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
-
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new LenientErrorHandler());
-		parser.parseResource(Bundle.class, string);
-	}
-
-	@Test(expected = DataFormatException.class)
-	public void testParseWithInvalidLocalRef() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
-
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new StrictErrorHandler());
-		parser.parseResource(Bundle.class, string);
-	}
-
-	@Test()
-	public void testParseWithInvalidLocalRefLenient() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
-
-		IParser parser = ourCtx.newXmlParser();
-		parser.setParserErrorHandler(new LenientErrorHandler());
-		parser.parseResource(Bundle.class, string);
-	}
-
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
@@ -257,6 +135,7 @@ public class XmlParserDstu3Test {
 
 	}
 
+	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -277,6 +156,24 @@ public class XmlParserDstu3Test {
 		Reference rr = (Reference) exts.get(0).getValue();
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
+	}
+
+	@Test(expected = DataFormatException.class)
+	public void testContainedResourceWithNoId() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		parser.parseResource(Bundle.class, string);
+	}
+
+	@Test()
+	public void testContainedResourceWithNoIdLenient() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_contained_with_no_id.xml"), StandardCharsets.UTF_8);
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		parser.parseResource(Bundle.class, string);
 	}
 
 	@Test
@@ -1021,6 +918,37 @@ public class XmlParserDstu3Test {
 
 		assertThat(encoded, stringContainsInOrder("<DiagnosticReport", "<contained", "<Observation", "<text value=\"Sharp1\"", "</DiagnosticReport"));
 		assertThat(encoded, not(stringContainsInOrder("<DiagnosticReport", "<contained", "<Observation", "<contained", "<Observation", "</DiagnosticReport")));
+	}
+
+	@Test
+	public void testEncodeChainedContainedResourcer() {
+		Organization gp = new Organization();
+		gp.setName("grandparent");
+
+		Organization parent = new Organization();
+		parent.setName("parent");
+		parent.getPartOf().setResource(gp);
+
+		Organization child = new Organization();
+		child.setName("child");
+		child.getPartOf().setResource(parent);
+
+		Patient patient = new Patient();
+		patient.getManagingOrganization().setResource(child);
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		patient = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
+
+		child = (Organization) patient.getManagingOrganization().getResource();
+		assertEquals("child", child.getName());
+
+		parent = (Organization) child.getPartOf().getResource();
+		assertEquals("parent", parent.getName());
+
+		gp = (Organization) parent.getPartOf().getResource();
+		assertEquals("grandparent", gp.getName());
 	}
 
 	/**
@@ -1929,8 +1857,6 @@ public class XmlParserDstu3Test {
 		assertThat(output, containsString("<text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">John <b>SMITH </b>"));
 	}
 
-	
-
 	@Test
 	public void testMoreExtensions() throws Exception {
 
@@ -2175,6 +2101,8 @@ public class XmlParserDstu3Test {
 		//@formatter:off
 
 	}
+
+	
 
 	@Test
 	public void testParseAndEncodeCommentsOnExtensions() {
@@ -3103,6 +3031,106 @@ public class XmlParserDstu3Test {
 		} catch (DataFormatException e) {
 			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
+	}
+
+	@Test(expected = DataFormatException.class)
+	public void testParseWithInvalidLocalRef() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		parser.parseResource(Bundle.class, string);
+	}
+
+	@Test()
+	public void testParseWithInvalidLocalRefLenient() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		parser.parseResource(Bundle.class, string);
+	}
+
+	/**
+	 * If a contained resource refers to a contained resource that comes after it, it should still be successfully
+	 * woven together.
+	 */
+	@Test
+	public void testParseWovenContainedResources() throws IOException {
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_woven_obs.xml"), StandardCharsets.UTF_8);
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		org.hl7.fhir.dstu3.model.Bundle bundle = parser.parseResource(Bundle.class, string);
+
+		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
+		Observation obs = (Observation) resource.getResult().get(1).getResource();
+		assertEquals("#2", obs.getId());
+		Reference performerFirstRep = obs.getPerformerFirstRep();
+		Practitioner performer = (Practitioner) performerFirstRep.getResource();
+		assertEquals("#3", performer.getId());
+	}
+
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseXmlExtensionWithoutUrl() {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"        <extension>\n" + 
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
+			"        </extension>\n" + 
+			"</Patient>";
+		//@formatter:on
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getExtension().size());
+		assertEquals(null, parsed.getExtension().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getExtension().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
+		}
+		
+	}
+
+	/**
+	 * See #414
+	 */
+	@Test
+	public void testParseXmlModifierExtensionWithoutUrl() {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"        <modifierExtension>\n" + 
+			"          <valueDateTime value=\"2011-01-02T11:13:15\"/>\n" + 
+			"        </modifierExtension>\n" + 
+			"</Patient>";
+		//@formatter:on
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new LenientErrorHandler());
+		Patient parsed = (Patient) parser.parseResource(input);
+		assertEquals(1, parsed.getModifierExtension().size());
+		assertEquals(null, parsed.getModifierExtension().get(0).getUrl());
+		assertEquals("2011-01-02T11:13:15", parsed.getModifierExtension().get(0).getValueAsPrimitive().getValueAsString());
+
+		try {
+			parser = ourCtx.newXmlParser();
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
+		}
+		
 	}
 
 	/**

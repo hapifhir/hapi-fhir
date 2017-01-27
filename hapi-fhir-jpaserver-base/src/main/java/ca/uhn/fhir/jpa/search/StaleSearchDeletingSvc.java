@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,22 +72,26 @@ public class StaleSearchDeletingSvc {
 				return;
 			}
 
-			TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
 			for (final Search next : toDelete) {
-				tt.execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-						Search searchToDelete = mySearchDao.findOne(next.getId());
-						ourLog.info("Expiring stale search {} / {}", searchToDelete.getId(), searchToDelete.getUuid());
-						mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-						mySearchResultDao.deleteForSearch(searchToDelete.getId());
-						mySearchDao.delete(searchToDelete);
-					}
-				});
+				deleteSearch(next);
 			}
 
 			ourLog.info("Deleted {} searches, {} remaining", toDelete.size(), mySearchDao.count());
 		}
+	}
+
+	protected void deleteSearch(final Search next) {
+		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+				Search searchToDelete = mySearchDao.findOne(next.getId());
+				ourLog.info("Expiring stale search {} / {}", searchToDelete.getId(), searchToDelete.getUuid());
+				mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
+				mySearchResultDao.deleteForSearch(searchToDelete.getId());
+				mySearchDao.delete(searchToDelete);
+			}
+		});
 	}
 
 }

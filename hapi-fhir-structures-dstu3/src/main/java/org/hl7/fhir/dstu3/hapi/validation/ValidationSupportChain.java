@@ -17,6 +17,8 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ValidationSupportChain implements IValidationSupport {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationSupportChain.class);
+
 	private List<IValidationSupport> myChain;
 
 	/**
@@ -97,9 +99,16 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		
+		ourLog.info("Validating code {} in chain with {} items", theCode, myChain.size());
+		
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
-				return next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+				ourLog.info("Chain item {} returned outcome {}", next, result.isOk());
+				return result;
+			} else {
+				ourLog.info("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
 		}
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);

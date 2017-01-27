@@ -157,7 +157,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(404, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle"));
 
@@ -171,7 +171,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertEquals(404, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, not(stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle")));
 		assertThat(responseContent, (stringContainsInOrder("Unknown resource type 'Foobar'")));
@@ -188,7 +188,7 @@ public class ResponseHighlightingInterceptorTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info("Resp: {}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name."));
 

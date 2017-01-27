@@ -130,10 +130,41 @@ public interface IIdType extends IPrimitiveType<String> {
 
 	IIdType toVersionless();
 
+	/**
+	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type} 
+	 * (or if this object does not have a resource type currently, returns a copy of this object with
+	 * the given resource type).
+	 * <p>
+	 * Note that if this object represents a local reference (e.g. <code>#foo</code>) or
+	 * a URN (e.g. <code>urn:oid:1.2.3.4</code>) this method will simply return a copy
+	 * of this object with no modifications.
+	 * </p>
+	 */
 	IIdType withResourceType(String theResName);
 	
+	/**
+	 * Returns a copy of this object, but with a different {@link #getResourceType() resource type} 
+	 * and {@link #getBaseUrl() base URL}
+	 * (or if this object does not have a resource type currently, returns a copy of this object with
+	 * the given server base and resource type).
+	 * <p>
+	 * Note that if this object represents a local reference (e.g. <code>#foo</code>) or
+	 * a URN (e.g. <code>urn:oid:1.2.3.4</code>) this method will simply return a copy
+	 * of this object with no modifications.
+	 * </p>
+	 */
 	IIdType withServerBase(String theServerBase, String theResourceName);
 
+	/**
+	 * Returns a copy of this object, but with a different {@link #getVersionIdPart() version ID} 
+	 * (or if this object does not have a resource type currently, returns a copy of this object with
+	 * the given version).
+	 * <p>
+	 * Note that if this object represents a local reference (e.g. <code>#foo</code>) or
+	 * a URN (e.g. <code>urn:oid:1.2.3.4</code>) this method will simply return a copy
+	 * of this object with no modifications.
+	 * </p>
+	 */
 	IIdType withVersion(String theVersion);
 
 	/**

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.term;
+package ca.uhn.fhir.rest.server.interceptor;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2017 University Health Network
  * %%
@@ -20,21 +20,28 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.rest.method.RequestDetails;
 
-public class HapiTerminologySvcDstu1 extends BaseHapiTerminologySvc {
+/**
+ * NOP implementation of {@link IServerOperationInterceptor}
+ */
+public class ServerOperationInterceptorAdapter extends InterceptorAdapter implements IServerOperationInterceptor {
 
 	@Override
-	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
-		throw new UnsupportedOperationException();
+	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
 	}
 
 	@Override
-	public void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
+
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
 	}
 
 }

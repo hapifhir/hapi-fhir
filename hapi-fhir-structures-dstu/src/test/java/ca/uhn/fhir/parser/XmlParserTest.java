@@ -561,8 +561,8 @@ public class XmlParserTest {
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
 		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
-		assertEquals("#", patient.getManagingOrganization().getReference().getBaseUrl());
-		assertEquals("1", patient.getManagingOrganization().getReference().getIdPart());
+		assertEquals(null, patient.getManagingOrganization().getReference().getBaseUrl());
+		assertEquals("#1", patient.getManagingOrganization().getReference().getIdPart());
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();

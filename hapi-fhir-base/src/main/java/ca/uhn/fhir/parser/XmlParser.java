@@ -446,7 +446,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 			writeBundleResourceLink(theEventWriter, "alternate", nextEntry.getLinkAlternate());
 
-			if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+			if (nextEntry.getResource() != null && isNotBlank(nextEntry.getResource().getIdElement().getValue()) && (nextEntry.getResource().getId().getBaseUrl() != null || nextEntry.getResource().getId().getValueAsString().startsWith("urn:"))) {
 				writeOptionalTagWithValue(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
 			}
 

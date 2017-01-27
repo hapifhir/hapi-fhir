@@ -54,7 +54,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
-		retVal.setHardSearchLimit(500);
 		return retVal;
 	}
 
@@ -74,7 +73,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	}
 
 	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")
-	@DependsOn("dbServer")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.postgresql.Driver());

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2016 University Health Network
+ * Copyright (C) 2014 - 2017 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 				entity = toEntity(nextResource);
 				entity.setUpdated(updateTime);
 				entity.setPublished(updateTime);
-				if (nextId.isEmpty() == false && "cid:".equals(nextId.getBaseUrl())) {
+				if (nextId.getIdPart() != null && nextId.getIdPart().startsWith("cid:")) {
 					ourLog.debug("Resource in transaction has ID[{}], will replace with server assigned ID", nextId.getIdPart());
 				} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.POST) {
 					if (nextId.isEmpty() == false) {
@@ -282,7 +282,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 	}
 
 	private static boolean isPlaceholder(IdDt theId) {
-		if ("cid:".equals(theId.getBaseUrl())) {
+		if (theId.getIdPart() != null && theId.getIdPart().startsWith("cid:")) {
 			return true;
 		}
 		return false;

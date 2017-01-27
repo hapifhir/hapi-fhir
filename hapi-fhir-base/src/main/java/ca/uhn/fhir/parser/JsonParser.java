@@ -347,7 +347,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			theEventWriter.beginObject();
 
-			if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+			if (nextEntry.getResource() != null && isNotBlank(nextEntry.getResource().getIdElement().getValue()) && (nextEntry.getResource().getId().getBaseUrl() != null || nextEntry.getResource().getId().getValueAsString().startsWith("urn:"))) {
 				writeOptionalTagWithTextNode(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
 			}
 

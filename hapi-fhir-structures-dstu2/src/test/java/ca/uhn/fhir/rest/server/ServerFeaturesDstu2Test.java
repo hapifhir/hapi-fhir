@@ -82,7 +82,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertEquals(404, status.getStatusLine().getStatusCode());
 	}
 
 	/**
