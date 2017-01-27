@@ -1527,6 +1527,14 @@
 
 	<profiles>
 		<profile>
+			<id>REALM</id>
+			<modules>
+				<module>hapi-fhir-base</module>
+				<module>hapi-tinder-plugin</module>
+				<module>hapi-fhir-android-realm</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>DIST</id>
 			<modules>
 				<module>hapi-fhir-osgi-core</module>

@@ -1,0 +1,125 @@
+#parse ( "/vm/realm_templates.vm" )
+
+package ${packageBase}.resource;
+
+import java.math.BigDecimal;
+import java.net.URI;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.rest.gclient.*;
+
+import io.realm.RealmObject;
+
+#foreach ( $import in $imports )
+import ${import};
+#end
+
+##import ${packageBase}.composite.*;
+##import ${packageBase}.valueset.*;
+
+/**
+ * HAPI/FHIR <b>${elementName}</b> Resource
+ * (${shortName})
+ *
+ * <p>
+ * <b>Definition:</b>
+ * ${definition}
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * ${requirements}
+ * </p> 
+ *
+ */
+@ResourceDef(name="${elementName}", profile="${profile}", id="${id}")
+public class ${className}
+    extends RealmObject 
+    implements #{if}( ${className}=="OperationOutcome" || ${className}=="Conformance" || ${className}=="SecurityEvent" ) ca.uhn.fhir.model.base.resource.Base${className} #{else} IResource #{end}
+#if ( ${className} == "Bundle" || ${className} == "Parameters" || ${className} == "Binary" )
+    , org.hl7.fhir.instance.model.api.IBase${className}
+#end
+    {
+
+#childExtensionFields( $childExtensionTypes )
+#childVars( $children )
+#childAccessors( $children )
+#childResourceBlocks($resourceBlockChildren)
+
+#childExtensionTypes( $childExtensionTypes )
+
+    @Override
+    public String getResourceName() {
+        return "${className.replaceAll("Resource", "")}";
+    }
+    
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.${versionEnumName};
+    }
+
+#if ( ${className}=="Binary" ) 
+
+	@Override
+	public String getContentAsBase64() {
+		return getContentElement().getValueAsString();
+	}
+
+	@Override
+	public Binary setContentAsBase64(String theContent) {
+		getContentElement().setValueAsString(theContent);
+		return this;
+	}
+
+#end
+#if ( ${className} ==  "Bundle" )
+	/**
+	 * Returns the {@link ${hash}getLink() link} which matches a given {@link Link${hash}getRelation() relation}. 
+	 * If no link is found which matches the given relation, returns <code>null</code>. If more than one
+	 * link is found which matches the given relation, returns the first matching Link.
+	 * 
+	 * @param theRelation
+	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle${hash}LINK_SELF} and {@link IBaseBundle${hash}LINK_NEXT}.
+	 * @return Returns a matching Link, or <code>null</code>
+	 * @see IBaseBundle#LINK_NEXT
+	 * @see IBaseBundle#LINK_PREV
+	 * @see IBaseBundle#LINK_SELF
+	 */
+	public Link getLink(String theRelation) {
+		org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+		for (Link next : getLink()) {
+			if (theRelation.equals(next.getRelation())) {
+				return next;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the {@link ${hash}getLink() link} which matches a given {@link Link${hash}getRelation() relation}. 
+	 * If no link is found which matches the given relation, creates a new Link with the
+	 * given relation and adds it to this Bundle. If more than one
+	 * link is found which matches the given relation, returns the first matching Link.
+	 * 
+	 * @param theRelation
+	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle${hash}LINK_SELF} and {@link IBaseBundle${hash}LINK_NEXT}.
+	 * @return Returns a matching Link, or <code>null</code>
+	 * @see IBaseBundle#LINK_NEXT
+	 * @see IBaseBundle#LINK_PREV
+	 * @see IBaseBundle#LINK_SELF
+	 */
+	public Link getLinkOrCreate(String theRelation) {
+		org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+		for (Link next : getLink()) {
+			if (theRelation.equals(next.getRelation())) {
+				return next;
+			}
+		}
+		Link retVal = new Link();
+		retVal.setRelation(theRelation);
+		getLink().add(retVal);
+		return retVal;
+	}
+#end
+
+}

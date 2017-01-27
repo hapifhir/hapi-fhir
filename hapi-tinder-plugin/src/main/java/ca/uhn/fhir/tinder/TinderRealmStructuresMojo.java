@@ -16,14 +16,16 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ProfileFileDefinition;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ProfileParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
-@Mojo(name = "generate-structures", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
-public class TinderStructuresMojo extends AbstractMojo {
+@Mojo(name = "generate-realm-structures", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+public class TinderRealmStructuresMojo extends AbstractMojo {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderStructuresMojo.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TinderRealmStructuresMojo.class);
 
 	@Parameter(required = false)
 	private List<String> baseResourceNames;
@@ -94,6 +96,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
 		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet(version, baseDir);
+		dtp.setTemplate("/vm/realm_dt_composite.vm");
 		if (buildDatatypes) {
 			try {
 				dtp.parse();
@@ -107,6 +110,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		}
 
 		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(version, baseDir);
+		rp.setTemplate("/vm/realm_resource.vm");
 		if (baseResourceNames != null && baseResourceNames.size() > 0) {
 			ourLog.info("Loading Resources...");
 			try {
@@ -129,6 +133,8 @@ public class TinderStructuresMojo extends AbstractMojo {
 		}
 
 		ProfileParser pp = new ProfileParser(version, baseDir);
+		pp.setTemplate("/vm/realm_resource.vm");
+		
 		if (resourceProfileFiles != null) {
 			ourLog.info("Loading profiles...");
 			for (ProfileFileDefinition next : resourceProfileFiles) {
@@ -220,6 +226,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		vsp.parse();
 
 		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dstu2", ".");
+		
 		dtp.parse();
 		dtp.markResourcesForImports();
 		dtp.bindValueSets(vsp);
@@ -260,23 +267,5 @@ public class TinderStructuresMojo extends AbstractMojo {
 		
 	}
 
-	public static class ProfileFileDefinition {
-		@Parameter(required = true) String profileFile;
-
-		@Parameter(required = true) String profileSourceUrl;
-	}
-
-	public static class ValueSetFileDefinition {
-		@Parameter(required = true)
-		private String valueSetFile;
-
-		public String getValueSetFile() {
-			return valueSetFile;
-		}
-
-		public void setValueSetFile(String theValueSetFile) {
-			valueSetFile = theValueSetFile;
-		}
-	}
 
 }

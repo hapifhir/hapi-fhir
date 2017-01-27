@@ -1,0 +1,428 @@
+##################################################################
+## childVars
+##################################################################
+
+#macro ( childVars $childElements )
+#foreach ( $child in $childElements )
+#if (${child.resourceRef} || ${child.hasMultipleTypes}) 
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, summary=${child.summary}, modifier=${child.modifier}, type={
+#foreach ($nextType in ${child.referenceTypesForMultiple})
+#if ( ${child.resourceRef} && ${nextType} != "IResource" )
+		${nextType}.class#{if}($foreach.hasNext), #{end}
+#else
+		${nextType}.class#{if}($foreach.hasNext), #{end}
+#end
+#end
+	})
+#elseif ($!child.block)
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, summary=${child.summary}, modifier=${child.modifier})	
+#else
+	@Child(name="${child.elementNameSimplified}", type=${child.annotationType}.class, order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, summary=${child.summary}, modifier=${child.modifier})	
+#end
+#if ( $child.hasExtensionUrl )
+	@Extension(url = "${child.extensionUrl}", isModifier=${child.extensionModifier}, definedLocally=${child.extensionLocal})
+#end
+#if (${includeDescriptionAnnotations})
+	@Description(
+		shortDefinition="${child.shortName}",
+		formalDefinition="${child.definition}"
+	)
+#end
+#if ( $child.hasBindingUrl )
+	@ca.uhn.fhir.model.api.annotation.Binding(valueSet = "${child.bindingUrl}")
+#end
+	private ${child.referenceType} ${child.variableName};
+	
+#end
+#end
+
+
+##################################################################
+## childAccessors
+##################################################################
+
+#macro ( childAccessors $childElements )
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty( #{foreach}($child in $childElements) ${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
+	}
+	
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, #{foreach}($child in $childElements)${child.variableName}#{if}($foreach.hasNext), #{end}#{end});
+	}
+
+#foreach ( $child in $childElements )
+#if ( $child.referenceType == 'IResource' )
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}() {  
+		return ${child.variableName};
+	}
+
+#elseif ( $child.primitive && $child.repeatable == false )
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}Element() {  
+#if ( (${child.hasMultipleTypes} == false && ${child.singleChildInstantiable} == true) || (${child.resourceRef}) )
+		if (${child.variableName} == null) {
+#if ( ${child.boundCode} && ${child.repeatable} == false )
+			${child.variableName} = new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER);
+#else
+			${child.variableName} = new ${child.referenceTypeForConstructor}();
+#end
+		}
+#end
+		return ${child.variableName};
+	}
+
+	
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
+	 * creating it if it does
+	 * not exist. This method may return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.primitiveType} get${child.methodName}() {  
+		return get${child.methodName}Element().getValue();
+	}
+#else
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}() {  
+#if ( (${child.hasMultipleTypes} == false && ${child.singleChildInstantiable} == true) || (${child.resourceRef}) )
+		if (${child.variableName} == null) {
+#if ( ${child.boundCode} && ${child.repeatable} == false )
+			${child.variableName} = new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER);
+#else
+			${child.variableName} = new ${child.referenceTypeForConstructor}();
+#end
+		}
+#end
+		return ${child.variableName};
+	}
+#end
+
+	/**
+	 * Sets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.declaringClassNameComplete} set${child.methodName}(${child.referenceType} theValue) {
+		${child.variableName} = theValue;
+		return this;
+	}
+	
+	
+
+#if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} == false && ${child.boundCode} == false )
+	/**
+	 * Adds and returns a new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.singleType} add${child.methodName}() {
+		${child.singleType} newType = new ${child.singleType}();
+		get${child.methodName}().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Adds a given new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+	 * <p>
+	 * <b>Definition:</b>
+	 * $esc.html(${child.definition})
+	 * </p>
+	 * @param theValue The ${child.elementName} to add (must not be <code>null</code>)
+	 */
+	public ${child.declaringClassNameComplete} add${child.methodName}(${child.singleType} theValue) {
+		if (theValue == null) {
+			throw new NullPointerException("theValue must not be null");
+		}
+		get${child.methodName}().add(theValue);
+		return this;
+	}
+
+	/**
+	 * Gets the first repetition for <b>${child.elementName}</b> ($esc.html(${child.shortName})),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.singleType} get${child.methodName}FirstRep() {
+		if (get${child.methodName}().isEmpty()) {
+			return add${child.methodName}();
+		}
+		return get${child.methodName}().get(0); 
+	}
+#end
+#if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} )
+	/**
+	 * Adds and returns a new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ResourceReferenceDt add${child.methodName}() {
+		ResourceReferenceDt newType = new ResourceReferenceDt();
+		get${child.methodName}().add(newType);
+		return newType; 
+	}
+#end
+#if ( ${child.boundCode} && ${child.repeatable} )
+	/**
+	 * Add a value for <b>${child.elementName}</b> ($esc.html(${child.shortName})) using an enumerated type. This
+	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
+	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
+	 * you may also use the {@link ${hash}add${child.methodName}()} method.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.boundDatatype}<${child.bindingClass}> add${child.methodName}(${child.bindingClass} theValue) {
+		${child.boundDatatype}<${child.bindingClass}> retVal = new ${child.boundDatatype}<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER, theValue);
+		get${child.methodName}().add(retVal);
+		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>${child.elementName}</b> ($esc.html(${child.shortName})),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.boundDatatype}<${child.bindingClass}> get${child.methodName}FirstRep() {
+		if (get${child.methodName}().size() == 0) {
+			add${child.methodName}();
+		}
+		return get${child.methodName}().get(0);
+	}
+
+	/**
+	 * Add a value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.boundDatatype}<${child.bindingClass}> add${child.methodName}() {
+		${child.boundDatatype}<${child.bindingClass}> retVal = new ${child.boundDatatype}<${child.bindingClass}>(${child.bindingClass}.VALUESET_BINDER);
+		get${child.methodName}().add(retVal);
+		return retVal;
+	}
+
+	/**
+	 * Sets the value(s), and clears any existing value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
+		get${child.methodName}().clear();
+		add${child.methodName}(theValue);
+		return this;
+	}
+
+#elseif ( ${child.boundCode} && ${child.referenceTypeForConstructor} != 'IDatatype')
+	/**
+	 * Sets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
+		set${child.methodName}(new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER, theValue));
+		
+/*
+#if ( $child.primitive && $child.repeatable == false )
+		get${child.methodName}Element().setValueAsEnum(theValue);
+#else
+		get${child.methodName}().setValueAsEnum(theValue);
+#end
+*/
+		return this;
+	}
+
+#end ##if (child.boundCode)
+#foreach ( $ss in $child.simpleSetters )
+#if(${child.repeatable})
+	/**
+	 * Adds a new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public ${child.declaringClassNameComplete} add${child.methodName}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
+		if (${child.variableName} == null) {
+			${child.variableName} = new ${child.referenceTypeForConstructor}();
+		}
+		${child.variableName}.add(new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}));
+		return this; 
+	}
+#else
+	/**
+	 * Sets the value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.declaringClassNameComplete} set${child.methodName}${ss.suffix}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {
+		${child.variableName} = new ${ss.datatype}(#{foreach}($param in $ss.parameters)${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}); 
+		return this; 
+	}
+#end
+
+#end ##foreach-child-in-simplesetters
+
+#end
+#end
+
+##################################################################
+## childExtensionFields
+##################################################################
+
+#macro ( childExtensionFields $childExtensionTypes )
+#foreach ( $extensionType in $childExtensionTypes )
+	@Child(name="$extensionType.name", type=${extensionType.annotationType}.class, order=${foreach.index}, min=${extensionType.cardMin}, max=${extensionType.cardMaxForChildAnnotation})
+	@Extension(url="${extensionType.url}") 
+	private ${extensionType.referenceType} ${extensionType.variableName};
+
+#end
+#end
+
+
+##################################################################
+## childExtensionTypes
+##################################################################
+
+#macro ( childExtensionTypes $childExtensionTypes )
+#foreach ( $extensionType in $childExtensionTypes )
+#if ( $extensionType.hasChildExtensions )
+	@Block()
+	public static class ${extensionType.nameType} implements IExtension {
+		
+#foreach ( $childExtensionSubtype in $extensionType.childExtensions )		
+		@Child(name="$childExtensionSubtype.name", type=${childExtensionSubtype.annotationType}.class, order=${foreach.index}, min=${childExtensionSubtype.cardMin}, max=${childExtensionSubtype.cardMaxForChildAnnotation})
+		@Extension(url="${childExtensionSubtype.url}") 
+		private ${childExtensionSubtype.referenceType} ${childExtensionSubtype.variableName};
+
+#end
+
+
+	}
+	
+#foreach ( $extensionSubType in $extensionTypes.childExtensionsWithChildren )
+#childExtensionTypes( $extensionSubType )
+#end
+#end
+#end
+#end
+
+
+
+##################################################################
+## childResourceBlocks
+##################################################################
+
+#macro ( childResourceBlocks $resourceBlockChildren )
+#foreach ( $blockChild in $resourceBlockChildren )
+	/**
+	 * Block class for child element: <b>${blockChild.name}</b> (${blockChild.shortName})
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${blockChild.definition}
+     * </p> 
+	 */
+	@Block()	
+	public static class ${blockChild.className} 
+	    extends #{if}( ${className}=="OperationOutcome" && ${blockChild.className}=="Issue" ) Base${blockChild.className} #{else} BaseIdentifiableElement #{end} 
+	    implements IResourceBlock {
+	
+#childVars( $blockChild.children )
+#childAccessors( $blockChild.children )
+
+#if ( ${className} == "OperationOutcome" && ${blockChild.className} == "Issue" )
+	/**
+	 * @deprecated Use {@link ${hash}getDiagnosticsElement()} instead - OperationOutcome.details was renamed to OperationOutcome.diagnostics in DSTU2 and a new OperationOutcome.details codeableconcept element was introduced
+	 */
+	@Deprecated
+	@Override
+	public StringDt getDetailsElement() {
+		return getDiagnosticsElement();
+	}
+
+	/**
+	 * @deprecated Use {@link ${hash}setDetails(String)} instead - OperationOutcome.details was renamed to OperationOutcome.diagnostics in DSTU2 and a new OperationOutcome.details codeableconcept element was introduced
+	 */
+	@Deprecated
+	@Override
+	public BaseIssue setDetails(String theString) {
+		setDiagnostics(theString);
+		return this;
+	}
+#end
+
+	}
+
+#childResourceBlocks( $blockChild.resourceBlockChildren )
+
+#end
+#end
+
+
