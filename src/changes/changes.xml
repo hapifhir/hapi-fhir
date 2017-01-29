@@ -241,6 +241,13 @@
 				STU3 XHTML parser for narrative choked if the narrative contained
 				an <![CDATA[<code>&amp;rsquot;</code>]]> entity string.
 			</action>
+			<action type="fix" issue="538">
+				When parsing a quantity parameter on the server with a 
+				value and units but no system (e.g. 
+				<![CDATA[<code>GET [base]/Observation?value=5.4||mg</code>]]>)
+				the unit was incorrectly treated as the system. Thanks to
+				@CarthageKing for the pull request!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
