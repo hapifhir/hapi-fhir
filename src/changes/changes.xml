@@ -237,6 +237,10 @@
 				Declared extensions with multiple type() options listed in the @Child
 				annotation caused a crash on startup. Now this is supported.
 			</action>
+			<action type="add">
+				STU3 XHTML parser for narrative choked if the narrative contained
+				an <![CDATA[<code>&amp;rsquot;</code>]]> entity string.
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
