@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import com.google.common.collect.Lists;
+
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -21,8 +23,9 @@ public class SomeResourceProvider implements IResourceProvider {
 	@Search()
 	public List<Practitioner> findPractitionersByName(
 			@RequiredParam(name = Practitioner.SP_NAME) final StringDt theName) {
-		throw new UnprocessableEntityException(
-				"Please provide more than 4 characters for the name");
+//		throw new UnprocessableEntityException(
+//				"Please provide more than 4 characters for the name");
+		return Lists.newArrayList();
 	}
 
 }

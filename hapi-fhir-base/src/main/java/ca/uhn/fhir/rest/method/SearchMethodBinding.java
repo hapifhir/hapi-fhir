@@ -37,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -140,6 +139,21 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		
+		String clientPreference = theRequest.getHeader(Constants.HEADER_PREFER);
+		boolean lenientHandling = false;
+		if(clientPreference != null)
+		{
+			String[] preferences = clientPreference.split(";");
+			for( String p : preferences){
+				if("handling:lenient".equalsIgnoreCase(p))
+				{
+					lenientHandling = true;
+					break;
+				}
+			}
+		}
+		
 		if (theRequest.getId() != null && myIdParamIndex == null) {
 			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
 			return false;
@@ -235,6 +249,9 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		Set<String> keySet = theRequest.getParameters().keySet();
+		if(lenientHandling == true)
+			return true;
+
 		if (myAllowUnknownParams == false) {
 			for (String next : keySet) {
 				if (!methodParamsTemp.contains(next)) {
@@ -271,7 +288,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}

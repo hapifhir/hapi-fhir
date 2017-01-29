@@ -61,7 +61,6 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.apache.ApacheHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.method.ElementsParameter;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -378,7 +377,7 @@ public class RestfulServerUtils {
 						break;
 					}
 				} catch (IllegalArgumentException e) {
-					ourLog.debug("Invalid {} parameger: {}", Constants.PARAM_NARRATIVE, narrative[0]);
+					ourLog.debug("Invalid {} parameter: {}", Constants.PARAM_NARRATIVE, narrative[0]);
 				}
 			}
 		}
