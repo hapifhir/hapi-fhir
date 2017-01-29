@@ -288,6 +288,10 @@
 			<id>rqg0717</id>
 			<name>James Ren</name>
 		</developer>
+		<developer>
+			<id>Robbert1</id>
+			<name>Robbert van Waveren</name>
+		</developer>
 	</developers>
 
 	<licenses>

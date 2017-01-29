@@ -248,6 +248,11 @@
 				the unit was incorrectly treated as the system. Thanks to
 				@CarthageKing for the pull request!
 			</action>
+			<action type="533">
+				Correct a typo in the JPA ValueSet ResourceProvider which prevented
+				successful operation under Spring 4.3. Thanks to 
+				Robbert van Waveren for the pull request!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
