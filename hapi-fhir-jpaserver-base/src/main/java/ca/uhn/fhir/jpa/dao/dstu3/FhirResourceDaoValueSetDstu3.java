@@ -60,7 +60,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	private IValidationSupport myValidationSupport;
 
 	@Autowired
-	private IFhirResourceDaoCodeSystem<CodeSystem, CodeableConcept, Coding> myCodeSystemDao;
+	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 
 	@Override
 	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
