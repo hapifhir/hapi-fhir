@@ -5,6 +5,7 @@
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
 		<version>2.3-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<packaging>jar</packaging>
@@ -41,6 +42,7 @@
 		<dependency>
 			<groupId>org.ebaysf.web</groupId>
 			<artifactId>cors-filter</artifactId>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

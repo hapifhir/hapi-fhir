@@ -325,7 +325,7 @@
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.4.6</phloc_commons_version>
-		<spring_version>4.3.1.RELEASE</spring_version>
+		<spring_version>4.3.4.RELEASE</spring_version>
 		<thymeleaf-version>3.0.1.RELEASE</thymeleaf-version>
 		<xmlunit_version>1.6</xmlunit_version>
 
@@ -1642,7 +1642,8 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
-				<module>hapi-fhir-base-example-embedded-ws</module>
+				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
+				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>hapi-fhir-jacoco</module>
 			</modules>
 		</profile>
