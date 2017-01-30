@@ -11,8 +11,11 @@
 				Bump the version of a few dependencies to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
-					<ul>
-						<li>spring (JPA): 4.3.1 -&gt; 4.3.4</li>
+				<ul>
+						<li>Hibernate (JPA): 5.1.0 -&gt; 5.2.7</li>
+						<li>Hibernate Search (JPA): 5.5.4 -&gtp; 5.7.0.CR1</li>
+						<li>Hibernate Validator (JPA): 5.2.4 -&gtp; 5.3.4</li>
+						<li>Spring (JPA): 4.3.1 -&gt; 4.3.6</li>
 						<li>Derby (CLI): 10.12.1.1 -&gt; 10.13.1.1</li>
 						<li>Jetty (CLI): 9.3.10.v20160621 -&gt; 9.3.14.v20161028</li>
 						<li>JAnsi (CLI): 1.13 -&gt; 1.14</li>
