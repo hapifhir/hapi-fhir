@@ -256,6 +256,13 @@
 				successful operation under Spring 4.3. Thanks to 
 				Robbert van Waveren for the pull request!
 			</action>
+			<action type="remove">
+				Deprecate the method
+				<![CDATA[<code>ICompositeElement#getAllPopulatedChildElementsOfType(Class)</code>]]>
+				as it is no longer used by HAPI and is just an annoying step
+				in creating custom structures. Thanks to Allan Bro Hansen
+				for pointing this out.
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">
