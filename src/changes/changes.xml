@@ -263,6 +263,12 @@
 				in creating custom structures. Thanks to Allan Bro Hansen
 				for pointing this out.
 			</action>
+			<action type="fix" issue="547">
+				CapturingInterceptor did not buffer the response meaning
+				that in many circumstances it did not actually capture
+				the response. Thanks to Jenny Syed of Cerner for
+				the pull request and contribution!
+			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">
 			<action type="add">

@@ -292,6 +292,11 @@
 			<id>Robbert1</id>
 			<name>Robbert van Waveren</name>
 		</developer>
+		<developer>
+			<id>daliboz</id>
+			<name>Jenny Syed</name>
+			<organization>Cerner</organization>
+		</developer>
 	</developers>
 
 	<licenses>
