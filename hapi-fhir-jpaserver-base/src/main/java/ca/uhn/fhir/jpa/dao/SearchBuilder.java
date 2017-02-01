@@ -41,6 +41,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -95,10 +96,12 @@ public class SearchBuilder {
 	private IFulltextSearchSvc mySearchDao;
 	private Search mySearchEntity;
 	private ISearchResultDao mySearchResultDao;
+	private ISearchParamRegistry mySerarchParamRegistry;
+
 	private IHapiTerminologySvc myTerminologySvc;
 
 	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, IFulltextSearchSvc theSearchDao, ISearchResultDao theSearchResultDao, BaseHapiFhirDao<?> theDao,
-			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc) {
+			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myPlatformTransactionManager = thePlatformTransactionManager;
@@ -108,6 +111,7 @@ public class SearchBuilder {
 		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
 		myForcedIdDao = theForcedIdDao;
 		myTerminologySvc = theTerminologySvc;
+		mySerarchParamRegistry = theSearchParamRegistry;
 	}
 
 	private void addPredicateComposite(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -1380,43 +1384,8 @@ public class SearchBuilder {
 		return singleCode;
 	}
 
-	private String determineSystemIfMissing(String theParamName, String code, String system) {
-		if (system == null) {
-			RuntimeSearchParam param = getSearchParam(theParamName);
-			if (param != null) {
-				Set<String> valueSetUris = Sets.newHashSet();
-				for (String nextPath : param.getPathsSplit()) {
-					BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, nextPath);
-					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
-						String valueSet = ((BaseRuntimeDeclaredChildDefinition) def).getBindingValueSet();
-						if (isNotBlank(valueSet)) {
-							valueSetUris.add(valueSet);
-						}
-					}
-				}
-				if (valueSetUris.size() == 1) {
-					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSetUris.iterator().next());
-					for (VersionIndependentConcept nextCandidate : candidateCodes) {
-						if (nextCandidate.getCode().equals(code)) {
-							system = nextCandidate.getSystem();
-							break;
-						}
-					}
-				}
-			}
-		}
-		return system;
-	}
-
 	private Predicate createResourceLinkPathPredicate(String theParamName, Root<? extends ResourceLink> from) {
 		return createResourceLinkPathPredicate(myContext, theParamName, from, myResourceType);
-	}
-
-	private static Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, Root<? extends ResourceLink> from, Class<? extends IBaseResource> resourceType) {
-		RuntimeSearchParam param = theContext.getResourceDefinition(resourceType).getSearchParam(theParamName);
-		List<String> path = param.getPathsSplit();
-		Predicate type = from.get("mySourcePath").in(path);
-		return type;
 	}
 
 	private TypedQuery<Long> createSearchAllByTypeQuery(DateRangeParam theLastUpdated) {
@@ -1532,10 +1501,32 @@ public class SearchBuilder {
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
-	private RuntimeSearchParam getSearchParam(String theParamName) {
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
-		RuntimeSearchParam param = resourceDef.getSearchParam(theParamName);
-		return param;
+	private String determineSystemIfMissing(String theParamName, String code, String system) {
+		if (system == null) {
+			RuntimeSearchParam param = getSearchParam(theParamName);
+			if (param != null) {
+				Set<String> valueSetUris = Sets.newHashSet();
+				for (String nextPath : param.getPathsSplit()) {
+					BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, nextPath);
+					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
+						String valueSet = ((BaseRuntimeDeclaredChildDefinition) def).getBindingValueSet();
+						if (isNotBlank(valueSet)) {
+							valueSetUris.add(valueSet);
+						}
+					}
+				}
+				if (valueSetUris.size() == 1) {
+					List<VersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(valueSetUris.iterator().next());
+					for (VersionIndependentConcept nextCandidate : candidateCodes) {
+						if (nextCandidate.getCode().equals(code)) {
+							system = nextCandidate.getSystem();
+							break;
+						}
+					}
+				}
+			}
+		}
+		return system;
 	}
 
 	public Set<Long> doGetPids() {
@@ -1619,6 +1610,12 @@ public class SearchBuilder {
 
 		List<Long> resultList = query.getResultList();
 		doSetPids(resultList);
+	}
+
+	private RuntimeSearchParam getSearchParam(String theParamName) {
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
+		RuntimeSearchParam param = resourceDef.getSearchParam(theParamName);
+		return param;
 	}
 
 	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation) {
@@ -1820,7 +1817,8 @@ public class SearchBuilder {
 
 		doInitializeSearch();
 
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
+//		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceType);
+		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(myResourceName);
 
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
@@ -1875,7 +1873,7 @@ public class SearchBuilder {
 
 			} else {
 
-				RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
+				RuntimeSearchParam nextParamDef = searchParams.get(nextParamName);
 				if (nextParamDef != null) {
 					switch (nextParamDef.getParamType()) {
 					case DATE:
@@ -1953,7 +1951,7 @@ public class SearchBuilder {
 		}
 
 	}
-
+	
 	public void setType(Class<? extends IBaseResource> theResourceType, String theResourceName) {
 		myResourceType = theResourceType;
 		myResourceName = theResourceName;
@@ -2042,6 +2040,13 @@ public class SearchBuilder {
 
 	private static String createLeftMatchLikeExpression(String likeExpression) {
 		return likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, Root<? extends ResourceLink> from, Class<? extends IBaseResource> resourceType) {
+		RuntimeSearchParam param = theContext.getResourceDefinition(resourceType).getSearchParam(theParamName);
+		List<String> path = param.getPathsSplit();
+		Predicate type = from.get("mySourcePath").in(path);
+		return type;
 	}
 
 	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {

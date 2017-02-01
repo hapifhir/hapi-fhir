@@ -130,11 +130,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
-//		if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			return ReturnTypeEnum.BUNDLE;
-//		} else {
-//			return ReturnTypeEnum.RESOURCE;
-//		}
 	}
 
 	@Override
@@ -406,14 +402,20 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			if (dotIdx < colonIdx) {
 				retVal.setDotQualifier(theParamName.substring(dotIdx, colonIdx));
 				retVal.setColonQualifier(theParamName.substring(colonIdx));
+				retVal.setParamName(theParamName.substring(0, dotIdx));
 			} else {
 				retVal.setColonQualifier(theParamName.substring(colonIdx, dotIdx));
 				retVal.setDotQualifier(theParamName.substring(dotIdx));
+				retVal.setParamName(theParamName.substring(0, colonIdx));
 			}
 		} else if (dotIdx != -1) {
 			retVal.setDotQualifier(theParamName.substring(dotIdx));
+			retVal.setParamName(theParamName.substring(0, dotIdx));
 		} else if (colonIdx != -1) {
 			retVal.setColonQualifier(theParamName.substring(colonIdx));
+			retVal.setParamName(theParamName.substring(0, colonIdx));
+		} else {
+			retVal.setParamName(theParamName);
 		}
 
 		return retVal;
@@ -423,6 +425,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 		private String myColonQualifier;
 		private String myDotQualifier;
+		private String myParamName;
 
 		public boolean passes(Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 			if (theQualifierWhitelist != null) {
@@ -466,6 +469,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 
 			return true;
+		}
+
+		public void setParamName(String theParamName) {
+			myParamName = theParamName;
+		}
+
+		public String getParamName() {
+			return myParamName;
 		}
 
 		public void setColonQualifier(String theColonQualifier) {

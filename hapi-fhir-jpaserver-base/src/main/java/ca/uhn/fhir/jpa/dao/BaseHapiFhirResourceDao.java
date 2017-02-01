@@ -863,6 +863,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return search(map);
 	}
 
+	@Autowired
+	private ISearchParamRegistry mySerarchParamRegistry;
+
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		// Notify interceptors
@@ -870,7 +873,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 
 		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao,
-				myTerminologySvc);
+				myTerminologySvc, mySerarchParamRegistry);
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(theParams);
 	}
@@ -899,7 +902,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theParams.setPersistResults(false);
 
 		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao, myForcedIdDao,
-				myTerminologySvc);
+				myTerminologySvc, mySerarchParamRegistry);
 		builder.setType(getResourceType(), getResourceName());
 		builder.search(theParams);
 		return builder.doGetPids();

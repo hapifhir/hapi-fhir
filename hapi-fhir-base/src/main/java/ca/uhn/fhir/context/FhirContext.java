@@ -82,87 +82,22 @@ public class FhirContext {
 	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private boolean myInitialized;
+	private boolean myInitializing;
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
 	private volatile Map<String, Class<? extends IBaseResource>> myNameToResourceType;
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IParserErrorHandler myParserErrorHandler = new LenientErrorHandler();
+	private ParserOptions myParserOptions = new ParserOptions();
 	private Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<PerformanceOptionsEnum>();
 	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private final IFhirVersion myVersion;
-	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
-	private boolean myInitializing;
 	private IContextValidationSupport<?, ?, ?, ?, ?, ?> myValidationSupport;
+	private final IFhirVersion myVersion;
 	
-	/**
-	 * Returns the validation support module configured for this context, creating a default
-	 * implementation if no module has been passed in via the {@link #setValidationSupport(IContextValidationSupport)}
-	 * method
-	 * @see #setValidationSupport(IContextValidationSupport)
-	 */
-	public IContextValidationSupport<?, ?, ?, ?, ?, ?> getValidationSupport() {
-		if (myValidationSupport == null) {
-			myValidationSupport = myVersion.createValidationSupport();
-		}
-		return myValidationSupport;
-	}
-
-	/**
-	 * Creates a new FluentPath engine which can be used to exvaluate
-	 * path expressions over FHIR resources. Note that this engine will use the
-	 * {@link IContextValidationSupport context validation support} module which is 
-	 * configured on the context at the time this method is called.
-	 * <p>
-	 * In other words, call {@link #setValidationSupport(IContextValidationSupport)} before
-	 * calling {@link #newFluentPath()}
-	 * </p>
-	 * <p>
-	 * Note that this feature was added for FHIR DSTU3 and is not available
-	 * for contexts configured to use an older version of FHIR. Calling this method
-	 * on a context for a previous version of fhir will result in an
-	 * {@link UnsupportedOperationException}
-	 * </p>
-	 * 
-	 * @since 2.2
-	 */
-	public IFluentPath newFluentPath() {
-		return myVersion.createFluentPathExecutor(this);
-	}
-	
-	/**
-	 * Sets the validation support module to use for this context. The validation support module
-	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
-	 * as well as to provide terminology services to modules such as the validator and FluentPath executor 
-	 */
-	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
-		myValidationSupport = theValidationSupport;
-	}
-
-	private ParserOptions myParserOptions = new ParserOptions();
-
-	/**
-	 * Returns the parser options object which will be used to supply default
-	 * options to newly created parsers
-	 * 
-	 * @return The parser options - Will not return <code>null</code>
-	 */
-	public ParserOptions getParserOptions() {
-		return myParserOptions;
-	}
-
-	/**
-	 * Sets the parser options object which will be used to supply default
-	 * options to newly created parsers
-	 *  
-	 * @param theParserOptions The parser options object - Must not be <code>null</code>
-	 */
-	public void setParserOptions(ParserOptions theParserOptions) {
-		Validate.notNull(theParserOptions, "theParserOptions must not be null");
-		myParserOptions = theParserOptions;
-	}
+	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -172,7 +107,7 @@ public class FhirContext {
 	public FhirContext() {
 		this(EMPTY_LIST);
 	}
-
+	
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
 	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
@@ -282,7 +217,7 @@ public class FhirContext {
 		validateInitialized();
 		return myNameToResourceDefinition.values();
 	}
-	
+
 	/**
 	 * Returns the default resource type for the given profile
 	 * 
@@ -332,7 +267,7 @@ public class FhirContext {
 		validateInitialized();
 		return Collections.unmodifiableCollection(myClassToElementDefinition.values());
 	}
-
+	
 	/**
 	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with
 	 * caution
@@ -346,6 +281,16 @@ public class FhirContext {
 
 	public INarrativeGenerator getNarrativeGenerator() {
 		return myNarrativeGenerator;
+	}
+
+	/**
+	 * Returns the parser options object which will be used to supply default
+	 * options to newly created parsers
+	 * 
+	 * @return The parser options - Will not return <code>null</code>
+	 */
+	public ParserOptions getParserOptions() {
+		return myParserOptions;
 	}
 
 	/**
@@ -449,6 +394,20 @@ public class FhirContext {
 		return myIdToResourceDefinition.get(theId);
 	}
 
+//	/**
+//	 * Return an unmodifiable collection containing all known resource definitions
+//	 */
+//	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
+//		
+//		Set<Class<? extends IBase>> datatypes = Collections.emptySet();
+//		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = Collections.emptyMap();
+//		HashMap<String, Class<? extends IBaseResource>> types = new HashMap<String, Class<? extends IBaseResource>>();
+//		ModelScanner.scanVersionPropertyFile(datatypes, types, myVersion.getVersion(), existing);
+//		for (int next : types.)
+//		
+//		return Collections.unmodifiableCollection(myIdToResourceDefinition.values());
+//	}
+
 	/**
 	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the
 	 * core library.
@@ -476,6 +435,19 @@ public class FhirContext {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
+	/**
+	 * Returns the validation support module configured for this context, creating a default
+	 * implementation if no module has been passed in via the {@link #setValidationSupport(IContextValidationSupport)}
+	 * method
+	 * @see #setValidationSupport(IContextValidationSupport)
+	 */
+	public IContextValidationSupport<?, ?, ?, ?, ?, ?> getValidationSupport() {
+		if (myValidationSupport == null) {
+			myValidationSupport = myVersion.createValidationSupport();
+		}
+		return myValidationSupport;
+	}
+
 	public IFhirVersion getVersion() {
 		return myVersion;
 	}
@@ -498,6 +470,28 @@ public class FhirContext {
 	 */
 	public IVersionSpecificBundleFactory newBundleFactory() {
 		return myVersion.newBundleFactory(this);
+	}
+
+	/**
+	 * Creates a new FluentPath engine which can be used to exvaluate
+	 * path expressions over FHIR resources. Note that this engine will use the
+	 * {@link IContextValidationSupport context validation support} module which is 
+	 * configured on the context at the time this method is called.
+	 * <p>
+	 * In other words, call {@link #setValidationSupport(IContextValidationSupport)} before
+	 * calling {@link #newFluentPath()}
+	 * </p>
+	 * <p>
+	 * Note that this feature was added for FHIR DSTU3 and is not available
+	 * for contexts configured to use an older version of FHIR. Calling this method
+	 * on a context for a previous version of fhir will result in an
+	 * {@link UnsupportedOperationException}
+	 * </p>
+	 * 
+	 * @since 2.2
+	 */
+	public IFluentPath newFluentPath() {
+		return myVersion.createFluentPathExecutor(this);
 	}
 
 	/**
@@ -784,6 +778,17 @@ public class FhirContext {
 	}
 
 	/**
+	 * Sets the parser options object which will be used to supply default
+	 * options to newly created parsers
+	 *  
+	 * @param theParserOptions The parser options object - Must not be <code>null</code>
+	 */
+	public void setParserOptions(ParserOptions theParserOptions) {
+		Validate.notNull(theParserOptions, "theParserOptions must not be null");
+		myParserOptions = theParserOptions;
+	}
+
+	/**
 	 * Sets the configured performance options
 	 * 
 	 * @see PerformanceOptionsEnum for a list of available options
@@ -816,6 +821,15 @@ public class FhirContext {
 	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
 		Validate.notNull(theRestfulClientFactory, "theRestfulClientFactory must not be null");
 		this.myRestfulClientFactory = theRestfulClientFactory;
+	}
+
+	/**
+	 * Sets the validation support module to use for this context. The validation support module
+	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
+	 * as well as to provide terminology services to modules such as the validator and FluentPath executor 
+	 */
+	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
+		myValidationSupport = theValidationSupport;
 	}
 
 	@SuppressWarnings({ "cast" })
@@ -851,6 +865,13 @@ public class FhirContext {
 	}
 
 	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2 DSTU2} (2016 May DSTU3 Snapshot)
+	 */
+	public static FhirContext forDstu2_1() {
+		return new FhirContext(FhirVersionEnum.DSTU2_1);
+	}
+
+	/**
 	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2_HL7ORG DSTU2} (using the Reference
 	 * Implementation Structures)
 	 */
@@ -883,13 +904,6 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2 DSTU2} (2016 May DSTU3 Snapshot)
-	 */
-	public static FhirContext forDstu2_1() {
-		return new FhirContext(FhirVersionEnum.DSTU2_1);
 	}
 
 }

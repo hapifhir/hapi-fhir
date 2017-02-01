@@ -21,9 +21,12 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -42,12 +45,32 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private FhirContext myContext;
 	
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+	
 	public BaseSearchParamExtractor() {
 		super();
 	}
-	
-	public BaseSearchParamExtractor(FhirContext theCtx) {
+
+	public BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+	
+	@Override
+	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
+		List<PathAndRef> refs = new ArrayList<PathAndRef>();
+		String[] nextPathsSplit = theNextSpDef.getPath().split("\\|");
+		for (String nextPath : nextPathsSplit) {
+			nextPath = nextPath.trim();
+			for (Object nextObject : extractValues(nextPath, theResource)) {
+				if (nextObject == null) {
+					continue;
+				}
+				refs.add(new PathAndRef(nextPath, nextObject));
+			}
+		}
+		return refs;
 	}
 
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
@@ -70,25 +93,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return myContext;
 	}
 
+	protected Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
+		Collection<RuntimeSearchParam> retVal = mySearchParamRegistry.getActiveSearchParams(def.getName()).values();
+		List<RuntimeSearchParam> defaultList= Collections.emptyList();
+		retVal = ObjectUtils.defaultIfNull(retVal, defaultList);
+		return retVal;
+	}
+
 	@VisibleForTesting
 	void setContextForUnitTest(FhirContext theContext) {
 		myContext = theContext;
-	}
-
-	@Override
-	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
-		List<PathAndRef> refs = new ArrayList<PathAndRef>();
-		String[] nextPathsSplit = theNextSpDef.getPath().split("\\|");
-		for (String nextPath : nextPathsSplit) {
-			nextPath = nextPath.trim();
-			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null) {
-					continue;
-				}
-				refs.add(new PathAndRef(nextPath, nextObject));
-			}
-		}
-		return refs;
 	}
 
 

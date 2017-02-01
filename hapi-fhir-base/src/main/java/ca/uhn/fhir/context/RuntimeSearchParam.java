@@ -37,15 +37,17 @@ public class RuntimeSearchParam {
 	private final String myPath;
 	private final Set<String> myTargets;
 	private final Set<String> myProvidesMembershipInCompartments;
+	private final RuntimeSearchParamStatusEnum myStatus;
 
 	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
-			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
+			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
 		super();
 		myName = theName;
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
 		myCompositeOf = theCompositeOf;
+		myStatus = theStatus;
 		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
 			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
 		} else {
@@ -62,8 +64,12 @@ public class RuntimeSearchParam {
 		return myTargets;
 	}
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets) {
-		this(theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets);
+	public RuntimeSearchParamStatusEnum getStatus() {
+		return myStatus;
+	}
+
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
+		this(theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
 	}
 
 	public List<RuntimeSearchParam> getCompositeOf() {
@@ -108,4 +114,10 @@ public class RuntimeSearchParam {
 		return myProvidesMembershipInCompartments;
 	}
 
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED
+	}
+	
 }
