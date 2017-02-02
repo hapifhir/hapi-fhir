@@ -99,6 +99,9 @@ public class ${className}ResourceProvider extends
 #end
 #end	
 
+			@RawParam
+			Map<String, List<String>> theAdditionalRawParams,
+
 #if ( $version != 'dstu' )
 			@IncludeParam(reverse=true)
 			Set<Include> theRevIncludes,

@@ -29,17 +29,28 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<SearchParameter>implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	
+	@Override
+	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
+		
+		if (theResource.getStatus() == null) {
+			throw new InvalidRequestException("Resource.status is missing or invalid: " + theResource.getStatusElement().getValueAsString());
+		}
+	}
+
 	/**
 	 * This method is called once per minute to perform any required re-indexing. During most passes this will
 	 * just check and find that there are no resources requiring re-indexing. In that case the method just returns
-	 * immediately. If the search finds that some resources require reindexing, the system will do a bunch of
-	 * reindexing and then return.
+	 * immediately. If the search finds that some resources require reindexing, the system will do multiple
+	 * reindexing passes and then return.
 	 */
 	@Override
 	@Scheduled(fixedDelay=DateUtils.MILLIS_PER_MINUTE)

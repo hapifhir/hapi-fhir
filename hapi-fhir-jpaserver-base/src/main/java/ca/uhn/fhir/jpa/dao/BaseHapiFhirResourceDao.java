@@ -57,6 +57,8 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.QualifierDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -73,6 +75,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	private DaoConfig myDaoConfig;
+
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
@@ -86,6 +89,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
 	private String mySecondaryPrimaryKeyParamName;
+	@Autowired
+	private ISearchParamRegistry mySerarchParamRegistry;
 	@Autowired()
 	protected IHapiTerminologySvc myTerminologySvc;
 
@@ -662,6 +667,30 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Override
+	public DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails) {
+		ResourceTable entityToUpdate = readEntityLatestVersion(theId);
+		if (theId.hasVersionIdPart()) {
+			if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
+				throw new ResourceVersionConflictException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
+			}
+		}
+		
+		validateResourceType(entityToUpdate);
+		
+		IBaseResource resourceToUpdate = toResource(entityToUpdate, false);
+		IBaseResource destination;
+		if (thePatchType == PatchTypeEnum.JSON_PATCH) {
+			destination = JsonPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
+		} else {
+			destination = XmlPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
+		}
+		
+		@SuppressWarnings("unchecked")
+		T destinationCasted = (T) destination;
+		return update(destinationCasted, null, true, theRequestDetails);
+	}
+
 	@PostConstruct
 	public void postConstruct() {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
@@ -863,9 +892,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return search(map);
 	}
 
-	@Autowired
-	private ISearchParamRegistry mySerarchParamRegistry;
-
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		// Notify interceptors
@@ -989,6 +1015,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	public void translateRawParameters(Map<String, List<String>> theSource, SearchParameterMap theTarget) {
+		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(getResourceName());
+		
+		Set<String> paramNames = theSource.keySet();
+		for (String nextParamName : paramNames) {
+			QualifierDetails qualifiedParamName = SearchMethodBinding.extractQualifiersFromParameterName(nextParamName);
+			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
+			if (param == null) {
+				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), new TreeSet<String>(searchParams.keySet()));
+				throw new InvalidRequestException(msg);
+			}
+			
+			aaaa
+		}
+	}
+
+	@Override
 	public DaoMethodOutcome update(T theResource) {
 		return update(theResource, null, null);
 	}
@@ -1077,30 +1120,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.info(msg);
 		return outcome;
-	}
-
-	@Override
-	public DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails) {
-		ResourceTable entityToUpdate = readEntityLatestVersion(theId);
-		if (theId.hasVersionIdPart()) {
-			if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
-				throw new ResourceVersionConflictException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
-			}
-		}
-		
-		validateResourceType(entityToUpdate);
-		
-		IBaseResource resourceToUpdate = toResource(entityToUpdate, false);
-		IBaseResource destination;
-		if (thePatchType == PatchTypeEnum.JSON_PATCH) {
-			destination = JsonPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
-		} else {
-			destination = XmlPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
-		}
-		
-		@SuppressWarnings("unchecked")
-		T destinationCasted = (T) destination;
-		return update(destinationCasted, null, true, theRequestDetails);
 	}
 	
 	
