@@ -214,6 +214,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	private ISearchParamExtractor mySearchParamExtractor;
 
 	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
 	protected void createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId) {
@@ -943,7 +946,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
-		SearchParameterMap paramMap = translateMatchUrl(myContext, theMatchUrl, resourceDef);
+		SearchParameterMap paramMap = translateMatchUrl(this, myContext, theMatchUrl, resourceDef);
 		paramMap.setPersistResults(false);
 
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
@@ -956,29 +959,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return ids;
 	}
 
+	@Override
+	public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
+		Map<String, RuntimeSearchParam> params = mySearchParamRegistry.getActiveSearchParams(theResourceDef.getName());
+		return params.get(theParamName);
+	}
+
 	@SuppressWarnings("unused")
 	@CoverageIgnore
 	public BaseHasResource readEntity(IIdType theValueId) {
 		throw new NotImplementedException("");
 	}
-
-	// protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
-	// MetaDt retVal = new MetaDt();
-	// for (TagDefinition next : tagDefinitions) {
-	// switch (next.getTagType()) {
-	// case PROFILE:
-	// retVal.addProfile(next.getCode());
-	// break;
-	// case SECURITY_LABEL:
-	// retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-	// break;
-	// case TAG:
-	// retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-	// break;
-	// }
-	// }
-	// return retVal;
-	// }
 
 	public void setConfig(DaoConfig theConfig) {
 		myConfig = theConfig;
@@ -1718,7 +1709,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return parameters;
 	}
 
-	public static SearchParameterMap translateMatchUrl(FhirContext theContext, String theMatchUrl, RuntimeResourceDefinition resourceDef) {
+	public static SearchParameterMap translateMatchUrl(IDao theCallingDao, FhirContext theContext, String theMatchUrl, RuntimeResourceDefinition resourceDef) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters = translateMatchUrl(theMatchUrl);
 
@@ -1788,7 +1779,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef = resourceDef.getSearchParam(nextParamName);
+				RuntimeSearchParam paramDef = theCallingDao.getSearchParamByName(resourceDef, nextParamName);
 				if (paramDef == null) {
 					throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
 				}

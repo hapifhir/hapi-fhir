@@ -403,19 +403,26 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				retVal.setDotQualifier(theParamName.substring(dotIdx, colonIdx));
 				retVal.setColonQualifier(theParamName.substring(colonIdx));
 				retVal.setParamName(theParamName.substring(0, dotIdx));
+				retVal.setWholeQualifier(theParamName.substring(dotIdx));
 			} else {
 				retVal.setColonQualifier(theParamName.substring(colonIdx, dotIdx));
 				retVal.setDotQualifier(theParamName.substring(dotIdx));
 				retVal.setParamName(theParamName.substring(0, colonIdx));
+				retVal.setWholeQualifier(theParamName.substring(colonIdx));
 			}
 		} else if (dotIdx != -1) {
 			retVal.setDotQualifier(theParamName.substring(dotIdx));
 			retVal.setParamName(theParamName.substring(0, dotIdx));
+			retVal.setWholeQualifier(theParamName.substring(dotIdx));
 		} else if (colonIdx != -1) {
 			retVal.setColonQualifier(theParamName.substring(colonIdx));
 			retVal.setParamName(theParamName.substring(0, colonIdx));
+			retVal.setWholeQualifier(theParamName.substring(colonIdx));
 		} else {
 			retVal.setParamName(theParamName);
+			retVal.setColonQualifier(null);
+			retVal.setDotQualifier(null);
+			retVal.setWholeQualifier(null);
 		}
 
 		return retVal;
@@ -426,6 +433,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		private String myColonQualifier;
 		private String myDotQualifier;
 		private String myParamName;
+		private String myWholeQualifier;
 
 		public boolean passes(Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 			if (theQualifierWhitelist != null) {
@@ -485,6 +493,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 		public void setDotQualifier(String theDotQualifier) {
 			myDotQualifier = theDotQualifier;
+		}
+
+		public String getWholeQualifier() {
+			return myWholeQualifier;
+		}
+
+		public void setWholeQualifier(String theWholeQualifier) {
+			myWholeQualifier = theWholeQualifier;
 		}
 
 	}

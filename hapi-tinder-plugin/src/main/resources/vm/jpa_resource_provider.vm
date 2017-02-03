@@ -39,7 +39,7 @@ public class ${className}ResourceProvider extends
 		return ${className}.class;
 	}
 
-	@Search()
+	@Search(allowUnknownParams=true)
 	public ca.uhn.fhir.rest.server.IBundleProvider search(
 			javax.servlet.http.HttpServletRequest theServletRequest,
 			
@@ -153,6 +153,8 @@ public class ${className}ResourceProvider extends
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
 			paramMap.setRequestDetails(theRequestDetails);
+
+			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;
