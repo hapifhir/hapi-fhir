@@ -40,7 +40,7 @@ import ca.uhn.fhir.util.FhirTerser;
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
-	protected static final Pattern SPLIT = Pattern.compile("\\||( or )");
+	public static final Pattern SPLIT = Pattern.compile("\\||( or )");
 
 	@Autowired
 	private FhirContext myContext;
