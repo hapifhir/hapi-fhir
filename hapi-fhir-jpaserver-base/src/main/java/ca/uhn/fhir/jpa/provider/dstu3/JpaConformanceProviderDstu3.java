@@ -31,7 +31,9 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -67,9 +69,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
 	}
-
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
 	
 	@Override
 	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
@@ -98,7 +97,9 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 				}
 
 				nextResource.getSearchParam().clear();
-				Collection<RuntimeSearchParam> searchParams = mySearchParamRegistry.getAllSearchParams(nextResource.getType());
+				String resourceName = nextResource.getType();
+				RuntimeResourceDefinition resourceDef = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
+				Collection<RuntimeSearchParam> searchParams = mySystemDao.getSearchParamsByResourceType(resourceDef);
 				for (RuntimeSearchParam runtimeSp : searchParams) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 

@@ -23,6 +23,12 @@
 					</ul>
 				]]>
 			</action>
+			<action type="add">
+				The JPA server now supports custom search parameters in DSTU3
+				mode. This allows users to create search parameters which contain
+				custom paths, or even override and disable existing search
+				parameters.
+			</action>
 		<action type="fix">
 				Fix issue in AuthorizationIntetceptor where
 				transactions are blocked even when they

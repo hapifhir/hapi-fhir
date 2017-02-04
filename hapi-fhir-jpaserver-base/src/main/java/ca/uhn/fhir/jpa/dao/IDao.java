@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -77,4 +78,7 @@ public interface IDao {
 	void populateFullTextFields(IBaseResource theResource, ResourceTable theEntity);
 
 	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
+
+	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
+
 }

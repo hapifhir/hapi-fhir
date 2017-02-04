@@ -71,7 +71,7 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 				if (runtimeSp == null) {
 					continue;
 				}
-
+				
 				int dotIdx = runtimeSp.getPath().indexOf('.');
 				if (dotIdx == -1) {
 					ourLog.warn("Can not determine resource type of {}", runtimeSp.getPath());
@@ -89,11 +89,22 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 			Map<String, Map<String, RuntimeSearchParam>> activeSearchParams = new HashMap<String, Map<String, RuntimeSearchParam>>();
 			for (Entry<String, Map<String, RuntimeSearchParam>> nextEntry : searchParams.entrySet()) {
 				for (RuntimeSearchParam nextSp : nextEntry.getValue().values()) {
-					if (nextSp.getStatus() == RuntimeSearchParamStatusEnum.ACTIVE) {
-						if (!activeSearchParams.containsKey(nextEntry.getKey())) {
-							activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
-						}
-						activeSearchParams.get(nextEntry.getKey()).put(nextSp.getName(), nextSp);
+					String nextName = nextSp.getName();
+					if (nextSp.getStatus() != RuntimeSearchParamStatusEnum.ACTIVE) {
+						nextSp = null;
+					}
+					
+					if (!activeSearchParams.containsKey(nextEntry.getKey())) {
+						activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
+					}
+					if (activeSearchParams.containsKey(nextEntry.getKey())) {
+						ourLog.info("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
+					}
+					
+					if (nextSp != null) {
+						activeSearchParams.get(nextEntry.getKey()).put(nextName, nextSp);
+					} else {
+						activeSearchParams.get(nextEntry.getKey()).remove(nextName);
 					}
 				}
 			}

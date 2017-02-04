@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -10,16 +12,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -29,7 +36,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProviderDstu3Test {
@@ -58,14 +65,35 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		try {
 			ourClient.create().resource(sp).execute();
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Resource.status is missing or invalid: null", e.getMessage());
+		} catch (UnprocessableEntityException e) {
+			assertEquals("HTTP 422 Unprocessable Entity: Resource.status is missing or invalid: null", e.getMessage());
 		}
 	}
 
-	@SuppressWarnings("unused")
+	@Override
+	@Before
+	public void beforeResetConfig() {
+		super.beforeResetConfig();
+
+		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamRegsitry.forceRefresh();
+	}
+
 	@Test
-	public void testConformance() {
+	public void testConformanceOverrideAllowed() {
+		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+
+		CapabilityStatement conformance = ourClient
+				.fetchConformance()
+				.ofType(CapabilityStatement.class)
+				.execute();
+		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
+
+		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
+		assertNull(param);
+
+		param = map.get("gender");
+		assertNotNull(param);
 
 		// Add a custom search parameter
 		SearchParameter fooSp = new SearchParameter();
@@ -76,7 +104,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
-		
+
 		// Disable an existing parameter
 		fooSp = new SearchParameter();
 		fooSp.setCode("gender");
@@ -87,15 +115,72 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		CapabilityStatement conformance = ourClient
-			.fetchConformance()
-			.ofType(CapabilityStatement.class)
-			.execute();
+		mySearchParamRegsitry.forceRefresh();
 
-		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
-		
-		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
+		conformance = ourClient
+				.fetchConformance()
+				.ofType(CapabilityStatement.class)
+				.execute();
+		map = extractSearchParams(conformance, "Patient");
+
+		param = map.get("foo");
 		assertEquals("foo", param.getName());
+
+		param = map.get("gender");
+		assertNull(param);
+
+	}
+
+	@Test
+	public void testConformanceOverrideNotAllowed() {
+		myDaoConfig.setDefaultSearchParamsCanBeOverridden(false);
+		
+		CapabilityStatement conformance = ourClient
+				.fetchConformance()
+				.ofType(CapabilityStatement.class)
+				.execute();
+		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
+
+		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
+		assertNull(param);
+
+		param = map.get("gender");
+		assertNotNull(param);
+
+		// Add a custom search parameter
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("FOO SP");
+		fooSp.setXpath("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		// Disable an existing parameter
+		fooSp = new SearchParameter();
+		fooSp.setCode("gender");
+		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("Gender");
+		fooSp.setXpath("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		conformance = ourClient
+				.fetchConformance()
+				.ofType(CapabilityStatement.class)
+				.execute();
+		map = extractSearchParams(conformance, "Patient");
+
+		param = map.get("foo");
+		assertEquals("foo", param.getName());
+
+		param = map.get("gender");
+		assertNotNull(param);
+
 	}
 
 	private Map<String, CapabilityStatementRestResourceSearchParamComponent> extractSearchParams(CapabilityStatement conformance, String resType) {
@@ -112,7 +197,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		}
 		return map;
 	}
-	
+
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithCustomParam() {
@@ -125,9 +210,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
-		
+
 		mySearchParamRegsitry.forceRefresh();
-		
+
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
@@ -142,16 +227,15 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		Bundle result;
 
 		result = ourClient
-			.search()
-			.forResource(Patient.class)
-			.where(new TokenClientParam("foo").exactly().code("male"))
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Patient.class)
+				.where(new TokenClientParam("foo").exactly().code("male"))
+				.returnBundle(Bundle.class)
+				.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(patId.getValue()));
 
 	}
-
 
 	@Test
 	public void testCreatingParamMarksCorrectResourcesForReindexing() {
@@ -167,7 +251,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
 		res = myResourceTableDao.findOne(obsId.getIdPartAsLong());
 		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
-		
+
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
@@ -184,7 +268,6 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	}
 
-	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchQualifiedWithCustomReferenceParam() {
@@ -197,9 +280,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
-		
+
 		mySearchParamRegsitry.forceRefresh();
-		
+
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
@@ -218,16 +301,16 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		Bundle result;
 
 		result = ourClient
-			.search()
-			.forResource(Observation.class)
-			.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Observation.class)
+				.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
+				.returnBundle(Bundle.class)
+				.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(obsId1.getValue()));
 
 	}
-	
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
