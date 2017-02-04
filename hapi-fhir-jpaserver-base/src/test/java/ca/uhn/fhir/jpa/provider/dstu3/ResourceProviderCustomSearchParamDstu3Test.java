@@ -6,14 +6,16 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
@@ -61,6 +63,56 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		}
 	}
 
+	@SuppressWarnings("unused")
+	@Test
+	public void testConformance() {
+
+		// Add a custom search parameter
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("FOO SP");
+		fooSp.setXpath("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+		
+		// Disable an existing parameter
+		fooSp = new SearchParameter();
+		fooSp.setCode("gender");
+		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("Gender");
+		fooSp.setXpath("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.RETIRED);
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		CapabilityStatement conformance = ourClient
+			.fetchConformance()
+			.ofType(CapabilityStatement.class)
+			.execute();
+
+		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
+		
+		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
+		assertEquals("foo", param.getName());
+	}
+
+	private Map<String, CapabilityStatementRestResourceSearchParamComponent> extractSearchParams(CapabilityStatement conformance, String resType) {
+		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = new HashMap<String, CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent>();
+		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
+			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
+				if (!resType.equals(nextResource.getType())) {
+					continue;
+				}
+				for (CapabilityStatementRestResourceSearchParamComponent nextParam : nextResource.getSearchParam()) {
+					map.put(nextParam.getName(), nextParam);
+				}
+			}
+		}
+		return map;
+	}
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithCustomParam() {

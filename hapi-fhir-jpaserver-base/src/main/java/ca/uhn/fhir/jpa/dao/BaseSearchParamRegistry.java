@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +16,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 
 public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
+
+	private static final Map<String, RuntimeSearchParam> EMPTY_SP_MAP = Collections.emptyMap();
 
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
 
@@ -60,6 +63,15 @@ public abstract class BaseSearchParamRegistry implements ISearchParamRegistry {
 		}
 
 		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
+	}
+
+	@Override
+	public Collection<RuntimeSearchParam> getAllSearchParams(String theResourceName) {
+		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
+		
+		Map<String, RuntimeSearchParam> map = myBuiltInSearchParams.get(theResourceName);
+		map = ObjectUtils.defaultIfNull(map, EMPTY_SP_MAP);
+		return Collections.unmodifiableCollection(map.values());
 	}
 
 }

@@ -458,7 +458,7 @@ class ModelScanner {
 				compositeOf.add(param);
 			}
 
-			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
+			RuntimeSearchParam param = new RuntimeSearchParam(null, null, searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
 			theResourceDef.addSearchParam(param);
 		}
 	}
