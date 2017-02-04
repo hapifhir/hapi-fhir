@@ -39,8 +39,10 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
@@ -134,6 +136,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
+	DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
+
 	Set<Long> processMatchUrl(String theMatchUrl);
 
 	/**
@@ -182,6 +186,15 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
 
 	/**
+	 * Takes a map of incoming raw search parameters and translates/parses them into 
+	 * appropriate {@link IQueryParameterType} instances of the appropriate type
+	 * for the given param
+	 * 
+	 * @throws InvalidRequestException If any of the parameters are not known
+	 */
+	void translateRawParameters(Map<String, List<String>> theSource, SearchParameterMap theTarget);
+
+	/**
 	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and 
 	 * therefore can not fire any interceptors. Use only for internal system calls 
 	 */
@@ -210,8 +223,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theRequestDetails TODO
 	 */
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
-
-	DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
 
 //	/**
 //	 * Invoke the everything operation

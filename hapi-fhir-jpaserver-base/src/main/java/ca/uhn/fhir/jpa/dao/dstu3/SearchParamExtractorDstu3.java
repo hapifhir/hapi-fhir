@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -56,7 +57,6 @@ import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
 import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Range;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -73,11 +73,11 @@ import com.google.common.annotations.VisibleForTesting;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.PathAndRef;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
@@ -97,7 +97,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	@Autowired
 	private org.hl7.fhir.dstu3.hapi.validation.IValidationSupport myValidationSupport;
-
+	
 	/**
 	 * Constructor
 	 */
@@ -105,8 +105,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		super();
 	}
 
-	public SearchParamExtractorDstu3(FhirContext theCtx, IValidationSupport theValidationSupport) {
-		super(theCtx);
+	public SearchParamExtractorDstu3(FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -147,8 +147,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<ResourceIndexedSearchParamDate>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.DATE) {
 				continue;
 			}
@@ -226,8 +226,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public HashSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamNumber> retVal = new HashSet<ResourceIndexedSearchParamNumber>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.NUMBER) {
 				continue;
 			}
@@ -320,8 +320,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamQuantity> retVal = new HashSet<ResourceIndexedSearchParamQuantity>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.QUANTITY) {
 				continue;
 			}
@@ -384,24 +384,28 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamString> retVal = new HashSet<ResourceIndexedSearchParamString>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		String resourceName = getContext().getResourceDefinition(theResource).getName();
+
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.STRING) {
 				continue;
 			}
 
 			String nextPath = nextSpDef.getPath();
-			String resourceName = nextSpDef.getName();
+			String nextSpName = nextSpDef.getName();
 
 			if (isBlank(nextPath)) {
 
-				// TODO: implement phonetic, and any others that have no path
-
-				if ("Questionnaire".equals(def.getName()) && nextSpDef.getName().equals("title")) {
-					Questionnaire q = (Questionnaire) theResource;
-					String title = "";// q.getGroup().getTitle();
-					addSearchTerm(theEntity, retVal, resourceName, title);
-				}
+//				// TODO: implement phonetic, and any others that have no path
+//
+//				// TODO: do we still need this check?
+//				if ("Questionnaire".equals(nextSpName) && nextSpDef.getName().equals("title")) {
+//					Questionnaire q = (Questionnaire) theResource;
+//					String title = "";// q.getGroup().getTitle();
+//					addSearchTerm(theEntity, retVal, nextSpName, title);
+//				}
+				
 				continue;
 			}
 
@@ -418,7 +422,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 				if (nextObject instanceof IPrimitiveType<?>) {
 					IPrimitiveType<?> nextValue = (IPrimitiveType<?>) nextObject;
 					String searchTerm = nextValue.getValueAsString();
-					addSearchTerm(theEntity, retVal, resourceName, searchTerm);
+					addSearchTerm(theEntity, retVal, nextSpName, searchTerm);
 				} else {
 					if (nextObject instanceof HumanName) {
 						ArrayList<StringType> allNames = new ArrayList<StringType>();
@@ -428,7 +432,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 						}
 						allNames.addAll(nextHumanName.getGiven());
 						for (StringType nextName : allNames) {
-							addSearchTerm(theEntity, retVal, resourceName, nextName.getValue());
+							addSearchTerm(theEntity, retVal, nextSpName, nextName.getValue());
 						}
 					} else if (nextObject instanceof Address) {
 						ArrayList<StringType> allNames = new ArrayList<StringType>();
@@ -439,29 +443,29 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 						allNames.add(nextAddress.getCountryElement());
 						allNames.add(nextAddress.getPostalCodeElement());
 						for (StringType nextName : allNames) {
-							addSearchTerm(theEntity, retVal, resourceName, nextName.getValue());
+							addSearchTerm(theEntity, retVal, nextSpName, nextName.getValue());
 						}
 					} else if (nextObject instanceof ContactPoint) {
 						ContactPoint nextContact = (ContactPoint) nextObject;
 						if (nextContact.getValueElement().isEmpty() == false) {
-							addSearchTerm(theEntity, retVal, resourceName, nextContact.getValue());
+							addSearchTerm(theEntity, retVal, nextSpName, nextContact.getValue());
 						}
 					} else if (nextObject instanceof Quantity) {
 						BigDecimal value = ((Quantity) nextObject).getValue();
 						if (value != null) {
-							addSearchTerm(theEntity, retVal, resourceName, value.toPlainString());
+							addSearchTerm(theEntity, retVal, nextSpName, value.toPlainString());
 						}
 					} else if (nextObject instanceof Range) {
 						SimpleQuantity low = ((Range) nextObject).getLow();
 						if (low != null) {
 							BigDecimal value = low.getValue();
 							if (value != null) {
-								addSearchTerm(theEntity, retVal, resourceName, value.toPlainString());
+								addSearchTerm(theEntity, retVal, nextSpName, value.toPlainString());
 							}
 						}
 					} else {
 						if (!multiType) {
-							throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
+							throw new ConfigurationException("Search param " + nextSpName + " is of unexpected datatype: " + nextObject.getClass());
 						}
 					}
 				}
@@ -486,8 +490,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			useSystem = cs.getUrl();
 		}
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.TOKEN) {
 				continue;
 			}
@@ -633,8 +637,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource) {
 		HashSet<ResourceIndexedSearchParamUri> retVal = new HashSet<ResourceIndexedSearchParamUri>();
 
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.URI) {
 				continue;
 			}

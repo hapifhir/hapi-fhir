@@ -407,6 +407,8 @@ public class MethodUtil {
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
+					} else if (nextAnnotation instanceof RawParam) {
+						param = new RawParamsParmeter(parameters);
 					} else if (nextAnnotation instanceof IncludeParam) {
 						Class<? extends Collection<Include>> instantiableCollectionType;
 						Class<?> specType;

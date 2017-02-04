@@ -141,9 +141,9 @@ public final class PersistedJpaBundleProvider implements IBundleProvider {
 
 		Set<Long> revIncludedPids = new HashSet<Long>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
+			revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
 		}
-		revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
+		revIncludedPids.addAll(SearchBuilder.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();

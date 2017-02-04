@@ -16,7 +16,7 @@ import org.apache.commons.lang3.time.DateUtils;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,26 +35,28 @@ public class DaoConfig {
 	// ***
 	// update setter javadoc if default changes
 	// ***
-	private boolean myAllowExternalReferences = false; 
+	private boolean myAllowExternalReferences = false;
 
 	// ***
 	// update setter javadoc if default changes
 	// ***
-	private boolean myAllowInlineMatchUrlReferences = false; 
+	private boolean myAllowInlineMatchUrlReferences = false;
 
 	private boolean myAllowMultipleDelete;
+	private boolean myDefaultSearchParamsCanBeOverridden = false;
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myDeferIndexingForCodesystemsOfSize = 2000;
 	private boolean myDeleteStaleSearches = true;
+
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private long myExpireSearchResultsAfterMillis = DateUtils.MILLIS_PER_HOUR;
-	
+
 	private int myHardTagListLimit = 1000;
-	
+
 	private int myIncludeLimit = 2000;
 
 	// ***
@@ -63,19 +65,19 @@ public class DaoConfig {
 	private boolean myIndexContainedResources = true;
 
 	private List<IServerInterceptor> myInterceptors;
-	
 	// ***
 	// update setter javadoc if default changes
 	// ***
 	private int myMaximumExpansionSize = 5000;
+
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 
 	private boolean mySchedulingDisabled;
 
 	private boolean mySubscriptionEnabled;
-	
+
 	private long mySubscriptionPollDelay = 1000;
-	
+
 	private Long mySubscriptionPurgeInactiveAfterMillis;
 
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<String>();
@@ -91,42 +93,44 @@ public class DaoConfig {
 	public int getDeferIndexingForCodesystemsOfSize() {
 		return myDeferIndexingForCodesystemsOfSize;
 	}
+
 	/**
-	 * Sets the number of milliseconds that search results for a given client search 
+	 * Sets the number of milliseconds that search results for a given client search
 	 * should be preserved before being purged from the database.
 	 * <p>
-	 * Search results are stored in the database so that they can be paged over multiple 
+	 * Search results are stored in the database so that they can be paged over multiple
 	 * requests. After this
 	 * number of milliseconds, they will be deleted from the database, and any paging links
-	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour. 
+	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
 	 * <p>
+	 * 
 	 * @see To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
-	 * </p>
+	 *      </p>
 	 * 
 	 * @since 1.5
 	 */
 	public long getExpireSearchResultsAfterMillis() {
 		return myExpireSearchResultsAfterMillis;
 	}
-	
+
 	/**
 	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
 	 */
 	public int getHardTagListLimit() {
 		return myHardTagListLimit;
 	}
-	
+
 	public int getIncludeLimit() {
 		return myIncludeLimit;
 	}
-	
+
 	/**
 	 * Returns the interceptors which will be notified of operations.
 	 * 
 	 * @see #setInterceptors(List)
 	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
-	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
+	 *             with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
 	@Deprecated
 	public List<IServerInterceptor> getInterceptors() {
@@ -135,22 +139,26 @@ public class DaoConfig {
 		}
 		return myInterceptors;
 	}
-	
+
 	/**
 	 * See {@link #setMaximumExpansionSize(int)}
 	 */
 	public int getMaximumExpansionSize() {
 		return myMaximumExpansionSize;
 	}
+
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
+
 	public long getSubscriptionPollDelay() {
 		return mySubscriptionPollDelay;
 	}
+
 	public Long getSubscriptionPurgeInactiveAfterMillis() {
 		return mySubscriptionPurgeInactiveAfterMillis;
 	}
+
 	/**
 	 * This setting may be used to advise the server that any references found in
 	 * resources that have any of the base URLs given here will be replaced with
@@ -165,6 +173,7 @@ public class DaoConfig {
 	public Set<String> getTreatBaseUrlsAsLocal() {
 		return myTreatBaseUrlsAsLocal;
 	}
+
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
 	 * resources to have references to external servers. For example if this server is
@@ -179,7 +188,7 @@ public class DaoConfig {
 	 * <p>
 	 * Note that external references will be indexed by the server and may be searched
 	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across 
+	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
 	 * these references.
 	 * </p>
 	 * <p>
@@ -193,19 +202,37 @@ public class DaoConfig {
 	public boolean isAllowExternalReferences() {
 		return myAllowExternalReferences;
 	}
+
 	/**
 	 * @see #setAllowInlineMatchUrlReferences(boolean)
 	 */
 	public boolean isAllowInlineMatchUrlReferences() {
 		return myAllowInlineMatchUrlReferences;
 	}
+
 	public boolean isAllowMultipleDelete() {
 		return myAllowMultipleDelete;
 	}
 
 	/**
-	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion 
-	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION. 
+	 * If set to {@code true} the default search params (i.e. the search parameters that are
+	 * defined by the FHIR specification itself) may be overridden by uploading search
+	 * parameters to the server with the same code as the built-in search parameter.
+	 * <p>
+	 * This can be useful if you want to be able to disable or alter
+	 * the behaviour of the default search parameters.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}
+	 * </p>
+	 */
+	public boolean isDefaultSearchParamsCanBeOverridden() {
+		return myDefaultSearchParamsCanBeOverridden;
+	}
+
+	/**
+	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion
+	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION.
 	 * <p>
 	 * This feature is useful if you want to define your own process for deleting these (e.g. because
 	 * you are running in a cluster)
@@ -217,7 +244,7 @@ public class DaoConfig {
 
 	/**
 	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>) 
+	 * <code>true</code>)
 	 */
 	public boolean isIndexContainedResources() {
 		return myIndexContainedResources;
@@ -248,7 +275,7 @@ public class DaoConfig {
 	 * <p>
 	 * Note that external references will be indexed by the server and may be searched
 	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across 
+	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
 	 * these references.
 	 * </p>
 	 * <p>
@@ -271,6 +298,7 @@ public class DaoConfig {
 	 * <p>
 	 * Default is false for now, as this is an experimental feature.
 	 * </p>
+	 * 
 	 * @since 1.5
 	 */
 	public void setAllowInlineMatchUrlReferences(boolean theAllowInlineMatchUrlReferences) {
@@ -279,6 +307,22 @@ public class DaoConfig {
 
 	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
 		myAllowMultipleDelete = theAllowMultipleDelete;
+	}
+
+	/**
+	 * If set to {@code true} the default search params (i.e. the search parameters that are
+	 * defined by the FHIR specification itself) may be overridden by uploading search
+	 * parameters to the server with the same code as the built-in search parameter.
+	 * <p>
+	 * This can be useful if you want to be able to disable or alter
+	 * the behaviour of the default search parameters.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}
+	 * </p>
+	 */
+	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
+		myDefaultSearchParamsCanBeOverridden = theDefaultSearchParamsCanBeOverridden;
 	}
 
 	/**
@@ -294,8 +338,8 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion 
-	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION. 
+	 * If this is set to <code>false</code> (default is <code>true</code>) the stale search deletion
+	 * task will be disabled (meaning that search results will be retained in the database indefinitely). USE WITH CAUTION.
 	 * <p>
 	 * This feature is useful if you want to define your own process for deleting these (e.g. because
 	 * you are running in a cluster)
@@ -306,17 +350,18 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Sets the number of milliseconds that search results for a given client search 
+	 * Sets the number of milliseconds that search results for a given client search
 	 * should be preserved before being purged from the database.
 	 * <p>
-	 * Search results are stored in the database so that they can be paged over multiple 
+	 * Search results are stored in the database so that they can be paged over multiple
 	 * requests. After this
 	 * number of milliseconds, they will be deleted from the database, and any paging links
-	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour. 
+	 * (next/prev links in search response bundles) will become invalid. Defaults to 1 hour.
 	 * </p>
 	 * <p>
+	 * 
 	 * @see To disable this feature entirely, see {@link #setExpireSearchResults(boolean)}
-	 * </p>
+	 *      </p>
 	 * @since 1.5
 	 */
 	public void setExpireSearchResultsAfterMillis(long theExpireSearchResultsAfterMillis) {
@@ -329,7 +374,7 @@ public class DaoConfig {
 	 * paging provider instead.
 	 * 
 	 * @deprecated This method does not do anything. Configure the page size on your
-	 * paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017) 
+	 *             paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017)
 	 */
 	@Deprecated
 	public void setHardSearchLimit(@SuppressWarnings("unused") int theHardSearchLimit) {
@@ -354,7 +399,7 @@ public class DaoConfig {
 
 	/**
 	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>) 
+	 * <code>true</code>)
 	 */
 	public void setIndexContainedResources(boolean theIndexContainedResources) {
 		myIndexContainedResources = theIndexContainedResources;
@@ -362,8 +407,9 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
+	 * 
 	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
-	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
+	 *             with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
 	@Deprecated
 	public void setInterceptors(IServerInterceptor... theInterceptor) {
@@ -375,8 +421,9 @@ public class DaoConfig {
 
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
+	 * 
 	 * @deprecated As of 2.2 this method is deprecated. There is no good reason to register an interceptor
-	 * with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
+	 *             with the DaoConfig and not with the server via {@link RestfulServer#registerInterceptor(IServerInterceptor)}
 	 */
 	@Deprecated
 	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
@@ -419,11 +466,11 @@ public class DaoConfig {
 		}
 		mySubscriptionPurgeInactiveAfterMillis = theMillis;
 	}
-	
+
 	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
 		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
-	
+
 	/**
 	 * This setting may be used to advise the server that any references found in
 	 * resources that have any of the base URLs given here will be replaced with
@@ -435,8 +482,9 @@ public class DaoConfig {
 	 * convert this reference to <code>Patient/1</code>
 	 * </p>
 	 * 
-	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
-	 * means no references will be treated as external
+	 * @param theTreatBaseUrlsAsLocal
+	 *           The set of base URLs. May be <code>null</code>, which
+	 *           means no references will be treated as external
 	 */
 	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
 		HashSet<String> treatBaseUrlsAsLocal = new HashSet<String>();
