@@ -114,6 +114,10 @@
 				the response. Thanks to Jenny Syed of Cerner for
 				the pull request and contribution!
 			</action>
+			<action type="fix" issue="548">
+				Clean up dependencies and remove Eclipse project files from git. Thanks to
+				@sekaijin for the pull request!
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">

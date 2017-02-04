@@ -297,6 +297,10 @@
 			<name>Jenny Syed</name>
 			<organization>Cerner</organization>
 		</developer>
+		<developer>
+			<id>sekaijin</id>
+			<name>sekaijin</name>
+		</developer>
 	</developers>
 
 	<licenses>
