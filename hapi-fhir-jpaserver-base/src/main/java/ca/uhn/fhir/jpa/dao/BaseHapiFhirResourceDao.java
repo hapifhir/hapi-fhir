@@ -1051,6 +1051,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public void translateRawParameters(Map<String, List<String>> theSource, SearchParameterMap theTarget) {
+		if (theSource == null || theSource.isEmpty()) {
+			return;
+		}
+		
 		Map<String, RuntimeSearchParam> searchParams = mySerarchParamRegistry.getActiveSearchParams(getResourceName());
 		
 		Set<String> paramNames = theSource.keySet();

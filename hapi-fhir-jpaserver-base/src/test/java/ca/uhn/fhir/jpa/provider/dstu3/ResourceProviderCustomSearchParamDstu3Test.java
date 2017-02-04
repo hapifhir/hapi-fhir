@@ -11,6 +11,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
@@ -19,8 +20,10 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -78,7 +81,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pat2 = new Patient();
-		pat.setGender(AdministrativeGender.FEMALE);
+		pat2.setGender(AdministrativeGender.FEMALE);
 		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
@@ -97,6 +100,39 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	}
 
+
+	@Test
+	public void testCreatingParamMarksCorrectResourcesForReindexing() {
+		Patient pat = new Patient();
+		pat.setGender(AdministrativeGender.MALE);
+		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		ResourceTable res = myResourceTableDao.findOne(patId.getIdPartAsLong());
+		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		res = myResourceTableDao.findOne(obsId.getIdPartAsLong());
+		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("FOO SP");
+		fooSp.setXpath("Patient.gender");
+		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		res = myResourceTableDao.findOne(patId.getIdPartAsLong());
+		assertEquals(null, res.getIndexStatus());
+		res = myResourceTableDao.findOne(obsId.getIdPartAsLong());
+		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+
+	}
+
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchQualifiedWithCustomReferenceParam() {
