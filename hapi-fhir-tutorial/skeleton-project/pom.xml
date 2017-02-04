@@ -67,7 +67,12 @@
 		<dependency>
 		    <groupId>com.phloc</groupId>
 		    <artifactId>phloc-schematron</artifactId>
-		    <version>2.7.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>Saxon-HE</artifactId>
+					<groupId>net.sf.saxon</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		    <groupId>com.phloc</groupId>
