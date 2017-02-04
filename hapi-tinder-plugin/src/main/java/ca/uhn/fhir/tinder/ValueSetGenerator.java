@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,7 +120,12 @@ public class ValueSetGenerator {
 			name = "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml";
 		}
 		ourLog.info("Loading valuesets from: {}", name);
-		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream(name));
+		InputStream is = ValueSetGenerator.class.getResourceAsStream(name);
+		if (null == is) {
+			ourLog.error("Failed loading valuesets from: " + name);
+			throw new FileNotFoundException(name);
+		}
+		String vs = IOUtils.toString(is, Charset.defaultCharset());
 		if ("dstu".equals(myVersion)) {
 			Bundle bundle = newXmlParser.parseBundle(vs);
 			for (BundleEntry next : bundle.getEntries()) {

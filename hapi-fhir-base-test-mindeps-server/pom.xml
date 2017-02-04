@@ -25,11 +25,6 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.7</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.7</version>
-		</dependency>
 
 		<!-- Xiaomi phones depend on an old version of this... See #394 -->
 		<dependency>
@@ -42,7 +37,6 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.3.1</version>
 		</dependency>
 		
 		<!--
@@ -59,11 +53,15 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>woodstox-core-asl</artifactId>
 					<groupId>org.codehaus.woodstox</groupId>
+				</exclusion>
+				<exclusion>
+		    		<groupId>org.apache.commons</groupId>
+		    		<artifactId>commons-lang3</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>javax.servlet</groupId>
@@ -74,7 +72,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>woodstox-core-asl</artifactId>
@@ -85,7 +83,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>woodstox-core-asl</artifactId>

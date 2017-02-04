@@ -36,19 +36,19 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-base</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-base</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-base</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
@@ -56,19 +56,19 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
@@ -76,19 +76,19 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
@@ -96,19 +96,19 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
@@ -116,19 +116,19 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
@@ -136,19 +136,19 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu3</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu3</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu3</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
@@ -156,30 +156,30 @@
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 				</dependency>
 				
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-cli-app</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<!-- Don't include in standard distribution -->
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-android</artifactId>
-					<version>2.3-SNAPSHOT</version>
+					<version>${project.version}</version>
 					<!-- Don't include in standard distribution -->
 					<scope>provided</scope>
 				</dependency>
@@ -194,6 +194,12 @@
 				<dependency>
 					<groupId>com.phloc</groupId>
 					<artifactId>phloc-schematron</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>Saxon-HE</artifactId>
+					<groupId>net.sf.saxon</groupId>
+				</exclusion>
+			</exclusions>
 				</dependency>
 				<dependency>
 					<groupId>com.phloc</groupId>
