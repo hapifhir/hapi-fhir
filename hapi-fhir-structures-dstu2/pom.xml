@@ -27,10 +27,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- 
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
+		<!-- The JPA project uses a newer API but we'll try to hold to this version as much as possible. See #283. -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -89,13 +86,7 @@
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
-			<scope>test</scope><!--
-			<exclusions>
-				<exclusion>
-					<artifactId>Saxon-HE</artifactId>
-					<groupId>net.sf.saxon</groupId>
-				</exclusion>
-			</exclusions>-->
+			<scope>test</scope><!-- <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> </exclusion> </exclusions> -->
 		</dependency>
 		<dependency>
 			<groupId>com.phloc</groupId>
@@ -119,11 +110,7 @@
 				<exclusion>
 					<artifactId>commons-lang</artifactId>
 					<groupId>commons-lang</groupId>
-				</exclusion><!--
-				<exclusion>
-					<artifactId>ezmorph</artifactId>
-					<groupId>net.sf.ezmorph</groupId>
-				</exclusion>-->
+				</exclusion><!-- <exclusion> <artifactId>ezmorph</artifactId> <groupId>net.sf.ezmorph</groupId> </exclusion> -->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -140,11 +127,7 @@
 				<exclusion>
 					<artifactId>commons-lang</artifactId>
 					<groupId>commons-lang</groupId>
-				</exclusion><!--
-				<exclusion>
-					<artifactId>ezmorph</artifactId>
-					<groupId>net.sf.ezmorph</groupId>
-				</exclusion>-->
+				</exclusion><!-- <exclusion> <artifactId>ezmorph</artifactId> <groupId>net.sf.ezmorph</groupId> </exclusion> -->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -252,9 +235,7 @@
 								<baseResourceName>deviceusestatement</baseResourceName>
 								<baseResourceName>diagnosticorder</baseResourceName>
 								<baseResourceName>diagnosticreport</baseResourceName>
-								<!-- This is not a real resource 
-								<baseResourceName>documentation</baseResourceName>
-								-->
+								<!-- This is not a real resource <baseResourceName>documentation</baseResourceName> -->
 								<baseResourceName>documentmanifest</baseResourceName>
 								<baseResourceName>documentreference</baseResourceName>
 								<baseResourceName>eligibilityrequest</baseResourceName>
@@ -330,6 +311,24 @@
 					</execution>
 					<!-- <execution> <id>clean_source</id> <goals> <goal>minimize-resources</goal> </goals> <configuration> <fhirVersion>DSTU2</fhirVersion> <targetDirectory>${project.baseDir}/../hapi-tinder-plugin/</targetDirectory> 
 						</configuration> </execution> -->
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>target/generated-sources/tinder</source>
+							</sources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

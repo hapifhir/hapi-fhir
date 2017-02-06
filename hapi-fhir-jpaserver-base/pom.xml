@@ -447,6 +447,7 @@
 				<configuration>
 					<runOrder>alphabetical</runOrder>
 					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+					<forkCount>0.6C</forkCount>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -523,13 +524,28 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>target/generated-sources/tinder</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>${basedir}/target/generated-sources/tinder</directory>
 			</resource>
 			<resource>
 				<directory>${basedir}/target/generated-resources/tinder</directory>
@@ -552,6 +568,20 @@
 			<properties>
 				<skip-hib4>true</skip-hib4>
 			</properties>
+		</profile>
+		<profile>
+			<id>NOPARALLEL</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<forkCount>1</forkCount>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<!-- <profile> <id>DIST</id> <build> <plugins> <plugin> <groupId>de.juplo</groupId> <artifactId>hibernate4-maven-plugin</artifactId> <configuration> <force>true</force> <target>SCRIPT</target> <skip>${skip-hib4}</skip> 
 			</configuration> <dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> <version>${hibernate_version}</version> </dependency> </dependencies> <executions> 

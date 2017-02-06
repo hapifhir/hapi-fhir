@@ -31,7 +31,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.SearchParamExtractorDstu2;
+import ca.uhn.fhir.jpa.dao.SearchParamRegistryDstu2;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -82,6 +84,11 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorDstu2 searchParamExtractor() {
 		return new SearchParamExtractorDstu2();
+	}
+
+	@Bean
+	public ISearchParamRegistry searchParamRegistry() {
+		return new SearchParamRegistryDstu2();
 	}
 
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)

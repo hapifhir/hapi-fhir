@@ -6,6 +6,124 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="2.3" date="TBD">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Hibernate (JPA): 5.1.0 -&gt; 5.2.7</li>
+						<li>Hibernate Search (JPA): 5.5.4 -&gtp; 5.7.0.CR1</li>
+						<li>Hibernate Validator (JPA): 5.2.4 -&gtp; 5.3.4</li>
+						<li>Spring (JPA): 4.3.1 -&gt; 4.3.6</li>
+					</ul>
+				]]>
+			</action>
+			<action type="add">
+				The JPA server now supports custom search parameters in DSTU3
+				mode. This allows users to create search parameters which contain
+				custom paths, or even override and disable existing search
+				parameters.
+			<action type="fix">
+				CLI example uploader couldn't find STU3 examples after CI server
+				was moved to build.fhir.org
+			</action>
+			<action type="fix">
+				Fix issue in JPA subscription module that prevented purging stale
+				subscriptions when many were present on Postgres
+			</action>
+			<action type="fix" issue="532">
+				Server interceptor methods were being called twice unnecessarily
+				by the JPA server, and the DaoConfig interceptor registration 
+				framework was not actually useful. Thanks to GitHub user
+				@mattiuusitalo for reporting!
+			</action>
+			<action type="fix" issue="503">
+				AuthorizationInterceptor on JPA server did not correctly
+				apply rules on deleting resources in a specific compartment
+				because the resource metadata was stripped by the JPA server
+				before the interceptor could see it. Thanks to
+				Eeva Turkka for reporting!
+			</action>
+			<action type="fix" issue="519">
+				JPA server exported CapabilityStatement includes 
+				double entries for the _id parameter and uses the
+				wrong type (string instead of token). Thanks to 
+				Robert Lichtenberger for reporting!
+			</action>
+			<action type="add" issue="504">
+				Custom resource types which extend Binary must not
+				have declared extensions since this is invalid in 
+				FHIR (and HAPI would just ignore them anyhow). Thanks 
+				to Thomas S Berg for reporting!
+			</action>
+			<action type="add">
+				Standard HAPI zip/tar distributions did not include the project
+				sources and JavaDoc JARs. Thanks to Keith Boone for pointing
+				this out!
+			</action>
+			<action type="fix">
+				Server AuthorizationInterceptor always rejects history operation 
+				at the type level even if rules should allow it.
+			</action>
+			<action type="fix">
+				JPA server terminology service was not correctly validating or expanding codes 
+				in SNOMED CT or LOINC code systems. Thanks to David Hay for reporting!
+			</action>
+			<action type="fix" issue="539">
+				Attempting to search for an invalid resource type (e.g. GET base/FooResource) should 
+				return an HTTP 404 and not a 400, per the HTTP spec. Thanks to 
+				GitHub user @CarthageKing for the pull request!
+			</action>
+			<action type="fix" issue="544">
+				When parsing a Bundle containing placeholder fullUrls and references
+				(e.g. "urn:uuid:0000-0000") the resource reference targets did not get
+				populated with the given resources. Note that as a part of this
+				change, <![CDATA[<code>IdType</code> and <code>IdDt</code>]]> have been modified
+				so that when parsing a placeholder ID, the complete placeholder including the
+				"urn:uuid:" or "urn:oid:" prefix will be placed into the ID part. Previously,
+				the prefix was treated as the base URL, which led to strange behaviour
+				like the placeholder being treated as a real IDs. Thanks to GitHub
+				user @jodue for reporting!
+			</action>
+			<action type="add">
+				Declared extensions with multiple type() options listed in the @Child
+				annotation caused a crash on startup. Now this is supported.
+			</action>
+			<action type="add">
+				STU3 XHTML parser for narrative choked if the narrative contained
+				an <![CDATA[<code>&amp;rsquot;</code>]]> entity string.
+			</action>
+			<action type="fix" issue="538">
+				When parsing a quantity parameter on the server with a 
+				value and units but no system (e.g. 
+				<![CDATA[<code>GET [base]/Observation?value=5.4||mg</code>]]>)
+				the unit was incorrectly treated as the system. Thanks to
+				@CarthageKing for the pull request!
+			</action>
+			<action type="533">
+				Correct a typo in the JPA ValueSet ResourceProvider which prevented
+				successful operation under Spring 4.3. Thanks to 
+				Robbert van Waveren for the pull request!
+			</action>
+			<action type="remove">
+				Deprecate the method
+				<![CDATA[<code>ICompositeElement#getAllPopulatedChildElementsOfType(Class)</code>]]>
+				as it is no longer used by HAPI and is just an annoying step
+				in creating custom structures. Thanks to Allan Bro Hansen
+				for pointing this out.
+			</action>
+			<action type="fix" issue="547">
+				CapturingInterceptor did not buffer the response meaning
+				that in many circumstances it did not actually capture
+				the response. Thanks to Jenny Syed of Cerner for
+				the pull request and contribution!
+			</action>
+			<action type="fix" issue="548">
+				Clean up dependencies and remove Eclipse project files from git. Thanks to
+				@sekaijin for the pull request!
+			</action>
+		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
 				Bump the version of a few dependencies to the
@@ -236,6 +354,35 @@
 			<action type="add">
 				Declared extensions with multiple type() options listed in the @Child
 				annotation caused a crash on startup. Now this is supported.
+			</action>
+			<action type="add">
+				STU3 XHTML parser for narrative choked if the narrative contained
+				an <![CDATA[<code>&amp;rsquot;</code>]]> entity string.
+			</action>
+			<action type="fix" issue="538">
+				When parsing a quantity parameter on the server with a 
+				value and units but no system (e.g. 
+				<![CDATA[<code>GET [base]/Observation?value=5.4||mg</code>]]>)
+				the unit was incorrectly treated as the system. Thanks to
+				@CarthageKing for the pull request!
+			</action>
+			<action type="533">
+				Correct a typo in the JPA ValueSet ResourceProvider which prevented
+				successful operation under Spring 4.3. Thanks to 
+				Robbert van Waveren for the pull request!
+			</action>
+			<action type="remove">
+				Deprecate the method
+				<![CDATA[<code>ICompositeElement#getAllPopulatedChildElementsOfType(Class)</code>]]>
+				as it is no longer used by HAPI and is just an annoying step
+				in creating custom structures. Thanks to Allan Bro Hansen
+				for pointing this out.
+			</action>
+			<action type="fix" issue="547">
+				CapturingInterceptor did not buffer the response meaning
+				that in many circumstances it did not actually capture
+				the response. Thanks to Jenny Syed of Cerner for
+				the pull request and contribution!
 			</action>
 		</release>
 		<release version="2.1" date="2016-11-11">

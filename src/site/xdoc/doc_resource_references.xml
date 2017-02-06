@@ -209,7 +209,7 @@ System.out.println(encoded);]]></source>
 						
 		</section>
 		
-		<section name="Versionned References">
+		<section name="Versioned References">
 		
 			<p>
 				By default, HAPI will strip resource versions from references between resources.

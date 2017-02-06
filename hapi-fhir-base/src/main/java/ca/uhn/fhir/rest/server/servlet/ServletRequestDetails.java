@@ -28,10 +28,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +38,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.BaseMethodBinding.IRequestReader;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -168,17 +164,6 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServletResponse = myServletResponse;
 	}
 
-	public static RequestDetails withResourceAndParams(String theResourceName, RequestTypeEnum theRequestType, Set<String> theParamNames) {
-		RequestDetails retVal = new ServletRequestDetails();
-		retVal.setResourceName(theResourceName);
-		retVal.setRequestType(theRequestType);
-		Map<String, String[]> paramNames = new HashMap<String, String[]>();
-		for (String next : theParamNames) {
-			paramNames.put(next, new String[0]);
-		}
-		retVal.setParameters(paramNames);
-		return retVal;
-	}
 
 	@Override
 	public Charset getCharset() {

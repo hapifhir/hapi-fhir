@@ -1,11 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -25,7 +30,12 @@ public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 
 	@Test
 	public void testTranslateMatchUrl() {
-		SearchParameterMap match = BaseHapiFhirDao.translateMatchUrl(ourCtx, "Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", ourCtx.getResourceDefinition(Condition.class));
+		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
+		
+		IDao dao = mock(IDao.class);
+		when(dao.getSearchParamByName(any(RuntimeResourceDefinition.class), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
+				
+		SearchParameterMap match = BaseHapiFhirDao.translateMatchUrl(dao, ourCtx, "Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
 		assertEquals("304", ((ReferenceParam)match.get("patient").get(0).get(0)).getIdPart());
