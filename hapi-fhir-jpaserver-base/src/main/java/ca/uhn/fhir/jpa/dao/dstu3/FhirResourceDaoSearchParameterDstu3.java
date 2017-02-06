@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -33,6 +35,7 @@ import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -45,12 +48,15 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	private void markAffectedResources(SearchParameter theResource) {
-		String expression = theResource.getExpression();
-		String resourceType = expression.substring(0, expression.indexOf('.'));
-		ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", expression);
-		int updatedCount = myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
-		ourLog.info("Marked {} resources for reindexing", updatedCount);
+		if (theResource != null) {
+			String expression = theResource.getExpression();
+			String resourceType = expression.substring(0, expression.indexOf('.'));
+			ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", expression);
+			int updatedCount = myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
+			ourLog.info("Marked {} resources for reindexing", updatedCount);
+		}
 	}
+
 
 	/**
 	 * This method is called once per minute to perform any required re-indexing. During most passes this will
@@ -78,12 +84,21 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	}
 
 	@Override
+	protected void preDelete(SearchParameter theResourceToDelete) {
+		super.preDelete(theResourceToDelete);
+		markAffectedResources(theResourceToDelete);
+	}
+
+
+	@Override
 	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
+		super.postPersist(theEntity, theResource);
 		markAffectedResources(theResource);
 	}
 
 	@Override
 	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource) {
+		super.postUpdate(theEntity, theResource);
 		markAffectedResources(theResource);
 	}
 
@@ -94,12 +109,12 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 		if (theResource.getStatus() == null) {
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid: " + theResource.getStatusElement().getValueAsString());
 		}
-		
+
 		String expression = theResource.getExpression();
 		if (isBlank(expression)) {
 			throw new UnprocessableEntityException("SearchParameter.expression is missing");
 		}
-			
+
 		String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(expression);
 		String allResourceName = null;
 		for (String nextPath : expressionSplit) {
@@ -107,14 +122,14 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 			if (dotIdx == -1) {
 				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");
 			}
-			
+
 			String resourceName = nextPath.substring(0, dotIdx);
 			try {
 				getContext().getResourceDefinition(resourceName);
 			} catch (DataFormatException e) {
 				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
 			}
-			
+
 			if (allResourceName == null) {
 				allResourceName = resourceName;
 			} else {
@@ -122,7 +137,7 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". All paths in a single SearchParameter must match the same resource type");
 				}
 			}
-			
+
 		}
 
 	}

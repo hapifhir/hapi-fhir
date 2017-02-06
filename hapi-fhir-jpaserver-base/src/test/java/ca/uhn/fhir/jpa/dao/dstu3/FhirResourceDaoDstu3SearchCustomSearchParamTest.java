@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -18,6 +19,7 @@ import org.junit.Test;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -120,7 +122,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setExpression("Patient.gender");
 		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(fooSp, mySrd);
+		IIdType spId = mySearchParameterDao.create(fooSp, mySrd).getId().toUnqualifiedVersionless();
 
 		mySearchParamRegsitry.forceRefresh();
 
@@ -150,6 +152,17 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(patId.getValue()));
 
+		// Delete the param
+		mySearchParameterDao.delete(spId, mySrd);
+		
+		mySearchParamRegsitry.forceRefresh();
+		mySystemDao.performReindexingPass(100);
+
+		// Try with custom gender SP
+		map = new SearchParameterMap();
+		map.add("foo", new TokenParam(null, "male"));
+		IBundleProvider res = myPatientDao.search(map);
+		assertEquals(0, res.size());
 	}
 
 	@Test
