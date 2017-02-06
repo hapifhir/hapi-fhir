@@ -45,9 +45,9 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	private void markAffectedResources(SearchParameter theResource) {
-		String xpath = theResource.getXpath();
-		String resourceType = xpath.substring(0, xpath.indexOf('.'));
-		ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", xpath);
+		String expression = theResource.getExpression();
+		String resourceType = expression.substring(0, expression.indexOf('.'));
+		ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", expression);
 		int updatedCount = myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
 		ourLog.info("Marked {} resources for reindexing", updatedCount);
 	}
@@ -92,34 +92,34 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
 		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("Resource.status is missing or invalid: " + theResource.getStatusElement().getValueAsString());
+			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid: " + theResource.getStatusElement().getValueAsString());
 		}
 		
-		String xpath = theResource.getXpath();
-		if (isBlank(xpath)) {
-			throw new UnprocessableEntityException("Resource.xpath is missing");
+		String expression = theResource.getExpression();
+		if (isBlank(expression)) {
+			throw new UnprocessableEntityException("SearchParameter.expression is missing");
 		}
 			
-		String[] xpathSplit = BaseSearchParamExtractor.SPLIT.split(xpath);
+		String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(expression);
 		String allResourceName = null;
-		for (String nextPath : xpathSplit) {
+		for (String nextPath : expressionSplit) {
 			int dotIdx = nextPath.indexOf('.');
 			if (dotIdx == -1) {
-				throw new UnprocessableEntityException("Invalid path value \"" + nextPath + "\". Must start with a resource name");
+				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");
 			}
 			
 			String resourceName = nextPath.substring(0, dotIdx);
 			try {
 				getContext().getResourceDefinition(resourceName);
 			} catch (DataFormatException e) {
-				throw new UnprocessableEntityException("Invalid path value \"" + nextPath + "\": " + e.getMessage());
+				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
 			}
 			
 			if (allResourceName == null) {
 				allResourceName = resourceName;
 			} else {
 				if (!allResourceName.equals(resourceName)) {
-					throw new UnprocessableEntityException("Invalid path value \"" + nextPath + "\". All paths in a single SearchParameter must match the same resource type");
+					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". All paths in a single SearchParameter must match the same resource type");
 				}
 			}
 			
