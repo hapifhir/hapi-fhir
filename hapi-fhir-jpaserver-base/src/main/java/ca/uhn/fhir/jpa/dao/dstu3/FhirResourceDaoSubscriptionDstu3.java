@@ -157,7 +157,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
-		SearchParameterMap criteriaUrl = translateMatchUrl(getContext(), subscription.getCriteria(), resourceDef);
+		SearchParameterMap criteriaUrl = translateMatchUrl(this, getContext(), subscription.getCriteria(), resourceDef);
 
 		criteriaUrl = new SearchParameterMap();
 		long start = theSubscriptionTable.getMostRecentMatch().getTime();

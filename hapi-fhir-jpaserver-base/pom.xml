@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -34,32 +34,32 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -87,6 +87,12 @@
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>Saxon-HE</artifactId>
+					<groupId>net.sf.saxon</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.phloc</groupId>
@@ -104,6 +110,12 @@
 		<dependency>
 			<groupId>net.riotopsys</groupId>
 			<artifactId>json_patch</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>com.google.code.gson</artifactId>
+					<groupId>gson</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
@@ -183,6 +195,12 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-aop</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -233,6 +251,16 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml</groupId>
+					<artifactId>classmate</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jboss.logging</groupId>
+					<artifactId>jboss-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
@@ -419,12 +447,13 @@
 				<configuration>
 					<runOrder>alphabetical</runOrder>
 					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+					<forkCount>0.6C</forkCount>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>2.3-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>build_dstu1</id>
@@ -476,32 +505,47 @@
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu</artifactId>
-						<version>2.3-SNAPSHOT</version>
+						<version>${project.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu2</artifactId>
-						<version>2.3-SNAPSHOT</version>
+						<version>${project.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu3</artifactId>
-						<version>2.3-SNAPSHOT</version>
+						<version>${project.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-						<version>2.3-SNAPSHOT</version>
+						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>target/generated-sources/tinder</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>${basedir}/target/generated-sources/tinder</directory>
 			</resource>
 			<resource>
 				<directory>${basedir}/target/generated-resources/tinder</directory>
@@ -524,6 +568,20 @@
 			<properties>
 				<skip-hib4>true</skip-hib4>
 			</properties>
+		</profile>
+		<profile>
+			<id>NOPARALLEL</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<forkCount>1</forkCount>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<!-- <profile> <id>DIST</id> <build> <plugins> <plugin> <groupId>de.juplo</groupId> <artifactId>hibernate4-maven-plugin</artifactId> <configuration> <force>true</force> <target>SCRIPT</target> <skip>${skip-hib4}</skip> 
 			</configuration> <dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> <version>${hibernate_version}</version> </dependency> </dependencies> <executions> 

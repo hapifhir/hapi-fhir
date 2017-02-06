@@ -17,20 +17,17 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 
-		<!-- 
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
+		<!-- The JPA project uses a newer API but we'll try to hold to this version as much as possible. See #283. -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -89,7 +86,7 @@
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
-			<scope>test</scope>
+			<scope>test</scope><!-- <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> </exclusion> </exclusions> -->
 		</dependency>
 		<dependency>
 			<groupId>com.phloc</groupId>
@@ -110,6 +107,10 @@
 					<artifactId>commons-logging</artifactId>
 					<groupId>commons-logging</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>commons-lang</artifactId>
+					<groupId>commons-lang</groupId>
+				</exclusion><!-- <exclusion> <artifactId>ezmorph</artifactId> <groupId>net.sf.ezmorph</groupId> </exclusion> -->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -117,6 +118,22 @@
 			<artifactId>json-lib</artifactId>
 			<version>2.4</version>
 			<classifier>jdk15-sources</classifier>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-lang</artifactId>
+					<groupId>commons-lang</groupId>
+				</exclusion><!-- <exclusion> <artifactId>ezmorph</artifactId> <groupId>net.sf.ezmorph</groupId> </exclusion> -->
+			</exclusions>
+		</dependency>
+		<dependency>
+			<artifactId>commons-lang</artifactId>
+			<groupId>commons-lang</groupId>
+			<version>2.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -179,7 +196,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>2.3-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>generate</id>
@@ -218,9 +235,7 @@
 								<baseResourceName>deviceusestatement</baseResourceName>
 								<baseResourceName>diagnosticorder</baseResourceName>
 								<baseResourceName>diagnosticreport</baseResourceName>
-								<!-- This is not a real resource 
-								<baseResourceName>documentation</baseResourceName>
-								-->
+								<!-- This is not a real resource <baseResourceName>documentation</baseResourceName> -->
 								<baseResourceName>documentmanifest</baseResourceName>
 								<baseResourceName>documentreference</baseResourceName>
 								<baseResourceName>eligibilityrequest</baseResourceName>
@@ -296,6 +311,24 @@
 					</execution>
 					<!-- <execution> <id>clean_source</id> <goals> <goal>minimize-resources</goal> </goals> <configuration> <fhirVersion>DSTU2</fhirVersion> <targetDirectory>${project.baseDir}/../hapi-tinder-plugin/</targetDirectory> 
 						</configuration> </execution> -->
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>target/generated-sources/tinder</source>
+							</sources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

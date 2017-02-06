@@ -38,7 +38,7 @@ package org.hl7.fhir.utilities.xhtml;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,7 +47,6 @@ package org.hl7.fhir.utilities.xhtml;
  * limitations under the License.
  * #L%
  */
-
 
 import java.io.*;
 import java.util.*;
@@ -378,10 +377,12 @@ public class XhtmlParser {
 		}
 		return result;
 	}
+
 	public XhtmlDocument parse(String source, String entryName) throws FHIRFormatError, IOException {
 		rdr = new StringReader(source);
 		return parse(entryName);
 	}
+
 	private void parseAttributes(XhtmlNode node) throws FHIRFormatError, IOException {
 		while (Character.isWhitespace(peekChar()))
 			readChar();
@@ -410,6 +411,7 @@ public class XhtmlParser {
 				readChar();
 		}
 	}
+
 	private String parseAttributeValue(char term) throws IOException, FHIRFormatError {
 		StringBuilder b = new StringBuilder();
 		while (peekChar() != '\0' && peekChar() != '>' && (term != '\0' || peekChar() != '/') && peekChar() != term) {
@@ -422,6 +424,7 @@ public class XhtmlParser {
 			readChar();
 		return b.toString();
 	}
+
 	private void parseElement(XhtmlNode parent, List<XhtmlNode> parents, NSMap nsm) throws IOException, FHIRFormatError {
 		QName name = new QName(readName());
 		XhtmlNode node = parent.addTag(name.getName());
@@ -438,6 +441,7 @@ public class XhtmlParser {
 			parseElementInner(node, newParents, nsm);
 		}
 	}
+
 	private void parseElementInner(XhtmlNode node, List<XhtmlNode> parents, NSMap nsm) throws FHIRFormatError, IOException {
 		StringBuilder s = new StringBuilder();
 		while (peekChar() != '\0' && !parents.contains(unwindPoint) && !(node == unwindPoint)) {
@@ -488,6 +492,7 @@ public class XhtmlParser {
 		}
 		addTextNode(node, s);
 	}
+
 	private XhtmlNode parseFragment() throws IOException, FHIRException {
 		skipWhiteSpace();
 		if (peekChar() != '<')
@@ -558,6 +563,8 @@ public class XhtmlParser {
 			s.append(XhtmlNode.NBSP);
 		else if (c.equals("amp"))
 			s.append('&');
+		else if (c.equals("rsquo"))
+			s.append('’');
 		else if (c.equals("gt"))
 			s.append('>');
 		else if (c.equals("lt"))
@@ -860,12 +867,12 @@ public class XhtmlParser {
 		StartElement firstEvent = (StartElement) xpp.nextEvent();
 		res.setName(firstEvent.getSchemaType().getLocalPart());
 
-		for (Iterator<?> attrIter = firstEvent.getAttributes(); attrIter.hasNext(); ) {
+		for (Iterator<?> attrIter = firstEvent.getAttributes(); attrIter.hasNext();) {
 			Attribute nextAttr = (Attribute) attrIter.next();
 			if (attributeIsOk(firstEvent.getName().getLocalPart(), nextAttr.getName().getLocalPart(), nextAttr.getValue()))
 				res.getAttributes().put(nextAttr.getName().getLocalPart(), nextAttr.getValue());
 		}
-		
+
 		while (xpp.hasNext()) {
 			XMLEvent nextEvent = xpp.nextEvent();
 			int eventType = nextEvent.getEventType();
@@ -873,11 +880,11 @@ public class XhtmlParser {
 				break;
 			}
 			if (eventType == XMLEvent.CHARACTERS) {
-				res.addText(((Characters)xpp).getData());
+				res.addText(((Characters) xpp).getData());
 			} else if (eventType == XMLEvent.COMMENT) {
-				res.addComment(((Comment)xpp).getText());
+				res.addComment(((Comment) xpp).getText());
 			} else if (eventType == XMLEvent.START_ELEMENT) {
-				StartElement nextStart = (StartElement)nextEvent;
+				StartElement nextStart = (StartElement) nextEvent;
 				if (elementIsOk(nextStart.getName().getLocalPart())) {
 					res.getChildNodes().add(parseNode(xpp));
 				}

@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- 
@@ -106,6 +106,10 @@
 					<artifactId>commons-logging</artifactId>
 					<groupId>commons-logging</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>commons-lang</artifactId>
+					<groupId>commons-lang</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -113,6 +117,22 @@
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15-sources</classifier>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-lang</artifactId>
+					<groupId>commons-lang</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<artifactId>commons-lang</artifactId>
+			<groupId>commons-lang</groupId>
+			<scope>test</scope>
+			<version>2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>directory-naming</groupId>
@@ -167,7 +187,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>2.3-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -244,6 +264,24 @@
 					</baseResourceNames>
 					<buildDatatypes>true</buildDatatypes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>target/generated-sources/tinder</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>

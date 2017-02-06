@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.*;
 
+import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -437,7 +438,7 @@ class ModelScanner {
 				}
 
 
-				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()));
+				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
 				theResourceDef.addSearchParam(param);
 				nameToParam.put(param.getName(), param);
 			}
@@ -457,7 +458,7 @@ class ModelScanner {
 				compositeOf.add(param);
 			}
 
-			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()));
+			RuntimeSearchParam param = new RuntimeSearchParam(null, null, searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
 			theResourceDef.addSearchParam(param);
 		}
 	}
