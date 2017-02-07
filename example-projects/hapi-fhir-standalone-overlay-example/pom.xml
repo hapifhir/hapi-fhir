@@ -37,14 +37,14 @@
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-testpage-overlay</artifactId>
-				<version>2.3-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<type>war</type>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-testpage-overlay</artifactId>
-				<version>2.3-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<classifier>classes</classifier>
 				<scope>provided</scope>
 			</dependency>
