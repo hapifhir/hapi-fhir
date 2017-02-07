@@ -123,6 +123,10 @@
 				Clean up dependencies and remove Eclipse project files from git. Thanks to
 				@sekaijin for the pull request!
 			</action>
+			<action type="fix">
+				Client revincludes did not include the :recurse modifier. Thanks to
+				Jenny Meinsma for pointing this out on Zulip!
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
