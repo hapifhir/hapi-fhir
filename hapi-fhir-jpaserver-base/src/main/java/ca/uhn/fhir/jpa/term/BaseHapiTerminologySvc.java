@@ -23,9 +23,11 @@ package ca.uhn.fhir.jpa.term;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +35,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -47,6 +50,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimaps;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -305,6 +310,8 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 		}
 	}
 
+	private ArrayListMultimap<Long, Long> myChildToParentPidCache;
+	
 	private void processReindexing() {
 		if (System.currentTimeMillis() < myNextReindexPass && !ourForceSaveDeferredAlwaysForUnitTest) {
 			return;
@@ -316,23 +323,60 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				int maxResult = 1000;
-				Page<TermConcept> resources = myConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
-				if (resources.hasContent() == false) {
+				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
+				if (concepts.hasContent() == false) {
 					myNextReindexPass = System.currentTimeMillis() + DateUtils.MILLIS_PER_MINUTE;
+					myChildToParentPidCache = null;
 					return;
 				}
 
-				ourLog.info("Indexing {} / {} concepts", resources.getContent().size(), resources.getTotalElements());
+				if (myChildToParentPidCache == null) {
+					myChildToParentPidCache = ArrayListMultimap.create();
+				}
+				
+				ourLog.info("Indexing {} / {} concepts", concepts.getContent().size(), concepts.getTotalElements());
 
 				int count = 0;
 				StopWatch stopwatch = new StopWatch();
 
-				for (TermConcept resourceTable : resources) {
-					saveConcept(resourceTable);
+				for (TermConcept nextConcept : concepts) {
+					
+					StringBuilder parentsBuilder = new StringBuilder();
+					createParentsString(parentsBuilder, nextConcept.getId());
+					nextConcept.setParentPids(parentsBuilder.toString());
+					
+					saveConcept(nextConcept);
 					count++;
 				}
 				
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, resources.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count) });
+				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] { count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count) });
+			}
+
+			private void createParentsString(StringBuilder theParentsBuilder, Long theConceptPid) {
+				Validate.notNull(theConceptPid, "theConceptPid must not be null");
+				List<Long> parents = myChildToParentPidCache.get(theConceptPid);
+				if (parents.contains(-1L)) {
+					return;
+				} else if (parents.isEmpty()) {
+					Collection<TermConceptParentChildLink> parentLinks = myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
+					if (parentLinks.isEmpty()) {
+						myChildToParentPidCache.put(theConceptPid, -1L);
+						return;
+					} else {
+						for (TermConceptParentChildLink next : parentLinks) {
+							myChildToParentPidCache.put(theConceptPid, next.getParentPid());
+						}
+					}
+				}
+				
+				
+				for (Long nextParent : parents) {
+					if (theParentsBuilder.length() > 0) {
+						theParentsBuilder.append(' ');
+					}
+					theParentsBuilder.append(nextParent);
+					createParentsString(theParentsBuilder, nextParent);
+				}
 			}
 		});
 
@@ -340,7 +384,15 @@ public abstract class BaseHapiTerminologySvc implements IHapiTerminologySvc {
 
 	private int saveConcept(TermConcept theConcept) {
 		int retVal = 0;
-		retVal += ensureParentsSaved(theConcept.getParents());
+	
+		/*
+		 * If the concept has an ID, we're reindexing, so there's no need to
+		 * save parent concepts first (it's way too slow to do that)
+		 */
+		if (theConcept.getId() == null) {
+			retVal += ensureParentsSaved(theConcept.getParents());
+		}
+		
 		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
