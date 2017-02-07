@@ -127,6 +127,10 @@
 				Client revincludes did not include the :recurse modifier. Thanks to
 				Jenny Meinsma for pointing this out on Zulip!
 			</action>
+			<action type="add">
+				JPA server did not return an OperationOutcome in the response for
+				a normal delete operation.
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">

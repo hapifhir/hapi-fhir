@@ -226,8 +226,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", 1, w.getMillis());
+		String severity = "information";
+		String code = "informational";
+		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+
 		ourLog.info("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
-		return toMethodOutcome(savedEntity, null);
+		DaoMethodOutcome retVal = toMethodOutcome(savedEntity, null);
+		retVal.setOperationOutcome(oo);
+		return retVal;
 	}
 
 	@Override
@@ -287,7 +295,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
 		} else {
 			oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", theUrl, deletedResources.size(), w.getMillis());
+			String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", deletedResources.size(), w.getMillis());
 			String severity = "information";
 			String code = "informational";
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
