@@ -1889,7 +1889,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			for (Include next : myRevInclude) {
-				addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
+				if (next.isRecurse()) {
+					addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+				} else {
+					addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
+				}
 			}
 
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {

@@ -155,7 +155,7 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry {
 	private RuntimeSearchParam toRuntimeSp(SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
 		String description = theNextSp.getDescription();
-		String path = theNextSp.getXpath();
+		String path = theNextSp.getExpression();
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParamStatusEnum status = null;
 		switch (theNextSp.getType()) {
