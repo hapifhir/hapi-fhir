@@ -382,6 +382,42 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		}
 	}
 
+	/**
+	 * Per a message on the mailing list
+	 */
+	@Test
+	public void testTransactionWithPostDoesntUpdate() throws Exception {
+
+		// First bundle (name is Joshua)
+		
+		String input = IOUtils.toString(getClass().getResource("/dstu3-post1.xml"), StandardCharsets.UTF_8);
+		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle response = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		
+		assertEquals(1, response.getEntry().size());
+		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
+		assertEquals("1", response.getEntry().get(0).getResponse().getEtag());
+		String id = response.getEntry().get(0).getResponse().getLocation();
+		
+		// Now the second (name is Adam, shouldn't get used)
+		
+		input = IOUtils.toString(getClass().getResource("/dstu3-post2.xml"), StandardCharsets.UTF_8);
+		request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		response = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		
+		assertEquals(1, response.getEntry().size());
+		assertEquals("200 OK", response.getEntry().get(0).getResponse().getStatus());
+		assertEquals("1", response.getEntry().get(0).getResponse().getEtag());
+		String id2 = response.getEntry().get(0).getResponse().getLocation();
+		assertEquals(id, id2);
+		
+		Patient patient = myPatientDao.read(new IdType(id), mySrd);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals("Joshua", patient.getNameFirstRep().getGivenAsSingleString());
+	}
+
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch";

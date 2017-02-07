@@ -123,6 +123,13 @@
 				Clean up dependencies and remove Eclipse project files from git. Thanks to
 				@sekaijin for the pull request!
 			</action>
+			<action type="fix">
+				When performing a conditional create in a transaction in JPA server, 
+				if a resource already existed matching the conditional expression, the 
+				server did not change the version of the resource but did update the body
+				with the passed in body. Thanks to Artem Sopin for reporting and providing a test
+				case for this!
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
