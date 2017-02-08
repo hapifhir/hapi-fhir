@@ -482,6 +482,7 @@ public abstract class BaseClient implements IRestfulClient {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
 			IParser parser = respType.newParser(getFhirContext());
+      parser.setServerBaseUrl(getUrlBase());
 			if (myPreferResponseTypes != null) {
 				parser.setPreferTypes(myPreferResponseTypes);
 			}

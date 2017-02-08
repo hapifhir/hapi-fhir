@@ -213,7 +213,7 @@ public class XmlParser extends BaseParser implements IParser {
 							} else {
 								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, url, false);
+							parserState.enteringNewElementExtension(elem, url, false, getServerBaseUrl());
 						} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
 							Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 							String url;
@@ -223,7 +223,7 @@ public class XmlParser extends BaseParser implements IParser {
 							} else {
 								url = urlAttr.getValue();
 							}
-							parserState.enteringNewElementExtension(elem, url, true);
+							parserState.enteringNewElementExtension(elem, url, true, getServerBaseUrl());
 						} else {
 							String elementName = elem.getName().getLocalPart();
 							parserState.enteringNewElement(namespaceURI, elementName);

@@ -77,6 +77,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.UrlUtil;
 
 public abstract class BaseParser implements IParser {
 
@@ -932,9 +933,17 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected String getExtensionUrl(final String extensionUrl) {
-		return StringUtils.isNotBlank(extensionUrl) && StringUtils.isNotBlank(myServerBaseUrl) ? extensionUrl.replace("%BASE_SERVER_URL%", myServerBaseUrl) : extensionUrl;
+		String url = extensionUrl;
+		if (StringUtils.isNotBlank(extensionUrl) && StringUtils.isNotBlank(myServerBaseUrl)) {
+			url = !UrlUtil.isValid(extensionUrl) && extensionUrl.startsWith("/") ? myServerBaseUrl + extensionUrl : extensionUrl;
+		}
+		return url;
 	}
 
+  protected String getServerBaseUrl() {
+		return  myServerBaseUrl;
+	}
+  
 	/**
 	 * Used for DSTU2 only
 	 */

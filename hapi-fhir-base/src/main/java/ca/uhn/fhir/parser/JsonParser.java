@@ -1407,7 +1407,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			} else {
 				url = getExtensionUrl(jsonElement.getAsString());
 			}
-			theState.enteringNewElementExtension(null, url, theIsModifier);
+			theState.enteringNewElementExtension(null, url, theIsModifier, getServerBaseUrl());
 			for (String next : nextExtObj.keySet()) {
 				if ("url".equals(next)) {
 					continue;

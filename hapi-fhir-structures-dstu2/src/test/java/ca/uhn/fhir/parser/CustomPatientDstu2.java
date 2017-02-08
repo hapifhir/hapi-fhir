@@ -14,7 +14,7 @@ public class CustomPatientDstu2 extends Patient {
     private static final long serialVersionUID = 1L;
 
     @Child(name = "homeless", order = 1)
-    @Extension(url = "%BASE_SERVER_URL%/StructureDefinition/homeless", definedLocally = true, isModifier = false)
+    @Extension(url = "/StructureDefinition/homeless", definedLocally = true, isModifier = false)
     @Description(shortDefinition = "The patient being homeless, true if homeless")
     private BooleanDt homeless;
 

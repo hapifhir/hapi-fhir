@@ -179,7 +179,7 @@ public class ResourceParameter implements IParameter {
 		}
 
 		IParser parser = encoding.newParser(ctx);
-
+    parser.setServerBaseUrl(theRequest.getFhirServerBase());
 		T retVal;
 		try {
 			if (theResourceType != null) {

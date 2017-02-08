@@ -98,8 +98,8 @@ class ParserState<T> {
 		myState.enteringNewElement(theNamespaceUri, theName);
 	}
 
-	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier) {
-		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier);
+	public void enteringNewElementExtension(StartElement theElem, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
+		myState.enteringNewElementExtension(theElem, theUrlAttr, theIsModifier, baseServerUrl);
 	}
 
 	public T getObject() {
@@ -791,7 +791,7 @@ class ParserState<T> {
 		 * Default implementation just handles undeclared extensions
 		 */
 		@SuppressWarnings("unused")
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
 				ExtensionDt newExtension = new ExtensionDt(theIsModifier);
 				newExtension.setUrl(theUrlAttr);
@@ -1483,7 +1483,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
 			if (declaredExtension != null) {
 				if (myChildInstance == null) {
@@ -1493,7 +1493,7 @@ class ParserState<T> {
 				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myChildInstance);
 				push(newState);
 			} else {
-				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
+				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier, baseServerUrl);
 			}
 		}
 
@@ -1664,13 +1664,13 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
-			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr);
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
+			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getDeclaredExtension(theUrlAttr, baseServerUrl);
 			if (declaredExtension != null) {
 				BaseState newState = new DeclaredExtensionState(getPreResourceState(), declaredExtension, myInstance);
 				push(newState);
 			} else {
-				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier);
+				super.enteringNewElementExtension(theElement, theUrlAttr, theIsModifier, baseServerUrl);
 			}
 		}
 
@@ -2466,7 +2466,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier, final String baseServerUrl) {
 			myDepth++;
 		}
 
