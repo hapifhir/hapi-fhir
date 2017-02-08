@@ -123,6 +123,21 @@
 				Clean up dependencies and remove Eclipse project files from git. Thanks to
 				@sekaijin for the pull request!
 			</action>
+			<action type="fix">
+				When performing a conditional create in a transaction in JPA server, 
+				if a resource already existed matching the conditional expression, the 
+				server did not change the version of the resource but did update the body
+				with the passed in body. Thanks to Artem Sopin for reporting and providing a test
+				case for this!
+			</action>
+			<action type="fix">
+				Client revincludes did not include the :recurse modifier. Thanks to
+				Jenny Meinsma for pointing this out on Zulip!
+			</action>
+			<action type="add">
+				JPA server did not return an OperationOutcome in the response for
+				a normal delete operation.
+			</action>
 		</release>
 		<release version="2.2" date="2016-12-20">
 			<action type="add">
