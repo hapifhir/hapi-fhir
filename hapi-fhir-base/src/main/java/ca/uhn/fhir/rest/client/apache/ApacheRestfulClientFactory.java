@@ -73,12 +73,14 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	public synchronized HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
+			//FIXME potential resoource leak
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000,
 					TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 
 			// @formatter:off
+			//TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(getSocketTimeout())
 					.setConnectTimeout(getConnectTimeout()).setConnectionRequestTimeout(getConnectionRequestTimeout())
 					.setStaleConnectionCheckEnabled(true).setProxy(myProxy).build();

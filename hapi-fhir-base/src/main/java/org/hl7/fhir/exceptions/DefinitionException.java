@@ -23,6 +23,8 @@ package org.hl7.fhir.exceptions;
 
 public class DefinitionException extends FHIRException {
 
+	private static final long serialVersionUID = 8175803009974854088L;
+
 	public DefinitionException() {
 		super();
 	}

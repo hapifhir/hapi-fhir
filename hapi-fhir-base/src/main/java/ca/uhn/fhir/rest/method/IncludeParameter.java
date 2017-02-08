@@ -149,12 +149,11 @@ class IncludeParameter extends BaseQueryParameter {
 			if (myInstantiableCollectionType == null) {
 				if (mySpecType == String.class) {
 					return value;
-				} else {
-					return new Include(value, recurse);
 				}
-			} else {
-				retValCollection.add(new Include(value, recurse));
+				return new Include(value, recurse);
 			}
+			//FIXME null access
+			retValCollection.add(new Include(value, recurse));
 		}
 
 		return retValCollection;

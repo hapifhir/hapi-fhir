@@ -305,24 +305,20 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 			return reference;
-		} else {
-			if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
-				ref = ref.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
-			}
-			if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
-				if (isStripVersionsFromReferences(theCompositeChildElement)) {
-					return ref.toUnqualifiedVersionless().getValue();
-				} else {
-					return ref.toUnqualified().getValue();
-				}
-			} else {
-				if (isStripVersionsFromReferences(theCompositeChildElement)) {
-					return ref.toVersionless().getValue();
-				} else {
-					return ref.getValue();
-				}
-			}
 		}
+		if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
+			ref = ref.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
+		}
+		if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
+			if (isStripVersionsFromReferences(theCompositeChildElement)) {
+				return ref.toUnqualifiedVersionless().getValue();
+			}
+			return ref.toUnqualified().getValue();
+		}
+		if (isStripVersionsFromReferences(theCompositeChildElement)) {
+			return ref.toVersionless().getValue();
+		}
+		return ref.getValue();
 	}
 
 	private boolean isStripVersionsFromReferences(CompositeChildElement theCompositeChildElement) {
@@ -1112,9 +1108,8 @@ public abstract class BaseParser implements IParser {
 				}
 				if (theElements.contains(thePathBuilder.toString())) {
 					return true;
-				} else {
-					return false;
 				}
+				return false;
 			} else if (myParent != null) {
 				boolean parentCheck;
 				if (theCheckingForWhitelist) {

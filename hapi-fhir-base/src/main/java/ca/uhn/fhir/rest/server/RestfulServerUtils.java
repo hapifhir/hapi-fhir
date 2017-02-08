@@ -425,9 +425,8 @@ public class RestfulServerUtils {
 		}
 		if (encoding == null) {
 			return null;
-		} else {
-			return new ResponseEncoding(theFhirContext, encoding, theContentType);
 		}
+		return new ResponseEncoding(theFhirContext, encoding, theContentType);
 	}
 
 	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
@@ -577,6 +576,7 @@ public class RestfulServerUtils {
 		} catch (Exception e) {
 			// always send a response, even if the parsing went wrong
 		}
+		//FIXME resource leak
 		return theRequestDetails.getResponse().sendWriterResponse(status, contentType, charset, writer);
 	}
 
@@ -700,7 +700,7 @@ public class RestfulServerUtils {
 			IParser parser = getNewParser(theServer.getFhirContext(), theRequestDetails);
 			parser.encodeResourceToWriter(theResource, writer);
 		}
-
+		//FIXME resource leak
 		return restUtil.sendWriterResponse(theStausCode, contentType, charset, writer);
 	}
 
@@ -780,9 +780,8 @@ public class RestfulServerUtils {
 		public String getResourceContentType() {
 			if (Boolean.TRUE.equals(isNonLegacy())) {
 				return getEncoding().getResourceContentTypeNonLegacy();
-			} else {
-				return getEncoding().getResourceContentType();
 			}
+			return getEncoding().getResourceContentType();
 		}
 
 		public Boolean isNonLegacy() {

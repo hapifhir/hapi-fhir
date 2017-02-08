@@ -25,7 +25,7 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package org.hl7.fhir.utilities.xhtml;
 
 /*
@@ -51,15 +51,17 @@ package org.hl7.fhir.utilities.xhtml;
 
 public class XhtmlDocument extends XhtmlNode {
 
-  public XhtmlDocument() {
-    super(NodeType.Document);
-  }
+	private static final long serialVersionUID = -5061185698841745693L;
 
-  public XhtmlNode getDocumentElement() {
-  	for (XhtmlNode n : getChildNodes()) {
-  		if (n.getNodeType() == NodeType.Element)
-  			return n;
-  	}
-  	return null;
-  }
+	public XhtmlDocument() {
+		super(NodeType.Document);
+	}
+
+	public XhtmlNode getDocumentElement() {
+		for (XhtmlNode n : getChildNodes()) {
+			if (n.getNodeType() == NodeType.Element)
+				return n;
+		}
+		return null;
+	}
 }

@@ -259,9 +259,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
-			} else {
-				throw new InternalErrorException("Failed to call access method", e);
 			}
+			throw new InternalErrorException("Failed to call access method", e);
 		} catch (Exception e) {
 			throw new InternalErrorException("Failed to call access method", e);
 		}
@@ -455,6 +454,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (returnTypeFromRp != null) {
 			if (returnTypeFromAnnotation != null && !isResourceInterface(returnTypeFromAnnotation)) {
 				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
+					//FIXME potential null access on retunrTypeFromMethod
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type "
 							+ returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
@@ -492,9 +492,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			if (search.dynamic()) {
 				IDynamicSearchResourceProvider provider = (IDynamicSearchResourceProvider) theProvider;
 				return new DynamicSearchMethodBinding(returnType, theMethod, theContext, provider);
-			} else {
-				return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
 			}
+			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {
@@ -510,9 +509,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (validate != null) {
 			if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				return new ValidateMethodBindingDstu1(theMethod, theContext, theProvider);
-			} else {
-				return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
 			}
+			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
 		} else if (getTags != null) {
 			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);
 		} else if (addTags != null) {

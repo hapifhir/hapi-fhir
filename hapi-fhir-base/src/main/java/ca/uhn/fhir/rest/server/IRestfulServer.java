@@ -1,9 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import java.util.List;
-
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /*
  * #%L

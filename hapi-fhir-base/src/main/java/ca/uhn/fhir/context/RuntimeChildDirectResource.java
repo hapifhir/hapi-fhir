@@ -33,7 +33,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildDirectResource extends BaseRuntimeDeclaredChildDefinition {
 
-	private RuntimeElemContainedResources myElem;
+//	private RuntimeElemContainedResources myElem;
 	private FhirContext myContext;
 
 	RuntimeChildDirectResource(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {

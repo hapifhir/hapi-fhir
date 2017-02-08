@@ -81,9 +81,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		IBase bundle = handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 		if (bundle instanceof Bundle) {
 			return new ResourceOrDstu1Bundle((Bundle) bundle);
-		} else {
-			return new ResourceOrDstu1Bundle((IBaseResource) bundle);
 		}
+		return new ResourceOrDstu1Bundle((IBaseResource) bundle);
 	}
 	
 	private IBase handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
@@ -144,9 +143,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		Bundle bundle = bundleFactory.getDstu1Bundle();
 		if (bundle != null) {
 			return bundle;
-		} else {
-			return bundleFactory.getResourceBundle();
 		}
+		return bundleFactory.getResourceBundle();
 		// if (bundle != null) {
 		// for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 		// IServerInterceptor next = getInterceptors().get(i);

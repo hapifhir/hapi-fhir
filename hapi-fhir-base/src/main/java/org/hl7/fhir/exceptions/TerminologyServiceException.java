@@ -23,6 +23,8 @@ package org.hl7.fhir.exceptions;
 
 public class TerminologyServiceException extends FHIRException {
 
+	private static final long serialVersionUID = -1547510329455394225L;
+
 	public TerminologyServiceException() {
 		super();
 	}

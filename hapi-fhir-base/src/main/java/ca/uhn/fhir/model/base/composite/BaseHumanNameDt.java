@@ -32,6 +32,8 @@ import ca.uhn.fhir.util.DatatypeUtil;
 
 public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
+	private static final long serialVersionUID = 2765500013165698259L;
+
 	/**
 	 * Gets the value(s) for <b>family</b> (Family name (often called 'Surname')). creating it if it does not exist. Will not return <code>null</code>.
 	 *
@@ -146,9 +148,8 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 		nameParts.addAll(getSuffix());
 		if (nameParts.size() > 0) {
 			return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(nameParts);
-		} else {
-			return getTextElement().getValue();
 		}
+		return getTextElement().getValue();
 	}
 
 }

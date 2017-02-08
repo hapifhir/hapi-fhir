@@ -37,6 +37,7 @@ import ca.uhn.fhir.util.ElementUtil;
 
 public class BundleEntry extends BaseBundle {
 
+	private static final long serialVersionUID = 2635639739195593736L;
 	//@formatter:off
 	/* ****************************************************
 	 * NB: add any new fields to the isEmpty() method!!!

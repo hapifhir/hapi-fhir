@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import ca.uhn.fhir.context.ConfigurationException;

@@ -81,9 +81,8 @@ public class ReflectionUtil {
 			ParameterizedType pt = ((ParameterizedType) firstArg);
 			Type pt2 = pt.getActualTypeArguments()[0];
 			return (Class<?>) pt2;
-		} else {
-			type = (Class<?>) firstArg;
 		}
+		type = (Class<?>) firstArg;
 		return type;
 	}
 

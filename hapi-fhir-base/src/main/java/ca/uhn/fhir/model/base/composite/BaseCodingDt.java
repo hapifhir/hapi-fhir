@@ -34,6 +34,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 
 public abstract class BaseCodingDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
+	private static final long serialVersionUID = 4425182816398730643L;
+
 	/**
 	 * Gets the value(s) for <b>code</b> (Symbol in syntax defined by the system). creating it if it does not exist. Will not return <code>null</code>.
 	 *
@@ -85,9 +87,8 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	public String getValueAsQueryToken(FhirContext theContext) {
 		if (getSystemElement().getValueAsString() != null) {
 			return ParameterUtil.escape(StringUtils.defaultString(getSystemElement().getValueAsString())) + '|' + ParameterUtil.escape(getCodeElement().getValueAsString());
-		} else {
-			return ParameterUtil.escape(getCodeElement().getValueAsString());
-		}
+		} 
+		return ParameterUtil.escape(getCodeElement().getValueAsString());
 	}
 
 	/**

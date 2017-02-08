@@ -98,65 +98,64 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	protected String encode(Date theValue) {
 		if (theValue == null) {
 			return null;
+		}
+		GregorianCalendar cal;
+		if (myTimeZoneZulu) {
+			cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+		} else if (myTimeZone != null) {
+			cal = new GregorianCalendar(myTimeZone);
 		} else {
-			GregorianCalendar cal;
-			if (myTimeZoneZulu) {
-				cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-			} else if (myTimeZone != null) {
-				cal = new GregorianCalendar(myTimeZone);
-			} else {
-				cal = new GregorianCalendar();
-			}
-			cal.setTime(theValue);
+			cal = new GregorianCalendar();
+		}
+		cal.setTime(theValue);
 
-			StringBuilder b = new StringBuilder();
-			leftPadWithZeros(cal.get(Calendar.YEAR), 4, b);
-			if (myPrecision.ordinal() > TemporalPrecisionEnum.YEAR.ordinal()) {
+		StringBuilder b = new StringBuilder();
+		leftPadWithZeros(cal.get(Calendar.YEAR), 4, b);
+		if (myPrecision.ordinal() > TemporalPrecisionEnum.YEAR.ordinal()) {
+			b.append('-');
+			leftPadWithZeros(cal.get(Calendar.MONTH) + 1, 2, b);
+			if (myPrecision.ordinal() > TemporalPrecisionEnum.MONTH.ordinal()) {
 				b.append('-');
-				leftPadWithZeros(cal.get(Calendar.MONTH) + 1, 2, b);
-				if (myPrecision.ordinal() > TemporalPrecisionEnum.MONTH.ordinal()) {
-					b.append('-');
-					leftPadWithZeros(cal.get(Calendar.DATE), 2, b);
-					if (myPrecision.ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
-						b.append('T');
-						leftPadWithZeros(cal.get(Calendar.HOUR_OF_DAY), 2, b);
+				leftPadWithZeros(cal.get(Calendar.DATE), 2, b);
+				if (myPrecision.ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+					b.append('T');
+					leftPadWithZeros(cal.get(Calendar.HOUR_OF_DAY), 2, b);
+					b.append(':');
+					leftPadWithZeros(cal.get(Calendar.MINUTE), 2, b);
+					if (myPrecision.ordinal() > TemporalPrecisionEnum.MINUTE.ordinal()) {
 						b.append(':');
-						leftPadWithZeros(cal.get(Calendar.MINUTE), 2, b);
-						if (myPrecision.ordinal() > TemporalPrecisionEnum.MINUTE.ordinal()) {
-							b.append(':');
-							leftPadWithZeros(cal.get(Calendar.SECOND), 2, b);
-							if (myPrecision.ordinal() > TemporalPrecisionEnum.SECOND.ordinal()) {
-								b.append('.');
-								b.append(myFractionalSeconds);
-								for (int i = myFractionalSeconds.length(); i < 3; i++) {
-									b.append('0');
-								}
+						leftPadWithZeros(cal.get(Calendar.SECOND), 2, b);
+						if (myPrecision.ordinal() > TemporalPrecisionEnum.SECOND.ordinal()) {
+							b.append('.');
+							b.append(myFractionalSeconds);
+							for (int i = myFractionalSeconds.length(); i < 3; i++) {
+								b.append('0');
 							}
 						}
+					}
 
-						if (myTimeZoneZulu) {
-							b.append('Z');
-						} else if (myTimeZone != null) {
-							int offset = myTimeZone.getOffset(theValue.getTime());
-							if (offset >= 0) {
-								b.append('+');
-							} else {
-								b.append('-');
-								offset = Math.abs(offset);
-							}
-
-							int hoursOffset = (int) (offset / DateUtils.MILLIS_PER_HOUR);
-							leftPadWithZeros(hoursOffset, 2, b);
-							b.append(':');
-							int minutesOffset = (int) (offset % DateUtils.MILLIS_PER_HOUR);
-							minutesOffset = (int) (minutesOffset / DateUtils.MILLIS_PER_MINUTE);
-							leftPadWithZeros(minutesOffset, 2, b);
+					if (myTimeZoneZulu) {
+						b.append('Z');
+					} else if (myTimeZone != null) {
+						int offset = myTimeZone.getOffset(theValue.getTime());
+						if (offset >= 0) {
+							b.append('+');
+						} else {
+							b.append('-');
+							offset = Math.abs(offset);
 						}
+
+						int hoursOffset = (int) (offset / DateUtils.MILLIS_PER_HOUR);
+						leftPadWithZeros(hoursOffset, 2, b);
+						b.append(':');
+						int minutesOffset = (int) (offset % DateUtils.MILLIS_PER_HOUR);
+						minutesOffset = (int) (minutesOffset / DateUtils.MILLIS_PER_MINUTE);
+						leftPadWithZeros(minutesOffset, 2, b);
 					}
 				}
 			}
-			return b.toString();
 		}
+		return b.toString();
 	}
 
 	/**
@@ -671,7 +670,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	public BaseDateTimeDt setNanos(long theNanos) {
 		validateValueInRange(theNanos, 0, NANOS_PER_SECOND-1);
 		String fractionalSeconds = StringUtils.leftPad(Long.toString(theNanos), 9, '0');
-		
+
 		// Strip trailing 0s
 		for (int i = fractionalSeconds.length(); i > 0; i--) {
 			if (fractionalSeconds.charAt(i-1) != '0') {

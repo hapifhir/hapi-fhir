@@ -36,6 +36,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 @DatatypeDef(name = "Extension")
 public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype, IBaseExtension<ExtensionDt, IDatatype> {
 
+	private static final long serialVersionUID = 6399491332783085935L;
+
 	private boolean myModifier;
 	
 	@Child(name="url", type=StringDt.class, order=0, min=1, max=1)	
@@ -75,6 +77,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 * since the URL itself can not contain extensions and it was therefore misleading.
 	 * </p>
 	 */
+	@Override
 	public String getUrl() {
 		return myUrl != null ? myUrl.getValue() : null;
 	}
@@ -95,6 +98,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 * {@link #getUndeclaredModifierExtensions()} to retrieve the child extensions.
 	 * </p>
 	 */
+	@Override
 	public IBaseDatatype getValue() {
 		return myValue;
 	}
@@ -148,6 +152,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	}
 
 	@Override
+	@Deprecated //override deprecated method
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return new ArrayList<T>();
 	}

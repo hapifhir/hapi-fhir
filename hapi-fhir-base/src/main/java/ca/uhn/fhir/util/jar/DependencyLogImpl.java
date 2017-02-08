@@ -100,8 +100,7 @@ public class DependencyLogImpl implements IDependencyLog {
 			} catch (MalformedURLException ex) {
 				return null;
 			}
-		} else {
-			return null;
 		}
+		return null;
 	}
 }
