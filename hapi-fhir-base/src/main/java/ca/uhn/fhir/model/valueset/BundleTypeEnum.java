@@ -102,6 +102,9 @@ public enum BundleTypeEnum {
 	 * Converts codes to their respective enumerated values
 	 */
 	public static final IValueSetEnumBinder<BundleTypeEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleTypeEnum>() {
+
+		private static final long serialVersionUID = -305725916208867517L;
+
 		@Override
 		public String toCodeString(BundleTypeEnum theEnum) {
 			return theEnum.getCode();

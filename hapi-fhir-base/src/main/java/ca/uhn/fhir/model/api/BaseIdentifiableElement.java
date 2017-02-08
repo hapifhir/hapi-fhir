@@ -26,6 +26,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public abstract class BaseIdentifiableElement extends BaseElement implements IIdentifiableElement {
 
+	private static final long serialVersionUID = -7816838417076777914L;
 	private String myElementSpecificId;
 
 	@Override
@@ -43,9 +44,8 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 	public IdDt getId() {
 		if (myElementSpecificId == null) {
 			return new LockedId();
-		} else {
-			return new LockedId(myElementSpecificId);
 		}
+		return new LockedId(myElementSpecificId);
 	}
 
 	@Override

@@ -227,17 +227,17 @@ public class XhtmlParser {
 		if (validatorMode)
 			return true;
 		boolean ok = attributes.contains(attr) || attributes.contains(elem + "." + attr);
-		if (ok)
+		if (ok) {
 			return true;
-		else
-			switch (policy) {
-			case Accept:
-				return true;
-			case Drop:
-				return false;
-			case Reject:
-				throw new FHIRFormatError("Illegal HTML attribute " + elem + "." + attr);
-			}
+		}
+		switch (policy) {
+		case Accept:
+			return true;
+		case Drop:
+			return false;
+		case Reject:
+			throw new FHIRFormatError("Illegal HTML attribute " + elem + "." + attr);
+		}
 
 		if ((elem + "." + attr).equals("img.src") && !(value.startsWith("#") || value.startsWith("http:") || value.startsWith("https:"))) {
 			switch (policy) {
@@ -306,17 +306,17 @@ public class XhtmlParser {
 		if (validatorMode)
 			return true;
 		boolean ok = elements.contains(name);
-		if (ok)
+		if (ok){
 			return true;
-		else
-			switch (policy) {
-			case Accept:
-				return true;
-			case Drop:
-				return false;
-			case Reject:
-				throw new FHIRFormatError("Illegal HTML element " + name);
-			}
+		}
+		switch (policy) {
+		case Accept:
+			return true;
+		case Drop:
+			return false;
+		case Reject:
+			throw new FHIRFormatError("Illegal HTML element " + name);
+		}
 		return false;
 	}
 
@@ -458,26 +458,25 @@ public class XhtmlParser {
 				else if (peekChar() == '/') {
 					readChar();
 					QName n = new QName(readToTagEnd());
-					if (node.getName().equals(n.getName()))
+					if (node.getName().equals(n.getName())){
 						return;
-					else {
-						if (mustBeWellFormed)
-							throw new FHIRFormatError("Malformed XHTML: Found \"</" + n.getName() + ">\" expecting \"</" + node.getName() + ">\"" + descLoc());
-						for (int i = parents.size() - 1; i >= 0; i--) {
-							if (parents.get(i).getName().equals(n))
-								unwindPoint = parents.get(i);
-						}
-						if (unwindPoint != null) {
-							for (int i = parents.size(); i > 0; i--) {
-								if (i < parents.size() && parents.get(i) == unwindPoint)
-									return;
-								if (i == parents.size()) {
-									parents.get(i - 1).getChildNodes().addAll(node.getChildNodes());
-									node.getChildNodes().clear();
-								} else {
-									parents.get(i - 1).getChildNodes().addAll(parents.get(i).getChildNodes());
-									parents.get(i).getChildNodes().clear();
-								}
+					}
+					if (mustBeWellFormed)
+						throw new FHIRFormatError("Malformed XHTML: Found \"</" + n.getName() + ">\" expecting \"</" + node.getName() + ">\"" + descLoc());
+					for (int i = parents.size() - 1; i >= 0; i--) {
+						if (parents.get(i).getName().equals(n))
+							unwindPoint = parents.get(i);
+					}
+					if (unwindPoint != null) {
+						for (int i = parents.size(); i > 0; i--) {
+							if (i < parents.size() && parents.get(i) == unwindPoint)
+								return;
+							if (i == parents.size()) {
+								parents.get(i - 1).getChildNodes().addAll(node.getChildNodes());
+								node.getChildNodes().clear();
+							} else {
+								parents.get(i - 1).getChildNodes().addAll(parents.get(i).getChildNodes());
+								parents.get(i).getChildNodes().clear();
 							}
 						}
 					}

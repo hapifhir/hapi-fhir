@@ -113,9 +113,8 @@ public class ElementsParameter implements IParameter {
 			retVal.add("meta");
 			
 			return retVal;
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	@Override

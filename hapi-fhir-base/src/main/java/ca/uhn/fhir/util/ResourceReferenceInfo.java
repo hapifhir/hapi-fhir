@@ -107,9 +107,8 @@ public class ResourceReferenceInfo {
 				}
 			}
 			return false;
-		} else {
-			// DSTU1 style
-			return (theInclude.getValue().equals(myOwningResource + '.' + myName));
 		}
+		// DSTU1 style
+		return (theInclude.getValue().equals(myOwningResource + '.' + myName));
 	}
 }

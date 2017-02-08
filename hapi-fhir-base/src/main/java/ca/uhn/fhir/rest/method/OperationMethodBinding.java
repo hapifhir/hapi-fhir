@@ -281,10 +281,9 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			if (!myIdempotent) {
 				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
 				throw new MethodNotAllowedException(message, RequestTypeEnum.POST);
-			} else {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.GET.name(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(message, RequestTypeEnum.GET, RequestTypeEnum.POST);
 			}
+			String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.GET.name(), RequestTypeEnum.POST.name());
+			throw new MethodNotAllowedException(message, RequestTypeEnum.GET, RequestTypeEnum.POST);
 		}
 
 		if (myIdParamIndex != null) {
@@ -341,34 +340,33 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		if (!theUseHttpGet) {
 			return new HttpPostClientInvocation(theContext, theInput, b.toString());
-		} else {
-			FhirTerser t = theContext.newTerser();
-			List<Object> parameters = t.getValues(theInput, "Parameters.parameter");
-
-			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
-			for (Object nextParameter : parameters) {
-				IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
-				if (nextNameDt == null || nextNameDt.isEmpty()) {
-					ourLog.warn("Ignoring input parameter with no value in Parameters.parameter.name in operation client invocation");
-					continue;
-				}
-				String nextName = nextNameDt.getValueAsString();
-				if (!params.containsKey(nextName)) {
-					params.put(nextName, new ArrayList<String>());
-				}
-
-				IBaseDatatype value = (IBaseDatatype) t.getSingleValueOrNull((IBase) nextParameter, "value[x]");
-				if (value == null) {
-					continue;
-				}
-				if (!(value instanceof IPrimitiveType)) {
-					throw new IllegalArgumentException("Can not invoke operation as HTTP GET when it has parameters with a composite (non priitive) datatype as the value. Found value: " + value.getClass().getName());
-				}
-				IPrimitiveType<?> primitive = (IPrimitiveType<?>) value;
-				params.get(nextName).add(primitive.getValueAsString());
-			}
-			return new HttpGetClientInvocation(theContext, params, b.toString());
 		}
+		FhirTerser t = theContext.newTerser();
+		List<Object> parameters = t.getValues(theInput, "Parameters.parameter");
+
+		Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
+		for (Object nextParameter : parameters) {
+			IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
+			if (nextNameDt == null || nextNameDt.isEmpty()) {
+				ourLog.warn("Ignoring input parameter with no value in Parameters.parameter.name in operation client invocation");
+				continue;
+			}
+			String nextName = nextNameDt.getValueAsString();
+			if (!params.containsKey(nextName)) {
+				params.put(nextName, new ArrayList<String>());
+			}
+
+			IBaseDatatype value = (IBaseDatatype) t.getSingleValueOrNull((IBase) nextParameter, "value[x]");
+			if (value == null) {
+				continue;
+			}
+			if (!(value instanceof IPrimitiveType)) {
+				throw new IllegalArgumentException("Can not invoke operation as HTTP GET when it has parameters with a composite (non priitive) datatype as the value. Found value: " + value.getClass().getName());
+			}
+			IPrimitiveType<?> primitive = (IPrimitiveType<?>) value;
+			params.get(nextName).add(primitive.getValueAsString());
+		}
+		return new HttpGetClientInvocation(theContext, params, b.toString());
 	}
 
 	public static class ReturnType {

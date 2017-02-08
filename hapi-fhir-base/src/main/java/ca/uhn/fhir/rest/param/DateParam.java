@@ -32,7 +32,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -43,7 +42,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ValidateUtil;
 
 @SuppressWarnings("deprecation")
-public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryParameterType , IQueryParameterOr<DateParam> {
+public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQueryParameterType , */IQueryParameterOr<DateParam> {
 
 	private final DateTimeDt myValue = new DateTimeDt();
 
@@ -220,9 +219,8 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryP
 	public String getValueAsString() {
 		if (myValue != null) {
 			return myValue.getValueAsString();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**

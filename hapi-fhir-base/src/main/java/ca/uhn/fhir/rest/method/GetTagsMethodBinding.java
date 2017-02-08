@@ -156,12 +156,9 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode, null);
 			TagList retVal = parser.parseTagList(theResponseReader);
 			return retVal;
-		} else {
-			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
 		}
-
+		throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
 	}
-
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		Object[] params = createParametersForServerRequest(theRequest);

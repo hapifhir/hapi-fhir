@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import org.apache.http.impl.client.HttpClientBuilder;
-
 /*
  * #%L
  * HAPI FHIR - Core Library

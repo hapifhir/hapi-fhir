@@ -27,9 +27,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
+//TODO Use of a deprecated method should be resolved
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
@@ -62,6 +62,7 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 
 		Integer versionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 		if (versionIdParameterIndex != null) {
+			//TODO Use of a deprecated method should be resolved
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName() + " annotation but delete methods may not have this annotation");
 		}
 

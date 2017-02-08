@@ -90,6 +90,9 @@ public enum BundleEntrySearchModeEnum {
 	 * Converts codes to their respective enumerated values
 	 */
 	public static final IValueSetEnumBinder<BundleEntrySearchModeEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleEntrySearchModeEnum>() {
+
+		private static final long serialVersionUID = -3836039426814809083L;
+
 		@Override
 		public String toCodeString(BundleEntrySearchModeEnum theEnum) {
 			return theEnum.getCode();

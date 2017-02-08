@@ -27,7 +27,6 @@ import java.util.Date;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.gclient.DateClientParam.IDateSpecifier;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 /**

@@ -93,12 +93,10 @@ public class HapiLocalizer {
 			format = new MessageFormat(formatString.trim());
 			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters).toString();
-		} else {
-			String retVal = findFormatString(theQualifiedKey);
-			return retVal;
 		}
+		String retVal = findFormatString(theQualifiedKey);
+		return retVal;
 	}
-	
 	
 	public Set<String> getAllKeys(){
 		HashSet<String> retVal = new HashSet<String>();

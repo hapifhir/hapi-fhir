@@ -32,7 +32,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChildDefinition {
 
-	private RuntimeResourceBlockDefinition myElementDef;
+//	private RuntimeResourceBlockDefinition myElementDef;
 	private Class<? extends IBase> myResourceBlockType;
 	private FhirContext myContext;
 
@@ -46,9 +46,8 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	public RuntimeResourceBlockDefinition getChildByName(String theName) {
 		if (getElementName().equals(theName)) {
 			return getDefinition();
-		}else {
-			return null;
 		}
+		return null;
 	}
 
 	private RuntimeResourceBlockDefinition getDefinition() {

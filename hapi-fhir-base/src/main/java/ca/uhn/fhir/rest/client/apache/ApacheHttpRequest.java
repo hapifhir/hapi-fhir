@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.apache;
  */
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,7 +93,8 @@ public class ApacheHttpRequest implements IHttpRequest {
 		if (myRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntity entity = ((HttpEntityEnclosingRequest) myRequest).getEntity();
 			if (entity.isRepeatable()) {
-				return IOUtils.toString(entity.getContent());
+				//TODO  verify the charset
+				return IOUtils.toString(entity.getContent(), Charset.defaultCharset());
 			}
 		}
 		return null;
